@@ -1,0 +1,4 @@
+.envrc
+*.local
+*.local.toml
+__pycache__/

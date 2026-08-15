@@ -1,0 +1,109 @@
+{
+  "plugins": [
+    {
+      "id": "agent-session-status",
+      "name": "Agent Session Status",
+      "author": "nzlov",
+      "description": "Runs a local MCP HTTP service for agents to report session status and shows active sessions in the bar.",
+      "license": "MIT",
+      "version": "1.0.0",
+      "tags": [
+        "Bar",
+        "Panel",
+        "Development",
+        "Indicator",
+        "AI"
+      ],
+      "repository": "https://github.com/alexindigo/atmosphera-plugins",
+      "official": true,
+      "lastUpdated": "2026-08-15"
+    },
+    {
+      "id": "arch-updater",
+      "name": "Arch Updater",
+      "author": "Ast",
+      "description": "A plugin to manage updates on Arch",
+      "license": "MIT",
+      "version": "2.1.10",
+      "tags": [
+        "Bar",
+        "Desktop",
+        "Panel",
+        "Launcher",
+        "System",
+        "Utility"
+      ],
+      "repository": "https://github.com/alexindigo/atmosphera-plugins",
+      "official": true,
+      "lastUpdated": "2026-08-15"
+    },
+    {
+      "id": "calendar-widget",
+      "name": "Desktop Calendar",
+      "author": "Simon",
+      "description": "Monthly calendar with today highlighted.",
+      "license": "MIT",
+      "version": "1.0.10",
+      "tags": [
+        "Desktop",
+        "Utility"
+      ],
+      "repository": "https://github.com/alexindigo/atmosphera-plugins",
+      "official": true,
+      "lastUpdated": "2026-08-15"
+    },
+    {
+      "id": "catwalk",
+      "name": "Catwalk",
+      "author": "MannuVilasara",
+      "description": "A cute animated cat for your bar.",
+      "license": "MIT",
+      "version": "1.1.7",
+      "tags": [
+        "Bar",
+        "Desktop",
+        "Panel",
+        "Fun"
+      ],
+      "repository": "https://github.com/alexindigo/atmosphera-plugins",
+      "official": true,
+      "lastUpdated": "2026-08-15"
+    },
+    {
+      "id": "clipboard",
+      "name": "Clipboard",
+      "author": "yanekyuk",
+      "description": "Clipboard history panel with search, pinning, and image previews.",
+      "license": "MIT",
+      "version": "1.0.3",
+      "tags": [
+        "Utility",
+        "Bar",
+        "Panel"
+      ],
+      "repository": "https://github.com/alexindigo/atmosphera-plugins",
+      "official": true,
+      "lastUpdated": "2026-08-15"
+    },
+    {
+      "id": "keybind-cheatsheet",
+      "name": "Keybind Cheatsheet",
+      "author": "blacku",
+      "description": "Universal keyboard shortcuts keymap that automatically detects and displays keybindings for Hyprland, Niri, or MangoWC compositors.",
+      "license": "MIT",
+      "version": "3.7.4",
+      "tags": [
+        "Bar",
+        "Panel",
+        "System",
+        "Indicator",
+        "Hyprland",
+        "Niri",
+        "MangoWC"
+      ],
+      "repository": "https://github.com/alexindigo/atmosphera-plugins",
+      "official": true,
+      "lastUpdated": "2026-08-15"
+    }
+  ]
+}
