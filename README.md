@@ -10,7 +10,7 @@ converted for the Atmosphera widget API.
 Top-level directories are plugins (one per id, per the registry contract); the
 `registry.json` at the root is what the shell's plugin system fetches.
 
-**All 132 upstream plugins** are mirrored here, converted — plus 27 plugins vendored from unmerged upstream PRs (each marked `official: false` with `upstreamPR` metadata). Most needed no
+**All 131 upstream plugins** are mirrored here, converted — plus 27 vendored from unmerged upstream PRs (each marked `official: false` with `upstreamPR` metadata). (`steam-price-watcher` is excluded: its manifest references a Main.qml that was never committed upstream.) Most needed no
 changes; the ones referencing the renamed icon widgets got the mechanical
 rename below.
 
