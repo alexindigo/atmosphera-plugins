@@ -10,7 +10,7 @@ converted for the Atmosphera widget API.
 Top-level directories are plugins (one per id, per the registry contract); the
 `registry.json` at the root is what the shell's plugin system fetches.
 
-**All 132 upstream plugins** are mirrored here, converted. Most needed no
+**All 132 upstream plugins** are mirrored here, converted — plus 27 plugins vendored from unmerged upstream PRs (each marked `official: false` with `upstreamPR` metadata). Most needed no
 changes; the ones referencing the renamed icon widgets got the mechanical
 rename below.
 
