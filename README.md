@@ -1,7 +1,8 @@
 # atmosphera-plugins
 
 Curated plugin registry for the [Atmosphera](https://github.com/alexindigo/atmosphera)
-shell — upstream [Noctalia plugins](https://github.com/noctalia-dev/noctalia-plugins)
+shell — a full mirror of the upstream
+[Noctalia plugins](https://github.com/noctalia-dev/noctalia-plugins) registry,
 converted for the Atmosphera widget API.
 
 ## What's here
@@ -9,14 +10,9 @@ converted for the Atmosphera widget API.
 Top-level directories are plugins (one per id, per the registry contract); the
 `registry.json` at the root is what the shell's plugin system fetches.
 
-| Plugin | Upstream id | Notes |
-|---|---|---|
-| agent-session-status | same | NIcon → AtmoIcon |
-| arch-updater | same | NIcon → AtmoIcon |
-| calendar-widget | same | no changes needed |
-| catwalk | same | no changes needed |
-| clipboard | same | NIcon → AtmoIcon, NIconButton → AtmoIconButton |
-| keybind-cheatsheet | same | NIcon → AtmoIcon, NIconButton(Hot) → AtmoIconButton(Hot) |
+**All 132 upstream plugins** are mirrored here, converted. Most needed no
+changes; the ones referencing the renamed icon widgets got the mechanical
+rename below.
 
 ## The conversion
 
@@ -34,6 +30,7 @@ sed -i -E 's/\bNIconButtonHot\b/AtmoIconButtonHot/g; s/\bNIconButton\b/AtmoIconB
 
 ## Licensing
 
-Each plugin retains its upstream license (see its `manifest.json`); upstream
-plugins are MIT by their respective authors. Registry tooling text in this
-repo is GPL-3.0 (see LICENSE).
+Each plugin retains its upstream license (see its `manifest.json`; upstream
+plugins are mostly MIT by their respective authors — `kde-connect` is GPLv2 by
+WerWolv, vendored with its LICENSE). Registry tooling text in this repo is
+GPL-3.0 (see LICENSE).
