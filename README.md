@@ -34,3 +34,18 @@ Each plugin retains its upstream license (see its `manifest.json`; upstream
 plugins are mostly MIT by their respective authors — `kde-connect` is GPLv2 by
 WerWolv, vendored with its LICENSE). Registry tooling text in this repo is
 GPL-3.0 (see LICENSE).
+
+## Registry contract
+
+- Each top-level directory is a plugin keyed by `id`; the `registry.json` at
+  the root is what the shell's plugin system fetches.
+- The index entry **must** carry `minNoctaliaVersion` / `minAtmospheraVersion`
+  whenever the plugin's `manifest.json` declares them, **because the shell
+  gates installs on the index, not on the downloaded manifest**. A field
+  present only in the manifest is invisible to the compatibility check.
+- Values must be plain `x.y.z` — no `v` prefix, no pre-release suffix.
+- Atmosphera provides the Noctalia **v4** API: a plugin passes when the major
+  of `minNoctaliaVersion` is ≤ 4. Atmosphera-native plugins may instead
+  declare `minAtmospheraVersion`, which is compared against the fork's real
+  version.
+
