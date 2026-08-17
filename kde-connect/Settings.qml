@@ -13,8 +13,6 @@ ColumnLayout {
 
   property bool hideIfNoDeviceConnected: pluginApi?.mainInstance?.hideIfNoDeviceConnected ?? (pluginApi?.pluginSettings?.hideIfNoDeviceConnected ?? false)
 
-  property string iconColor: cfg.iconColor ?? defaults.iconColor ?? "none"
-
   spacing: Style.marginL
 
   ColumnLayout {
@@ -30,13 +28,6 @@ ColumnLayout {
             root.hideIfNoDeviceConnected = checked
         }
     }
-
-    NColorChoice {
-      label: pluginApi?.tr("settings.iconColor.label")
-      description: pluginApi?.tr("settings.iconColor.desc")
-      currentKey: root.iconColor
-      onSelected: key => root.iconColor = key
-    }
   }
 
   function saveSettings() {
@@ -46,7 +37,6 @@ ColumnLayout {
     }
 
     pluginApi.pluginSettings.hideIfNoDeviceConnected = root.hideIfNoDeviceConnected;
-    pluginApi.pluginSettings.iconColor = root.iconColor;
     pluginApi.saveSettings();
 
     Logger.d("KDEConnect", "Settings saved successfully");

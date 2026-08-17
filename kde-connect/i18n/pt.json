@@ -1,6 +1,6 @@
 {
   "panel": {
-    "title": "Dispositivos conectados",
+    "title": "Dispositivos Conectados",
     "signal": {
       "very-weak": "Muito Fraco",
       "weak": "Fraco",
@@ -12,15 +12,14 @@
     "card": {
       "battery": "Bateria",
       "network": "Rede",
-      "signal-strength": "Intensidade do sinal",
+      "signal-strength": "Intensidade do Signal",
       "notifications": "Notificações"
     },
-    "other-devices": "Outros dispositivos",
+    "other-devices": "Outros Dispositivos",
     "send-file-picker": "Selecione o arquivo para enviar ao dispositivo",
     "send-file": "Enviar Arquivo",
-    "browser-device": "Navegar pelos arquivos do dispositivo",
-    "find-device": "Encontrar meu dispositivo",
-    "pair": "Emparelhar meu dispositivo",
+    "find-device": "Encontrar meu Dispositivo",
+    "pair": "Emparelhar meu Dispositivo",
     "unpair": "Desemparelhar meu dispositivo",
     "kdeconnect-error": {
       "no-devices": "Nenhum dispositivo executando o KDE Connect encontrado",
