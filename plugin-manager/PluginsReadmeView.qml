@@ -3,7 +3,6 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell.Io
 import qs.Commons
-import qs.Services.Noctalia
 import qs.Widgets
 
 Item {

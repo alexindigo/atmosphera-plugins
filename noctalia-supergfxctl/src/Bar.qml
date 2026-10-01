@@ -14,7 +14,6 @@ import qs.Commons
 import qs.Widgets
 import qs.Modules.Bar.Extras
 import qs.Services.UI
-import qs.Services.Noctalia
 
 /**
 	Bar widget for showing the current GPU mode, with an optional badge when a pending

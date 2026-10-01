@@ -4,7 +4,6 @@ import QtQuick.Layouts
 import Quickshell
 import qs.Commons
 import qs.Services.Keyboard
-import qs.Services.Noctalia
 import qs.Services.UI
 import qs.Widgets
 
