@@ -1,8 +1,9 @@
 {
   "id": "hermes-ssh-chat",
   "name": "Hermes SSH Terminal",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minNoctaliaVersion": "4.6.6",
+  "minAtmospheraVersion": "0.8.0",
   "author": "focky",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

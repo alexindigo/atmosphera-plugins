@@ -1,8 +1,9 @@
 {
   "id": "niri-ribbon",
   "name": "Niri Ribbon",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minNoctaliaVersion": "4.7.0",
+  "minAtmospheraVersion": "0.8.0",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
   "description": "Tracks off-screen windows in niri ribbon",

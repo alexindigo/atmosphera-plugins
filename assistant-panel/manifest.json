@@ -1,8 +1,9 @@
 {
   "id": "assistant-panel",
   "name": "Assistant Panel",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "minNoctaliaVersion": "4.1.2",
+  "minAtmospheraVersion": "0.8.0",
   "author": "j-1in",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

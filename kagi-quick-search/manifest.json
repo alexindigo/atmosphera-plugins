@@ -1,10 +1,11 @@
 {
   "id": "kagi-quick-search",
   "name": "Kagi Quick Search",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Get AI answers from Kagi in your launcher",
   "tags": ["Launcher", "Productivity"],
   "minNoctaliaVersion": "4.4.1",
+  "minAtmospheraVersion": "0.8.0",
   "author": "Kainoa Kanter",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

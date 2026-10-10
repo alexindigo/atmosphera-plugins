@@ -1,8 +1,9 @@
 {
   "id": "auto-cpufreq",
   "name": "auto-cpufreq",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "minNoctaliaVersion": "4.4.1",
+  "minAtmospheraVersion": "0.8.0",
   "author": "4rmcyt",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

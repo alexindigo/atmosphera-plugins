@@ -1,8 +1,9 @@
 {
   "id": "niri-outputs",
   "name": "Niri Outputs",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "minNoctaliaVersion": "4.1.2",
+  "minAtmospheraVersion": "0.8.0",
   "author": "adrlau",
   "official": false,
   "license": "MIT",

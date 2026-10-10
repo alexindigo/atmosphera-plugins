@@ -1,8 +1,9 @@
 {
   "id": "battery-monitor-plus",
   "name": "Battery Monitor Plus",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minNoctaliaVersion": "4.6.6",
+  "minAtmospheraVersion": "0.8.0",
   "author": "krteke",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

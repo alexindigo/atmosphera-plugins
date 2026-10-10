@@ -2,11 +2,12 @@
   "id": "clamshell",
   "name": "Clamshell Mode",
   "description": "Auto clamshell on external display, with manual override",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Sovego",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
   "minNoctaliaVersion": "3.6.0",
+  "minAtmospheraVersion": "0.8.0",
   "tags": ["Bar", "System", "Utility", "Niri"],
   "entryPoints": {
     "main": "Main.qml",

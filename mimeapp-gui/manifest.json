@@ -1,8 +1,9 @@
 {
   "id": "mimeapp-gui",
   "name": "MimeApp GUI",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "minNoctaliaVersion": "4.1.2",
+  "minAtmospheraVersion": "0.8.0",
   "author": "Mathew-D",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

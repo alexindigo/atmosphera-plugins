@@ -1,8 +1,9 @@
 {
   "id": "amd-gpu-monitor",
   "name": "AMD GPU Monitor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minNoctaliaVersion": "4.0.0",
+  "minAtmospheraVersion": "0.8.0",
   "author": "Dvaxert",
   "license": "MIT",
   "description": "AMD discrete GPU monitoring via rocm-smi with graphs and configurable metrics.",

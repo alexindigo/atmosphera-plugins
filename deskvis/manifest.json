@@ -1,8 +1,9 @@
 {
   "id": "deskvis",
   "name": "DeskVis",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "minNoctaliaVersion": "4.6.6",
+  "minAtmospheraVersion": "0.8.0",
   "author": "HAVEKziad",
   "license": "MIT",
   "description": "Audio visualizer desktop widget — bars, wave, or mirror. Supports all directions. Transparent, follows color scheme.",

@@ -1,8 +1,9 @@
 {
   "id": "latency-monitor",
   "name": "Latency Monitor",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "minNoctaliaVersion": "4.1.0",
+  "minAtmospheraVersion": "0.8.0",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
   "author": "Borhaneddine GUEMIDI <guemidiborhane@gmail.com>",
   "license": "MIT",

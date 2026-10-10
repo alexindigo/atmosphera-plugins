@@ -1,8 +1,9 @@
 {
   "id": "noctalia-vantage",
   "name": "Noctalia Vantage",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "minNoctaliaVersion": "3.6.0",
+  "minAtmospheraVersion": "0.8.0",
   "author": "Sourajyoti Basak",
   "license": "GPL-3.0-or-later",
   "repository": "https://github.com/wizard-28/noctalia-plugins",

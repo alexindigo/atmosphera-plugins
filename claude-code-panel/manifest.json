@@ -1,8 +1,9 @@
 {
   "id": "claude-code-panel",
   "name": "Claude Code Panel",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "minNoctaliaVersion": "4.1.2",
+  "minAtmospheraVersion": "0.8.0",
   "author": "d7om",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

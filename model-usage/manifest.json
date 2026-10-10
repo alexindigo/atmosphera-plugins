@@ -1,8 +1,9 @@
 {
   "id": "model-usage",
   "name": "Model Usage",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "minNoctaliaVersion": "3.6.0",
+  "minAtmospheraVersion": "0.8.0",
   "author": "cmptr",
   "license": "MIT",
   "description": "Shows AI coding assistant usage stats in the bar with detail panel (Claude Code, Codex, Copilot, Gemini, OpenRouter, Zen)",

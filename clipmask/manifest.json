@@ -1,8 +1,9 @@
 {
   "id": "clipmask",
   "name": "ClipMask",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minNoctaliaVersion": "4.1.0",
+  "minAtmospheraVersion": "0.8.0",
   "author": "x0d7x",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

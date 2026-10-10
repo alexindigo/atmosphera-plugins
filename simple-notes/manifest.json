@@ -1,8 +1,9 @@
 {
   "id": "simple-notes",
   "name": "Simple Notes",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "minNoctaliaVersion": "3.7.1",
+  "minAtmospheraVersion": "0.8.0",
   "author": "fusuyfusuy",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

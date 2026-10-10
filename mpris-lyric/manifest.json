@@ -1,8 +1,9 @@
 {
   "id": "mpris-lyric",
   "name": "MPRIS Lyric",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "minNoctaliaVersion": "3.8.0",
+  "minAtmospheraVersion": "0.8.0",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
   "author": "DBeidachazi",
   "license": "MIT",

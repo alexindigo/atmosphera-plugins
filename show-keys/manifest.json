@@ -1,8 +1,9 @@
 {
     "id": "show-keys",
     "name": "Show Keys",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "minNoctaliaVersion": "3.6.0",
+    "minAtmospheraVersion": "0.8.0",
     "author": "onez3r0",
     "license": "MIT",
     "repository": "https://github.com/noctalia-dev/noctalia-plugins",

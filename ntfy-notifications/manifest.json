@@ -1,8 +1,9 @@
 {
   "id": "ntfy-notifications",
   "name": "ntfy Notifications",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minNoctaliaVersion": "4.4.1",
+  "minAtmospheraVersion": "0.8.0",
   "author": "maxe",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

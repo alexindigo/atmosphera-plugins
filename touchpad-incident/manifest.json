@@ -2,7 +2,7 @@
   "id": "touchpad-incident",
   "name": "Touchpad Incident",
   "version": "1.0.0",
-  "minAtmospheraVersion": "0.7.0",
+  "minAtmospheraVersion": "0.8.0",
   "author": "Domovoy",
   "license": "GPL-3.0",
   "repository": "https://github.com/alexindigo/atmosphera-plugins",
