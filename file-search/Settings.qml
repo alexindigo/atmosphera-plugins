@@ -40,7 +40,7 @@ ColumnLayout {
           text: pluginApi?.tr("settings.showHidden.label")
           font.pointSize: Style.fontSizeL
           font.weight: Font.Medium
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           Layout.fillWidth: true
         }
       }
@@ -94,7 +94,7 @@ ColumnLayout {
           text: pluginApi?.tr("settings.maxResults.label")
           font.pointSize: Style.fontSizeL
           font.weight: Font.Medium
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           Layout.fillWidth: true
         }
 
@@ -102,14 +102,14 @@ ColumnLayout {
           text: root.valueMaxResults === 0 ? pluginApi?.tr("settings.maxResults.unlimited") : root.valueMaxResults.toString()
           font.pointSize: Style.fontSizeM
           font.weight: Font.Medium
-          color: Color.mPrimary
+          color: AtmoColor.mPrimary
         }
       }
 
       NText {
         text: pluginApi?.tr("settings.maxResults.description")
         font.pointSize: Style.fontSizeS
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
         wrapMode: Text.WordWrap
         Layout.fillWidth: true
       }

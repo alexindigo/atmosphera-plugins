@@ -54,14 +54,14 @@ Item {
 
             CloudflareIcon {
               pointSize: Style.fontSizeL
-              color: (mainInstance?.warpConnected ?? false) ? Color.mPrimary : Color.mOnSurfaceVariant
+              color: (mainInstance?.warpConnected ?? false) ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
             }
 
             NText {
               text: pluginApi?.tr("panel.title")
               pointSize: Style.fontSizeL
               font.weight: Style.fontWeightBold
-              color: Color.mOnSurface
+              color: AtmoColor.mOnSurface
               Layout.fillWidth: true
             }
 
@@ -70,7 +70,7 @@ Item {
                 ? pluginApi?.tr("panel.status.connected")
                 : pluginApi?.tr("panel.status.disconnected")
               pointSize: Style.fontSizeS
-              color: (mainInstance?.warpConnected ?? false) ? Color.mPrimary : Color.mOnSurfaceVariant
+              color: (mainInstance?.warpConnected ?? false) ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
             }
           }
 
@@ -82,13 +82,13 @@ Item {
             NText {
               text: pluginApi?.tr("panel.mode") + ":"
               pointSize: Style.fontSizeS
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
             }
 
             NText {
               text: mainInstance?.warpMode ?? ""
               pointSize: Style.fontSizeS
-              color: Color.mOnSurface
+              color: AtmoColor.mOnSurface
               font.family: Settings.data.ui.fontFixed
             }
           }
@@ -97,10 +97,10 @@ Item {
             Layout.fillWidth: true
             visible: !(mainInstance?.warpInstalled ?? true)
             Layout.preferredHeight: notInstalledLayout.implicitHeight + Style.marginM * 2
-            color: Qt.alpha(Color.mError, 0.1)
+            color: Qt.alpha(AtmoColor.mError, 0.1)
             radius: Style.radiusM
             border.width: Style.borderS
-            border.color: Qt.alpha(Color.mError, 0.3)
+            border.color: Qt.alpha(AtmoColor.mError, 0.3)
 
             RowLayout {
               id: notInstalledLayout
@@ -111,13 +111,13 @@ Item {
               AtmoIcon {
                 icon: "alert-circle"
                 pointSize: Style.fontSizeM
-                color: Color.mError
+                color: AtmoColor.mError
               }
 
               NText {
                 text: pluginApi?.tr("panel.not-installed")
                 pointSize: Style.fontSizeS
-                color: Color.mError
+                color: AtmoColor.mError
                 Layout.fillWidth: true
                 wrapMode: Text.Wrap
               }
@@ -132,8 +132,8 @@ Item {
           ? pluginApi?.tr("context.disconnect")
           : pluginApi?.tr("context.connect")
         icon: (mainInstance?.warpConnected ?? false) ? "plug-x" : "plug"
-        backgroundColor: (mainInstance?.warpConnected ?? false) ? Color.mError : Color.mPrimary
-        textColor: (mainInstance?.warpConnected ?? false) ? Color.mOnError : Color.mOnPrimary
+        backgroundColor: (mainInstance?.warpConnected ?? false) ? AtmoColor.mError : AtmoColor.mPrimary
+        textColor: (mainInstance?.warpConnected ?? false) ? AtmoColor.mOnError : AtmoColor.mOnPrimary
         enabled: mainInstance?.warpInstalled ?? false
 
         onClicked: {

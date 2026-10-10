@@ -171,14 +171,14 @@ Item {
                 Layout.fillWidth: true
                 spacing: Style.marginM
 
-                AtmoIcon { icon: "sparkles"; color: Color.mPrimary; pointSize: Style.fontSizeL }
+                AtmoIcon { icon: "sparkles"; color: AtmoColor.mPrimary; pointSize: Style.fontSizeL }
 
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 2
                     NText {
                         text: pluginApi?.tr("panel.title")
-                        pointSize: Style.fontSizeL; font.weight: Font.Bold; color: Color.mOnSurface
+                        pointSize: Style.fontSizeL; font.weight: Font.Bold; color: AtmoColor.mOnSurface
                         Layout.fillWidth: true
                     }
                     NText {
@@ -187,7 +187,7 @@ Item {
                             : root.kdlFiles.length > 0
                                 ? (pluginApi?.tr("panel.presetsAvailable", { count: root.kdlFiles.length }))
                                 : (pluginApi?.tr("panel.noPresetsFound"))
-                        pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant
+                        pointSize: Style.fontSizeXS; color: AtmoColor.mOnSurfaceVariant
                     }
                 }
 
@@ -202,7 +202,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 height: pathCol.implicitHeight + Style.marginM * 2
-                color: Color.mSurfaceVariant
+                color: AtmoColor.mSurfaceVariant
                 radius: Style.radiusM
 
                 ColumnLayout {
@@ -212,19 +212,19 @@ Item {
 
                     RowLayout {
                         spacing: Style.marginS
-                        AtmoIcon { icon: "folder-open"; color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeS }
+                        AtmoIcon { icon: "folder-open"; color: AtmoColor.mOnSurfaceVariant; pointSize: Style.fontSizeS }
                         NText {
                             text: root.resolvedAnimDir || "~/.config/niri/animations"
-                            pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant
+                            pointSize: Style.fontSizeXS; color: AtmoColor.mOnSurfaceVariant
                             elide: Text.ElideLeft; Layout.fillWidth: true
                         }
                     }
                     RowLayout {
                         spacing: Style.marginS
-                        AtmoIcon { icon: "file-code"; color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeS }
+                        AtmoIcon { icon: "file-code"; color: AtmoColor.mOnSurfaceVariant; pointSize: Style.fontSizeS }
                         NText {
                             text: root.resolvedTargetFile || "~/.config/niri/animations.kdl"
-                            pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant
+                            pointSize: Style.fontSizeXS; color: AtmoColor.mOnSurfaceVariant
                             elide: Text.ElideLeft; Layout.fillWidth: true
                         }
                     }
@@ -244,13 +244,13 @@ Item {
                     spacing: Style.marginS
                     AtmoIcon {
                         icon: root.statusIsError ? "circle-x" : "circle-check"
-                        color: root.statusIsError ? Qt.rgba(1,0.3,0.3,1) : Color.mPrimary
+                        color: root.statusIsError ? Qt.rgba(1,0.3,0.3,1) : AtmoColor.mPrimary
                         pointSize: Style.fontSizeS
                     }
                     NText {
                         id: statusText
                         text: root.statusMessage; pointSize: Style.fontSizeS
-                        color: root.statusIsError ? Qt.rgba(1,0.3,0.3,1) : Color.mPrimary
+                        color: root.statusIsError ? Qt.rgba(1,0.3,0.3,1) : AtmoColor.mPrimary
                         wrapMode: Text.WordWrap; Layout.fillWidth: true
                     }
                 }
@@ -260,7 +260,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                color: Qt.rgba(Color.mSurfaceVariant.r, Color.mSurfaceVariant.g, Color.mSurfaceVariant.b, 0.5)
+                color: Qt.rgba(AtmoColor.mSurfaceVariant.r, AtmoColor.mSurfaceVariant.g, AtmoColor.mSurfaceVariant.b, 0.5)
                 radius: Style.radiusL
 
                 // Loading
@@ -268,10 +268,10 @@ Item {
                     anchors.centerIn: parent
                     visible: root.loading
                     spacing: Style.marginM
-                    AtmoIcon { icon: "loader"; color: Color.mPrimary; pointSize: Style.fontSizeXXL; Layout.alignment: Qt.AlignHCenter }
+                    AtmoIcon { icon: "loader"; color: AtmoColor.mPrimary; pointSize: Style.fontSizeXXL; Layout.alignment: Qt.AlignHCenter }
                     NText {
                         text: pluginApi?.tr("panel.scanningAnimations")
-                        color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeM; Layout.alignment: Qt.AlignHCenter
+                        color: AtmoColor.mOnSurfaceVariant; pointSize: Style.fontSizeM; Layout.alignment: Qt.AlignHCenter
                     }
                 }
 
@@ -280,10 +280,10 @@ Item {
                     anchors.centerIn: parent
                     visible: !root.loading && root.kdlFiles.length === 0
                     spacing: Style.marginM
-                    AtmoIcon { icon: "folder-open"; color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeXXL; Layout.alignment: Qt.AlignHCenter }
+                    AtmoIcon { icon: "folder-open"; color: AtmoColor.mOnSurfaceVariant; pointSize: Style.fontSizeXXL; Layout.alignment: Qt.AlignHCenter }
                     NText {
                         text: pluginApi?.tr("panel.noFilesFound")
-                        color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeM
+                        color: AtmoColor.mOnSurfaceVariant; pointSize: Style.fontSizeM
                         horizontalAlignment: Text.AlignHCenter; Layout.alignment: Qt.AlignHCenter
                     }
                 }
@@ -293,7 +293,7 @@ Item {
                     anchors { fill: parent; margins: Style.marginS }
                     visible: !root.loading && root.kdlFiles.length > 0
                     model: root.kdlFiles
-                    gradientColor: Qt.rgba(Color.mSurfaceVariant.r, Color.mSurfaceVariant.g, Color.mSurfaceVariant.b, 0.5)
+                    gradientColor: Qt.rgba(AtmoColor.mSurfaceVariant.r, AtmoColor.mSurfaceVariant.g, AtmoColor.mSurfaceVariant.b, 0.5)
 
                     delegate: Rectangle {
                         id: fileRow
@@ -303,8 +303,8 @@ Item {
                         property bool isHovered: false
 
                         color: isActive
-                            ? Qt.rgba(Color.mPrimary.r, Color.mPrimary.g, Color.mPrimary.b, 0.18)
-                            : isHovered ? Color.mSurface : "transparent"
+                            ? Qt.rgba(AtmoColor.mPrimary.r, AtmoColor.mPrimary.g, AtmoColor.mPrimary.b, 0.18)
+                            : isHovered ? AtmoColor.mSurface : "transparent"
                         radius: Style.radiusM
                         Behavior on color { ColorAnimation { duration: 100 } }
 
@@ -314,14 +314,14 @@ Item {
 
                             Rectangle {
                                 width: 3; height: parent.height * 0.5; radius: 2
-                                color: Color.mPrimary
+                                color: AtmoColor.mPrimary
                                 opacity: fileRow.isActive ? 1 : 0
                                 Behavior on opacity { NumberAnimation { duration: 150 } }
                             }
 
                             NText {
                                 text: modelData
-                                color: fileRow.isActive ? Color.mPrimary : Color.mOnSurface
+                                color: fileRow.isActive ? AtmoColor.mPrimary : AtmoColor.mOnSurface
                                 pointSize: Style.fontSizeM
                                 font.weight: fileRow.isActive ? 600 : 400
                                 Layout.fillWidth: true
@@ -330,7 +330,7 @@ Item {
 
                             AtmoIcon {
                                 icon: root.writing && root.pendingFile === modelData ? "loader" : "check"
-                                color: Color.mPrimary; pointSize: Style.fontSizeM
+                                color: AtmoColor.mPrimary; pointSize: Style.fontSizeM
                                 opacity: fileRow.isActive || (root.writing && root.pendingFile === modelData) ? 1 : 0
                                 Behavior on opacity { NumberAnimation { duration: 150 } }
                             }

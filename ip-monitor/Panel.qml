@@ -63,7 +63,7 @@ Item {
           text: "IP Information"
           font.pointSize: Style.fontSizeL * Style.uiScaleRatio
           font.weight: Font.Bold
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           Layout.fillWidth: true
         }
 
@@ -81,7 +81,7 @@ Item {
       Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: ipDisplayLayout.implicitHeight + Style.marginL * 2
-        color: Color.mSurfaceVariant
+        color: AtmoColor.mSurfaceVariant
         radius: Style.radiusL
 
         ColumnLayout {
@@ -101,10 +101,10 @@ Item {
             pointSize: Style.fontSizeXXL * 2 * Style.uiScaleRatio
             color: {
               if (root.fetchState === "success")
-                return Color.mPrimary;
+                return AtmoColor.mPrimary;
               if (root.fetchState === "error")
-                return Color.mError;
-              return Color.mOnSurfaceVariant;
+                return AtmoColor.mError;
+              return AtmoColor.mOnSurfaceVariant;
             }
           }
 
@@ -122,7 +122,7 @@ Item {
             font.pointSize: Style.fontSizeXXL * Style.uiScaleRatio
             font.weight: Font.Bold
             font.family: Settings.data.ui.fontFixed
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
 
           NText {
@@ -137,7 +137,7 @@ Item {
               return parts.join(", ");
             }
             font.pointSize: Style.fontSizeM * Style.uiScaleRatio
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
           }
         }
       }
@@ -153,13 +153,13 @@ Item {
           text: pluginApi?.tr("panel.details.title")
           font.pointSize: Style.fontSizeM * Style.uiScaleRatio
           font.weight: Font.Medium
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
         }
 
         Rectangle {
           Layout.fillWidth: true
           Layout.fillHeight: true
-          color: Color.mSurfaceVariant
+          color: AtmoColor.mSurfaceVariant
           radius: Style.radiusM
 
           ColumnLayout {
@@ -224,7 +224,7 @@ Item {
                 NText {
                   text: modelData.label + ":"
                   font.pointSize: Style.fontSizeS * Style.uiScaleRatio
-                  color: Color.mOnSurfaceVariant
+                  color: AtmoColor.mOnSurfaceVariant
                   Layout.preferredWidth: 100
                 }
 
@@ -232,7 +232,7 @@ Item {
                   text: modelData.value
                   font.pointSize: Style.fontSizeS * Style.uiScaleRatio
                   font.family: Settings.data.ui.fontFixed
-                  color: Color.mOnSurface
+                  color: AtmoColor.mOnSurface
                   Layout.fillWidth: index !== 0
                   elide: Text.ElideRight
                 }
@@ -242,7 +242,7 @@ Item {
                   visible: index === 0 && root.fetchState === "success"
                   icon: "copy"
                   pointSize: Style.fontSizeS * Style.uiScaleRatio
-                  color: copyHover.containsMouse ? Color.mOnSurfaceVariant : Color.mPrimary
+                  color: copyHover.containsMouse ? AtmoColor.mOnSurfaceVariant : AtmoColor.mPrimary
                   Layout.alignment: Qt.AlignVCenter
 
                   MouseArea {

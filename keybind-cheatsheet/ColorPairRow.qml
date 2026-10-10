@@ -40,7 +40,7 @@ RowLayout {
 
   NText {
     text: row.labelText
-    color: Color.mOnSurface
+    color: AtmoColor.mOnSurface
     pointSize: Style.fontSizeM
     Layout.preferredWidth: 180 * Style.uiScaleRatio
     elide: Text.ElideRight

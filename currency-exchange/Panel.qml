@@ -80,13 +80,13 @@ Item {
           spacing: Style.marginM
 
           AtmoIcon {
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
             icon: "currency-dollar"
             pointSize: Style.fontSizeXXL
           }
           NText {
             Layout.fillWidth: true
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             font.weight: Style.fontWeightBold
             pointSize: Style.fontSizeL
             text: pluginApi?.tr("panel.title") || "Currency Converter"
@@ -130,7 +130,7 @@ Item {
       NBox {
         Layout.fillHeight: true
         Layout.fillWidth: true
-        color: Color.mSurfaceVariant
+        color: AtmoColor.mSurfaceVariant
         radius: Style.radiusM
 
         ColumnLayout {
@@ -149,9 +149,9 @@ Item {
               Layout.fillWidth: true
               Layout.preferredHeight: Style.baseWidgetSize
               Layout.preferredWidth: 100
-              border.color: fromInput.activeFocus ? Color.mPrimary : Color.mOutline
+              border.color: fromInput.activeFocus ? AtmoColor.mPrimary : AtmoColor.mOutline
               border.width: fromInput.activeFocus ? 2 : Style.borderS
-              color: Color.mSurfaceVariant
+              color: AtmoColor.mSurfaceVariant
               radius: Style.iRadiusM
 
               TextInput {
@@ -160,7 +160,7 @@ Item {
                 anchors.fill: parent
                 anchors.leftMargin: Style.marginL
                 anchors.rightMargin: Style.marginL
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
                 font.pointSize: Style.fontSizeM
                 font.weight: Font.Medium
                 horizontalAlignment: Text.AlignRight
@@ -228,7 +228,7 @@ Item {
               Layout.fillWidth: true
               Layout.preferredHeight: Style.baseWidgetSize
               Layout.preferredWidth: 100
-              color: Color.mPrimary
+              color: AtmoColor.mPrimary
               radius: Style.iRadiusM
 
               RowLayout {
@@ -240,7 +240,7 @@ Item {
                 NText {
                   Layout.fillHeight: true
                   Layout.fillWidth: true
-                  color: Color.mOnPrimary
+                  color: AtmoColor.mOnPrimary
                   font.weight: Style.fontWeightBold
                   horizontalAlignment: Text.AlignRight
                   pointSize: Style.fontSizeM
@@ -281,7 +281,7 @@ Item {
           // Rate info
           NText {
             Layout.fillWidth: true
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             horizontalAlignment: Text.AlignHCenter
             pointSize: Style.fontSizeS
             text: {
@@ -300,7 +300,7 @@ Item {
           // Last update time
           NText {
             Layout.fillWidth: true
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             horizontalAlignment: Text.AlignHCenter
             opacity: 0.6
             pointSize: Style.fontSizeXS

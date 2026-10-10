@@ -71,8 +71,8 @@ Item {
                 pluginApi.closePanel(root.screen);
             PanelService.showContextMenu(contextMenu, pill, screen);
         }
-        customIconColor: Color.resolveColorKeyOptional(root.connectedCount > 0 ? root.connectedColor : root.disconnectedColor)
-        customTextColor: Color.resolveColorKeyOptional(root.connectedCount > 0 ? root.connectedColor : root.disconnectedColor)
+        customIconColor: AtmoColor.resolveColorKeyOptional(root.connectedCount > 0 ? root.connectedColor : root.disconnectedColor)
+        customTextColor: AtmoColor.resolveColorKeyOptional(root.connectedCount > 0 ? root.connectedColor : root.disconnectedColor)
         forceOpen: root.displayMode === "alwaysShow"
         forceClose: root.displayMode === "alwaysHide"
     }

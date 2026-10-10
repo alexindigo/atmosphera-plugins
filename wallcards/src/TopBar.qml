@@ -29,7 +29,7 @@ Rectangle {
     shuffleBtn.flash();
   }
 
-  color: Color.mSurface
+  color: AtmoColor.mSurface
 
   Behavior on entryOffset {
     NumberAnimation {
@@ -52,7 +52,7 @@ Rectangle {
   component TButton: Rectangle {
     id: btn
 
-    property color accentColor: active ? Color.mOnSurface : Color.mOnSurfaceVariant
+    property color accentColor: active ? AtmoColor.mOnSurface : AtmoColor.mOnSurfaceVariant
     property bool active: false
     property string hotkey: ""
     property string icon: ""
@@ -61,9 +61,9 @@ Rectangle {
 
     signal clicked
 
-    border.color: active ? Qt.alpha(accentColor, Style.opacityMedium) : Qt.alpha(Color.mOutline, 0.3)
+    border.color: active ? Qt.alpha(accentColor, Style.opacityMedium) : Qt.alpha(AtmoColor.mOutline, 0.3)
     border.width: Style.borderS
-    color: active ? Qt.alpha(accentColor, 0.15) : Qt.alpha(Color.mOnSurface, 0.06)
+    color: active ? Qt.alpha(accentColor, 0.15) : Qt.alpha(AtmoColor.mOnSurface, 0.06)
     height: Style.margin2L
     radius: Style.radiusM
     width: btnRow.width + Style.margin2M
@@ -150,7 +150,7 @@ Rectangle {
 
     signal clicked
 
-    border.color: active ? Color.mOnSurface : Qt.alpha(Color.mOutline, 0.3)
+    border.color: active ? AtmoColor.mOnSurface : Qt.alpha(AtmoColor.mOutline, 0.3)
     border.width: Style.borderS
     color: faceColor
     height: Style.margin2L
@@ -193,7 +193,7 @@ Rectangle {
 
     NText {
       anchors.centerIn: parent
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
       font.bold: true
       font.pointSize: Style.fontSizeS
       text: topBar.pluginApi?.tr("buttons.color-na")
@@ -242,7 +242,7 @@ Rectangle {
       id: flashOverlay
 
       anchors.fill: innerBtn
-      color: Color.mPrimary
+      color: AtmoColor.mPrimary
       opacity: 0
       radius: innerBtn.radius
     }
@@ -270,7 +270,7 @@ Rectangle {
   component PulsingDot: Rectangle {
     id: root
 
-    property color dotColor: Color.mError
+    property color dotColor: AtmoColor.mError
     property bool pulsing: false
 
     color: dotColor
@@ -359,7 +359,7 @@ Rectangle {
 
     Rectangle {
       anchors.verticalCenter: parent.verticalCenter
-      color: Qt.alpha(Color.mOnSurface, 0.15)
+      color: Qt.alpha(AtmoColor.mOnSurface, 0.15)
       height: parent.height * 0.5
       width: 1
     }
@@ -406,7 +406,7 @@ Rectangle {
     }
 
     TButton {
-      accentColor: topBar.livePreview ? Color.mTertiary : Color.mOnSurfaceVariant
+      accentColor: topBar.livePreview ? AtmoColor.mTertiary : AtmoColor.mOnSurfaceVariant
       active: topBar.livePreview
       hotkey: "P"
       label: topBar.pluginApi?.tr("buttons.live-preview")

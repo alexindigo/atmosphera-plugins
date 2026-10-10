@@ -7,7 +7,7 @@ Item {
 
     property real pointSize: Style.fontSizeL
     property bool applyUiScale: true
-    property color color: Color.mOnSurface
+    property color color: AtmoColor.mOnSurface
     // Diagonal strike when disconnected (keep off on tiny bar icons)
     property bool crossed: false
 

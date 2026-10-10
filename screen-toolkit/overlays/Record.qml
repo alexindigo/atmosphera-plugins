@@ -248,19 +248,19 @@ Item {
                 Rectangle {
                     anchors.fill: parent
                     radius: Style.radiusL
-                    color: stopMA.containsMouse ? Color.mError || "#f44336" : Color.mSurface
-                    border.color: Color.mError || "#f44336"
+                    color: stopMA.containsMouse ? AtmoColor.mError || "#f44336" : AtmoColor.mSurface
+                    border.color: AtmoColor.mError || "#f44336"
                     border.width: Style.borderM
                     Row {
                         anchors.centerIn: parent; spacing: Style.marginS
                         Rectangle {
                             width: 10; height: 10; radius: Style.radiusXXXS
-                            color: stopMA.containsMouse ? "white" : Color.mError || "#f44336"
+                            color: stopMA.containsMouse ? "white" : AtmoColor.mError || "#f44336"
                             anchors.verticalCenter: parent.verticalCenter
                         }
                         NText {
                             text: root.pluginApi?.tr("record.stop")
-                            color: stopMA.containsMouse ? "white" : Color.mOnSurface
+                            color: stopMA.containsMouse ? "white" : AtmoColor.mOnSurface
                             font.weight: Font.Bold; pointSize: Style.fontSizeS
                             anchors.verticalCenter: parent.verticalCenter
                         }
@@ -290,13 +290,13 @@ Item {
                 Rectangle {
                     anchors.fill: parent
                     radius: Style.radiusL
-                    color: stopCMA.containsMouse ? Color.mError || "#f44336" : Color.mSurface
-                    border.color: Color.mError || "#f44336"
+                    color: stopCMA.containsMouse ? AtmoColor.mError || "#f44336" : AtmoColor.mSurface
+                    border.color: AtmoColor.mError || "#f44336"
                     border.width: Style.borderM
                     Rectangle {
                         anchors.centerIn: parent
                         width: 12; height: 12; radius: Style.radiusXXXS
-                        color: stopCMA.containsMouse ? "white" : Color.mError || "#f44336"
+                        color: stopCMA.containsMouse ? "white" : AtmoColor.mError || "#f44336"
                     }
                     MouseArea {
                         id: stopCMA; anchors.fill: parent; hoverEnabled: true
@@ -321,7 +321,7 @@ Item {
                 width:  root.regionW + 8
                 height: root.regionH + 8
                 color: "transparent"
-                border.color: Color.mError || "#f44336"
+                border.color: AtmoColor.mError || "#f44336"
                 border.width: Style.borderM
                 radius: Style.radiusS; opacity: 0.85
             }

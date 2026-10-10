@@ -43,7 +43,7 @@ Item {
         y: Style.pixelAlignCenter(parent.height, height)
         width: root.contentWidth
         height: root.contentHeight
-        color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+        color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
         radius: Style.radiusL
         border.color: Style.capsuleBorderColor
         border.width: Style.capsuleBorderWidth
@@ -61,7 +61,7 @@ Item {
                     width: Math.round(4 * Style.uiScaleRatio)
                     height: root.capsuleHeight * 0.5
                     radius: Style.radiusXXXS
-                    color: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+                    color: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
                 }
             }
         }
@@ -76,7 +76,7 @@ Item {
         height: Math.round(4 * Style.uiScaleRatio)
         radius: Math.round(2 * Style.uiScaleRatio)
         visible: isEnabled
-        color: isRunning ? Color.mPrimary : Color.mSecondary
+        color: isRunning ? AtmoColor.mPrimary : AtmoColor.mSecondary
     }
 
     NPopupContextMenu {

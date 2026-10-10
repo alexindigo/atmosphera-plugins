@@ -10,7 +10,7 @@ Rectangle {
   property real progress: total > 0 ? 1 - (pending / total) : 0
   required property int total
 
-  color: Qt.alpha(Color.mSurface, 0.9)
+  color: Qt.alpha(AtmoColor.mSurface, 0.9)
   height: upperRow.height + Style.margin2S + progressBar.height
   radius: Style.radiusXS
   visible: loading
@@ -38,7 +38,7 @@ Rectangle {
         Rectangle {
           property real angle: index * (2 * Math.PI / 3)
 
-          color: Color.mPrimary
+          color: AtmoColor.mPrimary
           height: Style.marginXS
           radius: Style.marginXXS
           width: Style.marginXS
@@ -80,12 +80,12 @@ Rectangle {
     anchors.bottom: parent.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    color: Qt.alpha(Color.mOnSurface, 0.1)
+    color: Qt.alpha(AtmoColor.mOnSurface, 0.1)
     height: Style.marginS
     radius: loadingBar.radius
 
     Rectangle {
-      color: Color.mPrimary
+      color: AtmoColor.mPrimary
       height: parent.height
       radius: parent.radius
       width: parent.width * loadingBar.progress

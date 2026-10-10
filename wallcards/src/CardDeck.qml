@@ -119,7 +119,7 @@ Item {
 
       signal applyRequested
 
-      border.color: isCenter ? Color.mOutline : Color.mSurface
+      border.color: isCenter ? AtmoColor.mOutline : AtmoColor.mSurface
       border.width: isCenter ? Style.borderM : Style.borderS
       color: "transparent"
       height: cardDeck.height

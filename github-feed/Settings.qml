@@ -400,7 +400,7 @@ ColumnLayout {
     Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: infoCol.implicitHeight + Style.marginM * 2
-        color: Color.mSurfaceVariant
+        color: AtmoColor.mSurfaceVariant
         radius: Style.radiusM
 
         ColumnLayout {
@@ -417,14 +417,14 @@ ColumnLayout {
                 AtmoIcon {
                     icon: "info-circle"
                     pointSize: Style.fontSizeS
-                    color: Color.mPrimary
+                    color: AtmoColor.mPrimary
                 }
 
                 NText {
                     text: "IPC Commands"
                     pointSize: Style.fontSizeS
                     font.weight: Font.Medium
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                 }
             }
 
@@ -433,7 +433,7 @@ ColumnLayout {
                 text: "Refresh: qs -c noctalia-shell ipc call plugin:github-feed refresh"
                 pointSize: Style.fontSizeXS
                 font.family: Settings.data.ui.fontFixed
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 wrapMode: Text.WrapAnywhere
             }
 
@@ -442,7 +442,7 @@ ColumnLayout {
                 text: "Toggle panel: qs -c noctalia-shell ipc call plugin:github-feed toggle"
                 pointSize: Style.fontSizeXS
                 font.family: Settings.data.ui.fontFixed
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 wrapMode: Text.WrapAnywhere
             }
         }

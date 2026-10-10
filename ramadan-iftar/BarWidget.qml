@@ -129,7 +129,7 @@ Item {
     width: root.contentWidth
     height: root.contentHeight
     radius: Style.radiusL
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
 
@@ -147,7 +147,7 @@ Item {
       AtmoIcon {
         icon: "moon-stars"
         pointSize: root.iconSize
-        color: mouseArea.containsMouse ? Color.mOnHover : Color.mPrimary
+        color: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mPrimary
         Layout.alignment: Qt.AlignVCenter
       }
 
@@ -156,7 +156,7 @@ Item {
         text: root.displayText
         pointSize: root.barFontSize
         applyUiScale: false
-        color: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+        color: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
         Layout.alignment: Qt.AlignVCenter
       }
     }
@@ -170,7 +170,7 @@ Item {
       AtmoIcon {
         icon: "moon-stars"
         pointSize: Style.toOdd(root.capsuleHeight * 0.45)
-        color: mouseArea.containsMouse ? Color.mOnHover : Color.mPrimary
+        color: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mPrimary
         Layout.alignment: Qt.AlignHCenter
       }
 
@@ -178,7 +178,7 @@ Item {
         text: root.displayText
         pointSize: root.barFontSize * 0.65
         applyUiScale: false
-        color: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+        color: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
         Layout.alignment: Qt.AlignHCenter
       }
     }

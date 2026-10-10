@@ -34,13 +34,13 @@ ColumnLayout {
       NText {
         text: pluginApi?.tr("settings.dataSource")
         pointSize: Style.fontSizeM
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
       }
 
       NText {
         text: pluginApi?.tr("settings.dataSourceDesc")
         pointSize: Style.fontSizeS
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
       }
     }
 
@@ -82,13 +82,13 @@ ColumnLayout {
       NText {
         text: pluginApi?.tr("settings.aqiScale")
         pointSize: Style.fontSizeM
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
       }
 
       NText {
         text: pluginApi?.tr("settings.aqiScaleDesc")
         pointSize: Style.fontSizeS
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
       }
     }
 

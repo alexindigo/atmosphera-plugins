@@ -599,7 +599,7 @@ Item {
             y: index * (root._monH * root._autoScale + root._rowGap)
             width: mapContent.width
             height: root._monH * root._autoScale
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
             opacity: 0.07
             z: -1
           }
@@ -611,9 +611,9 @@ Item {
             y: index * (root._monH * root._autoScale + root._rowGap)
             width: mapContent.width
             height: root._monH * root._autoScale
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
             opacity: 0.12
-            border.color: Color.mPrimary
+            border.color: AtmoColor.mPrimary
             border.width: 2
             z: 5
           }
@@ -624,7 +624,7 @@ Item {
             y: index * (root._monH * root._autoScale + root._rowGap)
             width: root._barWidth
             height: root._monH * root._autoScale
-            color: modelData.id === NiriState.focusedWorkspaceId ? Color.mPrimary : Color.mOutline
+            color: modelData.id === NiriState.focusedWorkspaceId ? AtmoColor.mPrimary : AtmoColor.mOutline
             z: 10
           }
 
@@ -682,7 +682,7 @@ Item {
           // Visual hierarchy: urgent (mError) > focused global (primary,
           // strongest fill) > secondary (active in workspace or in active
           // column) > normal
-          readonly property color winColor: modelData.isUrgent ? Color.mError : (_secondary ? Color.mSecondary : Color.mPrimary)
+          readonly property color winColor: modelData.isUrgent ? AtmoColor.mError : (_secondary ? AtmoColor.mSecondary : AtmoColor.mPrimary)
           // Hover is STATE-DRIVEN: hoveredWinId is the single source of
           // truth — tile color, corner-button colors, icon wash and the
           // info line all derive from it, so setting hoveredWinId
@@ -716,12 +716,12 @@ Item {
           function _lum(c) {
             return 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b;
           }
-          readonly property color _tileBg: _hovered ? Color.mTertiary : winColor
+          readonly property color _tileBg: _hovered ? AtmoColor.mTertiary : winColor
           readonly property real _tileBgOpacity: _hovered ? 1.0 : (modelData.isFocused ? 1.0 : (_secondary ? 0.3 : 0.15))
-          readonly property real _bgLum: _tileBgOpacity * _lum(_tileBg) + (1 - _tileBgOpacity) * _lum(Color.mSurface)
-          readonly property color _contrastColor: _bgLum > 0.5 ? Color.mSurface : Color.mOnSurface
+          readonly property real _bgLum: _tileBgOpacity * _lum(_tileBg) + (1 - _tileBgOpacity) * _lum(AtmoColor.mSurface)
+          readonly property color _contrastColor: _bgLum > 0.5 ? AtmoColor.mSurface : AtmoColor.mOnSurface
           // Shared by the tile's corner buttons: 50% mOnTertiary preview
-          readonly property color _onTertiaryHalf: Qt.rgba(Color.mOnTertiary.r, Color.mOnTertiary.g, Color.mOnTertiary.b, 0.5)
+          readonly property color _onTertiaryHalf: Qt.rgba(AtmoColor.mOnTertiary.r, AtmoColor.mOnTertiary.g, AtmoColor.mOnTertiary.b, 0.5)
 
           // Icon selection: foreground-app icon for terminal tiles when the
           // bridge resolved one (and the setting allows), else the window's
@@ -746,14 +746,14 @@ Item {
           // empty outline slot (the ghost carries the window's identity).
           Rectangle {
             anchors.fill: parent
-            color: winRect._dragged ? "transparent" : (winRect._hovered ? Color.mTertiary : winRect.winColor)
+            color: winRect._dragged ? "transparent" : (winRect._hovered ? AtmoColor.mTertiary : winRect.winColor)
             opacity: winRect._dragDim * (winRect._dragged ? 1.0 : (winRect._hovered ? 1.0 : (modelData.isFocused ? 1.0 : (winRect._secondary ? 0.3 : 0.15))))
             Behavior on opacity {
               NumberAnimation {
                 duration: 150
               }
             }
-            border.color: winRect._dragged ? Color.mOutline : (winRect._hovered ? Color.mTertiary : winRect.winColor)
+            border.color: winRect._dragged ? AtmoColor.mOutline : (winRect._hovered ? AtmoColor.mTertiary : winRect.winColor)
             border.width: winRect._dragged ? 1 : ((modelData.isFocused || winRect._secondary || winRect._hovered) ? 2 : 1)
           }
 
@@ -787,7 +787,7 @@ Item {
 
               layer.enabled: !(modelData.isFocused || winRect._hovered)
               layer.effect: ShaderEffect {
-                property color targetColor: Color.mOnSurface
+                property color targetColor: AtmoColor.mOnSurface
                 // Mask mode (4.0): flat washed-out color, alpha from luminance —
                 // dark icon backgrounds vanish, every icon reads as a uniform
                 // soft watermark regardless of its original colors
@@ -857,7 +857,7 @@ Item {
 
             layer.enabled: !(modelData.isFocused || winRect._hovered)
             layer.effect: ShaderEffect {
-              property color targetColor: Color.mOnSurface
+              property color targetColor: AtmoColor.mOnSurface
               property real colorizeMode: 4.0
               property real blendStrength: 0.0
               property real hueAdjustment: 0.0
@@ -976,12 +976,12 @@ Item {
               icon: (winRect._audio && winRect._audio.playing) ? Icon.mediaPause : Icon.mediaPlay
               pointSize: Math.max(5, playButton._box * 0.33)
               applyUiScale: false
-              color: playArea.containsMouse ? Color.mOnTertiary : ((winRect._hovered || modelData.isFocused) ? winRect._onTertiaryHalf : winRect._contrastColor)
+              color: playArea.containsMouse ? AtmoColor.mOnTertiary : ((winRect._hovered || modelData.isFocused) ? winRect._onTertiaryHalf : winRect._contrastColor)
               opacity: (modelData.isFocused || winRect._hovered) ? 1.0 : 0.75
 
               layer.enabled: !(modelData.isFocused || winRect._hovered)
               layer.effect: ShaderEffect {
-                property color targetColor: Color.mOnSurface
+                property color targetColor: AtmoColor.mOnSurface
                 property real colorizeMode: 4.0
                 property real blendStrength: 0.0
                 property real hueAdjustment: 0.0
@@ -1032,12 +1032,12 @@ Item {
               // Icon hover -> mOnTertiary full; active/hovered tile ->
               // same color at 50% opacity (softer preview of the armed
               // state); otherwise luminance-derived contrast
-              color: audioArea.containsMouse ? Color.mOnTertiary : ((winRect._hovered || modelData.isFocused) ? winRect._onTertiaryHalf : winRect._contrastColor)
+              color: audioArea.containsMouse ? AtmoColor.mOnTertiary : ((winRect._hovered || modelData.isFocused) ? winRect._onTertiaryHalf : winRect._contrastColor)
               opacity: (modelData.isFocused || winRect._hovered) ? 1.0 : 0.75
 
               layer.enabled: !(modelData.isFocused || winRect._hovered)
               layer.effect: ShaderEffect {
-                property color targetColor: Color.mOnSurface
+                property color targetColor: AtmoColor.mOnSurface
                 property real colorizeMode: 4.0
                 property real blendStrength: 0.0
                 property real hueAdjustment: 0.0
@@ -1089,8 +1089,8 @@ Item {
         Rectangle {
           anchors.fill: parent
           radius: 6
-          color: Color.mSurface
-          border.color: Color.mPrimary
+          color: AtmoColor.mSurface
+          border.color: AtmoColor.mPrimary
           border.width: 2
           opacity: 0.92
         }
@@ -1111,7 +1111,7 @@ Item {
         readonly property var _lines: root._hoverInfoLines
         visible: root.hoverInfo && _lines.length > 0
         text: _lines.join("\n")
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
         // Fixed per size preset (independent of content/fitScale)
         pointSize: root.sizeKey === "compact" ? 8 : (root.sizeKey === "large" ? 11 : 9)
         width: mapContent.width - 16
@@ -1142,7 +1142,7 @@ Item {
     // Soft band — clearly visible, brighter when it's the drop target
     Rectangle {
       anchors.fill: parent
-      color: Color.mPrimary
+      color: AtmoColor.mPrimary
       opacity: root._dragTargetWs === -1 ? 0.32 : 0.16
       Behavior on opacity {
         NumberAnimation {
@@ -1156,7 +1156,7 @@ Item {
       y: 0
       width: parent.width
       height: 2
-      color: Color.mPrimary
+      color: AtmoColor.mPrimary
       opacity: root._dragTargetWs === -1 ? 1.0 : 0.6
     }
     // Left indicator bar (same as real rows)
@@ -1165,7 +1165,7 @@ Item {
       y: 0
       width: root._barWidth
       height: parent.height
-      color: Color.mPrimary
+      color: AtmoColor.mPrimary
       opacity: root._dragTargetWs === -1 ? 1.0 : 0.6
     }
   }
@@ -1174,6 +1174,6 @@ Item {
     visible: root._windows.length === 0
     anchors.centerIn: parent
     text: "No windows"
-    color: Color.mOnSurfaceVariant
+    color: AtmoColor.mOnSurfaceVariant
   }
 }

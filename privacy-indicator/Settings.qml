@@ -72,8 +72,8 @@ ColumnLayout {
       description: pluginApi?.tr("settings.inactiveColor.desc")
       currentKey: root.inactiveColor
       onSelected: key => root.inactiveColor = key
-      noneColor: Qt.alpha(Color.mOnSurfaceVariant, 0.3)
-      noneOnColor: Qt.alpha(Color.mOnSurface, 0.7)
+      noneColor: Qt.alpha(AtmoColor.mOnSurfaceVariant, 0.3)
+      noneOnColor: Qt.alpha(AtmoColor.mOnSurface, 0.7)
     }
 
     NComboBox {

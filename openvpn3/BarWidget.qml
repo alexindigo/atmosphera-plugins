@@ -104,8 +104,8 @@ Item {
         text: root.pillText
         icon: root.pillIcon
         tooltipText: root._tooltipText()
-        customIconColor: Color.resolveColorKeyOptional(root.connectedCount > 0 ? root.connectedColor : root.disconnectedColor)
-        customTextColor: Color.resolveColorKeyOptional(root.connectedCount > 0 ? root.connectedColor : root.disconnectedColor)
+        customIconColor: AtmoColor.resolveColorKeyOptional(root.connectedCount > 0 ? root.connectedColor : root.disconnectedColor)
+        customTextColor: AtmoColor.resolveColorKeyOptional(root.connectedCount > 0 ? root.connectedColor : root.disconnectedColor)
         forceOpen: root.displayMode === "alwaysShow"
         forceClose: root.displayMode === "alwaysHide"
 

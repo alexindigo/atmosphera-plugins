@@ -82,8 +82,8 @@ Item {
             return pluginApi?.tr("bar.disconnected-state");
         }
 
-        customIconColor: Color.resolveColorKeyOptional(root.activeColor)
-        customTextColor: Color.resolveColorKeyOptional(root.activeColor)
+        customIconColor: AtmoColor.resolveColorKeyOptional(root.activeColor)
+        customTextColor: AtmoColor.resolveColorKeyOptional(root.activeColor)
 
         forceOpen: !root.isBarVertical && root.displayMode === "alwaysShow"
         forceClose: root.isBarVertical || root.displayMode === "alwaysHide"

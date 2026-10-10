@@ -7,7 +7,7 @@ Item {
 	property real pointSize: Style.fontSizeL
 	property bool applyUiScale: true
 	property bool crossed: false
-	property color color: Color.mOnSurface
+	property color color: AtmoColor.mOnSurface
 
 	implicitWidth: icon.implicitWidth
 	implicitHeight: icon.implicitHeight

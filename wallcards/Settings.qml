@@ -68,7 +68,7 @@ ColumnLayout {
     description: I18n.tr("common.select-color-description")
     label: I18n.tr("common.select-icon-color")
     minimumWidth: 200
-    model: Color.colorKeyModel
+    model: AtmoColor.colorKeyModel
 
     onSelected: key => root.editIconColor = key
   }

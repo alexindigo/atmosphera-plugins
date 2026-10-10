@@ -77,36 +77,36 @@ Item {
                 id: header
                 Layout.fillWidth: true
                 Layout.preferredHeight: topHeaderHeight
-                color: Color.mSurfaceVariant
+                color: AtmoColor.mSurfaceVariant
                 radius: Style.radiusM
 
                 RowLayout {
                     anchors.margins: Style.marginM
                     anchors.fill: parent
                     
-                    AtmoIcon { icon: "calendar-week"; pointSize: Style.fontSizeXXL; color: Color.mPrimary }
+                    AtmoIcon { icon: "calendar-week"; pointSize: Style.fontSizeXXL; color: AtmoColor.mPrimary }
 
                     ColumnLayout {
                         Layout.fillHeight: true
                         spacing: 0
                         NText {
                             text: pluginApi.tr("panel.header")
-                            font.pointSize: Style.fontSizeL; font.weight: Font.Bold; color: Color.mOnSurface
+                            font.pointSize: Style.fontSizeL; font.weight: Font.Bold; color: AtmoColor.mOnSurface
                         }
                         RowLayout {
                             spacing: Style.marginS
                             NText {
                                 text: mainInstance?.monthRangeText || ""
-                                font.pointSize: Style.fontSizeS; font.weight: Font.Medium; color: Color.mOnSurfaceVariant
+                                font.pointSize: Style.fontSizeS; font.weight: Font.Medium; color: AtmoColor.mOnSurfaceVariant
                             }
                             Rectangle {
                                 Layout.preferredWidth: 8; Layout.preferredHeight: 8; radius: 4
-                                color: mainInstance?.isLoading ? Color.mError : 
-                                       mainInstance?.syncStatus?.includes("No") ? Color.mError : Color.mOnSurfaceVariant
+                                color: mainInstance?.isLoading ? AtmoColor.mError : 
+                                       mainInstance?.syncStatus?.includes("No") ? AtmoColor.mError : AtmoColor.mOnSurfaceVariant
                             }
                             NText {
                                 text: mainInstance?.syncStatus || ""
-                                font.pointSize: Style.fontSizeS; color: Color.mOnSurfaceVariant
+                                font.pointSize: Style.fontSizeS; color: AtmoColor.mOnSurfaceVariant
                             }
                         }
                     }
@@ -144,7 +144,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                color: Color.mSurfaceVariant
+                color: AtmoColor.mSurfaceVariant
                 radius: Style.radiusM
                 clip: true
 
@@ -157,7 +157,7 @@ Item {
                         id: dayHeaders
                         width: parent.width
                         height: 56
-                        color: Color.mSurfaceVariant
+                        color: AtmoColor.mSurfaceVariant
                         radius: Style.radiusM
                         
                         Row {
@@ -181,8 +181,8 @@ Item {
                                     Rectangle {
                                         anchors.fill: parent
                                         anchors.margins: 4
-                                        color: Color.mSurfaceVariant
-                                        border.color: isToday ? Color.mPrimary : "transparent"
+                                        color: AtmoColor.mSurfaceVariant
+                                        border.color: isToday ? AtmoColor.mPrimary : "transparent"
                                         border.width: 2
                                         radius: Style.radiusM
                                         Column {
@@ -191,13 +191,13 @@ Item {
                                             NText {
                                                 anchors.horizontalCenter: parent.horizontalCenter
                                                 text: dayDate ? I18n.locale.dayName(dayDate.getDay(), Locale.ShortFormat).toUpperCase() : ""
-                                                color: isToday ? Color.mPrimary : Color.mOnSurface
+                                                color: isToday ? AtmoColor.mPrimary : AtmoColor.mOnSurface
                                                 font.pointSize: Style.fontSizeS; font.weight: Font.Medium
                                             }
                                             NText {
                                                 anchors.horizontalCenter: parent.horizontalCenter
                                                 text: dayDate ? ((dayDate.getDate() < 10 ? "0" : "") + dayDate.getDate()) : ""
-                                                color: isToday ? Color.mPrimary : Color.mOnSurface
+                                                color: isToday ? AtmoColor.mPrimary : AtmoColor.mOnSurface
                                                 font.pointSize: Style.fontSizeM; font.weight: Font.Bold
                                             }
                                         }
@@ -211,7 +211,7 @@ Item {
                         id: allDayEventsSection
                         width: parent.width
                         height: mainInstance.allDaySectionHeight
-                        color: Color.mSurfaceVariant
+                        color: AtmoColor.mSurfaceVariant
                         visible: height > 0
                         
                         Item {
@@ -224,7 +224,7 @@ Item {
                                 delegate: Rectangle {
                                     width: 1; height: parent.height
                                     x: (index + 1) * ((mainInstance?.dayColumnWidth) + (root.daySpacing)) - ((root.daySpacing) / 2)
-                                    color: Qt.alpha(mainInstance?.lineColor || Color.mOutline, mainInstance?.dayLineOpacitySetting || 0.9)
+                                    color: Qt.alpha(mainInstance?.lineColor || AtmoColor.mOutline, mainInstance?.dayLineOpacitySetting || 0.9)
                                 }
                             }
                             
@@ -239,12 +239,12 @@ Item {
                                     
                                     Rectangle {
                                         anchors.fill: parent
-                                        color: Color.mTertiary
+                                        color: AtmoColor.mTertiary
                                         radius: Style.radiusS
                                         NText {
                                             anchors.fill: parent; anchors.margins: 4
                                             text: eventData.title
-                                            color: Color.mOnTertiary
+                                            color: AtmoColor.mOnTertiary
                                             font.pointSize: Style.fontSizeXXS; font.weight: Font.Medium
                                             elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
                                         }
@@ -268,7 +268,7 @@ Item {
                     Rectangle {
                         width: parent.width
                         height: parent.height - dayHeaders.height - (allDayEventsSection.visible ? allDayEventsSection.height : 0)
-                        color: Color.mSurfaceVariant
+                        color: AtmoColor.mSurfaceVariant
                         radius: Style.radiusM
                         clip: true
                         
@@ -336,7 +336,7 @@ Item {
                                                 anchors.rightMargin: Style.marginS
                                                 anchors.verticalCenter: parent.top
                                                 anchors.verticalCenterOffset: root.hourHeight
-                                                font.pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant
+                                                font.pointSize: Style.fontSizeXS; color: AtmoColor.mOnSurfaceVariant
                                             }
                                         }
                                     }
@@ -357,7 +357,7 @@ Item {
                                                 height: parent.height
                                                 Repeater {
                                                     model: 24
-                                                    Rectangle { width: parent.width; height: 1; color: Color.mSurfaceVariant }
+                                                    Rectangle { width: parent.width; height: 1; color: AtmoColor.mSurfaceVariant }
                                                 }
                                             }
                                         }
@@ -368,7 +368,7 @@ Item {
                                         Rectangle {
                                             width: parent.width; height: 1
                                             y: index * (root.hourHeight)
-                                            color: Qt.alpha(mainInstance?.lineColor || Color.mOutline, mainInstance?.hourLineOpacitySetting || 0.5)
+                                            color: Qt.alpha(mainInstance?.lineColor || AtmoColor.mOutline, mainInstance?.hourLineOpacitySetting || 0.5)
                                         }
                                     }
                                     // Day Lines
@@ -377,7 +377,7 @@ Item {
                                         Rectangle {
                                             width: 1; height: parent.height
                                             x: (index + 1) * ((mainInstance?.dayColumnWidth) + (root.daySpacing)) - ((root.daySpacing) / 2)
-                                            color: Qt.alpha(mainInstance?.lineColor || Color.mOutline, mainInstance?.dayLineOpacitySetting || 0.9)
+                                            color: Qt.alpha(mainInstance?.lineColor || AtmoColor.mOutline, mainInstance?.dayLineOpacitySetting || 0.9)
                                         }
                                     }
                                     
@@ -408,7 +408,7 @@ Item {
                                             
                                             Rectangle {
                                                 anchors.fill: parent
-                                                color: Color.mPrimary
+                                                color: AtmoColor.mPrimary
                                                 radius: Style.radiusS
                                                 opacity: 0.9
                                                 clip: true
@@ -418,7 +418,7 @@ Item {
                                                     color: "transparent"
                                                     radius: parent.radius
                                                     border.width: 1
-                                                    border.color: Color.mPrimary
+                                                    border.color: AtmoColor.mPrimary
                                                 }
                                                 Loader {
                                                     anchors.fill: parent
@@ -436,14 +436,14 @@ Item {
                                                     NText {
                                                         visible: exactHeight >= 20
                                                         text: model.title
-                                                        color: Color.mOnPrimary
+                                                        color: AtmoColor.mOnPrimary
                                                         font.pointSize: Style.fontSizeXS; font.weight: Font.Medium
                                                         elide: Text.ElideRight; width: parent.width
                                                     }
                                                     NText {
                                                         visible: exactHeight >= 30
                                                         text: mainInstance?.formatTimeRangeForDisplay(model) || ""
-                                                        color: Color.mOnPrimary
+                                                        color: AtmoColor.mOnPrimary
                                                         font.pointSize: Style.fontSizeXXS; opacity: 0.9
                                                         elide: Text.ElideRight; width: parent.width
                                                     }
@@ -455,7 +455,7 @@ Item {
                                                 NText {
                                                     text: exactHeight < 15 ? model.title : 
                                                           model.title + " • " + (mainInstance?.formatTimeRangeForDisplay(model) || "")
-                                                    color: Color.mOnPrimary
+                                                    color: AtmoColor.mOnPrimary
                                                     font.pointSize: exactHeight < 15 ? Style.fontSizeXXS : Style.fontSizeXS
                                                     font.weight: Font.Medium
                                                     elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
@@ -493,11 +493,11 @@ Item {
                                         height: 2
                                         x: currentDay * ((mainInstance?.dayColumnWidth) + (root.daySpacing))
                                         y: currentHour * (root.hourHeight)
-                                        color: Color.mError
+                                        color: AtmoColor.mError
                                         radius: 1
                                         z: 1000
                                         Rectangle {
-                                            width: 8; height: 8; radius: 4; color: Color.mError
+                                            width: 8; height: 8; radius: 4; color: AtmoColor.mError
                                             anchors.verticalCenter: parent.verticalCenter; x: -4
                                         }
                                         Timer {

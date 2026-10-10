@@ -46,12 +46,12 @@ ColumnLayout {
 
     NText {
       text: root.currentIconName
-      color: Settings.data.colorSchemes.darkMode ? Color.mPrimary : Color.mOnPrimary
+      color: Settings.data.colorSchemes.darkMode ? AtmoColor.mPrimary : AtmoColor.mOnPrimary
     }
 
     AtmoIcon {
       icon: root.currentIconName
-      color: Settings.data.colorSchemes.darkMode ? Color.mPrimary : Color.mOnPrimary
+      color: Settings.data.colorSchemes.darkMode ? AtmoColor.mPrimary : AtmoColor.mOnPrimary
     }
 
     NButton {
@@ -84,7 +84,7 @@ ColumnLayout {
 
       NText {
         text: root.updateIntervalMinutes.toString().padStart(3, " ") + " minutes"
-        color: Settings.data.colorSchemes.darkMode ? Color.mOnSurface : Color.mOnPrimary
+        color: Settings.data.colorSchemes.darkMode ? AtmoColor.mOnSurface : AtmoColor.mOnPrimary
       }
     }
 
@@ -152,7 +152,7 @@ ColumnLayout {
   ColumnLayout {
     NText {
       text: pluginApi?.tr("settings.currentNumUpdatesCmd.label")
-      color: Settings.data.colorSchemes.darkMode ? Color.mSecondary : Color.mOnSecondary
+      color: Settings.data.colorSchemes.darkMode ? AtmoColor.mSecondary : AtmoColor.mOnSecondary
     }
     NLabel {
       description: `> ${root.customCmdGetNumUpdates || pluginApi?.mainInstance?.updater.cmdGetNumUpdates || "NA"}`
@@ -162,7 +162,7 @@ ColumnLayout {
   ColumnLayout {
     NText {
       text: pluginApi?.tr("settings.currentUpdateCmd.label")
-      color: Settings.data.colorSchemes.darkMode ? Color.mSecondary : Color.mOnSecondary
+      color: Settings.data.colorSchemes.darkMode ? AtmoColor.mSecondary : AtmoColor.mOnSecondary
     }
 
     NLabel {

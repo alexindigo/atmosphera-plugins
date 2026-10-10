@@ -45,7 +45,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                color: Color.mSurfaceVariant
+                color: AtmoColor.mSurfaceVariant
                 radius: Style.radiusL
 
                 ColumnLayout {
@@ -66,7 +66,7 @@ Item {
                             text: pluginApi?.tr("panel.title")
                             font.pointSize: Style.fontSizeL
                             font.weight: Font.Medium
-                            color: Color.mOnSurface
+                            color: AtmoColor.mOnSurface
                             Layout.fillWidth: true
                         }
 
@@ -107,7 +107,7 @@ Item {
                                     Layout.alignment: Qt.AlignHCenter
                                     icon: "usb"
                                     pointSize: Style.fontSizeXXL
-                                    color: Color.mOnSurfaceVariant
+                                    color: AtmoColor.mOnSurfaceVariant
                                     opacity: 0.4
                                 }
 
@@ -115,14 +115,14 @@ Item {
                                     Layout.alignment: Qt.AlignHCenter
                                     text: pluginApi?.tr("panel.empty")
                                     pointSize: Style.fontSizeM
-                                    color: Color.mOnSurfaceVariant
+                                    color: AtmoColor.mOnSurfaceVariant
                                 }
 
                                 NText {
                                     Layout.alignment: Qt.AlignHCenter
                                     text: pluginApi?.tr("panel.empty-hint")
                                     pointSize: Style.fontSizeS
-                                    color: Color.mOnSurfaceVariant
+                                    color: AtmoColor.mOnSurfaceVariant
                                     opacity: 0.7
                                 }
                             }
@@ -161,7 +161,7 @@ Item {
 
                         Rectangle {
                             height: Math.max(1, Style.marginXXS)
-                            color: Color.mOutline
+                            color: AtmoColor.mOutline
                             opacity: 0.3
                             Layout.fillWidth: true
                         }

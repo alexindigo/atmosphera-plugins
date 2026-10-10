@@ -104,7 +104,7 @@ Item {
                     Layout.preferredWidth: iconSize
                     Layout.preferredHeight: iconSize
                     icon: "music"
-                    color: root.hovered ? Color.mPrimary : Color.mOnSurfaceVariant
+                    color: root.hovered ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
                     pointSize: Style.fontSizeL * scaling
                 }
 
@@ -118,7 +118,7 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
 
                         text: root.lyricText
-                        textColor: Color.mOnSurface
+                        textColor: AtmoColor.mOnSurface
 
                         fontSize: root.customFontSize * scaling
                         fontFamily: root.customFontFamily
@@ -141,7 +141,7 @@ Item {
                     Layout.preferredWidth: iconSize
                     Layout.preferredHeight: iconSize
                     icon: "music"
-                    color: root.hovered ? Color.mPrimary : Color.mOnSurfaceVariant
+                    color: root.hovered ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
                     pointSize: Style.fontSizeL * scaling
                 }
 
@@ -162,7 +162,7 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
 
                             text: root.lyricText
-                            textColor: Color.mOnSurface
+                            textColor: AtmoColor.mOnSurface
 
                             fontSize: root.customFontSize * scaling
                             fontFamily: root.customFontFamily

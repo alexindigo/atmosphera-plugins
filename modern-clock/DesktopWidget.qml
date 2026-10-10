@@ -16,15 +16,15 @@ DraggableDesktopWidget {
   readonly property bool colourChoice: widgetData?.colourChoice ?? true
 
     readonly property color dayColour: colourChoice
-      ? Color.resolveColorKey(widgetData?.dayColourChoice ?? "secondary")
+      ? AtmoColor.resolveColorKey(widgetData?.dayColourChoice ?? "secondary")
       : (widgetData?.dayColourPicker ?? "black")
 
     readonly property color dateColour: colourChoice
-      ? Color.resolveColorKey(widgetData?.dateColourChoice ?? "secondary")
+      ? AtmoColor.resolveColorKey(widgetData?.dateColourChoice ?? "secondary")
       : (widgetData?.dateColourPicker ?? "black")
 
     readonly property color timeColour: colourChoice
-      ? Color.resolveColorKey(widgetData?.timeColourChoice ?? "secondary")
+      ? AtmoColor.resolveColorKey(widgetData?.timeColourChoice ?? "secondary")
       : (widgetData?.timeColourPicker ?? "black")
 
   // Font

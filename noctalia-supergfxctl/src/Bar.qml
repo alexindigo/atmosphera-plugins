@@ -73,8 +73,8 @@ Item {
             height: 8
             width: 8
             radius: Style.radiusXS
-            color: Color.mTertiary
-            border.color: Color.mSurface
+            color: AtmoColor.mTertiary
+            border.color: AtmoColor.mSurface
             border.width: Style.borderS
         }
     }

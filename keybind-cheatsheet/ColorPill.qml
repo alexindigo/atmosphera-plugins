@@ -28,8 +28,8 @@ Rectangle {
   implicitHeight: Math.round(Style.baseWidgetSize * 1.1)
 
   radius: Style.iRadiusM
-  color: Color.mSurface
-  border.color: mouseArea.containsMouse ? Color.mPrimary : Color.mOutline
+  color: AtmoColor.mSurface
+  border.color: mouseArea.containsMouse ? AtmoColor.mPrimary : AtmoColor.mOutline
   border.width: Style.borderS
 
   MouseArea {
@@ -67,7 +67,7 @@ Rectangle {
       Layout.preferredHeight: pill.height * 0.62
       radius: width / 2
       color: pill.textMode ? pill.textModeBg : pill.displayColor
-      border.color: Color.mOutline
+      border.color: AtmoColor.mOutline
       border.width: Style.borderS
 
       NText {
@@ -87,7 +87,7 @@ Rectangle {
             ? pill.hexValue.toUpperCase()
             : (pill.placeholderText.length > 0 ? pill.placeholderText : "auto")
       family: Settings.data.ui.fontFixed
-      color: pill.hexValue.length > 0 ? Color.mOnSurface : Color.mOnSurfaceVariant
+      color: pill.hexValue.length > 0 ? AtmoColor.mOnSurface : AtmoColor.mOnSurfaceVariant
       pointSize: Style.fontSizeXS
       elide: Text.ElideRight
     }
@@ -97,14 +97,14 @@ Rectangle {
       Layout.preferredHeight: pill.height * 0.62
       visible: pill.hasClipboardColor
       radius: width / 2
-      color: pasteArea.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
-      border.color: Color.mOutline
+      color: pasteArea.containsMouse ? AtmoColor.mPrimary : AtmoColor.mSurfaceVariant
+      border.color: AtmoColor.mOutline
       border.width: Style.borderS
 
       AtmoIcon {
         anchors.centerIn: parent
         icon: "clipboard"
-        color: pasteArea.containsMouse ? Color.mOnPrimary : Color.mOnSurfaceVariant
+        color: pasteArea.containsMouse ? AtmoColor.mOnPrimary : AtmoColor.mOnSurfaceVariant
         pointSize: Style.fontSizeS
       }
 

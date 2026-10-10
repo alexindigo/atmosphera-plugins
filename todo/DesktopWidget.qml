@@ -16,8 +16,8 @@ DraggableDesktopWidget {
   property int currentPageId: 0
   property ListModel filteredTodosModel: ListModel {}
   readonly property color todoBg: showBackground ? Qt.rgba(0, 0, 0, 0.2) : "transparent"
-  readonly property color itemBg: showBackground ? Color.mSurface : "transparent"
-  readonly property color completedItemBg: showBackground ? Color.mSurfaceVariant : "transparent"
+  readonly property color itemBg: showBackground ? AtmoColor.mSurface : "transparent"
+  readonly property color completedItemBg: showBackground ? AtmoColor.mSurfaceVariant : "transparent"
   // Scaled dimensions
   readonly property int scaledMarginM: Math.round(Style.marginM * widgetScale)
   readonly property int scaledMarginS: Math.round(Style.marginS * widgetScale)
@@ -143,14 +143,14 @@ DraggableDesktopWidget {
             var text = pluginApi?.tr("desktop_widget.items_count");
             return text.replace("{active}", activeTodos).replace("{total}", todos.length);
           }
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
           font.pointSize: scaledFontSizeS
         }
 
         AtmoIcon {
           icon: root.expanded ? "chevron-up" : "chevron-down"
           pointSize: scaledFontSizeM
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
       }
     }
@@ -189,7 +189,7 @@ DraggableDesktopWidget {
           tabIndex: index
           checked: index === tabBar.currentPageIndex
 
-          color: showBackground ? (isHovered ? Color.mHover : (checked ? Color.mPrimary : Color.mOnPrimary)) : (isHovered ? Color.mHover : (checked ? "transparent" : "transparent"))
+          color: showBackground ? (isHovered ? AtmoColor.mHover : (checked ? AtmoColor.mPrimary : AtmoColor.mOnPrimary)) : (isHovered ? AtmoColor.mHover : (checked ? "transparent" : "transparent"))
 
           border.width: 0
 
@@ -208,7 +208,7 @@ DraggableDesktopWidget {
             anchors.leftMargin: 12
             anchors.rightMargin: 12
             height: 1
-            color: (showBackground || !checked) ? "transparent" : Color.mPrimary
+            color: (showBackground || !checked) ? "transparent" : AtmoColor.mPrimary
             visible: !showBackground && checked
           }
 
@@ -295,9 +295,9 @@ DraggableDesktopWidget {
                         width: scaledBaseWidgetSize * 0.5
                         height: scaledBaseWidgetSize * 0.5
                         radius: Style.iRadiusXXS
-                        color: Color.mSurface
+                        color: AtmoColor.mSurface
                         opacity: showBackground ? 1.0 : 0.5
-                        border.color: Color.mOutline
+                        border.color: AtmoColor.mOutline
                         border.width: Style.borderS
                         anchors.centerIn: parent
 
@@ -306,7 +306,7 @@ DraggableDesktopWidget {
                           anchors.centerIn: parent
                           anchors.horizontalCenterOffset: 0
                           icon: "check"
-                          color: Color.mPrimary
+                          color: AtmoColor.mPrimary
                           pointSize: Math.max(Style.fontSizeXS, width * 0.5)
                         }
 
@@ -338,11 +338,11 @@ DraggableDesktopWidget {
                         } else {
                           var priority = model.priority || "medium";
                           if (priority === "high") {
-                            return Color.mError;
+                            return AtmoColor.mError;
                           } else if (priority === "low") {
-                            return Color.mOnSurfaceVariant;
+                            return AtmoColor.mOnSurfaceVariant;
                           } else {
-                            return Color.mPrimary;
+                            return AtmoColor.mPrimary;
                           }
                         }
                       }
@@ -350,7 +350,7 @@ DraggableDesktopWidget {
 
                     NText {
                       text: model.text
-                      color: model.completed ? Color.mOnSurfaceVariant : Color.mOnSurface
+                      color: model.completed ? AtmoColor.mOnSurfaceVariant : AtmoColor.mOnSurface
                       font.strikeout: model.completed
                       elide: Text.ElideRight
                       anchors.left: customCheckboxContainer.right
@@ -376,7 +376,7 @@ DraggableDesktopWidget {
           NText {
             anchors.centerIn: parent
             text: pluginApi?.tr("desktop_widget.empty_state")
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             font.pointSize: scaledFontSizeM
             font.weight: Font.Normal
           }
@@ -432,10 +432,10 @@ DraggableDesktopWidget {
   // Helper function to get theme color
   function getThemeColor(priority) {
     if (priority === "high")
-      return Color.mError;
+      return AtmoColor.mError;
     if (priority === "low")
-      return Color.mOnSurfaceVariant;
-    return Color.mPrimary;
+      return AtmoColor.mOnSurfaceVariant;
+    return AtmoColor.mPrimary;
   }
 
   function loadTodos() {

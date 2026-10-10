@@ -211,7 +211,7 @@ PanelWindow {
 
         Rectangle {
             anchors.fill: parent
-            color: Color.mSurface
+            color: AtmoColor.mSurface
             opacity: overlayTint
         }
 
@@ -291,7 +291,7 @@ PanelWindow {
             }
 
             color: isActiveState
-                ? desaturateColor(Color.resolveColorKey(pluginApi?.pluginSettings?.hoverColor ?? "primary"), hoverDesat)
+                ? desaturateColor(AtmoColor.resolveColorKey(pluginApi?.pluginSettings?.hoverColor ?? "primary"), hoverDesat)
                 : Qt.rgba(0, 0, 0, pluginApi?.pluginSettings?.buttonOpacity ?? 0.75)
 
             Behavior on color {

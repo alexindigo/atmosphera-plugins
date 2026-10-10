@@ -18,7 +18,7 @@ AtmoIconButton {
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   property string iconColorKey: cfg.iconColor ?? defaults.iconColor ?? "none"
-  readonly property color iconColor: Color.resolveColorKey(iconColorKey)
+  readonly property color iconColor: AtmoColor.resolveColorKey(iconColorKey)
   readonly property bool hasCustomColor: iconColorKey !== "none"
 
   icon: "device-desktop"
@@ -27,7 +27,7 @@ AtmoIconButton {
   baseSize: Style.getCapsuleHeightForScreen(screen?.name)
   customRadius: Style.radiusL
   colorBg: Style.capsuleColor
-  colorFg: hasCustomColor ? iconColor : Color.mOnSurface
+  colorFg: hasCustomColor ? iconColor : AtmoColor.mOnSurface
   border.color: Style.capsuleBorderColor
   border.width: Style.capsuleBorderWidth
 

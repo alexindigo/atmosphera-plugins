@@ -28,7 +28,7 @@ Item {
     AtmoIcon {
       icon: "alert-triangle"
       pointSize: Style.fontSizeXXL
-      color: Color.mError
+      color: AtmoColor.mError
       Layout.alignment: Qt.AlignHCenter
     }
 
@@ -36,14 +36,14 @@ Item {
       text: pluginApi?.tr("delete.title")
       pointSize: Style.fontSizeL
       font.weight: Font.DemiBold
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
       Layout.alignment: Qt.AlignHCenter
     }
 
     NText {
       text: pluginApi?.tr("delete.confirm", { "resource": root.resourceKind + "/" + root.resourceName })
       pointSize: Style.fontSizeM
-      color: Color.mOnSurfaceVariant
+      color: AtmoColor.mOnSurfaceVariant
       wrapMode: Text.WordWrap
       Layout.fillWidth: true
       Layout.alignment: Qt.AlignHCenter
@@ -63,8 +63,8 @@ Item {
       NButton {
         Layout.fillWidth: true
         text: pluginApi?.tr("delete.yes")
-        backgroundColor: Color.mError
-        textColor: Color.mOnError
+        backgroundColor: AtmoColor.mError
+        textColor: AtmoColor.mOnError
         onClicked: root.confirmed(root.resourceKind, root.resourceName)
       }
     }

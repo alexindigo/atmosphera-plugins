@@ -28,7 +28,7 @@ Rectangle {
 
         AtmoIcon {
             icon: "letter-v"
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
         }
     }
 

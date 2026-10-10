@@ -31,7 +31,7 @@ Item {
         y: Style.pixelAlignCenter(parent.height, height)
         width: root.contentWidth
         height: root.contentHeight
-        color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+        color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
         radius: Style.radiusL
 
         RowLayout {
@@ -43,13 +43,13 @@ Item {
             AtmoIcon {
                 icon: "server"
                 pointSize: Style.fontSizeL
-                color: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+                color: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
             }
 
             NText {
                 text: pluginApi?.tr("widget.title")
                 pointSize: Style.fontSizeS
-                color: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+                color: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
                 font.weight: Style.fontWeightMedium
             }
         }

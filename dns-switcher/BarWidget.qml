@@ -37,7 +37,7 @@ Item {
         y: Style.pixelAlignCenter(parent.height, height)
         width: root.contentWidth
         height: root.contentHeight
-        color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+        color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
         radius: height / 2
         border.color: Style.capsuleBorderColor
         border.width: Style.capsuleBorderWidth
@@ -52,12 +52,12 @@ Item {
             AtmoIcon {
                 icon: root.providerIcons[mainInstance?.activeProviderId || ""] || "globe"
                 pointSize: Style.fontSizeS
-                color: Color.mPrimary
+                color: AtmoColor.mPrimary
             }
 
             NText {
                 text: mainInstance?.currentDnsName || pluginApi?.tr("plugin.short_title") || "DNS"
-                color: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+                color: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
                 pointSize: Style.barFontSize
                 font.weight: Font.Medium
             }

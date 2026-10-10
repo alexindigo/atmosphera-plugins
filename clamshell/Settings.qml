@@ -76,7 +76,7 @@ ColumnLayout {
         visible: root.main.inhibitorAvailable === false
         Layout.fillWidth: true
         text: pluginApi?.tr("error.noInhibit")
-        color: Color.mError
+        color: AtmoColor.mError
         pointSize: Style.fontSizeM
         wrapMode: Text.WordWrap
     }
@@ -87,7 +87,7 @@ ColumnLayout {
 
         NText {
             text: pluginApi?.tr("status.title")
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             pointSize: Style.fontSizeL
             font.weight: Font.DemiBold
         }
@@ -97,7 +97,7 @@ ColumnLayout {
             text: pluginApi?.tr("status.state", {
                 "value": root.main.stateLabel ? root.main.stateLabel() : pluginApi?.tr("status.unknown")
             })
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             wrapMode: Text.WordWrap
         }
 
@@ -106,7 +106,7 @@ ColumnLayout {
             text: pluginApi?.tr("status.inhibitorPid", {
                 "value": root.main.inhibitorPid > 0 ? String(root.main.inhibitorPid) : "-"
             })
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             wrapMode: Text.WordWrap
         }
 
@@ -119,7 +119,7 @@ ColumnLayout {
                     + (modelData.internal ? "internal" : "external")
                     + ", "
                     + (modelData.active ? "active" : (modelData.connected ? "connected" : "disconnected"))
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 wrapMode: Text.WordWrap
             }
         }

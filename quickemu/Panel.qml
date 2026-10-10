@@ -37,9 +37,9 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: errorRow.implicitHeight + Style.marginS * 2
                 visible: mainInstance && mainInstance.lastError !== ""
-                color: Qt.alpha(Color.mError, 0.15)
+                color: Qt.alpha(AtmoColor.mError, 0.15)
                 radius: Style.radiusS
-                border.color: Qt.alpha(Color.mError, 0.4)
+                border.color: Qt.alpha(AtmoColor.mError, 0.4)
                 border.width: Style.borderWidth || 1
 
                 RowLayout {
@@ -51,12 +51,12 @@ Item {
                     AtmoIcon {
                         icon: "alert-triangle"
                         pointSize: Style.fontSizeS
-                        color: Color.mError
+                        color: AtmoColor.mError
                     }
                     NText {
                         Layout.fillWidth: true
                         text: mainInstance ? mainInstance.lastError : ""
-                        color: Color.mError
+                        color: AtmoColor.mError
                         pointSize: Style.fontSizeXS
                         elide: Text.ElideRight
                     }
@@ -75,12 +75,12 @@ Item {
                 AtmoIcon {
                     icon: "server"
                     pointSize: Style.fontSizeL
-                    color: Color.mPrimary
+                    color: AtmoColor.mPrimary
                 }
 
                 NText {
                     text: pluginApi?.tr("panel.title")
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                     pointSize: Style.fontSizeL
                     font.weight: Style.fontWeightBold
                     Layout.fillWidth: true
@@ -98,13 +98,13 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
-                color: Qt.alpha(Color.mOnSurface, 0.1)
+                color: Qt.alpha(AtmoColor.mOnSurface, 0.1)
             }
 
             // Existing VMs section header
             NText {
                 text: pluginApi?.tr("panel.existing-vms")
-                color: Color.mPrimary
+                color: AtmoColor.mPrimary
                 pointSize: Style.fontSizeM
                 font.weight: Style.fontWeightBold
             }
@@ -126,10 +126,10 @@ Item {
                     delegate: Rectangle {
                         width: ListView.view.width
                         height: delegateRow.implicitHeight + Style.marginS * 2
-                        color: delegateMouseArea.containsMouse ? Qt.alpha(Color.mPrimary, 0.1) : Color.mSurfaceVariant
+                        color: delegateMouseArea.containsMouse ? Qt.alpha(AtmoColor.mPrimary, 0.1) : AtmoColor.mSurfaceVariant
                         radius: Style.radiusM
                         border.width: delegateMouseArea.containsMouse ? 1 : 0
-                        border.color: Qt.alpha(Color.mPrimary, 0.3)
+                        border.color: Qt.alpha(AtmoColor.mPrimary, 0.3)
 
                         MouseArea {
                             id: delegateMouseArea
@@ -146,7 +146,7 @@ Item {
 
                             NText {
                                 text: model.vmName
-                                color: Color.mOnSurface
+                                color: AtmoColor.mOnSurface
                                 pointSize: Style.fontSizeS
                                 font.weight: Style.fontWeightMedium
                                 Layout.fillWidth: true
@@ -155,8 +155,8 @@ Item {
                             NButton {
                                 text: pluginApi?.tr("panel.start")
                                 icon: "play"
-                                backgroundColor: Color.mPrimary
-                                textColor: Color.mOnPrimary
+                                backgroundColor: AtmoColor.mPrimary
+                                textColor: AtmoColor.mOnPrimary
                                 onClicked: {
                                     if (mainInstance) mainInstance.startVm(model.vmName);
                                 }
@@ -178,8 +178,8 @@ Item {
                             NButton {
                                 text: pluginApi?.tr("panel.delete")
                                 icon: "trash-2"
-                                backgroundColor: Color.mError
-                                textColor: Color.mOnError
+                                backgroundColor: AtmoColor.mError
+                                textColor: AtmoColor.mOnError
                                 onClicked: {
                                     if (mainInstance) mainInstance.deleteVm(model.vmName);
                                 }
@@ -190,7 +190,7 @@ Item {
                     NText {
                         anchors.centerIn: parent
                         text: pluginApi?.tr("panel.no-vms")
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         visible: vmList.count === 0
                         pointSize: Style.fontSizeS
                         horizontalAlignment: Text.AlignHCenter
@@ -201,13 +201,13 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
-                color: Qt.alpha(Color.mOnSurface, 0.1)
+                color: Qt.alpha(AtmoColor.mOnSurface, 0.1)
             }
 
             // Create New VM section header
             NText {
                 text: pluginApi?.tr("panel.create-vm")
-                color: Color.mPrimary
+                color: AtmoColor.mPrimary
                 pointSize: Style.fontSizeM
                 font.weight: Style.fontWeightBold
             }
@@ -234,7 +234,7 @@ Item {
                         header: Rectangle {
                             width: ListView.view ? ListView.view.width : 0
                             height: 28
-                            color: (mainInstance && mainInstance.selectedCategory === "") ? Qt.alpha(Color.mPrimary, 0.2) : "transparent"
+                            color: (mainInstance && mainInstance.selectedCategory === "") ? Qt.alpha(AtmoColor.mPrimary, 0.2) : "transparent"
                             radius: Style.radiusS
 
                             NText {
@@ -242,7 +242,7 @@ Item {
                                 text: pluginApi?.tr("panel.all-categories")
                                 pointSize: Style.fontSizeXS
                                 font.weight: Style.fontWeightBold
-                                color: (mainInstance && mainInstance.selectedCategory === "") ? Color.mPrimary : Color.mOnSurfaceVariant
+                                color: (mainInstance && mainInstance.selectedCategory === "") ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
                             }
 
                             MouseArea {
@@ -259,8 +259,8 @@ Item {
                         delegate: Rectangle {
                             width: ListView.view.width
                             height: 26
-                            color: catMouse.containsMouse ? Qt.alpha(Color.mPrimary, 0.1)
-                                 : (mainInstance && mainInstance.selectedCategory === model.category) ? Qt.alpha(Color.mPrimary, 0.15)
+                            color: catMouse.containsMouse ? Qt.alpha(AtmoColor.mPrimary, 0.1)
+                                 : (mainInstance && mainInstance.selectedCategory === model.category) ? Qt.alpha(AtmoColor.mPrimary, 0.15)
                                  : "transparent"
                             radius: Style.radiusS
 
@@ -272,7 +272,7 @@ Item {
                                 anchors.rightMargin: Style.marginXS
                                 text: model.category
                                 pointSize: Style.fontSizeXS
-                                color: (mainInstance && mainInstance.selectedCategory === model.category) ? Color.mPrimary : Color.mOnSurface
+                                color: (mainInstance && mainInstance.selectedCategory === model.category) ? AtmoColor.mPrimary : AtmoColor.mOnSurface
                                 font.weight: (mainInstance && mainInstance.selectedCategory === model.category) ? Style.fontWeightBold : Style.fontWeightMedium
                                 elide: Text.ElideRight
                             }
@@ -321,19 +321,19 @@ Item {
                         }
 
                         background: Rectangle {
-                            color: Color.mSurfaceVariant
+                            color: AtmoColor.mSurfaceVariant
                             radius: Style.radiusS
-                            border.color: osComboBox.activeFocus ? Color.mPrimary : Qt.alpha(Color.mOnSurface, 0.1)
+                            border.color: osComboBox.activeFocus ? AtmoColor.mPrimary : Qt.alpha(AtmoColor.mOnSurface, 0.1)
                             border.width: Style.borderWidth || 1
                         }
                         contentItem: TextField {
                             text: osComboBox.editText
-                            color: Color.mOnSurface
+                            color: AtmoColor.mOnSurface
                             verticalAlignment: Text.AlignVCenter
                             leftPadding: Style.marginS
                             font.pixelSize: Style.fontSizeS * Style.uiScaleRatio
                             placeholderText: pluginApi?.tr("panel.search-os")
-                            placeholderTextColor: Color.mOnSurfaceVariant
+                            placeholderTextColor: AtmoColor.mOnSurfaceVariant
                             background: Item {}
                             onTextChanged: osComboBox.editText = text
                         }
@@ -343,7 +343,7 @@ Item {
                         visible: mainInstance && mainInstance.selectedCategory !== ""
                         text: (pluginApi?.tr("panel.category") || "") + ": " + (mainInstance ? mainInstance.selectedCategory : "")
                         pointSize: Style.fontSizeXS
-                        color: Color.mPrimary
+                        color: AtmoColor.mPrimary
                     }
 
                     Item { Layout.fillHeight: true }
@@ -352,8 +352,8 @@ Item {
                         Layout.fillWidth: true
                         text: pluginApi?.tr("panel.download")
                         icon: "download"
-                        backgroundColor: Color.mPrimary
-                        textColor: Color.mOnPrimary
+                        backgroundColor: AtmoColor.mPrimary
+                        textColor: AtmoColor.mOnPrimary
                         enabled: (parent.selectedOs !== "" || osComboBox.editText !== "") && (!mainInstance || !mainInstance.isDownloading)
                         onClicked: {
                             // Prefer the dropdown selection; fall back to typed text
@@ -374,7 +374,7 @@ Item {
 
                 Rectangle {
                     anchors.fill: parent
-                    color: Color.mSurfaceVariant
+                    color: AtmoColor.mSurfaceVariant
                     radius: Style.radiusS
                 }
                 Rectangle {
@@ -382,7 +382,7 @@ Item {
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
                     width: parent.width * (mainInstance ? mainInstance.downloadProgress : 0.0)
-                    color: Color.mPrimary
+                    color: AtmoColor.mPrimary
                     radius: Style.radiusS
 
                     Behavior on width {
@@ -392,7 +392,7 @@ Item {
                 NText {
                     anchors.centerIn: parent
                     text: mainInstance ? Math.round(mainInstance.downloadProgress * 100) + "%" : "0%"
-                    color: Color.mOnPrimary
+                    color: AtmoColor.mOnPrimary
                     pointSize: Style.fontSizeXS
                     font.weight: Style.fontWeightBold
                 }
@@ -403,7 +403,7 @@ Item {
         Rectangle {
             id: downloadOverlay
             anchors.fill: parent
-            color: Qt.alpha(Color.mSurface, 0.85)
+            color: Qt.alpha(AtmoColor.mSurface, 0.85)
             visible: mainInstance && mainInstance.isDownloading
             z: 100
 
@@ -419,13 +419,13 @@ Item {
                 BusyIndicator {
                     Layout.alignment: Qt.AlignHCenter
                     running: downloadOverlay.visible
-                    palette.dark: Color.mPrimary
+                    palette.dark: AtmoColor.mPrimary
                 }
 
                 NText {
                     Layout.alignment: Qt.AlignHCenter
                     text: pluginApi?.tr("panel.downloading")
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                     pointSize: Style.fontSizeM
                     font.weight: Style.fontWeightBold
                 }
@@ -437,7 +437,7 @@ Item {
 
                     Rectangle {
                         anchors.fill: parent
-                        color: Color.mSurfaceVariant
+                        color: AtmoColor.mSurfaceVariant
                         radius: Style.radiusS
                     }
                     Rectangle {
@@ -445,7 +445,7 @@ Item {
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
                         width: parent.width * (mainInstance ? mainInstance.downloadProgress : 0.0)
-                        color: Color.mPrimary
+                        color: AtmoColor.mPrimary
                         radius: Style.radiusS
 
                         Behavior on width {
@@ -455,7 +455,7 @@ Item {
                     NText {
                         anchors.centerIn: parent
                         text: mainInstance ? Math.round(mainInstance.downloadProgress * 100) + "%" : "0%"
-                        color: Color.mOnPrimary
+                        color: AtmoColor.mOnPrimary
                         pointSize: Style.fontSizeXS
                         font.weight: Style.fontWeightBold
                     }
@@ -464,7 +464,7 @@ Item {
                 NText {
                     Layout.alignment: Qt.AlignHCenter
                     text: pluginApi?.tr("panel.download-wait")
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                     pointSize: Style.fontSizeXS
                 }
             }

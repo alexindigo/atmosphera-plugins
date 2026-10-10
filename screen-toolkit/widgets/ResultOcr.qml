@@ -76,7 +76,7 @@ Item {
         spacing: Style.marginS
         Rectangle {
             width: parent.width; height: 160 * Style.uiScaleRatio
-            radius: Style.radiusM; color: Color.mSurfaceVariant; clip: true
+            radius: Style.radiusM; color: AtmoColor.mSurfaceVariant; clip: true
             visible: root.ocrCapturePath !== "" && root.ocrResult !== "" && ocrThumb.status === Image.Ready
             Image {
                 id: ocrThumb; anchors.fill: parent
@@ -87,7 +87,7 @@ Item {
         }
         Rectangle {
             width: parent.width; height: 220 * Style.uiScaleRatio
-            radius: Style.radiusM; color: Color.mSurface; clip: true
+            radius: Style.radiusM; color: AtmoColor.mSurface; clip: true
             border.color: Style.capsuleBorderColor
             border.width: Style.capsuleBorderWidth
             Flickable {
@@ -96,12 +96,12 @@ Item {
                 interactive: ocrText.implicitHeight > ocrFlick.height
                 TextEdit {
                     id: ocrText; width: ocrFlick.width; text: root.ocrResult
-                    wrapMode: TextEdit.WordWrap; color: Color.mOnSurface
+                    wrapMode: TextEdit.WordWrap; color: AtmoColor.mOnSurface
                     font.pointSize: Style.fontSizeS
                     horizontalAlignment: /[\u0600-\u06FF\u0590-\u05FF]/.test(root.ocrResult)
                         ? TextEdit.AlignRight : TextEdit.AlignLeft
-                    selectByMouse: true; selectionColor: Color.mPrimary
-                    selectedTextColor: Color.mOnPrimary
+                    selectByMouse: true; selectionColor: AtmoColor.mPrimary
+                    selectedTextColor: AtmoColor.mOnPrimary
                     WheelHandler {
                         onWheel: event => { ocrFlick.flick(0, event.angleDelta.y * 5); event.accepted = false }
                     }
@@ -116,17 +116,17 @@ Item {
                 Rectangle {
                     visible: root.ocrType === "url" || root.ocrType === "email"
                     height: 26; width: _ocrOpenRow.implicitWidth + Style.marginS * 2; radius: Style.radiusS
-                    color: _ocrOpenMA.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+                    color: _ocrOpenMA.containsMouse ? AtmoColor.mPrimary : AtmoColor.mSurfaceVariant
                     Row {
                         id: _ocrOpenRow; anchors.centerIn: parent; spacing: Style.marginXS
                         AtmoIcon {
                             icon: root.ocrType === "email" ? "mail" : "external-link"
-                            color: _ocrOpenMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface; scale: 0.8
+                            color: _ocrOpenMA.containsMouse ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface; scale: 0.8
                         }
                         NText {
                             text: root.ocrType === "email"
                                 ? pluginApi?.tr("panel.composeMail") : pluginApi?.tr("panel.openUrl")
-                            color: _ocrOpenMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface
+                            color: _ocrOpenMA.containsMouse ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface
                             pointSize: Style.fontSizeXS
                         }
                     }
@@ -139,11 +139,11 @@ Item {
                 }
                 Rectangle {
                     height: 26; width: _ocrSearchRow.implicitWidth + Style.marginS * 2; radius: Style.radiusS
-                    color: _ocrSearchMA.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+                    color: _ocrSearchMA.containsMouse ? AtmoColor.mPrimary : AtmoColor.mSurfaceVariant
                     Row {
                         id: _ocrSearchRow; anchors.centerIn: parent; spacing: Style.marginXS
-                        AtmoIcon { icon: "search"; color: _ocrSearchMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface; scale: 0.8 }
-                        NText { text: pluginApi?.tr("panel.searchText"); color: _ocrSearchMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface; pointSize: Style.fontSizeXS }
+                        AtmoIcon { icon: "search"; color: _ocrSearchMA.containsMouse ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface; scale: 0.8 }
+                        NText { text: pluginApi?.tr("panel.searchText"); color: _ocrSearchMA.containsMouse ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface; pointSize: Style.fontSizeXS }
                     }
                     MouseArea {
                         id: _ocrSearchMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
@@ -152,11 +152,11 @@ Item {
                 }
                 Rectangle {
                     height: 26; width: _ocrCopyRow.implicitWidth + Style.marginS * 2; radius: Style.radiusS
-                    color: _ocrCopyMA.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+                    color: _ocrCopyMA.containsMouse ? AtmoColor.mPrimary : AtmoColor.mSurfaceVariant
                     Row {
                         id: _ocrCopyRow; anchors.centerIn: parent; spacing: Style.marginXS
-                        AtmoIcon { icon: "copy"; color: _ocrCopyMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface; scale: 0.8 }
-                        NText { text: pluginApi?.tr("panel.copy"); color: _ocrCopyMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface; pointSize: Style.fontSizeXS }
+                        AtmoIcon { icon: "copy"; color: _ocrCopyMA.containsMouse ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface; scale: 0.8 }
+                        NText { text: pluginApi?.tr("panel.copy"); color: _ocrCopyMA.containsMouse ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface; pointSize: Style.fontSizeXS }
                     }
                     MouseArea {
                         id: _ocrCopyMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
@@ -167,12 +167,12 @@ Item {
             Rectangle {
                 id: _ocrClearBtn; height: 26; width: _ocrClearRow.implicitWidth + Style.marginM * 2; radius: Style.radiusS
                 color: _ocrClearMA.containsMouse
-                    ? Qt.rgba(Color.mError.r, Color.mError.g, Color.mError.b, 0.15) : Color.mSurfaceVariant
-                border.color: Color.mError; border.width: Style.capsuleBorderWidth
+                    ? Qt.rgba(AtmoColor.mError.r, AtmoColor.mError.g, AtmoColor.mError.b, 0.15) : AtmoColor.mSurfaceVariant
+                border.color: AtmoColor.mError; border.width: Style.capsuleBorderWidth
                 Row {
                     id: _ocrClearRow; anchors.centerIn: parent; spacing: Style.marginXS
-                    AtmoIcon { icon: "trash"; color: _ocrClearMA.containsMouse ? Color.mError : Color.mOnSurfaceVariant; scale: 0.8 }
-                    NText { text: pluginApi?.tr("panel.clearResult"); color: _ocrClearMA.containsMouse ? Color.mError : Color.mOnSurfaceVariant; pointSize: Style.fontSizeXS }
+                    AtmoIcon { icon: "trash"; color: _ocrClearMA.containsMouse ? AtmoColor.mError : AtmoColor.mOnSurfaceVariant; scale: 0.8 }
+                    NText { text: pluginApi?.tr("panel.clearResult"); color: _ocrClearMA.containsMouse ? AtmoColor.mError : AtmoColor.mOnSurfaceVariant; pointSize: Style.fontSizeXS }
                 }
                 MouseArea {
                     id: _ocrClearMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
@@ -184,11 +184,11 @@ Item {
         }
         Row {
             width: parent.width; spacing: Style.marginS
-            Rectangle { width: 32; height: 1; color: Color.mOnSurfaceVariant; opacity: 0.25; anchors.verticalCenter: parent.verticalCenter }
-            AtmoIcon { icon: "world"; color: Color.mOnSurfaceVariant; scale: 0.75 }
-            NText { text: pluginApi?.tr("ocr.translateSection"); color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeXS }
+            Rectangle { width: 32; height: 1; color: AtmoColor.mOnSurfaceVariant; opacity: 0.25; anchors.verticalCenter: parent.verticalCenter }
+            AtmoIcon { icon: "world"; color: AtmoColor.mOnSurfaceVariant; scale: 0.75 }
+            NText { text: pluginApi?.tr("ocr.translateSection"); color: AtmoColor.mOnSurfaceVariant; pointSize: Style.fontSizeXS }
             Rectangle {
-                height: 1; color: Color.mOnSurfaceVariant; opacity: 0.25
+                height: 1; color: AtmoColor.mOnSurfaceVariant; opacity: 0.25
                 anchors.verticalCenter: parent.verticalCenter
                 width: parent.width - 32 - Style.marginS * 3 - 16 - _transLabel.implicitWidth
             }
@@ -197,7 +197,7 @@ Item {
         NText {
             visible: !root.transAvailable; width: parent.width
             text: pluginApi?.tr("ocr.noTranslateTool")
-            color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeXS; wrapMode: Text.WordWrap
+            color: AtmoColor.mOnSurfaceVariant; pointSize: Style.fontSizeXS; wrapMode: Text.WordWrap
         }
         Column {
             width: parent.width; spacing: Style.marginS
@@ -214,8 +214,8 @@ Item {
                 }
                 Rectangle {
                     id: translateBtn; height: 34; width: 34; radius: Style.radiusM
-                    color: transBtnMa.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
-                    AtmoIcon { anchors.centerIn: parent; icon: "world"; color: transBtnMa.containsMouse ? Color.mOnPrimary : Color.mOnSurface }
+                    color: transBtnMa.containsMouse ? AtmoColor.mPrimary : AtmoColor.mSurfaceVariant
+                    AtmoIcon { anchors.centerIn: parent; icon: "world"; color: transBtnMa.containsMouse ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface }
                     MouseArea {
                         id: transBtnMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                         onClicked: root._translate(root.ocrResult, root.selectedTransLang)
@@ -226,7 +226,7 @@ Item {
             }
             Rectangle {
                 width: parent.width; height: 140 * Style.uiScaleRatio
-                radius: Style.radiusM; color: Color.mSurface; clip: true
+                radius: Style.radiusM; color: AtmoColor.mSurface; clip: true
                 border.color: Style.capsuleBorderColor
                 border.width: Style.capsuleBorderWidth
                 visible: root.translateResult !== ""
@@ -236,19 +236,19 @@ Item {
                     interactive: trText.implicitHeight > trFlick.height
                     TextEdit {
                         id: trText; width: trFlick.width; text: root.translateResult
-                        color: Color.mOnSurface; font.pointSize: Style.fontSizeS
+                        color: AtmoColor.mOnSurface; font.pointSize: Style.fontSizeS
                         wrapMode: TextEdit.WordWrap
                         horizontalAlignment: /[\u0600-\u06FF\u0590-\u05FF]/.test(root.translateResult)
                             ? TextEdit.AlignRight : TextEdit.AlignLeft
-                        selectByMouse: true; selectionColor: Color.mPrimary
-                        selectedTextColor: Color.mOnPrimary
+                        selectByMouse: true; selectionColor: AtmoColor.mPrimary
+                        selectedTextColor: AtmoColor.mOnPrimary
                         WheelHandler {
                             onWheel: event => { trFlick.flick(0, event.angleDelta.y * 5); event.accepted = false }
                         }
                     }
                 }
                 AtmoIcon {
-                    icon: "copy"; color: Color.mOnSurfaceVariant
+                    icon: "copy"; color: AtmoColor.mOnSurfaceVariant
                     anchors.right: parent.right; anchors.top: parent.top; anchors.margins: Style.marginS
                     MouseArea {
                         anchors.fill: parent; cursorShape: Qt.PointingHandCursor

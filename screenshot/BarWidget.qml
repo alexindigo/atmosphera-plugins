@@ -24,7 +24,7 @@ AtmoIconButton {
     applyUiScale: false
     customRadius: Style.radiusL
     colorBg: Style.capsuleColor
-    colorFg: Color.mOnSurface
+    colorFg: AtmoColor.mOnSurface
     colorBorder: "transparent"
     colorBorderHover: "transparent"
     border.color: Style.capsuleBorderColor

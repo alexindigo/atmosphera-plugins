@@ -130,10 +130,10 @@ Item {
     width: root.contentPreferredWidth
     height: root.contentPreferredHeight
 
-    color: Color.mSurface
+    color: AtmoColor.mSurface
     radius: Style.radiusL
     border.width: 1
-    border.color: Color.mOutline
+    border.color: AtmoColor.mOutline
 
     // Inner Click Catcher (Prevents closing when clicking the panel itself)
     MouseArea {
@@ -161,14 +161,14 @@ Item {
           AtmoIcon {
             icon: "layout-grid"
             pointSize: Style.fontSizeXL
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
           }
 
           NText {
             text: "Switch Layout"
             pointSize: Style.fontSizeXL
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             Layout.fillWidth: true
           }
         }
@@ -181,7 +181,7 @@ Item {
         NText {
           text: "Apply to all monitors"
           pointSize: Style.fontSizeL
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
           Layout.fillWidth: true
         }
 
@@ -211,7 +211,7 @@ Item {
           NText {
             text: "Select monitors"
             pointSize: Style.fontSizeL
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             Layout.fillWidth: true
           }
 
@@ -219,7 +219,7 @@ Item {
           AtmoIcon {
             icon: "grip-vertical"
             pointSize: Style.fontSizeS
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             opacity: 0.5
           }
         }
@@ -286,7 +286,7 @@ Item {
             width: 2
             height: 36 * Style.uiScaleRatio
             radius: 1
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
             visible: monitorDragContainer.dragStarted && monitorDragContainer.dropTargetIndex !== -1
             z: 10
 
@@ -307,7 +307,7 @@ Item {
             width: ghostText.implicitWidth + Style.margin2M
             height: 36 * Style.uiScaleRatio
             radius: Style.radiusM
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
             opacity: 0.85
             visible: false
             z: 20
@@ -318,7 +318,7 @@ Item {
               anchors.centerIn: parent
               pointSize: Style.fontSizeS
               font.weight: Font.Medium
-              color: Color.mOnPrimary
+              color: AtmoColor.mOnPrimary
             }
           }
 
@@ -348,10 +348,10 @@ Item {
                   return dict[modelData] || ""
                 }
 
-                color: isSelected ? Color.mPrimary : Color.mSurfaceVariant
+                color: isSelected ? AtmoColor.mPrimary : AtmoColor.mSurfaceVariant
                 radius: Style.radiusM
                 border.width: 2
-                border.color: isSelected ? Color.mPrimary : Color.mOutline
+                border.color: isSelected ? AtmoColor.mPrimary : AtmoColor.mOutline
 
                 opacity: isDragging ? 0.35 : 1.0
                 scale: isDragging ? 0.95 : 1.0
@@ -368,7 +368,7 @@ Item {
                   AtmoIcon {
                     icon: "grip-vertical"
                     pointSize: Style.fontSizeS
-                    color: isSelected ? Qt.alpha(Color.mOnPrimary, 0.6) : Color.mOnSurfaceVariant
+                    color: isSelected ? Qt.alpha(AtmoColor.mOnPrimary, 0.6) : AtmoColor.mOnSurfaceVariant
                     opacity: 0.7
                   }
 
@@ -376,12 +376,12 @@ Item {
                     visible: isSelected
                     icon: "check"
                     pointSize: Style.fontSizeM
-                    color: Color.mOnPrimary
+                    color: AtmoColor.mOnPrimary
                   }
 
                   NText {
                     text: modelData
-                    color: isSelected ? Color.mOnPrimary : Color.mOnSurface
+                    color: isSelected ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface
                     font.weight: Font.Medium
                     pointSize: Style.fontSizeS
                   }
@@ -516,13 +516,13 @@ Item {
             }
             property bool isHovered: false
 
-            color: isActive ? Color.mPrimary : Color.mSurfaceVariant
+            color: isActive ? AtmoColor.mPrimary : AtmoColor.mSurfaceVariant
             radius: Style.radiusM
 
             Rectangle {
               anchors.fill: parent
               radius: parent.radius
-              color: isHovered && !isActive ? Color.mHover : "transparent"
+              color: isHovered && !isActive ? AtmoColor.mHover : "transparent"
               opacity: isHovered && !isActive ? 0.2 : 0
             }
 
@@ -534,13 +534,13 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 icon: root.iconMap[modelData.code] || "layout-board"
                 pointSize: Style.fontSizeL
-                color: layoutBtn.isActive ? Color.mOnPrimary : Color.mOnSurface
+                color: layoutBtn.isActive ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface
               }
 
               NText {
                 Layout.alignment: Qt.AlignHCenter
                 text: modelData.name
-                color: layoutBtn.isActive ? Color.mOnPrimary : Color.mOnSurface
+                color: layoutBtn.isActive ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface
                 font.weight: Font.Medium
                 pointSize: Style.fontSizeS
               }

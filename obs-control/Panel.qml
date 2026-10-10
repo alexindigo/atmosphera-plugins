@@ -34,7 +34,7 @@ Item {
   })
   readonly property string headerIconName: Ui.primaryIcon(root.outputState) || "camera-video"
 
-  readonly property color statusAccentColor: Ui.accentBackgroundColor(root.outputState, Color, Color.mOnSurface)
+  readonly property color statusAccentColor: Ui.accentBackgroundColor(root.outputState, AtmoColor, AtmoColor.mOnSurface)
 
   property bool allowAttach: true
   property real contentPreferredWidth: Math.round(372 * Style.uiScaleRatio)
@@ -59,7 +59,7 @@ Item {
         AtmoIcon {
           icon: root.headerIconName
           pointSize: Math.round(Style.fontSizeXXL * 1.4)
-          color: root.recording ? Color.mError : Color.mPrimary
+          color: root.recording ? AtmoColor.mError : AtmoColor.mPrimary
           Layout.alignment: Qt.AlignTop
         }
 
@@ -71,13 +71,13 @@ Item {
             text: root.pluginApi?.tr("panel.header.title") ?? ""
             pointSize: Style.fontSizeXL
             font.weight: Style.fontWeightSemiBold
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
           }
 
           NText {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             text: Ui.panelHeaderText(root.pluginApi, root.outputState, root.connected, root.obsRunning, root.websocketSupportMissing, root.websocketConfigMissing)
           }
         }
@@ -113,7 +113,7 @@ Item {
           NText {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             text: root.websocket
                   ? (root.pluginApi?.tr("panel.status.connected_hint", {
                        primaryAction: root.primaryActionText,
@@ -126,7 +126,7 @@ Item {
             visible: root.recording && root.recordDurationMs > 0
             text: `${root.pluginApi?.tr("panel.status.recording_elapsed") ?? ""}: ${Ui.formatDuration(root.recordDurationMs)}`
             font.weight: Style.fontWeightMedium
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
 
           NText {
@@ -134,14 +134,14 @@ Item {
             visible: root.streaming && root.streamDurationMs > 0
             text: `${root.pluginApi?.tr("panel.status.streaming_elapsed") ?? ""}: ${Ui.formatDuration(root.streamDurationMs)}`
             font.weight: Style.fontWeightMedium
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
 
           NText {
             Layout.fillWidth: true
             visible: root.autoCloseManagedObs
             wrapMode: Text.WordWrap
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             text: root.pluginApi?.tr("panel.status.managed_hint") ?? ""
           }
         }
@@ -183,8 +183,8 @@ Item {
                 ? (root.pluginApi?.tr("panel.actions.stop_recording") ?? "")
                 : (root.pluginApi?.tr("panel.actions.start_recording") ?? "")
           enabled: root.connected && !root.actionBusy
-          backgroundColor: root.recording ? Color.mError : Color.mPrimary
-          textColor: root.recording ? Color.mOnError : Color.mOnPrimary
+          backgroundColor: root.recording ? AtmoColor.mError : AtmoColor.mPrimary
+          textColor: root.recording ? AtmoColor.mOnError : AtmoColor.mOnPrimary
           onClicked: root.service?.toggleRecord()
         }
 
@@ -195,8 +195,8 @@ Item {
                 ? (root.pluginApi?.tr("panel.actions.stop_streaming") ?? "")
                 : (root.pluginApi?.tr("panel.actions.start_streaming") ?? "")
           enabled: root.connected && !root.actionBusy
-          backgroundColor: root.streaming ? Color.mPrimary : Color.mSurfaceVariant
-          textColor: root.streaming ? Color.mOnPrimary : Color.mOnSurface
+          backgroundColor: root.streaming ? AtmoColor.mPrimary : AtmoColor.mSurfaceVariant
+          textColor: root.streaming ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface
           onClicked: root.service?.toggleStream()
         }
 
@@ -207,8 +207,8 @@ Item {
                 ? (root.pluginApi?.tr("panel.actions.stop_replay") ?? "")
                 : (root.pluginApi?.tr("panel.actions.start_replay") ?? "")
           enabled: root.connected && !root.actionBusy
-          backgroundColor: root.replayBuffer ? Color.mSecondary : Color.mSurfaceVariant
-          textColor: root.replayBuffer ? Color.mOnSecondary : Color.mOnSurface
+          backgroundColor: root.replayBuffer ? AtmoColor.mSecondary : AtmoColor.mSurfaceVariant
+          textColor: root.replayBuffer ? AtmoColor.mOnSecondary : AtmoColor.mOnSurface
           onClicked: root.service?.toggleReplay()
         }
 

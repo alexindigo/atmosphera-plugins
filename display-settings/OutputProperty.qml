@@ -12,12 +12,12 @@ RowLayout {
 
   NText {
     text: root.label
-    pointSize: Style.fontSizeS; color: Color.mOnSurfaceVariant
+    pointSize: Style.fontSizeS; color: AtmoColor.mOnSurfaceVariant
     Layout.preferredWidth: 120 * Style.uiScaleRatio
   }
   NText {
     text: root.value
-    pointSize: Style.fontSizeS; color: Color.mOnSurface
+    pointSize: Style.fontSizeS; color: AtmoColor.mOnSurface
     Layout.fillWidth: true
   }
 }

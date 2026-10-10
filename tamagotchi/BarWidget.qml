@@ -47,7 +47,7 @@ Item {
             return "#E24B4A";
         if (_minStat < 40)
             return "#EF9F27";
-        return Color.mOnSurface;
+        return AtmoColor.mOnSurface;
     }
 
     Rectangle {
@@ -55,7 +55,7 @@ Item {
         height: capsuleHeight
         width: root.implicitWidth
         radius: Style.radiusL
-        color: Color.mSurfaceVariant
+        color: AtmoColor.mSurfaceVariant
 
         border.color: root._minStat < 20 ? "#E24B4A" : "transparent"
         border.width: root._minStat < 20 ? 1 : 0
@@ -82,7 +82,7 @@ Item {
             Text {
                 text: root._petEmoji
                 font.pixelSize: Style.fontSizeM
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
                 Layout.alignment: Qt.AlignVCenter
             }
 

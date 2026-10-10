@@ -87,7 +87,7 @@ Item {
 
     // Panel background. Solid surface color — list item cards use
     // mSurfaceVariant so they stand out against this base.
-    property color panelBackgroundColor: Color.mSurface
+    property color panelBackgroundColor: AtmoColor.mSurface
 
     // Cached settings for reactive use inside bindings.
     readonly property bool showImagePreviews: pluginApi?.pluginSettings?.showImagePreviews ?? true
@@ -814,7 +814,7 @@ Item {
                         AtmoIcon {
                             icon: "clipboard"
                             pointSize: Style.fontSizeXXL
-                            color: Color.mPrimary
+                            color: AtmoColor.mPrimary
                         }
 
                         NText {
@@ -822,7 +822,7 @@ Item {
                             text: root.pluginApi?.tr("panel.title")
                             pointSize: Style.fontSizeL
                             font.weight: Style.fontWeightBold
-                            color: Color.mOnSurface
+                            color: AtmoColor.mOnSurface
                         }
 
                         // Wipe-all: mirrors the notification panel's "clear
@@ -1079,7 +1079,7 @@ Item {
                     AtmoIcon {
                         icon: root.searchQuery.length > 0 ? "search-off" : "clipboard-off"
                         pointSize: Style.baseWidgetSize
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         Layout.alignment: Qt.AlignHCenter
                     }
 
@@ -1088,7 +1088,7 @@ Item {
                             ? root.pluginApi?.tr("panel.no-matches")
                             : root.pluginApi?.tr("panel.empty")
                         pointSize: Style.fontSizeL
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         Layout.alignment: Qt.AlignHCenter
                     }
 

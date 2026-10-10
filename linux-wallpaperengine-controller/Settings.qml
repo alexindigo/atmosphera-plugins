@@ -186,14 +186,14 @@ ColumnLayout {
           NText {
             Layout.fillWidth: true
             text: pluginApi?.tr("settings.badges.title")
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             font.weight: Font.Bold
           }
 
           NText {
             Layout.fillWidth: true
             text: pluginApi?.tr("settings.badges.description")
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             wrapMode: Text.Wrap
           }
 
@@ -264,7 +264,7 @@ ColumnLayout {
               width: 0
               height: 3
               radius: Style.radiusXS
-              color: Color.mPrimary
+              color: AtmoColor.mPrimary
               visible: badgeEditorContainer.dragStarted && badgeEditorContainer.dropTargetIndex !== -1
               z: 10
             }
@@ -274,9 +274,9 @@ ColumnLayout {
               width: Math.min(badgeEditorContainer.width, ghostRow.implicitWidth + Style.marginL * 2)
               height: ghostRow.implicitHeight + Style.marginM * 2
               radius: Style.radiusM
-              color: Color.mPrimary
+              color: AtmoColor.mPrimary
               border.width: Style.borderS
-              border.color: Qt.alpha(Color.mOnPrimary, 0.18)
+              border.color: Qt.alpha(AtmoColor.mOnPrimary, 0.18)
               opacity: 0.9
               visible: false
               z: 20
@@ -290,20 +290,20 @@ ColumnLayout {
                 AtmoIcon {
                   icon: "grip-vertical"
                   pointSize: Style.fontSizeS
-                  color: Qt.alpha(Color.mOnPrimary, 0.75)
+                  color: Qt.alpha(AtmoColor.mOnPrimary, 0.75)
                 }
 
                 AtmoIcon {
                   icon: root.badgeIcon(modelData)
                   pointSize: Style.fontSizeM
-                  color: Color.mOnPrimary
+                  color: AtmoColor.mOnPrimary
                 }
 
                 NText {
                   id: ghostText
                   Layout.fillWidth: true
                   text: ""
-                  color: Color.mOnPrimary
+                  color: AtmoColor.mOnPrimary
                   font.weight: Font.Medium
                   elide: Text.ElideRight
                 }
@@ -326,11 +326,11 @@ ColumnLayout {
                   width: badgeEditorColumn.width
                   height: badgeCardRow.implicitHeight + Style.marginS * 2
                   radius: Style.radiusM
-                  color: Qt.alpha(Color.mSurfaceVariant, 0.6)
+                  color: Qt.alpha(AtmoColor.mSurfaceVariant, 0.6)
                   border.width: Style.borderS
                   border.color: badgeDragHandleMouseArea.containsMouse
-                    ? Qt.alpha(Color.mPrimary, 0.55)
-                    : Qt.alpha(Color.mOutline, 0.35)
+                    ? Qt.alpha(AtmoColor.mPrimary, 0.55)
+                    : Qt.alpha(AtmoColor.mOutline, 0.35)
                   opacity: badgeEditorContainer.draggedIndex === index && badgeEditorContainer.dragStarted ? 0.3 : 1.0
 
                   RowLayout {
@@ -348,8 +348,8 @@ ColumnLayout {
                         icon: "grip-vertical"
                         pointSize: Style.fontSizeS
                         color: badgeDragHandleMouseArea.containsMouse || badgeEditorContainer.draggedIndex === index
-                          ? Color.mPrimary
-                          : Color.mOnSurfaceVariant
+                          ? AtmoColor.mPrimary
+                          : AtmoColor.mOnSurfaceVariant
                       }
 
                       MouseArea {
@@ -411,20 +411,20 @@ ColumnLayout {
                       Layout.preferredWidth: 34 * Style.uiScaleRatio
                       Layout.preferredHeight: 34 * Style.uiScaleRatio
                       radius: Style.radiusS
-                      color: Qt.alpha(Color.mPrimary, 0.12)
+                      color: Qt.alpha(AtmoColor.mPrimary, 0.12)
 
                       AtmoIcon {
                         anchors.centerIn: parent
                         icon: root.badgeIcon(modelData)
                         pointSize: Style.fontSizeM
-                        color: Color.mPrimary
+                        color: AtmoColor.mPrimary
                       }
                     }
 
                     NText {
                       Layout.fillWidth: true
                       text: root.badgeLabel(modelData)
-                      color: Color.mOnSurface
+                      color: AtmoColor.mOnSurface
                       font.weight: Font.Medium
                       elide: Text.ElideRight
                     }
@@ -473,7 +473,7 @@ ColumnLayout {
         NText {
           Layout.fillWidth: true
           text: pluginApi?.tr("settings.category.compatibilityTitle")
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           font.weight: Font.Bold
           font.pointSize: Style.fontSizeL
         }
@@ -481,7 +481,7 @@ ColumnLayout {
         NText {
           Layout.fillWidth: true
           text: pluginApi?.tr("settings.resourcesIntro")
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
           wrapMode: Text.Wrap
         }
 
@@ -525,7 +525,7 @@ ColumnLayout {
           NText {
             Layout.fillWidth: true
             text: pluginApi?.tr("settings.cache.currentSize", { size: root.cacheSizeLabel })
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             wrapMode: Text.Wrap
           }
 
@@ -573,7 +573,7 @@ ColumnLayout {
         NText {
           Layout.fillWidth: true
           text: pluginApi?.tr("settings.defaults.title")
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           font.weight: Font.Bold
           font.pointSize: Style.fontSizeL
         }
@@ -581,7 +581,7 @@ ColumnLayout {
         NText {
           Layout.fillWidth: true
           text: pluginApi?.tr("settings.defaults.description")
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
           wrapMode: Text.Wrap
         }
 
@@ -593,7 +593,7 @@ ColumnLayout {
           NText {
             Layout.fillWidth: true
             text: pluginApi?.tr("settings.category.performanceTitle")
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             font.weight: Font.Bold
           }
 
@@ -641,7 +641,7 @@ ColumnLayout {
           NText {
             Layout.fillWidth: true
             text: pluginApi?.tr("settings.category.audioTitle")
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             font.weight: Font.Bold
           }
 
@@ -690,7 +690,7 @@ ColumnLayout {
           NText {
             Layout.fillWidth: true
             text: pluginApi?.tr("settings.category.displayTitle")
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             font.weight: Font.Bold
           }
 

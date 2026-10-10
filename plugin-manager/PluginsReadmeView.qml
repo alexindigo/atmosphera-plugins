@@ -184,10 +184,10 @@ Item {
     result = result.replace(/\*([^*\s][^*]*?)\*/g, '<i>$1</i>')
     // Inline code: `code` → styled span
     result = result.replace(/`([^`]+)`/g,
-      '<code style="font-family:monospace;background-color:' + Color.mSurfaceVariant + ';color:' + Color.mOnSurfaceVariant + ';">$1</code>')
+      '<code style="font-family:monospace;background-color:' + AtmoColor.mSurfaceVariant + ';color:' + AtmoColor.mOnSurfaceVariant + ';">$1</code>')
     // Links: [text](url) → clickable (http/https only)
     result = result.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
-      '<a href="$2" style="color:' + Color.mPrimary + ';">$1</a>')
+      '<a href="$2" style="color:' + AtmoColor.mPrimary + ';">$1</a>')
     // Softbreaks / hardbreaks: preserve line breaks from the markdown source
     result = result.replace(/\n/g, '<br/>')
     return result
@@ -210,7 +210,7 @@ Item {
         }
         pointSize: Style.fontSizeL
         font.weight: Style.fontWeightSemiBold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
         elide: Text.ElideRight
         Layout.fillWidth: true
       }
@@ -221,7 +221,7 @@ Item {
           return m && m.version ? pluginApi?.tr("panel.version-prefix") + m.version : ""
         }
         pointSize: Style.fontSizeM
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
       }
     }
 
@@ -234,7 +234,7 @@ Item {
       Layout.fillWidth: true
       Layout.fillHeight: true
       horizontalPolicy: ScrollBar.AlwaysOff
-      gradientColor: Color.mSurface
+      gradientColor: AtmoColor.mSurface
       leftPadding: Style.marginL
 
       ColumnLayout {
@@ -249,7 +249,7 @@ Item {
           NText {
             anchors.centerIn: parent
             text: pluginApi?.tr("panel.readme-select-plugin")
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             pointSize: Style.fontSizeM
           }
         }
@@ -273,7 +273,7 @@ Item {
           NText {
             anchors.centerIn: parent
             text: pluginApi?.tr("panel.readme-not-available")
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             pointSize: Style.fontSizeM
           }
         }
@@ -287,7 +287,7 @@ Item {
           baseUrl: root._readmeBaseUrl
           wrapMode: Text.WordWrap
           elide: Text.ElideNone
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           pointSize: Style.fontSizeM
         }
 
@@ -341,7 +341,7 @@ Item {
       richTextEnabled: true
       wrapMode: Text.WordWrap
       elide: Text.ElideNone
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
       font.weight: Style.fontWeightBold
       pointSize: {
         if (!blockData) return Style.fontSizeM
@@ -364,7 +364,7 @@ Item {
       richTextEnabled: true
       wrapMode: Text.WordWrap
       elide: Text.ElideNone
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
       pointSize: Style.fontSizeM
       onLinkActivated: link => root._safeOpenUrl(link)
     }
@@ -376,7 +376,7 @@ Item {
       width: parent ? parent.width : 0
       implicitHeight: codeText.implicitHeight + Style.margin2L
       radius: Style.radiusS
-      color: Color.mSurfaceVariant
+      color: AtmoColor.mSurfaceVariant
       border.color: Style.boxBorderColor
       border.width: Style.borderS
 
@@ -388,7 +388,7 @@ Item {
         family: Settings.data.ui.fontFixed
         wrapMode: Text.WordWrap
         elide: Text.ElideNone
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
         pointSize: Style.fontSizeS
       }
     }
@@ -409,7 +409,7 @@ Item {
 
           NText {
             text: blockData && blockData.ordered ? (index + 1) + "." : "\u2022"
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
             pointSize: Style.fontSizeM
             Layout.alignment: Qt.AlignTop
             Layout.preferredWidth: blockData && blockData.ordered ? Math.round(20 * Style.uiScaleRatio) : Math.round(12 * Style.uiScaleRatio)
@@ -420,7 +420,7 @@ Item {
             richTextEnabled: true
             wrapMode: Text.WordWrap
             elide: Text.ElideNone
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             pointSize: Style.fontSizeM
             Layout.fillWidth: true
             onLinkActivated: link => root._safeOpenUrl(link)
@@ -483,7 +483,7 @@ Item {
       Rectangle {
         Layout.preferredWidth: Math.round(3 * Style.uiScaleRatio)
         Layout.fillHeight: true
-        color: Color.mPrimary
+        color: AtmoColor.mPrimary
         radius: Style.radiusXS
       }
 
@@ -492,7 +492,7 @@ Item {
         richTextEnabled: true
         wrapMode: Text.WordWrap
         elide: Text.ElideNone
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
         pointSize: Style.fontSizeM
         font.italic: true
         Layout.fillWidth: true
@@ -508,16 +508,16 @@ Item {
       richTextEnabled: true
       wrapMode: Text.WordWrap
       elide: Text.ElideNone
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
       pointSize: Style.fontSizeS
       onLinkActivated: link => root._safeOpenUrl(link)
 
       text: {
         if (!blockData) return ""
         var borderColor = Style.boxBorderColor.toString()
-        var headerBg = Color.mSurfaceVariant.toString()
-        var textColor = Color.mOnSurface.toString()
-        var altBg = Qt.alpha(Color.mSurfaceVariant, 0.3).toString()
+        var headerBg = AtmoColor.mSurfaceVariant.toString()
+        var textColor = AtmoColor.mOnSurface.toString()
+        var altBg = Qt.alpha(AtmoColor.mSurfaceVariant, 0.3).toString()
 
         var html = '<table cellpadding="6" cellspacing="0" border="1" bordercolor="' + borderColor + '">'
 

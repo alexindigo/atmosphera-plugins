@@ -25,15 +25,15 @@ Item {
   }
 
   readonly property string iconColorKey: cfg.iconColor !== undefined ? cfg.iconColor : "primary"
-  readonly property color graphColor: Color.resolveColorKey(iconColorKey === "none" ? "primary" : iconColorKey)
+  readonly property color graphColor: AtmoColor.resolveColorKey(iconColorKey === "none" ? "primary" : iconColorKey)
 
   // Цвета для разных линий графиков (берем из темы)
   readonly property var lineColors: [
-    Color.mPrimary,
-    Color.mSecondary,
-    Color.mTertiary,
-    Color.resolveColorKey("error"),
-    Color.resolveColorKey("warning"),
+    AtmoColor.mPrimary,
+    AtmoColor.mSecondary,
+    AtmoColor.mTertiary,
+    AtmoColor.resolveColorKey("error"),
+    AtmoColor.resolveColorKey("warning"),
   ]
 
   function getLineColor(index) {
@@ -43,20 +43,20 @@ Item {
   // Функция для определения цвета на основе процента (75% warning, 90% critical)
   function getThresholdColor(percentValue) {
     if (percentValue >= 90)
-      return Color.resolveColorKey("error");
+      return AtmoColor.resolveColorKey("error");
     if (percentValue >= 75)
-      return Color.mTertiary;
+      return AtmoColor.mTertiary;
     return graphColor;
   }
 
   // Цвет для температурных датчиков
   function tempGraphColor(sensorType) {
     if (sensorType === "junction")
-      return Color.mPrimary;
+      return AtmoColor.mPrimary;
     if (sensorType === "edge")
-      return Color.mSecondary;
+      return AtmoColor.mSecondary;
     if (sensorType === "memory")
-      return Color.mTertiary;
+      return AtmoColor.mTertiary;
     return graphColor;
   }
 
@@ -67,9 +67,9 @@ Item {
 
     if (sensorType === "junction") {
       if (mon.gpuCritical)
-        return Color.resolveColorKey("error");
+        return AtmoColor.resolveColorKey("error");
       if (mon.gpuWarning)
-        return Color.resolveColorKey("warning");
+        return AtmoColor.resolveColorKey("warning");
     }
 
     return tempGraphColor(sensorType);
@@ -159,7 +159,7 @@ Item {
     anchors.top: parent.top
     anchors.margins: Style.marginS
     implicitHeight: mainColumn.implicitHeight + Style.marginM * 2
-    color: Color.mSurface
+    color: AtmoColor.mSurface
     border.width: 0
     radius: Style.radiusL
 
@@ -179,13 +179,13 @@ Item {
         AtmoIcon {
           icon: "device-desktop-analytics"
           pointSize: 24 * Style.uiScaleRatio
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
         }
 
         NText {
           text: pluginApi?.tr("panel.title") ?? "AMD GPU Monitor"
           pointSize: Style.fontSizeM
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
         }
 
         Item { Layout.fillWidth: true }
@@ -193,7 +193,7 @@ Item {
         NText {
           text: mon ? mon.productName : "—"
           pointSize: Style.fontSizeXS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
       }
 
@@ -202,8 +202,8 @@ Item {
         visible: !dataReady
         Layout.fillWidth: true
         implicitHeight: errorCol.implicitHeight + Style.marginM * 2
-        color: Color.resolveColorKey("errorContainer")
-        border.color: Color.resolveColorKey("error")
+        color: AtmoColor.resolveColorKey("errorContainer")
+        border.color: AtmoColor.resolveColorKey("error")
         border.width: 1
         radius: Style.radiusM
 
@@ -218,7 +218,7 @@ Item {
           NText {
             text: pluginApi?.tr("panel.unavailable") ?? "GPU data unavailable"
             pointSize: Style.fontSizeS
-            color: Color.resolveColorKey("onErrorContainer")
+            color: AtmoColor.resolveColorKey("onErrorContainer")
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
           }
@@ -226,7 +226,7 @@ Item {
           NText {
             text: mon?.lastError || pluginApi?.tr("panel.check_rocm") || ""
             pointSize: Style.fontSizeXS
-            color: Color.resolveColorKey("onErrorContainer")
+            color: AtmoColor.resolveColorKey("onErrorContainer")
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
           }
@@ -448,7 +448,7 @@ Item {
     property string cardIcon: ""
     property string cardTitle: ""
     property string displayValue: ""
-    property color displayColor: Color.mPrimary
+    property color displayColor: AtmoColor.mPrimary
     property var graphValues: []
     property real graphMin: 0
     property real graphMax: 100
@@ -475,7 +475,7 @@ Item {
         NText {
           text: card.cardTitle
           pointSize: Style.fontSizeXS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
 
         Item {
@@ -514,7 +514,7 @@ Item {
     property string cardIcon: ""
     property string cardTitle: ""
     property string displayValue: ""
-    property color displayColor: Color.mPrimary
+    property color displayColor: AtmoColor.mPrimary
     property real graphMin: 0
     property real graphMax: 100
     property int pollMs: 1000
@@ -543,7 +543,7 @@ Item {
         NText {
           text: groupedCard.cardTitle
           pointSize: Style.fontSizeXS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
 
         Item {

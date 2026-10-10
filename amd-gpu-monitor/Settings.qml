@@ -70,7 +70,7 @@ ColumnLayout {
     text: pluginApi?.tr("settings.bar_section")
     pointSize: Style.fontSizeL
     font.weight: Font.Bold
-    color: Color.mOnSurface
+    color: AtmoColor.mOnSurface
   }
 
   NToggle {
@@ -128,13 +128,13 @@ ColumnLayout {
     text: pluginApi?.tr("settings.metrics_section")
     pointSize: Style.fontSizeL
     font.weight: Font.Bold
-    color: Color.mOnSurface
+    color: AtmoColor.mOnSurface
   }
 
   NText {
     text: pluginApi?.tr("settings.metrics_description")
     pointSize: Style.fontSizeS
-    color: Color.mOnSurfaceVariant
+    color: AtmoColor.mOnSurfaceVariant
     wrapMode: Text.WordWrap
     Layout.fillWidth: true
   }
@@ -221,7 +221,7 @@ ColumnLayout {
     text: pluginApi?.tr("settings.display_section")
     pointSize: Style.fontSizeL
     font.weight: Font.Bold
-    color: Color.mOnSurface
+    color: AtmoColor.mOnSurface
     Layout.topMargin: Style.marginL
   }
 

@@ -223,7 +223,7 @@ ColumnLayout {
         Layout.leftMargin: Style.borderS
         Layout.rightMargin: Style.borderS
         implicitHeight: Math.round(contentColumn.implicitHeight + Style.margin2L)
-        color: modelData.id === root.selectedPluginId ? Color.mHover : Color.mSurface
+        color: modelData.id === root.selectedPluginId ? AtmoColor.mHover : AtmoColor.mSurface
 
         MouseArea {
           anchors.fill: parent
@@ -249,12 +249,12 @@ ColumnLayout {
             AtmoIcon {
               icon: "plugin"
               pointSize: Style.fontSizeL
-              color: Color.mPrimary
+              color: AtmoColor.mPrimary
             }
 
             NText {
               text: modelData.name
-              color: Color.mPrimary
+              color: AtmoColor.mPrimary
               elide: Text.ElideRight
               Layout.fillWidth: true
             }
@@ -262,7 +262,7 @@ ColumnLayout {
             // Official badge
             Rectangle {
               visible: modelData.official === true
-              color: Color.mSecondary
+              color: AtmoColor.mSecondary
               radius: Style.radiusXS
               implicitWidth: officialBadgeRow.implicitWidth + Style.margin2S
               implicitHeight: officialBadgeRow.implicitHeight + Style.margin2XS
@@ -275,14 +275,14 @@ ColumnLayout {
                 AtmoIcon {
                   icon: "official-plugin"
                   pointSize: Style.fontSizeXXS
-                  color: Color.mOnSecondary
+                  color: AtmoColor.mOnSecondary
                 }
 
                 NText {
                   text: pluginApi?.tr("panel.official")
                   font.pointSize: Style.fontSizeXXS
                   font.weight: Style.fontWeightMedium
-                  color: Color.mOnSecondary
+                  color: AtmoColor.mOnSecondary
                 }
               }
             }
@@ -307,7 +307,7 @@ ColumnLayout {
             AtmoIcon {
               icon: "circle-check"
               pointSize: Style.baseWidgetSize * 0.5
-              color: Color.mPrimary
+              color: AtmoColor.mPrimary
               visible: modelData.downloaded === true
             }
 
@@ -333,7 +333,7 @@ ColumnLayout {
             visible: modelData.description
             text: modelData.description || ""
             font.pointSize: Style.fontSizeXS
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             wrapMode: Text.WordWrap
             elide: Text.ElideNone
             Layout.fillWidth: true
@@ -347,19 +347,19 @@ ColumnLayout {
             NText {
               text: pluginApi?.tr("panel.version-display", { version: modelData.version })
               font.pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
             }
 
             NText {
               text: pluginApi?.tr("panel.separator")
               font.pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
             }
 
             NText {
               text: stripAuthorEmail(modelData.author)
               font.pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
             }
 
             Item {
@@ -372,7 +372,7 @@ ColumnLayout {
             visible: modelData.source ? true : false
             text: modelData.source ? modelData.source.name : ""
             font.pointSize: Style.fontSizeXS
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
           }
 
           // Last updated
@@ -380,7 +380,7 @@ ColumnLayout {
             visible: !!modelData.lastUpdated
             text: modelData.lastUpdated ? Time.formatRelativeTime(new Date(modelData.lastUpdated)) : ""
             font.pointSize: Style.fontSizeXS
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
           }
         }
       }

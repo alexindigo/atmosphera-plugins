@@ -264,7 +264,7 @@ FocusScope {
                 Layout.rightMargin: Style.marginL
                 text: root.pluginApi?.tr("provider.customInputHint")
                 pointSize: Style.fontSizeXS
-                color: Color.mPrimary
+                color: AtmoColor.mPrimary
             }
 
             // ── Results area ──
@@ -275,7 +275,7 @@ FocusScope {
                 Layout.leftMargin: Style.marginL
                 Layout.rightMargin: Style.marginL
                 radius: Style.radiusL
-                color: Color.mSurfaceVariant
+                color: AtmoColor.mSurfaceVariant
                 clip: true
 
                 Flickable {
@@ -302,9 +302,9 @@ FocusScope {
                                 property var itemData: root.filteredItems[index] || {}
                                 property bool isSelected: index === root.selectedIndex
 
-                                color: isSelected ? Color.mPrimary
-                                    : itemMouse.containsMouse ? Qt.lighter(Color.mSurfaceVariant, 1.15)
-                                    : Color.mSurface
+                                color: isSelected ? AtmoColor.mPrimary
+                                    : itemMouse.containsMouse ? Qt.lighter(AtmoColor.mSurfaceVariant, 1.15)
+                                    : AtmoColor.mSurface
 
                                 Row {
                                     anchors.fill: parent
@@ -323,7 +323,7 @@ FocusScope {
                                             anchors.centerIn: parent
                                             visible: (itemRect.itemData.image || "") === "" && (itemRect.itemData.icon || "") !== ""
                                             icon: itemRect.itemData.icon || ""
-                                            color: itemRect.isSelected ? Color.mOnPrimary : Color.mOnSurface
+                                            color: itemRect.isSelected ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface
                                         }
 
                                         // File image (when image path is set)
@@ -351,7 +351,7 @@ FocusScope {
                                             text: itemRect.itemData.name || ""
                                             font.pointSize: Style.fontSizeM
                                             font.weight: Font.Medium
-                                            color: itemRect.isSelected ? Color.mOnPrimary : Color.mOnSurface
+                                            color: itemRect.isSelected ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface
                                             elide: Text.ElideRight
                                         }
 
@@ -360,7 +360,7 @@ FocusScope {
                                             visible: (itemRect.itemData.description || "") !== ""
                                             text: itemRect.itemData.description || ""
                                             font.pointSize: Style.fontSizeS
-                                            color: itemRect.isSelected ? Color.mOnPrimary : Color.mOnSurfaceVariant
+                                            color: itemRect.isSelected ? AtmoColor.mOnPrimary : AtmoColor.mOnSurfaceVariant
                                             elide: Text.ElideRight
                                         }
                                     }
@@ -393,7 +393,7 @@ FocusScope {
                         return root.pluginApi?.tr("provider.noItems");
                     }
                     pointSize: Style.fontSizeM
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                 }
             }
 
@@ -426,7 +426,7 @@ FocusScope {
                         );
                     }
                     pointSize: Style.fontSizeXS
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                     horizontalAlignment: Text.AlignCenter
                 }
             }

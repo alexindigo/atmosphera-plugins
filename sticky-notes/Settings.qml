@@ -39,7 +39,7 @@ ColumnLayout {
     Layout.fillWidth: true
     text: pluginApi?.tr("settings.githubToken.help")
     pointSize: Style.fontSizeS
-    color: Color.mOnSurfaceVariant
+    color: AtmoColor.mOnSurfaceVariant
     wrapMode: Text.Wrap
     textFormat: Text.MarkdownText
   }
@@ -69,7 +69,7 @@ ColumnLayout {
         }
         return mainInstance?.lastSyncMessage || "";
       }
-      color: mainInstance?.lastSyncOk ? Color.mPrimary : Color.mOnSurfaceVariant
+      color: mainInstance?.lastSyncOk ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
       pointSize: Style.fontSizeS
       wrapMode: Text.Wrap
       Layout.fillWidth: true

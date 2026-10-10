@@ -68,7 +68,7 @@ Item {
                             Layout.alignment: Qt.AlignVCenter
                             pointSize: Style.fontSizeXXL
                             applyUiScale: false
-                            color: Color.mPrimary
+                            color: AtmoColor.mPrimary
                         }
 
                         NLabel {
@@ -91,7 +91,7 @@ Item {
                             icon: "file-text"
                             tooltipText: pluginApi?.tr("panel.logs")
                             baseSize: Style.baseWidgetSize * 0.8
-                            colorBg: root.showLogs ? Qt.alpha(Color.mPrimary, 0.2) : "transparent"
+                            colorBg: root.showLogs ? Qt.alpha(AtmoColor.mPrimary, 0.2) : "transparent"
                             onClicked: {
                                 root.showLogs = !root.showLogs
                                 if (main) main.logStreamActive = root.showLogs
@@ -165,7 +165,7 @@ Item {
                         NText {
                             text: pluginApi?.tr("import.persistent")
                             pointSize: Style.fontSizeS
-                            color: Color.mOnSurface
+                            color: AtmoColor.mOnSurface
                             Layout.fillWidth: true
                         }
 
@@ -356,21 +356,21 @@ Item {
                             OpenVpnIcon {
                                 pointSize: Style.fontSizeXXL
                                 applyUiScale: false
-                                color: Color.mOnSurfaceVariant
+                                color: AtmoColor.mOnSurfaceVariant
                                 Layout.alignment: Qt.AlignHCenter
                             }
 
                             NText {
                                 text: pluginApi?.tr("panel.noConfigs")
                                 pointSize: Style.fontSizeL
-                                color: Color.mOnSurfaceVariant
+                                color: AtmoColor.mOnSurfaceVariant
                                 Layout.alignment: Qt.AlignHCenter
                             }
 
                             NText {
                                 text: pluginApi?.tr("panel.clickToImport")
                                 pointSize: Style.fontSizeS
-                                color: Color.mOnSurfaceVariant
+                                color: AtmoColor.mOnSurfaceVariant
                                 Layout.alignment: Qt.AlignHCenter
                             }
 
@@ -406,14 +406,14 @@ Item {
                                 AtmoIcon {
                                     icon: "file-text"
                                     pointSize: Style.fontSizeM
-                                    color: Color.mOnSurfaceVariant
+                                    color: AtmoColor.mOnSurfaceVariant
                                 }
 
                                 NText {
                                     text: pluginApi?.tr("panel.logs")
                                     pointSize: Style.fontSizeS
                                     font.weight: Style.fontWeightMedium
-                                    color: Color.mOnSurface
+                                    color: AtmoColor.mOnSurface
                                 }
 
                                 NBox { Layout.fillWidth: true }
@@ -421,7 +421,7 @@ Item {
                                 NText {
                                     text: (main?.sessionLogs?.length ?? 0) + " " + pluginApi?.tr("panel.lines")
                                     pointSize: Style.fontSizeXXS
-                                    color: Color.mOnSurfaceVariant
+                                    color: AtmoColor.mOnSurfaceVariant
                                 }
 
                                 AtmoIconButton {
@@ -468,10 +468,10 @@ Item {
     }
 
     function _logColor(raw) {
-        if (raw.match(/ERR|ERROR|FAIL|FATAL/i)) return Color.mError
-        if (raw.match(/WARN/i)) return Color.mSurfaceVariant
-        if (raw.match(/INIT|SUCCESS|CONNECTED/i)) return Color.mPrimary
-        return Color.mOnSurfaceVariant
+        if (raw.match(/ERR|ERROR|FAIL|FATAL/i)) return AtmoColor.mError
+        if (raw.match(/WARN/i)) return AtmoColor.mSurfaceVariant
+        if (raw.match(/INIT|SUCCESS|CONNECTED/i)) return AtmoColor.mPrimary
+        return AtmoColor.mOnSurfaceVariant
     }
 
     Connections {

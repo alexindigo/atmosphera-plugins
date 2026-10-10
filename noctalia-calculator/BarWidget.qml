@@ -27,13 +27,13 @@ Item {
     readonly property string badge: mainInst?.badgeText ?? ""
     readonly property color capsuleBgColor: {
         if (isSelected) {
-            return mouseArea.containsMouse ? Qt.darker(Color.mPrimary, 1.08) : Color.mPrimary;
+            return mouseArea.containsMouse ? Qt.darker(AtmoColor.mPrimary, 1.08) : AtmoColor.mPrimary;
         }
-        return mouseArea.containsMouse ? Color.mHover : Style.capsuleColor;
+        return mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor;
     }
     readonly property color contentColor: isSelected
-        ? Color.mOnPrimary
-        : (mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface)
+        ? AtmoColor.mOnPrimary
+        : (mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface)
     implicitWidth: visualCapsule.width
     implicitHeight: visualCapsule.height
 
@@ -72,7 +72,7 @@ Item {
         height: root.capsuleHeight
         radius: Style.radiusL
         color: root.capsuleBgColor
-        border.color: root.isSelected ? Color.mPrimary : Style.capsuleBorderColor
+        border.color: root.isSelected ? AtmoColor.mPrimary : Style.capsuleBorderColor
         border.width: Style.capsuleBorderWidth
 
         Row {

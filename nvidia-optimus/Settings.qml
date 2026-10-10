@@ -21,14 +21,14 @@ Item {
       text: root.pluginApi?.tr("settings.title")
       font.weight: Style.fontWeightBold
       pointSize: Style.fontSizeL
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
     }
 
     NText {
       Layout.fillWidth: true
       wrapMode: Text.WordWrap
       pointSize: Style.fontSizeS
-      color: Color.mOnSurfaceVariant
+      color: AtmoColor.mOnSurfaceVariant
       text: root.pluginApi?.tr("settings.description")
     }
 
@@ -36,7 +36,7 @@ Item {
       Layout.fillWidth: true
       wrapMode: Text.WordWrap
       pointSize: Style.fontSizeXS
-      color: Color.mOnSurfaceVariant
+      color: AtmoColor.mOnSurfaceVariant
       text: root.pluginApi?.tr("settings.requirements")
     }
   }

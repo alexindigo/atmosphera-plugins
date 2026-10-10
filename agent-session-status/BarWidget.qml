@@ -57,7 +57,7 @@ Item {
     y: Style.pixelAlignCenter(parent.height, height)
     width: root.contentWidth
     height: root.contentHeight
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
     radius: Style.radiusL
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
@@ -69,13 +69,13 @@ Item {
 
       AtmoIcon {
         icon: root.runningCount > 0 ? "bot" : "bot-off"
-        color: mouseArea.containsMouse ? Color.mOnHover : (root.runningCount > 0 ? Color.mPrimary : Color.mOnSurfaceVariant)
+        color: mouseArea.containsMouse ? AtmoColor.mOnHover : (root.runningCount > 0 ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant)
         applyUiScale: true
       }
 
       NText {
         text: root.runningCount.toString()
-        color: mouseArea.containsMouse ? Color.mOnHover : (root.runningCount > 0 ? Color.mPrimary : Color.mOnSurfaceVariant)
+        color: mouseArea.containsMouse ? AtmoColor.mOnHover : (root.runningCount > 0 ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant)
         pointSize: root.barFontSize
         applyUiScale: false
       }

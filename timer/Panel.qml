@@ -167,14 +167,14 @@ Item {
             AtmoIcon {
               icon: isStopwatchMode ? "clock" : "hourglass"
               pointSize: Style.fontSizeL
-              color: Color.mPrimary
+              color: AtmoColor.mPrimary
             }
 
             NText {
               text: pluginApi?.tr("panel.title") || "Timer"
               pointSize: Style.fontSizeL
               font.weight: Style.fontWeightBold
-              color: Color.mOnSurface
+              color: AtmoColor.mOnSurface
               Layout.fillWidth: true
             }
           }
@@ -213,8 +213,8 @@ Item {
           width: Math.max(timerInput.implicitWidth + Style.marginM * 2, parent.width * 0.8)
           height: timerInput.implicitHeight + Style.marginM * 2
           radius: Style.iRadiusM
-          color: Color.mSurfaceVariant
-          border.color: (timerInput.activeFocus || timerDisplayItem.isEditing) ? Color.mPrimary : Color.mOutline
+          color: AtmoColor.mSurfaceVariant
+          border.color: (timerInput.activeFocus || timerDisplayItem.isEditing) ? AtmoColor.mPrimary : AtmoColor.mOutline
           border.width: Style.borderS
           visible: !isRunning && !isStopwatchMode && totalSeconds === 0
           z: 0
@@ -262,14 +262,14 @@ Item {
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
             ctx.lineWidth = 10;
-            ctx.strokeStyle = Qt.alpha(Color.mOnSurface, 0.1);
+            ctx.strokeStyle = Qt.alpha(AtmoColor.mOnSurface, 0.1);
             ctx.stroke();
 
             if (progressRatio > 0) {
               ctx.beginPath();
               ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + progressRatio * 2 * Math.PI);
               ctx.lineWidth = 10;
-              ctx.strokeStyle = Color.mPrimary;
+              ctx.strokeStyle = AtmoColor.mPrimary;
               ctx.lineCap = "round";
               ctx.stroke();
             }
@@ -316,12 +316,12 @@ Item {
             font.weight: Style.fontWeightBold
             color: {
               if (totalSeconds > 0) {
-                return Color.mPrimary;
+                return AtmoColor.mPrimary;
               }
               if (timerDisplayItem.isEditing) {
-                return Color.mPrimary;
+                return AtmoColor.mPrimary;
               }
-              return Color.mOnSurface;
+              return AtmoColor.mOnSurface;
             }
 
             property string _cachedText: ""

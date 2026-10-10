@@ -41,7 +41,7 @@ Item {
 
            AtmoIcon {
              icon: "shield-check"
-             color: Color.mPrimary
+             color: AtmoColor.mPrimary
              pointSize: Style.fontSizeL
            }
 
@@ -50,7 +50,7 @@ Item {
              text: pluginApi?.tr("history.title")
              font.weight: Style.fontWeightBold
              pointSize: Style.fontSizeL
-             color: Color.mOnSurface
+             color: AtmoColor.mOnSurface
            }
            
            AtmoIconButton {
@@ -85,7 +85,7 @@ Item {
                       Layout.fillWidth: true
                       implicitHeight: 56 * Style.uiScaleRatio
                       radius: Style.radiusM
-                      color: Color.mSurfaceVariant
+                      color: AtmoColor.mSurfaceVariant
                       
                       RowLayout {
                         anchors.fill: parent
@@ -98,7 +98,7 @@ Item {
                             radius: width/2
                             color: Qt.alpha(iconColor, 0.1)
                             
-                            readonly property color iconColor: Color.resolveColorKey(modelData.colorKey || "primary")
+                            readonly property color iconColor: AtmoColor.resolveColorKey(modelData.colorKey || "primary")
                             
                             AtmoIcon {
                                anchors.centerIn: parent
@@ -126,13 +126,13 @@ Item {
                               
                               NText {
                                 text: modelData.time
-                                color: Qt.alpha(Color.mOnSurface, 0.7)
+                                color: Qt.alpha(AtmoColor.mOnSurface, 0.7)
                                 pointSize: Style.fontSizeS
                               }
                               
                               NText {
                                 text: "•"
-                                color: Qt.alpha(Color.mOnSurface, 0.3)
+                                color: Qt.alpha(AtmoColor.mOnSurface, 0.3)
                                 pointSize: Style.fontSizeS
                               }
                               
@@ -141,7 +141,7 @@ Item {
                                     const action = modelData.action || "started";
                                     return pluginApi?.tr("history.action." + action) || action;
                                 }
-                                color: (modelData.action || "started") === "stopped" ? Color.resolveColorKey("error") : Color.resolveColorKey("primary")
+                                color: (modelData.action || "started") === "stopped" ? AtmoColor.resolveColorKey("error") : AtmoColor.resolveColorKey("primary")
                                 font.weight: Style.fontWeightBold
                                 pointSize: Style.fontSizeS
                               }
@@ -156,7 +156,7 @@ Item {
                     Layout.alignment: Qt.AlignHCenter
                     visible: (!mainInstance || mainInstance.accessHistory.length === 0)
                     text: pluginApi?.tr("history.empty")
-                    color: Qt.alpha(Color.mOnSurface, 0.5)
+                    color: Qt.alpha(AtmoColor.mOnSurface, 0.5)
                     pointSize: Style.fontSizeM
                     Layout.topMargin: Style.marginL
                 }

@@ -30,10 +30,10 @@ AtmoIconButton {
   icon: "screenshot"
   tooltipText: pluginApi?.tr("panel.title")
   tooltipDirection: BarService.getTooltipDirection(screenName)
-  colorBg: recording ? Color.mError : Style.capsuleColor
-  colorFg: recording ? Color.mOnError : Color.mOnSurface
-  colorBgHover: recording ? Color.mError : Color.mHover
-  colorFgHover: recording ? Color.mOnError : Color.mOnHover
+  colorBg: recording ? AtmoColor.mError : Style.capsuleColor
+  colorFg: recording ? AtmoColor.mOnError : AtmoColor.mOnSurface
+  colorBgHover: recording ? AtmoColor.mError : AtmoColor.mHover
+  colorFgHover: recording ? AtmoColor.mOnError : AtmoColor.mOnHover
   colorBorder: Style.capsuleBorderColor
   colorBorderHover: Style.capsuleBorderColor
 

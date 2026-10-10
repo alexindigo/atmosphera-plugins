@@ -89,8 +89,8 @@ ColumnLayout {
             Layout.fillWidth: true
             height: Math.round(36 * Style.uiScaleRatio)
             radius: Style.radiusM
-            color: Color.mSurfaceVariant
-            border.color: urlField.activeFocus ? Color.mPrimary : Color.mOutline
+            color: AtmoColor.mSurfaceVariant
+            border.color: urlField.activeFocus ? AtmoColor.mPrimary : AtmoColor.mOutline
             border.width: Style.borderS
 
             TextInput {
@@ -98,9 +98,9 @@ ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: Style.marginM
                 verticalAlignment: TextInput.AlignVCenter
-                color: Color.mOnSurface
-                selectionColor: Color.mPrimary
-                selectedTextColor: Color.mOnPrimary
+                color: AtmoColor.mOnSurface
+                selectionColor: AtmoColor.mPrimary
+                selectedTextColor: AtmoColor.mOnPrimary
                 clip: true
                 text: root.valueApiUrl
                 onTextChanged: root.valueApiUrl = text
@@ -128,8 +128,8 @@ ColumnLayout {
             Layout.fillWidth: true
             height: Math.round(36 * Style.uiScaleRatio)
             radius: Style.radiusM
-            color: Color.mSurfaceVariant
-            border.color: apiField.activeFocus ? Color.mPrimary : Color.mOutline
+            color: AtmoColor.mSurfaceVariant
+            border.color: apiField.activeFocus ? AtmoColor.mPrimary : AtmoColor.mOutline
             border.width: Style.borderS
 
             TextInput {
@@ -137,9 +137,9 @@ ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: Style.marginM
                 verticalAlignment: TextInput.AlignVCenter
-                color: Color.mOnSurface
-                selectionColor: Color.mPrimary
-                selectedTextColor: Color.mOnPrimary
+                color: AtmoColor.mOnSurface
+                selectionColor: AtmoColor.mPrimary
+                selectedTextColor: AtmoColor.mOnPrimary
                 clip: true
                 echoMode: TextInput.Password
                 text: root.valueApiKey
@@ -168,8 +168,8 @@ ColumnLayout {
             Layout.fillWidth: true
             height: Math.round(36 * Style.uiScaleRatio)
             radius: Style.radiusM
-            color: Color.mSurfaceVariant
-            border.color: pathField.activeFocus ? Color.mPrimary : Color.mOutline
+            color: AtmoColor.mSurfaceVariant
+            border.color: pathField.activeFocus ? AtmoColor.mPrimary : AtmoColor.mOutline
             border.width: Style.borderS
 
             TextInput {
@@ -177,9 +177,9 @@ ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: Style.marginM
                 verticalAlignment: TextInput.AlignVCenter
-                color: Color.mOnSurface
-                selectionColor: Color.mPrimary
-                selectedTextColor: Color.mOnPrimary
+                color: AtmoColor.mOnSurface
+                selectionColor: AtmoColor.mPrimary
+                selectedTextColor: AtmoColor.mOnPrimary
                 clip: true
                 text: root.valueConfigPath
                 onTextChanged: root.valueConfigPath = text
@@ -244,8 +244,8 @@ ColumnLayout {
                     width: chipLabel.implicitWidth + Math.round(22 * Style.uiScaleRatio)
                     height: Math.round(30 * Style.uiScaleRatio)
                     radius: height / 2
-                    color: isSelected ? Qt.alpha(Color.mPrimary, 0.15) : Color.mSurfaceVariant
-                    border.color: isSelected ? Color.mPrimary : Color.mOutline
+                    color: isSelected ? Qt.alpha(AtmoColor.mPrimary, 0.15) : AtmoColor.mSurfaceVariant
+                    border.color: isSelected ? AtmoColor.mPrimary : AtmoColor.mOutline
                     border.width: Style.borderS
 
                     NText {
@@ -253,7 +253,7 @@ ColumnLayout {
                         anchors.centerIn: parent
                         text: modelData.label
                         font.bold: parent.isSelected
-                        color: parent.isSelected ? Color.mPrimary : Color.mOnSurface
+                        color: parent.isSelected ? AtmoColor.mPrimary : AtmoColor.mOnSurface
                     }
 
                     MouseArea {
@@ -270,7 +270,7 @@ ColumnLayout {
             text: tr("settings.no-folders")
             visible: (mainInst?.availableFolders?.length ?? 0) === 0
             wrapMode: Text.Wrap
-            color: Qt.alpha(Color.mOnSurface, 0.65)
+            color: Qt.alpha(AtmoColor.mOnSurface, 0.65)
         }
     }
 
@@ -282,13 +282,13 @@ ColumnLayout {
             Layout.preferredWidth: saveLabel.width + Math.round(24 * Style.uiScaleRatio)
             Layout.preferredHeight: Math.round(32 * Style.uiScaleRatio)
             radius: Style.radiusM
-            color: saveMouse.containsMouse ? Qt.darker(Color.mPrimary, 1.1) : Color.mPrimary
+            color: saveMouse.containsMouse ? Qt.darker(AtmoColor.mPrimary, 1.1) : AtmoColor.mPrimary
 
             NText {
                 id: saveLabel
                 anchors.centerIn: parent
                 text: tr("settings.save")
-                color: Color.mOnPrimary
+                color: AtmoColor.mOnPrimary
             }
 
             MouseArea {
@@ -308,8 +308,8 @@ ColumnLayout {
             Layout.preferredWidth: refreshLabel.width + Math.round(24 * Style.uiScaleRatio)
             Layout.preferredHeight: Math.round(32 * Style.uiScaleRatio)
             radius: Style.radiusM
-            color: refreshMouse.containsMouse ? Color.mOutline : Color.mSurfaceVariant
-            border.color: Color.mOutline
+            color: refreshMouse.containsMouse ? AtmoColor.mOutline : AtmoColor.mSurfaceVariant
+            border.color: AtmoColor.mOutline
             border.width: Style.borderS
 
             NText {
@@ -356,26 +356,26 @@ ColumnLayout {
 
         NText {
             text: mainInst?.stateLabel(mainInst.enabled ? mainInst.state : "disabled") ?? ""
-            color: mainInst ? mainInst.statusColor(mainInst.enabled ? mainInst.state : "disabled") : Color.mOutline
+            color: mainInst ? mainInst.statusColor(mainInst.enabled ? mainInst.state : "disabled") : AtmoColor.mOutline
         }
 
         NText {
             text: mainInst?.statusSummary() ?? ""
             wrapMode: Text.Wrap
-            color: Qt.alpha(Color.mOnSurface, 0.75)
+            color: Qt.alpha(AtmoColor.mOnSurface, 0.75)
         }
 
         NText {
             text: tr("settings.url-info", { "value": mainInst?.resolvedUrl || "-" })
             pointSize: Style.fontSizeS
-            color: Qt.alpha(Color.mOnSurface, 0.6)
+            color: Qt.alpha(AtmoColor.mOnSurface, 0.6)
             elide: Text.ElideRight
         }
 
         NText {
             text: tr("settings.api-source-info", { "value": root.sourceLabel(mainInst?.apiKeySource ?? "none") })
             pointSize: Style.fontSizeS
-            color: Qt.alpha(Color.mOnSurface, 0.6)
+            color: Qt.alpha(AtmoColor.mOnSurface, 0.6)
         }
     }
 
@@ -392,12 +392,12 @@ ColumnLayout {
         NText {
             text: tr("settings.developer")
             wrapMode: Text.Wrap
-            color: Qt.alpha(Color.mOnSurface, 0.75)
+            color: Qt.alpha(AtmoColor.mOnSurface, 0.75)
         }
 
         NText {
             text: "v" + (pluginApi?.manifest?.version ?? "1.0.0")
-            color: Qt.alpha(Color.mOnSurface, 0.5)
+            color: Qt.alpha(AtmoColor.mOnSurface, 0.5)
         }
     }
 }

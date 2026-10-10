@@ -275,7 +275,7 @@ Item {
       width: Math.min(screen?.width ?? 800, 700)
       height: Math.min(screen?.height ?? 600, 520)
       radius: Style.radiusL
-      color: Color.mSurface
+      color: AtmoColor.mSurface
 
       ColumnLayout {
         anchors.fill: parent
@@ -288,16 +288,16 @@ Item {
             text: pluginApi?.tr("panel.title")
             font.weight: Font.Bold
             font.pointSize: Style.fontSizeL
-            color: Color.mOnSurface; Layout.alignment: Qt.AlignVCenter
+            color: AtmoColor.mOnSurface; Layout.alignment: Qt.AlignVCenter
           }
           NText {
             text: pluginApi?.tr("panel.count-filtered", { visible: visibleCount(), total: items.length })
             font.pointSize: Style.fontSizeXS
-            color: Color.mOnSurfaceVariant; Layout.alignment: Qt.AlignVCenter
+            color: AtmoColor.mOnSurfaceVariant; Layout.alignment: Qt.AlignVCenter
           }
           Item { Layout.fillWidth: true }
           Rectangle {
-            color: root.masked === false ? Color.mPrimary : (root.masked === "partial" ? Color.mTertiary : Color.mSurfaceVariant)
+            color: root.masked === false ? AtmoColor.mPrimary : (root.masked === "partial" ? AtmoColor.mTertiary : AtmoColor.mSurfaceVariant)
             radius: Style.radiusS || 4; height: Style.baseWidgetSize * 0.65; Layout.alignment: Qt.AlignVCenter; opacity: 0.9
             RowLayout {
               anchors.left: parent.left; anchors.leftMargin: Style.marginS
@@ -306,18 +306,18 @@ Item {
               AtmoIcon {
                 icon: root.masked === false ? "eye" : "eye-off"
                 pointSize: Style.fontSizeXS
-                color: root.masked === false ? Color.mOnPrimary : Color.mOnSurface
+                color: root.masked === false ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface
               }
               NText {
                 text: root.masked === false ? pluginApi?.tr("panel.revealed") : (root.masked === "partial" ? pluginApi?.tr("panel.partial") : pluginApi?.tr("panel.masked"))
                 font.pointSize: Style.fontSizeXS
-                color: root.masked === false ? Color.mOnPrimary : Color.mOnSurface
+                color: root.masked === false ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface
               }
             }
           }
           AtmoIconButton {
             icon: "x"; tooltipText: pluginApi?.tr("panel.close")
-            colorBg: "transparent"; colorFg: Color.mOnSurface; colorBgHover: Color.mHover
+            colorBg: "transparent"; colorFg: AtmoColor.mOnSurface; colorBgHover: AtmoColor.mHover
             onClicked: pluginApi?.closePanel(screen)
           }
         }
@@ -327,13 +327,13 @@ Item {
           Layout.fillWidth: true
           height: root.searchMode ? 32 : 0
           radius: Style.radiusM
-          color: Color.mSurface
+          color: AtmoColor.mSurface
           NText {
             anchors.left: parent.left; anchors.leftMargin: Style.marginM
             anchors.verticalCenter: parent.verticalCenter
             visible: root.searchMode
             text: root.searchQuery.length > 0 ? "/" + root.searchQuery : pluginApi?.tr("panel.search-hint")
-            color: root.searchQuery.length > 0 ? Color.mOnSurface : Color.mOnSurfaceVariant
+            color: root.searchQuery.length > 0 ? AtmoColor.mOnSurface : AtmoColor.mOnSurfaceVariant
             font.pointSize: Style.fontSizeS
             opacity: root.searchQuery.length > 0 ? 1 : 0.5
           }
@@ -344,13 +344,13 @@ Item {
             ? pluginApi?.tr("panel.hint-search")
             : pluginApi?.tr("panel.hint-normal")
           font.pointSize: Style.fontSizeXS
-          color: Color.mOnSurfaceVariant; opacity: 0.7
+          color: AtmoColor.mOnSurfaceVariant; opacity: 0.7
         }
 
         Rectangle {
           Layout.fillWidth: true; Layout.fillHeight: true
           radius: Style.radiusM
-          color: Color.mSurfaceVariant; clip: true
+          color: AtmoColor.mSurfaceVariant; clip: true
 
           ListView {
             id: itemList
@@ -378,7 +378,7 @@ Item {
 
               Rectangle {
                 anchors.fill: parent; radius: Style.radiusM
-                color: isSelected ? Color.mPrimary : (mouseArea.containsMouse ? Color.mHover : Color.mSurface)
+                color: isSelected ? AtmoColor.mPrimary : (mouseArea.containsMouse ? AtmoColor.mHover : AtmoColor.mSurface)
                 opacity: isSelected ? 0.15 : (mouseArea.containsMouse ? 0.08 : 0.35)
               }
 
@@ -401,7 +401,7 @@ Item {
                     anchors.centerIn: parent
                     visible: !isImg || !root.imageCache[modelData.id]
                     icon: isImg ? "photo" : "align-left"
-                    pointSize: Style.fontSizeM; color: Color.mOnSurface
+                    pointSize: Style.fontSizeM; color: AtmoColor.mOnSurface
                   }
 
 
@@ -417,7 +417,7 @@ Item {
                       return root.formatPreview(modelData.preview) || ""
                     }
                     elide: Text.ElideRight; maximumLineCount: 2
-                    color: isImg ? Color.mOnSurfaceVariant : Color.mOnSurface
+                    color: isImg ? AtmoColor.mOnSurfaceVariant : AtmoColor.mOnSurface
                     font.weight: isSelected ? Font.Bold : Font.Normal
                     font.pointSize: Style.fontSizeS
                   }
@@ -426,20 +426,20 @@ Item {
                     Layout.fillWidth: true
                     text: root.formatPreview(modelData.preview.slice(80))
                     elide: Text.ElideRight; maximumLineCount: 1
-                    color: Color.mOnSurfaceVariant; font.pointSize: Style.fontSizeXS; opacity: Style.opacityHeavy
+                    color: AtmoColor.mOnSurfaceVariant; font.pointSize: Style.fontSizeXS; opacity: Style.opacityHeavy
                   }
                 }
 
                 Rectangle {
                   visible: isImg
-                  color: Color.mTertiary; radius: Style.radiusS || 4; height: Style.baseWidgetSize * 0.5
+                  color: AtmoColor.mTertiary; radius: Style.radiusS || 4; height: Style.baseWidgetSize * 0.5
                   Layout.alignment: Qt.AlignVCenter
                   RowLayout {
                     anchors.left: parent.left; anchors.leftMargin: Style.marginS
                     anchors.right: parent.right; anchors.rightMargin: Style.marginS
                     anchors.verticalCenter: parent.verticalCenter; spacing: Style.marginXS
-                    AtmoIcon { icon: "photo"; pointSize: Style.fontSizeXS; color: Color.mOnTertiary }
-                    NText { text: pluginApi?.tr("item.img-badge"); font.pointSize: Style.fontSizeXS; font.bold: true; color: Color.mOnTertiary }
+                    AtmoIcon { icon: "photo"; pointSize: Style.fontSizeXS; color: AtmoColor.mOnTertiary }
+                    NText { text: pluginApi?.tr("item.img-badge"); font.pointSize: Style.fontSizeXS; font.bold: true; color: AtmoColor.mOnTertiary }
                   }
                 }
               }
@@ -448,7 +448,7 @@ Item {
                 anchors.left: parent.left; anchors.leftMargin: Style.marginM
                 anchors.right: parent.right; anchors.rightMargin: Style.marginM
                 anchors.bottom: parent.bottom; height: 1
-                color: Color.mOnSurface; opacity: 0.08
+                color: AtmoColor.mOnSurface; opacity: 0.08
               }
 
               MouseArea {
@@ -464,17 +464,17 @@ Item {
             NText {
               anchors.centerIn: parent
               visible: root.loading && items.length === 0
-              text: pluginApi?.tr("panel.loading"); color: Color.mOnSurfaceVariant
+              text: pluginApi?.tr("panel.loading"); color: AtmoColor.mOnSurfaceVariant
             }
             NText {
               anchors.centerIn: parent
               visible: !root.loading && items.length === 0
-              text: pluginApi?.tr("panel.empty"); color: Color.mOnSurfaceVariant
+              text: pluginApi?.tr("panel.empty"); color: AtmoColor.mOnSurfaceVariant
             }
             NText {
               anchors.centerIn: parent
               visible: !root.loading && items.length > 0 && visibleCount() === 0
-              text: pluginApi?.tr("panel.no-matches"); color: Color.mOnSurfaceVariant
+              text: pluginApi?.tr("panel.no-matches"); color: AtmoColor.mOnSurfaceVariant
             }
           }
         }
@@ -491,7 +491,7 @@ Item {
             return ""
           }
           font.pointSize: Style.fontSizeXS
-          color: Color.mOnSurfaceVariant; opacity: 0.6
+          color: AtmoColor.mOnSurfaceVariant; opacity: 0.6
         }
       }
     }

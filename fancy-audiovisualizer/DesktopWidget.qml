@@ -118,8 +118,8 @@ DraggableDesktopWidget {
     property real time: root.shaderTime
     property real itemWidth: visualizer.width
     property real itemHeight: visualizer.height
-    property color primaryColor: root.useCustomColors ? root.customPrimaryColor : Color.mPrimary
-    property color secondaryColor: root.useCustomColors ? root.customSecondaryColor : Color.mSecondary
+    property color primaryColor: root.useCustomColors ? root.customPrimaryColor : AtmoColor.mPrimary
+    property color secondaryColor: root.useCustomColors ? root.customSecondaryColor : AtmoColor.mSecondary
     property real sensitivity: root.sensitivity
     property real rotationSpeed: root.rotationSpeed
     property real barWidth: root.barWidth
@@ -136,14 +136,14 @@ DraggableDesktopWidget {
   // Fallback when shader not loaded
   Rectangle {
     anchors.fill: parent
-    color: Color.mSurface
+    color: AtmoColor.mSurface
     radius: scaledRadiusL
     visible: !visualizer.visible || visualizer.fragmentShader === ""
 
     Text {
       anchors.centerIn: parent
       text: "Loading..."
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
       font.pointSize: Math.round(Style.fontSizeM * widgetScale)
     }
   }

@@ -34,13 +34,13 @@ DraggableDesktopWidget {
                 text: (root.pluginApi.mainInstance.updates.length).toString() + " " + pluginApi.trp("desktop.header", root.pluginApi.mainInstance.updates.length)
                 pointSize: Style.fontSizeXL
                 font.weight: Font.Bold
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
                 anchors.centerIn: parent
             }
         }
 
         NDivider {
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             width: root.tableContentWidth
             height: 1
             Layout.topMargin: Style.marginL
@@ -57,7 +57,7 @@ DraggableDesktopWidget {
                 text: pluginApi.tr("desktop.name")
                 pointSize: Style.fontSizeM
                 font.weight: Font.Bold
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
                 horizontalAlignment: Text.AlignLeft
             }
             NText {
@@ -65,7 +65,7 @@ DraggableDesktopWidget {
                 text: pluginApi.tr("desktop.oldVer")
                 pointSize: Style.fontSizeM
                 font.weight: Font.Bold
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
                 horizontalAlignment: Text.AlignHCenter
             }
             NText {
@@ -73,7 +73,7 @@ DraggableDesktopWidget {
                 text: pluginApi.tr("desktop.newVer")
                 pointSize: Style.fontSizeM
                 font.weight: Font.Bold
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
                 horizontalAlignment: Text.AlignHCenter
             }
         }
@@ -97,7 +97,7 @@ DraggableDesktopWidget {
                     Layout.preferredWidth: 0.4 * root.tableContentWidth
                     text: modelData.name
                     pointSize: Style.fontSizeM
-                    color: (modelData.source == "flatpak") ? Color.mTertiary : (modelData.source == "system") ? Color.mSecondary : Color.mPrimary
+                    color: (modelData.source == "flatpak") ? AtmoColor.mTertiary : (modelData.source == "system") ? AtmoColor.mSecondary : AtmoColor.mPrimary
                     elide: Text.ElideRight
                     maximumLineCount: 1
                 }
@@ -105,7 +105,7 @@ DraggableDesktopWidget {
                     Layout.preferredWidth: 0.3 * root.tableContentWidth
                     text: modelData.oldVer
                     pointSize: Style.fontSizeM
-                    color: (modelData.source == "flatpak") ? Color.mTertiary : (modelData.source == "system") ? Color.mSecondary : Color.mPrimary
+                    color: (modelData.source == "flatpak") ? AtmoColor.mTertiary : (modelData.source == "system") ? AtmoColor.mSecondary : AtmoColor.mPrimary
                     horizontalAlignment: Text.AlignHCenter
                     elide: Text.ElideRight
                     maximumLineCount: 1
@@ -115,7 +115,7 @@ DraggableDesktopWidget {
                     text: modelData.newVer
                     pointSize: Style.fontSizeM
                     font.weight: (pluginApi.pluginSettings.boldVerDesktop ?? pluginApi.manifest.metadata.defaultSettings.boldVerDesktop) ? Font.Bold : Font.Normal
-                    color: (modelData.source == "flatpak") ? Color.mTertiary : (modelData.source == "system") ? Color.mSecondary : Color.mPrimary
+                    color: (modelData.source == "flatpak") ? AtmoColor.mTertiary : (modelData.source == "system") ? AtmoColor.mSecondary : AtmoColor.mPrimary
                     horizontalAlignment: Text.AlignHCenter
                     elide: Text.ElideRight
                     maximumLineCount: 1
@@ -132,7 +132,7 @@ DraggableDesktopWidget {
         anchors.centerIn: parent
         radius: Style.marginL
 
-        color: Color.mShadow
+        color: AtmoColor.mShadow
         opacity: 0
 
         Behavior on opacity {
@@ -148,7 +148,7 @@ DraggableDesktopWidget {
 
             pointSize: Style.fontSizeXL
             font.weight: Font.Bold
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
 
             text: pluginApi.tr("desktop.tipLeft") + "\n---------------\n" + pluginApi.tr("desktop.tipMiddle") + "\n---------------\n" + pluginApi.tr("desktop.tipRight")
         }

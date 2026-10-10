@@ -49,7 +49,7 @@ Item {
       Rectangle {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        color: Color.mSurfaceVariant
+        color: AtmoColor.mSurfaceVariant
         radius: Style.radiusL
 
         ColumnLayout {
@@ -69,7 +69,7 @@ Item {
             text: I18n.tr("system.welcome-back")
             pointSize: Style.fontSizeL
             font.weight: Font.Medium
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
 
           // Local pluginApi translation
@@ -78,7 +78,7 @@ Item {
             text: pluginApi?.tr("panel.test")
             pointSize: Style.fontSizeL
             font.weight: Font.Medium
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
 
           NText {
@@ -86,7 +86,7 @@ Item {
             text: pluginApi?.pluginSettings?.message || pluginApi?.manifest?.metadata?.defaultSettings?.message || ""
             font.pointSize: Style.fontSizeXXL * Style.uiScaleRatio
             font.weight: Font.Bold
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
           }
 
           // Button to open plugin settings - demonstrates using panelOpenScreen
@@ -117,13 +117,13 @@ Item {
           text: "Plugin Information"
           font.pointSize: Style.fontSizeM * Style.uiScaleRatio
           font.weight: Font.Medium
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
         }
 
         Rectangle {
           Layout.fillWidth: true
           Layout.preferredHeight: infoColumn.implicitHeight + Style.marginM * 2
-          color: Color.mSurfaceVariant
+          color: AtmoColor.mSurfaceVariant
           radius: Style.radiusM
 
           ColumnLayout {
@@ -141,7 +141,7 @@ Item {
               NText {
                 text: "Plugin ID:"
                 font.pointSize: Style.fontSizeS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 Layout.preferredWidth: 100
               }
 
@@ -149,7 +149,7 @@ Item {
                 text: pluginApi?.pluginId || "unknown"
                 font.pointSize: Style.fontSizeS
                 font.family: Settings.data.ui.fontFixed
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
                 Layout.fillWidth: true
               }
             }
@@ -161,14 +161,14 @@ Item {
               NText {
                 text: "Plugin Dir:"
                 font.pointSize: Style.fontSizeS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 Layout.preferredWidth: 100
               }
 
               NText {
                 text: pluginApi?.pluginDir || "unknown"
                 font.pointSize: Style.fontSizeS
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
                 Layout.fillWidth: true
                 elide: Text.ElideMiddle
               }
@@ -182,7 +182,7 @@ Item {
                 text: "IPC Commands:"
                 font.pointSize: Style.fontSizeS
                  font.family: Settings.data.ui.fontFixed
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 Layout.preferredWidth: 100
               }
 
@@ -190,7 +190,7 @@ Item {
                 text: "setMessage"
                 font.pointSize: Style.fontSizeS
                 font.family: Settings.data.ui.fontFixed
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
                 Layout.fillWidth: true
               }
             }
@@ -203,13 +203,13 @@ Item {
           text: "Try these IPC commands:"
           font.pointSize: Style.fontSizeM * Style.uiScaleRatio
           font.weight: Font.Medium
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
         }
 
         Rectangle {
           Layout.fillWidth: true
           Layout.preferredHeight: examplesColumn.implicitHeight + Style.marginM * 2
-          color: Color.mSurfaceVariant
+          color: AtmoColor.mSurfaceVariant
           radius: Style.radiusM
 
           ColumnLayout {
@@ -224,7 +224,7 @@ Item {
               text: "$ qs -c noctalia-shell ipc call plugin:hello-world setMessage \"Bonjour\""
               font.pointSize: Style.fontSizeS
               font.family: Settings.data.ui.fontFixed
-              color: Color.mPrimary
+              color: AtmoColor.mPrimary
               Layout.fillWidth: true
               wrapMode: Text.WrapAnywhere
             }
@@ -233,7 +233,7 @@ Item {
               text: "$ qs -c noctalia-shell ipc call plugin:hello-world toggle"
               font.pointSize: Style.fontSizeS
               font.family: Settings.data.ui.fontFixed
-              color: Color.mPrimary
+              color: AtmoColor.mPrimary
               Layout.fillWidth: true
               wrapMode: Text.WrapAnywhere
             }

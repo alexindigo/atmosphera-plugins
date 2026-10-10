@@ -105,14 +105,14 @@ Item {
         text: pluginApi?.tr("panel.title")
         pointSize: Style.fontSizeL
         font.weight: Font.DemiBold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
       }
 
       NText {
         Layout.fillWidth: true
         text: pluginApi?.tr("panel.subtitle")
         pointSize: Style.fontSizeS
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
         wrapMode: Text.WordWrap
       }
 
@@ -142,7 +142,7 @@ Item {
         visible: root.sameSelection
         text: pluginApi?.tr("panel.validation.sameSelection")
         pointSize: Style.fontSizeS
-        color: Color.mError
+        color: AtmoColor.mError
       }
 
       NText {
@@ -150,7 +150,7 @@ Item {
         visible: !root.hasEnoughMonitors
         text: pluginApi?.tr("panel.validation.needTwoMonitors")
         pointSize: Style.fontSizeS
-        color: Color.mError
+        color: AtmoColor.mError
       }
 
       // No discoveryError needed with Quickshell.screens
@@ -160,7 +160,7 @@ Item {
         visible: (mainInstance?.lastError ?? "") !== ""
         text: mainInstance?.lastError ?? ""
         pointSize: Style.fontSizeS
-        color: Color.mError
+        color: AtmoColor.mError
         wrapMode: Text.WordWrap
       }
 
@@ -173,8 +173,8 @@ Item {
           Layout.fillWidth: true
           text: pluginApi?.tr("panel.actions.start")
           icon: "media-play"
-          backgroundColor: Color.mPrimary
-          textColor: Color.mOnPrimary
+          backgroundColor: AtmoColor.mPrimary
+          textColor: AtmoColor.mOnPrimary
           enabled: !(mainInstance?.mirroringActive ?? false)
               && !root.controlsLocked
               && root.selectedSource !== ""
@@ -189,8 +189,8 @@ Item {
         visible: mainInstance?.mirroringActive ?? false
         text: pluginApi?.tr("panel.actions.stop")
         icon: "stop"
-        backgroundColor: Color.mError
-        textColor: Color.mOnError
+        backgroundColor: AtmoColor.mError
+        textColor: AtmoColor.mOnError
         enabled: true
         onClicked: root.stopMirror()
       }

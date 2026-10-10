@@ -131,14 +131,14 @@ Item {
           AtmoIcon {
             icon: "device-mobile"
             pointSize: Style.fontSizeXXL
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
           }
 
           NText {
             text: pluginApi?.tr("panel.title")
             pointSize: Style.fontSizeL
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
 
           AtmoIconButton {
@@ -188,7 +188,7 @@ Item {
 
         Rectangle {
           Layout.fillWidth: true
-          color: Color.mSurfaceVariant
+          color: AtmoColor.mSurfaceVariant
           radius: Style.radiusM
 
           Component.onCompleted: {
@@ -212,7 +212,7 @@ Item {
                 text: KDEConnect.mainDevice.name
                 pointSize: Style.fontSizeXXL
                 font.weight: Style.fontWeightBold
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
                 Layout.fillWidth: true
               }
 
@@ -305,7 +305,7 @@ Item {
                     icon: deviceData.getBatteryIcon(KDEConnect.mainDevice.battery, KDEConnect.mainDevice.charging)
                     pointSize: Style.fontSizeXXXL
                     applyUiScale: true
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                   }
 
                   ColumnLayout {
@@ -314,14 +314,14 @@ Item {
                     NText {
                       text: pluginApi?.tr("panel.card.battery")
                       pointSize: Style.fontSizeS
-                      color: Color.mOnSurface
+                      color: AtmoColor.mOnSurface
                     }
 
                     NText {
                       text: KDEConnect.mainDevice.battery < 0 ? pluginApi?.tr("panel.unknown") : (KDEConnect.mainDevice.battery + "%")
                       pointSize: Style.fontSizeL
                       font.weight: Style.fontWeightMedium
-                      color: Color.mOnSurface
+                      color: AtmoColor.mOnSurface
                     }
                   }
                 }
@@ -334,7 +334,7 @@ Item {
                     icon: deviceData.getCellularTypeIcon(KDEConnect.mainDevice.cellularNetworkType)
                     pointSize: Style.fontSizeXXXL
                     applyUiScale: true
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                   }
 
                   ColumnLayout {
@@ -343,14 +343,14 @@ Item {
                     NText {
                       text: pluginApi?.tr("panel.card.network")
                       pointSize: Style.fontSizeS
-                      color: Color.mOnSurface
+                      color: AtmoColor.mOnSurface
                     }
 
                     NText {
                       text: KDEConnect.mainDevice.cellularNetworkType || pluginApi?.tr("panel.unknown")
                       pointSize: Style.fontSizeL
                       font.weight: Style.fontWeightMedium
-                      color: Color.mOnSurface
+                      color: AtmoColor.mOnSurface
                     }
                   }
                 }
@@ -363,7 +363,7 @@ Item {
                     icon: deviceData.getCellularStrengthIcon(KDEConnect.mainDevice.cellularNetworkStrength)
                     pointSize: Style.fontSizeXXXL
                     applyUiScale: true
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                   }
 
                   ColumnLayout {
@@ -372,14 +372,14 @@ Item {
                     NText {
                       text: pluginApi?.tr("panel.card.signal-strength")
                       pointSize: Style.fontSizeS
-                      color: Color.mOnSurface
+                      color: AtmoColor.mOnSurface
                     }
 
                     NText {
                       text: deviceData.getSignalStrengthText(KDEConnect.mainDevice.cellularNetworkStrength)
                       pointSize: Style.fontSizeL
                       font.weight: Style.fontWeightMedium
-                      color: Color.mOnSurface
+                      color: AtmoColor.mOnSurface
                     }
                   }
                 }
@@ -392,7 +392,7 @@ Item {
                     icon: "notification"
                     pointSize: Style.fontSizeXXXL
                     applyUiScale: true
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                   }
 
                   ColumnLayout {
@@ -401,14 +401,14 @@ Item {
                     NText {
                       text: pluginApi?.tr("panel.card.notifications")
                       pointSize: Style.fontSizeS
-                      color: Color.mOnSurface
+                      color: AtmoColor.mOnSurface
                     }
 
                     NText {
                       text: KDEConnect.mainDevice.notificationIds.length
                       pointSize: Style.fontSizeL
                       font.weight: Style.fontWeightMedium
-                      color: Color.mOnSurface
+                      color: AtmoColor.mOnSurface
                     }
                   }
                 }
@@ -425,7 +425,7 @@ Item {
         Rectangle {
           Layout.fillWidth: true
           Layout.fillHeight: true
-          color: Color.mSurfaceVariant
+          color: AtmoColor.mSurfaceVariant
           radius: Style.radiusM
 
           ColumnLayout {
@@ -440,7 +440,7 @@ Item {
                 text: KDEConnect.mainDevice.name
                 pointSize: Style.fontSizeXXL
                 font.weight: Style.fontWeightBold
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
                 Layout.fillWidth: true
               }
             }
@@ -473,7 +473,7 @@ Item {
                   AtmoIcon {
                     icon: "key"
                     pointSize: Style.fontSizeXL
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                     Layout.alignment: Qt.AlignHCenter
                     opacity: KDEConnect.mainDevice.pairRequested ? 1.0 : 0.0
                   }
@@ -483,7 +483,7 @@ Item {
                     Layout.alignment: Qt.AlignHCenter
                     pointSize: Style.fontSizeL
                     font.weight: Style.fontWeightBold
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                     opacity: KDEConnect.mainDevice.pairRequested ? 1.0 : 0.0
                   }
                 }
@@ -506,7 +506,7 @@ Item {
         Rectangle {
           Layout.fillWidth: true
           Layout.fillHeight: true
-          color: Color.mSurfaceVariant
+          color: AtmoColor.mSurfaceVariant
           radius: Style.radiusM
 
           ColumnLayout {
@@ -522,7 +522,7 @@ Item {
             AtmoIcon {
               icon: "device-mobile-off"
               pointSize: 48 * Style.uiScaleRatio
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               Layout.alignment: Qt.AlignHCenter
             }
 
@@ -531,7 +531,7 @@ Item {
             NText {
               text: pluginApi?.tr("panel.kdeconnect-error.no-devices")
               pointSize: Style.fontSizeL
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               Layout.alignment: Qt.AlignCenter
               horizontalAlignment: Text.AlignHCenter
               verticalAlignment: Text.AlignVCenter
@@ -551,7 +551,7 @@ Item {
         Rectangle {
           Layout.fillWidth: true
           Layout.fillHeight: true
-          color: Color.mSurfaceVariant
+          color: AtmoColor.mSurfaceVariant
           radius: Style.radiusM
 
           ColumnLayout {
@@ -567,7 +567,7 @@ Item {
             AtmoIcon {
               icon: "device-mobile-off"
               pointSize: 48 * Style.uiScaleRatio
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               Layout.alignment: Qt.AlignHCenter
             }
 
@@ -576,7 +576,7 @@ Item {
             NText {
               text: pluginApi?.tr("panel.kdeconnect-error.device-unavailable")
               pointSize: Style.fontSizeL
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               Layout.alignment: Qt.AlignCenter
               horizontalAlignment: Text.AlignHCenter
               verticalAlignment: Text.AlignVCenter
@@ -609,7 +609,7 @@ Item {
         Rectangle {
           Layout.fillWidth: true
           Layout.fillHeight: true
-          color: Color.mSurfaceVariant
+          color: AtmoColor.mSurfaceVariant
           radius: Style.radiusM
 
           ColumnLayout {
@@ -625,7 +625,7 @@ Item {
             AtmoIcon {
               icon: "exclamation-circle"
               pointSize: 48 * Style.uiScaleRatio
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               Layout.alignment: Qt.AlignHCenter
             }
 
@@ -634,7 +634,7 @@ Item {
             NText {
               text: pluginApi?.tr("panel.busctl-error.unavailable-title")
               pointSize: Style.fontSizeL
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               Layout.alignment: Qt.AlignCenter
               horizontalAlignment: Text.AlignHCenter
               verticalAlignment: Text.AlignVCenter
@@ -643,7 +643,7 @@ Item {
             NText {
               text: pluginApi?.tr("panel.busctl-error.unavailable-desc")
               pointSize: Style.fontSizeS
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               Layout.alignment: Qt.AlignCenter
               horizontalAlignment: Text.AlignHCenter
               verticalAlignment: Text.AlignVCenter
@@ -664,7 +664,7 @@ Item {
         Rectangle {
           Layout.fillWidth: true
           Layout.fillHeight: true
-          color: Color.mSurfaceVariant
+          color: AtmoColor.mSurfaceVariant
           radius: Style.radiusM
 
           ColumnLayout {
@@ -680,7 +680,7 @@ Item {
             AtmoIcon {
               icon: "exclamation-circle"
               pointSize: 48 * Style.uiScaleRatio
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               Layout.alignment: Qt.AlignHCenter
             }
 
@@ -689,7 +689,7 @@ Item {
             NText {
               text: pluginApi?.tr("panel.kdeconnect-error.unavailable-title")
               pointSize: Style.fontSizeL
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               Layout.alignment: Qt.AlignCenter
               horizontalAlignment: Text.AlignHCenter
               verticalAlignment: Text.AlignVCenter
@@ -698,7 +698,7 @@ Item {
             NText {
               text: pluginApi?.tr("panel.kdeconnect-error.unavailable-desc")
               pointSize: Style.fontSizeS
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               Layout.alignment: Qt.AlignCenter
               horizontalAlignment: Text.AlignHCenter
               verticalAlignment: Text.AlignVCenter
@@ -719,7 +719,7 @@ Item {
         Rectangle {
           Layout.fillWidth: true
           Layout.fillHeight: true
-          color: Color.mSurfaceVariant
+          color: AtmoColor.mSurfaceVariant
           radius: Style.radiusM
 
           NScrollView{
@@ -727,7 +727,7 @@ Item {
             verticalPolicy: ScrollBar.AsNeeded
             contentWidth: parent.width
             reserveScrollbarSpace: false
-            gradientColor: Color.mSurface
+            gradientColor: AtmoColor.mSurface
 
             ColumnLayout {
               id: emptyState
@@ -743,7 +743,7 @@ Item {
                   required property var modelData
                   text: modelData.name
                   Layout.fillWidth: true
-                  backgroundColor: modelData.id === KDEConnect.mainDevice.id ? Color.mSecondary : Color.mPrimary
+                  backgroundColor: modelData.id === KDEConnect.mainDevice.id ? AtmoColor.mSecondary : AtmoColor.mPrimary
 
                   onClicked: {
                     KDEConnect.setMainDevice(modelData.id);

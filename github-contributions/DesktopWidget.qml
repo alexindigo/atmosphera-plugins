@@ -63,8 +63,8 @@ DraggableDesktopWidget {
   }
 
   function cellColor(level) {
-    if (level <= 0) return Qt.alpha(Color.mOnSurface, 0.08)
-    return Qt.alpha(Color.mPrimary, [0.25, 0.45, 0.7, 1.0][Math.min(level, 4) - 1])
+    if (level <= 0) return Qt.alpha(AtmoColor.mOnSurface, 0.08)
+    return Qt.alpha(AtmoColor.mPrimary, [0.25, 0.45, 0.7, 1.0][Math.min(level, 4) - 1])
   }
 
   function footerText() {
@@ -101,7 +101,7 @@ DraggableDesktopWidget {
         text: pluginApi?.tr("desktop.total", { "total": root.mainInstance?.totalContributions ?? 0 })
         pointSize: Style.fontSizeS * root.widgetScale
         font.weight: Font.Bold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
       }
 
       Item { Layout.fillWidth: true }
@@ -110,7 +110,7 @@ DraggableDesktopWidget {
         visible: (root.mainInstance?.currentStreak ?? 0) > 0
         text: pluginApi?.tr("desktop.streak", { "count": root.mainInstance?.currentStreak ?? 0 })
         pointSize: Style.fontSizeXS * root.widgetScale
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
       }
     }
 
@@ -126,7 +126,7 @@ DraggableDesktopWidget {
           x: root.dayLabelWidth + modelData.col * root.cellStep
           text: modelData.name
           pointSize: Style.fontSizeXS * root.widgetScale
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
       }
     }
@@ -146,24 +146,24 @@ DraggableDesktopWidget {
           text: (root.mainInstance?.currentStreak ?? 0).toString()
           pointSize: Style.fontSizeXXL * 1.4 * root.widgetScale
           font.weight: Font.Bold
-          color: Color.mPrimary
+          color: AtmoColor.mPrimary
         }
         NText {
           text: pluginApi?.tr("desktop.streakLabel")
           pointSize: Style.fontSizeXS * root.widgetScale
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
         Item { implicitHeight: Style.marginM * root.widgetScale }
         NText {
           text: Number(root.mainInstance?.totalContributions ?? 0).toLocaleString(Qt.locale(), 'f', 0)
           pointSize: Style.fontSizeXXL * 1.4 * root.widgetScale
           font.weight: Font.Bold
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
         }
         NText {
           text: pluginApi?.tr("desktop.contributionsLabel")
           pointSize: Style.fontSizeXS * root.widgetScale
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
       }
 
@@ -178,7 +178,7 @@ DraggableDesktopWidget {
             y: modelData * root.cellStep + (root.cellSize - height) / 2
             text: Qt.locale().dayName(modelData, Locale.ShortFormat)
             pointSize: Style.fontSizeXXS * root.widgetScale
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
           }
         }
       }
@@ -199,7 +199,7 @@ DraggableDesktopWidget {
             radius: 2 * root.widgetScale
             color: root.cellColor(modelData.level)
             border.width: root.hoveredIndex === index ? Math.max(1, root.widgetScale) : 0
-            border.color: Color.mOnSurface
+            border.color: AtmoColor.mOnSurface
           }
         }
 
@@ -224,7 +224,7 @@ DraggableDesktopWidget {
       visible: root.hasData
       text: root.footerText()
       pointSize: Style.fontSizeXS * root.widgetScale
-      color: Color.mOnSurfaceVariant
+      color: AtmoColor.mOnSurfaceVariant
       elide: Text.ElideRight
     }
 
@@ -239,7 +239,7 @@ DraggableDesktopWidget {
         return pluginApi?.tr("errors.noUsername")
       }
       pointSize: Style.fontSizeS * root.widgetScale
-      color: Color.mOnSurfaceVariant
+      color: AtmoColor.mOnSurfaceVariant
     }
   }
 }

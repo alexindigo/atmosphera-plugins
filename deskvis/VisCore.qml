@@ -19,8 +19,8 @@ Item {
     property color  customPrimary:   "#6750A4"
     property color  customSecondary: "#625B71"
 
-    readonly property color colorA: useCustomColors ? customPrimary   : Color.mPrimary
-    readonly property color colorB: useCustomColors ? customSecondary : Color.mSecondary
+    readonly property color colorA: useCustomColors ? customPrimary   : AtmoColor.mPrimary
+    readonly property color colorB: useCustomColors ? customSecondary : AtmoColor.mSecondary
     readonly property bool isVertical: orientation === "left" || orientation === "right"
 
     opacity: (fadeWhenIdle && SpectrumService.isIdle) ? 0.0 : 1.0

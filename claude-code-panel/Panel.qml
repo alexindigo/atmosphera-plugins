@@ -95,10 +95,10 @@ Item {
   }
 
   function bannerColor() {
-    if (dangerouslySkip || permissionMode === "bypassPermissions") { return Color.mError; }
-    if (permissionMode === "acceptEdits") { return Color.mSecondary; }
-    if (permissionMode === "plan") { return Color.mTertiary; }
-    return Color.mPrimary;
+    if (dangerouslySkip || permissionMode === "bypassPermissions") { return AtmoColor.mError; }
+    if (permissionMode === "acceptEdits") { return AtmoColor.mSecondary; }
+    if (permissionMode === "plan") { return AtmoColor.mTertiary; }
+    return AtmoColor.mPrimary;
   }
 
   function bannerText() {
@@ -114,7 +114,7 @@ Item {
   // the Material3 `*Container` slots. We fake them with tinted surfaces so bubbles don't
   // collapse to white (QML's undefined-color fallback).
   function tintOf(base, amount) {
-    if (!base) { return Color.mSurface; }
+    if (!base) { return AtmoColor.mSurface; }
     return Qt.rgba(base.r, base.g, base.b, amount);
   }
 
@@ -136,7 +136,7 @@ Item {
       Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: headerRow.implicitHeight + Style.marginS * 2
-        color: Color.mSurfaceVariant
+        color: AtmoColor.mSurfaceVariant
         radius: Style.radiusM
 
         RowLayout {
@@ -146,7 +146,7 @@ Item {
           spacing: Style.marginM
 
           ClaudeLogo {
-            tint: Color.mPrimary
+            tint: AtmoColor.mPrimary
             Layout.preferredWidth: Style.fontSizeL * 1.6
             Layout.preferredHeight: Style.fontSizeL * 1.6
           }
@@ -158,7 +158,7 @@ Item {
               text: pluginApi?.tr("panel.title")
               font.weight: Font.Bold
               pointSize: Style.fontSizeM
-              color: Color.mOnSurface
+              color: AtmoColor.mOnSurface
             }
             NText {
               Layout.fillWidth: true
@@ -173,7 +173,7 @@ Item {
                 return parts.join(" · ");
               }
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
             }
           }
 
@@ -210,7 +210,7 @@ Item {
             text: root.bannerText() || ""
             wrapMode: Text.WordWrap
             elide: Text.ElideNone
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             pointSize: Style.fontSizeS
           }
           NText {
@@ -228,7 +228,7 @@ Item {
         visible: !!(mainInstance && mainInstance.binaryChecked && !mainInstance.binaryAvailable)
         Layout.preferredHeight: visible ? binaryHelp.implicitHeight + Style.marginS * 2 : 0
         color: Qt.rgba(0.9, 0.2, 0.2, 0.15)
-        border.color: Color.mError
+        border.color: AtmoColor.mError
         radius: Style.radiusM
         NText {
           id: binaryHelp
@@ -236,7 +236,7 @@ Item {
           anchors.margins: Style.marginS
           text: pluginApi?.tr("panel.acpNotFound")
           wrapMode: Text.WordWrap
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           pointSize: Style.fontSizeXS
         }
       }
@@ -245,7 +245,7 @@ Item {
       Rectangle {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        color: Color.mSurfaceVariant
+        color: AtmoColor.mSurfaceVariant
         radius: Style.radiusL
         clip: true
 
@@ -276,7 +276,7 @@ Item {
           reserveScrollbarSpace: true
           interactive: true
           verticalPolicy: ScrollBar.AlwaysOn   // make the scrollbar a real, draggable control
-          gradientColor: Color.mSurfaceVariant
+          gradientColor: AtmoColor.mSurfaceVariant
           // Disable NListView's custom WheelHandler branch — its smooth-scroll animation
           // stalls on tall conversations and swallows wheel events. `1.0` reroutes wheel to
           // the stock ListView handler, which just works.
@@ -331,7 +331,7 @@ Item {
             width: jumpRow.implicitWidth + Style.marginM * 2
             height: jumpRow.implicitHeight + Style.marginS * 2
             radius: height / 2
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
             opacity: jumpMouse.containsMouse ? 1.0 : 0.85
             z: 10
 
@@ -339,8 +339,8 @@ Item {
               id: jumpRow
               anchors.centerIn: parent
               spacing: Style.marginXS
-              AtmoIcon { icon: "arrow-down"; color: Color.mOnPrimary; pointSize: Style.fontSizeXS }
-              NText { text: pluginApi?.tr("panel.jumpToLatest"); color: Color.mOnPrimary; pointSize: Style.fontSizeXS }
+              AtmoIcon { icon: "arrow-down"; color: AtmoColor.mOnPrimary; pointSize: Style.fontSizeXS }
+              NText { text: pluginApi?.tr("panel.jumpToLatest"); color: AtmoColor.mOnPrimary; pointSize: Style.fontSizeXS }
             }
             MouseArea {
               id: jumpMouse
@@ -361,7 +361,7 @@ Item {
         color: "transparent"
         Rectangle {
           anchors.fill: parent
-          color: Color.mPrimary
+          color: AtmoColor.mPrimary
           opacity: 0.8
           radius: Style.marginXXS
           SequentialAnimation on opacity {
@@ -379,7 +379,7 @@ Item {
         visible: !!(mainInstance && mainInstance.errorMessage !== "")
         Layout.preferredHeight: visible ? errText.implicitHeight + Style.marginS * 2 : 0
         color: Qt.rgba(0.9, 0.2, 0.2, 0.15)
-        border.color: Color.mError
+        border.color: AtmoColor.mError
         radius: Style.radiusM
         NText {
           id: errText
@@ -387,7 +387,7 @@ Item {
           anchors.margins: Style.marginS
           text: mainInstance?.errorMessage || ""
           wrapMode: Text.Wrap
-          color: Color.mError
+          color: AtmoColor.mError
           pointSize: Style.fontSizeXS
         }
       }
@@ -406,8 +406,8 @@ Item {
           readonly property int maxInputHeight: Math.round(200 * Style.uiScaleRatio)
           Layout.preferredHeight: Math.max(minInputHeight, Math.min(maxInputHeight, inputArea.contentHeight + Style.marginS * 2 + 4))
           radius: Style.radiusM
-          color: Color.mSurface
-          border.color: inputArea.activeFocus ? Color.mSecondary : Color.mOutline
+          color: AtmoColor.mSurface
+          border.color: inputArea.activeFocus ? AtmoColor.mSecondary : AtmoColor.mOutline
           border.width: Style.borderS
           Behavior on border.color { ColorAnimation { duration: Style.animationFast } }
 
@@ -423,8 +423,8 @@ Item {
             height: Math.min(root.slashMenuMatches.length, maxRows) * rowHeight + Style.marginS * 2
             y: -height - Math.round(4 * Style.uiScaleRatio)
             radius: Style.radiusM
-            color: Color.mSurface
-            border.color: Color.mOutline
+            color: AtmoColor.mSurface
+            border.color: AtmoColor.mOutline
             border.width: Style.borderS
             z: 1000
 
@@ -447,7 +447,7 @@ Item {
                 width: slashMenuList.width
                 height: slashMenu.rowHeight
                 readonly property bool active: index === root.slashMenuIndex
-                color: active ? Qt.alpha(Color.mSecondary, 0.18) : "transparent"
+                color: active ? Qt.alpha(AtmoColor.mSecondary, 0.18) : "transparent"
                 radius: Style.radiusS
 
                 RowLayout {
@@ -458,13 +458,13 @@ Item {
 
                   NText {
                     text: modelData.cmd
-                    color: Color.mPrimary
+                    color: AtmoColor.mPrimary
                     pointSize: Style.fontSizeS
                     Layout.preferredWidth: Math.round(90 * Style.uiScaleRatio)
                   }
                   NText {
                     text: modelData.desc
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                     pointSize: Style.fontSizeXS
                     elide: Text.ElideRight
                     Layout.fillWidth: true
@@ -508,7 +508,7 @@ Item {
               width: Math.round(5 * Style.uiScaleRatio)
               contentItem: Rectangle {
                 radius: width / 2
-                color: Qt.alpha(Color.mOnSurfaceVariant, 0.7)
+                color: Qt.alpha(AtmoColor.mOnSurfaceVariant, 0.7)
               }
             }
 
@@ -519,8 +519,8 @@ Item {
               selectByMouse: true
               persistentSelection: true
               placeholderText: pluginApi?.tr("panel.inputPlaceholder")
-              placeholderTextColor: Qt.alpha(Color.mOnSurfaceVariant, 0.6)
-              color: Color.mOnSurface
+              placeholderTextColor: Qt.alpha(AtmoColor.mOnSurfaceVariant, 0.6)
+              color: AtmoColor.mOnSurface
               background: null
               topPadding: 0
               bottomPadding: 0
@@ -629,7 +629,7 @@ Item {
     property alias label: btnLbl.text
     property alias numeral: btnNum.text
     property string iconName: "check"
-    property color accent: Color.mSecondary
+    property color accent: AtmoColor.mSecondary
     property string tooltip: ""
     signal clicked
 
@@ -650,14 +650,14 @@ Item {
       spacing: Style.marginXXS
       NText {
         id: btnNum
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
         pointSize: Style.fontSizeXS
         font.family: "monospace"
       }
       AtmoIcon { icon: btn.iconName; color: btn.accent; pointSize: Style.fontSizeXS }
       NText {
         id: btnLbl
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
         font.weight: Font.Medium
         pointSize: Style.fontSizeXS
         elide: Text.ElideRight
@@ -683,7 +683,7 @@ Item {
   // ====================================================================
   component ClaudeLogo: Item {
     id: logoRoot
-    property color tint: Color.mPrimary
+    property color tint: AtmoColor.mPrimary
 
     implicitWidth: 16 * Style.uiScaleRatio
     implicitHeight: 16 * Style.uiScaleRatio
@@ -736,21 +736,21 @@ Item {
     // "soft accent" bubbles (user / tool_use) we mix the accent colour with the surface
     // manually — otherwise they fall through to QML's undefined-color default (white).
     function bubbleColor() {
-      if (!entry) return Color.mSurface;
-      if (entry.role === "user")       { return Qt.rgba(Color.mPrimary.r,   Color.mPrimary.g,   Color.mPrimary.b,   0.14); }
-      if (entry.kind === "tool_use")   { return Qt.rgba(Color.mSecondary.r, Color.mSecondary.g, Color.mSecondary.b, 0.12); }
-      if (entry.kind === "thinking")   { return Qt.rgba(Color.mTertiary.r,  Color.mTertiary.g,  Color.mTertiary.b,  0.10); }
-      if (entry.role === "tool")       { return Color.mSurface; }
-      return Color.mSurface;
+      if (!entry) return AtmoColor.mSurface;
+      if (entry.role === "user")       { return Qt.rgba(AtmoColor.mPrimary.r,   AtmoColor.mPrimary.g,   AtmoColor.mPrimary.b,   0.14); }
+      if (entry.kind === "tool_use")   { return Qt.rgba(AtmoColor.mSecondary.r, AtmoColor.mSecondary.g, AtmoColor.mSecondary.b, 0.12); }
+      if (entry.kind === "thinking")   { return Qt.rgba(AtmoColor.mTertiary.r,  AtmoColor.mTertiary.g,  AtmoColor.mTertiary.b,  0.10); }
+      if (entry.role === "tool")       { return AtmoColor.mSurface; }
+      return AtmoColor.mSurface;
     }
 
     function borderColor() {
       if (!entry) return "transparent";
-      if (entry.role === "user")     return Qt.alpha(Color.mPrimary,   0.45);
-      if (entry.kind === "tool_use") return Qt.alpha(Color.mSecondary, 0.45);
-      if (entry.kind === "thinking") return Qt.alpha(Color.mTertiary,  0.35);
-      if (entry.role === "tool" && entry.meta && entry.meta.isError) return Qt.alpha(Color.mError, 0.6);
-      return Qt.alpha(Color.mOutline, 0.8);
+      if (entry.role === "user")     return Qt.alpha(AtmoColor.mPrimary,   0.45);
+      if (entry.kind === "tool_use") return Qt.alpha(AtmoColor.mSecondary, 0.45);
+      if (entry.kind === "thinking") return Qt.alpha(AtmoColor.mTertiary,  0.35);
+      if (entry.role === "tool" && entry.meta && entry.meta.isError) return Qt.alpha(AtmoColor.mError, 0.6);
+      return Qt.alpha(AtmoColor.mOutline, 0.8);
     }
 
     function headerIcon() {
@@ -763,15 +763,15 @@ Item {
     }
 
     function headerIconColor() {
-      if (!entry) return Color.mOnSurface;
+      if (!entry) return AtmoColor.mOnSurface;
       if (entry.kind === "tool_use") {
         var c = entry.meta ? entry.meta.classification : "safe";
-        if (c === "exec") return Color.mError;
-        if (c === "write") return Color.mSecondary;
-        if (c === "network") return Color.mTertiary;
+        if (c === "exec") return AtmoColor.mError;
+        if (c === "write") return AtmoColor.mSecondary;
+        if (c === "network") return AtmoColor.mTertiary;
       }
-      if (entry.role === "tool" && entry.meta && entry.meta.isError) return Color.mError;
-      return Color.mOnSurface;
+      if (entry.role === "tool" && entry.meta && entry.meta.isError) return AtmoColor.mError;
+      return AtmoColor.mOnSurface;
     }
 
     function headerLabel() {
@@ -824,7 +824,7 @@ Item {
 
             Component {
               id: logoComp
-              ClaudeLogo { tint: Color.mPrimary }
+              ClaudeLogo { tint: AtmoColor.mPrimary }
             }
             Component {
               id: glyphComp
@@ -839,14 +839,14 @@ Item {
             text: bubbleRoot.headerLabel()
             font.weight: Font.Medium
             pointSize: Style.fontSizeXS
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
           }
           Item { Layout.fillWidth: true }
           NText {
             visible: !!(entry && entry.timestamp)
             text: entry && entry.timestamp ? entry.timestamp.slice(11, 19) : ""
             pointSize: Style.fontSizeXS
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             opacity: 0.6
           }
         }
@@ -899,13 +899,13 @@ Item {
               if (entry && entry.streaming === true) return TextEdit.PlainText;
               return TextEdit.MarkdownText;
             }
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             font.pointSize: Style.fontSizeS * Style.uiScaleRatio
             font.family: blockData.kind === "tool"
                            ? "monospace"
                            : (Settings.data.ui.fontDefault || "sans-serif")
-            selectionColor: Qt.alpha(Color.mPrimary, 0.45)
-            selectedTextColor: Color.mOnPrimary
+            selectionColor: Qt.alpha(AtmoColor.mPrimary, 0.45)
+            selectedTextColor: AtmoColor.mOnPrimary
             onLinkActivated: function (url) { Qt.openUrlExternally(url); }
             // Render-as-rich URLs; passes Qt's safety check.
             HoverHandler {
@@ -920,8 +920,8 @@ Item {
           Rectangle {
             id: codeSlab
             implicitHeight: codeCol.implicitHeight + Style.marginS * 2
-            color: Qt.alpha(Color.mShadow, 0.7)
-            border.color: Qt.alpha(Color.mOutline, 0.55)
+            color: Qt.alpha(AtmoColor.mShadow, 0.7)
+            border.color: Qt.alpha(AtmoColor.mOutline, 0.55)
             border.width: Style.borderS
             radius: Style.radiusS
 
@@ -942,7 +942,7 @@ Item {
                   pointSize: Style.fontSizeXS
                   font.weight: Font.DemiBold
                   font.family: "monospace"
-                  color: Color.mOnSurfaceVariant
+                  color: AtmoColor.mOnSurfaceVariant
                   opacity: 0.85
                 }
                 Item { Layout.fillWidth: true }
@@ -954,9 +954,9 @@ Item {
                   implicitHeight: codeCopyRow.implicitHeight + Style.marginXXS * 2
                   radius: height / 2
                   color: codeCopyArea.containsMouse
-                           ? Color.mSecondary
-                           : Qt.alpha(Color.mSurface, 0.55)
-                  border.color: Qt.alpha(Color.mOutline, 0.6)
+                           ? AtmoColor.mSecondary
+                           : Qt.alpha(AtmoColor.mSurface, 0.55)
+                  border.color: Qt.alpha(AtmoColor.mOutline, 0.6)
                   border.width: Style.borderS
                   Behavior on color { ColorAnimation { duration: Style.animationFast } }
 
@@ -967,14 +967,14 @@ Item {
                     AtmoIcon {
                       icon: codeCopy.flashed ? "check" : "copy"
                       pointSize: Style.fontSizeXS
-                      color: codeCopyArea.containsMouse ? Color.mOnSecondary : Color.mOnSurfaceVariant
+                      color: codeCopyArea.containsMouse ? AtmoColor.mOnSecondary : AtmoColor.mOnSurfaceVariant
                     }
                     NText {
                       text: codeCopy.flashed
                               ? pluginApi?.tr("panel.copied")
                               : pluginApi?.tr("panel.copy")
                       pointSize: Style.fontSizeXS
-                      color: codeCopyArea.containsMouse ? Color.mOnSecondary : Color.mOnSurfaceVariant
+                      color: codeCopyArea.containsMouse ? AtmoColor.mOnSecondary : AtmoColor.mOnSurfaceVariant
                     }
                   }
 
@@ -1012,9 +1012,9 @@ Item {
                 textFormat: TextEdit.PlainText
                 font.family: "monospace"
                 font.pointSize: Style.fontSizeXS * Style.uiScaleRatio
-                color: Color.mOnSurface
-                selectionColor: Qt.alpha(Color.mPrimary, 0.45)
-                selectedTextColor: Color.mOnPrimary
+                color: AtmoColor.mOnSurface
+                selectionColor: Qt.alpha(AtmoColor.mPrimary, 0.45)
+                selectedTextColor: AtmoColor.mOnPrimary
                 // Allow horizontal pan with the mouse wheel + shift, since long
                 // lines are common in code.
                 clip: true
@@ -1032,7 +1032,7 @@ Item {
           Rectangle {
             width: 8
             height: 14
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
             radius: Style.marginXXXS
             anchors.left: parent ? parent.left : undefined
             SequentialAnimation on opacity {
@@ -1050,8 +1050,8 @@ Item {
           Layout.fillWidth: true
           visible: !!(entry && entry.kind === "tool_use" && entry.meta && entry.meta.input && Object.keys(entry.meta.input).length > 0)
           Layout.preferredHeight: visible ? (argsText.implicitHeight + Style.marginXS * 2) : 0
-          color: Qt.alpha(Color.mShadow, 0.55)   // dark slab that actually contrasts with mOnSurface text
-          border.color: Qt.alpha(Color.mOutline, 0.6)
+          color: Qt.alpha(AtmoColor.mShadow, 0.55)   // dark slab that actually contrasts with mOnSurface text
+          border.color: Qt.alpha(AtmoColor.mOutline, 0.6)
           border.width: Style.borderS
           radius: Style.radiusS
 
@@ -1069,7 +1069,7 @@ Item {
             elide: Text.ElideNone
             font.family: "monospace"
             pointSize: Style.fontSizeXS
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
         }
 
@@ -1108,7 +1108,7 @@ Item {
                 else if (approvalRow.classification === "network") verb = "this network call";
                 return "Approve " + verb + "?";
               }
-              color: Color.mOnSurface
+              color: AtmoColor.mOnSurface
               font.weight: Font.Medium
               pointSize: Style.fontSizeXS
               wrapMode: Text.WordWrap
@@ -1125,7 +1125,7 @@ Item {
               ApprovalBtn {
                 numeral: "1."
                 iconName: "check"
-                accent: Color.mSecondary
+                accent: AtmoColor.mSecondary
                 label: pluginApi?.tr("panel.permitYes")
                 tooltip: {
                   if (approvalRow.classification === "exec")    return pluginApi?.tr("panel.tipYesExec");
@@ -1142,7 +1142,7 @@ Item {
               ApprovalBtn {
                 numeral: "2."
                 iconName: "circle-check"
-                accent: Color.mTertiary
+                accent: AtmoColor.mTertiary
                 label: pluginApi?.tr("panel.permitAllowAll")
                 tooltip: {
                   if (approvalRow.classification === "write")   return pluginApi?.tr("panel.tipAllowAllWrite");
@@ -1160,7 +1160,7 @@ Item {
               ApprovalBtn {
                 numeral: "3."
                 iconName: "x"
-                accent: Color.mError
+                accent: AtmoColor.mError
                 label: pluginApi?.tr("panel.permitNo")
                 tooltip: pluginApi?.tr("panel.tipNo")
                 onClicked: {
@@ -1197,9 +1197,9 @@ Item {
               return "";
             }
             color: {
-              if (!entry || !entry.meta) return Color.mOnSurface;
-              if (entry.meta.approval === "deny") return Color.mError;
-              return Color.mSecondary;
+              if (!entry || !entry.meta) return AtmoColor.mOnSurface;
+              if (entry.meta.approval === "deny") return AtmoColor.mError;
+              return AtmoColor.mSecondary;
             }
             pointSize: Style.fontSizeXS
             font.weight: Font.Medium
@@ -1226,13 +1226,13 @@ Item {
         height: implicitHeight
         radius: height / 2
         color: copyMouse.pressed
-                 ? Qt.darker(Color.mSecondary, 1.1)
+                 ? Qt.darker(AtmoColor.mSecondary, 1.1)
                  : copyMouse.containsMouse
-                   ? Color.mSecondary
-                   : Qt.alpha(Color.mSurface, 0.92)
+                   ? AtmoColor.mSecondary
+                   : Qt.alpha(AtmoColor.mSurface, 0.92)
         border.color: copyMouse.containsMouse
-                        ? Color.mSecondary
-                        : Qt.alpha(Color.mOutline, 0.7)
+                        ? AtmoColor.mSecondary
+                        : Qt.alpha(AtmoColor.mOutline, 0.7)
         border.width: Style.borderS
         Behavior on color { ColorAnimation { duration: Style.animationFast } }
 
@@ -1247,7 +1247,7 @@ Item {
           AtmoIcon {
             icon: copyBtn._copyFlash ? "check" : "copy"
             pointSize: Style.fontSizeXS
-            color: copyMouse.containsMouse ? Color.mOnSecondary : Color.mOnSurfaceVariant
+            color: copyMouse.containsMouse ? AtmoColor.mOnSecondary : AtmoColor.mOnSurfaceVariant
           }
           NText {
             text: copyBtn._copyFlash
@@ -1255,7 +1255,7 @@ Item {
                     : pluginApi?.tr("panel.copy")
             pointSize: Style.fontSizeXS
             font.weight: Font.Medium
-            color: copyMouse.containsMouse ? Color.mOnSecondary : Color.mOnSurfaceVariant
+            color: copyMouse.containsMouse ? AtmoColor.mOnSecondary : AtmoColor.mOnSurfaceVariant
           }
         }
 

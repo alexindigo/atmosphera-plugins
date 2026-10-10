@@ -25,7 +25,7 @@ Item {
     readonly property real contentWidth: row.implicitWidth + Style.marginM * 2
     readonly property real contentHeight: capsuleHeight
 
-    readonly property color iconColor: Color.resolveColorKey(cfg.iconColor ?? defaults.iconColor ?? "none")
+    readonly property color iconColor: AtmoColor.resolveColorKey(cfg.iconColor ?? defaults.iconColor ?? "none")
 
     implicitWidth: row.implicitWidth + Style.marginM * 2
     implicitHeight: Style.barHeight
@@ -36,7 +36,7 @@ Item {
         y: Style.pixelAlignCenter(parent.height, height)
         width: root.contentWidth
         height: root.contentHeight
-        color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+        color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
         radius: Style.radiusL
         border.color: Style.capsuleBorderColor
         border.width: Style.capsuleBorderWidth
@@ -48,7 +48,7 @@ Item {
 
             AtmoIcon {
                 icon: "burger"
-                color: mouseArea.containsMouse ? Color.mOnHover : root.iconColor
+                color: mouseArea.containsMouse ? AtmoColor.mOnHover : root.iconColor
             }
         }
     }

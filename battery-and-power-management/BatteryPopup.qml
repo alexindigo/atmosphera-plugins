@@ -36,7 +36,7 @@ Item {
             Layout.preferredWidth: root.contentPreferredWidth - (Style.marginM * 2)
             Layout.preferredHeight: 64 * Style.uiScaleRatio
             
-            color: Color.mSurfaceVariant
+            color: AtmoColor.mSurfaceVariant
             radius: Style.capsuleRadius ?? Style.radiusM
             border.color: Style.capsuleBorderColor
             border.width: Style.capsuleBorderWidth
@@ -57,7 +57,7 @@ Item {
                     AtmoIcon {
                         icon: root.mainWidget?.getBatteryIcon()
                         pointSize: Style.fontSizeXL
-                        color: Color.mPrimary
+                        color: AtmoColor.mPrimary
                         Layout.alignment: Qt.AlignHCenter
                     }
 
@@ -73,7 +73,7 @@ Item {
                 Rectangle {
                     Layout.fillHeight: true
                     width: 1
-                    color: Color.mOutline
+                    color: AtmoColor.mOutline
                     opacity: 0.15
                 }
 
@@ -86,7 +86,7 @@ Item {
                         text: root.mainWidget ? root.mainWidget.batStatus : pluginApi?.tr("battery.status_unknown")
                         font.weight: Font.Bold
                         pointSize: Style.fontSizeS
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                         Layout.fillWidth: true
                     }
 
@@ -104,7 +104,7 @@ Item {
                             }
                         }
                         pointSize: Style.fontSizeXS
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         Layout.fillWidth: true
                         elide: Text.ElideNone
                     }
@@ -118,7 +118,7 @@ Item {
             Layout.preferredWidth: batteryCapsule.Layout.preferredWidth
             Layout.preferredHeight: 52 * Style.uiScaleRatio
             
-            color: Color.mSurfaceVariant
+            color: AtmoColor.mSurfaceVariant
             radius: Style.capsuleRadius ?? Style.radiusM
             border.color: Style.capsuleBorderColor
             border.width: Style.capsuleBorderWidth
@@ -156,7 +156,7 @@ Item {
             Layout.preferredWidth: batteryCapsule.Layout.preferredWidth
             Layout.preferredHeight: 52 * Style.uiScaleRatio
             
-            color: Color.mSurfaceVariant
+            color: AtmoColor.mSurfaceVariant
             radius: Style.capsuleRadius ?? Style.radiusM
             border.color: Style.capsuleBorderColor
             border.width: Style.capsuleBorderWidth
@@ -170,7 +170,7 @@ Item {
                 AtmoIcon {
                     icon: "shield-heart"
                     pointSize: Style.fontSizeM
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                     Layout.alignment: Qt.AlignVCenter
                 }
 
@@ -191,7 +191,7 @@ Item {
                     text: thresholdSlider.value + "%"
                     font.weight: Font.Bold
                     pointSize: Style.fontSizeS
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                     Layout.preferredWidth: 40 * Style.uiScaleRatio
                     horizontalAlignment: Text.AlignRight
                     Layout.alignment: Qt.AlignVCenter
@@ -214,7 +214,7 @@ Item {
             anchors.fill: parent
             radius: Style.radiusS ?? 4
             
-            color: parent.active ? Color.mPrimary : Color.mSurface
+            color: parent.active ? AtmoColor.mPrimary : AtmoColor.mSurface
             opacity: parent.active ? 1.0 : (parent.containsMouse ? 0.8 : 0.0)
         }
 
@@ -223,8 +223,8 @@ Item {
             icon: parent.icon
             pointSize: Style.fontSizeS
             color: parent.active 
-                ? Color.mOnPrimary 
-                : (parent.containsMouse ? Color.mPrimary : Color.mOnSurfaceVariant)
+                ? AtmoColor.mOnPrimary 
+                : (parent.containsMouse ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant)
         }
     }
 }

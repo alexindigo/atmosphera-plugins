@@ -37,7 +37,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: headerRow.implicitHeight + Style.marginM * 2
-                color: Color.mSurfaceVariant
+                color: AtmoColor.mSurfaceVariant
                 radius: Style.radiusM
 
                 RowLayout {
@@ -48,7 +48,7 @@ Item {
                     AtmoIcon {
                         icon: "cpu"
                         pointSize: Style.fontSizeXL
-                        color: root.main?.daemonRunning ? Color.mPrimary : Color.mError
+                        color: root.main?.daemonRunning ? AtmoColor.mPrimary : AtmoColor.mError
                     }
 
                     ColumnLayout {
@@ -58,14 +58,14 @@ Item {
                             text: pluginApi?.tr("panel.title")
                             pointSize: Style.fontSizeM
                             font.weight: Font.Bold
-                            color: Color.mOnSurface
+                            color: AtmoColor.mOnSurface
                         }
                         NText {
                             text: root.main?.daemonRunning
                                 ? pluginApi?.tr("panel.daemon-running")
                                 : pluginApi?.tr("panel.daemon-stopped")
                             pointSize: Style.fontSizeXS
-                            color: root.main?.daemonRunning ? Color.mOnSurfaceVariant : Color.mError
+                            color: root.main?.daemonRunning ? AtmoColor.mOnSurfaceVariant : AtmoColor.mError
                         }
                     }
 
@@ -80,7 +80,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: statsRow.implicitHeight + Style.marginM * 2
-                color: Color.mSurfaceVariant
+                color: AtmoColor.mSurfaceVariant
                 radius: Style.radiusM
 
                 RowLayout {
@@ -94,9 +94,9 @@ Item {
                         value: Math.round(SystemStatService.cpuUsage) + "%"
                         valueColor: {
                             let u = SystemStatService.cpuUsage
-                            if (u >= 90) return Color.mError
-                            if (u >= 70) return Color.mTertiary
-                            return Color.mOnSurface
+                            if (u >= 90) return AtmoColor.mError
+                            if (u >= 70) return AtmoColor.mTertiary
+                            return AtmoColor.mOnSurface
                         }
                     }
 
@@ -114,9 +114,9 @@ Item {
                             : "—"
                         valueColor: {
                             let t = SystemStatService.cpuTemp
-                            if (t >= 90) return Color.mError
-                            if (t >= 75) return Color.mTertiary
-                            return Color.mOnSurface
+                            if (t >= 90) return AtmoColor.mError
+                            if (t >= 75) return AtmoColor.mTertiary
+                            return AtmoColor.mOnSurface
                         }
                     }
                 }
@@ -126,7 +126,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: batRow.implicitHeight + Style.marginM * 2
-                color: Color.mSurfaceVariant
+                color: AtmoColor.mSurfaceVariant
                 radius: Style.radiusM
                 visible: (root.main?.batCapacity ?? -1) >= 0
 
@@ -149,9 +149,9 @@ Item {
                         color: {
                             let s = root.main?.batStatus ?? ""
                             let c = root.main?.batCapacity ?? 100
-                            if (s === "Charging") return Color.mTertiary
-                            if (c <= 20) return Color.mError
-                            return Color.mOnSurface
+                            if (s === "Charging") return AtmoColor.mTertiary
+                            if (c <= 20) return AtmoColor.mError
+                            return AtmoColor.mOnSurface
                         }
                         pointSize: Style.fontSizeXL
                     }
@@ -164,7 +164,7 @@ Item {
                             text: (root.main?.batCapacity ?? 0) + "%  ·  " + (root.main?.batStatus ?? "—")
                             pointSize: Style.fontSizeM
                             font.weight: Font.Bold
-                            color: Color.mOnSurface
+                            color: AtmoColor.mOnSurface
                         }
 
                         NText {
@@ -175,7 +175,7 @@ Item {
                                 return (s === "Charging" ? "+" : "−") + w.toFixed(1) + " W"
                             }
                             pointSize: Style.fontSizeXS
-                            color: Color.mOnSurfaceVariant
+                            color: AtmoColor.mOnSurfaceVariant
                         }
                     }
                 }
@@ -185,7 +185,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: govCol.implicitHeight + Style.marginM * 2
-                color: Color.mSurfaceVariant
+                color: AtmoColor.mSurfaceVariant
                 radius: Style.radiusM
 
                 ColumnLayout {
@@ -196,7 +196,7 @@ Item {
                     NText {
                         text: pluginApi?.tr("panel.section-governor")
                         pointSize: Style.fontSizeXS
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         font.weight: Font.Medium
                     }
 
@@ -213,9 +213,9 @@ Item {
                             }
                             color: {
                                 let g = root.main?.governor ?? ""
-                                if (g === "performance") return Color.mTertiary
-                                if (g === "powersave")   return Color.mPrimary
-                                return Color.mOnSurface
+                                if (g === "performance") return AtmoColor.mTertiary
+                                if (g === "powersave")   return AtmoColor.mPrimary
+                                return AtmoColor.mOnSurface
                             }
                         }
 
@@ -224,7 +224,7 @@ Item {
                             pointSize: Style.fontSizeM
                             font.weight: Font.Bold
                             font.family: Settings.data?.ui?.fontFixed ?? "monospace"
-                            color: Color.mOnSurface
+                            color: AtmoColor.mOnSurface
                             Layout.fillWidth: true
                         }
 
@@ -232,7 +232,7 @@ Item {
                             visible: (root.main?.forceOverride ?? "default") !== "default"
                             text: pluginApi?.tr("panel.forced")
                             pointSize: Style.fontSizeXS
-                            color: Color.mTertiary
+                            color: AtmoColor.mTertiary
                         }
                     }
 
@@ -243,13 +243,13 @@ Item {
                         AtmoIcon {
                             icon: "bolt"
                             color: (root.main?.turboState ?? "") === "on"
-                                ? Color.mTertiary : Color.mOnSurfaceVariant
+                                ? AtmoColor.mTertiary : AtmoColor.mOnSurfaceVariant
                         }
 
                         NText {
                             text: pluginApi?.tr("panel.turbo") + ": " + (root.main?.turboState ?? "—")
                             pointSize: Style.fontSizeS
-                            color: Color.mOnSurface
+                            color: AtmoColor.mOnSurface
                             Layout.fillWidth: true
                         }
                     }
@@ -260,7 +260,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: errorRow.implicitHeight + Style.marginM * 2
-                color: Qt.rgba(Color.mError.r, Color.mError.g, Color.mError.b, 0.15)
+                color: Qt.rgba(AtmoColor.mError.r, AtmoColor.mError.g, AtmoColor.mError.b, 0.15)
                 radius: Style.radiusM
                 visible: root.main?.pkexecFailed ?? false
 
@@ -268,11 +268,11 @@ Item {
                     id: errorRow
                     anchors { fill: parent; margins: Style.marginM }
                     spacing: Style.marginM
-                    AtmoIcon { icon: "alert-triangle"; color: Color.mError; pointSize: Style.fontSizeM }
+                    AtmoIcon { icon: "alert-triangle"; color: AtmoColor.mError; pointSize: Style.fontSizeM }
                     NText {
                         text: pluginApi?.tr("panel.pkexec-error")
                         pointSize: Style.fontSizeXS
-                        color: Color.mError
+                        color: AtmoColor.mError
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                     }
@@ -283,7 +283,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: forceCol.implicitHeight + Style.marginM * 2
-                color: Color.mSurfaceVariant
+                color: AtmoColor.mSurfaceVariant
                 radius: Style.radiusM
                 opacity: (root.main?.daemonRunning ?? false) ? 1.0 : 0.4
 
@@ -295,16 +295,16 @@ Item {
                     NText {
                         text: pluginApi?.tr("panel.section-force")
                         pointSize: Style.fontSizeXS
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         font.weight: Font.Medium
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
                         implicitHeight: 44 * Style.uiScaleRatio
-                        color: Color.mSurface
+                        color: AtmoColor.mSurface
                         radius: Style.radiusS
-                        border.color: Color.mOutline
+                        border.color: AtmoColor.mOutline
                         border.width: Style.borderS
                         clip: true
 
@@ -344,7 +344,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: turboCol.implicitHeight + Style.marginM * 2
-                color: Color.mSurfaceVariant
+                color: AtmoColor.mSurfaceVariant
                 radius: Style.radiusM
                 property bool turboAvailable: (root.main?.turboState ?? "n/a") !== "n/a"
                 opacity: ((root.main?.daemonRunning ?? false) && turboAvailable) ? 1.0 : 0.4
@@ -357,16 +357,16 @@ Item {
                     NText {
                         text: pluginApi?.tr("panel.section-turbo")
                         pointSize: Style.fontSizeXS
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         font.weight: Font.Medium
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
                         implicitHeight: 44 * Style.uiScaleRatio
-                        color: Color.mSurface
+                        color: AtmoColor.mSurface
                         radius: Style.radiusS
-                        border.color: Color.mOutline
+                        border.color: AtmoColor.mOutline
                         border.width: Style.borderS
                         clip: true
 
@@ -407,12 +407,12 @@ Item {
         property string icon: ""
         property string label: ""
         property string value: "—"
-        property color  valueColor: Color.mOnSurface
+        property color  valueColor: AtmoColor.mOnSurface
         spacing: Style.marginXXS
         Layout.fillWidth: true
         AtmoIcon {
             icon: statCell.icon; pointSize: Style.fontSizeM
-            color: Color.mOnSurfaceVariant; Layout.alignment: Qt.AlignHCenter
+            color: AtmoColor.mOnSurfaceVariant; Layout.alignment: Qt.AlignHCenter
         }
         NText {
             text: statCell.value; pointSize: Style.fontSizeM; font.weight: Font.Bold
@@ -420,7 +420,7 @@ Item {
         }
         NText {
             text: statCell.label; pointSize: Style.fontSizeXS
-            color: Color.mOnSurfaceVariant; Layout.alignment: Qt.AlignHCenter
+            color: AtmoColor.mOnSurfaceVariant; Layout.alignment: Qt.AlignHCenter
         }
     }
 
@@ -436,12 +436,12 @@ Item {
         Rectangle {
             anchors { fill: parent; margins: Style.marginXXS }
             radius: Style.radiusS
-            color: segItem.active ? Color.mPrimary : "transparent"
+            color: segItem.active ? AtmoColor.mPrimary : "transparent"
         }
         Rectangle {
             anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter
             width: Style.borderS; height: parent.height * 0.5
-            color: Color.mOutline; opacity: 0.5
+            color: AtmoColor.mOutline; opacity: 0.5
             visible: segItem.showDivider
         }
         ColumnLayout {
@@ -449,12 +449,12 @@ Item {
             spacing: Style.marginXXXS
             AtmoIcon {
                 icon: segItem.icon; pointSize: Style.fontSizeS
-                color: segItem.active ? Color.mOnPrimary : Color.mOnSurfaceVariant
+                color: segItem.active ? AtmoColor.mOnPrimary : AtmoColor.mOnSurfaceVariant
                 Layout.alignment: Qt.AlignHCenter
             }
             NText {
                 text: segItem.label; pointSize: Style.fontSizeXS
-                color: segItem.active ? Color.mOnPrimary : Color.mOnSurfaceVariant
+                color: segItem.active ? AtmoColor.mOnPrimary : AtmoColor.mOnSurfaceVariant
                 Layout.alignment: Qt.AlignHCenter
             }
         }

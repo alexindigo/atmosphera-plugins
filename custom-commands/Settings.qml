@@ -69,7 +69,7 @@ ColumnLayout {
 
     NText {
         text: pluginApi.tr("settings.description")
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
         Layout.fillWidth: true
         wrapMode: Text.Wrap
     }

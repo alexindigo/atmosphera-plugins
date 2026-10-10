@@ -123,7 +123,7 @@ ColumnLayout {
     NComboBox {
         label: I18n.tr("common.select-icon-color")
         description: I18n.tr("common.select-color-description")
-        model: Color.colorKeyModel
+        model: AtmoColor.colorKeyModel
         currentKey: root.editIconColor
         onSelected: key => root.editIconColor = key
         minimumWidth: 200

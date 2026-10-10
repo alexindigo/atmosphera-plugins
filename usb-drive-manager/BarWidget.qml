@@ -38,7 +38,7 @@ AtmoIconButton {
     property var cfg: pluginApi?.pluginSettings || ({})
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
     readonly property string iconColorKey: cfg.iconColor ?? defaults.iconColor ?? "none"
-    readonly property color iconColor: Color.resolveColorKey(iconColorKey)
+    readonly property color iconColor: AtmoColor.resolveColorKey(iconColorKey)
 
     // ===== VISIBILITY =====
     visible: shouldShow
@@ -51,10 +51,10 @@ AtmoIconButton {
     applyUiScale: false
     customRadius: Style.radiusL
 
-    colorBg: hasMountedDevices ? Color.mPrimary : Style.capsuleColor
-    colorFg: hasMountedDevices ? Color.mOnPrimary : root.iconColor !== "transparent" ? root.iconColor : Color.mOnSurface
-    colorBgHover: Color.mHover
-    colorFgHover: Color.mOnHover
+    colorBg: hasMountedDevices ? AtmoColor.mPrimary : Style.capsuleColor
+    colorFg: hasMountedDevices ? AtmoColor.mOnPrimary : root.iconColor !== "transparent" ? root.iconColor : AtmoColor.mOnSurface
+    colorBgHover: AtmoColor.mHover
+    colorFgHover: AtmoColor.mOnHover
     colorBorder: "transparent"
     colorBorderHover: "transparent"
 
@@ -70,7 +70,7 @@ AtmoIconButton {
         width: badgeText.implicitWidth + Style.marginS
         height: badgeText.implicitHeight + Style.marginXS
         radius: height / 2
-        color: Color.mPrimary
+        color: AtmoColor.mPrimary
         z: 1
 
         NText {
@@ -78,7 +78,7 @@ AtmoIconButton {
             anchors.centerIn: parent
             text: mountedCount
             pointSize: Style.fontSizeXXS
-            color: Color.mOnPrimary
+            color: AtmoColor.mOnPrimary
             font.weight: Font.Bold
         }
     }

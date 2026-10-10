@@ -44,9 +44,9 @@ Item {
     property string batDevice:     ""       // BAT0, BAT1, etc.
 
     readonly property color govColor: {
-        if (governor === "performance") return Color.mTertiary
-        if (governor === "powersave")   return Color.mPrimary
-        return Color.mOnSurface
+        if (governor === "performance") return AtmoColor.mTertiary
+        if (governor === "powersave")   return AtmoColor.mPrimary
+        return AtmoColor.mOnSurface
     }
 
     // ── Widget dimensions ─────────────────────────────────────────────────────
@@ -229,7 +229,7 @@ Item {
         width:  root.contentWidth
         height: root.contentHeight
         radius: Style.radiusL
-        color:  mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+        color:  mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
         border.color: Style.capsuleBorderColor
         border.width: Style.capsuleBorderWidth
 
@@ -240,7 +240,7 @@ Item {
 
             AtmoIcon {
                 icon: "cpu"
-                color: mouseArea.containsMouse ? Color.mOnHover : root.govColor
+                color: mouseArea.containsMouse ? AtmoColor.mOnHover : root.govColor
                 pointSize: Style.fontSizeM
                 applyUiScale: false
             }
@@ -255,14 +255,14 @@ Item {
                     pointSize: root.barFontSize
                     font.family: root.fixedFont
                     font.weight: Font.Bold
-                    color: mouseArea.containsMouse ? Color.mOnHover : root.govColor
+                    color: mouseArea.containsMouse ? AtmoColor.mOnHover : root.govColor
                 }
 
                 NText {
                     visible: root.turboState !== "—"
                     text: pluginApi?.tr("widget.turbo-label", { state: root.turboState })
                     pointSize: root.barFontSize * 0.85
-                    color: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurfaceVariant
+                    color: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurfaceVariant
                 }
             }
         }

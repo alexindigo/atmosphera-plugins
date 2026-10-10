@@ -44,20 +44,20 @@ DraggableDesktopWidget {
 
     // ---- Colors (from Noctalia theme) ----
     readonly property bool isDark: typeof Settings !== "undefined" && Settings.data && Settings.data.colorSchemes ? Settings.data.colorSchemes.darkMode : true
-    readonly property color colBackground: Color.mSurfaceVariant
-    readonly property color colOnBackground: Color.mOnSurfaceVariant
-    readonly property color colHourHand: Color.mPrimary
-    readonly property color colMinuteHand: Color.mTertiary
-    readonly property color colSecondHand: Color.mPrimary
-    readonly property color colBackgroundInfo: Color.mOnSurfaceVariant
+    readonly property color colBackground: AtmoColor.mSurfaceVariant
+    readonly property color colOnBackground: AtmoColor.mOnSurfaceVariant
+    readonly property color colHourHand: AtmoColor.mPrimary
+    readonly property color colMinuteHand: AtmoColor.mTertiary
+    readonly property color colSecondHand: AtmoColor.mPrimary
+    readonly property color colBackgroundInfo: AtmoColor.mOnSurfaceVariant
     
     // Container colors
-    readonly property color colTertiaryContainer: Color.mTertiary
-    readonly property color colOnTertiaryContainer: Color.mOnTertiary
-    readonly property color colSecondaryContainer: Color.mSecondary
-    readonly property color colOnSecondaryContainer: Color.mOnSecondary
-    readonly property color colSurfaceContainerHighest: Color.mSurfaceVariant
-    readonly property color colOnSurface: Color.mOnSurface
+    readonly property color colTertiaryContainer: AtmoColor.mTertiary
+    readonly property color colOnTertiaryContainer: AtmoColor.mOnTertiary
+    readonly property color colSecondaryContainer: AtmoColor.mSecondary
+    readonly property color colOnSecondaryContainer: AtmoColor.mOnSecondary
+    readonly property color colSurfaceContainerHighest: AtmoColor.mSurfaceVariant
+    readonly property color colOnSurface: AtmoColor.mOnSurface
 
     // Transparent background - the cookie shape IS the background
     showBackground: false

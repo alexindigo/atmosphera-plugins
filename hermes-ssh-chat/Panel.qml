@@ -93,14 +93,14 @@ Item {
             text: pluginApi?.tr("panel.title")
             pointSize: Style.fontSizeL
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
 
           NText {
             Layout.fillWidth: true
             text: Local.HermesSession.statusText
             pointSize: Style.fontSizeS
-            color: Local.HermesSession.lastError ? Color.mError : Color.mOnSurfaceVariant
+            color: Local.HermesSession.lastError ? AtmoColor.mError : AtmoColor.mOnSurfaceVariant
             elide: Text.ElideRight
           }
         }
@@ -110,7 +110,7 @@ Item {
           baseSize: Style.baseWidgetSize * 0.8
           icon: "power"
           tooltipText: pluginApi?.tr("panel.disconnect")
-          colorFg: Color.mError
+          colorFg: AtmoColor.mError
           onClicked: Local.HermesSession.disconnect()
         }
 

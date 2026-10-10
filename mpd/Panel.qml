@@ -138,7 +138,7 @@ Item {
           height: 80 * Style.uiScaleRatio
           Layout.alignment: Qt.AlignVCenter
           radius: Style.radiusL
-          color: Color.mSurfaceVariant
+          color: AtmoColor.mSurfaceVariant
           clip: true
 
           Image {
@@ -154,7 +154,7 @@ Item {
             anchors.centerIn: parent
             visible: coverImage.status !== Image.Ready
             icon: "music-note"
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             applyUiScale: true
           }
         }
@@ -168,7 +168,7 @@ Item {
           NText {
             visible: root.songArtist !== ""
             text: root.songArtist
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             pointSize: Style.fontSizeS
             font.weight: Font.Medium
             elide: Text.ElideRight
@@ -177,7 +177,7 @@ Item {
 
           NText {
             text: root.songTitle
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             pointSize: Style.fontSizeM
             font.weight: Font.Bold
             wrapMode: Text.WordWrap
@@ -187,7 +187,7 @@ Item {
           NText {
             visible: root.songAlbum !== ""
             text: root.songAlbum
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             pointSize: Style.fontSizeS
             opacity: 0.7
             elide: Text.ElideRight

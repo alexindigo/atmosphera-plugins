@@ -116,7 +116,7 @@ Item {
       90: "#4c566a", 91: "#d08770", 92: "#8fbcbb", 93: "#f0d399",
       94: "#8ab6e6", 95: "#c895bf", 96: "#8fdbd7", 97: "#eceff4"
     };
-    return colors[code] || Color.mOnSurface;
+    return colors[code] || AtmoColor.mOnSurface;
   }
 
   function color256(index) {
@@ -507,8 +507,8 @@ Item {
   Rectangle {
     anchors.fill: parent
     radius: Style.radiusS
-    color: Color.mSurface
-    border.color: terminalDisplay.activeFocus ? Color.mSecondary : Color.mOutline
+    color: AtmoColor.mSurface
+    border.color: terminalDisplay.activeFocus ? AtmoColor.mSecondary : AtmoColor.mOutline
     border.width: Style.borderS
 
     ScrollView {
@@ -526,9 +526,9 @@ Item {
         focus: true
         wrapMode: TextEdit.NoWrap
         textFormat: TextEdit.RichText
-        color: Color.mOnSurface
-        selectedTextColor: Color.mOnPrimary
-        selectionColor: Color.mPrimary
+        color: AtmoColor.mOnSurface
+        selectedTextColor: AtmoColor.mOnPrimary
+        selectionColor: AtmoColor.mPrimary
         font.family: root.fontFamily
         font.pointSize: Math.max(1, root.fontSize * Style.uiScaleRatio)
         textMargin: 0

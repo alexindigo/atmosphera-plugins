@@ -101,7 +101,7 @@ Item {
                     text: pluginApi?.tr("panel.title") || "Wi-Fi QR"
                     pointSize: Style.fontSizeL
                     font.weight: Font.Bold
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                 }
 
                 Item { Layout.fillWidth: true }
@@ -109,7 +109,7 @@ Item {
                 NText {
                     visible: root.loading
                     text: "⟳"
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                     pointSize: Style.fontSizeL
 
                     RotationAnimator on rotation {
@@ -127,14 +127,14 @@ Item {
                 visible: root.errorText !== "" && !root.loading
                 Layout.fillWidth: true
                 implicitHeight: errorLabel.implicitHeight + Style.marginL * 2
-                color: Color.mSurfaceVariant
+                color: AtmoColor.mSurfaceVariant
                 radius: Style.radiusM
 
                 NText {
                     id: errorLabel
                     anchors { fill: parent; margins: Style.marginL }
                     text: root.errorText
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                     wrapMode: Text.WordWrap
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
@@ -150,7 +150,7 @@ Item {
                 NText {
                     anchors.centerIn: parent
                     text: pluginApi?.tr("panel.empty_state") || "No QR data available"
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                     pointSize: Style.fontSizeM
                 }
             }
@@ -216,7 +216,7 @@ Item {
             NText {
                 visible: root.ssid !== "" && !root.loading
                 text: (pluginApi?.tr("panel.connected") || "Connected: ") + root.ssid
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 pointSize: Style.fontSizeS
                 Layout.alignment: Qt.AlignHCenter
             }
@@ -225,7 +225,7 @@ Item {
             NText {
                 visible: root.qrSize > 0 && !root.loading
                 text: pluginApi?.tr("panel.scan_to_connect") || "Scan to connect"
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 pointSize: Style.fontSizeS
                 Layout.alignment: Qt.AlignHCenter
             }

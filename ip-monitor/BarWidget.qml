@@ -48,8 +48,8 @@ Item {
     return successIconKey;
   }
 
-  readonly property color iconColor: isHot ? Color.resolveColorKey(iconColorKey) : Color.mOnSurfaceVariant
-  readonly property color textColor: isHot ? Color.mOnSurface : Color.mOnSurfaceVariant
+  readonly property color iconColor: isHot ? AtmoColor.resolveColorKey(iconColorKey) : AtmoColor.mOnSurfaceVariant
+  readonly property color textColor: isHot ? AtmoColor.mOnSurface : AtmoColor.mOnSurfaceVariant
 
   implicitWidth: pill.width
   implicitHeight: pill.height

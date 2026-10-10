@@ -38,7 +38,7 @@ ColumnLayout {
 
     NText {
         text: pluginApi?.tr("settings.description") || "Configure NetBird VPN status display and behavior"
-        color: Color.mSecondary
+        color: AtmoColor.mSecondary
         Layout.fillWidth: true
         wrapMode: Text.Wrap
     }
@@ -123,7 +123,7 @@ ColumnLayout {
         Layout.fillWidth: true
         text: "⚠ " + (pluginApi?.tr("settings.show-ping-warning") || "This feature sends ICMP packets to each connected peer at every refresh interval. It may increase network usage and CPU load.")
         pointSize: Style.fontSizeXS
-        color: Color.mError
+        color: AtmoColor.mError
         wrapMode: Text.Wrap
     }
 

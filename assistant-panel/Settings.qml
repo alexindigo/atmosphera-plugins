@@ -63,7 +63,7 @@ ColumnLayout {
     text: pluginApi?.tr("settings.panelSection")
     pointSize: Style.fontSizeM
     font.weight: Font.Bold
-    color: Color.mOnSurface
+    color: AtmoColor.mOnSurface
   }
 
   NToggle {
@@ -231,7 +231,7 @@ ColumnLayout {
     text: pluginApi?.tr("settings.aiSection")
     pointSize: Style.fontSizeM
     font.weight: Font.Bold
-    color: Color.mOnSurface
+    color: AtmoColor.mOnSurface
   }
 
   // Provider selection
@@ -288,7 +288,7 @@ ColumnLayout {
       Layout.fillWidth: true
       visible: true
       text: pluginApi?.tr("settings.baseUrlNote") + "https://platform.openai.com/docs/api-reference/chat/create" + pluginApi?.tr("settings.moreInfo")
-      color: Color.mOnSurfaceVariant
+      color: AtmoColor.mOnSurfaceVariant
       pointSize: Style.fontSizeXS
       wrapMode: Text.Wrap
       onLinkActivated: link => Qt.openUrlExternally(link)
@@ -384,9 +384,9 @@ ColumnLayout {
     Rectangle {
       Layout.fillWidth: true
       Layout.preferredHeight: 80
-      color: Color.mSurface
+      color: AtmoColor.mSurface
       radius: Style.radiusS
-      border.color: Color.mOutline
+      border.color: AtmoColor.mOutline
       border.width: 1
 
       TextArea {
@@ -394,8 +394,8 @@ ColumnLayout {
         anchors.margins: Style.marginS
         text: root.editSystemPrompt
         placeholderText: pluginApi?.tr("settings.systemPromptPlaceholder")
-        placeholderTextColor: Color.mOnSurfaceVariant
-        color: Color.mOnSurface
+        placeholderTextColor: AtmoColor.mOnSurfaceVariant
+        color: AtmoColor.mOnSurface
         font.pointSize: Style.fontSizeS
         wrapMode: TextArea.Wrap
         background: null
@@ -437,7 +437,7 @@ ColumnLayout {
     text: pluginApi?.tr("settings.translatorSection")
     pointSize: Style.fontSizeM
     font.weight: Font.Bold
-    color: Color.mOnSurface
+    color: AtmoColor.mOnSurface
   }
 
   // Translator backend

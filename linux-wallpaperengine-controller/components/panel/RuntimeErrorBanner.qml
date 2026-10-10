@@ -30,9 +30,9 @@ Rectangle {
   implicitHeight: errorBannerContent.implicitHeight + Style.marginS * 2
   Layout.preferredHeight: implicitHeight
   radius: Style.radiusM
-  color: Qt.alpha(Color.mError, 0.08)
+  color: Qt.alpha(AtmoColor.mError, 0.08)
   border.width: Style.borderS
-  border.color: Qt.alpha(Color.mError, 0.32)
+  border.color: Qt.alpha(AtmoColor.mError, 0.32)
 
   ColumnLayout {
     id: errorBannerContent
@@ -50,12 +50,12 @@ Rectangle {
       AtmoIcon {
         icon: "alert-triangle"
         pointSize: Style.fontSizeL
-        color: Color.mError
+        color: AtmoColor.mError
       }
 
       NText {
         text: pluginApi?.tr("panel.errorBannerTitle")
-        color: Color.mError
+        color: AtmoColor.mError
         font.weight: Font.Bold
       }
 
@@ -92,7 +92,7 @@ Rectangle {
     NText {
       Layout.fillWidth: true
       text: mainInstance?.lastError ?? ""
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
       wrapMode: Text.WordWrap
       font.weight: Font.Medium
     }
@@ -102,9 +102,9 @@ Rectangle {
       Layout.fillWidth: true
       Layout.preferredHeight: 136 * Style.uiScaleRatio
       radius: Style.radiusS
-      color: Qt.alpha(Color.mSurface, 0.55)
+      color: Qt.alpha(AtmoColor.mSurface, 0.55)
       border.width: Style.borderS
-      border.color: Qt.alpha(Color.mError, 0.18)
+      border.color: Qt.alpha(AtmoColor.mError, 0.18)
 
       NScrollView {
         anchors.fill: parent
@@ -115,7 +115,7 @@ Rectangle {
         NText {
           width: parent.width
           text: mainInstance?.lastErrorDetails ?? ""
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           wrapMode: Text.WrapAnywhere
         }
       }

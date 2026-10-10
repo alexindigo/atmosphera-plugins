@@ -156,8 +156,8 @@ ColumnLayout {
 
         background: Rectangle {
             radius: Style.radiusS
-            color: Color.mSurface
-            border.color: Color.mSurfaceVariant
+            color: AtmoColor.mSurface
+            border.color: AtmoColor.mSurfaceVariant
         }
 
         text: root.availableDevices

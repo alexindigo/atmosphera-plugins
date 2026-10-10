@@ -9,7 +9,7 @@ Rectangle {
 
     width: ListView.view.width - (ListView.view.ScrollBar.vertical ? 10 : 0)
     height: contentLayout.implicitHeight + (2 * Style.marginM)
-    color: Color.mSurfaceVariant
+    color: AtmoColor.mSurfaceVariant
     radius: Style.radiusM
 
     signal requestRun(string repo, string tag)
@@ -53,14 +53,14 @@ Rectangle {
                     Text {
                         text: "" + model.repository + ":" + model.tag
                         font.bold: true
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
 
                     Text {
                         text: "" + model.size + " • " + model.created
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         font.pixelSize: 11
                         Layout.fillWidth: true
                     }
@@ -112,7 +112,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     height: 1
-                    color: Color.mOutline
+                    color: AtmoColor.mOutline
                     opacity: 0.2
                 }
 
@@ -124,12 +124,12 @@ Rectangle {
 
                     Text {
                         text: "Image ID:"
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         font.bold: true
                     }
                     Text {
                         text: model.id
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                         Layout.fillWidth: true
                         elide: Text.ElideRight
                         font.family: "Monospace"
@@ -137,23 +137,23 @@ Rectangle {
 
                     Text {
                         text: "Size:"
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         font.bold: true
                     }
                     Text {
                         text: model.size
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                         Layout.fillWidth: true
                     }
 
                     Text {
                         text: "Created:"
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         font.bold: true
                     }
                     Text {
                         text: model.created
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                         Layout.fillWidth: true
                     }
                 }

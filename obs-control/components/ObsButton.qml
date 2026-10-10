@@ -33,8 +33,8 @@ AtmoIconButtonHot {
 
   icon: ""
   hot: root.hasActiveOutput
-  colorBgHot: Ui.accentBackgroundColor(root.outputState, Color, Color.mSecondary)
-  colorFgHot: Ui.accentForegroundColor(root.outputState, Color, Color.mOnSecondary)
+  colorBgHot: Ui.accentBackgroundColor(root.outputState, AtmoColor, AtmoColor.mSecondary)
+  colorFgHot: Ui.accentForegroundColor(root.outputState, AtmoColor, AtmoColor.mOnSecondary)
   tooltipText: Ui.quickActionTooltip(root.pluginApi, root.outputState, root.connected, root.obsRunning, root.primaryActionText)
 
   AtmoIcon {
@@ -44,10 +44,10 @@ AtmoIconButtonHot {
     pointSize: Math.max(1, Math.round(root.width * 0.48))
     color: {
       if ((root.enabled && root.hovering) || root.pressed) {
-        return Color.mOnHover
+        return AtmoColor.mOnHover
       }
 
-      return Ui.accentForegroundColor(root.outputState, Color, Color.mOnSecondary)
+      return Ui.accentForegroundColor(root.outputState, AtmoColor, AtmoColor.mOnSecondary)
     }
   }
 
@@ -56,7 +56,7 @@ AtmoIconButtonHot {
     visible: root.currentIconName === ""
     icon: "camera-video"
     pointSize: Math.max(1, Math.round(root.width * 0.42))
-    color: ((root.enabled && root.hovering) || root.pressed) ? Color.mOnHover : Color.mOnSurfaceVariant
+    color: ((root.enabled && root.hovering) || root.pressed) ? AtmoColor.mOnHover : AtmoColor.mOnSurfaceVariant
   }
 
   onClicked: {
@@ -91,8 +91,8 @@ AtmoIconButtonHot {
     width: Math.max(14, Math.round(root.width * 0.3))
     height: width
     radius: width / 2
-    color: Color.mSurface
-    border.color: Color.mOutline
+    color: AtmoColor.mSurface
+    border.color: AtmoColor.mOutline
     border.width: 1
 
     NText {
@@ -100,7 +100,7 @@ AtmoIconButtonHot {
       text: String(root.activeOutputs.length)
       pointSize: Math.max(1, Math.round(Style.fontSizeXS))
       font.weight: Style.fontWeightBold
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
     }
   }
 }

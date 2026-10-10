@@ -183,9 +183,9 @@ ColumnLayout {
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
         background: Rectangle {
-            color: Color.mSurfaceVariant
+            color: AtmoColor.mSurfaceVariant
             radius: Style.iRadiusL
-            border.color: Color.mOutline
+            border.color: AtmoColor.mOutline
             border.width: Style.borderS
         }
 

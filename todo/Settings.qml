@@ -15,9 +15,9 @@ ColumnLayout {
 
   // Priority color properties
   property bool valueUseCustomColors: pluginApi?.pluginSettings?.useCustomColors !== undefined ? pluginApi.pluginSettings.useCustomColors : pluginApi?.manifest?.metadata?.defaultSettings?.useCustomColors
-  property color valueHighPriorityColor: (pluginApi?.pluginSettings?.priorityColors?.high) || (pluginApi?.manifest?.metadata?.defaultSettings?.priorityColors?.high) || Color.mError.toString()
-  property color valueMediumPriorityColor: (pluginApi?.pluginSettings?.priorityColors?.medium) || (pluginApi?.manifest?.metadata?.defaultSettings?.priorityColors?.medium) || Color.mPrimary.toString()
-  property color valueLowPriorityColor: (pluginApi?.pluginSettings?.priorityColors?.low) || (pluginApi?.manifest?.metadata?.defaultSettings?.priorityColors?.low) || Color.mOnSurfaceVariant.toString()
+  property color valueHighPriorityColor: (pluginApi?.pluginSettings?.priorityColors?.high) || (pluginApi?.manifest?.metadata?.defaultSettings?.priorityColors?.high) || AtmoColor.mError.toString()
+  property color valueMediumPriorityColor: (pluginApi?.pluginSettings?.priorityColors?.medium) || (pluginApi?.manifest?.metadata?.defaultSettings?.priorityColors?.medium) || AtmoColor.mPrimary.toString()
+  property color valueLowPriorityColor: (pluginApi?.pluginSettings?.priorityColors?.low) || (pluginApi?.manifest?.metadata?.defaultSettings?.priorityColors?.low) || AtmoColor.mOnSurfaceVariant.toString()
 
   // Export path property
   property string valueExportPath: pluginApi?.pluginSettings?.exportPath !== undefined ? pluginApi?.pluginSettings?.exportPath : pluginApi?.manifest?.metadata?.defaultSettings?.exportPath
@@ -336,7 +336,7 @@ ColumnLayout {
                     AtmoIconButton {
                       icon: "trash"
                       tooltipText: pluginApi?.tr("settings.pages.delete_button_tooltip")
-                      colorFg: Color.mError
+                      colorFg: AtmoColor.mError
                       enabled: (pluginApi?.pluginSettings?.pages?.length || 0) > 1 && modelData.id !== 0
                       onClicked: {
                         if ((pluginApi?.pluginSettings?.pages?.length || 0) <= 1) {
@@ -384,16 +384,16 @@ ColumnLayout {
                   NButton {
                     text: "✓"
                     fontSize: Style.fontSizeS
-                    backgroundColor: Color.mPrimary
-                    textColor: Color.mOnPrimary
+                    backgroundColor: AtmoColor.mPrimary
+                    textColor: AtmoColor.mOnPrimary
                     onClicked: saveRename()
                   }
 
                   NButton {
                     text: "✕"
                     fontSize: Style.fontSizeS
-                    backgroundColor: Color.mError
-                    textColor: Color.mOnError
+                    backgroundColor: AtmoColor.mError
+                    textColor: AtmoColor.mOnError
                     onClicked: cancelRename()
                   }
                 }
@@ -451,8 +451,8 @@ ColumnLayout {
     height: 150
 
     background: Rectangle {
-      color: Color.mSurface
-      border.color: Color.mOutline
+      color: AtmoColor.mSurface
+      border.color: AtmoColor.mOutline
       border.width: 1
       radius: Style.radiusL
     }
@@ -481,8 +481,8 @@ ColumnLayout {
 
         NButton {
           text: "Delete"
-          textColor: Color.mOnError
-          backgroundColor: Color.mError
+          textColor: AtmoColor.mOnError
+          backgroundColor: AtmoColor.mError
           onClicked: {
             performPageDeletion(confirmDialog.pageIndex);
             confirmDialog.close();
@@ -551,9 +551,9 @@ ColumnLayout {
     } else {
       // If custom colors are disabled, reset to defaults
       pluginApi.pluginSettings.priorityColors = {
-        "high": Color.mError.toString(),
-        "medium": Color.mPrimary.toString(),
-        "low": Color.mOnSurfaceVariant.toString()
+        "high": AtmoColor.mError.toString(),
+        "medium": AtmoColor.mPrimary.toString(),
+        "low": AtmoColor.mOnSurfaceVariant.toString()
       };
     }
 

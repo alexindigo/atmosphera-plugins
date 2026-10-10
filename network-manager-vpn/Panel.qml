@@ -50,7 +50,7 @@ Item {
                         AtmoIcon {
                             icon: "shield"
                             pointSize: Style.fontSizeXXL
-                            color: Color.mPrimary
+                            color: AtmoColor.mPrimary
                         }
 
                         NLabel {
@@ -195,21 +195,21 @@ Item {
                             AtmoIcon {
                                 icon: "search"
                                 pointSize: 48
-                                color: Color.mOnSurfaceVariant
+                                color: AtmoColor.mOnSurfaceVariant
                                 Layout.alignment: Qt.AlignHCenter
                             }
 
                             NText {
                                 text: pluginApi?.tr("panel.emptyTitle")
                                 pointSize: Style.fontSizeL
-                                color: Color.mOnSurfaceVariant
+                                color: AtmoColor.mOnSurfaceVariant
                                 Layout.alignment: Qt.AlignHCenter
                             }
 
                             NText {
                                 text: pluginApi?.tr("panel.emptyDescription")
                                 pointSize: Style.fontSizeS
-                                color: Color.mOnSurfaceVariant
+                                color: AtmoColor.mOnSurfaceVariant
                                 Layout.alignment: Qt.AlignHCenter
                             }
 

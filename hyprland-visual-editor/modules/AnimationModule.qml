@@ -57,7 +57,7 @@ NScrollView {
             property string cDescKey: model.desc || ""
             property string cFile: model.file || ""
             property string cTag: model.tag || "USER"
-            property color cColor: model.color || Color.mPrimary
+            property color cColor: model.color || AtmoColor.mPrimary
             property string cIcon: model.icon || "movie"
 
             property bool isActive: root.activeAnimFile === cFile
@@ -65,7 +65,7 @@ NScrollView {
             color: isActive ? Qt.alpha(cColor, 0.12) : (hoverArea.containsMouse ? Qt.alpha(cColor, 0.05) : "transparent")
             
             border.width: isActive ? Style.borderL : (hoverArea.containsMouse ? Style.borderM : Style.borderS)
-            border.color: isActive ? cColor : (hoverArea.containsMouse ? Qt.alpha(cColor, 0.4) : Color.mOutline)
+            border.color: isActive ? cColor : (hoverArea.containsMouse ? Qt.alpha(cColor, 0.4) : AtmoColor.mOutline)
 
             Behavior on color { ColorAnimation { duration: 150 } }
             Behavior on border.color { ColorAnimation { duration: 150 } }
@@ -79,7 +79,7 @@ NScrollView {
                 anchors.fill: parent; anchors.margins: Style.marginM; spacing: Style.marginM
                 AtmoIcon {
                     icon: cardRoot.cIcon
-                    color: (cardRoot.isActive || hoverArea.containsMouse) ? cardRoot.cColor : Color.mOnSurfaceVariant
+                    color: (cardRoot.isActive || hoverArea.containsMouse) ? cardRoot.cColor : AtmoColor.mOnSurfaceVariant
                     pointSize: Style.fontSizeL
                 }
                 ColumnLayout {
@@ -89,7 +89,7 @@ NScrollView {
                         NText {
                             text: pluginApi?.tr(cardRoot.cTitleKey)
                             font.weight: Font.Bold
-                            color: cardRoot.isActive ? Color.mOnSurface : Color.mOnSurfaceVariant
+                            color: cardRoot.isActive ? AtmoColor.mOnSurface : AtmoColor.mOnSurfaceVariant
                         }
                         NBox {
                             width: tagT.implicitWidth + Style.marginM
@@ -108,7 +108,7 @@ NScrollView {
                     }
                     NText {
                         text: pluginApi?.tr(cardRoot.cDescKey)
-                        pointSize: Style.fontSizeS; color: Color.mOnSurfaceVariant; elide: Text.ElideRight; Layout.fillWidth: true
+                        pointSize: Style.fontSizeS; color: AtmoColor.mOnSurfaceVariant; elide: Text.ElideRight; Layout.fillWidth: true
                     }
                 }
                 NToggle {
@@ -146,11 +146,11 @@ NScrollView {
             Layout.fillWidth: true; spacing: Style.marginXS; Layout.margins: Style.marginL
             NText {
                 text: pluginApi?.tr("animations.header_title")
-                font.weight: Font.Bold; pointSize: Style.fontSizeL; color: Color.mPrimary
+                font.weight: Font.Bold; pointSize: Style.fontSizeL; color: AtmoColor.mPrimary
             }
             NText {
                 text: pluginApi?.tr("animations.header_subtitle")
-                pointSize: Style.fontSizeS; color: Color.mOnSurfaceVariant
+                pointSize: Style.fontSizeS; color: AtmoColor.mOnSurfaceVariant
             }
         }
 

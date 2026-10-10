@@ -32,13 +32,13 @@ ColumnLayout {
       text: pluginApi?.tr("settings.appearance.title")
       font.pointSize: Style.fontSizeM * Style.uiScaleRatio
       font.weight: Font.Medium
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
     }
 
     NComboBox {
       label: pluginApi?.tr("settings.iconColor.label")
       description: pluginApi?.tr("settings.iconColor.desc")
-      model: Color.colorKeyModel
+      model: AtmoColor.colorKeyModel
       currentKey: root.valueIconColor
       onSelected: key => root.valueIconColor = key
     }
@@ -48,7 +48,7 @@ ColumnLayout {
       text: pluginApi?.tr("settings.stateIcons.title")
       font.pointSize: Style.fontSizeM * Style.uiScaleRatio
       font.weight: Font.Medium
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
       Layout.topMargin: Style.marginM
     }
 
@@ -147,7 +147,7 @@ ColumnLayout {
       text: pluginApi?.tr("settings.behavior.title")
       font.pointSize: Style.fontSizeM * Style.uiScaleRatio
       font.weight: Font.Medium
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
       Layout.topMargin: Style.marginM
     }
 
@@ -170,14 +170,14 @@ ColumnLayout {
       text: pluginApi?.tr("settings.commands.title")
       font.pointSize: Style.fontSizeM * Style.uiScaleRatio
       font.weight: Font.Medium
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
       Layout.topMargin: Style.marginM
     }
 
 		Rectangle {
 			Layout.fillWidth: true
 			Layout.preferredHeight: infoCol.implicitHeight + Style.marginM * 2
-			color: Color.mSurfaceVariant
+			color: AtmoColor.mSurfaceVariant
 			radius: Style.radiusM
 
 			ColumnLayout {
@@ -194,14 +194,14 @@ ColumnLayout {
 					AtmoIcon {
 						icon: "info-circle"
 						pointSize: Style.fontSizeS
-						color: Color.mPrimary
+						color: AtmoColor.mPrimary
 					}
 
 					NText {
 						text: pluginApi?.tr("settings.ipcCommands.title")
 						pointSize: Style.fontSizeS
 						font.weight: Font.Medium
-						color: Color.mOnSurface
+						color: AtmoColor.mOnSurface
 					}
 				}
 
@@ -210,7 +210,7 @@ ColumnLayout {
 					text: pluginApi?.tr("settings.ipcCommands.refreshIp") + ": qs -c noctalia-shell ipc call plugin:ip-monitor refreshIp"
 					pointSize: Style.fontSizeXS
 					font.family: Settings.data.ui.fontFixed
-					color: Color.mOnSurfaceVariant
+					color: AtmoColor.mOnSurfaceVariant
 					wrapMode: Text.WrapAnywhere
 				}
 
@@ -219,7 +219,7 @@ ColumnLayout {
 					text: pluginApi?.tr("settings.ipcCommands.togglePanel") + ": qs -c noctalia-shell ipc call plugin:ip-monitor toggle"
 					pointSize: Style.fontSizeXS
 					font.family: Settings.data.ui.fontFixed
-					color: Color.mOnSurfaceVariant
+					color: AtmoColor.mOnSurfaceVariant
 					wrapMode: Text.WrapAnywhere
 				}
 			}

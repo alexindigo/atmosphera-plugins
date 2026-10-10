@@ -67,7 +67,7 @@ Item {
             anchors.centerIn: parent
             icon: controllerCount === 0 ? "bluetooth-off" : "device-gamepad"
             pointSize: root.iconSize
-            color: controllerCount === 0 ? Color.mOnSurfaceVariant : (colorIcon ? Qt.color(currentColor) : Color.mPrimary)
+            color: controllerCount === 0 ? AtmoColor.mOnSurfaceVariant : (colorIcon ? Qt.color(currentColor) : AtmoColor.mPrimary)
         }
 
         NBattery {
@@ -83,10 +83,10 @@ Item {
             critical: batteryLevel <= 10
             baseSize: Style.fontSizeM
             
-            baseColor: colorIcon ? Qt.color(currentColor) : Color.mPrimary
+            baseColor: colorIcon ? Qt.color(currentColor) : AtmoColor.mPrimary
             chargingColor: baseColor
-            lowColor: Color.mError
-            textColor: Color.mSurface
+            lowColor: AtmoColor.mError
+            textColor: AtmoColor.mSurface
         }
 
         NBusyIndicator {

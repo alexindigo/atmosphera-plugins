@@ -149,7 +149,7 @@ Item {
 
     NBox {
         id: rowBackground
-        color: Color.mPrimary
+        color: AtmoColor.mPrimary
         radius: Style.radiusM
         width: rowLayout.implicitWidth + Style.marginL * 2
         height: rowLayout.implicitHeight + Style.marginM * 2
@@ -169,19 +169,19 @@ Item {
 
             AtmoIcon {
                 icon: host?.targetMeta?.iconForTarget(host?.target)
-                color: Color.mOnPrimary
+                color: AtmoColor.mOnPrimary
             }
 
             NText {
                 text: host?.targetMeta?.labelForTarget(host?.pluginApi, host?.target)
-                color: Color.mOnPrimary
+                color: AtmoColor.mOnPrimary
             }
 
             NButton {
                 z: 20
                 icon: "close"
-                backgroundColor: Color.mError
-                textColor: Color.mOnError
+                backgroundColor: AtmoColor.mError
+                textColor: AtmoColor.mOnError
                 onClicked: {
                     host?.closeSelector()
                 }

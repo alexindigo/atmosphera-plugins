@@ -52,14 +52,14 @@ Item {
           AtmoIcon {
             icon: "device-desktop"
             pointSize: Style.fontSizeL
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
           }
 
           NText {
             text: pluginApi?.tr("panel.title")
             pointSize: Style.fontSizeL
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             Layout.fillWidth: true
           }
 
@@ -69,8 +69,8 @@ Item {
               : pluginApi?.tr("panel.no-profile")
             pointSize: Style.fontSizeS
             color: (mainInstance?.activeProfile ?? "") !== ""
-              ? Color.mPrimary
-              : Color.mOnSurfaceVariant
+              ? AtmoColor.mPrimary
+              : AtmoColor.mOnSurfaceVariant
           }
         }
       }
@@ -80,10 +80,10 @@ Item {
         Layout.fillWidth: true
         visible: !(mainInstance?.moniqueInstalled ?? true)
         Layout.preferredHeight: notInstalledLayout.implicitHeight + Style.marginM * 2
-        color: Qt.alpha(Color.mError, 0.1)
+        color: Qt.alpha(AtmoColor.mError, 0.1)
         radius: Style.radiusM
         border.width: Style.borderS
-        border.color: Qt.alpha(Color.mError, 0.3)
+        border.color: Qt.alpha(AtmoColor.mError, 0.3)
 
         RowLayout {
           id: notInstalledLayout
@@ -94,13 +94,13 @@ Item {
           AtmoIcon {
             icon: "alert-circle"
             pointSize: Style.fontSizeM
-            color: Color.mError
+            color: AtmoColor.mError
           }
 
           NText {
             text: pluginApi?.tr("panel.not-installed")
             pointSize: Style.fontSizeS
-            color: Color.mError
+            color: AtmoColor.mError
             Layout.fillWidth: true
             wrapMode: Text.Wrap
           }
@@ -132,11 +132,11 @@ Item {
               text: modelData
               icon: modelData === (mainInstance?.activeProfile ?? "") ? "check" : "device-desktop"
               backgroundColor: modelData === (mainInstance?.activeProfile ?? "")
-                ? Qt.alpha(Color.mPrimary, 0.15)
+                ? Qt.alpha(AtmoColor.mPrimary, 0.15)
                 : "transparent"
               textColor: modelData === (mainInstance?.activeProfile ?? "")
-                ? Color.mPrimary
-                : Color.mOnSurface
+                ? AtmoColor.mPrimary
+                : AtmoColor.mOnSurface
               enabled: mainInstance?.moniqueInstalled ?? false
 
               onClicked: {
@@ -154,7 +154,7 @@ Item {
         visible: (mainInstance?.moniqueInstalled ?? false) && (mainInstance?.profiles?.length ?? 0) === 0
         text: pluginApi?.tr("panel.no-profiles")
         pointSize: Style.fontSizeS
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
         horizontalAlignment: Text.AlignHCenter
         wrapMode: Text.Wrap
       }

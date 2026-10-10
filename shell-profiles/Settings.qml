@@ -68,7 +68,7 @@ ColumnLayout {
       Layout.alignment: Qt.AlignVCenter
       icon: root.editIcon || "bookmark"
       pointSize: Style.fontSizeXXXL
-      color: Color.resolveColorKeyOptional(root.editIconColor).a > 0 ? Color.resolveColorKeyOptional(root.editIconColor) : Color.mOnSurface
+      color: AtmoColor.resolveColorKeyOptional(root.editIconColor).a > 0 ? AtmoColor.resolveColorKeyOptional(root.editIconColor) : AtmoColor.mOnSurface
     }
   }
 

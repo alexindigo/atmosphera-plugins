@@ -112,7 +112,7 @@ ColumnLayout {
     Layout.fillWidth: true
     Layout.preferredHeight: 180 * Style.uiScaleRatio
     radius: Style.radiusM
-    color: Color.mSurfaceVariant
+    color: AtmoColor.mSurfaceVariant
     clip: true
 
     Image {
@@ -146,7 +146,7 @@ ColumnLayout {
   NText {
     Layout.fillWidth: true
     text: root.selectedWallpaperData ? root.selectedWallpaperData.name : ""
-    color: Color.mOnSurface
+    color: AtmoColor.mOnSurface
     font.weight: Font.Bold
     elide: Text.ElideRight
   }
@@ -193,32 +193,32 @@ ColumnLayout {
           }
           badgeColor: {
             const key = String(modelData || "");
-            if (key === "type") return Color.mSecondary;
-            if (key === "dynamic") return root.selectedWallpaperData.dynamic ? Color.mTertiary : Color.mOnSurfaceVariant;
-            if (key === "music") return Color.mPrimary;
-            if (key === "reactive") return Color.mSecondary;
-            if (key === "approved") return Color.mPrimary;
-            if (key === "resolution") return Color.mOnSurfaceVariant;
+            if (key === "type") return AtmoColor.mSecondary;
+            if (key === "dynamic") return root.selectedWallpaperData.dynamic ? AtmoColor.mTertiary : AtmoColor.mOnSurfaceVariant;
+            if (key === "music") return AtmoColor.mPrimary;
+            if (key === "reactive") return AtmoColor.mSecondary;
+            if (key === "approved") return AtmoColor.mPrimary;
+            if (key === "resolution") return AtmoColor.mOnSurfaceVariant;
             if (key === "compatibility") {
               const cPath = String(root.selectedWallpaperData?.path || "");
-              return root.propertyCompatibilityBadgeColorForPath ? root.propertyCompatibilityBadgeColorForPath(cPath) : Color.mError;
+              return root.propertyCompatibilityBadgeColorForPath ? root.propertyCompatibilityBadgeColorForPath(cPath) : AtmoColor.mError;
             }
-            return Color.mOnSurfaceVariant;
+            return AtmoColor.mOnSurfaceVariant;
           }
           badgeBgColor: {
             const key = String(modelData || "");
-            if (key === "type") return Qt.alpha(Color.mSecondary, 0.1);
-            if (key === "dynamic") return root.selectedWallpaperData.dynamic ? Qt.alpha(Color.mTertiary, 0.1) : Qt.alpha(Color.mOutline, 0.1);
-            if (key === "music") return Qt.alpha(Color.mPrimary, 0.1);
-            if (key === "reactive") return Qt.alpha(Color.mSecondary, 0.1);
-            if (key === "approved") return Qt.alpha(Color.mPrimary, 0.1);
-            if (key === "resolution") return Qt.alpha(Color.mSurfaceVariant, 0.24);
+            if (key === "type") return Qt.alpha(AtmoColor.mSecondary, 0.1);
+            if (key === "dynamic") return root.selectedWallpaperData.dynamic ? Qt.alpha(AtmoColor.mTertiary, 0.1) : Qt.alpha(AtmoColor.mOutline, 0.1);
+            if (key === "music") return Qt.alpha(AtmoColor.mPrimary, 0.1);
+            if (key === "reactive") return Qt.alpha(AtmoColor.mSecondary, 0.1);
+            if (key === "approved") return Qt.alpha(AtmoColor.mPrimary, 0.1);
+            if (key === "resolution") return Qt.alpha(AtmoColor.mSurfaceVariant, 0.24);
             if (key === "compatibility") {
               const cPath = String(root.selectedWallpaperData?.path || "");
-              const cColor = root.propertyCompatibilityBadgeColorForPath ? root.propertyCompatibilityBadgeColorForPath(cPath) : Color.mError;
+              const cColor = root.propertyCompatibilityBadgeColorForPath ? root.propertyCompatibilityBadgeColorForPath(cPath) : AtmoColor.mError;
               return root.propertyCompatibilityBadgeBackgroundForPath ? root.propertyCompatibilityBadgeBackgroundForPath(cPath) : Qt.alpha(cColor, 0.1);
             }
-            return Qt.alpha(Color.mSurfaceVariant, 0.24);
+            return Qt.alpha(AtmoColor.mSurfaceVariant, 0.24);
           }
         }
       }
@@ -231,14 +231,14 @@ ColumnLayout {
 
     NText {
       text: pluginApi?.tr("panel.infoType")
-      color: Color.mOnSurfaceVariant
+      color: AtmoColor.mOnSurfaceVariant
     }
 
     Item { Layout.fillWidth: true }
 
     NText {
       text: root.selectedWallpaperData && root.typeLabel ? root.typeLabel(root.selectedWallpaperData.type) : ""
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
     }
   }
 
@@ -247,14 +247,14 @@ ColumnLayout {
 
     NText {
       text: pluginApi?.tr("panel.infoId")
-      color: Color.mOnSurfaceVariant
+      color: AtmoColor.mOnSurfaceVariant
     }
 
     Item { Layout.fillWidth: true }
 
     NText {
       text: root.selectedWallpaperData ? root.selectedWallpaperData.id : ""
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
       elide: Text.ElideMiddle
     }
   }
@@ -264,7 +264,7 @@ ColumnLayout {
 
     NText {
       text: pluginApi?.tr("panel.infoResolution")
-      color: Color.mOnSurfaceVariant
+      color: AtmoColor.mOnSurfaceVariant
     }
 
     Item { Layout.fillWidth: true }
@@ -275,7 +275,7 @@ ColumnLayout {
           ? pluginApi?.tr("panel.resolutionUnknown")
           : root.selectedWallpaperData.resolution)
         : ""
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
     }
   }
 
@@ -284,14 +284,14 @@ ColumnLayout {
 
     NText {
       text: pluginApi?.tr("panel.infoSize")
-      color: Color.mOnSurfaceVariant
+      color: AtmoColor.mOnSurfaceVariant
     }
 
     Item { Layout.fillWidth: true }
 
     NText {
       text: root.selectedWallpaperData && root.formatBytes ? root.formatBytes(root.selectedWallpaperData.bytes) : ""
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
     }
   }
 
@@ -308,7 +308,7 @@ ColumnLayout {
     NText {
       Layout.fillWidth: true
       text: pluginApi?.tr("panel.infoDescription")
-      color: Color.mOnSurfaceVariant
+      color: AtmoColor.mOnSurfaceVariant
     }
 
     Rectangle {
@@ -320,9 +320,9 @@ ColumnLayout {
         return root.collapsedDescriptionHeight + Style.marginS * 2;
       }
       radius: Style.radiusM
-      color: Qt.alpha(Color.mSurfaceVariant, 0.2)
+      color: Qt.alpha(AtmoColor.mSurfaceVariant, 0.2)
       border.width: Style.borderS
-      border.color: Qt.alpha(Color.mOutline, 0.22)
+      border.color: Qt.alpha(AtmoColor.mOutline, 0.22)
       clip: true
 
       NText {
@@ -342,9 +342,9 @@ ColumnLayout {
         anchors.margins: Style.marginS
         text: root.selectedDescriptionMarkup
         textFormat: Text.RichText
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
         wrapMode: Text.Wrap
-        linkColor: Color.mPrimary
+        linkColor: AtmoColor.mPrimary
         onLinkActivated: url => Qt.openUrlExternally(url)
       }
 
@@ -355,9 +355,9 @@ ColumnLayout {
         height: 36 * Style.uiScaleRatio
         visible: root.descriptionShouldCollapse && !root.descriptionExpanded
         color: Qt.rgba(
-          Color.mSurfaceVariant.r,
-          Color.mSurfaceVariant.g,
-          Color.mSurfaceVariant.b,
+          AtmoColor.mSurfaceVariant.r,
+          AtmoColor.mSurfaceVariant.g,
+          AtmoColor.mSurfaceVariant.b,
           0.28
         )
       }

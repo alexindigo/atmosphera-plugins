@@ -64,7 +64,7 @@ ColumnLayout {
     NComboBox {
       label: pluginApi?.tr("settings.iconColor.label")
       description: pluginApi?.tr("settings.iconColor.desc")
-      model: Color.colorKeyModel
+      model: AtmoColor.colorKeyModel
       currentKey: root.valueIconColor
       onSelected: key => root.valueIconColor = key
     }

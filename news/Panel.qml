@@ -45,14 +45,14 @@ Item {
               text: "📰"
               font.family: "Noto Color Emoji, sans-serif"
               font.pointSize: Style.fontSizeXXL
-              color: Color.mPrimary
+              color: AtmoColor.mPrimary
             }
 
             NText {
               text: "News Headlines"
               pointSize: Style.fontSizeL
               font.weight: Style.fontWeightBold
-              color: Color.mOnSurface
+              color: AtmoColor.mOnSurface
               Layout.fillWidth: true
             }
 
@@ -91,10 +91,10 @@ Item {
           visible: main && main.errorMessage && main.errorMessage.length > 0
           Layout.fillWidth: true
           Layout.preferredHeight: errorRow.implicitHeight + (Style.marginXL)
-          color: Qt.alpha(Color.mError, 0.1)
+          color: Qt.alpha(AtmoColor.mError, 0.1)
           radius: Style.radiusS
           border.width: Style.borderS
-          border.color: Color.mError
+          border.color: AtmoColor.mError
 
           RowLayout {
             id: errorRow
@@ -105,12 +105,12 @@ Item {
             Text {
               text: "⚠️"
               font.pointSize: Style.fontSizeL
-              color: Color.mError
+              color: AtmoColor.mError
             }
 
             NText {
               text: main ? main.errorMessage : ""
-              color: Color.mError
+              color: AtmoColor.mError
               pointSize: Style.fontSizeS
               wrapMode: Text.Wrap
               Layout.fillWidth: true
@@ -126,7 +126,7 @@ Item {
           horizontalPolicy: ScrollBar.AlwaysOff
           verticalPolicy: ScrollBar.AsNeeded
           reserveScrollbarSpace: false
-          gradientColor: Color.mSurface
+          gradientColor: AtmoColor.mSurface
 
           ColumnLayout {
             id: contentColumn
@@ -151,7 +151,7 @@ Item {
 
                 NBusyIndicator {
                   running: true
-                  color: Color.mPrimary
+                  color: AtmoColor.mPrimary
                   size: Style.baseWidgetSize
                   Layout.alignment: Qt.AlignHCenter
                 }
@@ -159,7 +159,7 @@ Item {
                 NText {
                   text: "Loading news..."
                   pointSize: Style.fontSizeM
-                  color: Color.mOnSurfaceVariant
+                  color: AtmoColor.mOnSurfaceVariant
                   Layout.alignment: Qt.AlignHCenter
                 }
 
@@ -188,14 +188,14 @@ Item {
                 Text {
                   text: "📰"
                   font.pointSize: 48
-                  color: Color.mOnSurfaceVariant
+                  color: AtmoColor.mOnSurfaceVariant
                   Layout.alignment: Qt.AlignHCenter
                 }
 
                 NText {
                   text: "No news available"
                   pointSize: Style.fontSizeL
-                  color: Color.mOnSurfaceVariant
+                  color: AtmoColor.mOnSurfaceVariant
                   Layout.alignment: Qt.AlignHCenter
                 }
 
@@ -214,7 +214,7 @@ Item {
               NText {
                 text: main && main.newsData ? "Headlines (" + main.newsData.length + ")" : "Headlines"
                 pointSize: Style.fontSizeS
-                color: Color.mSecondary
+                color: AtmoColor.mSecondary
                 font.weight: Style.fontWeightBold
                 Layout.leftMargin: Style.marginS
               }
@@ -243,7 +243,7 @@ Item {
 
                       // News number badge
                       Rectangle {
-                        color: Color.mPrimary
+                        color: AtmoColor.mPrimary
                         radius: height * 0.5
                         width: Math.max(numberText.implicitWidth + (Style.marginS * 2), Style.baseWidgetSize * 0.6)
                         height: numberText.implicitHeight + (Style.marginXS * 2)
@@ -254,7 +254,7 @@ Item {
                           text: (index + 1).toString()
                           pointSize: Style.fontSizeXS
                           font.weight: Style.fontWeightBold
-                          color: Color.mOnPrimary
+                          color: AtmoColor.mOnPrimary
                         }
                       }
 
@@ -266,7 +266,7 @@ Item {
                           text: modelData.title || "No headline"
                           pointSize: Style.fontSizeM
                           font.weight: Style.fontWeightMedium
-                          color: Color.mOnSurface
+                          color: AtmoColor.mOnSurface
                           wrapMode: Text.Wrap
                           Layout.fillWidth: true
                         }
@@ -275,7 +275,7 @@ Item {
                           visible: modelData.description && modelData.description.length > 0
                           text: modelData.description || ""
                           pointSize: Style.fontSizeXS
-                          color: Color.mOnSurfaceVariant
+                          color: AtmoColor.mOnSurfaceVariant
                           wrapMode: Text.Wrap
                           Layout.fillWidth: true
                           maximumLineCount: 2
@@ -286,7 +286,7 @@ Item {
                           visible: modelData.source && modelData.source.name
                           text: (modelData.source?.name || "") + (modelData.publishedAt ? " • " + formatRelativeTime(modelData.publishedAt) : "")
                           pointSize: Style.fontSizeXXS
-                          color: Color.mSecondary
+                          color: AtmoColor.mSecondary
                           Layout.fillWidth: true
                         }
                       }
@@ -307,8 +307,8 @@ Item {
                     anchors.fill: parent
                     hoverEnabled: true
                     propagateComposedEvents: true
-                    onEntered: parent.color = Qt.lighter(Color.mSurface, 1.05)
-                    onExited: parent.color = Color.mSurface
+                    onEntered: parent.color = Qt.lighter(AtmoColor.mSurface, 1.05)
+                    onExited: parent.color = AtmoColor.mSurface
                     onClicked: mouse.accepted = false
                     onPressed: mouse.accepted = false
                     onReleased: mouse.accepted = false

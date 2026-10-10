@@ -52,7 +52,7 @@ NScrollView {
         ProCard {
             title: pluginApi?.tr("welcome.activation_title")
             iconName: "power"
-            accentColor: root.isSystemActive ? Color.mPrimary : Color.mError
+            accentColor: root.isSystemActive ? AtmoColor.mPrimary : AtmoColor.mError
             description: root.isSystemActive
                 ? (pluginApi?.tr("welcome.system_active"))
                 : (pluginApi?.tr("welcome.system_inactive"))
@@ -68,7 +68,7 @@ NScrollView {
                         text: pluginApi?.tr("welcome.enable_label")
                         font.weight: Font.Bold
                         pointSize: Style.fontSizeL
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                     }
                     Item { Layout.fillWidth: true }
                     
@@ -97,23 +97,23 @@ NScrollView {
                     visible: !root.isSystemActive
                     Layout.fillWidth: true
                     implicitHeight: warnCol.implicitHeight + (Style.marginM * 2)
-                    color: Qt.alpha(Color.mError, 0.08)
+                    color: Qt.alpha(AtmoColor.mError, 0.08)
                     radius: Style.radiusM
-                    border.color: Qt.alpha(Color.mError, 0.3)
+                    border.color: Qt.alpha(AtmoColor.mError, 0.3)
                     border.width: Style.borderS
                     RowLayout {
                         id: warnCol
                         anchors.fill: parent; anchors.margins: Style.marginM; spacing: Style.marginM
-                        AtmoIcon { icon: "alert-circle"; color: Color.mError; pointSize: Style.fontSizeXL; Layout.alignment: Qt.AlignTop }
+                        AtmoIcon { icon: "alert-circle"; color: AtmoColor.mError; pointSize: Style.fontSizeXL; Layout.alignment: Qt.AlignTop }
                         ColumnLayout {
                             Layout.fillWidth: true; spacing: Style.marginXS
                             NText {
                                 text: pluginApi?.tr("welcome.warning.title")
-                                font.weight: Font.Bold; color: Color.mError; pointSize: Style.fontSizeS
+                                font.weight: Font.Bold; color: AtmoColor.mError; pointSize: Style.fontSizeS
                             }
                             NText {
                                 text: pluginApi?.tr("welcome.warning.text")
-                                color: Color.mOnSurfaceVariant; wrapMode: Text.WordWrap; textFormat: Text.RichText; Layout.fillWidth: true; pointSize: Style.fontSizeS
+                                color: AtmoColor.mOnSurfaceVariant; wrapMode: Text.WordWrap; textFormat: Text.RichText; Layout.fillWidth: true; pointSize: Style.fontSizeS
                             }
                         }
                     }
@@ -123,7 +123,7 @@ NScrollView {
 
         ProCard {
             title: pluginApi?.tr("welcome.features.title")
-            iconName: "star"; accentColor: Color.mTertiary
+            iconName: "star"; accentColor: AtmoColor.mTertiary
             description: pluginApi?.tr("welcome.features.description")
             extraContent: ColumnLayout {
                 spacing: Style.marginXS
@@ -136,8 +136,8 @@ NScrollView {
                     ]
                     delegate: RowLayout {
                         spacing: Style.marginS
-                        AtmoIcon { icon: "check"; color: Color.mPrimary; pointSize: Style.fontSizeM }
-                        NText { text: pluginApi?.tr(modelData); color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeS; textFormat: Text.RichText }
+                        AtmoIcon { icon: "check"; color: AtmoColor.mPrimary; pointSize: Style.fontSizeM }
+                        NText { text: pluginApi?.tr(modelData); color: AtmoColor.mOnSurfaceVariant; pointSize: Style.fontSizeS; textFormat: Text.RichText }
                     }
                 }
             }
@@ -145,12 +145,12 @@ NScrollView {
         
         ProCard {
             title: pluginApi?.tr("welcome.docs.title")
-            iconName: "book"; accentColor: Color.mSecondary
+            iconName: "book"; accentColor: AtmoColor.mSecondary
             description: pluginApi?.tr("welcome.docs.description")
             extraContent: ColumnLayout {
                 spacing: Style.marginL
                 NText {
-                    Layout.fillWidth: true; wrapMode: Text.Wrap; color: Color.mOnSurfaceVariant; font.pointSize: Style.fontSizeS; textFormat: Text.RichText
+                    Layout.fillWidth: true; wrapMode: Text.Wrap; color: AtmoColor.mOnSurfaceVariant; font.pointSize: Style.fontSizeS; textFormat: Text.RichText
                     text: pluginApi?.tr("welcome.docs.summary")
                 }
                 RowLayout {
@@ -171,7 +171,7 @@ NScrollView {
 
         ProCard {
             title: pluginApi?.tr("welcome.credits.title")
-            iconName: "heart"; accentColor: Color.mOutline
+            iconName: "heart"; accentColor: AtmoColor.mOutline
             description: pluginApi?.tr("welcome.credits.description")
             extraContent: ColumnLayout {
                 spacing: Style.marginM
@@ -183,13 +183,13 @@ NScrollView {
                 NDivider { Layout.fillWidth: true }
                 RowLayout {
                     spacing: Style.marginM
-                    AtmoIcon { icon: "code"; color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeL }
+                    AtmoIcon { icon: "code"; color: AtmoColor.mOnSurfaceVariant; pointSize: Style.fontSizeL }
                     ColumnLayout {
                         spacing: Style.marginXS
                         NText { text: pluginApi?.tr("welcome.credits.ai_title"); font.weight: Font.Bold }
                         NText {
                             text: pluginApi?.tr("welcome.credits.ai_desc")
-                            color: Color.mOnSurfaceVariant; wrapMode: Text.Wrap; Layout.fillWidth: true; pointSize: Style.fontSizeS
+                            color: AtmoColor.mOnSurfaceVariant; wrapMode: Text.Wrap; Layout.fillWidth: true; pointSize: Style.fontSizeS
                         }
                     }
                 }
@@ -214,7 +214,7 @@ NScrollView {
                 NText { text: cardRoot.title; font.weight: Font.Bold; pointSize: Style.fontSizeL }
             }
             NDivider { Layout.fillWidth: true; opacity: 0.2 }
-            NText { text: cardRoot.description; color: Color.mOnSurface; wrapMode: Text.WordWrap; Layout.fillWidth: true; textFormat: Text.RichText }
+            NText { text: cardRoot.description; color: AtmoColor.mOnSurface; wrapMode: Text.WordWrap; Layout.fillWidth: true; textFormat: Text.RichText }
             Loader { active: extraContent !== null; sourceComponent: extraContent; Layout.fillWidth: true }
         }
     }

@@ -63,29 +63,29 @@ Item {
             // retain text color if busy
             // lower opacity will signal the button is currently disabled
             if (!root.pluginCore?.available || !_supported) {
-                return Color.mOutline;
+                return AtmoColor.mOutline;
             }
 
             if (_hovered) {
-                return Color.mTertiary;
+                return AtmoColor.mTertiary;
             }
 
             if (_pending) {
-                return Color.mOnTertiary;
+                return AtmoColor.mOnTertiary;
             }
 
             if (_current) {
-                return Color.mOnPrimary;
+                return AtmoColor.mOnPrimary;
             }
 
-            return Color.mPrimary;
+            return AtmoColor.mPrimary;
         }
 
         readonly property color backgroundColor: {
             // retain background color if busy
             // opacity will signal the button is currently disabled
             if (!root.pluginCore?.available || !_supported) {
-                return Qt.lighter(Color.mSurfaceVariant, 1.2);
+                return Qt.lighter(AtmoColor.mSurfaceVariant, 1.2);
             }
 
             if (_hovered) {
@@ -93,11 +93,11 @@ Item {
             }
 
             if (_current) {
-                return Color.mPrimary;
+                return AtmoColor.mPrimary;
             }
 
             if (_pending) {
-                return Color.mTertiary;
+                return AtmoColor.mTertiary;
             }
 
             // non-current default
@@ -106,14 +106,14 @@ Item {
 
         readonly property color borderColor: {
             if (!_enabled) {
-                return Color.mOutline;
+                return AtmoColor.mOutline;
             }
 
             if (_pending || _hovered) {
-                return Color.mTertiary;
+                return AtmoColor.mTertiary;
             }
 
-            return Color.mPrimary;
+            return AtmoColor.mPrimary;
         }
 
         readonly property ColorAnimation animationBehaviour: ColorAnimation {
@@ -198,7 +198,7 @@ Item {
             AtmoIcon {
                 icon: root.pluginCore?.getModeIcon(pluginCore?.mode) ?? ""
                 pointSize: Style.fontSizeXXL
-                color: Color.mPrimary
+                color: AtmoColor.mPrimary
             }
 
             // https://github.com/noctalia-dev/noctalia-shell/blob/main/Widgets/NText.qml
@@ -207,7 +207,7 @@ Item {
                 text: root.pluginApi?.tr("gpu") ?? ""
                 pointSize: Style.fontSizeL
                 font.weight: Style.fontWeightBold
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
             }
 
             // https://github.com/noctalia-dev/noctalia-shell/blob/main/Widgets/AtmoIconButton.qml

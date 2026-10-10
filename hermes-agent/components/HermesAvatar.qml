@@ -7,7 +7,7 @@ Item {
 
   property string iconPath: ""
   property string fallbackIcon: "sparkles"
-  property color statusColor: Color.mOnSurface
+  property color statusColor: AtmoColor.mOnSurface
   property real iconSize: Style.fontSizeXL
   property real dotSize: 8 * Style.uiScaleRatio
 
@@ -40,6 +40,6 @@ Item {
     anchors.bottom: parent.bottom
     color: root.statusColor
     border.width: Style.borderS
-    border.color: Color.mSurface
+    border.color: AtmoColor.mSurface
   }
 }

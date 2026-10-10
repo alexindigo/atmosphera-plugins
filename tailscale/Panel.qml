@@ -386,14 +386,14 @@ Item {
             AtmoIcon {
               icon: "network"
               pointSize: Style.fontSizeL
-              color: Color.mPrimary
+              color: AtmoColor.mPrimary
             }
 
             NText {
               text: pluginApi?.tr("panel.title")
               pointSize: Style.fontSizeL
               font.weight: Style.fontWeightBold
-              color: Color.mOnSurface
+              color: AtmoColor.mOnSurface
               Layout.fillWidth: true
             }
 
@@ -402,7 +402,7 @@ Item {
                 ? (mainInstance?.peerList?.length || 0) + " " + (pluginApi?.tr("panel.peers"))
                 : (mainInstance?.needsLogin ? pluginApi?.tr("panel.not-authenticated") : pluginApi?.tr("panel.not-connected"))
               pointSize: Style.fontSizeS
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
             }
           }
 
@@ -411,7 +411,7 @@ Item {
             text: mainInstance?.tailscaleIp || ""
             visible: (mainInstance?.tailscaleRunning ?? false) && (mainInstance?.tailscaleIp ?? false)
             pointSize: Style.fontSizeS
-            color: mainIpMouseArea.containsMouse ? Color.mPrimary : Color.mOnSurfaceVariant
+            color: mainIpMouseArea.containsMouse ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
             font.family: Settings.data.ui.fontFixed
 
             MouseArea {
@@ -452,10 +452,10 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: exitNodeLayout.implicitHeight + Style.marginS * 2
             visible: mainInstance?.exitNodeStatus !== null && mainInstance?.exitNodeStatus !== undefined
-            color: Qt.alpha(Color.mPrimary, 0.1)
+            color: Qt.alpha(AtmoColor.mPrimary, 0.1)
             radius: Style.radiusS
             border.width: 1
-            border.color: Qt.alpha(Color.mPrimary, 0.3)
+            border.color: Qt.alpha(AtmoColor.mPrimary, 0.3)
 
             RowLayout {
               id: exitNodeLayout
@@ -466,7 +466,7 @@ Item {
               AtmoIcon {
                 icon: "globe"
                 pointSize: Style.fontSizeS
-                color: mainInstance?.exitNodeStatus?.Online ? Color.mPrimary : Color.mOnSurfaceVariant
+                color: mainInstance?.exitNodeStatus?.Online ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
               }
 
               ColumnLayout {
@@ -477,7 +477,7 @@ Item {
                   text: pluginApi?.tr("panel.exit-node.active")
                   pointSize: Style.fontSizeXS
                   font.weight: Style.fontWeightMedium
-                  color: Color.mPrimary
+                  color: AtmoColor.mPrimary
                 }
 
                 NText {
@@ -489,7 +489,7 @@ Item {
                     return ipv4 ? ipv4 + " • " + status : status
                   }
                   pointSize: Style.fontSizeXS
-                  color: Color.mOnSurfaceVariant
+                  color: AtmoColor.mOnSurfaceVariant
                   font.family: Settings.data.ui.fontFixed
                   wrapMode: Text.Wrap
                 }
@@ -502,10 +502,10 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: terminalWarningLayout.implicitHeight + Style.marginM * 2
             visible: !root.isTerminalConfigured
-            color: Qt.alpha(Color.mError, 0.1)
+            color: Qt.alpha(AtmoColor.mError, 0.1)
             radius: Style.radiusM
             border.width: 1
-            border.color: Qt.alpha(Color.mError, 0.3)
+            border.color: Qt.alpha(AtmoColor.mError, 0.3)
 
             RowLayout {
               id: terminalWarningLayout
@@ -516,7 +516,7 @@ Item {
               AtmoIcon {
                 icon: "alert-circle"
                 pointSize: Style.fontSizeM
-                color: Color.mError
+                color: AtmoColor.mError
               }
 
               ColumnLayout {
@@ -527,14 +527,14 @@ Item {
                   text: pluginApi?.tr("panel.terminal-warning.title")
                   pointSize: Style.fontSizeS
                   font.weight: Style.fontWeightMedium
-                  color: Color.mError
+                  color: AtmoColor.mError
                 }
 
                 NText {
                   Layout.fillWidth: true
                   text: pluginApi?.tr("panel.terminal-warning.message")
                   pointSize: Style.fontSizeXS
-                  color: Color.mOnSurfaceVariant
+                  color: AtmoColor.mOnSurfaceVariant
                   wrapMode: Text.Wrap
                 }
               }
@@ -560,7 +560,7 @@ Item {
           Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: Qt.alpha(Color.mOnSurface, 0.1)
+            color: Qt.alpha(AtmoColor.mOnSurface, 0.1)
             visible: (root.mainInstance?.tailscaleRunning ?? false) && root.sortedPeerList.length > 0
           }
 
@@ -608,10 +608,10 @@ Item {
 
                   background: Rectangle {
                     anchors.fill: parent
-                    color: peerDelegate.hovered ? Qt.alpha(Color.mPrimary, 0.1) : "transparent"
+                    color: peerDelegate.hovered ? Qt.alpha(AtmoColor.mPrimary, 0.1) : "transparent"
                     radius: Style.radiusM
                     border.width: peerDelegate.hovered ? 1 : 0
-                    border.color: Qt.alpha(Color.mPrimary, 0.3)
+                    border.color: Qt.alpha(AtmoColor.mPrimary, 0.3)
                   }
 
                   contentItem: RowLayout {
@@ -620,7 +620,7 @@ Item {
                     AtmoIcon {
                       icon: root.getOSIcon(peerDelegate.peerData.OS)
                       pointSize: Style.fontSizeM
-                      color: peerDelegate.peerOnline ? Color.mPrimary : Color.mOnSurfaceVariant
+                      color: peerDelegate.peerOnline ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
                     }
 
                     ColumnLayout {
@@ -629,7 +629,7 @@ Item {
 
                       NText {
                         text: peerDelegate.peerHostname
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                         font.weight: Style.fontWeightMedium
                         elide: Text.ElideRight
                         Layout.fillWidth: true
@@ -638,7 +638,7 @@ Item {
                       NText {
                         text: peerDelegate.peerTsName
                         pointSize: Style.fontSizeXS
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                         visible: peerDelegate.peerTsName !== "" && peerDelegate.peerTsName !== peerDelegate.peerHostname
@@ -648,7 +648,7 @@ Item {
                     AtmoIcon {
                       icon: "globe"
                       pointSize: Style.fontSizeS
-                      color: peerDelegate.peerData.ExitNode ? Color.mPrimary : Qt.alpha(Color.mOnSurfaceVariant, 0.4)
+                      color: peerDelegate.peerData.ExitNode ? AtmoColor.mPrimary : Qt.alpha(AtmoColor.mOnSurfaceVariant, 0.4)
                       visible: peerDelegate.peerData.ExitNode || peerDelegate.peerData.ExitNodeOption
                       Layout.alignment: Qt.AlignRight
                     }
@@ -656,7 +656,7 @@ Item {
                     NText {
                       text: peerDelegate.peerIp
                       pointSize: Style.fontSizeS
-                      color: Color.mOnSurfaceVariant
+                      color: AtmoColor.mOnSurfaceVariant
                       font.family: Settings.data.ui.fontFixed
                       visible: peerDelegate.peerIp !== ""
                       Layout.alignment: Qt.AlignRight
@@ -683,7 +683,7 @@ Item {
                 text: root.searchHasNoResults ? root.pluginApi?.tr("panel.no-search-results") : root.pluginApi?.tr("panel.no-peers")
                 visible: !(root.mainInstance?.tailscaleRunning ?? false) || root.sortedPeerList.length === 0 || root.searchHasNoResults
                 pointSize: Style.fontSizeM
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 horizontalAlignment: Text.AlignHCenter
               }
             }
@@ -727,8 +727,8 @@ Item {
         visible: mainInstance?.needsLogin ?? false
         text: pluginApi?.tr("context.login")
         icon: "login"
-        backgroundColor: Color.mPrimary
-        textColor: Color.mOnPrimary
+        backgroundColor: AtmoColor.mPrimary
+        textColor: AtmoColor.mOnPrimary
         enabled: mainInstance?.tailscaleInstalled ?? false
         onClicked: {
           if (mainInstance) {
@@ -744,8 +744,8 @@ Item {
           ? pluginApi?.tr("context.disconnect")
           : pluginApi?.tr("context.connect")
         icon: mainInstance?.tailscaleRunning ? "plug-x" : "plug"
-        backgroundColor: mainInstance?.tailscaleRunning ? Color.mError : Color.mPrimary
-        textColor: mainInstance?.tailscaleRunning ? Color.mOnError : Color.mOnPrimary
+        backgroundColor: mainInstance?.tailscaleRunning ? AtmoColor.mError : AtmoColor.mPrimary
+        textColor: mainInstance?.tailscaleRunning ? AtmoColor.mOnError : AtmoColor.mOnPrimary
         enabled: mainInstance?.tailscaleInstalled ?? false
         onClicked: {
           if (mainInstance) {

@@ -84,12 +84,12 @@ ColumnLayout {
     text: pluginApi?.tr("settings.title")
     pointSize: Style.fontSizeXXL
     font.weight: Style.fontWeightBold
-    color: Color.mOnSurface
+    color: AtmoColor.mOnSurface
   }
   NText {
     Layout.fillWidth: true
     text: pluginApi?.tr("settings.description")
-    color: Color.mOnSurfaceVariant
+    color: AtmoColor.mOnSurfaceVariant
     pointSize: Style.fontSizeM
     wrapMode: Text.WordWrap
   }
@@ -98,7 +98,7 @@ ColumnLayout {
   NBox {
     Layout.fillWidth: true
     visible: root.cliMissing
-    color: Color.mError
+    color: AtmoColor.mError
     Layout.preferredHeight: bannerCol.implicitHeight + Style.marginM * 2
 
     ColumnLayout {
@@ -108,13 +108,13 @@ ColumnLayout {
       spacing: Style.marginXS
       NText {
         text: pluginApi?.tr("settings.cli-missing.title")
-        color: Color.mOnError
+        color: AtmoColor.mOnError
         font.weight: Style.fontWeightBold
         pointSize: Style.fontSizeL
       }
       NText {
         text: pluginApi?.tr("settings.cli-missing.desc")
-        color: Color.mOnError
+        color: AtmoColor.mOnError
         wrapMode: Text.WordWrap
         Layout.fillWidth: true
       }
@@ -125,7 +125,7 @@ ColumnLayout {
   NBox {
     Layout.fillWidth: true
     Layout.preferredHeight: idleCol.implicitHeight + Style.marginM * 2
-    color: Color.mSurfaceVariant
+    color: AtmoColor.mSurfaceVariant
 
     ColumnLayout {
       id: idleCol
@@ -137,7 +137,7 @@ ColumnLayout {
         text: pluginApi?.tr("settings.idle-section")
         pointSize: Style.fontSizeL
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
       }
 
       NToggle {
@@ -167,7 +167,7 @@ ColumnLayout {
   NBox {
     Layout.fillWidth: true
     Layout.preferredHeight: powerCol.implicitHeight + Style.marginM * 2
-    color: Color.mSurfaceVariant
+    color: AtmoColor.mSurfaceVariant
 
     ColumnLayout {
       id: powerCol
@@ -179,7 +179,7 @@ ColumnLayout {
         text: pluginApi?.tr("settings.power-section")
         pointSize: Style.fontSizeL
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
       }
 
       NSpinBox {
@@ -200,7 +200,7 @@ ColumnLayout {
   NBox {
     Layout.fillWidth: true
     Layout.preferredHeight: logoCol.implicitHeight + Style.marginM * 2
-    color: Color.mSurfaceVariant
+    color: AtmoColor.mSurfaceVariant
 
     ColumnLayout {
       id: logoCol
@@ -212,7 +212,7 @@ ColumnLayout {
         text: pluginApi?.tr("settings.logo-section")
         pointSize: Style.fontSizeL
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
       }
 
       NComboBox {
@@ -254,7 +254,7 @@ ColumnLayout {
   NBox {
     Layout.fillWidth: true
     Layout.preferredHeight: fxCol.implicitHeight + Style.marginM * 2
-    color: Color.mSurfaceVariant
+    color: AtmoColor.mSurfaceVariant
 
     ColumnLayout {
       id: fxCol
@@ -266,7 +266,7 @@ ColumnLayout {
         text: pluginApi?.tr("settings.effects-section")
         pointSize: Style.fontSizeL
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
       }
 
       NTextInput {
@@ -328,7 +328,7 @@ ColumnLayout {
   NBox {
     Layout.fillWidth: true
     Layout.preferredHeight: clockCol.implicitHeight + Style.marginM * 2
-    color: Color.mSurfaceVariant
+    color: AtmoColor.mSurfaceVariant
 
     ColumnLayout {
       id: clockCol
@@ -340,7 +340,7 @@ ColumnLayout {
         text: pluginApi?.tr("settings.clock-section")
         pointSize: Style.fontSizeL
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
       }
 
       NToggle {
@@ -367,7 +367,7 @@ ColumnLayout {
   NBox {
     Layout.fillWidth: true
     Layout.preferredHeight: nowPlayingCol.implicitHeight + Style.marginM * 2
-    color: Color.mSurfaceVariant
+    color: AtmoColor.mSurfaceVariant
 
     ColumnLayout {
       id: nowPlayingCol
@@ -379,7 +379,7 @@ ColumnLayout {
         text: pluginApi?.tr("settings.now-playing-section")
         pointSize: Style.fontSizeL
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
       }
 
       NToggle {

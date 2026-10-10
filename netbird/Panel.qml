@@ -234,21 +234,21 @@ Item {
                         AtmoIcon {
                             icon: "network"
                             pointSize: Style.fontSizeL
-                            color: Color.mPrimary
+                            color: AtmoColor.mPrimary
                         }
 
                         NText {
                             text: pluginApi?.tr("panel.title") || "NetBird Network"
                             pointSize: Style.fontSizeL
                             font.weight: Style.fontWeightBold
-                            color: Color.mOnSurface
+                            color: AtmoColor.mOnSurface
                             Layout.fillWidth: true
                         }
 
                         NText {
                             text: mainInstance?.netbirdRunning ? (mainInstance?.peerConnected || 0) + "/" + (mainInstance?.peerCount || 0) + " " + (pluginApi?.tr("panel.peers") || "peers") : (pluginApi?.tr("panel.not-connected") || "Not connected")
                             pointSize: Style.fontSizeS
-                            color: Color.mOnSurfaceVariant
+                            color: AtmoColor.mOnSurfaceVariant
                         }
                     }
 
@@ -257,7 +257,7 @@ Item {
                         text: mainInstance?.netbirdIp || ""
                         visible: (mainInstance?.netbirdRunning ?? false) && (mainInstance?.netbirdIp ?? false)
                         pointSize: Style.fontSizeS
-                        color: mainIpMouseArea.containsMouse ? Color.mPrimary : Color.mOnSurfaceVariant
+                        color: mainIpMouseArea.containsMouse ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
                         font.family: Settings.data.ui.fontFixed
 
                         MouseArea {
@@ -279,7 +279,7 @@ Item {
                         text: mainInstance?.netbirdFqdn || ""
                         visible: (mainInstance?.netbirdRunning ?? false) && (mainInstance?.netbirdFqdn ?? false)
                         pointSize: Style.fontSizeXS
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         font.family: Settings.data.ui.fontFixed
                         elide: Text.ElideRight
                     }
@@ -288,10 +288,10 @@ Item {
                         Layout.fillWidth: true
                         Layout.preferredHeight: connectionStatusLayout.implicitHeight + Style.marginS * 2
                         visible: (mainInstance?.netbirdRunning ?? false)
-                        color: Qt.alpha(Color.mPrimary, 0.1)
+                        color: Qt.alpha(AtmoColor.mPrimary, 0.1)
                         radius: Style.radiusS
                         border.width: 1
-                        border.color: Qt.alpha(Color.mPrimary, 0.3)
+                        border.color: Qt.alpha(AtmoColor.mPrimary, 0.3)
 
                         RowLayout {
                             id: connectionStatusLayout
@@ -305,13 +305,13 @@ Item {
                                 AtmoIcon {
                                     icon: "server"
                                     pointSize: Style.fontSizeXS
-                                    color: (mainInstance?.managementConnected ?? false) ? Color.mPrimary : Color.mError
+                                    color: (mainInstance?.managementConnected ?? false) ? AtmoColor.mPrimary : AtmoColor.mError
                                 }
 
                                 NText {
                                     text: pluginApi?.tr("panel.management") || "Management"
                                     pointSize: Style.fontSizeXS
-                                    color: Color.mOnSurfaceVariant
+                                    color: AtmoColor.mOnSurfaceVariant
                                 }
                             }
 
@@ -321,13 +321,13 @@ Item {
                                 AtmoIcon {
                                     icon: "antenna-bars-5"
                                     pointSize: Style.fontSizeXS
-                                    color: (mainInstance?.signalConnected ?? false) ? Color.mPrimary : Color.mError
+                                    color: (mainInstance?.signalConnected ?? false) ? AtmoColor.mPrimary : AtmoColor.mError
                                 }
 
                                 NText {
                                     text: pluginApi?.tr("panel.signal") || "Signal"
                                     pointSize: Style.fontSizeXS
-                                    color: Color.mOnSurfaceVariant
+                                    color: AtmoColor.mOnSurfaceVariant
                                 }
                             }
                         }
@@ -336,7 +336,7 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 1
-                        color: Qt.alpha(Color.mOnSurface, 0.1)
+                        color: Qt.alpha(AtmoColor.mOnSurface, 0.1)
                         visible: (mainInstance?.netbirdRunning ?? false) && (mainInstance?.peerList?.length ?? 0) > 0
                     }
 
@@ -377,10 +377,10 @@ Item {
 
                                     background: Rectangle {
                                         anchors.fill: parent
-                                        color: peerDelegate.hovered ? Qt.alpha(Color.mPrimary, 0.1) : "transparent"
+                                        color: peerDelegate.hovered ? Qt.alpha(AtmoColor.mPrimary, 0.1) : "transparent"
                                         radius: Style.radiusM
                                         border.width: peerDelegate.hovered ? 1 : 0
-                                        border.color: Qt.alpha(Color.mPrimary, 0.3)
+                                        border.color: Qt.alpha(AtmoColor.mPrimary, 0.3)
                                     }
 
                                     contentItem: RowLayout {
@@ -389,7 +389,7 @@ Item {
                                         AtmoIcon {
                                             icon: root.getConnectionIcon(peerDelegate.peerData.connectionType)
                                             pointSize: Style.fontSizeM
-                                            color: peerDelegate.peerConnected ? Color.mPrimary : Color.mOnSurfaceVariant
+                                            color: peerDelegate.peerConnected ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
                                         }
 
                                         ColumnLayout {
@@ -398,7 +398,7 @@ Item {
 
                                             NText {
                                                 text: peerDelegate.peerHostname
-                                                color: Color.mOnSurface
+                                                color: AtmoColor.mOnSurface
                                                 font.weight: Style.fontWeightMedium
                                                 elide: Text.ElideRight
                                                 Layout.fillWidth: true
@@ -408,7 +408,7 @@ Item {
                                                 visible: peerDelegate.peerData.connectionType !== ""
                                                 text: peerDelegate.peerData.connectionType || ""
                                                 pointSize: Style.fontSizeXS
-                                                color: Color.mOnSurfaceVariant
+                                                color: AtmoColor.mOnSurfaceVariant
                                             }
                                         }
 
@@ -420,7 +420,7 @@ Item {
                                             NText {
                                                 text: peerDelegate.peerIp
                                                 pointSize: Style.fontSizeS
-                                                color: Color.mOnSurfaceVariant
+                                                color: AtmoColor.mOnSurfaceVariant
                                                 font.family: Settings.data.ui.fontFixed
                                                 Layout.alignment: Qt.AlignRight
                                             }
@@ -441,13 +441,13 @@ Item {
                                                 color: {
                                                     var pingVal = mainInstance?.peerPings?.[peerDelegate.peerIp] ?? "";
                                                     if (pingVal === "" || pingVal === "timeout")
-                                                        return Color.mError;
+                                                        return AtmoColor.mError;
                                                     var ms = parseFloat(pingVal);
                                                     if (ms < 50)
-                                                        return Color.mPrimary;
+                                                        return AtmoColor.mPrimary;
                                                     if (ms < 150)
-                                                        return Color.mWarning || "#FF9800";
-                                                    return Color.mError;
+                                                        return AtmoColor.mWarning || "#FF9800";
+                                                    return AtmoColor.mError;
                                                 }
                                             }
                                         }
@@ -473,7 +473,7 @@ Item {
                                 text: pluginApi?.tr("panel.no-peers") || "No connected peers"
                                 visible: !(mainInstance?.netbirdRunning ?? false) || (mainInstance?.peerList?.length ?? 0) === 0
                                 pointSize: Style.fontSizeM
-                                color: Color.mOnSurfaceVariant
+                                color: AtmoColor.mOnSurfaceVariant
                                 horizontalAlignment: Text.AlignHCenter
                             }
                         }
@@ -498,8 +498,8 @@ Item {
                 Layout.fillWidth: true
                 text: mainInstance?.netbirdRunning ? (pluginApi?.tr("context.disconnect") || "Disconnect") : (pluginApi?.tr("context.connect") || "Connect")
                 icon: mainInstance?.netbirdRunning ? "plug-x" : "plug"
-                backgroundColor: mainInstance?.netbirdRunning ? Color.mError : Color.mPrimary
-                textColor: mainInstance?.netbirdRunning ? Color.mOnError : Color.mOnPrimary
+                backgroundColor: mainInstance?.netbirdRunning ? AtmoColor.mError : AtmoColor.mPrimary
+                textColor: mainInstance?.netbirdRunning ? AtmoColor.mOnError : AtmoColor.mOnPrimary
                 enabled: mainInstance?.netbirdInstalled ?? false
                 onClicked: {
                     if (mainInstance) {

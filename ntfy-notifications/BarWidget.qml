@@ -57,7 +57,7 @@ Item {
         width: root.implicitWidth
         height: root.implicitHeight
         radius: Style.radiusM
-        color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+        color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
         border.color: Style.capsuleBorderColor
         border.width: Style.capsuleBorderWidth
 
@@ -99,7 +99,7 @@ Item {
                 icon: "bell"
                 width: root.barFontSize * 1.4
                 height: width
-                color: unreadCount > 0 ? Color.mPrimary : (mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface)
+                color: unreadCount > 0 ? AtmoColor.mPrimary : (mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface)
             }
 
             // Badge
@@ -108,7 +108,7 @@ Item {
                 width: Math.max(badgeText.implicitWidth + Style.marginS * 2, height)
                 height: root.barFontSize * 1.3
                 radius: height / 2
-                color: Color.mPrimary
+                color: AtmoColor.mPrimary
 
                 NText {
                     id: badgeText
@@ -116,7 +116,7 @@ Item {
                     text: unreadCount > 99 ? "99+" : unreadCount.toString()
                     pointSize: root.barFontSize * 0.7
                     applyUiScale: false
-                    color: Color.mOnPrimary
+                    color: AtmoColor.mOnPrimary
                     font.weight: Style.fontWeightBold
                 }
 
@@ -152,7 +152,7 @@ Item {
                 icon: "bell"
                 width: root.barFontSize * 1.4
                 height: width
-                color: unreadCount > 0 ? Color.mPrimary : (mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface)
+                color: unreadCount > 0 ? AtmoColor.mPrimary : (mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface)
                 Layout.alignment: Qt.AlignHCenter
             }
 
@@ -161,7 +161,7 @@ Item {
                 text: unreadCount > 99 ? "99+" : unreadCount.toString()
                 pointSize: root.barFontSize * 0.6
                 applyUiScale: false
-                color: Color.mPrimary
+                color: AtmoColor.mPrimary
                 font.weight: Style.fontWeightBold
                 Layout.alignment: Qt.AlignHCenter
             }

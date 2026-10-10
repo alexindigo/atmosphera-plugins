@@ -99,7 +99,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                color: Color.mSurfaceVariant;
+                color: AtmoColor.mSurfaceVariant;
                 radius: Style.iRadiusS;
 
                 ColumnLayout {
@@ -154,7 +154,7 @@ Item {
                                 radius: Style.iRadiusXS
 
                                 borderWidth: root.thumbCacheReady && root.currentWallpaper == wallpapersFolderModel.get(index, "filePath") ? Style.borderM : 0
-                                borderColor: Color.mPrimary;
+                                borderColor: AtmoColor.mPrimary;
 
                                 imagePath: root.thumbCacheReady ? pluginApi.mainInstance.getThumbUrl(wallpaper.path) : "";
                                 fallbackIcon: "alert-circle"

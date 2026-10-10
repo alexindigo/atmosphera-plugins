@@ -60,14 +60,14 @@ Item {
         AtmoIcon {
           icon: "lamp"
           pointSize: Style.fontSizeXXL
-          color: Color.mPrimary
+          color: AtmoColor.mPrimary
         }
 
         NText {
           text: "Hue lights"
           pointSize: Style.fontSizeL
           font.weight: Style.fontWeightBold
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           Layout.fillWidth: true
         }
 
@@ -151,7 +151,7 @@ Item {
 
                   NLabel {
                     label: lightBox.name
-                    labelColor: Color.mPrimary
+                    labelColor: AtmoColor.mPrimary
                     Layout.fillWidth: true
                   }
 
@@ -220,7 +220,7 @@ Item {
 
                   NLabel {
                     label: roomBox.name
-                    labelColor: Color.mPrimary
+                    labelColor: AtmoColor.mPrimary
                     Layout.fillWidth: true
                   }
 

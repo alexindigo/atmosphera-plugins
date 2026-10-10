@@ -26,11 +26,11 @@ AtmoIconButtonHot {
     icon: "smart-home"
     colorFg: {
         switch (status) {
-            case "Connected": return Color.mPrimary;
-            case "Connecting": return Color.mOnError;
-            case "Disconnected": return Color.mError;
-            case "AuthFailed": return Color.mError;
-            default: return Color.mOnSurfaceVariant;
+            case "Connected": return AtmoColor.mPrimary;
+            case "Connecting": return AtmoColor.mOnError;
+            case "Disconnected": return AtmoColor.mError;
+            case "AuthFailed": return AtmoColor.mError;
+            default: return AtmoColor.mOnSurfaceVariant;
         }
     }
 

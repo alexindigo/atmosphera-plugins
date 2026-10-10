@@ -53,11 +53,11 @@ Item {
     readonly property var rawColorLevel0:
         pluginApi?.pluginSettings?.colorLevel0 ??
         pluginApi?.manifest?.metadata?.defaultSettings?.colorLevel0 ??
-        Color.mError
+        AtmoColor.mError
     readonly property var rawColorActive:
         pluginApi?.pluginSettings?.colorActive ??
         pluginApi?.manifest?.metadata?.defaultSettings?.colorActive ??
-        Color.mPrimary
+        AtmoColor.mPrimary
     readonly property var rawColorAuto:
         pluginApi?.pluginSettings?.colorAuto ??
         pluginApi?.manifest?.metadata?.defaultSettings?.colorAuto ??
@@ -213,7 +213,7 @@ Item {
             AtmoIcon {
                 id: fanIcon
                 icon: "car-fan"
-                color: root.currentIsNeutral ? Color.mOnSurface : Color.mOnPrimary
+                color: root.currentIsNeutral ? AtmoColor.mOnSurface : AtmoColor.mOnPrimary
             }
 
             NText {
@@ -222,7 +222,7 @@ Item {
                 pointSize: barFontSize
                 font.family: root.fixedFont
                 font.weight: Font.Bold
-                color: root.currentIsNeutral ? Color.mOnSurface : Color.mOnPrimary
+                color: root.currentIsNeutral ? AtmoColor.mOnSurface : AtmoColor.mOnPrimary
             }
         }
     }

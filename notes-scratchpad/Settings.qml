@@ -134,7 +134,7 @@ ColumnLayout {
       visible: root.filePath !== "" && !root.filePathWritable
       text: pluginApi?.tr("settings.file_storage.not_writable") || "⚠ Warning: No write permission for this location"
       pointSize: Style.fontSizeS
-      color: Color.mError
+      color: AtmoColor.mError
       Layout.fillWidth: true
     }
   }
@@ -189,7 +189,7 @@ ColumnLayout {
     Rectangle {
       Layout.fillWidth: true
       Layout.preferredHeight: commandText.implicitHeight + Style.marginM * 2
-      color: Color.mSurfaceVariant
+      color: AtmoColor.mSurfaceVariant
       radius: Style.radiusM
 
       TextEdit {
@@ -199,12 +199,12 @@ ColumnLayout {
         text: "qs -c noctalia-shell ipc call plugin:notes-scratchpad togglePanel"
         font.pointSize: Style.fontSizeS
         font.family: Settings.data.ui.fontFixed
-        color: Color.mPrimary
+        color: AtmoColor.mPrimary
         wrapMode: TextEdit.WrapAnywhere
         readOnly: true
         selectByMouse: true
-        selectionColor: Color.mPrimary
-        selectedTextColor: Color.mOnPrimary
+        selectionColor: AtmoColor.mPrimary
+        selectedTextColor: AtmoColor.mOnPrimary
       }
     }
   }

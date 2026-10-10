@@ -62,7 +62,7 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        color: Color.mSurfaceVariant;
+        color: AtmoColor.mSurfaceVariant;
         radius: Style.radiusS;
 
         ColumnLayout {
@@ -118,7 +118,7 @@ ColumnLayout {
                             if (root.thumbCacheReady && root.currentWallpaper == wallpaper.modelData) return Style.borderM;
                             else return 0;
                         }
-                        borderColor: Color.mPrimary;
+                        borderColor: AtmoColor.mPrimary;
 
                         imagePath: {
                             if (root.thumbCacheReady && root.pluginApi.mainInstance != null) return root.pluginApi.mainInstance.getThumbPath(wallpaper.modelData);

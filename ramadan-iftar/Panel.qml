@@ -98,7 +98,7 @@ Item {
         AtmoIcon {
           icon: "moon-stars"
           pointSize: Style.fontSizeXL
-          color: Color.mPrimary
+          color: AtmoColor.mPrimary
           Layout.alignment: Qt.AlignVCenter
         }
 
@@ -109,14 +109,14 @@ Item {
             text: pluginApi?.tr("panel.title") || "Prayer Times"
             pointSize: Style.fontSizeL
             font.weight: Font.Bold
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
 
           NText {
             visible: hijriDateStr !== ""
             text: hijriDateStr !== "" ? `${hijriMonthName} ${hijriYear} AH` : ""
             pointSize: Style.fontSizeS
-            color: isRamadan ? Color.mPrimary : Color.mSecondary
+            color: isRamadan ? AtmoColor.mPrimary : AtmoColor.mSecondary
           }
         }
 
@@ -159,7 +159,7 @@ Item {
         visible: gregorianDateStr !== ""
         text: gregorianDateStr
         pointSize: Style.fontSizeS
-        color: Color.mSecondary
+        color: AtmoColor.mSecondary
       }
 
       NDivider {
@@ -171,7 +171,7 @@ Item {
       Rectangle {
         Layout.fillWidth: true
         implicitHeight: countdownColumn.implicitHeight + Style.marginM * 2
-        color: iftarPassed ? Color.mSurfaceVariant : Qt.alpha(Color.mPrimary, 0.12)
+        color: iftarPassed ? AtmoColor.mSurfaceVariant : Qt.alpha(AtmoColor.mPrimary, 0.12)
         radius: Style.radiusL
         visible: prayerTimings !== null
 
@@ -187,7 +187,7 @@ Item {
               return pluginApi?.tr("panel.iftarIn") || "Iftar in";
             }
             pointSize: Style.fontSizeS
-            color: iftarPassed ? Color.mSecondary : Color.mPrimary
+            color: iftarPassed ? AtmoColor.mSecondary : AtmoColor.mPrimary
           }
 
           NText {
@@ -196,7 +196,7 @@ Item {
             text: formatCountdown(secondsToIftar)
             pointSize: Style.fontSizeXXL
             font.weight: Font.Bold
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
           }
 
           NText {
@@ -204,7 +204,7 @@ Item {
             visible: !iftarPassed && prayerTimings !== null && prayerTimings.Maghrib !== undefined
             text: formatTime(prayerTimings?.Maghrib || "")
             pointSize: iftarPassed ? Style.fontSizeXL : Style.fontSizeM
-            color: iftarPassed ? Color.mOnSurface : Color.mSecondary
+            color: iftarPassed ? AtmoColor.mOnSurface : AtmoColor.mSecondary
           }
         }
       }
@@ -225,7 +225,7 @@ Item {
           anchors.centerIn: parent
           visible: hasError && !isLoading
           text: errorMessage || (pluginApi?.tr("error.generic") || "Failed to load prayer times")
-          color: Color.mError
+          color: AtmoColor.mError
           pointSize: Style.fontSizeS
           wrapMode: Text.Wrap
           horizontalAlignment: Text.AlignHCenter
@@ -262,9 +262,9 @@ Item {
               implicitHeight: rowLayout.implicitHeight + Style.marginS * 2
               radius: Style.radiusM
               color: {
-                if (isHighlightIftar) return Qt.alpha(Color.mPrimary, 0.15);
-                if (isHighlightSuhoor) return Qt.alpha(Color.mSecondary, 0.12);
-                return Color.mSurfaceVariant;
+                if (isHighlightIftar) return Qt.alpha(AtmoColor.mPrimary, 0.15);
+                if (isHighlightSuhoor) return Qt.alpha(AtmoColor.mSecondary, 0.12);
+                return AtmoColor.mSurfaceVariant;
               }
 
               RowLayout {
@@ -281,7 +281,7 @@ Item {
                 AtmoIcon {
                   icon: modelData.icon
                   pointSize: Style.fontSizeM
-                  color: isHighlightIftar ? Color.mPrimary : (isHighlightSuhoor ? Color.mSecondary : Color.mOnSurfaceVariant)
+                  color: isHighlightIftar ? AtmoColor.mPrimary : (isHighlightSuhoor ? AtmoColor.mSecondary : AtmoColor.mOnSurfaceVariant)
                   Layout.alignment: Qt.AlignVCenter
                 }
 
@@ -289,7 +289,7 @@ Item {
                   text: pluginApi?.tr(modelData.labelKey) || modelData.key
                   pointSize: Style.fontSizeM
                   font.weight: isHighlighted ? Style.fontWeightSemiBold : Style.fontWeightRegular
-                  color: isHighlightIftar ? Color.mPrimary : (isHighlightSuhoor ? Color.mSecondary : Color.mOnSurface)
+                  color: isHighlightIftar ? AtmoColor.mPrimary : (isHighlightSuhoor ? AtmoColor.mSecondary : AtmoColor.mOnSurface)
                   Layout.fillWidth: true
                   Layout.alignment: Qt.AlignVCenter
                 }
@@ -298,7 +298,7 @@ Item {
                   text: rawTime ? formatTime(rawTime) : "—"
                   pointSize: Style.fontSizeM
                   font.weight: isHighlighted ? Style.fontWeightBold : Style.fontWeightRegular
-                  color: isHighlightIftar ? Color.mPrimary : (isHighlightSuhoor ? Color.mSecondary : Color.mOnSurface)
+                  color: isHighlightIftar ? AtmoColor.mPrimary : (isHighlightSuhoor ? AtmoColor.mSecondary : AtmoColor.mOnSurface)
                   Layout.alignment: Qt.AlignVCenter
                 }
               }
@@ -320,13 +320,13 @@ Item {
           AtmoIcon {
             icon: "moon-stars"
             pointSize: Style.fontSizeXXXL
-            color: Color.mSecondary
+            color: AtmoColor.mSecondary
             Layout.alignment: Qt.AlignHCenter
           }
 
           NText {
             text: pluginApi?.tr("panel.configure") || "Configure your city in settings"
-            color: Color.mSecondary
+            color: AtmoColor.mSecondary
             pointSize: Style.fontSizeM
             wrapMode: Text.Wrap
             horizontalAlignment: Text.AlignHCenter

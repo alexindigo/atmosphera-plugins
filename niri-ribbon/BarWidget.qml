@@ -25,13 +25,13 @@ Item {
         id: track
         anchors.fill: parent
         anchors.margins: Style.marginS
-        color: Color.mSurfaceVariant
+        color: AtmoColor.mSurfaceVariant
         opacity: 0.3
         radius: Style.radiusS
         clip: true
         
         border.width: Style.borderS
-        border.color: Qt.rgba(Color.mOnSurface.r, Color.mOnSurface.g, Color.mOnSurface.b, 0.1)
+        border.color: Qt.rgba(AtmoColor.mOnSurface.r, AtmoColor.mOnSurface.g, AtmoColor.mOnSurface.b, 0.1)
 
         Rectangle {
             id: viewportIndicator
@@ -41,7 +41,7 @@ Item {
             width: Math.max(12, parent.width * Math.min(1.0, root.ratioWidth))
             x: Math.max(0, Math.min(parent.width - width, parent.width * root.ratioStart))
             
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
             radius: Math.max(0, Style.radiusS - Style.borderS)
             opacity: 0.8
 

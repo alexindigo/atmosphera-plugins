@@ -87,7 +87,7 @@ ColumnLayout {
     text: pluginApi?.tr("settings.tool_row.nuke.text")
     icon: "x"
     tooltipText: pluginApi?.tr("settings.tool_row.nuke.tooltip")
-    backgroundColor: Color.mError
+    backgroundColor: AtmoColor.mError
 
     onClicked: {
       if (!root.pluginApi) {

@@ -139,8 +139,8 @@ PanelWindow {
             id: customBackground
             anchors.fill: parent
             radius: Style.radiusL
-            color: Qt.alpha(Color.mSurface, 0.95)
-            border.color: (flow && (flow.failed || flow.supplementaryIsError)) ? Color.mError : Color.mOutline
+            color: Qt.alpha(AtmoColor.mSurface, 0.95)
+            border.color: (flow && (flow.failed || flow.supplementaryIsError)) ? AtmoColor.mError : AtmoColor.mOutline
             border.width: Style.borderS
             
             Behavior on border.color {
@@ -175,7 +175,7 @@ PanelWindow {
                         text: polkitWindow.resolvedMessage || (flow ? flow.message : (pluginApi ? pluginApi.tr("window.title") : "Authentication Required"))
                         pointSize: Style.fontSizeL
                         font.weight: Style.fontWeightBold
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                         wrapMode: Text.Wrap
                         Layout.fillWidth: true
                     }
@@ -183,7 +183,7 @@ PanelWindow {
                     NText {
                         text: flow ? flow.actionId : ""
                         pointSize: Style.fontSizeXS
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         wrapMode: Text.Wrap
                         Layout.fillWidth: true
                         visible: text !== ""
@@ -196,7 +196,7 @@ PanelWindow {
                 visible: flow && flow.supplementaryMessage !== ""
                 text: flow ? flow.supplementaryMessage : ""
                 pointSize: Style.fontSizeS
-                color: (flow && flow.supplementaryIsError) ? Color.mError : Color.mOnSurfaceVariant
+                color: (flow && flow.supplementaryIsError) ? AtmoColor.mError : AtmoColor.mOnSurfaceVariant
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
             }
@@ -228,8 +228,8 @@ PanelWindow {
 
                 NButton {
                     text: pluginApi ? pluginApi.tr("action.cancel") : "Cancel"
-                    backgroundColor: Color.mSurfaceVariant
-                    textColor: Color.mOnSurfaceVariant
+                    backgroundColor: AtmoColor.mSurfaceVariant
+                    textColor: AtmoColor.mOnSurfaceVariant
                     outlined: false
                     onClicked: {
                         if (flow) flow.cancelAuthenticationRequest()
@@ -238,8 +238,8 @@ PanelWindow {
 
                 NButton {
                     text: pluginApi ? pluginApi.tr("action.authenticate") : "Authenticate"
-                    backgroundColor: Color.mPrimary
-                    textColor: Color.mOnPrimary
+                    backgroundColor: AtmoColor.mPrimary
+                    textColor: AtmoColor.mOnPrimary
                     enabled: flow && flow.isResponseRequired
                     onClicked: {
                         if (flow) {

@@ -25,9 +25,9 @@ Item {
     Rectangle {
         id: bg
         anchors.fill: parent
-        color: Color.mSurface
+        color: AtmoColor.mSurface
         radius: Style.radiusL
-        border.color: Qt.alpha(Color.mOutline, 0.2)
+        border.color: Qt.alpha(AtmoColor.mOutline, 0.2)
         border.width: 1
 
         ColumnLayout {
@@ -49,21 +49,21 @@ Item {
                     AtmoIcon {
                         icon: "globe"
                         pointSize: Style.fontSizeL
-                        color: Color.mPrimary
+                        color: AtmoColor.mPrimary
                     }
 
                     NText {
                         text: pluginApi?.tr("plugin.title") || "DNS Switcher"
                         pointSize: Style.fontSizeL
                         font.weight: Style.fontWeightBold
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                         Layout.fillWidth: true
                     }
 
                     NText {
                         text: mainInstance?.currentDnsName || "..."
                         pointSize: Style.fontSizeS
-                        color: (mainInstance?.isChanging) ? Color.mPrimary : Color.mSecondary
+                        color: (mainInstance?.isChanging) ? AtmoColor.mPrimary : AtmoColor.mSecondary
                         font.weight: Font.Medium
                     }
                 }
@@ -73,9 +73,9 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: errorText.implicitHeight + Style.marginM
                 visible: (mainInstance?.lastError || "") !== ""
-                color: Qt.alpha(Color.mError, 0.1)
+                color: Qt.alpha(AtmoColor.mError, 0.1)
                 radius: Style.radiusS
-                border.color: Qt.alpha(Color.mError, 0.3)
+                border.color: Qt.alpha(AtmoColor.mError, 0.3)
                 border.width: 1
 
                 NText {
@@ -83,7 +83,7 @@ Item {
                     anchors.fill: parent
                     anchors.margins: Style.marginS
                     text: mainInstance?.lastError || ""
-                    color: Color.mError
+                    color: AtmoColor.mError
                     pointSize: Style.fontSizeS
                     wrapMode: Text.WordWrap
                 }
@@ -112,7 +112,7 @@ Item {
                         property bool isActive: (mainInstance?.activeProviderId || "") === providerId
                         property bool isDisabled: mainInstance?.isChanging || false
 
-                        color: isActive ? Color.mPrimary : Color.mSurfaceVariant
+                        color: isActive ? AtmoColor.mPrimary : AtmoColor.mSurfaceVariant
                         opacity: isDisabled ? 0.6 : 1.0
                         Behavior on color { ColorAnimation { duration: Style.animationFast } }
                         Behavior on opacity { NumberAnimation { duration: 150 } }
@@ -121,7 +121,7 @@ Item {
                             anchors.fill: parent
                             radius: opt.radius
                             color: (hoverArea.containsMouse && !opt.isActive && !opt.isDisabled)
-                                   ? Color.mHover : "transparent"
+                                   ? AtmoColor.mHover : "transparent"
                             opacity: (hoverArea.containsMouse && !opt.isActive && !opt.isDisabled)
                                      ? 0.2 : 0
                             Behavior on opacity { NumberAnimation { duration: 150 } }
@@ -136,14 +136,14 @@ Item {
                             AtmoIcon {
                                 icon: opt.isActive ? "check" : "circle"
                                 pointSize: Style.fontSizeM
-                                color: opt.isActive ? Color.mOnPrimary : Color.mOnSurfaceVariant
+                                color: opt.isActive ? AtmoColor.mOnPrimary : AtmoColor.mOnSurfaceVariant
                             }
 
                             NText {
                                 text: opt.label
                                 pointSize: Style.fontSizeM
                                 font.weight: Font.Medium
-                                color: opt.isActive ? Color.mOnPrimary : Color.mOnSurface
+                                color: opt.isActive ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface
                                 Layout.fillWidth: true
                             }
 
@@ -151,15 +151,15 @@ Item {
                                 text: opt.providerIp
                                 pointSize: Style.fontSizeXS
                                 color: opt.isActive
-                                       ? Qt.alpha(Color.mOnPrimary, 0.7)
-                                       : Color.mOnSurfaceVariant
+                                       ? Qt.alpha(AtmoColor.mOnPrimary, 0.7)
+                                       : AtmoColor.mOnSurfaceVariant
                                 visible: opt.providerIp !== ""
                             }
 
                             AtmoIconButton {
                                 visible: opt.isCustom
                                 icon: "trash"
-                                colorFg: opt.isActive ? Color.mOnPrimary : Color.mError
+                                colorFg: opt.isActive ? AtmoColor.mOnPrimary : AtmoColor.mError
                                 enabled: !opt.isDisabled
                                 onClicked: {
                                     if (mainInstance && opt.customIndex >= 0) {
@@ -233,8 +233,8 @@ Item {
                       ? (pluginApi?.tr("panel.cancel") || "Cancel")
                       : (pluginApi?.tr("panel.add_server") || "Add Custom Server")
                 icon: root.isAdding ? "x" : "plus"
-                backgroundColor: root.isAdding ? Color.mSurfaceVariant : Qt.alpha(Color.mPrimary, 0.15)
-                textColor: root.isAdding ? Color.mOnSurface : Color.mPrimary
+                backgroundColor: root.isAdding ? AtmoColor.mSurfaceVariant : Qt.alpha(AtmoColor.mPrimary, 0.15)
+                textColor: root.isAdding ? AtmoColor.mOnSurface : AtmoColor.mPrimary
                 enabled: !(mainInstance?.isChanging || false)
                 onClicked: {
                     root.isAdding = !root.isAdding;
@@ -283,7 +283,7 @@ Item {
                     Layout.fillWidth: true
                     visible: root.validationError !== ""
                     text: root.validationError
-                    color: Color.mError
+                    color: AtmoColor.mError
                     pointSize: Style.fontSizeXS
                     wrapMode: Text.WordWrap
                 }
@@ -315,8 +315,8 @@ Item {
                 Layout.topMargin: Style.marginS
                 text: pluginApi?.tr("panel.reset") || "Reset to Default (ISP)"
                 icon: "refresh"
-                backgroundColor: Qt.alpha(Color.mError, 0.15)
-                textColor: Color.mError
+                backgroundColor: Qt.alpha(AtmoColor.mError, 0.15)
+                textColor: AtmoColor.mError
                 enabled: !(mainInstance?.isChanging || false)
                          && (mainInstance?.isCustomDns || false)
                 onClicked: {

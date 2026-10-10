@@ -18,12 +18,12 @@ ColumnLayout {
     property string editColorPowerSaver:
         pluginApi?.pluginSettings?.colorPowerSaver ??
         pluginApi?.manifest?.metadata?.defaultSettings?.colorPowerSaver ??
-        Color.mSecondary
+        AtmoColor.mSecondary
 
     property string editColorPerformance:
         pluginApi?.pluginSettings?.colorPerformance ??
         pluginApi?.manifest?.metadata?.defaultSettings?.colorPerformance ??
-        Color.mError
+        AtmoColor.mError
 
     property bool editShowProfile:
         pluginApi?.pluginSettings?.showProfile  ??
@@ -47,8 +47,8 @@ ColumnLayout {
 
     // All palette colors
     readonly property var noctaliaPalette: [
-        Color.mPrimary, Color.mSecondary, Color.mTertiary, Color.mError,
-        Color.mSurface, Color.mSurfaceVariant, Color.mOutline
+        AtmoColor.mPrimary, AtmoColor.mSecondary, AtmoColor.mTertiary, AtmoColor.mError,
+        AtmoColor.mSurface, AtmoColor.mSurfaceVariant, AtmoColor.mOutline
     ]
 
     Component.onCompleted: {
@@ -86,7 +86,7 @@ ColumnLayout {
             NText {
                 text: pluginApi?.tr("settings.color-powersaver-desc")
                 font.pointSize: Style.fontSizeSmall
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
             }
 
             RowLayout {
@@ -101,7 +101,7 @@ ColumnLayout {
                         //height: 28
                         radius: Style.radiusL
                         color: modelData
-                        border.color: Qt.colorEqual(root.editColorPowerSaver, modelData) ? Color.mOnSurface : Color.mOutline
+                        border.color: Qt.colorEqual(root.editColorPowerSaver, modelData) ? AtmoColor.mOnSurface : AtmoColor.mOutline
                         border.width: Qt.colorEqual(root.editColorPowerSaver, modelData) ? 3 : 1
 
                         MouseArea {
@@ -133,7 +133,7 @@ ColumnLayout {
             NText {
                 text: pluginApi?.tr("settings.color-performance-desc")
                 font.pointSize: Style.fontSizeSmall
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
             }
 
             RowLayout {
@@ -148,7 +148,7 @@ ColumnLayout {
                         //height: 28
                         radius: Style.radiusL
                         color: modelData
-                        border.color: Qt.colorEqual(root.editColorPerformance, modelData) ? Color.mOnSurface : Color.mOutline
+                        border.color: Qt.colorEqual(root.editColorPerformance, modelData) ? AtmoColor.mOnSurface : AtmoColor.mOutline
                         border.width: Qt.colorEqual(root.editColorPerformance, modelData) ? 3 : 1
 
                         MouseArea {

@@ -412,7 +412,7 @@ Item {
     horizontalPolicy: ScrollBar.AlwaysOff
     verticalPolicy: ScrollBar.AsNeeded
     reserveScrollbarSpace: false
-    gradientColor: Color.mSurfaceVariant
+    gradientColor: AtmoColor.mSurfaceVariant
 
     Item {
       id: previewContent
@@ -481,7 +481,7 @@ Item {
 
           Rectangle {
             radius: Style.radiusM
-            color: Color.mSecondary
+            color: AtmoColor.mSecondary
             implicitHeight: chipLabel.implicitHeight + Style.marginXS
             implicitWidth: chipLabel.implicitWidth + Style.marginM
 
@@ -490,7 +490,7 @@ Item {
               anchors.centerIn: parent
               text: modelData?.label || ""
               pointSize: Style.fontSizeXS
-              color: Color.mOnSecondary
+              color: AtmoColor.mOnSecondary
             }
 
             MouseArea {
@@ -522,7 +522,7 @@ Item {
         elide: Text.ElideRight
         font.weight: Style.fontWeightBold
         pointSize: Style.fontSizeL
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
       }
 
       RowLayout {
@@ -535,7 +535,7 @@ Item {
           visible: showUploaderMetadata && text !== ""
           text: effectiveUploader()
           pointSize: Style.fontSizeM
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
           wrapMode: compactLayout ? Text.NoWrap : Text.Wrap
           elide: Text.ElideRight
         }
@@ -547,7 +547,7 @@ Item {
           NButton {
             text: "-"
             backgroundColor: "transparent"
-            textColor: Color.mOnSurfaceVariant
+            textColor: AtmoColor.mOnSurfaceVariant
             outlined: false
             enabled: isItemPlayingNow(currentItem)
             implicitWidth: Math.round(24 * Style.uiScaleRatio)
@@ -557,7 +557,7 @@ Item {
 
           Rectangle {
             radius: Style.radiusM
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
             implicitHeight: Math.round(24 * Style.uiScaleRatio)
             implicitWidth: speedChipLabel.implicitWidth + Math.round(18 * Style.uiScaleRatio)
 
@@ -566,7 +566,7 @@ Item {
               anchors.centerIn: parent
               text: formatSpeed(currentSpeed)
               pointSize: Style.fontSizeS
-              color: Color.mOnPrimary
+              color: AtmoColor.mOnPrimary
             }
 
             MouseArea {
@@ -579,7 +579,7 @@ Item {
           NButton {
             text: "+"
             backgroundColor: "transparent"
-            textColor: Color.mOnSurfaceVariant
+            textColor: AtmoColor.mOnSurfaceVariant
             outlined: false
             enabled: isItemPlayingNow(currentItem)
             implicitWidth: Math.round(24 * Style.uiScaleRatio)
@@ -673,7 +673,7 @@ Item {
           NText {
             text: MusicUtils.formatDuration(previewPanel.livePosition)
             pointSize: Style.fontSizeXS
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
           }
 
           Item {
@@ -683,7 +683,7 @@ Item {
           NText {
             text: MusicUtils.formatDuration(effectiveDuration())
             pointSize: Style.fontSizeXS
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
           }
         }
       }
@@ -702,13 +702,13 @@ Item {
           visible: showDurationMetadata && previewPanel.showLengthDetails
           text: visible ? previewTr("preview.length") : ""
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
         NText {
           visible: showDurationMetadata && previewPanel.showLengthDetails
           text: MusicUtils.formatDuration(effectiveDuration()) || "-"
           pointSize: Style.fontSizeS
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           horizontalAlignment: Text.AlignRight
           Layout.fillWidth: true
         }
@@ -717,13 +717,13 @@ Item {
           visible: showAlbumMetadata && effectiveAlbum() !== ""
           text: visible ? previewTr("preview.album") : ""
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
         NText {
           visible: showAlbumMetadata && effectiveAlbum() !== ""
           text: effectiveAlbum()
           pointSize: Style.fontSizeS
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           horizontalAlignment: Text.AlignRight
           Layout.fillWidth: true
         }
@@ -732,13 +732,13 @@ Item {
           visible: showPlayStatsMetadata && (currentItem?.playCount || 0) > 0
           text: visible ? previewTr("preview.plays") : ""
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
         NText {
           visible: showPlayStatsMetadata && (currentItem?.playCount || 0) > 0
           text: currentItem?.playCount || 0
           pointSize: Style.fontSizeS
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           horizontalAlignment: Text.AlignRight
           Layout.fillWidth: true
         }
@@ -747,13 +747,13 @@ Item {
           visible: showPlayStatsMetadata && MusicUtils.formatRelativeTime(currentItem?.lastPlayedAt) !== ""
           text: visible ? previewTr("preview.lastPlayed") : ""
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
         NText {
           visible: showPlayStatsMetadata && MusicUtils.formatRelativeTime(currentItem?.lastPlayedAt) !== ""
           text: MusicUtils.formatRelativeTime(currentItem?.lastPlayedAt)
           pointSize: Style.fontSizeS
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           horizontalAlignment: Text.AlignRight
           Layout.fillWidth: true
         }
@@ -762,13 +762,13 @@ Item {
           visible: previewPanel.richMetadataAllowedForItem(previewPanel.currentItem) && formatUploadDate(detailData?.uploadDate) !== ""
           text: visible ? previewTr("preview.uploaded") : ""
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
         NText {
           visible: previewPanel.richMetadataAllowedForItem(previewPanel.currentItem) && formatUploadDate(detailData?.uploadDate) !== ""
           text: formatUploadDate(detailData?.uploadDate)
           pointSize: Style.fontSizeS
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           horizontalAlignment: Text.AlignRight
           Layout.fillWidth: true
         }
@@ -777,13 +777,13 @@ Item {
           visible: previewPanel.richMetadataAllowedForItem(previewPanel.currentItem) && formatViews(detailData?.viewCount) !== ""
           text: visible ? previewTr("preview.reach") : ""
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
         NText {
           visible: previewPanel.richMetadataAllowedForItem(previewPanel.currentItem) && formatViews(detailData?.viewCount) !== ""
           text: formatViews(detailData?.viewCount)
           pointSize: Style.fontSizeS
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           horizontalAlignment: Text.AlignRight
           Layout.fillWidth: true
         }
@@ -792,13 +792,13 @@ Item {
           visible: showStatusMetadata && previewPanel.richMetadataAllowedForItem(previewPanel.currentItem) && !!detailData?.availability
           text: visible ? previewTr("preview.status") : ""
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
         NText {
           visible: showStatusMetadata && previewPanel.richMetadataAllowedForItem(previewPanel.currentItem) && !!detailData?.availability
           text: detailData?.availability || ""
           pointSize: Style.fontSizeS
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           horizontalAlignment: Text.AlignRight
           Layout.fillWidth: true
         }
@@ -828,7 +828,7 @@ Item {
               return effectiveDescription();
             }
             pointSize: Style.fontSizeS
-            color: (previewError || currentItem?.lastError) ? Color.mError : Color.mOnSurfaceVariant
+            color: (previewError || currentItem?.lastError) ? AtmoColor.mError : AtmoColor.mOnSurfaceVariant
           }
 
           NButton {
@@ -836,7 +836,7 @@ Item {
             text: previewPanel.descriptionExpanded ? previewTr("preview.readLess") : previewTr("preview.readMore")
             backgroundColor: "transparent"
             outlined: false
-            textColor: Color.mPrimary
+            textColor: AtmoColor.mPrimary
             implicitHeight: Math.round(24 * Style.uiScaleRatio)
             implicitWidth: readMoreMeasure.implicitWidth + Math.round(16 * Style.uiScaleRatio)
             onClicked: previewPanel.descriptionExpanded = !previewPanel.descriptionExpanded
@@ -859,14 +859,14 @@ Item {
         NBusyIndicator {
           running: true
           size: Math.round(Style.baseWidgetSize * 0.75)
-          color: Color.mPrimary
+          color: AtmoColor.mPrimary
         }
 
         NText {
           Layout.fillWidth: true
           text: startupMessage()
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
           wrapMode: Text.Wrap
         }
       }
@@ -878,13 +878,13 @@ Item {
         NBusyIndicator {
           running: true
           size: Math.round(Style.baseWidgetSize * 0.75)
-          color: Color.mPrimary
+          color: AtmoColor.mPrimary
         }
 
         NText {
           text: previewTr("preview.loadingMetadata")
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
       }
     }

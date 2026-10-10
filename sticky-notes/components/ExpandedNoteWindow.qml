@@ -113,7 +113,7 @@ Item {
         color: Qt.rgba(1, 1, 1, 0.28)
         border.width: root.editing ? Style.borderM : Style.borderS
         border.color: root.editing
-          ? (editor.activeFocus ? Qt.darker(Color.mPrimary, 1.35) : Color.mPrimary)
+          ? (editor.activeFocus ? Qt.darker(AtmoColor.mPrimary, 1.35) : AtmoColor.mPrimary)
           : Qt.rgba(0, 0, 0, 0.08)
 
         Behavior on border.color { ColorAnimation { duration: 150 } }

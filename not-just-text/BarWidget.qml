@@ -41,7 +41,7 @@ Item {
         y: Style.pixelAlignCenter(parent.height, height)
         width: root.contentWidth
         height: root.contentHeight
-        color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+        color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
         radius: Style.radiusL
         border.color: Style.capsuleBorderColor
         border.width: Style.capsuleBorderWidth
@@ -50,7 +50,7 @@ Item {
             id: label
             anchors.centerIn: parent
             text: root.displayText
-            color: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+            color: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
             font.pointSize: Style.barFontSize
         }
     }

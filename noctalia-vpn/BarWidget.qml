@@ -32,10 +32,10 @@ Item {
     }
 
     readonly property color tintColor: {
-        if (!active) return Color.mOnSurfaceVariant
-        if (degraded === "failed" || degraded === "error") return Color.mError
-        if (degraded === "degraded") return Color.mSecondary
-        return Color.mPrimary
+        if (!active) return AtmoColor.mOnSurfaceVariant
+        if (degraded === "failed" || degraded === "error") return AtmoColor.mError
+        if (degraded === "degraded") return AtmoColor.mSecondary
+        return AtmoColor.mPrimary
     }
 
     implicitWidth: row.implicitWidth + Style.margin2M
@@ -78,13 +78,13 @@ Item {
 
                 Rectangle {
                     width: Style.marginS; height: Style.marginS; radius: width / 2
-                    color: root.main ? root.main.pingColor(root.latencyMs) : Color.mPrimary
+                    color: root.main ? root.main.pingColor(root.latencyMs) : AtmoColor.mPrimary
                 }
                 NText {
                     text: pluginApi
                           ? pluginApi.tr("widget.latency-ms", { ms: root.latencyMs })
                           : root.latencyMs + "ms"
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                     pointSize: Style.fontSizeXS
                     font.family: "JetBrains Mono, monospace"
                 }
@@ -103,7 +103,7 @@ Item {
                      : "↓ " + root.main.formatBytes(root.main.trafficRecv)
                        + " ↑ " + root.main.formatBytes(root.main.trafficSent))
                   : ""
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             pointSize: Style.fontSizeXS
             font.family: "JetBrains Mono, monospace"
         }

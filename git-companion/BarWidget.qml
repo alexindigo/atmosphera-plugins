@@ -53,8 +53,8 @@ Item {
         id: pill
 
         autoHide: false
-        customIconColor: Color.resolveColorKeyOptional(root.iconColorKey)
-        customTextColor: Color.resolveColorKeyOptional(root.textColorKey)
+        customIconColor: AtmoColor.resolveColorKeyOptional(root.iconColorKey)
+        customTextColor: AtmoColor.resolveColorKeyOptional(root.textColorKey)
         forceClose: isBarVertical || root.displayMode === "alwaysHide" || text === ""
         forceOpen: !isBarVertical && root.displayMode === "alwaysShow"
         icon: platform === 'gitlab' ? 'brand-gitlab' : "brand-github"

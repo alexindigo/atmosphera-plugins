@@ -43,7 +43,7 @@ OutputCard {
 
     NText {
       text: root.pluginApi?.tr("panel.scale")
-      pointSize: Style.fontSizeS; font.weight: Font.DemiBold; color: Color.mOnSurfaceVariant
+      pointSize: Style.fontSizeS; font.weight: Font.DemiBold; color: AtmoColor.mOnSurfaceVariant
     }
 
     RowLayout {
@@ -57,7 +57,7 @@ OutputCard {
 
       NText {
         text: root.output.scale || "?"
-        pointSize: Style.fontSizeM; font.weight: Font.Bold; color: Color.mOnSurface
+        pointSize: Style.fontSizeM; font.weight: Font.Bold; color: AtmoColor.mOnSurface
         Layout.preferredWidth: 50 * Style.uiScaleRatio
         horizontalAlignment: Text.AlignHCenter
       }
@@ -83,7 +83,7 @@ OutputCard {
 
     NText {
       text: root.pluginApi?.tr("panel.transform")
-      pointSize: Style.fontSizeS; font.weight: Font.DemiBold; color: Color.mOnSurfaceVariant
+      pointSize: Style.fontSizeS; font.weight: Font.DemiBold; color: AtmoColor.mOnSurfaceVariant
     }
 
     Flow {
@@ -112,7 +112,7 @@ OutputCard {
 
       NText {
         text: root.pluginApi?.tr("panel.vrr")
-        pointSize: Style.fontSizeS; font.weight: Font.DemiBold; color: Color.mOnSurfaceVariant
+        pointSize: Style.fontSizeS; font.weight: Font.DemiBold; color: AtmoColor.mOnSurfaceVariant
       }
 
       RowLayout {
@@ -131,7 +131,7 @@ OutputCard {
         NText {
           visible: !root.output.vrrSupported
           text: root.pluginApi?.tr("panel.vrrNotSupported")
-          pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant
+          pointSize: Style.fontSizeXS; color: AtmoColor.mOnSurfaceVariant
         }
       }
     }
@@ -143,7 +143,7 @@ OutputCard {
 
       NText {
         text: root.pluginApi?.tr("panel.power")
-        pointSize: Style.fontSizeS; font.weight: Font.DemiBold; color: Color.mOnSurfaceVariant
+        pointSize: Style.fontSizeS; font.weight: Font.DemiBold; color: AtmoColor.mOnSurfaceVariant
       }
 
       PillButton {

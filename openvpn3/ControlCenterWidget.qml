@@ -27,8 +27,8 @@ Item {
     readonly property color iconColor: {
         const key = isConnected ? connectedColor : disconnectedColor
         if (!key || key === "none")
-            return mouseArea.containsMouse ? Color.mOnHover : Color.mPrimary
-        return Color.resolveColorKeyOptional(key) ?? Color.mPrimary
+            return mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mPrimary
+        return AtmoColor.resolveColorKeyOptional(key) ?? AtmoColor.mPrimary
     }
 
     function tipText() {
@@ -64,7 +64,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: Style.radiusM
-        color: mouseArea.containsMouse ? Color.mHover : "transparent"
+        color: mouseArea.containsMouse ? AtmoColor.mHover : "transparent"
 
         OpenVpnIcon {
             anchors.centerIn: parent

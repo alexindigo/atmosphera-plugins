@@ -56,13 +56,13 @@ ColumnLayout {
         text: pluginApi?.tr("header.title")
         pointSize: Style.fontSizeXL
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
     }
 
     NText {
         text: pluginApi?.tr("header.desc")
         pointSize: Style.fontSizeS
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
         Layout.bottomMargin: Style.marginM
     }
 
@@ -72,7 +72,7 @@ ColumnLayout {
         text: pluginApi?.tr("section.barButton")
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
     }
 
     NColorChoice {
@@ -89,7 +89,7 @@ ColumnLayout {
         text: pluginApi?.tr("section.behavior")
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
     }
 
     NToggle {
@@ -107,7 +107,7 @@ ColumnLayout {
         text: pluginApi?.tr("section.buttons")
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
     }
 
     NValueSlider {
@@ -181,7 +181,7 @@ ColumnLayout {
         text: pluginApi?.tr("section.background")
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
     }
 
     NToggle {
@@ -247,7 +247,7 @@ ColumnLayout {
         text: pluginApi?.tr("section.animations")
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
     }
 
     NToggle {

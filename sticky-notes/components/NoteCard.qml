@@ -79,8 +79,8 @@ Rectangle {
   color: noteCard.noteColor || "#FFF9C4"
   radius: Style.radiusM
   border.color: isEditing
-    ? (editTextArea.activeFocus ? Qt.darker(Color.mPrimary, 1.35) : Color.mPrimary)
-    : (isSelected ? Color.mPrimary : Qt.darker(noteCard.noteColor || "#FFF9C4", 1.06))
+    ? (editTextArea.activeFocus ? Qt.darker(AtmoColor.mPrimary, 1.35) : AtmoColor.mPrimary)
+    : (isSelected ? AtmoColor.mPrimary : Qt.darker(noteCard.noteColor || "#FFF9C4", 1.06))
   border.width: isEditing
     ? Style.borderM
     : (isSelected ? (Style.borderM + Style.borderS) : Style.borderS)
@@ -100,7 +100,7 @@ Rectangle {
     anchors.fill: parent
     color: Qt.rgba(0, 0, 0, 0)
     radius: noteCard.radius
-    border.color: Color.mPrimary
+    border.color: AtmoColor.mPrimary
     border.width: (!noteCard.isEditing && noteCard.isSelected) ? Style.borderS : 0
     visible: !noteCard.isEditing && noteCard.isSelected
     z: 180

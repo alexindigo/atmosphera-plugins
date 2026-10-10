@@ -38,8 +38,8 @@ Item {
 
     screen: root.screen
     oppositeDirection: BarService.getPillDirection(root)
-    customIconColor: Color.resolveColorKeyOptional(root.iconColorKey)
-    customTextColor: Color.resolveColorKeyOptional(root.textColorKey)
+    customIconColor: AtmoColor.resolveColorKeyOptional(root.iconColorKey)
+    customTextColor: AtmoColor.resolveColorKeyOptional(root.textColorKey)
     icon: KDEConnectUtils.getConnectionStateIcon(KDEConnect.mainDevice, KDEConnect.daemonAvailable)
     autoHide: false // Important to be false so we can hover as long as we want
     text: !KDEConnect.daemonAvailable || KDEConnect.mainDevice === null || KDEConnect.mainDevice.battery === -1 ? "" : (KDEConnect.mainDevice.battery + "%")

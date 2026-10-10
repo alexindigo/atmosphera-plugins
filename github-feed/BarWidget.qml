@@ -29,11 +29,11 @@ AtmoIconButton {
 
     function getThemeColor(type) {
         switch (type) {
-            case "Primary": return Color.mPrimary
-            case "Secondary": return Color.mSecondary
-            case "Tertiary": return Color.mTertiary
-            case "Error": return Color.mError
-            default: return Color.mOnSurface
+            case "Primary": return AtmoColor.mPrimary
+            case "Secondary": return AtmoColor.mSecondary
+            case "Tertiary": return AtmoColor.mTertiary
+            case "Error": return AtmoColor.mError
+            default: return AtmoColor.mOnSurface
         }
     }
 
@@ -45,13 +45,13 @@ AtmoIconButton {
     customRadius: Style.radiusL
     colorBg: Style.capsuleColor
     colorFg: {
-        if (hasError) return Color.mError
-        if (!hasUsername) return Color.mOnSurfaceVariant
+        if (hasError) return AtmoColor.mError
+        if (!hasUsername) return AtmoColor.mOnSurfaceVariant
         if (colorizationEnabled && colorizationIcon !== "None") return getThemeColor(colorizationIcon)
-        return Color.mOnSurface
+        return AtmoColor.mOnSurface
     }
-    colorBgHover: Color.mHover
-    colorFgHover: Color.mOnHover
+    colorBgHover: AtmoColor.mHover
+    colorFgHover: AtmoColor.mOnHover
     colorBorder: "transparent"
     colorBorderHover: "transparent"
 
@@ -69,8 +69,8 @@ AtmoIconButton {
         height: 14 * Style.uiScaleRatio
         width: Math.max(height, badgeText.implicitWidth + 6 * Style.uiScaleRatio)
         radius: height / 2
-        color: (colorizationEnabled && colorizationBadge !== "None") ? getThemeColor(colorizationBadge) : Color.mError
-        border.color: Color.mSurface
+        color: (colorizationEnabled && colorizationBadge !== "None") ? getThemeColor(colorizationBadge) : AtmoColor.mError
+        border.color: AtmoColor.mSurface
         border.width: 1
 
         NText {
@@ -82,7 +82,7 @@ AtmoIconButton {
             }
             pointSize: Style.fontSizeXS * 0.8
             font.weight: Font.Bold
-            color: (colorizationEnabled && colorizationBadgeText !== "None") ? getThemeColor(colorizationBadgeText) : Color.mOnError
+            color: (colorizationEnabled && colorizationBadgeText !== "None") ? getThemeColor(colorizationBadgeText) : AtmoColor.mOnError
         }
     }
 

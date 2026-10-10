@@ -25,12 +25,12 @@ AtmoIconButton {
     : pluginApi?.tr("bar.tooltip.inactive")
   tooltipDirection: BarService.getTooltipDirection(screenName)
 
-  colorBg: mirroring ? Color.mError : Style.capsuleColor
-  colorFg: mirroring ? Color.mOnError : Color.mOnSurface
-  colorBgHover: mirroring ? Color.mError : Color.mHover
-  colorFgHover: mirroring ? Color.mOnError : Color.mOnHover
-  colorBorder: mirroring ? Color.mError : Style.capsuleBorderColor
-  colorBorderHover: mirroring ? Color.mError : Style.capsuleBorderColor
+  colorBg: mirroring ? AtmoColor.mError : Style.capsuleColor
+  colorFg: mirroring ? AtmoColor.mOnError : AtmoColor.mOnSurface
+  colorBgHover: mirroring ? AtmoColor.mError : AtmoColor.mHover
+  colorFgHover: mirroring ? AtmoColor.mOnError : AtmoColor.mOnHover
+  colorBorder: mirroring ? AtmoColor.mError : Style.capsuleBorderColor
+  colorBorderHover: mirroring ? AtmoColor.mError : Style.capsuleBorderColor
 
   onClicked: {
     pluginApi?.openPanel(root.screen, root);

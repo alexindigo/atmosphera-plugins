@@ -53,7 +53,7 @@ Item {
     // SmartPanel background color - transparent when hidePanelBackground is enabled
     property color panelBackgroundColor: (pluginApi?.pluginSettings?.hidePanelBackground ?? false)
         ? "transparent"
-        : ((typeof Color !== "undefined") ? Color.mSurface : "#222222")
+        : ((typeof AtmoColor !== "undefined") ? AtmoColor.mSurface : "#222222")
 
     // Keyboard navigation
     property int selectedIndex: 0
@@ -164,10 +164,10 @@ Item {
             z: 10
             icon: "x"
             tooltipText: pluginApi?.tr("panel.close")
-            colorBg: (typeof Color !== "undefined") ? Color.mSurfaceVariant : "#444444"
-            colorBgHover: (typeof Color !== "undefined") ? Color.mError : "#CC0000"
-            colorFg: (typeof Color !== "undefined") ? Color.mOnSurface : "#FFFFFF"
-            colorFgHover: (typeof Color !== "undefined") ? Color.mOnError : "#FFFFFF"
+            colorBg: (typeof AtmoColor !== "undefined") ? AtmoColor.mSurfaceVariant : "#444444"
+            colorBgHover: (typeof AtmoColor !== "undefined") ? AtmoColor.mError : "#CC0000"
+            colorFg: (typeof AtmoColor !== "undefined") ? AtmoColor.mOnSurface : "#FFFFFF"
+            colorFgHover: (typeof AtmoColor !== "undefined") ? AtmoColor.mOnError : "#FFFFFF"
             onClicked: {
                 if (root.pluginApi) {
                     root.pluginApi.closePanel(screen);
@@ -182,7 +182,7 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             height: Math.min(300, screen?.height * 0.3 || 300)
-            color: (typeof Color !== "undefined") ? Color.mSurface : "#222222"
+            color: (typeof AtmoColor !== "undefined") ? AtmoColor.mSurface : "#222222"
             radius: Style.radiusM
             opacity: 1.0  // Override global panel opacity
 
@@ -219,10 +219,10 @@ Item {
                         icon: "settings"
                         tooltipText: pluginApi?.tr("panel.settings")
                         Layout.alignment: Qt.AlignVCenter
-                        colorBg: (typeof Color !== "undefined") ? Color.mSurfaceVariant : "#444444"
-                        colorBgHover: (typeof Color !== "undefined") ? Color.mHover : "#666666"
-                        colorFg: (typeof Color !== "undefined") ? Color.mOnSurface : "#FFFFFF"
-                        colorFgHover: (typeof Color !== "undefined") ? Color.mOnSurface : "#FFFFFF"
+                        colorBg: (typeof AtmoColor !== "undefined") ? AtmoColor.mSurfaceVariant : "#444444"
+                        colorBgHover: (typeof AtmoColor !== "undefined") ? AtmoColor.mHover : "#666666"
+                        colorFg: (typeof AtmoColor !== "undefined") ? AtmoColor.mOnSurface : "#FFFFFF"
+                        colorFgHover: (typeof AtmoColor !== "undefined") ? AtmoColor.mOnSurface : "#FFFFFF"
                         onClicked: {
                             if (root.pluginApi) {
                                 BarService.openPluginSettings(screen, root.pluginApi.manifest);
@@ -324,8 +324,8 @@ Item {
                         // --- ALL ---
                         Item {
                             readonly property string fType: ""
-                            readonly property color accentColor: (typeof Color !== "undefined") ? Color.mPrimary : "#BB86FC"
-                            readonly property color accentFgColor: (typeof Color !== "undefined") ? Color.mOnPrimary : "#FFFFFF"
+                            readonly property color accentColor: (typeof AtmoColor !== "undefined") ? AtmoColor.mPrimary : "#BB86FC"
+                            readonly property color accentFgColor: (typeof AtmoColor !== "undefined") ? AtmoColor.mOnPrimary : "#FFFFFF"
                             readonly property bool isActive: root.filterType === fType
                             readonly property int itemCount: (pluginApi?.mainInstance?.items || []).length
                             // Expand slightly so the burst ring has room without clipping
@@ -338,10 +338,10 @@ Item {
                                 focus: true
                                 icon: "apps"
                                 tooltipText: pluginApi?.tr("panel.filter-all")
-                                colorBg: (typeof Color !== "undefined") ? (parent.isActive ? Color.mPrimary : Color.mSurfaceVariant) : "#444444"
-                                colorBgHover: (typeof Color !== "undefined") ? (parent.isActive ? Color.mPrimary : Color.mHover) : "#666666"
-                                colorFg: (typeof Color !== "undefined") ? (parent.isActive ? Color.mOnPrimary : Color.mOnSurface) : "#FFFFFF"
-                                colorFgHover: (typeof Color !== "undefined") ? (parent.isActive ? Color.mOnPrimary : Color.mOnSurface) : "#FFFFFF"
+                                colorBg: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mPrimary : AtmoColor.mSurfaceVariant) : "#444444"
+                                colorBgHover: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mPrimary : AtmoColor.mHover) : "#666666"
+                                colorFg: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface) : "#FFFFFF"
+                                colorFgHover: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface) : "#FFFFFF"
                                 onClicked: root.filterType = ""
                                 Keys.onTabPressed: {
                                     root.filterType = "";
@@ -356,7 +356,7 @@ Item {
                                 height: btnAll.height + 8
                                 radius: Math.min(width, height) / 2
                                 color: "transparent"
-                                border.color: (typeof Color !== "undefined") ? parent.accentColor : "#BB86FC"
+                                border.color: (typeof AtmoColor !== "undefined") ? parent.accentColor : "#BB86FC"
                                 border.width: 2
                                 opacity: parent.isActive ? 0.85 : 0
                                 scale: parent.isActive ? 1.0 : 0.7
@@ -389,7 +389,7 @@ Item {
                                 Rectangle {
                                     anchors.fill: parent
                                     radius: Math.min(Style.radiusL, width / 2)
-                                    color: (typeof Color !== "undefined") ? parent.parent.accentColor : "#BB86FC"
+                                    color: (typeof AtmoColor !== "undefined") ? parent.parent.accentColor : "#BB86FC"
                                     scale: parent.parent.parent.isActive ? 1.0 : 0.85
                                     Behavior on scale {
                                         NumberAnimation {
@@ -398,7 +398,7 @@ Item {
                                         }
                                     }
                                     Behavior on color {
-                                        enabled: (typeof Color !== "undefined") && !Color.isTransitioning
+                                        enabled: (typeof AtmoColor !== "undefined") && !AtmoColor.isTransitioning
                                         ColorAnimation {
                                             duration: Style.animationFast
                                             easing.type: Easing.InOutCubic
@@ -412,7 +412,7 @@ Item {
                                     text: parent.parent.itemCount > 99 ? "99+" : parent.parent.itemCount
                                     font.pointSize: (typeof Style !== "undefined") ? Style.fontSizeXS * 0.75 : 8
                                     font.bold: true
-                                    color: (typeof Color !== "undefined") ? parent.parent.accentFgColor : "#FFFFFF"
+                                    color: (typeof AtmoColor !== "undefined") ? parent.parent.accentFgColor : "#FFFFFF"
                                 }
                             }
                         }
@@ -420,8 +420,8 @@ Item {
                         // --- TEXT ---
                         Item {
                             readonly property string fType: "Text"
-                            readonly property color accentColor: (typeof Color !== "undefined") ? Color.mPrimary : "#BB86FC"
-                            readonly property color accentFgColor: (typeof Color !== "undefined") ? Color.mOnPrimary : "#FFFFFF"
+                            readonly property color accentColor: (typeof AtmoColor !== "undefined") ? AtmoColor.mPrimary : "#BB86FC"
+                            readonly property color accentFgColor: (typeof AtmoColor !== "undefined") ? AtmoColor.mOnPrimary : "#FFFFFF"
                             readonly property bool isActive: root.filterType === fType
                             readonly property int itemCount: {
                                 const all = pluginApi?.mainInstance?.items || [];
@@ -436,10 +436,10 @@ Item {
                                 focus: true
                                 icon: "align-left"
                                 tooltipText: pluginApi?.tr("panel.filter-text")
-                                colorBg: (typeof Color !== "undefined") ? (parent.isActive ? Color.mPrimary : Color.mSurfaceVariant) : "#444444"
-                                colorBgHover: (typeof Color !== "undefined") ? (parent.isActive ? Color.mPrimary : Color.mHover) : "#666666"
-                                colorFg: (typeof Color !== "undefined") ? (parent.isActive ? Color.mOnPrimary : Color.mOnSurface) : "#FFFFFF"
-                                colorFgHover: (typeof Color !== "undefined") ? (parent.isActive ? Color.mOnPrimary : Color.mOnSurface) : "#FFFFFF"
+                                colorBg: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mPrimary : AtmoColor.mSurfaceVariant) : "#444444"
+                                colorBgHover: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mPrimary : AtmoColor.mHover) : "#666666"
+                                colorFg: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface) : "#FFFFFF"
+                                colorFgHover: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface) : "#FFFFFF"
                                 onClicked: root.filterType = "Text"
                                 Keys.onTabPressed: {
                                     root.filterType = "Image";
@@ -453,7 +453,7 @@ Item {
                                 height: btnText.height + 8
                                 radius: Math.min(width, height) / 2
                                 color: "transparent"
-                                border.color: (typeof Color !== "undefined") ? parent.accentColor : "#BB86FC"
+                                border.color: (typeof AtmoColor !== "undefined") ? parent.accentColor : "#BB86FC"
                                 border.width: 2
                                 opacity: parent.isActive ? 0.85 : 0
                                 scale: parent.isActive ? 1.0 : 0.7
@@ -485,7 +485,7 @@ Item {
                                 Rectangle {
                                     anchors.fill: parent
                                     radius: Math.min(Style.radiusL, width / 2)
-                                    color: (typeof Color !== "undefined") ? parent.parent.accentColor : "#BB86FC"
+                                    color: (typeof AtmoColor !== "undefined") ? parent.parent.accentColor : "#BB86FC"
                                     scale: parent.parent.parent.isActive ? 1.0 : 0.85
                                     Behavior on scale {
                                         NumberAnimation {
@@ -494,7 +494,7 @@ Item {
                                         }
                                     }
                                     Behavior on color {
-                                        enabled: (typeof Color !== "undefined") && !Color.isTransitioning
+                                        enabled: (typeof AtmoColor !== "undefined") && !AtmoColor.isTransitioning
                                         ColorAnimation {
                                             duration: Style.animationFast
                                             easing.type: Easing.InOutCubic
@@ -507,7 +507,7 @@ Item {
                                     text: parent.parent.itemCount > 99 ? "99+" : parent.parent.itemCount
                                     font.pointSize: (typeof Style !== "undefined") ? Style.fontSizeXS * 0.75 : 8
                                     font.bold: true
-                                    color: (typeof Color !== "undefined") ? parent.parent.accentFgColor : "#FFFFFF"
+                                    color: (typeof AtmoColor !== "undefined") ? parent.parent.accentFgColor : "#FFFFFF"
                                 }
                             }
                         }
@@ -515,8 +515,8 @@ Item {
                         // --- IMAGE ---
                         Item {
                             readonly property string fType: "Image"
-                            readonly property color accentColor: (typeof Color !== "undefined") ? Color.mTertiary : "#03DAC6"
-                            readonly property color accentFgColor: (typeof Color !== "undefined") ? Color.mOnTertiary : "#FFFFFF"
+                            readonly property color accentColor: (typeof AtmoColor !== "undefined") ? AtmoColor.mTertiary : "#03DAC6"
+                            readonly property color accentFgColor: (typeof AtmoColor !== "undefined") ? AtmoColor.mOnTertiary : "#FFFFFF"
                             readonly property bool isActive: root.filterType === fType
                             readonly property int itemCount: {
                                 const all = pluginApi?.mainInstance?.items || [];
@@ -531,10 +531,10 @@ Item {
                                 focus: true
                                 icon: "photo"
                                 tooltipText: pluginApi?.tr("panel.filter-images")
-                                colorBg: (typeof Color !== "undefined") ? (parent.isActive ? Color.mTertiary : Color.mSurfaceVariant) : "#444444"
-                                colorBgHover: (typeof Color !== "undefined") ? (parent.isActive ? Color.mTertiary : Color.mHover) : "#666666"
-                                colorFg: (typeof Color !== "undefined") ? (parent.isActive ? Color.mOnTertiary : Color.mOnSurface) : "#FFFFFF"
-                                colorFgHover: (typeof Color !== "undefined") ? (parent.isActive ? Color.mOnTertiary : Color.mOnSurface) : "#FFFFFF"
+                                colorBg: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mTertiary : AtmoColor.mSurfaceVariant) : "#444444"
+                                colorBgHover: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mTertiary : AtmoColor.mHover) : "#666666"
+                                colorFg: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mOnTertiary : AtmoColor.mOnSurface) : "#FFFFFF"
+                                colorFgHover: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mOnTertiary : AtmoColor.mOnSurface) : "#FFFFFF"
                                 onClicked: root.filterType = "Image"
                             }
 
@@ -544,7 +544,7 @@ Item {
                                 height: btnImage.height + 8
                                 radius: Math.min(width, height) / 2
                                 color: "transparent"
-                                border.color: (typeof Color !== "undefined") ? parent.accentColor : "#03DAC6"
+                                border.color: (typeof AtmoColor !== "undefined") ? parent.accentColor : "#03DAC6"
                                 border.width: 2
                                 opacity: parent.isActive ? 0.85 : 0
                                 scale: parent.isActive ? 1.0 : 0.7
@@ -576,7 +576,7 @@ Item {
                                 Rectangle {
                                     anchors.fill: parent
                                     radius: Math.min(Style.radiusL, width / 2)
-                                    color: (typeof Color !== "undefined") ? parent.parent.accentColor : "#03DAC6"
+                                    color: (typeof AtmoColor !== "undefined") ? parent.parent.accentColor : "#03DAC6"
                                     scale: parent.parent.parent.isActive ? 1.0 : 0.85
                                     Behavior on scale {
                                         NumberAnimation {
@@ -585,7 +585,7 @@ Item {
                                         }
                                     }
                                     Behavior on color {
-                                        enabled: (typeof Color !== "undefined") && !Color.isTransitioning
+                                        enabled: (typeof AtmoColor !== "undefined") && !AtmoColor.isTransitioning
                                         ColorAnimation {
                                             duration: Style.animationFast
                                             easing.type: Easing.InOutCubic
@@ -598,7 +598,7 @@ Item {
                                     text: parent.parent.itemCount > 99 ? "99+" : parent.parent.itemCount
                                     font.pointSize: (typeof Style !== "undefined") ? Style.fontSizeXS * 0.75 : 8
                                     font.bold: true
-                                    color: (typeof Color !== "undefined") ? parent.parent.accentFgColor : "#FFFFFF"
+                                    color: (typeof AtmoColor !== "undefined") ? parent.parent.accentFgColor : "#FFFFFF"
                                 }
                             }
                         }
@@ -606,8 +606,8 @@ Item {
                         // --- COLOR ---
                         Item {
                             readonly property string fType: "Color"
-                            readonly property color accentColor: (typeof Color !== "undefined") ? Color.mSecondary : "#CF6679"
-                            readonly property color accentFgColor: (typeof Color !== "undefined") ? Color.mOnSecondary : "#FFFFFF"
+                            readonly property color accentColor: (typeof AtmoColor !== "undefined") ? AtmoColor.mSecondary : "#CF6679"
+                            readonly property color accentFgColor: (typeof AtmoColor !== "undefined") ? AtmoColor.mOnSecondary : "#FFFFFF"
                             readonly property bool isActive: root.filterType === fType
                             readonly property int itemCount: {
                                 const all = pluginApi?.mainInstance?.items || [];
@@ -622,10 +622,10 @@ Item {
                                 focus: true
                                 icon: "palette"
                                 tooltipText: pluginApi?.tr("panel.filter-colors")
-                                colorBg: (typeof Color !== "undefined") ? (parent.isActive ? Color.mSecondary : Color.mSurfaceVariant) : "#444444"
-                                colorBgHover: (typeof Color !== "undefined") ? (parent.isActive ? Color.mSecondary : Color.mHover) : "#666666"
-                                colorFg: (typeof Color !== "undefined") ? (parent.isActive ? Color.mOnSecondary : Color.mOnSurface) : "#FFFFFF"
-                                colorFgHover: (typeof Color !== "undefined") ? (parent.isActive ? Color.mOnSecondary : Color.mOnSurface) : "#FFFFFF"
+                                colorBg: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mSecondary : AtmoColor.mSurfaceVariant) : "#444444"
+                                colorBgHover: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mSecondary : AtmoColor.mHover) : "#666666"
+                                colorFg: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mOnSecondary : AtmoColor.mOnSurface) : "#FFFFFF"
+                                colorFgHover: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mOnSecondary : AtmoColor.mOnSurface) : "#FFFFFF"
                                 onClicked: root.filterType = "Color"
                             }
 
@@ -635,7 +635,7 @@ Item {
                                 height: btnColorFilter.height + 8
                                 radius: Math.min(width, height) / 2
                                 color: "transparent"
-                                border.color: (typeof Color !== "undefined") ? parent.accentColor : "#CF6679"
+                                border.color: (typeof AtmoColor !== "undefined") ? parent.accentColor : "#CF6679"
                                 border.width: 2
                                 opacity: parent.isActive ? 0.85 : 0
                                 scale: parent.isActive ? 1.0 : 0.7
@@ -667,7 +667,7 @@ Item {
                                 Rectangle {
                                     anchors.fill: parent
                                     radius: Math.min(Style.radiusL, width / 2)
-                                    color: (typeof Color !== "undefined") ? parent.parent.accentColor : "#CF6679"
+                                    color: (typeof AtmoColor !== "undefined") ? parent.parent.accentColor : "#CF6679"
                                     scale: parent.parent.parent.isActive ? 1.0 : 0.85
                                     Behavior on scale {
                                         NumberAnimation {
@@ -676,7 +676,7 @@ Item {
                                         }
                                     }
                                     Behavior on color {
-                                        enabled: (typeof Color !== "undefined") && !Color.isTransitioning
+                                        enabled: (typeof AtmoColor !== "undefined") && !AtmoColor.isTransitioning
                                         ColorAnimation {
                                             duration: Style.animationFast
                                             easing.type: Easing.InOutCubic
@@ -689,7 +689,7 @@ Item {
                                     text: parent.parent.itemCount > 99 ? "99+" : parent.parent.itemCount
                                     font.pointSize: (typeof Style !== "undefined") ? Style.fontSizeXS * 0.75 : 8
                                     font.bold: true
-                                    color: (typeof Color !== "undefined") ? parent.parent.accentFgColor : "#FFFFFF"
+                                    color: (typeof AtmoColor !== "undefined") ? parent.parent.accentFgColor : "#FFFFFF"
                                 }
                             }
                         }
@@ -697,8 +697,8 @@ Item {
                         // --- LINK ---
                         Item {
                             readonly property string fType: "Link"
-                            readonly property color accentColor: (typeof Color !== "undefined") ? Color.mPrimary : "#BB86FC"
-                            readonly property color accentFgColor: (typeof Color !== "undefined") ? Color.mOnPrimary : "#FFFFFF"
+                            readonly property color accentColor: (typeof AtmoColor !== "undefined") ? AtmoColor.mPrimary : "#BB86FC"
+                            readonly property color accentFgColor: (typeof AtmoColor !== "undefined") ? AtmoColor.mOnPrimary : "#FFFFFF"
                             readonly property bool isActive: root.filterType === fType
                             readonly property int itemCount: {
                                 const all = pluginApi?.mainInstance?.items || [];
@@ -713,10 +713,10 @@ Item {
                                 focus: true
                                 icon: "link"
                                 tooltipText: pluginApi?.tr("panel.filter-links")
-                                colorBg: (typeof Color !== "undefined") ? (parent.isActive ? Color.mPrimary : Color.mSurfaceVariant) : "#444444"
-                                colorBgHover: (typeof Color !== "undefined") ? (parent.isActive ? Color.mPrimary : Color.mHover) : "#666666"
-                                colorFg: (typeof Color !== "undefined") ? (parent.isActive ? Color.mOnPrimary : Color.mOnSurface) : "#FFFFFF"
-                                colorFgHover: (typeof Color !== "undefined") ? (parent.isActive ? Color.mOnPrimary : Color.mOnSurface) : "#FFFFFF"
+                                colorBg: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mPrimary : AtmoColor.mSurfaceVariant) : "#444444"
+                                colorBgHover: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mPrimary : AtmoColor.mHover) : "#666666"
+                                colorFg: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface) : "#FFFFFF"
+                                colorFgHover: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface) : "#FFFFFF"
                                 onClicked: root.filterType = "Link"
                             }
 
@@ -726,7 +726,7 @@ Item {
                                 height: btnLink.height + 8
                                 radius: Math.min(width, height) / 2
                                 color: "transparent"
-                                border.color: (typeof Color !== "undefined") ? parent.accentColor : "#BB86FC"
+                                border.color: (typeof AtmoColor !== "undefined") ? parent.accentColor : "#BB86FC"
                                 border.width: 2
                                 opacity: parent.isActive ? 0.85 : 0
                                 scale: parent.isActive ? 1.0 : 0.7
@@ -758,7 +758,7 @@ Item {
                                 Rectangle {
                                     anchors.fill: parent
                                     radius: Math.min(Style.radiusL, width / 2)
-                                    color: (typeof Color !== "undefined") ? parent.parent.accentColor : "#BB86FC"
+                                    color: (typeof AtmoColor !== "undefined") ? parent.parent.accentColor : "#BB86FC"
                                     scale: parent.parent.parent.isActive ? 1.0 : 0.85
                                     Behavior on scale {
                                         NumberAnimation {
@@ -767,7 +767,7 @@ Item {
                                         }
                                     }
                                     Behavior on color {
-                                        enabled: (typeof Color !== "undefined") && !Color.isTransitioning
+                                        enabled: (typeof AtmoColor !== "undefined") && !AtmoColor.isTransitioning
                                         ColorAnimation {
                                             duration: Style.animationFast
                                             easing.type: Easing.InOutCubic
@@ -780,7 +780,7 @@ Item {
                                     text: parent.parent.itemCount > 99 ? "99+" : parent.parent.itemCount
                                     font.pointSize: (typeof Style !== "undefined") ? Style.fontSizeXS * 0.75 : 8
                                     font.bold: true
-                                    color: (typeof Color !== "undefined") ? parent.parent.accentFgColor : "#FFFFFF"
+                                    color: (typeof AtmoColor !== "undefined") ? parent.parent.accentFgColor : "#FFFFFF"
                                 }
                             }
                         }
@@ -788,8 +788,8 @@ Item {
                         // --- CODE ---
                         Item {
                             readonly property string fType: "Code"
-                            readonly property color accentColor: (typeof Color !== "undefined") ? Color.mSecondary : "#CF6679"
-                            readonly property color accentFgColor: (typeof Color !== "undefined") ? Color.mOnSecondary : "#FFFFFF"
+                            readonly property color accentColor: (typeof AtmoColor !== "undefined") ? AtmoColor.mSecondary : "#CF6679"
+                            readonly property color accentFgColor: (typeof AtmoColor !== "undefined") ? AtmoColor.mOnSecondary : "#FFFFFF"
                             readonly property bool isActive: root.filterType === fType
                             readonly property int itemCount: {
                                 const all = pluginApi?.mainInstance?.items || [];
@@ -804,10 +804,10 @@ Item {
                                 focus: true
                                 icon: "code"
                                 tooltipText: pluginApi?.tr("panel.filter-code")
-                                colorBg: (typeof Color !== "undefined") ? (parent.isActive ? Color.mSecondary : Color.mSurfaceVariant) : "#444444"
-                                colorBgHover: (typeof Color !== "undefined") ? (parent.isActive ? Color.mSecondary : Color.mHover) : "#666666"
-                                colorFg: (typeof Color !== "undefined") ? (parent.isActive ? Color.mOnSecondary : Color.mOnSurface) : "#FFFFFF"
-                                colorFgHover: (typeof Color !== "undefined") ? (parent.isActive ? Color.mOnSecondary : Color.mOnSurface) : "#FFFFFF"
+                                colorBg: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mSecondary : AtmoColor.mSurfaceVariant) : "#444444"
+                                colorBgHover: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mSecondary : AtmoColor.mHover) : "#666666"
+                                colorFg: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mOnSecondary : AtmoColor.mOnSurface) : "#FFFFFF"
+                                colorFgHover: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mOnSecondary : AtmoColor.mOnSurface) : "#FFFFFF"
                                 onClicked: root.filterType = "Code"
                             }
 
@@ -817,7 +817,7 @@ Item {
                                 height: btnCode.height + 8
                                 radius: Math.min(width, height) / 2
                                 color: "transparent"
-                                border.color: (typeof Color !== "undefined") ? parent.accentColor : "#CF6679"
+                                border.color: (typeof AtmoColor !== "undefined") ? parent.accentColor : "#CF6679"
                                 border.width: 2
                                 opacity: parent.isActive ? 0.85 : 0
                                 scale: parent.isActive ? 1.0 : 0.7
@@ -849,7 +849,7 @@ Item {
                                 Rectangle {
                                     anchors.fill: parent
                                     radius: Math.min(Style.radiusL, width / 2)
-                                    color: (typeof Color !== "undefined") ? parent.parent.accentColor : "#CF6679"
+                                    color: (typeof AtmoColor !== "undefined") ? parent.parent.accentColor : "#CF6679"
                                     scale: parent.parent.parent.isActive ? 1.0 : 0.85
                                     Behavior on scale {
                                         NumberAnimation {
@@ -858,7 +858,7 @@ Item {
                                         }
                                     }
                                     Behavior on color {
-                                        enabled: (typeof Color !== "undefined") && !Color.isTransitioning
+                                        enabled: (typeof AtmoColor !== "undefined") && !AtmoColor.isTransitioning
                                         ColorAnimation {
                                             duration: Style.animationFast
                                             easing.type: Easing.InOutCubic
@@ -871,7 +871,7 @@ Item {
                                     text: parent.parent.itemCount > 99 ? "99+" : parent.parent.itemCount
                                     font.pointSize: (typeof Style !== "undefined") ? Style.fontSizeXS * 0.75 : 8
                                     font.bold: true
-                                    color: (typeof Color !== "undefined") ? parent.parent.accentFgColor : "#FFFFFF"
+                                    color: (typeof AtmoColor !== "undefined") ? parent.parent.accentFgColor : "#FFFFFF"
                                 }
                             }
                         }
@@ -879,8 +879,8 @@ Item {
                         // --- EMOJI ---
                         Item {
                             readonly property string fType: "Emoji"
-                            readonly property color accentColor: (typeof Color !== "undefined") ? Color.mPrimary : "#BB86FC"
-                            readonly property color accentFgColor: (typeof Color !== "undefined") ? Color.mOnPrimary : "#FFFFFF"
+                            readonly property color accentColor: (typeof AtmoColor !== "undefined") ? AtmoColor.mPrimary : "#BB86FC"
+                            readonly property color accentFgColor: (typeof AtmoColor !== "undefined") ? AtmoColor.mOnPrimary : "#FFFFFF"
                             readonly property bool isActive: root.filterType === fType
                             readonly property int itemCount: {
                                 const all = pluginApi?.mainInstance?.items || [];
@@ -895,10 +895,10 @@ Item {
                                 focus: true
                                 icon: "mood-smile"
                                 tooltipText: pluginApi?.tr("panel.filter-emoji")
-                                colorBg: (typeof Color !== "undefined") ? (parent.isActive ? Color.mPrimary : Color.mSurfaceVariant) : "#444444"
-                                colorBgHover: (typeof Color !== "undefined") ? (parent.isActive ? Color.mPrimary : Color.mHover) : "#666666"
-                                colorFg: (typeof Color !== "undefined") ? (parent.isActive ? Color.mOnPrimary : Color.mOnSurface) : "#FFFFFF"
-                                colorFgHover: (typeof Color !== "undefined") ? (parent.isActive ? Color.mOnPrimary : Color.mOnSurface) : "#FFFFFF"
+                                colorBg: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mPrimary : AtmoColor.mSurfaceVariant) : "#444444"
+                                colorBgHover: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mPrimary : AtmoColor.mHover) : "#666666"
+                                colorFg: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface) : "#FFFFFF"
+                                colorFgHover: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface) : "#FFFFFF"
                                 onClicked: root.filterType = "Emoji"
                             }
 
@@ -908,7 +908,7 @@ Item {
                                 height: btnEmoji.height + 8
                                 radius: Math.min(width, height) / 2
                                 color: "transparent"
-                                border.color: (typeof Color !== "undefined") ? parent.accentColor : "#BB86FC"
+                                border.color: (typeof AtmoColor !== "undefined") ? parent.accentColor : "#BB86FC"
                                 border.width: 2
                                 opacity: parent.isActive ? 0.85 : 0
                                 scale: parent.isActive ? 1.0 : 0.7
@@ -940,7 +940,7 @@ Item {
                                 Rectangle {
                                     anchors.fill: parent
                                     radius: Math.min(Style.radiusL, width / 2)
-                                    color: (typeof Color !== "undefined") ? parent.parent.accentColor : "#BB86FC"
+                                    color: (typeof AtmoColor !== "undefined") ? parent.parent.accentColor : "#BB86FC"
                                     scale: parent.parent.parent.isActive ? 1.0 : 0.85
                                     Behavior on scale {
                                         NumberAnimation {
@@ -949,7 +949,7 @@ Item {
                                         }
                                     }
                                     Behavior on color {
-                                        enabled: (typeof Color !== "undefined") && !Color.isTransitioning
+                                        enabled: (typeof AtmoColor !== "undefined") && !AtmoColor.isTransitioning
                                         ColorAnimation {
                                             duration: Style.animationFast
                                             easing.type: Easing.InOutCubic
@@ -962,7 +962,7 @@ Item {
                                     text: parent.parent.itemCount > 99 ? "99+" : parent.parent.itemCount
                                     font.pointSize: (typeof Style !== "undefined") ? Style.fontSizeXS * 0.75 : 8
                                     font.bold: true
-                                    color: (typeof Color !== "undefined") ? parent.parent.accentFgColor : "#FFFFFF"
+                                    color: (typeof AtmoColor !== "undefined") ? parent.parent.accentFgColor : "#FFFFFF"
                                 }
                             }
                         }
@@ -970,8 +970,8 @@ Item {
                         // --- FILE ---
                         Item {
                             readonly property string fType: "File"
-                            readonly property color accentColor: (typeof Color !== "undefined") ? Color.mTertiary : "#03DAC6"
-                            readonly property color accentFgColor: (typeof Color !== "undefined") ? Color.mOnTertiary : "#FFFFFF"
+                            readonly property color accentColor: (typeof AtmoColor !== "undefined") ? AtmoColor.mTertiary : "#03DAC6"
+                            readonly property color accentFgColor: (typeof AtmoColor !== "undefined") ? AtmoColor.mOnTertiary : "#FFFFFF"
                             readonly property bool isActive: root.filterType === fType
                             readonly property int itemCount: {
                                 const all = pluginApi?.mainInstance?.items || [];
@@ -986,10 +986,10 @@ Item {
                                 focus: true
                                 icon: "file"
                                 tooltipText: pluginApi?.tr("panel.filter-files")
-                                colorBg: (typeof Color !== "undefined") ? (parent.isActive ? Color.mTertiary : Color.mSurfaceVariant) : "#444444"
-                                colorBgHover: (typeof Color !== "undefined") ? (parent.isActive ? Color.mTertiary : Color.mHover) : "#666666"
-                                colorFg: (typeof Color !== "undefined") ? (parent.isActive ? Color.mOnTertiary : Color.mOnSurface) : "#FFFFFF"
-                                colorFgHover: (typeof Color !== "undefined") ? (parent.isActive ? Color.mOnTertiary : Color.mOnSurface) : "#FFFFFF"
+                                colorBg: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mTertiary : AtmoColor.mSurfaceVariant) : "#444444"
+                                colorBgHover: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mTertiary : AtmoColor.mHover) : "#666666"
+                                colorFg: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mOnTertiary : AtmoColor.mOnSurface) : "#FFFFFF"
+                                colorFgHover: (typeof AtmoColor !== "undefined") ? (parent.isActive ? AtmoColor.mOnTertiary : AtmoColor.mOnSurface) : "#FFFFFF"
                                 onClicked: root.filterType = "File"
                             }
 
@@ -999,7 +999,7 @@ Item {
                                 height: btnFile.height + 8
                                 radius: Math.min(width, height) / 2
                                 color: "transparent"
-                                border.color: (typeof Color !== "undefined") ? parent.accentColor : "#03DAC6"
+                                border.color: (typeof AtmoColor !== "undefined") ? parent.accentColor : "#03DAC6"
                                 border.width: 2
                                 opacity: parent.isActive ? 0.85 : 0
                                 scale: parent.isActive ? 1.0 : 0.7
@@ -1031,7 +1031,7 @@ Item {
                                 Rectangle {
                                     anchors.fill: parent
                                     radius: Math.min(Style.radiusL, width / 2)
-                                    color: (typeof Color !== "undefined") ? parent.parent.accentColor : "#03DAC6"
+                                    color: (typeof AtmoColor !== "undefined") ? parent.parent.accentColor : "#03DAC6"
                                     scale: parent.parent.parent.isActive ? 1.0 : 0.85
                                     Behavior on scale {
                                         NumberAnimation {
@@ -1040,7 +1040,7 @@ Item {
                                         }
                                     }
                                     Behavior on color {
-                                        enabled: (typeof Color !== "undefined") && !Color.isTransitioning
+                                        enabled: (typeof AtmoColor !== "undefined") && !AtmoColor.isTransitioning
                                         ColorAnimation {
                                             duration: Style.animationFast
                                             easing.type: Easing.InOutCubic
@@ -1053,7 +1053,7 @@ Item {
                                     text: parent.parent.itemCount > 99 ? "99+" : parent.parent.itemCount
                                     font.pointSize: (typeof Style !== "undefined") ? Style.fontSizeXS * 0.75 : 8
                                     font.bold: true
-                                    color: (typeof Color !== "undefined") ? parent.parent.accentFgColor : "#FFFFFF"
+                                    color: (typeof AtmoColor !== "undefined") ? parent.parent.accentFgColor : "#FFFFFF"
                                 }
                             }
                         }
@@ -1063,7 +1063,7 @@ Item {
                         Layout.preferredWidth: 1
                         Layout.preferredHeight: 24
                         Layout.alignment: Qt.AlignVCenter
-                        color: (typeof Color !== "undefined") ? Color.mOutline : "#888888"
+                        color: (typeof AtmoColor !== "undefined") ? AtmoColor.mOutline : "#888888"
                         opacity: 0.5
                     }
 
@@ -1245,7 +1245,7 @@ Item {
                         anchors.centerIn: parent
                         visible: listView.count === 0
                         text: root.filterType || root.searchText ? pluginApi?.tr("panel.no-matches") : pluginApi?.tr("panel.empty")
-                        color: (typeof Color !== "undefined") ? Color.mOnSurfaceVariant : "#AAAAAA"
+                        color: (typeof AtmoColor !== "undefined") ? AtmoColor.mOnSurfaceVariant : "#AAAAAA"
                     }
                 }
             }
@@ -1260,7 +1260,7 @@ Item {
             anchors.bottom: clipboardPanel.top
             anchors.bottomMargin: Style.marginM
             width: Math.min(300, screen?.width * 0.2 || 300)
-            color: (typeof Color !== "undefined") ? Color.mSurface : "#222222"
+            color: (typeof AtmoColor !== "undefined") ? AtmoColor.mSurface : "#222222"
             radius: Style.radiusM
             opacity: 1.0  // Override global panel opacity
 
@@ -1352,7 +1352,7 @@ Item {
                         anchors.centerIn: parent
                         visible: pinnedListView.count === 0
                         text: pluginApi?.tr("panel.no-pinned")
-                        color: (typeof Color !== "undefined") ? Color.mOnSurfaceVariant : "#AAAAAA"
+                        color: (typeof AtmoColor !== "undefined") ? AtmoColor.mOnSurfaceVariant : "#AAAAAA"
                     }
                 }
             }
@@ -1376,7 +1376,7 @@ Item {
                     Rectangle {
                         width: 2
                         height: 8
-                        color: (typeof Color !== "undefined") ? Color.mOutline : "#555555"
+                        color: (typeof AtmoColor !== "undefined") ? AtmoColor.mOutline : "#555555"
                         opacity: 0.7
                     }
                 }

@@ -23,12 +23,12 @@ ColumnLayout {
     property string editColorLevel0:
         pluginApi?.pluginSettings?.colorLevel0 ??
         pluginApi?.manifest?.metadata?.defaultSettings?.colorLevel0 ??
-        Color.mError
+        AtmoColor.mError
 
     property string editColorActive:
         pluginApi?.pluginSettings?.colorActive ??
         pluginApi?.manifest?.metadata?.defaultSettings?.colorActive ??
-        Color.mPrimary
+        AtmoColor.mPrimary
 
     // Empty = unset → automatic mode stays neutral
     property string editColorAuto:
@@ -56,8 +56,8 @@ ColumnLayout {
 
     // All palette colors
     readonly property var noctaliaPalette: [
-        Color.mPrimary, Color.mSecondary, Color.mTertiary, Color.mError,
-        Color.mSurface, Color.mSurfaceVariant, Color.mOutline
+        AtmoColor.mPrimary, AtmoColor.mSecondary, AtmoColor.mTertiary, AtmoColor.mError,
+        AtmoColor.mSurface, AtmoColor.mSurfaceVariant, AtmoColor.mOutline
     ]
 
     // Reusable palette picker: a "neutral" (no-color) swatch followed by the theme palette.
@@ -74,13 +74,13 @@ ColumnLayout {
             height: root.swatchSize
             radius: root.swatchSize / 2
             color: Style.capsuleColor
-            border.color: !swatchRow.selected ? Color.mOnSurface : Color.mOutline
+            border.color: !swatchRow.selected ? AtmoColor.mOnSurface : AtmoColor.mOutline
             border.width: !swatchRow.selected ? root.swatchBorderSelected : root.swatchBorderDefault
 
             AtmoIcon {
                 anchors.centerIn: parent
                 icon: "close"
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
             }
 
             MouseArea {
@@ -98,7 +98,7 @@ ColumnLayout {
                 height: root.swatchSize
                 radius: root.swatchSize / 2
                 color: modelData
-                border.color: (swatchRow.selected && Qt.colorEqual(swatchRow.selected, modelData)) ? Color.mOnSurface : Color.mOutline
+                border.color: (swatchRow.selected && Qt.colorEqual(swatchRow.selected, modelData)) ? AtmoColor.mOnSurface : AtmoColor.mOutline
                 border.width: (swatchRow.selected && Qt.colorEqual(swatchRow.selected, modelData)) ? root.swatchBorderSelected : root.swatchBorderDefault
 
                 MouseArea {
@@ -140,7 +140,7 @@ ColumnLayout {
             NText {
                 text: pluginApi?.tr("settings.color-level0-desc")
                 font.pointSize: Style.fontSizeS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
             }
 
             ColorSwatchRow {
@@ -167,7 +167,7 @@ ColumnLayout {
             NText {
                 text: pluginApi?.tr("settings.color-active-desc")
                 font.pointSize: Style.fontSizeS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
             }
 
             ColorSwatchRow {
@@ -194,7 +194,7 @@ ColumnLayout {
             NText {
                 text: pluginApi?.tr("settings.color-auto-desc")
                 font.pointSize: Style.fontSizeS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
             }
 
             ColorSwatchRow {

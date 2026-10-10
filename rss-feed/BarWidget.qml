@@ -390,7 +390,7 @@ Item {
             AtmoIcon {
                 icon: "rss"
                 pointSize: Style.barFontSize
-                color: error ? Color.mOnError : loading ? Color.mPrimary : Color.mOnSurface
+                color: error ? AtmoColor.mOnError : loading ? AtmoColor.mPrimary : AtmoColor.mOnSurface
 
                 NumberAnimation on opacity {
                     running: loading
@@ -408,7 +408,7 @@ Item {
                 width: unreadCount > 0 ? (badgeText.implicitWidth + 8) : 0
                 height: unreadCount > 0 ? (badgeText.implicitHeight + 6) : 0
                 radius: height * 0.5
-                color: error ? Color.mError : Color.mPrimary
+                color: error ? AtmoColor.mError : AtmoColor.mPrimary
                 Layout.preferredWidth: width
                 Layout.preferredHeight: height
 
@@ -419,7 +419,7 @@ Item {
                     anchors.centerIn: parent
                     text: unreadCount > 99 ? "99+" : unreadCount.toString()
                     pointSize: Style.barFontSize
-                    color: error ? Color.mOnError : Color.mOnPrimary
+                    color: error ? AtmoColor.mOnError : AtmoColor.mOnPrimary
                 }
 
                 SequentialAnimation {

@@ -30,7 +30,7 @@ Item {
     y: Style.pixelAlignCenter(parent.height, height)
     width: root.contentWidth
     height: root.contentHeight
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
     radius: Style.radiusL
 
     RowLayout {
@@ -40,7 +40,7 @@ Item {
 
       AtmoIcon {
         icon: "lamp"
-        color: Color.mPrimary
+        color: AtmoColor.mPrimary
       }
     }
   }

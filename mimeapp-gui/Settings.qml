@@ -39,7 +39,7 @@ ColumnLayout {
 		Rectangle {
 			Layout.fillWidth: true
 			Layout.preferredHeight: commandText.implicitHeight + Style.marginM * 2
-			color: Color.mSurfaceVariant
+			color: AtmoColor.mSurfaceVariant
 			radius: Style.radiusM
 
 			TextEdit {
@@ -49,12 +49,12 @@ ColumnLayout {
 				text: "qs -c noctalia-shell ipc call plugin:mimeapp-gui openPanel"
 				font.pointSize: Style.fontSizeS
 				font.family: Settings.data.ui.fontFixed
-				color: Color.mPrimary
+				color: AtmoColor.mPrimary
 				wrapMode: TextEdit.WrapAnywhere
 				readOnly: true
 				selectByMouse: true
-				selectionColor: Color.mPrimary
-				selectedTextColor: Color.mOnPrimary
+				selectionColor: AtmoColor.mPrimary
+				selectedTextColor: AtmoColor.mOnPrimary
 			}
 		}
 	}

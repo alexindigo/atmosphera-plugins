@@ -39,10 +39,10 @@ Item {
   property real paddingRight: cfg.paddingRight ?? defaults.paddingRight
 
   property bool useCustomColors: cfg.useCustomColors ?? defaults.useCustomColors
-  property color colorSilent: root.useCustomColors && cfg.colorSilent || Color.mSurfaceVariant
-  property color colorTx: root.useCustomColors && cfg.colorTx || Color.mSecondary
-  property color colorRx: root.useCustomColors && cfg.colorRx || Color.mPrimary
-  property color colorText: root.useCustomColors && cfg.colorText || Color.mOnSurfaceVariant
+  property color colorSilent: root.useCustomColors && cfg.colorSilent || AtmoColor.mSurfaceVariant
+  property color colorTx: root.useCustomColors && cfg.colorTx || AtmoColor.mSecondary
+  property color colorRx: root.useCustomColors && cfg.colorRx || AtmoColor.mPrimary
+  property color colorText: root.useCustomColors && cfg.colorText || AtmoColor.mOnSurfaceVariant
 
   property bool useCustomFont: cfg.useCustomFont ?? defaults.useCustomFont
   property string customFontFamily: cfg.customFontFamily ?? defaults.customFontFamily

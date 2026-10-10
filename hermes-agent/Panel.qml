@@ -59,11 +59,11 @@ Item {
 
   function statusColor() {
     switch (root.status) {
-      case "offline": return Color.mError;
+      case "offline": return AtmoColor.mError;
       case "attention": return "#f59e0b";
       case "degraded": return "#f97316";
-      case "error": return Color.mError;
-      default: return Color.mPrimary;
+      case "error": return AtmoColor.mError;
+      default: return AtmoColor.mPrimary;
     }
   }
 
@@ -147,7 +147,7 @@ Item {
               text: pluginApi?.tr("panel.title")
               pointSize: Style.fontSizeL
               font.weight: Style.fontWeightBold
-              color: Color.mOnSurface
+              color: AtmoColor.mOnSurface
               Layout.fillWidth: true
               elide: Text.ElideRight
             }
@@ -163,7 +163,7 @@ Item {
           NText {
             text: root.modelLabel
             pointSize: Style.fontSizeS
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             elide: Text.ElideRight
             Layout.fillWidth: true
           }
@@ -211,7 +211,7 @@ Item {
         Layout.fillWidth: true
         implicitHeight: activityRow.implicitHeight + Style.margin2S
         radius: Style.radiusS
-        color: Color.mSurfaceVariant
+        color: AtmoColor.mSurfaceVariant
 
         RowLayout {
           id: activityRow
@@ -227,13 +227,13 @@ Item {
           AtmoIcon {
             icon: root.isBusy ? "loader" : "activity"
             pointSize: Style.fontSizeS
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
           }
 
           NText {
             text: root.activityLabel
             pointSize: Style.fontSizeS
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             elide: Text.ElideRight
             Layout.fillWidth: true
           }
@@ -244,7 +244,7 @@ Item {
         Layout.fillWidth: true
         Layout.fillHeight: true
         radius: Style.radiusS
-        color: Color.mSurface
+        color: AtmoColor.mSurface
 
         ScrollView {
           id: transcriptScroll
@@ -265,14 +265,14 @@ Item {
               AtmoIcon {
                 icon: root.bridgeOnline ? "message-circle" : "power"
                 pointSize: Style.fontSizeXXL
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 Layout.alignment: Qt.AlignHCenter
               }
 
               NText {
                 text: root.bridgeOnline ? (pluginApi?.tr("panel.noSession")) : (pluginApi?.tr("panel.bridgeOffline"))
                 pointSize: Style.fontSizeM
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true

@@ -9,8 +9,8 @@ Rectangle {
 
   property string badgeIcon: ""
   property string badgeText: ""
-  property color badgeColor: Color.mOnSurfaceVariant
-  property color badgeBgColor: Qt.alpha(Color.mSurfaceVariant, 0.24)
+  property color badgeColor: AtmoColor.mOnSurfaceVariant
+  property color badgeBgColor: Qt.alpha(AtmoColor.mSurfaceVariant, 0.24)
   property bool compact: false
 
   color: badgeBgColor

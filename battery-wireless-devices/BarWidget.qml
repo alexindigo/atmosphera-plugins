@@ -85,14 +85,14 @@ Item {
     function ringColorFor(device, cfg) {
         var key = cfg ? cfg.ringColor : ""
         if (key && key !== "" && key !== "none")
-            return Color.resolveColorKey(key)
+            return AtmoColor.resolveColorKey(key)
         // Auto: colour by charge state / level.
         if (device.charging)
-            return Color.mTertiary
+            return AtmoColor.mTertiary
         var b = (typeof device.battery === "number") ? device.battery : 100
-        if (b <= 15) return Color.mError
-        if (b <= 35) return Color.mSecondary
-        return Color.mPrimary
+        if (b <= 15) return AtmoColor.mError
+        if (b <= 35) return AtmoColor.mSecondary
+        return AtmoColor.mPrimary
     }
 
     function launch(cfg) {
@@ -137,7 +137,7 @@ Item {
                 readonly property var cfg: root.cfgFor(modelData.id)
                 readonly property int battery: (typeof modelData.battery === "number") ? modelData.battery : -1
                 readonly property color ringColor: root.ringColorFor(modelData, cfg)
-                readonly property color iconColor: Color.resolveColorKey((cfg && cfg.iconColor) ? cfg.iconColor : "none")
+                readonly property color iconColor: AtmoColor.resolveColorKey((cfg && cfg.iconColor) ? cfg.iconColor : "none")
                 readonly property string iconName: (cfg && cfg.icon) ? cfg.icon : root.defaultIconForType(modelData.type)
 
                 readonly property string tooltipLabel: modelData.name
@@ -147,10 +147,10 @@ Item {
                 implicitWidth: pillRow.implicitWidth + Style.marginM * 2
                 implicitHeight: root.capsuleHeight
                 radius: Style.radiusM
-                color: pillMouse.containsMouse ? Color.mHover : Style.capsuleColor
+                color: pillMouse.containsMouse ? AtmoColor.mHover : Style.capsuleColor
 
                 Behavior on color {
-                    enabled: !Color.isTransitioning
+                    enabled: !AtmoColor.isTransitioning
                     ColorAnimation {
                         duration: Style.animationFast
                         easing.type: Easing.InOutQuad
@@ -179,7 +179,7 @@ Item {
                             readonly property real ratio: pill.battery >= 0 ? Math.max(0, Math.min(1, pill.battery / 100)) : 0
                             // Repaint when any visual input changes.
                             onRatioChanged: requestPaint()
-                            property color trackColor: Qt.alpha(Color.mOnSurface, 0.22)
+                            property color trackColor: Qt.alpha(AtmoColor.mOnSurface, 0.22)
                             property color valueColor: pill.ringColor
                             onValueColorChanged: requestPaint()
                             onTrackColorChanged: requestPaint()
@@ -224,7 +224,7 @@ Item {
                     AtmoIcon {
                         visible: root.showCharging && modelData.charging
                         icon: "bolt"
-                        color: Color.mTertiary
+                        color: AtmoColor.mTertiary
                         applyUiScale: false
                         pointSize: Math.round(root.capsuleHeight * 0.4)
                         Layout.alignment: Qt.AlignVCenter
@@ -233,7 +233,7 @@ Item {
                     NText {
                         visible: root.showPercentage && pill.battery >= 0
                         text: pill.battery + "%"
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                         pointSize: root.barFontSize
                         Layout.alignment: Qt.AlignVCenter
                     }

@@ -16,8 +16,8 @@ ColumnLayout {
     property bool   editCapture:  cfg.captureEnabled ?? def.captureEnabled ?? true
     property string editDevice:   cfg.evtestDevice   || def.evtestDevice   || "/dev/input/event3"
     property bool   editUseCustomColors: cfg.useCustomColors ?? def.useCustomColors ?? false
-    property string editPillColor: cfg.pillColor ? cfg.pillColor : (def.pillColor ? def.pillColor : Color.mPrimary.toString())
-    property string editPillBg:    cfg.pillBg    ? cfg.pillBg    : (def.pillBg    ? def.pillBg    : Color.mSurface.toString())
+    property string editPillColor: cfg.pillColor ? cfg.pillColor : (def.pillColor ? def.pillColor : AtmoColor.mPrimary.toString())
+    property string editPillBg:    cfg.pillBg    ? cfg.pillBg    : (def.pillBg    ? def.pillBg    : AtmoColor.mSurface.toString())
     property string editPosition:  cfg.position   || def.position   || "bottom"
     property int    editMargin:    cfg.marginPx   ?? def.marginPx   ?? 60
     property int    editDelay:     cfg.hideDelaySec ?? def.hideDelaySec ?? 2
@@ -39,7 +39,7 @@ ColumnLayout {
     Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: infoCol.implicitHeight + Style.marginM * 2
-        color: Color.mSurfaceVariant
+        color: AtmoColor.mSurfaceVariant
         radius: Style.radiusM
 
         ColumnLayout {
@@ -56,14 +56,14 @@ ColumnLayout {
                 AtmoIcon {
                     icon: "info-circle"
                     pointSize: Style.fontSizeS
-                    color: Color.mPrimary
+                    color: AtmoColor.mPrimary
                 }
 
                 NText {
                     text: pluginApi?.tr("settings.ipc.title")
                     pointSize: Style.fontSizeS
                     font.weight: Font.Medium
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                 }
             }
 
@@ -72,7 +72,7 @@ ColumnLayout {
                 text: pluginApi?.tr("settings.ipc.toggleCommand")
                 pointSize: Style.fontSizeXS
                 font.family: Settings.data.ui.fontFixed
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 wrapMode: Text.WrapAnywhere
             }
         }
@@ -82,8 +82,8 @@ ColumnLayout {
     Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: securityCol.implicitHeight + Style.marginM * 2
-        color: Qt.alpha(Color.mError, 0.12)
-        border.color: Qt.alpha(Color.mError, 0.32)
+        color: Qt.alpha(AtmoColor.mError, 0.12)
+        border.color: Qt.alpha(AtmoColor.mError, 0.32)
         border.width: 1
         radius: Style.radiusM
 
@@ -101,14 +101,14 @@ ColumnLayout {
                 AtmoIcon {
                     icon: "exclamation-circle"
                     pointSize: Style.fontSizeS
-                    color: Color.mError
+                    color: AtmoColor.mError
                 }
 
                 NText {
                     text: pluginApi?.tr("settings.security.title")
                     pointSize: Style.fontSizeS
                     font.weight: Font.Medium
-                    color: Color.mError
+                    color: AtmoColor.mError
                 }
             }
 
@@ -116,7 +116,7 @@ ColumnLayout {
                 Layout.fillWidth: true
                 text: pluginApi?.tr("settings.security.message")
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 wrapMode: Text.Wrap
                 lineHeight: 1.2
             }
@@ -126,7 +126,7 @@ ColumnLayout {
                 text: pluginApi?.tr("settings.security.disclaimer")
                 pointSize: Style.fontSizeXS
                 font.weight: Font.Medium
-                color: Color.mError
+                color: AtmoColor.mError
                 wrapMode: Text.Wrap
                 lineHeight: 1.2
             }
@@ -155,7 +155,7 @@ ColumnLayout {
     Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: guideCol.implicitHeight + Style.marginM * 2
-        color: Color.mSurfaceVariant
+        color: AtmoColor.mSurfaceVariant
         radius: Style.radiusM
 
         ColumnLayout {
@@ -172,14 +172,14 @@ ColumnLayout {
                 AtmoIcon {
                     icon: "terminal"
                     pointSize: Style.fontSizeS
-                    color: Color.mPrimary
+                    color: AtmoColor.mPrimary
                 }
 
                 NText {
                     text: pluginApi?.tr("settings.guide.title")
                     pointSize: Style.fontSizeS
                     font.weight: Font.Medium
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                 }
             }
 
@@ -188,7 +188,7 @@ ColumnLayout {
                 text: pluginApi?.tr("settings.guide.steps")
                 pointSize: Style.fontSizeXS
                 font.family: Settings.data.ui.fontFixed
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 wrapMode: Text.WrapAnywhere
                 lineHeight: 1.2
             }
@@ -372,8 +372,8 @@ ColumnLayout {
                 width: previewText.implicitWidth + 20
                 height: 36
                 radius: 8
-                readonly property color previewBg: root.editUseCustomColors ? root.editPillBg : Color.mSurface
-                readonly property color previewFg: root.editUseCustomColors ? root.editPillColor : Color.mPrimary
+                readonly property color previewBg: root.editUseCustomColors ? root.editPillBg : AtmoColor.mSurface
+                readonly property color previewFg: root.editUseCustomColors ? root.editPillColor : AtmoColor.mPrimary
                 
                 color: Qt.alpha(previewBg, 0.8)
                 border.color: Qt.alpha(previewFg, 0.27)

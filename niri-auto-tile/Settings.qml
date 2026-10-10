@@ -153,9 +153,9 @@ ColumnLayout {
             radius: Math.round(4 * Style.uiScaleRatio)
             color: {
                 const status = pluginApi?.mainInstance?.status ?? "stopped";
-                if (status === "running") return Color.mPrimary;
-                if (status === "error") return Color.mError;
-                return Color.mOutline;
+                if (status === "running") return AtmoColor.mPrimary;
+                if (status === "error") return AtmoColor.mError;
+                return AtmoColor.mOutline;
             }
         }
 

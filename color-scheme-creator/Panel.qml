@@ -198,22 +198,22 @@ Item {
   // ── Logic ─────────────────────────────────────────────────────
   function seedColors() {
     return {
-      mPrimary: Color.mPrimary.toString(),
-      mOnPrimary: Color.mOnPrimary.toString(),
-      mSecondary: Color.mSecondary.toString(),
-      mOnSecondary: Color.mOnSecondary.toString(),
-      mTertiary: Color.mTertiary.toString(),
-      mOnTertiary: Color.mOnTertiary.toString(),
-      mError: Color.mError.toString(),
-      mOnError: Color.mOnError.toString(),
-      mSurface: Color.mSurface.toString(),
-      mOnSurface: Color.mOnSurface.toString(),
-      mSurfaceVariant: Color.mSurfaceVariant.toString(),
-      mOnSurfaceVariant: Color.mOnSurfaceVariant.toString(),
-      mOutline: Color.mOutline.toString(),
-      mShadow: Color.mShadow.toString(),
-      mHover: Color.mHover.toString(),
-      mOnHover: Color.mOnHover.toString()
+      mPrimary: AtmoColor.mPrimary.toString(),
+      mOnPrimary: AtmoColor.mOnPrimary.toString(),
+      mSecondary: AtmoColor.mSecondary.toString(),
+      mOnSecondary: AtmoColor.mOnSecondary.toString(),
+      mTertiary: AtmoColor.mTertiary.toString(),
+      mOnTertiary: AtmoColor.mOnTertiary.toString(),
+      mError: AtmoColor.mError.toString(),
+      mOnError: AtmoColor.mOnError.toString(),
+      mSurface: AtmoColor.mSurface.toString(),
+      mOnSurface: AtmoColor.mOnSurface.toString(),
+      mSurfaceVariant: AtmoColor.mSurfaceVariant.toString(),
+      mOnSurfaceVariant: AtmoColor.mOnSurfaceVariant.toString(),
+      mOutline: AtmoColor.mOutline.toString(),
+      mShadow: AtmoColor.mShadow.toString(),
+      mHover: AtmoColor.mHover.toString(),
+      mOnHover: AtmoColor.mOnHover.toString()
     };
   }
 
@@ -376,14 +376,14 @@ Item {
           AtmoIcon {
             icon: "palette"
             pointSize: Style.fontSizeXXL
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
           }
 
           NText {
             text: pluginApi?.tr("panel.title")
             pointSize: Style.fontSizeL
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             Layout.fillWidth: true
           }
 
@@ -422,7 +422,7 @@ Item {
 
             NText {
               text: pluginApi?.tr("panel.dark")
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               pointSize: Style.fontSizeS
               font.weight: Font.Medium
               horizontalAlignment: Text.AlignHCenter
@@ -431,7 +431,7 @@ Item {
 
             NText {
               text: pluginApi?.tr("panel.light")
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               pointSize: Style.fontSizeS
               font.weight: Font.Medium
               horizontalAlignment: Text.AlignHCenter
@@ -449,7 +449,7 @@ Item {
 
               NText {
                 text: modelData.label
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
                 Layout.preferredWidth: 150 * Style.uiScaleRatio
                 elide: Text.ElideRight
               }
@@ -465,7 +465,7 @@ Item {
                   height: 25 * Style.uiScaleRatio
                   radius: Style.radiusS
                   color: root.editingScheme?.dark?.[modelData.key] ?? "#000000"
-                  border.color: Color.mOutline
+                  border.color: AtmoColor.mOutline
                   border.width: Style.borderS
 
                   MouseArea {
@@ -492,7 +492,7 @@ Item {
                   height: 25 * Style.uiScaleRatio
                   radius: Style.radiusS
                   color: root.editingScheme?.light?.[modelData.key] ?? "#000000"
-                  border.color: Color.mOutline
+                  border.color: AtmoColor.mOutline
                   border.width: Style.borderS
 
                   MouseArea {

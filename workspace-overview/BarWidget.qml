@@ -26,7 +26,7 @@ Item {
         icon: "layout-dashboard"
         // Default icon color: white/light gray, like the others. 
         // Add hover color if the mouse is over.
-        color: mouseArea.containsMouse ? Color.mPrimary : Color.mOnSurface
+        color: mouseArea.containsMouse ? AtmoColor.mPrimary : AtmoColor.mOnSurface
     }
 
     MouseArea {

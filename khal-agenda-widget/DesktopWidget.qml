@@ -59,7 +59,7 @@ DraggableDesktopWidget {
 
     Rectangle {
         anchors.fill: parent
-        color: Color.mSurface
+        color: AtmoColor.mSurface
         opacity: 0.85
         radius: Style.radiusM
 
@@ -75,7 +75,7 @@ DraggableDesktopWidget {
 
                 NText {
                     text: root.pluginApi.tr("widget.heading")
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                     font.pointSize: Style.fontSizeL * widgetScale
                     Layout.fillWidth: true
                 }
@@ -107,7 +107,7 @@ DraggableDesktopWidget {
                     width: parent.width
                     text: root.calendarVal !== "" ? root.calendarVal : root.pluginApi.tr("widget.loading")
 
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                     font.pointSize: Style.fontSizeL * widgetScale
                     wrapMode: Text.NoWrap
                     elide: Text.ElideRight

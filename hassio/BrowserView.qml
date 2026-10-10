@@ -95,7 +95,7 @@ Item {
                 AtmoIcon {
                     Layout.alignment: Qt.AlignHCenter
                     icon: "loader"
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
 
                     RotationAnimation on rotation {
                         running: root._loading
@@ -109,7 +109,7 @@ Item {
                 NText {
                     Layout.alignment: Qt.AlignHCenter
                     text: pluginApi?.tr("browser.loading")
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                     pointSize: Style.fontSizeM
                 }
             }
@@ -134,7 +134,7 @@ Item {
                     id: entityRow
                     width: ListView.view.width
                     height: Math.round(56 * Style.uiScaleRatio)
-                    color: Color.mSurfaceVariant
+                    color: AtmoColor.mSurfaceVariant
                     radius: Style.radiusM
 
                     readonly property bool pinned: {
@@ -155,7 +155,7 @@ Item {
 
                             NText {
                                 text: model.friendly_name
-                                color: Color.mOnSurface
+                                color: AtmoColor.mOnSurface
                                 pointSize: Style.fontSizeM
                                 elide: Text.ElideRight
                                 Layout.fillWidth: true
@@ -163,7 +163,7 @@ Item {
 
                             NText {
                                 text: model.entity_id
-                                color: Color.mOnSurfaceVariant
+                                color: AtmoColor.mOnSurfaceVariant
                                 pointSize: Style.fontSizeS
                                 elide: Text.ElideRight
                                 Layout.fillWidth: true
@@ -172,7 +172,7 @@ Item {
 
                         AtmoIconButton {
                             icon: entityRow.pinned ? "pin-filled" : "pin"
-                            color: entityRow.pinned ? Color.mTertiary : Color.mOutline
+                            color: entityRow.pinned ? AtmoColor.mTertiary : AtmoColor.mOutline
 
                             onClicked: root._togglePin(model.entity_id)
                         }

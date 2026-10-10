@@ -49,8 +49,8 @@ Item {
   readonly property string statusTooltip: Ui.quickActionTooltip(root.pluginApi, root.outputState, root.connected, root.obsRunning, root.primaryActionText)
   readonly property bool showIdleIcon: root.activeOutputs.length === 0
   readonly property string displayText: Ui.barDisplayText(root.pluginApi, root.outputState, root.barLabelMode, root.showElapsedInBar)
-  readonly property color accentColor: Ui.accentBackgroundColor(root.outputState, Color, Color.mOnSurface)
-  readonly property color idleIconColor: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurfaceVariant
+  readonly property color accentColor: Ui.accentBackgroundColor(root.outputState, AtmoColor, AtmoColor.mOnSurface)
+  readonly property color idleIconColor: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurfaceVariant
   readonly property string primaryIconName: Ui.primaryIcon(root.outputState)
 
   readonly property bool showInBar: root.service?.showInBar ?? false
@@ -77,7 +77,7 @@ Item {
     y: Style.pixelAlignCenter(parent.height, height)
     width: root.contentWidth
     height: root.contentHeight
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
     radius: Style.radiusL
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth

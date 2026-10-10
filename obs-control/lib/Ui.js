@@ -71,33 +71,33 @@ function primaryIcon(state) {
   return ""
 }
 
-function accentBackgroundColor(state, Color, fallback) {
+function accentBackgroundColor(state, AtmoColor, fallback) {
   if (state?.recording) {
-    return Color.mError
+    return AtmoColor.mError
   }
 
   if (state?.streaming) {
-    return Color.mPrimary
+    return AtmoColor.mPrimary
   }
 
   if (state?.replayBuffer) {
-    return Color.mSecondary
+    return AtmoColor.mSecondary
   }
 
   return fallback
 }
 
-function accentForegroundColor(state, Color, fallback) {
+function accentForegroundColor(state, AtmoColor, fallback) {
   if (state?.recording) {
-    return Color.mOnError
+    return AtmoColor.mOnError
   }
 
   if (state?.streaming) {
-    return Color.mOnPrimary
+    return AtmoColor.mOnPrimary
   }
 
   if (state?.replayBuffer) {
-    return Color.mOnSecondary
+    return AtmoColor.mOnSecondary
   }
 
   return fallback

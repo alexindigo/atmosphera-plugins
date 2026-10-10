@@ -155,14 +155,14 @@ ColumnLayout {
     NText {
       text: pluginApi?.tr("settings.interval.label")
       pointSize: Style.fontSizeS
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
       Layout.fillWidth: true
     }
 
     NText {
       text: root.valueIntervalSeconds + " s"
       pointSize: Style.fontSizeS
-      color: Color.mSecondary
+      color: AtmoColor.mSecondary
       font.family: "monospace"
     }
   }
@@ -191,7 +191,7 @@ ColumnLayout {
     NText {
       text: pluginApi?.tr("settings.thresholds.good")
       pointSize: Style.fontSizeS
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
       Layout.fillWidth: true
     }
     NText {
@@ -216,7 +216,7 @@ ColumnLayout {
     NText {
       text: pluginApi?.tr("settings.thresholds.warning")
       pointSize: Style.fontSizeS
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
       Layout.fillWidth: true
     }
     NText {

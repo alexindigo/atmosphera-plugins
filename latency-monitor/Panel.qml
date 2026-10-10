@@ -85,14 +85,14 @@ Item {
         AtmoIcon {
           icon: "cloud"
           pointSize: Style.fontSizeXL
-          color: Color.mPrimary
+          color: AtmoColor.mPrimary
           Layout.alignment: Qt.AlignVCenter
         }
         NText {
           text: pluginApi?.tr("panel.title")
           pointSize: Style.fontSizeL
           font.weight: Font.Bold
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           Layout.alignment: Qt.AlignVCenter
         }
         Item {
@@ -136,7 +136,7 @@ Item {
           NButton {
             text: modelData.name
             fontSize: Style.fontSizeXS
-            backgroundColor: root._activeHost == index ? Color.mPrimary : Color.mSecondary
+            backgroundColor: root._activeHost == index ? AtmoColor.mPrimary : AtmoColor.mSecondary
             tooltipText: modelData.address
             onClicked: {
               root._activeHost = index;
@@ -181,7 +181,7 @@ Item {
                 implicitHeight: timeoutLabel.implicitHeight + Style.marginXS * 2
 
                 radius: Style.radiusS
-                color: Qt.alpha(Color.mError, 0.12)
+                color: Qt.alpha(AtmoColor.mError, 0.12)
                 border.color: accentColor
                 border.width: Style.marginXXS
                 opacity: rootHostLayout.index === root._activeHost ? 1.0 : 0.5
@@ -382,7 +382,7 @@ Item {
               x: graphHover._idx >= 0 ? (graphHover._idx / Math.max(root._currentSamples.length - 1, 1)) * parent.width - width / 2 : 0
               width: 1
               height: parent.height
-              color: Qt.alpha(Color.mOnSurface, 0.25)
+              color: Qt.alpha(AtmoColor.mOnSurface, 0.25)
 
               Rectangle {
                 readonly property string _label: {
@@ -401,8 +401,8 @@ Item {
                 implicitWidth: bubbleText.implicitWidth + Style.marginS * 2
                 implicitHeight: bubbleText.implicitHeight + Style.marginXS * 2
                 radius: Style.radiusS
-                color: Color.mSurfaceVariant
-                border.color: Qt.alpha(Color.mOnSurface, 0.15)
+                color: AtmoColor.mSurfaceVariant
+                border.color: Qt.alpha(AtmoColor.mOnSurface, 0.15)
                 border.width: Style.marginM
 
                 NText {
@@ -410,7 +410,7 @@ Item {
                   anchors.centerIn: parent
                   text: parent._label
                   pointSize: Style.fontSizeXS
-                  color: Color.mOnSurface
+                  color: AtmoColor.mOnSurface
                 }
               }
             }
@@ -454,7 +454,7 @@ Item {
                   return d.getHours().toString().padStart(2, "0") + ":" + d.getMinutes().toString().padStart(2, "0");
                 }
                 pointSize: Style.fontSizeXS * 0.85
-                color: Qt.alpha(Color.mSecondary, 0.6)
+                color: Qt.alpha(AtmoColor.mSecondary, 0.6)
               }
             }
           }

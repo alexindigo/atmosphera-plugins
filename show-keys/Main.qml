@@ -17,8 +17,8 @@ Item {
     
     // Dynamic theme colors fallback if user does not supply custom
     property bool useCustomColors: cfg.useCustomColors ?? def.useCustomColors ?? false
-    readonly property color  pillColor:    useCustomColors ? (cfg.pillColor || def.pillColor || Color.mPrimary) : Color.mPrimary
-    readonly property color  pillBg:       useCustomColors ? (cfg.pillBg    || def.pillBg    || Color.mSurface) : Color.mSurface
+    readonly property color  pillColor:    useCustomColors ? (cfg.pillColor || def.pillColor || AtmoColor.mPrimary) : AtmoColor.mPrimary
+    readonly property color  pillBg:       useCustomColors ? (cfg.pillBg    || def.pillBg    || AtmoColor.mSurface) : AtmoColor.mSurface
     
     readonly property string position:     cfg.position    || def.position    || "bottom"
     readonly property int    marginPx:     cfg.marginPx    ?? def.marginPx    ?? 60

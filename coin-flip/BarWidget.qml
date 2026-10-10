@@ -21,7 +21,7 @@ AtmoIconButton {
     tooltipDirection: BarService.getTooltipDirection(screen?.name)
     baseSize: Style.getCapsuleHeightForScreen(screen?.name)
     applyUiScale: false
-    colorFg: Color.resolveColorKey(iconColorKey)
+    colorFg: AtmoColor.resolveColorKey(iconColorKey)
     customRadius: Style.radiusL
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth

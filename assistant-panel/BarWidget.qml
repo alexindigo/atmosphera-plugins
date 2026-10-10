@@ -71,7 +71,7 @@ Item {
     y: Style.pixelAlignCenter(parent.height, height)
     width: root.contentWidth
     height: root.contentHeight
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
     radius: Style.radiusL
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
@@ -82,10 +82,10 @@ Item {
       icon: root.isGenerating ? "loader-2" : "sparkles"
       color: {
         if (root.isGenerating)
-          return Color.mPrimary;
+          return AtmoColor.mPrimary;
         if (!root.hasApiKey)
-          return Color.mOnSurfaceVariant;
-        return Color.mOnSurface;
+          return AtmoColor.mOnSurfaceVariant;
+        return AtmoColor.mOnSurface;
       }
       applyUiScale: false
 

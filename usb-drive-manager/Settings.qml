@@ -69,7 +69,7 @@ ColumnLayout {
         text: pluginApi?.tr("settings.section-bar")
         pointSize: Style.fontSizeM
         font.weight: Font.Bold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
     }
 
     NToggle {
@@ -101,7 +101,7 @@ ColumnLayout {
         text: pluginApi?.tr("settings.section-behavior")
         pointSize: Style.fontSizeM
         font.weight: Font.Bold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
     }
 
     NToggle {
@@ -133,7 +133,7 @@ ColumnLayout {
         text: pluginApi?.tr("settings.section-browser")
         pointSize: Style.fontSizeM
         font.weight: Font.Bold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
     }
 
     NComboBox {
@@ -182,7 +182,7 @@ ColumnLayout {
         text: pluginApi?.tr("settings.icon-color")
         pointSize: Style.fontSizeM
         font.weight: Font.Bold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
     }
     NColorChoice {
         currentKey: root.iconColor

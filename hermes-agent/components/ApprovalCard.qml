@@ -51,7 +51,7 @@ Rectangle {
           text: toolName !== "" ? toolName : pluginApi?.tr("panel.approvalRequired")
           pointSize: Style.fontSizeM
           font.weight: Style.fontWeightSemiBold
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           Layout.fillWidth: true
           elide: Text.ElideRight
         }
@@ -60,7 +60,7 @@ Rectangle {
           visible: message !== ""
           text: message
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
           wrapMode: Text.Wrap
           Layout.fillWidth: true
         }

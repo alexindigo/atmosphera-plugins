@@ -107,12 +107,12 @@ PopupWindow {
 
   function statusColor(status) {
     switch (status) {
-      case "offline": return Color.mError;
-      case "busy": return Color.mPrimary;
+      case "offline": return AtmoColor.mError;
+      case "busy": return AtmoColor.mPrimary;
       case "attention": return "#f59e0b";
       case "degraded": return "#f97316";
-      case "error": return Color.mError;
-      default: return Color.mPrimary;
+      case "error": return AtmoColor.mError;
+      default: return AtmoColor.mPrimary;
     }
   }
 
@@ -133,8 +133,8 @@ PopupWindow {
     id: popupContent
     width: root.implicitWidth
     implicitHeight: layout.implicitHeight + Style.margin2M
-    color: Color.mSurface
-    border.color: Color.mOutline
+    color: AtmoColor.mSurface
+    border.color: AtmoColor.mOutline
     border.width: Style.borderS
     radius: Style.radiusM
 
@@ -175,7 +175,7 @@ PopupWindow {
             text: (pluginApi?.tr("summary.hermes"))
             pointSize: Style.fontSizeL
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             Layout.fillWidth: true
           }
 
@@ -201,7 +201,7 @@ PopupWindow {
       Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: 1
-        color: Color.mOutline
+        color: AtmoColor.mOutline
         opacity: 0.5
       }
 
@@ -214,13 +214,13 @@ PopupWindow {
           NText {
           text: (pluginApi?.tr("summary.model"))
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
 
         NText {
           text: root.modelLabel
           pointSize: Style.fontSizeS
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           horizontalAlignment: Text.AlignRight
           elide: Text.ElideRight
           Layout.fillWidth: true
@@ -229,13 +229,13 @@ PopupWindow {
         NText {
           text: (pluginApi?.tr("summary.cron"))
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
 
         NText {
           text: root.cronLabel
           pointSize: Style.fontSizeS
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           horizontalAlignment: Text.AlignRight
           elide: Text.ElideRight
           Layout.fillWidth: true
@@ -244,13 +244,13 @@ PopupWindow {
         NText {
           text: (pluginApi?.tr("summary.mcp"))
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
 
         NText {
           text: root.mcpLabel
           pointSize: Style.fontSizeS
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           horizontalAlignment: Text.AlignRight
           elide: Text.ElideRight
           Layout.fillWidth: true
@@ -259,13 +259,13 @@ PopupWindow {
         NText {
           text: (pluginApi?.tr("summary.gateway"))
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
 
         NText {
           text: root.gatewayLabel
           pointSize: Style.fontSizeS
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           horizontalAlignment: Text.AlignRight
           elide: Text.ElideRight
           Layout.fillWidth: true
@@ -274,13 +274,13 @@ PopupWindow {
         NText {
           text: (pluginApi?.tr("summary.activity"))
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
 
         NText {
           text: root.activityLabel
           pointSize: Style.fontSizeS
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           horizontalAlignment: Text.AlignRight
           elide: Text.ElideRight
           Layout.fillWidth: true
@@ -296,7 +296,7 @@ PopupWindow {
           text: pluginApi?.tr("bar.cronJobs")
           pointSize: Style.fontSizeS
           font.weight: Style.fontWeightSemiBold
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           Layout.fillWidth: true
         }
 
@@ -311,7 +311,7 @@ PopupWindow {
             AtmoIcon {
               icon: modelData.active ? "circle-check" : "circle-off"
               pointSize: Style.fontSizeS
-              color: modelData.active ? Color.mPrimary : Color.mOnSurfaceVariant
+              color: modelData.active ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
             }
 
             ColumnLayout {
@@ -321,7 +321,7 @@ PopupWindow {
               NText {
                 text: modelData.name || (pluginApi?.tr("summary.unnamedJob"))
                 pointSize: Style.fontSizeS
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
                 elide: Text.ElideRight
                 Layout.fillWidth: true
               }
@@ -329,7 +329,7 @@ PopupWindow {
               NText {
                 text: (modelData.next_run || modelData.schedule || modelData.state || "").replace("T", " ")
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 elide: Text.ElideRight
                 Layout.fillWidth: true
               }
@@ -338,7 +338,7 @@ PopupWindow {
             NText {
               text: modelData.last_status || modelData.state || ""
               pointSize: Style.fontSizeXS
-              color: modelData.active ? Color.mPrimary : Color.mOnSurfaceVariant
+              color: modelData.active ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
               elide: Text.ElideRight
             }
           }
@@ -366,13 +366,13 @@ PopupWindow {
           AtmoIcon {
             icon: root.hasApproval ? "bell-ringing" : "alert-triangle"
             pointSize: Style.fontSizeS
-            color: root.hasApproval ? "#f59e0b" : Color.mError
+            color: root.hasApproval ? "#f59e0b" : AtmoColor.mError
           }
 
           NText {
             text: root.hasApproval ? (approval.message || (pluginApi?.tr("summary.approvalRequired"))) : bridge.error
             pointSize: Style.fontSizeS
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             elide: Text.ElideRight
             Layout.fillWidth: true
           }

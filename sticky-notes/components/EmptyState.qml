@@ -16,21 +16,21 @@ Item {
       Layout.alignment: Qt.AlignHCenter
       icon: "note"
       pointSize: Style.fontSizeXXL * 2
-      color: Color.mOnSurfaceVariant
+      color: AtmoColor.mOnSurfaceVariant
     }
 
     NText {
       Layout.alignment: Qt.AlignHCenter
       text: emptyState.pluginApi?.tr("notes.empty")
       font.pointSize: Style.fontSizeM * Style.uiScaleRatio
-      color: Color.mOnSurfaceVariant
+      color: AtmoColor.mOnSurfaceVariant
     }
 
     NText {
       Layout.alignment: Qt.AlignHCenter
       text: emptyState.pluginApi?.tr("notes.create-first")
       font.pointSize: Style.fontSizeS * Style.uiScaleRatio
-      color: Color.mOutline
+      color: AtmoColor.mOutline
     }
   }
 }

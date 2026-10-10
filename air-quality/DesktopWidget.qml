@@ -17,7 +17,7 @@ DraggableDesktopWidget {
   readonly property var mainInstance: pluginApi?.mainInstance
   readonly property bool hasData: mainInstance?.hasData ?? false
   readonly property int aqi: hasData ? mainInstance.getAqi() : 0
-  readonly property string aqiColor: hasData ? mainInstance.getAqiColor(aqi) : Color.mOnSurfaceVariant
+  readonly property string aqiColor: hasData ? mainInstance.getAqiColor(aqi) : AtmoColor.mOnSurfaceVariant
 
   ColumnLayout {
     anchors {
@@ -49,7 +49,7 @@ DraggableDesktopWidget {
       visible: root.hasData
       text: root.mainInstance?.getLocationName() ?? ""
       pointSize: Style.fontSizeS
-      color: Color.mOnSurfaceVariant
+      color: AtmoColor.mOnSurfaceVariant
     }
 
     // PM2.5 / PM10 row
@@ -61,13 +61,13 @@ DraggableDesktopWidget {
       NText {
         text: pluginApi?.tr("pollutants.pm25Short", { value: root.hasData ? Math.round(root.mainInstance.pm25 * 10) / 10 : "--" })
         pointSize: Style.fontSizeS
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
       }
 
       NText {
         text: pluginApi?.tr("pollutants.pm10Short", { value: root.hasData ? Math.round(root.mainInstance.pm10 * 10) / 10 : "--" })
         pointSize: Style.fontSizeS
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
       }
     }
   }
@@ -79,7 +79,7 @@ DraggableDesktopWidget {
     height: root.height - (Style.marginL * root.widgetScale)
     anchors.centerIn: parent
     radius: Style.radiusL
-    color: Color.mShadow
+    color: AtmoColor.mShadow
     visible: false
     opacity: 0
 
@@ -94,7 +94,7 @@ DraggableDesktopWidget {
       anchors.centerIn: parent
       text: pluginApi?.tr("desktop.tipLeft") + "\n" + pluginApi?.tr("desktop.tipMiddle") + "\n" + pluginApi?.tr("desktop.tipRight")
       pointSize: Style.fontSizeS
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
       horizontalAlignment: Text.AlignHCenter
     }
   }

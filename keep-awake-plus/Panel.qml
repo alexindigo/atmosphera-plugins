@@ -100,8 +100,8 @@ Item {
           icon: root.active ? "coffee" : "coffee-off"
           pointSize: Style.fontSizeXL
           color: root.active
-            ? (mainInstance.scope === "full" ? Color.mPrimary : Color.mSecondary)
-            : Color.mOnSurfaceVariant
+            ? (mainInstance.scope === "full" ? AtmoColor.mPrimary : AtmoColor.mSecondary)
+            : AtmoColor.mOnSurfaceVariant
         }
 
         ColumnLayout {
@@ -112,7 +112,7 @@ Item {
             text: pluginApi?.tr("panel.title")
             pointSize: Style.fontSizeL
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
           NText {
             text: {
@@ -123,7 +123,7 @@ Item {
               return pluginApi?.tr(key, { time: mainInstance.formatRemaining() });
             }
             pointSize: Style.fontSizeS
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             elide: Text.ElideRight
             Layout.fillWidth: true
           }
@@ -151,8 +151,8 @@ Item {
             fontSize: Style.fontSizeM
             readonly property bool isSelected: modelData.minutes === root.selectedMinutes
             outlined: !isSelected
-            backgroundColor: root.selectedScopeIsFull ? Color.mPrimary : Color.mSecondary
-            textColor: root.selectedScopeIsFull ? Color.mOnPrimary : Color.mOnSecondary
+            backgroundColor: root.selectedScopeIsFull ? AtmoColor.mPrimary : AtmoColor.mSecondary
+            textColor: root.selectedScopeIsFull ? AtmoColor.mOnPrimary : AtmoColor.mOnSecondary
             onClicked: root._onDurationClicked(modelData.minutes)
           }
         }
@@ -174,7 +174,7 @@ Item {
             anchors.centerIn: parent
             icon: "sun"
             pointSize: Style.fontSizeXL
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
             opacity: root.selectedScopeIsFull ? 1.0 : 0.0
             rotation: root.selectedScopeIsFull ? 0 : -90
             scale: root.selectedScopeIsFull ? 1.0 : 0.6
@@ -186,7 +186,7 @@ Item {
             anchors.centerIn: parent
             icon: "moon"
             pointSize: Style.fontSizeXL
-            color: Color.mSecondary
+            color: AtmoColor.mSecondary
             opacity: root.selectedScopeIsFull ? 0.0 : 1.0
             rotation: root.selectedScopeIsFull ? 90 : 0
             scale: root.selectedScopeIsFull ? 0.6 : 1.0
@@ -230,8 +230,8 @@ Item {
           text: pluginApi?.tr("panel.extend", { minutes: mainInstance?.quickExtendMinutes ?? 30 })
           icon: "clock-plus"
           outlined: true
-          backgroundColor: Color.mPrimary
-          textColor: Color.mOnPrimary
+          backgroundColor: AtmoColor.mPrimary
+          textColor: AtmoColor.mOnPrimary
           onClicked: mainInstance.extend((mainInstance.quickExtendMinutes ?? 30) * 60)
 
           Behavior on opacity {
@@ -250,11 +250,11 @@ Item {
           text: pluginApi?.tr(root.active ? "panel.turn-off" : "panel.turn-on")
           icon: "power"
           backgroundColor: root.active
-            ? Color.mError
-            : (root.selectedScopeIsFull ? Color.mPrimary : Color.mSecondary)
+            ? AtmoColor.mError
+            : (root.selectedScopeIsFull ? AtmoColor.mPrimary : AtmoColor.mSecondary)
           textColor: root.active
-            ? Color.mOnError
-            : (root.selectedScopeIsFull ? Color.mOnPrimary : Color.mOnSecondary)
+            ? AtmoColor.mOnError
+            : (root.selectedScopeIsFull ? AtmoColor.mOnPrimary : AtmoColor.mOnSecondary)
           onClicked: root._onMainToggleClicked()
 
           // Suppress one-shot animation on initial panel open (width: 0

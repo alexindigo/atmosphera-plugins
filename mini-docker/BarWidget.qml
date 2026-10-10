@@ -30,13 +30,13 @@ Item {
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
     readonly property string iconColorKey: cfg.iconColor ?? defaults.iconColor ?? "none"
     readonly property string statusStateKey: cfg.statusState ?? defaults.statusState ?? "all"
-    property color colorFg: Color.resolveColorKey(iconColorKey)
+    property color colorFg: AtmoColor.resolveColorKey(iconColorKey)
     readonly property string activeColorKey: cfg.activeColor ?? defaults.activeColor ?? "success"
     readonly property string inactiveColorKey: cfg.inactiveColor ?? defaults.inactiveColor ?? "error"
-    readonly property color activeColor: Color.resolveColorKey(activeColorKey)
-    readonly property color inactiveColor: Color.resolveColorKey(inactiveColorKey)
-    property color colorBgHover: Color.mHover
-    property color colorFgHover: Color.mOnHover
+    readonly property color activeColor: AtmoColor.resolveColorKey(activeColorKey)
+    readonly property color inactiveColor: AtmoColor.resolveColorKey(inactiveColorKey)
+    property color colorBgHover: AtmoColor.mHover
+    property color colorFgHover: AtmoColor.mOnHover
     property color colorBorder: Style.capsuleBorderColor
     property color colorBorderHover: Style.capsuleBorderColor
     property real customRadius: Style.radiusL
@@ -122,7 +122,7 @@ Item {
 
             anchors.centerIn: parent
             icon: "brand-docker"
-            color: dockerAvailable ? (hovering ? colorFgHover : colorFg) : Color.mOnSurfaceVariant
+            color: dockerAvailable ? (hovering ? colorFgHover : colorFg) : AtmoColor.mOnSurfaceVariant
         }
 
         Rectangle {

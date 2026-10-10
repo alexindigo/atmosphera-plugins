@@ -247,13 +247,13 @@ Item {
                 text: pluginApi?.tr("panel.canvasTitle")
                 pointSize: Style.fontSizeL
                 font.weight: Style.fontWeightBold
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
               }
 
               NText {
                 text: pluginApi?.tr("panel.dragHint")
                 pointSize: Style.fontSizeS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
                 maximumLineCount: 2
@@ -269,7 +269,7 @@ Item {
                 NBox {
                   id: sceneFrame
                   anchors.fill: parent
-                  border.color: Color.mOutline
+                  border.color: AtmoColor.mOutline
                   border.width: Style.borderS
                 }
 
@@ -288,10 +288,10 @@ Item {
                     var innerWidth = width - (root.scenePadding * 2);
                     var innerHeight = height - (root.scenePadding * 2);
 
-                    ctx.fillStyle = Qt.alpha(Color.mSurfaceVariant, 0.45);
+                    ctx.fillStyle = Qt.alpha(AtmoColor.mSurfaceVariant, 0.45);
                     ctx.fillRect(0, 0, width, height);
 
-                    ctx.strokeStyle = Qt.alpha(Color.mOutline, 0.16);
+                    ctx.strokeStyle = Qt.alpha(AtmoColor.mOutline, 0.16);
                     ctx.lineWidth = 1;
 
                     var columnCount = 16;
@@ -341,7 +341,7 @@ Item {
                   visible: outputs.length === 0
                   text: pluginApi?.tr("panel.empty")
                   pointSize: Style.fontSizeM
-                  color: Color.mOnSurfaceVariant
+                  color: AtmoColor.mOnSurfaceVariant
                 }
 
                 Repeater {
@@ -369,7 +369,7 @@ Item {
 
                     NBox {
                       anchors.fill: parent
-                      border.color: outputData.outputId === root.selectedOutputId ? Color.mPrimary : Color.mOutline
+                      border.color: outputData.outputId === root.selectedOutputId ? AtmoColor.mPrimary : AtmoColor.mOutline
                       border.width: outputData.outputId === root.selectedOutputId ? 2 : 1
 
                       NBox {
@@ -378,7 +378,7 @@ Item {
                         anchors.top: parent.top
                         anchors.margins: Style.marginXS
                         height: outputTile.badgeHeight
-                        border.color: outputData.outputId === root.selectedOutputId ? Color.mPrimary : Qt.alpha(Color.mOutline, 0.55)
+                        border.color: outputData.outputId === root.selectedOutputId ? AtmoColor.mPrimary : Qt.alpha(AtmoColor.mOutline, 0.55)
                         border.width: Style.borderS
                       }
                     }
@@ -394,7 +394,7 @@ Item {
                       text: outputData.name
                       pointSize: Style.fontSizeXS
                       font.weight: Style.fontWeightBold
-                      color: Color.mOnSurface
+                      color: AtmoColor.mOnSurface
                       horizontalAlignment: Text.AlignHCenter
                       verticalAlignment: Text.AlignVCenter
                       elide: Text.ElideRight
@@ -409,7 +409,7 @@ Item {
                       anchors.rightMargin: Style.marginS
                       text: outputData.resolutionLabel
                       pointSize: Style.fontSizeXXS
-                      color: Color.mOnSurfaceVariant
+                      color: AtmoColor.mOnSurfaceVariant
                       horizontalAlignment: Text.AlignHCenter
                       elide: Text.ElideRight
                       visible: outputTile.height > (outputTile.badgeHeight + (Style.marginL * 2))
@@ -424,7 +424,7 @@ Item {
                       anchors.rightMargin: Style.marginS
                       text: outputData.x + ", " + outputData.y
                       pointSize: Style.fontSizeXXS
-                      color: Color.mOnSurfaceVariant
+                      color: AtmoColor.mOnSurfaceVariant
                       horizontalAlignment: Text.AlignHCenter
                       elide: Text.ElideRight
                       visible: outputTile.height > (outputTile.badgeHeight + (Style.marginL * 3))
@@ -511,14 +511,14 @@ Item {
                 text: pluginApi?.tr("panel.inspectorTitle")
                 pointSize: Style.fontSizeL
                 font.weight: Style.fontWeightBold
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
               }
 
               NText {
                 visible: !selectedOutput
                 text: pluginApi?.tr("panel.selectionHint")
                 pointSize: Style.fontSizeS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 wrapMode: Text.WordWrap
               }
 
@@ -539,14 +539,14 @@ Item {
                     text: selectedOutput ? selectedOutput.name : ""
                     pointSize: Style.fontSizeM
                     font.weight: Style.fontWeightBold
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                   }
 
                   NText {
                     Layout.fillWidth: true
                     text: selectedOutput && selectedOutput.description !== "" ? selectedOutput.description : "-"
                     pointSize: Style.fontSizeS
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                     wrapMode: Text.NoWrap
                     elide: Text.ElideRight
                   }
@@ -554,7 +554,7 @@ Item {
                   NText {
                     text: pluginApi?.tr("panel.resolution")
                     pointSize: Style.fontSizeS
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                   }
 
                   Item {
@@ -579,14 +579,14 @@ Item {
                   NText {
                     text: root.resolutionSummary(selectedOutput)
                     pointSize: Style.fontSizeS
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                     wrapMode: Text.WordWrap
                   }
 
                   NText {
                     text: pluginApi?.tr("panel.position")
                     pointSize: Style.fontSizeS
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                   }
 
                   RowLayout {
@@ -619,7 +619,7 @@ Item {
                   NText {
                     text: pluginApi?.tr("panel.scale")
                     pointSize: Style.fontSizeS
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                   }
 
                   RowLayout {
@@ -644,7 +644,7 @@ Item {
                   NText {
                     text: pluginApi?.tr("panel.scaleDesc")
                     pointSize: Style.fontSizeS
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                   }
@@ -652,13 +652,13 @@ Item {
                   NText {
                     text: pluginApi?.tr("panel.transform") + ": " + (selectedOutput ? selectedOutput.transform : "")
                     pointSize: Style.fontSizeS
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                   }
 
                   NText {
                     text: pluginApi?.tr("panel.backend") + ": " + (mainInstance ? mainInstance.backendId : "")
                     pointSize: Style.fontSizeS
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                   }
 
                 }
@@ -668,7 +668,7 @@ Item {
                 visible: mainInstance && mainInstance.statusText !== ""
                 text: mainInstance ? mainInstance.statusText : ""
                 pointSize: Style.fontSizeS
-                color: Color.mPrimary
+                color: AtmoColor.mPrimary
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
               }
@@ -677,7 +677,7 @@ Item {
                 visible: mainInstance && mainInstance.errorText !== ""
                 text: mainInstance ? mainInstance.errorText : ""
                 pointSize: Style.fontSizeS
-                color: Color.mError
+                color: AtmoColor.mError
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
               }
@@ -686,7 +686,7 @@ Item {
                 visible: mainInstance && mainInstance.hasPendingChanges
                 text: pluginApi?.tr("panel.pendingChanges")
                 pointSize: Style.fontSizeS
-                color: Color.mPrimary
+                color: AtmoColor.mPrimary
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
               }
@@ -734,13 +734,13 @@ Item {
               text: pluginApi?.tr("panel.configTitle")
               pointSize: Style.fontSizeL
               font.weight: Style.fontWeightBold
-              color: Color.mOnSurface
+              color: AtmoColor.mOnSurface
             }
 
             NText {
               text: pluginApi?.tr("panel.configDescription")
               pointSize: Style.fontSizeS
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               wrapMode: Text.WordWrap
               Layout.fillWidth: true
             }
@@ -749,7 +749,7 @@ Item {
               visible: mainInstance && mainInstance.errorText !== ""
               text: mainInstance ? mainInstance.errorText : ""
               pointSize: Style.fontSizeS
-              color: Color.mError
+              color: AtmoColor.mError
               wrapMode: Text.WordWrap
               Layout.fillWidth: true
             }
@@ -765,7 +765,7 @@ Item {
 
                 NBox {
                   width: parent.width - 12 * Style.uiScaleRatio
-                  border.color: Color.mOutline
+                  border.color: AtmoColor.mOutline
                   border.width: Style.borderS
 
                   ColumnLayout {
@@ -782,7 +782,7 @@ Item {
                       }
                       pointSize: Style.fontSizeS
                       font.family: "Monospace"
-                      color: Color.mOnSurfaceVariant
+                      color: AtmoColor.mOnSurfaceVariant
                       wrapMode: Text.Wrap
                       textFormat: Text.PlainText
                       Layout.fillWidth: true

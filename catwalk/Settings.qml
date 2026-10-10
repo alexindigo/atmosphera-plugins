@@ -41,7 +41,7 @@ ColumnLayout {
 
         Text {
             text: (pluginApi?.tr("settings.currentThreshold") || "Current threshold: {value}%").replace("{value}", thresholdSlider.value)
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             font.pointSize: Style.fontSizeS
         }
     }

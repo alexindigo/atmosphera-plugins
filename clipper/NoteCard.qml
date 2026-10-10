@@ -61,7 +61,7 @@ Rectangle {
         const scheme = colorSchemes[noteColor];
         return scheme ? scheme.bg : "#FFF9C4";
     }
-    border.color: Color.mOnSurfaceVariant
+    border.color: AtmoColor.mOnSurfaceVariant
     border.width: 1
     radius: Style.radiusM
 

@@ -56,7 +56,7 @@ Item {
     width: root.contentWidth
     height: root.contentHeight
     radius: Style.radiusL
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
 
@@ -65,8 +65,8 @@ Item {
       icon: "contrast"
       applyUiScale: false
       color: root.vibrantEnabled
-        ? Color.mPrimary
-        : (mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface)
+        ? AtmoColor.mPrimary
+        : (mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface)
     }
   }
 

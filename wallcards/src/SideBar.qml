@@ -8,7 +8,7 @@ Rectangle {
   property bool expanded: false
   property bool hideHelp: true
 
-  color: Qt.alpha(Color.mSurface, 0.9)
+  color: Qt.alpha(AtmoColor.mSurface, 0.9)
   radius: Style.radiusS
   width: expanded ? shortcutColumn.width + Style.margin2L : !hideHelp ? collapsedColumn.width + Style.margin2L : 0
   height: expanded ? shortcutColumn.height + Style.margin2L : !hideHelp ? collapsedColumn.height + Style.margin2L : 0
@@ -50,7 +50,7 @@ Rectangle {
 
     // Navigation
     NText {
-      color: Qt.alpha(Color.mOnSurface, 0.35)
+      color: Qt.alpha(AtmoColor.mOnSurface, 0.35)
       font.bold: true
       font.pointSize: Style.fontSizeXXS
       text: root.pluginApi?.tr("shortcuts.header.navigation")
@@ -70,14 +70,14 @@ Rectangle {
 
     // Separator
     Rectangle {
-      color: Qt.alpha(Color.mOnSurface, 0.1)
+      color: Qt.alpha(AtmoColor.mOnSurface, 0.1)
       height: 1
       width: shortcutColumn.width
     }
 
     // Actions
     NText {
-      color: Qt.alpha(Color.mOnSurface, 0.35)
+      color: Qt.alpha(AtmoColor.mOnSurface, 0.35)
       font.bold: true
       font.pointSize: Style.fontSizeXXS
       text: root.pluginApi?.tr("shortcuts.header.actions")
@@ -97,14 +97,14 @@ Rectangle {
 
     // Separator
     Rectangle {
-      color: Qt.alpha(Color.mOnSurface, 0.1)
+      color: Qt.alpha(AtmoColor.mOnSurface, 0.1)
       height: 1
       width: shortcutColumn.width
     }
 
     // Filters
     NText {
-      color: Qt.alpha(Color.mOnSurface, 0.35)
+      color: Qt.alpha(AtmoColor.mOnSurface, 0.35)
       font.bold: true
       font.pointSize: Style.fontSizeXXS
       text: root.pluginApi?.tr("shortcuts.header.filters")
@@ -128,14 +128,14 @@ Rectangle {
 
     // Separator
     Rectangle {
-      color: Qt.alpha(Color.mOnSurface, 0.1)
+      color: Qt.alpha(AtmoColor.mOnSurface, 0.1)
       height: 1
       width: shortcutColumn.width
     }
 
     // View
     NText {
-      color: Qt.alpha(Color.mOnSurface, 0.35)
+      color: Qt.alpha(AtmoColor.mOnSurface, 0.35)
       font.bold: true
       font.pointSize: Style.fontSizeXXS
       text: root.pluginApi?.tr("shortcuts.header.view")
@@ -151,14 +151,14 @@ Rectangle {
 
     // Separator
     Rectangle {
-      color: Qt.alpha(Color.mOnSurface, 0.1)
+      color: Qt.alpha(AtmoColor.mOnSurface, 0.1)
       height: 1
       width: shortcutColumn.width
     }
 
     // Layout
     NText {
-      color: Qt.alpha(Color.mOnSurface, 0.35)
+      color: Qt.alpha(AtmoColor.mOnSurface, 0.35)
       font.bold: true
       font.pointSize: Style.fontSizeXXS
       text: root.pluginApi?.tr("shortcuts.header.layout")
@@ -186,7 +186,7 @@ Rectangle {
 
     // Separator
     Rectangle {
-      color: Qt.alpha(Color.mOnSurface, 0.1)
+      color: Qt.alpha(AtmoColor.mOnSurface, 0.1)
       height: 1
       width: shortcutColumn.width
     }

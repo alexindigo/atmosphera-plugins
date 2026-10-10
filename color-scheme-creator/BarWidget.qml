@@ -20,7 +20,7 @@ AtmoIconButton {
 
   property string iconColorKey: cfg.iconColor ?? defaults.iconColor ?? "none"
 
-  readonly property color iconColor: Color.resolveColorKey(iconColorKey)  
+  readonly property color iconColor: AtmoColor.resolveColorKey(iconColorKey)  
 
   icon: "palette"
   tooltipText: pluginApi?.tr("widget.tooltip")

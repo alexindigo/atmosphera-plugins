@@ -23,7 +23,7 @@ Item {
   readonly property real capsuleHeight: Style.getCapsuleHeightForScreen(screenName)
   readonly property real barFontSize: Style.getBarFontSizeForScreen(screenName)
   readonly property bool showBarText: Local.HermesSession.setting("showBarText", true)
-  readonly property color stateColor: Local.HermesSession.connected ? Color.mPrimary : (Local.HermesSession.connecting ? Color.mSecondary : Color.mOnSurfaceVariant)
+  readonly property color stateColor: Local.HermesSession.connected ? AtmoColor.mPrimary : (Local.HermesSession.connecting ? AtmoColor.mSecondary : AtmoColor.mOnSurfaceVariant)
 
   implicitWidth: isVertical ? capsuleHeight : Math.round(contentRow.implicitWidth + Style.margin2M)
   implicitHeight: isVertical ? Math.round(contentRow.implicitHeight + Style.margin2M) : capsuleHeight

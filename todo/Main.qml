@@ -69,9 +69,9 @@ Item {
       // Initialize priority colors
       if (!pluginApi.pluginSettings.priorityColors) {
         pluginApi.pluginSettings.priorityColors = {
-          "high": Color.mError,
-          "medium": Color.mPrimary,
-          "low": Color.mOnSurfaceVariant
+          "high": AtmoColor.mError,
+          "medium": AtmoColor.mPrimary,
+          "low": AtmoColor.mOnSurfaceVariant
         };
       }
 

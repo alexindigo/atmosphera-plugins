@@ -289,7 +289,7 @@ ColumnLayout {
     NText {
         visible: root.deviceList.length === 0
         text: pluginApi?.tr("settings.noDevices")
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
         wrapMode: Text.WordWrap
         Layout.fillWidth: true
     }
@@ -324,9 +324,9 @@ ColumnLayout {
                 onHeightChanged: if (root.cardHeight !== height) root.cardHeight = height
 
                 radius: Style.radiusM
-                color: Color.mSurfaceVariant
+                color: AtmoColor.mSurfaceVariant
                 border.width: 1
-                border.color: dragging ? Color.mPrimary : Color.mOutline
+                border.color: dragging ? AtmoColor.mPrimary : AtmoColor.mOutline
                 z: dragging ? 10 : 0
 
                 // Resting position, with neighbours shifting to make room while
@@ -382,7 +382,7 @@ ColumnLayout {
                             Layout.preferredHeight: Style.baseWidgetSize * 0.7
                             Layout.alignment: Qt.AlignVCenter
                             radius: Style.iRadiusXS
-                            color: dragMouse.containsMouse ? Color.mSurface : "transparent"
+                            color: dragMouse.containsMouse ? AtmoColor.mSurface : "transparent"
 
                             ColumnLayout {
                                 anchors.centerIn: parent
@@ -393,7 +393,7 @@ ColumnLayout {
                                         Layout.preferredWidth: Style.baseWidgetSize * 0.45
                                         Layout.preferredHeight: 2
                                         radius: 1
-                                        color: Color.mOutline
+                                        color: AtmoColor.mOutline
                                     }
                                 }
                             }
@@ -443,7 +443,7 @@ ColumnLayout {
                         NText {
                             text: card.modelData.name
                             font.weight: Style.fontWeightBold
-                            color: Color.mOnSurface
+                            color: AtmoColor.mOnSurface
                             Layout.fillWidth: true
                             elide: Text.ElideRight
                         }
@@ -452,14 +452,14 @@ ColumnLayout {
                                   ? (card.modelData.battery >= 0 ? card.modelData.battery + "%" : "—")
                                     + (card.modelData.charging ? " ⚡" : "")
                                   : pluginApi?.tr("settings.offline")
-                            color: card.modelData.online ? Color.mPrimary : Color.mOnSurfaceVariant
+                            color: card.modelData.online ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
                         }
 
                         AtmoIconButton {
                             icon: "trash"
                             baseSize: Style.baseWidgetSize * 0.8
                             tooltipText: pluginApi?.tr("settings.removeDevice")
-                            colorFg: Color.mError
+                            colorFg: AtmoColor.mError
                             onClicked: root.removeDevice(card.modelData.id)
                         }
                     }

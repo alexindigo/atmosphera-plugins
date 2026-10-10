@@ -27,7 +27,7 @@ Row {
         // Separator between keys
         NText {
           anchors.verticalCenter: parent.verticalCenter
-          color: Qt.alpha(Color.mOnSurface, 0.3)
+          color: Qt.alpha(AtmoColor.mOnSurface, 0.3)
           font.pointSize: Style.fontSizeXXS
           text: root.pluginApi?.tr("shortcuts.key-separator")
           visible: index > 0
@@ -36,9 +36,9 @@ Row {
         // Keycap
         Rectangle {
           anchors.verticalCenter: parent.verticalCenter
-          border.color: Qt.alpha(Color.mOnSurface, 0.2)
+          border.color: Qt.alpha(AtmoColor.mOnSurface, 0.2)
           border.width: Style.borderS
-          color: Qt.alpha(Color.mOnSurface, 0.08)
+          color: Qt.alpha(AtmoColor.mOnSurface, 0.08)
           height: Style.marginL + 2
           radius: Style.radiusXS
           width: Math.max(Style.marginL + 2, keycapText.width + Style.marginS)
@@ -46,16 +46,16 @@ Row {
           Rectangle {
             anchors.bottomMargin: 2
             anchors.fill: parent
-            border.color: Qt.alpha(Color.mOnSurface, 0.15)
+            border.color: Qt.alpha(AtmoColor.mOnSurface, 0.15)
             border.width: Style.borderS
-            color: Qt.alpha(Color.mOnSurface, 0.05)
+            color: Qt.alpha(AtmoColor.mOnSurface, 0.05)
             radius: Style.radiusXS
 
             NText {
               id: keycapText
 
               anchors.centerIn: parent
-              color: Qt.alpha(Color.mOnSurface, 0.6)
+              color: Qt.alpha(AtmoColor.mOnSurface, 0.6)
               font.bold: true
               font.pointSize: Style.fontSizeXXS
               text: modelData.trim()
@@ -68,7 +68,7 @@ Row {
 
   NText {
     anchors.verticalCenter: parent.verticalCenter
-    color: Qt.alpha(Color.mOnSurface, 0.4)
+    color: Qt.alpha(AtmoColor.mOnSurface, 0.4)
     font.pointSize: Style.fontSizeXXS
     text: hint.label
   }

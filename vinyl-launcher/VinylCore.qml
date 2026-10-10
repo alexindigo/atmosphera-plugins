@@ -157,7 +157,7 @@ Item {
     width: Math.floor(Math.min(parent.width, parent.height) / 2) * 2
     height: width
     radius: width / 2
-    color: Color.mSurface
+    color: AtmoColor.mSurface
     border.width: 0
     border.color: "transparent"
 
@@ -168,7 +168,7 @@ Item {
       width: Math.floor((parent.width * 0.6) / 2) * 2
       height: width
       radius: width / 2
-      color: Color.mSurfaceVariant
+      color: AtmoColor.mSurfaceVariant
       z: 5
 
       // 3. Selected app in the VERY center
@@ -196,7 +196,7 @@ Item {
           elide: Text.ElideRight
           font.weight: Style.fontWeightBold
           pointSize: Style.fontSizeL
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
         }
       }
     }
@@ -342,7 +342,7 @@ Item {
     NText {
       anchors.centerIn: parent
       text: (root.pluginApi ? root.pluginApi.tr("plugin.vinyl-launcher.search") : "Search:") + " " + root.searchText
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
       font.italic: true
       pointSize: Style.fontSizeS
     }

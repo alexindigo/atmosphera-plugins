@@ -30,9 +30,9 @@ Item {
 
   readonly property string iconColorKey: pluginApi?.pluginSettings?.iconColor || pluginApi?.manifest?.metadata?.defaultSettings?.iconColor || "primary"
 
-  readonly property color resolvedIconColor: Color.resolveColorKeyOptional(iconColorKey)
+  readonly property color resolvedIconColor: AtmoColor.resolveColorKeyOptional(iconColorKey)
 
-  readonly property color iconColor: mouseArea.containsMouse ? Color.mOnHover : (resolvedIconColor.a > 0 ? resolvedIconColor : Color.mOnSurface)
+  readonly property color iconColor: mouseArea.containsMouse ? AtmoColor.mOnHover : (resolvedIconColor.a > 0 ? resolvedIconColor : AtmoColor.mOnSurface)
 
   // Content dimensions
   readonly property real contentWidth: Style.capsuleHeight
@@ -50,7 +50,7 @@ Item {
     y: Style.pixelAlignCenter(parent.height, height)
     width: root.contentWidth
     height: root.contentHeight
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
     radius: Style.radiusL
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
@@ -66,7 +66,7 @@ Item {
         applyUiScale: true
 
         Behavior on color {
-          enabled: !Color.isTransitioning
+          enabled: !AtmoColor.isTransitioning
           ColorAnimation {
             duration: Style.animationFast
             easing.type: Easing.InOutQuad

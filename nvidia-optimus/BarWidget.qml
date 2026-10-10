@@ -70,7 +70,7 @@ AtmoIconButton {
       anchors.fill: eyeImg
       source: eyeImg
       colorization: 1.0
-      colorizationColor: root.lit ? Color.mPrimary : Color.mOnSurface
+      colorizationColor: root.lit ? AtmoColor.mPrimary : AtmoColor.mOnSurface
       Behavior on colorizationColor {
         ColorAnimation {
           duration: Style.animationFast

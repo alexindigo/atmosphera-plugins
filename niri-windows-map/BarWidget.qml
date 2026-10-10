@@ -20,9 +20,9 @@ AtmoIconButton {
   baseSize: Style.getCapsuleHeightForScreen(screen ? screen.name : "")
   applyUiScale: false
   colorBg: Style.capsuleColor
-  colorFg: Color.mOnSurface
-  colorBgHover: Color.mHover
-  colorFgHover: Color.mOnHover
+  colorFg: AtmoColor.mOnSurface
+  colorBgHover: AtmoColor.mHover
+  colorFgHover: AtmoColor.mOnHover
   colorBorder: Style.capsuleBorderColor
   colorBorderHover: Style.capsuleBorderColor
 

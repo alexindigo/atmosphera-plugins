@@ -30,8 +30,8 @@ ColumnLayout {
     Layout.fillWidth: true
     height: 34 * Style.uiScaleRatio
     radius: Style.radiusS
-    color: hovered ? Color.mSurface : "transparent"
-    border.color: Color.mOutline
+    color: hovered ? AtmoColor.mSurface : "transparent"
+    border.color: AtmoColor.mOutline
     border.width: Style.borderS
 
     RowLayout {
@@ -40,17 +40,17 @@ ColumnLayout {
 
       NText {
         text: root.pluginApi?.tr("panel.mode")
-        pointSize: Style.fontSizeS; font.weight: Font.DemiBold; color: Color.mOnSurfaceVariant
+        pointSize: Style.fontSizeS; font.weight: Font.DemiBold; color: AtmoColor.mOnSurfaceVariant
       }
       NText {
         text: root.currentModeText
-        pointSize: Style.fontSizeS; color: Color.mOnSurface
+        pointSize: Style.fontSizeS; color: AtmoColor.mOnSurface
         Layout.fillWidth: true
         elide: Text.ElideRight
       }
       AtmoIcon {
         icon: root.expanded ? "chevron-up" : "chevron-down"
-        pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant
+        pointSize: Style.fontSizeXS; color: AtmoColor.mOnSurfaceVariant
       }
     }
 
@@ -82,8 +82,8 @@ ColumnLayout {
         height: 34 * Style.uiScaleRatio
         radius: Style.radiusS
         color: isCurrent
-          ? Qt.rgba(Color.mPrimary.r, Color.mPrimary.g, Color.mPrimary.b, 0.18)
-          : hovered ? Color.mSurface : "transparent"
+          ? Qt.rgba(AtmoColor.mPrimary.r, AtmoColor.mPrimary.g, AtmoColor.mPrimary.b, 0.18)
+          : hovered ? AtmoColor.mSurface : "transparent"
         Behavior on color { ColorAnimation { duration: 100 } }
 
         RowLayout {
@@ -93,24 +93,24 @@ ColumnLayout {
           NText {
             text: row.mode.width + "x" + row.mode.height
             pointSize: Style.fontSizeS
-            color: row.isCurrent ? Color.mPrimary : Color.mOnSurface
+            color: row.isCurrent ? AtmoColor.mPrimary : AtmoColor.mOnSurface
             font.weight: row.isCurrent ? 600 : 400
           }
           NText {
             text: root.pluginApi?.tr("panel.refreshRateSuffix").arg(parseFloat(row.mode.refreshRate).toFixed(1))
             pointSize: Style.fontSizeXS
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
           }
           NText {
             visible: row.mode.isPreferred
             text: root.pluginApi?.tr("panel.preferred")
             pointSize: Style.fontSizeXS
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
           }
           Item { Layout.fillWidth: true }
           AtmoIcon {
             icon: "check"
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
             pointSize: Style.fontSizeS
             visible: row.isCurrent
           }

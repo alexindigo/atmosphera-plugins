@@ -50,19 +50,19 @@ Item {
             width: parent.width
             height: 36
             radius: Style.radiusM
-            color: pickAgainBtn.containsMouse ? Color.mPrimary : Color.mSurface
-            border.color: Color.mPrimary
+            color: pickAgainBtn.containsMouse ? AtmoColor.mPrimary : AtmoColor.mSurface
+            border.color: AtmoColor.mPrimary
             border.width: Style.capsuleBorderWidth
             Row {
                 anchors.centerIn: parent
                 spacing: Style.marginS
                 AtmoIcon {
                     icon: "color-picker"
-                    color: pickAgainBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
+                    color: pickAgainBtn.containsMouse ? AtmoColor.mOnPrimary : AtmoColor.mPrimary
                 }
                 NText {
                     text: pluginApi?.tr("panel.pickAgain")
-                    color: pickAgainBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
+                    color: pickAgainBtn.containsMouse ? AtmoColor.mOnPrimary : AtmoColor.mPrimary
                     pointSize: Style.fontSizeS
                 }
             }
@@ -85,7 +85,7 @@ Item {
                     width: 110
                     height: 110
                     radius: Style.radiusM
-                    color: Color.mSurfaceVariant
+                    color: AtmoColor.mSurfaceVariant
                     clip: true
                     border.color: Style.capsuleBorderColor
                     border.width: Style.capsuleBorderWidth
@@ -118,7 +118,7 @@ Item {
                         anchors.centerIn: parent
                         visible: pixelImg.status !== Image.Ready
                         text: pluginApi?.tr("panel.loading")
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         pointSize: Style.fontSizeS
                     }
                 }
@@ -148,7 +148,7 @@ Item {
                     NText {
                         width: parent.width
                         text: root.pickedHex.toUpperCase()
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                         font.weight: Font.Bold
                         pointSize: Style.fontSizeM
                         horizontalAlignment: Text.AlignHCenter
@@ -166,7 +166,7 @@ Item {
                     width: root.width
                     height: 36
                     radius: Style.radiusM
-                    color: rh.containsMouse ? Color.mHover : Color.mSurface
+                    color: rh.containsMouse ? AtmoColor.mHover : AtmoColor.mSurface
                     border.color: Style.capsuleBorderColor
                     border.width: Style.capsuleBorderWidth
                     Row {
@@ -176,7 +176,7 @@ Item {
                         spacing: Style.marginS
                         NText {
                             text: modelData.label
-                            color: Color.mPrimary
+                            color: AtmoColor.mPrimary
                             font.weight: Font.Bold
                             pointSize: Style.fontSizeS
                             width: 36
@@ -185,7 +185,7 @@ Item {
                         }
                         NText {
                             text: modelData.value || "—"
-                            color: Color.mOnSurface
+                            color: AtmoColor.mOnSurface
                             pointSize: Style.fontSizeS
                             width: root.width - 90
                             height: parent.height
@@ -195,7 +195,7 @@ Item {
                     }
                     AtmoIcon {
                         icon: "copy"
-                        color: rh.containsMouse ? Color.mPrimary : Color.mOnSurfaceVariant
+                        color: rh.containsMouse ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
                         anchors.right: parent.right
                         anchors.rightMargin: Style.marginS
                         anchors.verticalCenter: parent.verticalCenter
@@ -219,7 +219,7 @@ Item {
                     width: parent.width
                     height: 36
                     radius: Style.radiusM
-                    color: cah.containsMouse ? Color.mSurfaceVariant : Color.mSurface
+                    color: cah.containsMouse ? AtmoColor.mSurfaceVariant : AtmoColor.mSurface
                     border.color: Style.capsuleBorderColor
                     border.width: Style.capsuleBorderWidth
                     Row {
@@ -227,11 +227,11 @@ Item {
                         spacing: Style.marginS
                         AtmoIcon {
                             icon: "copy"
-                            color: cah.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
+                            color: cah.containsMouse ? AtmoColor.mOnSurface : AtmoColor.mOnSurfaceVariant
                         }
                         NText {
                             text: pluginApi?.tr("panel.copyAll")
-                            color: cah.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
+                            color: cah.containsMouse ? AtmoColor.mOnSurface : AtmoColor.mOnSurfaceVariant
                             pointSize: Style.fontSizeS
                         }
                     }
@@ -250,19 +250,19 @@ Item {
                     width: parent.width
                     height: 36
                     radius: Style.radiusM
-                    color: clrh.containsMouse ? Qt.alpha(Color.mError, 0.15) : Color.mSurface
-                    border.color: clrh.containsMouse ? Color.mError : Style.capsuleBorderColor
+                    color: clrh.containsMouse ? Qt.alpha(AtmoColor.mError, 0.15) : AtmoColor.mSurface
+                    border.color: clrh.containsMouse ? AtmoColor.mError : Style.capsuleBorderColor
                     border.width: Style.capsuleBorderWidth
                     Row {
                         anchors.centerIn: parent
                         spacing: Style.marginS
                         AtmoIcon {
                             icon: "trash"
-                            color: clrh.containsMouse ? Color.mError : Color.mOnSurfaceVariant
+                            color: clrh.containsMouse ? AtmoColor.mError : AtmoColor.mOnSurfaceVariant
                         }
                         NText {
                             text: pluginApi?.tr("panel.clearResult")
-                            color: clrh.containsMouse ? Color.mError : Color.mOnSurfaceVariant
+                            color: clrh.containsMouse ? AtmoColor.mError : AtmoColor.mOnSurfaceVariant
                             pointSize: Style.fontSizeS
                         }
                     }
@@ -291,7 +291,7 @@ Item {
                     anchors.rightMargin:    Style.marginS
                     anchors.verticalCenter: parent.verticalCenter
                     height:  1
-                    color:   Color.mOnSurfaceVariant
+                    color:   AtmoColor.mOnSurfaceVariant
                     opacity: 0.3
                 }
 
@@ -299,7 +299,7 @@ Item {
                     id:              historyLabel
                     anchors.centerIn: parent
                     text:             pluginApi?.tr("panel.history")
-                    color:            Color.mOnSurfaceVariant
+                    color:            AtmoColor.mOnSurfaceVariant
                     pointSize:        Style.fontSizeXS
                 }
 
@@ -310,7 +310,7 @@ Item {
                     anchors.rightMargin:    Style.marginS
                     anchors.verticalCenter: parent.verticalCenter
                     height:  1
-                    color:   Color.mOnSurfaceVariant
+                    color:   AtmoColor.mOnSurfaceVariant
                     opacity: 0.3
                 }
 
@@ -320,12 +320,12 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     width:  22; height: 22
                     radius: Style.radiusS
-                    color:  hhc.containsMouse ? Color.mError : "transparent"
+                    color:  hhc.containsMouse ? AtmoColor.mError : "transparent"
                     AtmoIcon {
                         anchors.centerIn: parent
                         icon:  "trash"
                         scale: 0.75
-                        color: hhc.containsMouse ? Color.mError : Color.mOnSurfaceVariant
+                        color: hhc.containsMouse ? AtmoColor.mError : AtmoColor.mOnSurfaceVariant
                     }
                     MouseArea {
                         id:          hhc
@@ -348,7 +348,7 @@ Item {
                         width: 28
                         height: 28
                         radius: Style.radiusS
-                        border.color: hh.containsMouse ? Color.mPrimary : Style.capsuleBorderColor
+                        border.color: hh.containsMouse ? AtmoColor.mPrimary : Style.capsuleBorderColor
                         border.width: hh.containsMouse ? 2 : Style.capsuleBorderWidth
                         Component.onCompleted: color = modelData
                         MouseArea {

@@ -64,7 +64,7 @@ Item {
     y: Style.pixelAlignCenter(parent.height, height)
     width: root.contentWidth
     height: root.contentHeight
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
     radius: Style.radiusL
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
@@ -78,7 +78,7 @@ Item {
       AtmoIcon {
         visible: root.mainInstance?.loading ?? false
         icon: "loader"
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
         applyUiScale: true
 
         RotationAnimator on rotation {
@@ -95,9 +95,9 @@ Item {
         visible: !(root.mainInstance?.loading ?? false)
         text: root.mainInstance?.hasData ? root.mainInstance.getAqi().toString() : "--"
         color: {
-          if (mouseArea.containsMouse) return Color.mOnHover
+          if (mouseArea.containsMouse) return AtmoColor.mOnHover
           if (root.mainInstance?.hasData) return root.mainInstance.getAqiColor(root.mainInstance.getAqi())
-          return Color.mOnSurface
+          return AtmoColor.mOnSurface
         }
         pointSize: root.barFontSize
         applyUiScale: false

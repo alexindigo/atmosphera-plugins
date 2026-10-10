@@ -59,13 +59,13 @@ Item {
 
   readonly property color statusColor: {
     switch (status) {
-      case "offline": return Color.mError;
-      case "idle": return Color.mPrimary;
-      case "busy": return Color.mPrimary;
+      case "offline": return AtmoColor.mError;
+      case "idle": return AtmoColor.mPrimary;
+      case "busy": return AtmoColor.mPrimary;
       case "attention": return "#f59e0b";
       case "degraded": return "#f97316";
-      case "error": return Color.mError;
-      default: return Color.mOnSurface;
+      case "error": return AtmoColor.mError;
+      default: return AtmoColor.mOnSurface;
     }
   }
 
@@ -123,7 +123,7 @@ Item {
     width: root.contentWidth
     height: root.contentHeight
     radius: Style.radiusL
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
 
@@ -159,7 +159,7 @@ Item {
           pointSize: root.barFontSize
           applyUiScale: false
           font.weight: Style.fontWeightSemiBold
-          color: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+          color: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
           Layout.alignment: Qt.AlignVCenter
         }
       }

@@ -132,7 +132,7 @@ Item {
                 AtmoIcon {
                     icon: "brand-github"
                     pointSize: Style.fontSizeL
-                    color: Color.mPrimary
+                    color: AtmoColor.mPrimary
                 }
 
                 NText {
@@ -140,13 +140,13 @@ Item {
                     text: "GitHub Activity"
                     pointSize: Style.fontSizeM
                     font.weight: Font.Bold
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                 }
 
                 AtmoIconButton {
                     icon: "refresh"
                     enabled: !root.isLoading && root.hasUsername
-                    colorFg: root.isLoading ? Color.mOnSurfaceVariant : Color.mOnSurface
+                    colorFg: root.isLoading ? AtmoColor.mOnSurfaceVariant : AtmoColor.mOnSurface
 
                     onClicked: {
                         if (root.mainInstance) {
@@ -158,7 +158,7 @@ Item {
                 AtmoIconButton {
                     icon: "checks"
                     visible: root.currentTab === 1 && (root.mainInstance?.notificationCount || 0) > 0
-                    colorFg: Color.mOnSurfaceVariant
+                    colorFg: AtmoColor.mOnSurfaceVariant
                     onClicked: root.mainInstance?.markAllNotificationsAsRead()
                 }
             }
@@ -170,14 +170,14 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: activityBtn.implicitHeight
-                    color: root.currentTab === 0 ? Color.mPrimary : Color.mSurfaceVariant
+                    color: root.currentTab === 0 ? AtmoColor.mPrimary : AtmoColor.mSurfaceVariant
                     radius: Style.radiusM
 
                     NText {
                         id: activityBtn
                         anchors.centerIn: parent
                         text: "Activity"
-                        color: root.currentTab === 0 ? Color.mOnPrimary : Color.mOnSurfaceVariant
+                        color: root.currentTab === 0 ? AtmoColor.mOnPrimary : AtmoColor.mOnSurfaceVariant
                         pointSize: Style.fontSizeS
                         font.weight: Font.Medium
                     }
@@ -192,7 +192,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: notifBtn.implicitHeight
-                    color: root.currentTab === 1 ? Color.mPrimary : Color.mSurfaceVariant
+                    color: root.currentTab === 1 ? AtmoColor.mPrimary : AtmoColor.mSurfaceVariant
                     radius: Style.radiusM
 
                     NText {
@@ -202,7 +202,7 @@ Item {
                             var count = root.mainInstance?.notificationCount || 0
                             return count > 0 ? "Notifications (" + count + ")" : "Notifications"
                         }
-                        color: root.currentTab === 1 ? Color.mOnPrimary : Color.mOnSurfaceVariant
+                        color: root.currentTab === 1 ? AtmoColor.mOnPrimary : AtmoColor.mOnSurfaceVariant
                         pointSize: Style.fontSizeS
                         font.weight: Font.Medium
                     }
@@ -233,14 +233,14 @@ Item {
                         return "Updated " + Math.floor(hours / 24) + "d ago"
                     }
                     pointSize: Style.fontSizeXS
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                 }
             }
 
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                color: Color.mSurfaceVariant
+                color: AtmoColor.mSurfaceVariant
                 radius: Style.radiusL
 
                 ColumnLayout {
@@ -252,7 +252,7 @@ Item {
                         Layout.alignment: Qt.AlignHCenter
                         icon: "user-circle"
                         pointSize: Style.fontSizeXXL * 2
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                     }
 
                     NText {
@@ -260,7 +260,7 @@ Item {
                         text: "No username configured"
                         pointSize: Style.fontSizeM
                         font.weight: Font.Medium
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                     }
                 }
 
@@ -273,7 +273,7 @@ Item {
                         Layout.alignment: Qt.AlignHCenter
                         text: "Failed to fetch events"
                         pointSize: Style.fontSizeM
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                     }
                 }
 
@@ -286,7 +286,7 @@ Item {
                         Layout.alignment: Qt.AlignHCenter
                         text: "Loading GitHub events..."
                         pointSize: Style.fontSizeM
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                     }
                 }
 
@@ -302,7 +302,7 @@ Item {
                         Layout.alignment: Qt.AlignHCenter
                         text: root.currentTab === 0 ? "No recent activity" : "No notifications"
                         pointSize: Style.fontSizeM
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                     }
                 }
 
@@ -329,7 +329,7 @@ Item {
                                 id: eventCard
                                 Layout.fillWidth: true
                                 height: cardContent.implicitHeight + Style.marginM * 2
-                                color: cardMouse.containsMouse ? Qt.lighter(Color.mSurface, 1.05) : Color.mSurface
+                                color: cardMouse.containsMouse ? Qt.lighter(AtmoColor.mSurface, 1.05) : AtmoColor.mSurface
                                 radius: Style.radiusM
 
                                 Behavior on color {
@@ -370,13 +370,13 @@ Item {
                                                 text: eventCard.event?.actor?.login || ""
                                                 pointSize: Style.fontSizeS
                                                 font.weight: Font.Bold
-                                                color: Color.mOnSurface
+                                                color: AtmoColor.mOnSurface
                                             }
 
                                             NText {
                                                 text: formatEventType(eventCard.event)
                                                 pointSize: Style.fontSizeS
-                                                color: Color.mOnSurfaceVariant
+                                                color: AtmoColor.mOnSurfaceVariant
                                             }
 
                                             Item { Layout.fillWidth: true }
@@ -384,7 +384,7 @@ Item {
                                             NText {
                                                 text: formatRelativeTime(eventCard.event?.created_at)
                                                 pointSize: Style.fontSizeXS
-                                                color: Color.mOnSurfaceVariant
+                                                color: AtmoColor.mOnSurfaceVariant
                                             }
                                         }
 
@@ -393,7 +393,7 @@ Item {
                                             text: formatRepoName(eventCard.event?.repo)
                                             pointSize: Style.fontSizeS
                                             font.weight: Font.Medium
-                                            color: Color.mPrimary
+                                            color: AtmoColor.mPrimary
                                             elide: Text.ElideRight
                                         }
 
@@ -402,7 +402,7 @@ Item {
                                             visible: eventCard.eventDetail !== ""
                                             text: eventCard.eventDetail
                                             pointSize: Style.fontSizeXS
-                                            color: Color.mOnSurfaceVariant
+                                            color: AtmoColor.mOnSurfaceVariant
                                             elide: Text.ElideRight
                                             maximumLineCount: 1
                                         }
@@ -437,7 +437,7 @@ Item {
                                 id: notifCard
                                 Layout.fillWidth: true
                                 height: notifContent.implicitHeight + Style.marginM * 2
-                                color: cardHover.hovered ? Qt.lighter(Color.mSurface, 1.05) : Color.mSurface
+                                color: cardHover.hovered ? Qt.lighter(AtmoColor.mSurface, 1.05) : AtmoColor.mSurface
                                 radius: Style.radiusM
 
                                 Behavior on color {
@@ -461,7 +461,7 @@ Item {
                                     AtmoIcon {
                                         icon: root.getNotificationIcon(notifCard.notification.type)
                                         pointSize: Style.fontSizeL
-                                        color: Color.mPrimary
+                                        color: AtmoColor.mPrimary
                                     }
 
                                     ColumnLayout {
@@ -476,13 +476,13 @@ Item {
                                                 text: notifCard.notification.repo
                                                 pointSize: Style.fontSizeS
                                                 font.weight: Font.Bold
-                                                color: Color.mOnSurface
+                                                color: AtmoColor.mOnSurface
                                             }
 
                                             NText {
                                                 text: "• " + notifCard.notification.type
                                                 pointSize: Style.fontSizeXS
-                                                color: Color.mOnSurfaceVariant
+                                                color: AtmoColor.mOnSurfaceVariant
                                             }
 
                                             Item { Layout.fillWidth: true }
@@ -491,7 +491,7 @@ Item {
                                                 visible: !cardHover.hovered
                                                 text: formatRelativeTime(notifCard.notification.updated_at)
                                                 pointSize: Style.fontSizeXS
-                                                color: Color.mOnSurfaceVariant
+                                                color: AtmoColor.mOnSurfaceVariant
                                             }
                                         }
 
@@ -499,7 +499,7 @@ Item {
                                             Layout.fillWidth: true
                                             text: notifCard.notification.title
                                             pointSize: Style.fontSizeS
-                                            color: Color.mOnSurface
+                                            color: AtmoColor.mOnSurface
                                             elide: Text.ElideRight
                                             maximumLineCount: 2
                                         }
@@ -528,7 +528,7 @@ Item {
                                         rightMargin: Style.marginM
                                     }
                                     icon: "check"
-                                    colorFg: Color.mOnSurfaceVariant
+                                    colorFg: AtmoColor.mOnSurfaceVariant
                                     onClicked: root.mainInstance?.markNotificationAsRead(notifCard.notification.id)
                                 }
                             }

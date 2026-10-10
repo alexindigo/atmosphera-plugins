@@ -256,11 +256,11 @@ Item {
         forceOpaque: true
         radius: Style.radiusM
         color: card.pressed
-            ? Qt.alpha(Color.mPrimary, 0.12)
-            : (card.selected ? Color.mSecondaryContainer : Color.mSurfaceVariant)
+            ? Qt.alpha(AtmoColor.mPrimary, 0.12)
+            : (card.selected ? AtmoColor.mSecondaryContainer : AtmoColor.mSurfaceVariant)
         border.color: (cardHover.hovered || card.pressed || card.selected)
-            ? Color.mPrimary
-            : Qt.alpha(Color.mOutline, Style.opacityHeavy)
+            ? AtmoColor.mPrimary
+            : Qt.alpha(AtmoColor.mOutline, Style.opacityHeavy)
         border.width: Style.borderS
     }
 
@@ -325,7 +325,7 @@ Item {
             text: card.previewText
             pointSize: Style.fontSizeM
             font.weight: Font.Normal
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             elide: Text.ElideRight
             maximumLineCount: 1
             wrapMode: Text.NoWrap
@@ -344,14 +344,14 @@ Item {
             AtmoIcon {
                 icon: "image"
                 pointSize: Style.fontSizeXXL
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
             }
 
             NText {
                 Layout.fillWidth: true
                 text: card.previewText
                 pointSize: Style.fontSizeM
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
                 elide: Text.ElideRight
                 maximumLineCount: 1
                 wrapMode: Text.NoWrap
@@ -380,7 +380,7 @@ Item {
             AtmoIcon {
                 icon: "file"
                 pointSize: Style.fontSizeXXL
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
             }
 
             ColumnLayout {
@@ -400,7 +400,7 @@ Item {
                     text: card.fileMeta.filename || card.previewText
                     pointSize: Style.fontSizeM
                     font.weight: Style.fontWeightBold
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                     elide: Text.ElideRight
                     maximumLineCount: 1
                     wrapMode: Text.NoWrap
@@ -418,7 +418,7 @@ Item {
                     visible: text.length > 0
                     text: card.fileMeta.parentDir
                     pointSize: Style.fontSizeS
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                     elide: Text.ElideMiddle
                     maximumLineCount: 1
                     wrapMode: Text.NoWrap
@@ -434,7 +434,7 @@ Item {
                 visible: text.length > 0
                 text: card.fileMeta.sizeHuman
                 pointSize: Style.fontSizeS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 horizontalAlignment: Text.AlignRight
             }
         }
@@ -471,7 +471,7 @@ Item {
                 visible: !cardHover.hovered && !card.pinned && card.relativeTimeText.length > 0
                 text: card.relativeTimeText
                 pointSize: Style.fontSizeS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 horizontalAlignment: Text.AlignRight
             }
 
@@ -565,7 +565,7 @@ Item {
             visible: card.pinned
             icon: "pin"
             pointSize: Style.fontSizeL
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
         }
 
         AtmoIconButton {

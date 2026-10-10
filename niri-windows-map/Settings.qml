@@ -15,7 +15,7 @@ ColumnLayout {
     text: "Panel"
     pointSize: Style.fontSizeM
     font.weight: Font.Bold
-    color: Color.mOnSurface
+    color: AtmoColor.mOnSurface
   }
 
   NComboBox {

@@ -83,7 +83,7 @@ ColumnLayout {
             NText {
                 text: pluginApi.tr("settings.hourLineOpacity_description")
                 font.pointSize: Style.fontSizeS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
             }
@@ -91,7 +91,7 @@ ColumnLayout {
             NText {
                 text: Math.round(root.hourLineOpacity * 100) + "%"
                 font.pointSize: Style.fontSizeS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
             }
         }
 
@@ -117,7 +117,7 @@ ColumnLayout {
             NText {
                 text: pluginApi.tr("settings.dayLineOpacity_description")
                 font.pointSize: Style.fontSizeS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
             }
@@ -125,7 +125,7 @@ ColumnLayout {
             NText {
                 text: Math.round(root.dayLineOpacity * 100) + "%"
                 font.pointSize: Style.fontSizeS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
             }
         }
 

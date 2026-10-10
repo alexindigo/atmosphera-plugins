@@ -97,14 +97,14 @@ Item {
           AtmoIcon {
             icon: "device-mobile"
             pointSize: Style.fontSizeXXL
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
           }
 
           NText {
             text: pluginApi?.tr("panel.title")
             pointSize: Style.fontSizeL
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
 
           Item {
@@ -126,7 +126,7 @@ Item {
               visible: main.isRefreshing
               icon: "refresh"
               pointSize: Style.fontSizeL
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
 
               NumberAnimation on rotation {
                 from: 0
@@ -186,7 +186,7 @@ Item {
         id: deviceConnectedCard
 
         Rectangle {
-          color: Color.mSurfaceVariant
+          color: AtmoColor.mSurfaceVariant
           radius: Style.radiusM
 
           Component.onCompleted: {
@@ -206,7 +206,7 @@ Item {
                 text: main.mainDevice?.name ?? ""
                 pointSize: Style.fontSizeXXL
                 font.weight: Style.fontWeightBold
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
                 Layout.fillWidth: true
               }
 
@@ -283,14 +283,14 @@ Item {
                   spacing: Style.marginM
                   AtmoIcon {
                     icon: deviceData.getBatteryIcon(main.mainDevice?.batteryCharge ?? -1, main.mainDevice?.batteryCharging ?? false)
-                    pointSize: Style.fontSizeXXXL; applyUiScale: true; color: Color.mOnSurface
+                    pointSize: Style.fontSizeXXXL; applyUiScale: true; color: AtmoColor.mOnSurface
                   }
                   ColumnLayout {
                     spacing: 2 * Style.uiScaleRatio
-                    NText { text: pluginApi?.tr("panel.card.battery"); pointSize: Style.fontSizeS; color: Color.mOnSurface }
+                    NText { text: pluginApi?.tr("panel.card.battery"); pointSize: Style.fontSizeS; color: AtmoColor.mOnSurface }
                     NText {
                       text: (main.mainDevice?.batteryCharge ?? -1) !== -1 ? (main.mainDevice.batteryCharge + "%") : pluginApi?.tr("panel.signal.unknown")
-                      pointSize: Style.fontSizeL; font.weight: Style.fontWeightMedium; color: Color.mOnSurface
+                      pointSize: Style.fontSizeL; font.weight: Style.fontWeightMedium; color: AtmoColor.mOnSurface
                     }
                   }
                 }
@@ -300,14 +300,14 @@ Item {
                   spacing: Style.marginM
                   AtmoIcon {
                     icon: deviceData.getCellularTypeIcon(main.mainDevice?.networkType ?? "")
-                    pointSize: Style.fontSizeXXXL; applyUiScale: true; color: Color.mOnSurface
+                    pointSize: Style.fontSizeXXXL; applyUiScale: true; color: AtmoColor.mOnSurface
                   }
                   ColumnLayout {
                     spacing: 2 * Style.uiScaleRatio
-                    NText { text: pluginApi?.tr("panel.card.network"); pointSize: Style.fontSizeS; color: Color.mOnSurface }
+                    NText { text: pluginApi?.tr("panel.card.network"); pointSize: Style.fontSizeS; color: AtmoColor.mOnSurface }
                     NText {
                       text: main.mainDevice?.networkType || pluginApi?.tr("panel.signal.unknown")
-                      pointSize: Style.fontSizeL; font.weight: Style.fontWeightMedium; color: Color.mOnSurface
+                      pointSize: Style.fontSizeL; font.weight: Style.fontWeightMedium; color: AtmoColor.mOnSurface
                     }
                   }
                 }
@@ -317,14 +317,14 @@ Item {
                   spacing: Style.marginM
                   AtmoIcon {
                     icon: deviceData.getCellularStrengthIcon(main.mainDevice?.networkStrength ?? -1)
-                    pointSize: Style.fontSizeXXXL; applyUiScale: true; color: Color.mOnSurface
+                    pointSize: Style.fontSizeXXXL; applyUiScale: true; color: AtmoColor.mOnSurface
                   }
                   ColumnLayout {
                     spacing: 2 * Style.uiScaleRatio
-                    NText { text: pluginApi?.tr("panel.card.signal-strength"); pointSize: Style.fontSizeS; color: Color.mOnSurface }
+                    NText { text: pluginApi?.tr("panel.card.signal-strength"); pointSize: Style.fontSizeS; color: AtmoColor.mOnSurface }
                     NText {
                       text: deviceData.getSignalStrengthText(main.mainDevice?.networkStrength ?? -1)
-                      pointSize: Style.fontSizeL; font.weight: Style.fontWeightMedium; color: Color.mOnSurface
+                      pointSize: Style.fontSizeL; font.weight: Style.fontWeightMedium; color: AtmoColor.mOnSurface
                     }
                   }
                 }
@@ -334,14 +334,14 @@ Item {
                   spacing: Style.marginM
                   AtmoIcon {
                     icon: "notification"
-                    pointSize: Style.fontSizeXXXL; applyUiScale: true; color: Color.mOnSurface
+                    pointSize: Style.fontSizeXXXL; applyUiScale: true; color: AtmoColor.mOnSurface
                   }
                   ColumnLayout {
                     spacing: 2 * Style.uiScaleRatio
-                    NText { text: pluginApi?.tr("panel.card.notifications"); pointSize: Style.fontSizeS; color: Color.mOnSurface }
+                    NText { text: pluginApi?.tr("panel.card.notifications"); pointSize: Style.fontSizeS; color: AtmoColor.mOnSurface }
                     NText {
                       text: main.mainDevice?.notificationIds?.length ?? 0
-                      pointSize: Style.fontSizeL; font.weight: Style.fontWeightMedium; color: Color.mOnSurface
+                      pointSize: Style.fontSizeL; font.weight: Style.fontWeightMedium; color: AtmoColor.mOnSurface
                     }
                   }
                 }
@@ -356,7 +356,7 @@ Item {
         id: noDevicePairedCard
 
         Rectangle {
-          color: Color.mSurfaceVariant
+          color: AtmoColor.mSurfaceVariant
           radius: Style.radiusM
 
           ColumnLayout {
@@ -367,7 +367,7 @@ Item {
               text: main.mainDevice?.name ?? ""
               pointSize: Style.fontSizeXXL
               font.weight: Style.fontWeightBold
-              color: Color.mOnSurface
+              color: AtmoColor.mOnSurface
               Layout.fillWidth: true
             }
 
@@ -397,7 +397,7 @@ Item {
                   AtmoIcon {
                     icon: "key"
                     pointSize: Style.fontSizeXL
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                     Layout.alignment: Qt.AlignHCenter
                     opacity: (main.mainDevice?.isPairRequested ?? false) ? 1.0 : 0.0
                   }
@@ -407,7 +407,7 @@ Item {
                     Layout.alignment: Qt.AlignHCenter
                     pointSize: Style.fontSizeL
                     font.weight: Style.fontWeightBold
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                     opacity: (main.mainDevice?.isPairRequested ?? false) ? 1.0 : 0.0
                   }
                 }
@@ -429,7 +429,7 @@ Item {
         id: noDevicesAvailableCard
 
         Rectangle {
-          color: Color.mSurfaceVariant
+          color: AtmoColor.mSurfaceVariant
           radius: Style.radiusM
 
           ColumnLayout {
@@ -440,13 +440,13 @@ Item {
             AtmoIcon {
               icon: "device-mobile-off"
               pointSize: 48 * Style.uiScaleRatio
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               Layout.alignment: Qt.AlignHCenter
             }
             NText {
               text: pluginApi?.tr("panel.valent-error.no-devices")
               pointSize: Style.fontSizeL
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               Layout.alignment: Qt.AlignCenter
               horizontalAlignment: Text.AlignHCenter
               wrapMode: Text.WordWrap
@@ -461,7 +461,7 @@ Item {
         id: deviceNotReachableCard
 
         Rectangle {
-          color: Color.mSurfaceVariant
+          color: AtmoColor.mSurfaceVariant
           radius: Style.radiusM
 
           ColumnLayout {
@@ -472,13 +472,13 @@ Item {
             AtmoIcon {
               icon: "device-mobile-off"
               pointSize: 48 * Style.uiScaleRatio
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               Layout.alignment: Qt.AlignHCenter
             }
             NText {
               text: pluginApi?.tr("panel.valent-error.device-unavailable")
               pointSize: Style.fontSizeL
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               Layout.alignment: Qt.AlignCenter
               horizontalAlignment: Text.AlignHCenter
               wrapMode: Text.WordWrap
@@ -498,7 +498,7 @@ Item {
         id: daemonNotRunningCard
 
         Rectangle {
-          color: Color.mSurfaceVariant
+          color: AtmoColor.mSurfaceVariant
           radius: Style.radiusM
 
           ColumnLayout {
@@ -509,20 +509,20 @@ Item {
             AtmoIcon {
               icon: "exclamation-circle"
               pointSize: 48 * Style.uiScaleRatio
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               Layout.alignment: Qt.AlignHCenter
             }
             NText {
               text: pluginApi?.tr("panel.valent-error.unavailable-title")
               pointSize: Style.fontSizeL
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               Layout.alignment: Qt.AlignCenter
               horizontalAlignment: Text.AlignHCenter
             }
             NText {
               text: pluginApi?.tr("panel.valent-error.unavailable-desc")
               pointSize: Style.fontSizeS
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               Layout.alignment: Qt.AlignCenter
               horizontalAlignment: Text.AlignHCenter
               wrapMode: Text.WordWrap
@@ -538,7 +538,7 @@ Item {
         id: deviceSwitcherCard
 
         Rectangle {
-          color: Color.mSurfaceVariant
+          color: AtmoColor.mSurfaceVariant
           radius: Style.radiusM
 
           NScrollView {
@@ -546,7 +546,7 @@ Item {
             verticalPolicy: ScrollBar.AsNeeded
             contentWidth: parent.width
             reserveScrollbarSpace: false
-            gradientColor: Color.mSurface
+            gradientColor: AtmoColor.mSurface
 
             ColumnLayout {
               anchors { fill: parent; margins: Style.marginM }
@@ -561,8 +561,8 @@ Item {
                   text: modelData.name
                   Layout.fillWidth: true
                   backgroundColor: modelData.id === (main.mainDevice?.id ?? "")
-                    ? Color.mSecondary
-                    : Color.mPrimary
+                    ? AtmoColor.mSecondary
+                    : AtmoColor.mPrimary
                   onClicked: {
                     main.setMainDevice(modelData.id)
                     deviceSwitcherOpen = false

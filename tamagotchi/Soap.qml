@@ -40,7 +40,7 @@ Rectangle {
         width: parent.width + 6
         height: parent.height + 6
         radius: parent.radius + 3
-        color: Color.mPrimary
+        color: AtmoColor.mPrimary
         opacity: _dragging ? 0 : 1
         z: -1
     }

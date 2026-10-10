@@ -30,19 +30,19 @@ Item {
     readonly property string currentState: mainInst?.enabled ? (mainInst?.state ?? "unconfigured") : "disabled"
     readonly property color capsuleBgColor: {
         if (isSelected) {
-            return mouseArea.containsMouse ? Qt.darker(Color.mPrimary, 1.08) : Color.mPrimary;
+            return mouseArea.containsMouse ? Qt.darker(AtmoColor.mPrimary, 1.08) : AtmoColor.mPrimary;
         }
-        return mouseArea.containsMouse ? Color.mHover : Style.capsuleColor;
+        return mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor;
     }
     readonly property color iconColor: {
-        if (isSelected) return Color.mOnPrimary;
-        return mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface;
+        if (isSelected) return AtmoColor.mOnPrimary;
+        return mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface;
     }
     readonly property color badgeColor: isSelected
-        ? Color.mOnPrimary
-        : (mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface)
-    readonly property color statusBadgeBg: mainInst ? mainInst.statusBadgeBackground(root.currentState) : Color.mOutline
-    readonly property color statusBadgeFg: mainInst ? mainInst.statusBadgeForeground(root.currentState) : Color.mOnSurface
+        ? AtmoColor.mOnPrimary
+        : (mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface)
+    readonly property color statusBadgeBg: mainInst ? mainInst.statusBadgeBackground(root.currentState) : AtmoColor.mOutline
+    readonly property color statusBadgeFg: mainInst ? mainInst.statusBadgeForeground(root.currentState) : AtmoColor.mOnSurface
     readonly property string statusBadgeIcon: mainInst ? mainInst.statusBadgeIcon(root.currentState) : ""
 
     implicitWidth: visualCapsule.width
@@ -100,7 +100,7 @@ Item {
         height: root.capsuleHeight
         color: root.capsuleBgColor
         radius: Style.radiusL
-        border.color: isSelected ? Color.mPrimary : Style.capsuleBorderColor
+        border.color: isSelected ? AtmoColor.mPrimary : Style.capsuleBorderColor
         border.width: Style.capsuleBorderWidth
 
         Row {

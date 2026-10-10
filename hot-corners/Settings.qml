@@ -105,7 +105,7 @@ ColumnLayout {
             
             ctx.closePath();
             // Noctalia primary color or gray
-            ctx.fillStyle = isActive ? Color.mPrimary : Qt.rgba(0.5, 0.5, 0.5, 0.5);
+            ctx.fillStyle = isActive ? AtmoColor.mPrimary : Qt.rgba(0.5, 0.5, 0.5, 0.5);
             ctx.fill();
             
             // Hover effect outline
@@ -181,8 +181,8 @@ ColumnLayout {
         width: 400
         height: column.height + Style.marginL * 2
         anchors.centerIn: parent
-        color: Color.mSurfaceVariant
-        border.color: Color.mOutline
+        color: AtmoColor.mSurfaceVariant
+        border.color: AtmoColor.mOutline
         border.width: Style.borderM
         radius: Style.radiusL
 
@@ -196,7 +196,7 @@ ColumnLayout {
 
           NText {
             text: "Custom Command for " + popupOverlay.targetCorner
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
 
           RowLayout {

@@ -92,7 +92,7 @@ Item {
     y: Style.pixelAlignCenter(parent.height, height)
     width: root.contentWidth
     height: root.contentHeight
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
     radius: Style.radiusM
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
@@ -108,7 +108,7 @@ Item {
       // Loading spinner
       AtmoIcon {
         Layout.alignment: Qt.AlignVCenter
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
         icon: "loader"
         visible: loading
 
@@ -124,14 +124,14 @@ Item {
         applyUiScale: false
         icon: "currency-dollar"
         visible: !loading
-        color: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+        color: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
       }
       NText {
         id: rateText
 
         Layout.alignment: Qt.AlignVCenter
         applyUiScale: false
-        color: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+        color: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
         font.weight: Font.Medium
         pointSize: Style.getBarFontSizeForScreen(screen?.name)
         text: displayText
@@ -148,7 +148,7 @@ Item {
       // Loading spinner
       AtmoIcon {
         Layout.alignment: Qt.AlignVCenter
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
         icon: "loader"
         visible: loading
 
@@ -163,7 +163,7 @@ Item {
         Layout.alignment: Qt.AlignHCenter
         icon: "currency-dollar"
         visible: !loading
-        color: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+        color: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
       }
     }
   }

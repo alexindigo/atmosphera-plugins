@@ -54,7 +54,7 @@ NBox {
         spacing: Style.marginL; Layout.fillWidth: true
         AtmoIcon {
           icon: weatherReady ? LocationService.weatherSymbolFromCode(code, isDay) : "weather-cloud-off"
-          pointSize: Style.fontSizeXXXL * 1.75; color: Color.mPrimary
+          pointSize: Style.fontSizeXXXL * 1.75; color: AtmoColor.mPrimary
         }
         ColumnLayout {
           spacing: Style.marginXXS
@@ -71,7 +71,7 @@ NBox {
             }
             NText {
               text: weatherReady ? `(${LocationService.data.weather.timezone_abbreviation})` : ""
-              pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant
+              pointSize: Style.fontSizeXS; color: AtmoColor.mOnSurfaceVariant
               visible: weatherReady && showLocation && !Settings.data.location.hideWeatherTimezone
             }
           }
@@ -91,24 +91,24 @@ NBox {
           NText {
             Layout.alignment: Qt.AlignCenter
             text: I18n.locale.toString(new Date(LocationService.data.weather.daily.time[index].replace(/-/g, "/")), "ddd")
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
           AtmoIcon {
             Layout.alignment: Qt.AlignCenter
             icon: LocationService.weatherSymbolFromCode(LocationService.data.weather.daily.weathercode[index])
-            pointSize: Style.fontSizeXXL * 1.6; color: Color.mPrimary
+            pointSize: Style.fontSizeXXL * 1.6; color: AtmoColor.mPrimary
           }
           NText {
             Layout.alignment: Qt.AlignCenter
             text: `${Utils.formatTemp(LocationService.data.weather.daily.temperature_2m_max[index], Settings.data.location.useFahrenheit, false, LocationService)}°/${Utils.formatTemp(LocationService.data.weather.daily.temperature_2m_min[index], Settings.data.location.useFahrenheit, false, LocationService)}°`
-            pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant
+            pointSize: Style.fontSizeXS; color: AtmoColor.mOnSurfaceVariant
           }
           Repeater {
             model: ["sunrise", "sunset"]
             delegate: NText {
               Layout.alignment: Qt.AlignCenter
               text: I18n.locale.toString(new Date(LocationService.data.weather.daily[modelData][index]), Settings.data.location.use12hourFormat ? "hh:mm AP" : "HH:mm")
-              pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant
+              pointSize: Style.fontSizeXS; color: AtmoColor.mOnSurfaceVariant
             }
           }
         }

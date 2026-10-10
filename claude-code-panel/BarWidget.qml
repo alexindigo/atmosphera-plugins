@@ -36,12 +36,12 @@ Item {
   implicitHeight: contentHeight
 
   function accentColor() {
-    if (!binaryAvailable) { return Color.mOnSurfaceVariant; }
-    if (dangerouslySkip || permissionMode === "bypassPermissions") { return Color.mError; }
-    if (permissionMode === "acceptEdits") { return Color.mSecondary; }
-    if (permissionMode === "plan") { return Color.mTertiary; }
-    if (isGenerating) { return Color.mPrimary; }
-    return Color.mOnSurface;
+    if (!binaryAvailable) { return AtmoColor.mOnSurfaceVariant; }
+    if (dangerouslySkip || permissionMode === "bypassPermissions") { return AtmoColor.mError; }
+    if (permissionMode === "acceptEdits") { return AtmoColor.mSecondary; }
+    if (permissionMode === "plan") { return AtmoColor.mTertiary; }
+    if (isGenerating) { return AtmoColor.mPrimary; }
+    return AtmoColor.mOnSurface;
   }
 
   Rectangle {
@@ -50,7 +50,7 @@ Item {
     y: Style.pixelAlignCenter(parent.height, height)
     width: root.contentWidth
     height: root.contentHeight
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
     radius: Style.radiusL
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
@@ -77,7 +77,7 @@ Item {
       visible: root.sessionId !== ""
       width: Style.marginS; height: Style.marginS; radius: Style.radiusXXXS
       color: root.dangerouslySkip || root.permissionMode === "bypassPermissions"
-             ? Color.mError : Color.mPrimary
+             ? AtmoColor.mError : AtmoColor.mPrimary
       anchors.top: parent.top
       anchors.right: parent.right
       anchors.margins: Style.radiusXXXS

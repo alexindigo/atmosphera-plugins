@@ -25,9 +25,9 @@ Item {
   }
 
   function statusColor(status) {
-    if (status === "running") return Color.mPrimary
-    if (status === "blocked") return Color.mError
-    return Color.mSecondary
+    if (status === "running") return AtmoColor.mPrimary
+    if (status === "blocked") return AtmoColor.mError
+    return AtmoColor.mSecondary
   }
 
   Rectangle {
@@ -54,7 +54,7 @@ Item {
 
           AtmoIcon {
             icon: "bot"
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
           }
 
           ColumnLayout {
@@ -65,7 +65,7 @@ Item {
               text: pluginApi?.tr("panel.title")
               pointSize: Style.fontSizeM
               font.weight: Font.DemiBold
-              color: Color.mOnSurface
+              color: AtmoColor.mOnSurface
             }
 
             NText {
@@ -75,7 +75,7 @@ Item {
                 url: root.mainInstance?.serverUrl ?? ""
               })
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               elide: Text.ElideRight
             }
           }
@@ -99,7 +99,7 @@ Item {
           anchors.margins: Style.marginM
           text: root.mainInstance?.serviceError ?? ""
           pointSize: Style.fontSizeS
-          color: Color.mError
+          color: AtmoColor.mError
           wrapMode: Text.WordWrap
         }
       }
@@ -134,7 +134,7 @@ Item {
 
                   AtmoIcon {
                     icon: "terminal"
-                    color: Color.mPrimary
+                    color: AtmoColor.mPrimary
                   }
 
                   NText {
@@ -142,14 +142,14 @@ Item {
                     text: modelData.agent
                     pointSize: Style.fontSizeM
                     font.weight: Font.DemiBold
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                     elide: Text.ElideRight
                   }
 
                   NText {
                     text: pluginApi?.tr("panel.agentRunning", { count: modelData.runningCount ?? 0 })
                     pointSize: Style.fontSizeXS
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                   }
                 }
 
@@ -174,7 +174,7 @@ Item {
                         Layout.fillWidth: true
                         text: modelData.title
                         pointSize: Style.fontSizeS
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                         elide: Text.ElideRight
                       }
 
@@ -185,7 +185,7 @@ Item {
                           status: pluginApi?.tr("status." + modelData.status)
                         })
                         pointSize: Style.fontSizeXS
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         elide: Text.ElideMiddle
                       }
                     }
@@ -210,7 +210,7 @@ Item {
               AtmoIcon {
                 Layout.alignment: Qt.AlignHCenter
                 icon: "bot-off"
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 pointSize: Style.fontSizeXXL
               }
 
@@ -219,7 +219,7 @@ Item {
                 Layout.fillWidth: true
                 text: pluginApi?.tr("panel.empty")
                 pointSize: Style.fontSizeM
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap
               }

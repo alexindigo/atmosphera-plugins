@@ -61,12 +61,12 @@ Item {
 
           NText {
             text: pluginApi?.tr("panel.title")
-            pointSize: Style.fontSizeL; font.weight: Font.Bold; color: Color.mOnSurface
+            pointSize: Style.fontSizeL; font.weight: Font.Bold; color: AtmoColor.mOnSurface
             Layout.fillWidth: true
           }
           NText {
             text: root.subtitleText
-            pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant
+            pointSize: Style.fontSizeXS; color: AtmoColor.mOnSurfaceVariant
           }
         }
 
@@ -104,12 +104,12 @@ Item {
             spacing: Style.marginM
 
             AtmoIcon {
-              icon: "loader"; color: Color.mPrimary; pointSize: Style.fontSizeXXL
+              icon: "loader"; color: AtmoColor.mPrimary; pointSize: Style.fontSizeXXL
               Layout.alignment: Qt.AlignHCenter
             }
             NText {
               text: pluginApi?.tr("panel.loading")
-              color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeM
+              color: AtmoColor.mOnSurfaceVariant; pointSize: Style.fontSizeM
               Layout.alignment: Qt.AlignHCenter
             }
           }
@@ -121,12 +121,12 @@ Item {
             spacing: Style.marginM
 
             AtmoIcon {
-              icon: "device-desktop-off"; color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeXXL
+              icon: "device-desktop-off"; color: AtmoColor.mOnSurfaceVariant; pointSize: Style.fontSizeXXL
               Layout.alignment: Qt.AlignHCenter
             }
             NText {
               text: pluginApi?.tr("panel.noOutputs")
-              color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeM
+              color: AtmoColor.mOnSurfaceVariant; pointSize: Style.fontSizeM
               Layout.alignment: Qt.AlignHCenter
             }
           }
@@ -138,10 +138,10 @@ Item {
 
             RowLayout {
               spacing: Style.marginS
-              AtmoIcon { icon: "activity"; color: Color.mPrimary; pointSize: Style.fontSizeS }
+              AtmoIcon { icon: "activity"; color: AtmoColor.mPrimary; pointSize: Style.fontSizeS }
               NText {
                 text: pluginApi?.tr("panel.liveSection")
-                pointSize: Style.fontSizeM; font.weight: Font.DemiBold; color: Color.mOnSurface
+                pointSize: Style.fontSizeM; font.weight: Font.DemiBold; color: AtmoColor.mOnSurface
               }
             }
 
@@ -169,16 +169,16 @@ Item {
 
             RowLayout {
               spacing: Style.marginS
-              AtmoIcon { icon: "activity"; color: Color.mPrimary; pointSize: Style.fontSizeS }
+              AtmoIcon { icon: "activity"; color: AtmoColor.mPrimary; pointSize: Style.fontSizeS }
               NText {
                 text: pluginApi?.tr("panel.liveSection")
-                pointSize: Style.fontSizeM; font.weight: Font.DemiBold; color: Color.mOnSurface
+                pointSize: Style.fontSizeM; font.weight: Font.DemiBold; color: AtmoColor.mOnSurface
               }
             }
 
             NText {
               text: pluginApi?.tr("panel.liveDescriptionWlr")
-              pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant
+              pointSize: Style.fontSizeXS; color: AtmoColor.mOnSurfaceVariant
               Layout.fillWidth: true
             }
 
@@ -200,12 +200,12 @@ Item {
 
             NText {
               text: pluginApi?.tr("panel.niriSection")
-              pointSize: Style.fontSizeM; font.weight: Font.DemiBold; color: Color.mOnSurface
+              pointSize: Style.fontSizeM; font.weight: Font.DemiBold; color: AtmoColor.mOnSurface
             }
 
             NText {
               text: pluginApi?.tr("panel.niriDescription")
-              pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant
+              pointSize: Style.fontSizeXS; color: AtmoColor.mOnSurfaceVariant
               Layout.fillWidth: true
             }
 
@@ -227,11 +227,11 @@ Item {
 
             NText {
               text: pluginApi?.tr("panel.niriSection")
-              pointSize: Style.fontSizeM; font.weight: Font.DemiBold; color: Color.mOnSurfaceVariant
+              pointSize: Style.fontSizeM; font.weight: Font.DemiBold; color: AtmoColor.mOnSurfaceVariant
             }
             NText {
               text: pluginApi?.tr("panel.noNiriOutputs")
-              pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant
+              pointSize: Style.fontSizeXS; color: AtmoColor.mOnSurfaceVariant
               Layout.fillWidth: true
             }
           }

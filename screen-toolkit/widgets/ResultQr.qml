@@ -53,12 +53,12 @@ Item {
             spacing: Style.marginS
             AtmoIcon {
                 icon: "qrcode"
-                color: Color.mPrimary
+                color: AtmoColor.mPrimary
                 anchors.verticalCenter: parent.verticalCenter
             }
             NText {
                 text: pluginApi?.tr("tools.qr")
-                color: Color.mPrimary
+                color: AtmoColor.mPrimary
                 font.weight: Font.Bold
                 pointSize: Style.fontSizeS
                 anchors.verticalCenter: parent.verticalCenter
@@ -91,13 +91,13 @@ Item {
             height: 26
             width: qrBadge.implicitWidth + Style.marginM * 2
             radius: Style.radiusS
-            color: Qt.alpha(Color.mPrimary, 0.15)
+            color: Qt.alpha(AtmoColor.mPrimary, 0.15)
             NText {
                 id: qrBadge
                 anchors.centerIn: parent
                 font.weight: Font.Bold
                 pointSize: Style.fontSizeXS
-                color: Color.mPrimary
+                color: AtmoColor.mPrimary
                 text: root.qrType === "url" ? "🔗 URL"
                     : root.qrType === "wifi" ? "📶 WiFi"
                     : root.qrType === "contact" ? "👤 Contact"
@@ -114,7 +114,7 @@ Item {
                 width: parent.width
                 height: 38
                 radius: Style.radiusM
-                color: Color.mSurface
+                color: AtmoColor.mSurface
                 border.color: Style.capsuleBorderColor
                 border.width: Style.capsuleBorderWidth
                 Row {
@@ -123,11 +123,11 @@ Item {
                     spacing: Style.marginS
                     AtmoIcon {
                         icon: "wifi"
-                        color: Color.mPrimary
+                        color: AtmoColor.mPrimary
                     }
                     NText {
                         text: root.qrWifiName || "Unknown"
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                         font.weight: Font.Bold
                         pointSize: Style.fontSizeS
                     }
@@ -137,7 +137,7 @@ Item {
                 width: parent.width
                 height: 38
                 radius: Style.radiusM
-                color: wph.containsMouse ? Color.mHover : Color.mSurface
+                color: wph.containsMouse ? AtmoColor.mHover : AtmoColor.mSurface
                 border.color: Style.capsuleBorderColor
                 border.width: Style.capsuleBorderWidth
                 Row {
@@ -146,16 +146,16 @@ Item {
                     spacing: Style.marginS
                     AtmoIcon {
                         icon: "key"
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                     }
                     NText {
                         text: root.qrWifiPass ? "••••••••" : pluginApi?.tr("panel.noPassword")
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         pointSize: Style.fontSizeS
                     }
                     AtmoIcon {
                         icon: "copy"
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                     }
                 }
                 MouseArea {
@@ -175,7 +175,7 @@ Item {
             width: parent.width
             height: 120 * Style.uiScaleRatio
             radius: Style.radiusM
-            color: Color.mSurface
+            color: AtmoColor.mSurface
             clip: true
             border.color: Style.capsuleBorderColor
             border.width: Style.capsuleBorderWidth
@@ -192,11 +192,11 @@ Item {
                     width: qrFlick.width
                     text: root.qrResult
                     wrapMode: TextEdit.WordWrap
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                     font.pointSize: Style.fontSizeS
                     selectByMouse: true
-                    selectionColor: Color.mPrimary
-                    selectedTextColor: Color.mOnPrimary
+                    selectionColor: AtmoColor.mPrimary
+                    selectedTextColor: AtmoColor.mOnPrimary
                     WheelHandler {
                         onWheel: event => {
                             qrFlick.flick(0, event.angleDelta.y * 5)
@@ -213,8 +213,8 @@ Item {
                 width: parent.width - 46
                 height: 38
                 radius: Style.radiusM
-                color: qah.containsMouse ? Color.mPrimary : Color.mSurface
-                border.color: Color.mPrimary
+                color: qah.containsMouse ? AtmoColor.mPrimary : AtmoColor.mSurface
+                border.color: AtmoColor.mPrimary
                 border.width: Style.capsuleBorderWidth
                 Row {
                     anchors.centerIn: parent
@@ -223,13 +223,13 @@ Item {
                         icon: root.qrType === "url" ? "external-link"
                             : root.qrType === "email" ? "mail"
                             : "copy"
-                        color: qah.containsMouse ? Color.mOnPrimary : Color.mPrimary
+                        color: qah.containsMouse ? AtmoColor.mOnPrimary : AtmoColor.mPrimary
                     }
                     NText {
                         text: root.qrType === "url" ? pluginApi?.tr("panel.openUrl")
                             : root.qrType === "email" ? pluginApi?.tr("panel.composeEmail")
                             : pluginApi?.tr("panel.copy")
-                        color: qah.containsMouse ? Color.mOnPrimary : Color.mPrimary
+                        color: qah.containsMouse ? AtmoColor.mOnPrimary : AtmoColor.mPrimary
                         font.weight: Font.Bold
                         pointSize: Style.fontSizeS
                     }
@@ -253,13 +253,13 @@ Item {
                 width: 38
                 height: 38
                 radius: Style.radiusM
-                color: qch.containsMouse ? Qt.alpha(Color.mError, 0.15) : Color.mSurface
-                border.color: qch.containsMouse ? Color.mError : Style.capsuleBorderColor
+                color: qch.containsMouse ? Qt.alpha(AtmoColor.mError, 0.15) : AtmoColor.mSurface
+                border.color: qch.containsMouse ? AtmoColor.mError : Style.capsuleBorderColor
                 border.width: Style.capsuleBorderWidth
                 AtmoIcon {
                     anchors.centerIn: parent
                     icon: "trash"
-                    color: qch.containsMouse ? (Color.mError || "#f44336") : Color.mOnSurfaceVariant
+                    color: qch.containsMouse ? (AtmoColor.mError || "#f44336") : AtmoColor.mOnSurfaceVariant
                 }
                 MouseArea {
                     id: qch

@@ -38,14 +38,14 @@ Item {
 
       AtmoIcon {
         icon: getProviderIcon()
-        color: Color.mPrimary
+        color: AtmoColor.mPrimary
         pointSize: Style.fontSizeM
         applyUiScale: false
       }
 
       NText {
         text: model
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
         pointSize: Style.fontSizeS
         applyUiScale: false
         font.weight: Font.Medium
@@ -56,7 +56,7 @@ Item {
       AtmoIcon {
         icon: "loader-2"
         visible: isGenerating
-        color: Color.mPrimary
+        color: AtmoColor.mPrimary
         pointSize: Style.fontSizeS
         applyUiScale: false
 
@@ -75,7 +75,7 @@ Item {
         text: pluginApi?.tr("chat.clearHistory")
         property bool enabledClear: messages.length > 0 && !isGenerating
         property bool hovered: false
-        color: clearHistoryText.enabledClear ? (clearHistoryText.hovered ? Color.mOnSurface : Color.mOnSurfaceVariant) : Color.mOnSurfaceVariant
+        color: clearHistoryText.enabledClear ? (clearHistoryText.hovered ? AtmoColor.mOnSurface : AtmoColor.mOnSurfaceVariant) : AtmoColor.mOnSurfaceVariant
         pointSize: Style.fontSizeXS
         applyUiScale: false
         font.weight: clearHistoryText.hovered ? Font.Medium : Font.Normal
@@ -102,7 +102,7 @@ Item {
     Rectangle {
       Layout.fillWidth: true
       Layout.fillHeight: true
-      color: Color.mSurface
+      color: AtmoColor.mSurface
       radius: Style.radiusM
       clip: true
 
@@ -118,7 +118,7 @@ Item {
           AtmoIcon {
             Layout.alignment: Qt.AlignHCenter
             icon: "sparkles"
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             pointSize: Style.fontSizeXXL * 2
             applyUiScale: false
           }
@@ -126,7 +126,7 @@ Item {
           NText {
             Layout.alignment: Qt.AlignHCenter
             text: pluginApi?.tr("chat.emptyTitle")
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             pointSize: Style.fontSizeM
             applyUiScale: false
             font.weight: Font.Medium
@@ -135,7 +135,7 @@ Item {
           NText {
             Layout.alignment: Qt.AlignHCenter
             text: pluginApi?.tr("chat.emptyHint")
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             pointSize: Style.fontSizeS
             applyUiScale: false
           }
@@ -258,7 +258,7 @@ Item {
         width: 32
         height: 32
         radius: width / 2
-        color: Color.mPrimary
+        color: AtmoColor.mPrimary
         visible: !chatFlickable.autoScrollEnabled && messages.length > 0
         opacity: scrollButtonMouse.containsMouse ? 1.0 : 0.8
 
@@ -271,7 +271,7 @@ Item {
         AtmoIcon {
           anchors.centerIn: parent
           icon: "chevron-down"
-          color: Color.mOnPrimary
+          color: AtmoColor.mOnPrimary
           pointSize: Style.fontSizeM
           applyUiScale: false
         }
@@ -293,7 +293,7 @@ Item {
     Rectangle {
       Layout.fillWidth: true
       Layout.preferredHeight: errorRow.implicitHeight + Style.marginS * 2
-      color: Qt.alpha(Color.mError, 0.2)
+      color: Qt.alpha(AtmoColor.mError, 0.2)
       radius: Style.radiusS
       visible: errorMessage !== ""
 
@@ -305,14 +305,14 @@ Item {
 
         AtmoIcon {
           icon: "alert-triangle"
-          color: Color.mError
+          color: AtmoColor.mError
           pointSize: Style.fontSizeM
         }
 
         TextEdit {
           Layout.fillWidth: true
           text: errorMessage
-          color: Color.mError
+          color: AtmoColor.mError
           font.pointSize: Math.max(1, Style.fontSizeS * Settings.data.ui.fontDefaultScale * Style.uiScaleRatio)
           font.family: Settings.data.ui.fontDefault
           wrapMode: TextEdit.Wrap
@@ -328,7 +328,7 @@ Item {
     Rectangle {
       Layout.fillWidth: true
       Layout.preferredHeight: inputLayout.implicitHeight + Style.marginS * 2
-      color: Color.mSurface
+      color: AtmoColor.mSurface
       radius: Style.radiusM
 
       RowLayout {
@@ -345,8 +345,8 @@ Item {
             id: inputField
             text: initialInputText
             placeholderText: pluginApi?.tr("chat.placeholder")
-            placeholderTextColor: Color.mOnSurfaceVariant
-            color: Color.mOnSurface
+            placeholderTextColor: AtmoColor.mOnSurfaceVariant
+            color: AtmoColor.mOnSurface
             font.pointSize: Style.fontSizeM
             wrapMode: TextArea.Wrap
             background: null
@@ -398,7 +398,7 @@ Item {
         AtmoIconButton {
           id: sendButton
           icon: isGenerating ? "player-stop" : "send"
-          colorFg: isGenerating ? Color.mError : (inputField.text.trim() !== "" ? Color.mPrimary : Color.mOnSurfaceVariant)
+          colorFg: isGenerating ? AtmoColor.mError : (inputField.text.trim() !== "" ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant)
           enabled: isGenerating || inputField.text.trim() !== ""
           tooltipText: isGenerating ? pluginApi?.tr("chat.stop") : pluginApi?.tr("chat.send")
           onClicked: {

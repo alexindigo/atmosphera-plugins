@@ -242,8 +242,8 @@ Item {
                         Column {
                             anchors.centerIn: parent; spacing: Style.marginS
                             visible: pinDelegate.pinImgPath === ""
-                            AtmoIcon { anchors.horizontalCenter: parent.horizontalCenter; icon: "photo-off"; color: Color.mOnSurfaceVariant }
-                            NText { anchors.horizontalCenter: parent.horizontalCenter; text: root.pluginApi?.tr("pin.noFile"); color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeXS }
+                            AtmoIcon { anchors.horizontalCenter: parent.horizontalCenter; icon: "photo-off"; color: AtmoColor.mOnSurfaceVariant }
+                            NText { anchors.horizontalCenter: parent.horizontalCenter; text: root.pluginApi?.tr("pin.noFile"); color: AtmoColor.mOnSurfaceVariant; pointSize: Style.fontSizeXS }
                         }
                         HoverHandler { id: cardHover }
                         MouseArea {
@@ -443,7 +443,7 @@ Item {
                             implicitWidth:  menuCol.implicitWidth  + Style.marginS * 2
                             implicitHeight: menuCol.implicitHeight + Style.marginS * 2
                             width: implicitWidth; height: implicitHeight
-                            radius: Style.radiusM; color: Color.mSurface
+                            radius: Style.radiusM; color: AtmoColor.mSurface
                             border.color: Qt.rgba(1,1,1,0.12); border.width: Style.capsuleBorderWidth
                             Column {
                                 id: menuCol
@@ -453,13 +453,13 @@ Item {
                                     property string mIcon: ""; property string mLabel: ""; property bool mEnabled: true
                                     signal activated()
                                     width: parent.width; height: 32; radius: Style.radiusS
-                                    color:   miMA.containsMouse && mEnabled ? Color.mHover : "transparent"
+                                    color:   miMA.containsMouse && mEnabled ? AtmoColor.mHover : "transparent"
                                     opacity: mEnabled ? 1.0 : 0.38
                                     Row {
                                         anchors { fill: parent; leftMargin: Style.marginS; rightMargin: Style.marginS }
                                         spacing: Style.marginS
-                                        AtmoIcon { icon: mIcon;  color: Color.mOnSurface; scale: 0.85; anchors.verticalCenter: parent.verticalCenter }
-                                        NText { text: mLabel; color: Color.mOnSurface; pointSize: Style.fontSizeS; anchors.verticalCenter: parent.verticalCenter }
+                                        AtmoIcon { icon: mIcon;  color: AtmoColor.mOnSurface; scale: 0.85; anchors.verticalCenter: parent.verticalCenter }
+                                        NText { text: mLabel; color: AtmoColor.mOnSurface; pointSize: Style.fontSizeS; anchors.verticalCenter: parent.verticalCenter }
                                     }
                                     MouseArea {
                                         id: miMA; anchors.fill: parent

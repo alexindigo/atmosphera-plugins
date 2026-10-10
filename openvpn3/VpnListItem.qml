@@ -36,7 +36,7 @@ NBox {
     Layout.rightMargin: Style.marginXS
     implicitHeight: Math.round(netColumn.implicitHeight + Style.marginXL)
 
-    color: root.isConnected ? Qt.alpha(Color.mPrimary, 0.15) : Color.mSurface
+    color: root.isConnected ? Qt.alpha(AtmoColor.mPrimary, 0.15) : AtmoColor.mSurface
 
     MouseArea {
         anchors.fill: parent
@@ -62,7 +62,7 @@ NBox {
                 Layout.alignment: Qt.AlignVCenter
                 icon: root.isConnected ? (root.isPaused ? "shield-pause" : "shield-lock") : "shield"
                 pointSize: Style.fontSizeXXL
-                color: root.isConnected ? Color.mPrimary : Color.mOnSurface
+                color: root.isConnected ? AtmoColor.mPrimary : AtmoColor.mOnSurface
             }
 
             ColumnLayout {
@@ -76,7 +76,7 @@ NBox {
                     text: root.name
                     pointSize: Style.fontSizeM
                     font.weight: Style.fontWeightMedium
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                     horizontalAlignment: Text.AlignLeft
                     elide: Text.ElideRight
                     Layout.fillWidth: true
@@ -99,7 +99,7 @@ NBox {
                     NText {
                         text: root.isConnected ? (root.isPaused ? pluginApi?.tr("status.paused") : pluginApi?.tr("status.connected")) : pluginApi?.tr("status.disconnected")
                         pointSize: Style.fontSizeXXS
-                        color: root.isConnected ? Color.mPrimary : Color.mOnSurfaceVariant
+                        color: root.isConnected ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
                         horizontalAlignment: Text.AlignLeft
                     }
 
@@ -108,7 +108,7 @@ NBox {
                         Layout.alignment: Qt.AlignVCenter
                         icon: "clock"
                         pointSize: Style.fontSizeXS
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
 
                         MouseArea {
                             anchors.fill: parent
@@ -152,7 +152,7 @@ NBox {
                     icon: "trash"
                     tooltipText: pluginApi?.tr("actions.delete")
                     baseSize: Style.baseWidgetSize * 0.7
-                    colorBg: Qt.alpha(Color.mError, 0.15)
+                    colorBg: Qt.alpha(AtmoColor.mError, 0.15)
                     onClicked: root.confirmingDelete = true
                 }
 
@@ -162,7 +162,7 @@ NBox {
                     icon: "check"
                     tooltipText: pluginApi?.tr("actions.confirm")
                     baseSize: Style.baseWidgetSize * 0.7
-                    colorBg: Qt.alpha(Color.mPrimary, 0.2)
+                    colorBg: Qt.alpha(AtmoColor.mPrimary, 0.2)
                     onClicked: root._confirmRename()
                 }
 
@@ -183,8 +183,8 @@ NBox {
                     icon: "trash"
                     tooltipText: pluginApi?.tr("actions.confirmDelete")
                     baseSize: Style.baseWidgetSize * 0.7
-                    colorBg: Qt.alpha(Color.mError, 0.3)
-                    colorFg: Color.mError
+                    colorBg: Qt.alpha(AtmoColor.mError, 0.3)
+                    colorFg: AtmoColor.mError
                     onClicked: {
                         root.confirmingDelete = false
                         root.deleteRequested(root.configPath)
@@ -205,7 +205,7 @@ NBox {
                     text: pluginApi?.tr("actions.disconnect")
                     outlined: !hovered
                     fontSize: Style.fontSizeS
-                    backgroundColor: Color.mError
+                    backgroundColor: AtmoColor.mError
                     onClicked: root.buttonClicked()
                 }
 
@@ -222,7 +222,7 @@ NBox {
                         anchors.centerIn: parent
                         visible: root.isLoading
                         running: visible
-                        color: Color.mPrimary
+                        color: AtmoColor.mPrimary
                         size: Style.baseWidgetSize * 0.4
                     }
                 }
@@ -239,21 +239,21 @@ NBox {
             NText {
                 text: pluginApi?.tr("stats.download") + " " + (root.stats ? formatBytes(root.stats.bytesIn) : "0 B")
                 pointSize: Style.fontSizeXXS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 horizontalAlignment: Text.AlignLeft
             }
 
             NText {
                 text: pluginApi?.tr("stats.upload") + " " + (root.stats ? formatBytes(root.stats.bytesOut) : "0 B")
                 pointSize: Style.fontSizeXXS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 horizontalAlignment: Text.AlignLeft
             }
 
             NText {
                 text: pluginApi?.tr("stats.packets") + " " + (root.stats ? root.stats.packetsIn + "/" + root.stats.packetsOut : "0/0")
                 pointSize: Style.fontSizeXXS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 horizontalAlignment: Text.AlignLeft
             }
 
@@ -261,7 +261,7 @@ NBox {
                 visible: root.stats && root.stats.nReconnect > 0
                 text: pluginApi?.tr("stats.reconnect") + " " + (root.stats ? root.stats.nReconnect : 0)
                 pointSize: Style.fontSizeXXS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 horizontalAlignment: Text.AlignLeft
             }
 
@@ -289,13 +289,13 @@ NBox {
                         text: modelData.label + ":"
                         pointSize: Style.fontSizeXXS
                         font.weight: Style.fontWeightMedium
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         Layout.preferredWidth: 80
                     }
                     NText {
                         text: modelData.value
                         pointSize: Style.fontSizeXXS
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                         Layout.fillWidth: true
                     }
                 }

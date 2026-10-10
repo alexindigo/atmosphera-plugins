@@ -24,10 +24,10 @@ Item {
 
   readonly property color resolvedIconColor: {
     var key = (mainInstance?.warpConnected ?? false) ? connectedColorKey : disconnectedColorKey;
-    var resolved = Color.resolveColorKeyOptional(key);
+    var resolved = AtmoColor.resolveColorKeyOptional(key);
     // resolveColorKeyOptional ritorna "transparent" per "none" — fallback al colore neutro
     if (!resolved || resolved === "transparent" || resolved.a === 0)
-      return mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface;
+      return mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface;
     return resolved;
   }
 
@@ -51,7 +51,7 @@ Item {
     y: Style.pixelAlignCenter(parent.height, height)
     width: root.contentWidth
     height: root.contentHeight
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
     radius: Style.radiusL
 
     RowLayout {

@@ -32,12 +32,12 @@ Item {
 
   readonly property color statusColor: {
     var s = root.status.toLowerCase();
-    if (s === "running" || s === "active" || s === "bound") return Color.mTertiary;
-    if (s === "pending" || s === "containercreating") return Color.mWarning;
+    if (s === "running" || s === "active" || s === "bound") return AtmoColor.mTertiary;
+    if (s === "pending" || s === "containercreating") return AtmoColor.mWarning;
     if (s === "error" || s === "crashloopbackoff" || s === "oomkilled" ||
-        s === "failed" || s === "imagepullbackoff" || s === "errimagepull") return Color.mError;
-    if (s === "completed" || s === "succeeded") return Color.mOnSurfaceVariant;
-    return Color.mOnSurfaceVariant;
+        s === "failed" || s === "imagepullbackoff" || s === "errimagepull") return AtmoColor.mError;
+    if (s === "completed" || s === "succeeded") return AtmoColor.mOnSurfaceVariant;
+    return AtmoColor.mOnSurfaceVariant;
   }
 
   readonly property string statusIcon: {
@@ -73,7 +73,7 @@ Item {
     NText {
       text: root.resourceName
       pointSize: Style.fontSizeL
-      color: root.expanded ? Color.mPrimary : Color.mOnSurface
+      color: root.expanded ? AtmoColor.mPrimary : AtmoColor.mOnSurface
       elide: Text.ElideRight
       Layout.fillWidth: true
       Layout.alignment: Qt.AlignVCenter
@@ -83,14 +83,14 @@ Item {
       visible: root.ready !== ""
       text: root.ready
       pointSize: Style.fontSizeS
-      color: Color.mOnSurfaceVariant
+      color: AtmoColor.mOnSurfaceVariant
       Layout.alignment: Qt.AlignVCenter
     }
 
     AtmoIcon {
       icon: root.expanded ? "chevron-up" : "chevron-down"
       pointSize: Style.fontSizeS
-      color: Color.mOnSurfaceVariant
+      color: AtmoColor.mOnSurfaceVariant
       Layout.alignment: Qt.AlignVCenter
     }
   }
@@ -165,8 +165,8 @@ Item {
       fontSize: Style.fontSizeS
       iconSize: Style.fontSizeS
       Layout.fillWidth: true
-      backgroundColor: Qt.alpha(Color.mError, 0.15)
-      textColor: Color.mError
+      backgroundColor: Qt.alpha(AtmoColor.mError, 0.15)
+      textColor: AtmoColor.mError
       onClicked: {
         root.expanded = false;
         root.deleteRequested(root.resourceKind, root.resourceName);

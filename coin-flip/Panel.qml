@@ -26,9 +26,9 @@ Item {
         Rectangle {
             anchors.fill: parent
             anchors.margins: Style.marginL
-            color: Color.mSurface
+            color: AtmoColor.mSurface
             radius: Style.radiusL
-            border.color: Color.mOutline
+            border.color: AtmoColor.mOutline
             border.width: Style.borderS
 
             ColumnLayout {

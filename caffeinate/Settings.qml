@@ -127,7 +127,7 @@ ColumnLayout {
   NText {
     Layout.fillWidth: true
     text: pluginApi?.tr("settings.description")
-    color: Color.mOnSurfaceVariant
+    color: AtmoColor.mOnSurfaceVariant
     wrapMode: Text.Wrap
   }
 
@@ -148,7 +148,7 @@ ColumnLayout {
   NText {
     Layout.fillWidth: true
     text: root.aliasFeedback()
-    color: root.aliasValidation().state === "valid" ? Color.mOnSurfaceVariant : Color.mError
+    color: root.aliasValidation().state === "valid" ? AtmoColor.mOnSurfaceVariant : AtmoColor.mError
     wrapMode: Text.Wrap
   }
 
@@ -187,7 +187,7 @@ ColumnLayout {
     Layout.preferredHeight: Math.min(presetsColumn.implicitHeight, 360 * Style.uiScaleRatio)
     horizontalPolicy: ScrollBar.AlwaysOff
     showScrollbarWhenScrollable: true
-    gradientColor: Color.mSurfaceVariant
+    gradientColor: AtmoColor.mSurfaceVariant
 
     ColumnLayout {
       id: presetsColumn
@@ -250,7 +250,7 @@ ColumnLayout {
           NText {
             Layout.fillWidth: true
             text: root.durationFeedback(presetInput.text)
-            color: presetDelegate.parsed.state === "valid" ? Color.mOnSurfaceVariant : Color.mError
+            color: presetDelegate.parsed.state === "valid" ? AtmoColor.mOnSurfaceVariant : AtmoColor.mError
             wrapMode: Text.Wrap
           }
         }

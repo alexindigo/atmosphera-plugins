@@ -87,9 +87,9 @@ Item {
 					pointSize: Style.fontSizeXL
 					crossed: root.vpnState === "error" || !root.installed
 					color: {
-						if (root.vpnState === "connected") return Color.mPrimary
-						if (root.locked) return Color.mError
-						return Color.mOnSurface
+						if (root.vpnState === "connected") return AtmoColor.mPrimary
+						if (root.locked) return AtmoColor.mError
+						return AtmoColor.mOnSurface
 					}
 				}
 
@@ -99,12 +99,12 @@ Item {
 					NText {
 						text: root._stateLabel()
 						pointSize: Style.fontSizeL
-						color: Color.mOnSurface
+						color: AtmoColor.mOnSurface
 					}
 					NText {
 						Layout.fillWidth: true
 						pointSize: Style.fontSizeS
-						color: Color.mOnSurfaceVariant
+						color: AtmoColor.mOnSurfaceVariant
 						wrapMode: Text.Wrap
 						// Read every property upfront so QML's binding tracker
 						// registers them all as dependencies (otherwise props
@@ -145,7 +145,7 @@ Item {
 						text: root.main?.currentLocation?.ipv4 || ""
 						font.family: Settings.data.ui.fontFixed
 						pointSize: Style.fontSizeS
-						color: Color.mOnSurfaceVariant
+						color: AtmoColor.mOnSurfaceVariant
 						MouseArea {
 							anchors.fill: parent
 							cursorShape: Qt.PointingHandCursor
@@ -172,7 +172,7 @@ Item {
 				visible: root.installed && root.main?.accountDaysLeft !== undefined && root.main.accountDaysLeft <= (root.main?.expiryWarningDays ?? 7)
 				Layout.fillWidth: true
 				Layout.preferredHeight: expiryText.implicitHeight + Style.marginS * 2
-				color: Color.mError
+				color: AtmoColor.mError
 				radius: Style.radiusS
 				NText {
 					id: expiryText
@@ -181,7 +181,7 @@ Item {
 					text: (root.main?.accountDaysLeft ?? 0) <= 0
 						? pluginApi?.tr("account.expired")
 						: pluginApi?.tr("account.expires-in", { days: root.main?.accountDaysLeft ?? 0 })
-					color: Color.mOnError
+					color: AtmoColor.mOnError
 					wrapMode: Text.Wrap
 				}
 			}
@@ -259,8 +259,8 @@ Item {
 				delegate: Rectangle {
 					width: relayListView.width
 					height: rowText.implicitHeight + Style.marginS * 2
-					color: rowMouse.containsMouse ? Color.mHover :
-						(model.isCurrent ? Color.mPrimary : "transparent")
+					color: rowMouse.containsMouse ? AtmoColor.mHover :
+						(model.isCurrent ? AtmoColor.mPrimary : "transparent")
 					radius: Style.radiusS
 
 					RowLayout {
@@ -274,14 +274,14 @@ Item {
 							Layout.fillWidth: true
 							text: model.label
 							pointSize: Style.fontSizeS
-							color: model.isCurrent ? Color.mOnPrimary : Color.mOnSurface
+							color: model.isCurrent ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface
 							elide: Text.ElideRight
 						}
 						NText {
 							visible: model.kind === "country"
 							text: String(model.count)
 							pointSize: Style.fontSizeXS
-							color: Color.mOnSurfaceVariant
+							color: AtmoColor.mOnSurfaceVariant
 						}
 					}
 
@@ -300,7 +300,7 @@ Item {
 					text: (root.main?.relayList?.length ?? 0) === 0
 						? pluginApi?.tr("relay.loading")
 						: pluginApi?.tr("relay.no-results")
-					color: Color.mOnSurfaceVariant
+					color: AtmoColor.mOnSurfaceVariant
 				}
 			}
 		}

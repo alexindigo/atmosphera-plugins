@@ -67,7 +67,7 @@ Item {
     color: {
       if (mouseArea.containsMouse &&
           (!mainInstance || (!mainInstance.pomodoroRunning && !mainInstance.pomodoroSoundPlaying)))
-        return Color.mHover
+        return AtmoColor.mHover
       return Style.capsuleColor
     }
     radius: Style.radiusL
@@ -83,9 +83,9 @@ Item {
         applyUiScale: false
         color: {
           if (mainInstance && (mainInstance.pomodoroRunning || mainInstance.pomodoroSoundPlaying)) {
-            return Color.mPrimary
+            return AtmoColor.mPrimary
           }
-          return mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+          return mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
         }
       }
 
@@ -99,9 +99,9 @@ Item {
         }
         color: {
           if (mainInstance && (mainInstance.pomodoroRunning || mainInstance.pomodoroSoundPlaying)) {
-            return Color.mPrimary
+            return AtmoColor.mPrimary
           }
-          return mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+          return mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
         }
       }
     }

@@ -47,8 +47,8 @@ Item {
     text: (root.active && root.showText) ? root.remainingText : ""
     tooltipText: root.buildTooltip()
     customIconColor: root.active
-      ? (root.scope === "full" ? Color.mSecondary : Color.mPrimary)
-      : Color.mOnSurface
+      ? (root.scope === "full" ? AtmoColor.mSecondary : AtmoColor.mPrimary)
+      : AtmoColor.mOnSurface
     oppositeDirection: BarService.getPillDirection(root)
     onEntered: { if (mainInstance) mainInstance.pollGuard(); }
     onClicked: {

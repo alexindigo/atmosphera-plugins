@@ -20,7 +20,7 @@ AtmoIconButton {
   readonly property var cfg: pluginApi?.pluginSettings || ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
   readonly property string iconColorKey: cfg.iconColor ?? defaults.iconColor ?? "none"
-  readonly property color resolvedIconColor: Color.resolveColorKey(iconColorKey)
+  readonly property color resolvedIconColor: AtmoColor.resolveColorKey(iconColorKey)
   readonly property bool hasCustomIconColor: iconColorKey !== "none"
 
   icon: "wallpaper-selector"
@@ -33,7 +33,7 @@ AtmoIconButton {
     if (root.hasCustomIconColor) {
       return root.resolvedIconColor;
     }
-    return Color.mOnSurface;
+    return AtmoColor.mOnSurface;
   }
 
   border.color: Style.capsuleBorderColor

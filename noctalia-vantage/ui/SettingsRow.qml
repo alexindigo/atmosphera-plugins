@@ -59,7 +59,7 @@ Item {
 
             NText {
                 text: root.description
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 pointSize: Style.fontSizeS
                 elide: Text.ElideRight
                 Layout.fillWidth: true

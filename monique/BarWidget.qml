@@ -30,9 +30,9 @@ Item {
   readonly property bool hasActiveProfile: (mainInstance?.activeProfile ?? "") !== ""
 
   readonly property color resolvedIconColor: {
-    var resolved = Color.resolveColorKeyOptional(activeColorKey)
+    var resolved = AtmoColor.resolveColorKeyOptional(activeColorKey)
     if (!resolved || resolved === "transparent" || resolved.a === 0)
-      return mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+      return mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
     return resolved
   }
 
@@ -56,7 +56,7 @@ Item {
     y: Style.pixelAlignCenter(parent.height, height)
     width: root.contentWidth
     height: root.contentHeight
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
     radius: Style.radiusL
 
     RowLayout {

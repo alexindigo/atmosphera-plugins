@@ -73,7 +73,7 @@ ListView {
         id: quoteCard
         width: quotesList.width
         height: quoteContent.height + Style.marginM * 2
-        color: Color.mSurfaceVariant
+        color: AtmoColor.mSurfaceVariant
         radius: Style.radiusM
 
         RowLayout {
@@ -91,14 +91,14 @@ ListView {
 
                 NText {
                     text: modelData.text
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                     pointSize: Style.fontSizeS
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                 }
                 NText {
                     text: modelData.author ? "\u2014 " + modelData.author : ""
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                     pointSize: Style.fontSizeXS
                     visible: modelData.author && modelData.author !== ""
                     Layout.fillWidth: true
@@ -107,7 +107,7 @@ ListView {
 
             AtmoIconButton {
                 icon: "close"
-                color: hovering ? Color.mError : Color.mOnSurfaceVariant
+                color: hovering ? AtmoColor.mError : AtmoColor.mOnSurfaceVariant
                 Layout.alignment: Qt.AlignTop
                 onClicked: {
                     var quotes = root.userQuotes.slice();

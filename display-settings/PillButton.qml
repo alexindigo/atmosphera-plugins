@@ -17,9 +17,9 @@ Rectangle {
   height: 28 * Style.uiScaleRatio
   radius: Style.radiusS
   color: active
-    ? Qt.rgba(Color.mPrimary.r, Color.mPrimary.g, Color.mPrimary.b, 0.18)
-    : hovered ? Color.mSurface : "transparent"
-  border.color: active ? Color.mPrimary : Color.mOutline
+    ? Qt.rgba(AtmoColor.mPrimary.r, AtmoColor.mPrimary.g, AtmoColor.mPrimary.b, 0.18)
+    : hovered ? AtmoColor.mSurface : "transparent"
+  border.color: active ? AtmoColor.mPrimary : AtmoColor.mOutline
   border.width: Style.borderS
   Behavior on color { ColorAnimation { duration: 100 } }
 
@@ -28,7 +28,7 @@ Rectangle {
     anchors.centerIn: parent
     text: root.label
     pointSize: Style.fontSizeXS
-    color: root.active ? Color.mPrimary : Color.mOnSurfaceVariant
+    color: root.active ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
     font.weight: root.active ? 600 : 400
   }
 

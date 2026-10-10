@@ -29,7 +29,7 @@ Item {
       anchors.left: parent.left
       anchors.right: parent.right
       height: 40
-      color: Color.mSurfaceVariant
+      color: AtmoColor.mSurfaceVariant
       opacity: 0.95
 
       RowLayout {
@@ -41,14 +41,14 @@ Item {
         AtmoIcon {
           icon: "steam"
           pointSize: Style.fontSizeL
-          color: Color.mPrimary
+          color: AtmoColor.mPrimary
         }
 
         NText {
           text: "Steam Overlay"
           font.pointSize: Style.fontSizeM
           font.weight: Font.Bold
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
         }
 
         Item {
@@ -69,7 +69,7 @@ Item {
           NText {
             text: steamRunning ? "Steam Running" : "Steam Stopped"
             font.pointSize: Style.fontSizeS
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
         }
 
@@ -99,14 +99,14 @@ Item {
         height: parent.height
         color: "#1976D2"
         opacity: 0.1
-        border.color: Color.mPrimary
+        border.color: AtmoColor.mPrimary
         border.width: 2
 
         NText {
           anchors.centerIn: parent
           text: "Friends List\n" + friendsWidth + "px"
           font.pointSize: Style.fontSizeL
-          color: Color.mPrimary
+          color: AtmoColor.mPrimary
           horizontalAlignment: Text.AlignHCenter
           opacity: 0.5
         }
@@ -118,14 +118,14 @@ Item {
         height: parent.height
         color: "#388E3C"
         opacity: 0.1
-        border.color: Color.mSecondary
+        border.color: AtmoColor.mSecondary
         border.width: 2
 
         NText {
           anchors.centerIn: parent
           text: "Main Steam\n" + mainWidth + "px"
           font.pointSize: Style.fontSizeL
-          color: Color.mSecondary
+          color: AtmoColor.mSecondary
           horizontalAlignment: Text.AlignHCenter
           opacity: 0.5
         }
@@ -137,14 +137,14 @@ Item {
         height: parent.height
         color: "#D32F2F"
         opacity: 0.1
-        border.color: Color.mTertiary
+        border.color: AtmoColor.mTertiary
         border.width: 2
 
         NText {
           anchors.centerIn: parent
           text: "Steam Chat\n" + chatWidth + "px"
           font.pointSize: Style.fontSizeL
-          color: Color.mTertiary
+          color: AtmoColor.mTertiary
           horizontalAlignment: Text.AlignHCenter
           opacity: 0.5
         }

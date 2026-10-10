@@ -12,8 +12,8 @@ AtmoIconButton {
     enabled: mainInstance?.isAvailable ?? false
     icon: "camera-video"
     tooltipText: mainInstance?.buildTooltip()
-    colorFg: mainInstance?.isRecording ? Color.mOnPrimary : (mainInstance?.isReplaying ? Color.mSecondary : Color.mPrimary)
-    colorBg: mainInstance?.isRecording ? Color.mPrimary : (mainInstance?.isReplaying ? Qt.alpha(Color.mSecondary, 0.25) : Style.capsuleColor)
+    colorFg: mainInstance?.isRecording ? AtmoColor.mOnPrimary : (mainInstance?.isReplaying ? AtmoColor.mSecondary : AtmoColor.mPrimary)
+    colorBg: mainInstance?.isRecording ? AtmoColor.mPrimary : (mainInstance?.isReplaying ? Qt.alpha(AtmoColor.mSecondary, 0.25) : Style.capsuleColor)
     onClicked: {
         if (pluginApi && pluginApi.mainInstance) {
             pluginApi.mainInstance.toggleRecording();

@@ -25,8 +25,8 @@ AtmoIconButton {
 
   colorBg: Style.capsuleColor
   colorFg: getColor()
-  colorBgHover: Color.mHover
-  colorFgHover: Color.mOnHover
+  colorBgHover: AtmoColor.mHover
+  colorFgHover: AtmoColor.mOnHover
   colorBorder: "transparent"
   colorBorderHover: "transparent"
 
@@ -97,15 +97,15 @@ AtmoIconButton {
   function getColor() {
     switch (fanState) {
     case 3:
-      return Color.mPrimary;
+      return AtmoColor.mPrimary;
     case 2:
-      return Color.mTertiary;
+      return AtmoColor.mTertiary;
     case 1:
-      return Color.mSecondary;
+      return AtmoColor.mSecondary;
     case 0:
-      return Color.mOnSurface;
+      return AtmoColor.mOnSurface;
     default:
-      return Color.mOnSurface;
+      return AtmoColor.mOnSurface;
     }
   }
 

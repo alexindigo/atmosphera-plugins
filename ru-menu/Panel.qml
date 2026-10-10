@@ -62,7 +62,7 @@ Item {
                 Layout.preferredWidth: parent.width
                 Layout.preferredHeight: 40 * Style.uiScaleRatio
                 color: "transparent"
-                border.color: Color.mPrimary
+                border.color: AtmoColor.mPrimary
 
                 NButton {
                     anchors.left: parent.left

@@ -566,7 +566,7 @@ Variants {
 			visible: overlayWin.isPrimary && overlayWin.showSharePopover
 			z: 20
 			radius: Style.radiusL
-			color: Color.mSurface
+			color: AtmoColor.mSurface
 			border.color: Style.capsuleBorderColor
 			border.width: Style.capsuleBorderWidth
 			height: 44
@@ -593,12 +593,12 @@ Variants {
                 spacing: Style.marginS
                 visible: overlayWin.isUploading
                 AtmoIcon {
-                    icon: "upload"; color: Color.mOnSurfaceVariant
+                    icon: "upload"; color: AtmoColor.mOnSurfaceVariant
                     anchors.verticalCenter: parent.verticalCenter
                 }
                 NText {
                     text:      root.mainInstance?.pluginApi?.tr("annotate.sharing")
-                    color:     Color.mOnSurface
+                    color:     AtmoColor.mOnSurface
                     pointSize: Style.fontSizeS
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -609,12 +609,12 @@ Variants {
                 spacing: Style.marginXS
                 visible: !overlayWin.isUploading && !overlayWin.uploadFailed && overlayWin.shareUrl !== ""
                 AtmoIcon {
-                    icon: "link"; color: Color.mPrimary
+                    icon: "link"; color: AtmoColor.mPrimary
                     anchors.verticalCenter: parent.verticalCenter
                 }
                 NText {
                     text:      overlayWin.shareUrl
-                    color:     Color.mOnSurface
+                    color:     AtmoColor.mOnSurface
                     pointSize: Style.fontSizeXS
                     width:     Math.min(implicitWidth, 260)
                     elide:     Text.ElideMiddle
@@ -622,12 +622,12 @@ Variants {
                 }
                 Rectangle {
                     width: 28; height: 28; radius: Style.radiusS
-                    color: _copyUrlMA.containsMouse ? Color.mHover : "transparent"
+                    color: _copyUrlMA.containsMouse ? AtmoColor.mHover : "transparent"
                     anchors.verticalCenter: parent.verticalCenter
                     AtmoIcon {
                         anchors.centerIn: parent
                         icon:  "copy"
-                        color: _copyUrlMA.containsMouse ? Color.mOnHover : Color.mOnSurface
+                        color: _copyUrlMA.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
                     }
                     MouseArea {
                         id: _copyUrlMA
@@ -651,12 +651,12 @@ Variants {
                 spacing: Style.marginS
                 visible: !overlayWin.isUploading && overlayWin.uploadFailed
                 AtmoIcon {
-                    icon: "alert-circle"; color: Color.mError
+                    icon: "alert-circle"; color: AtmoColor.mError
                     anchors.verticalCenter: parent.verticalCenter
                 }
                 NText {
                     text:      root.mainInstance?.pluginApi?.tr("annotate.shareFailed")
-                    color:     Color.mOnSurface
+                    color:     AtmoColor.mOnSurface
                     pointSize: Style.fontSizeS
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -733,15 +733,15 @@ Variants {
             width:  zoomBadgeRow.implicitWidth + Style.marginS * 2
             height: 22
             radius: Style.radiusS
-            color:  Color.mPrimary
+            color:  AtmoColor.mPrimary
             Row {
                 id: zoomBadgeRow
                 anchors.centerIn: parent
                 spacing: Style.marginXS
-                AtmoIcon { icon: "zoom-in"; color: Color.mOnPrimary }
+                AtmoIcon { icon: "zoom-in"; color: AtmoColor.mOnPrimary }
                 NText {
                     text:      root.mainInstance?.pluginApi?.tr("annotate.zoomViewOnly", { scale: Math.round(root.zoomScale) })
-                    color:     Color.mOnPrimary
+                    color:     AtmoColor.mOnPrimary
                     pointSize: Style.fontSizeXS
                 }
             }
@@ -1057,14 +1057,14 @@ Variants {
                ? Math.max(0, Math.min(overlayWin.height - height, overlayWin._tbUserY))
                : _autoY
             radius:       Style.radiusL
-            color:        Color.mSurface
+            color:        AtmoColor.mSurface
             border.color: Style.capsuleBorderColor
             border.width: Style.capsuleBorderWidth
             component ToolbarSeparator: Rectangle {
                 readonly property bool vertical: toolbar.useVertical
                 width:   vertical ? 28 : Style.borderS
                 height:  vertical ? Style.borderS : 28
-                color:   Color.mOnSurfaceVariant
+                color:   AtmoColor.mOnSurfaceVariant
                 opacity: 0.3
                 anchors.horizontalCenter: vertical ? parent.horizontalCenter : undefined
                 anchors.verticalCenter:   vertical ? undefined               : parent.verticalCenter
@@ -1077,14 +1077,14 @@ Variants {
                 radius:  Style.radiusS
                 opacity: root.zoomScale > 1.0 ? 0.35 : 1.0
                 color:   overlayWin.tool === toolId
-                    ? Color.mPrimary
-                    : (tbHover.containsMouse ? Color.mHover : "transparent")
+                    ? AtmoColor.mPrimary
+                    : (tbHover.containsMouse ? AtmoColor.mHover : "transparent")
                 AtmoIcon {
                     anchors.centerIn: parent
                     icon:  iconName
-                    color: overlayWin.tool === toolId ? Color.mOnPrimary
-                         : tbHover.containsMouse      ? Color.mOnHover
-                         : Color.mOnSurface
+                    color: overlayWin.tool === toolId ? AtmoColor.mOnPrimary
+                         : tbHover.containsMouse      ? AtmoColor.mOnHover
+                         : AtmoColor.mOnSurface
                 }
                 MouseArea {
                     id: tbHover
@@ -1108,14 +1108,14 @@ Variants {
                 width:   28
                 height:  34
                 radius:  Style.radiusS
-                color:   zbHover.containsMouse ? Color.mHover : "transparent"
+                color:   zbHover.containsMouse ? AtmoColor.mHover : "transparent"
                 enabled: btnEnabled
                 opacity: enabled ? 1.0 : 0.3
                 signal clicked()
                 AtmoIcon {
                     anchors.centerIn: parent
                     icon:  iconName
-                    color: zbHover.containsMouse ? Color.mOnHover : Color.mOnSurface
+                    color: zbHover.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
                 }
                 MouseArea {
                     id:           zbHover
@@ -1137,17 +1137,17 @@ Variants {
                 radius:  Style.radiusS
                 opacity: disabled ? 0.3 : 1.0
                 color:   (!disabled && abHover.containsMouse)
-                         ? (danger ? Qt.alpha(Color.mError, 0.15) : Color.mHover)
+                         ? (danger ? Qt.alpha(AtmoColor.mError, 0.15) : AtmoColor.mHover)
                          : "transparent"
                 signal clicked()
                 AtmoIcon {
                     anchors.centerIn: parent
                     icon:  iconName
                     color: (!parent.disabled && abHover.containsMouse) && parent.danger
-                           ? Color.mError
+                           ? AtmoColor.mError
                            : (!parent.disabled && abHover.containsMouse)
-                             ? Color.mOnHover
-                             : Color.mOnSurface
+                             ? AtmoColor.mOnHover
+                             : AtmoColor.mOnSurface
                 }
                 MouseArea {
                     id:           abHover
@@ -1169,16 +1169,16 @@ Variants {
                 radius: Style.radiusS
                 width:  _sbRow.implicitWidth + Style.marginL
                 color:  sbHover.containsMouse
-                    ? (primary ? Color.mPrimary : Color.mSecondary || Color.mPrimary)
-                    : (primary ? Color.mPrimaryContainer || Color.mSurfaceVariant : Color.mSurfaceVariant)
+                    ? (primary ? AtmoColor.mPrimary : AtmoColor.mSecondary || AtmoColor.mPrimary)
+                    : (primary ? AtmoColor.mPrimaryContainer || AtmoColor.mSurfaceVariant : AtmoColor.mSurfaceVariant)
                 opacity: overlayWin.isSaving ? 0.5 : 1.0
                 signal clicked()
                 Row {
                     id: _sbRow
                     anchors.centerIn: parent
                     spacing: Style.marginXS
-                    AtmoIcon { icon: iconName; color: sbHover.containsMouse ? Color.mOnPrimary : (primary ? Color.mPrimary : Color.mOnSurface) }
-                    NText { text: labelText; color: sbHover.containsMouse ? Color.mOnPrimary : (primary ? Color.mPrimary : Color.mOnSurface); font.weight: Font.Bold; pointSize: Style.fontSizeS }
+                    AtmoIcon { icon: iconName; color: sbHover.containsMouse ? AtmoColor.mOnPrimary : (primary ? AtmoColor.mPrimary : AtmoColor.mOnSurface) }
+                    NText { text: labelText; color: sbHover.containsMouse ? AtmoColor.mOnPrimary : (primary ? AtmoColor.mPrimary : AtmoColor.mOnSurface); font.weight: Font.Bold; pointSize: Style.fontSizeS }
                 }
                 MouseArea {
                     id: sbHover
@@ -1197,13 +1197,13 @@ Variants {
                 property bool isVertical: false
                 width:  30; height: 30
                 radius: Style.radiusS
-                color:  dragMA.containsMouse || dragMA.pressed ? Color.mHover : "transparent"
+                color:  dragMA.containsMouse || dragMA.pressed ? AtmoColor.mHover : "transparent"
                 Column {
                     anchors.centerIn: parent; spacing: Style.marginXS
                     visible: !parent.isVertical
                     Repeater {
                         model: 3
-                        Rectangle { width: Style.marginL; height: Style.marginXXS; radius: Style.radiusXXXS; color: Color.mOnSurfaceVariant; opacity: 0.6 }
+                        Rectangle { width: Style.marginL; height: Style.marginXXS; radius: Style.radiusXXXS; color: AtmoColor.mOnSurfaceVariant; opacity: 0.6 }
                     }
                 }
                 Row {
@@ -1211,7 +1211,7 @@ Variants {
                     visible: parent.isVertical
                     Repeater {
                         model: 3
-                        Rectangle { width: Style.marginXXS; height: Style.marginL; radius: Style.radiusXXXS; color: Color.mOnSurfaceVariant; opacity: 0.6 }
+                        Rectangle { width: Style.marginXXS; height: Style.marginL; radius: Style.radiusXXXS; color: AtmoColor.mOnSurfaceVariant; opacity: 0.6 }
                     }
                 }
                 MouseArea {
@@ -1338,7 +1338,7 @@ Variants {
                     NText {
                         anchors.verticalCenter: parent.verticalCenter
                         text:                   root.zoomScale === 1.0 ? "1×" : Math.round(root.zoomScale) + "×"
-                        color:                  root.zoomScale > 1.0 ? Color.mPrimary : Color.mOnSurfaceVariant
+                        color:                  root.zoomScale > 1.0 ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
                         pointSize:              Style.fontSizeXS
                         font.bold:              root.zoomScale > 1.0
                         width:                  22
@@ -1356,7 +1356,7 @@ Variants {
                         radius: Math.round(Style.marginXL / 2)
                         anchors.verticalCenter: parent.verticalCenter
                         color:        overlayWin.drawColor
-                        border.color: overlayWin.showPopover ? Color.mPrimary : Qt.rgba(0, 0, 0, 0.2)
+                        border.color: overlayWin.showPopover ? AtmoColor.mPrimary : Qt.rgba(0, 0, 0, 0.2)
                         border.width: overlayWin.showPopover ? Style.borderM : Style.borderS
                         scale: colorBtnH.containsMouse ? 1.1 : 1
                         Behavior on scale { NumberAnimation { duration: 80 } }
@@ -1443,7 +1443,7 @@ Variants {
                     NText {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text:      root.zoomScale === 1.0 ? "1×" : Math.round(root.zoomScale) + "×"
-                        color:     root.zoomScale > 1.0 ? Color.mPrimary : Color.mOnSurfaceVariant
+                        color:     root.zoomScale > 1.0 ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
                         pointSize: Style.fontSizeXS
                         font.bold: root.zoomScale > 1.0
                     }
@@ -1459,7 +1459,7 @@ Variants {
                         radius: Math.round(Style.marginXL / 2)
                         anchors.horizontalCenter: parent.horizontalCenter
                         color:        overlayWin.drawColor
-                        border.color: overlayWin.showPopover ? Color.mPrimary : Qt.rgba(0, 0, 0, 0.2)
+                        border.color: overlayWin.showPopover ? AtmoColor.mPrimary : Qt.rgba(0, 0, 0, 0.2)
                         border.width: overlayWin.showPopover ? Style.borderM : Style.borderS
                         scale: colorBtnV.containsMouse ? 1.1 : 1
                         Behavior on scale { NumberAnimation { duration: 80 } }
@@ -1525,7 +1525,7 @@ Variants {
 			id: popover
 			visible: overlayWin.isPrimary && overlayWin.showPopover
 			radius: Style.radiusL
-			color: Color.mSurface
+			color: AtmoColor.mSurface
 			border.color: Style.capsuleBorderColor
 			border.width: Style.capsuleBorderWidth
 			width: toolbar.useVertical
@@ -1564,7 +1564,7 @@ Variants {
                         model: toolbar.colorDefs
                         delegate: Rectangle {
                             width: 20; height: 20; radius: 10; color: modelData
-                            border.color: overlayWin.drawColor.toString().toUpperCase() === modelData.toUpperCase() ? Color.mPrimary : Qt.rgba(0, 0, 0, 0.15)
+                            border.color: overlayWin.drawColor.toString().toUpperCase() === modelData.toUpperCase() ? AtmoColor.mPrimary : Qt.rgba(0, 0, 0, 0.15)
                             border.width: overlayWin.drawColor.toString().toUpperCase() === modelData.toUpperCase() ? Style.borderM : Style.borderS
                             scale: chH.containsMouse ? 1.2 : 1
                             Behavior on scale { NumberAnimation { duration: 80 } }
@@ -1575,18 +1575,18 @@ Variants {
                             }
                         }
                     }
-                    Rectangle { width: Style.borderS; height: 16; color: Color.mOnSurfaceVariant; opacity: 0.3; anchors.verticalCenter: parent.verticalCenter }
+                    Rectangle { width: Style.borderS; height: 16; color: AtmoColor.mOnSurfaceVariant; opacity: 0.3; anchors.verticalCenter: parent.verticalCenter }
                     Repeater {
                         model: toolbar.sizeDefs
                         delegate: Rectangle {
                             width: 28; height: 24; radius: Style.radiusS
-                            color: overlayWin.drawSize === modelData.size ? Color.mPrimaryContainer : (shH.containsMouse ? Color.mHover : "transparent")
-                            border.color: overlayWin.drawSize === modelData.size ? Color.mPrimary : "transparent"
+                            color: overlayWin.drawSize === modelData.size ? AtmoColor.mPrimaryContainer : (shH.containsMouse ? AtmoColor.mHover : "transparent")
+                            border.color: overlayWin.drawSize === modelData.size ? AtmoColor.mPrimary : "transparent"
                             border.width: Style.borderS
                             Row {
                                 anchors.centerIn: parent; spacing: Style.marginXS
                                 Rectangle { width: modelData.size * 2; height: modelData.size * 2; radius: modelData.size; color: overlayWin.drawColor; anchors.verticalCenter: parent.verticalCenter }
-                                NText { text: modelData.label; pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant; anchors.verticalCenter: parent.verticalCenter }
+                                NText { text: modelData.label; pointSize: Style.fontSizeXS; color: AtmoColor.mOnSurfaceVariant; anchors.verticalCenter: parent.verticalCenter }
                             }
                             MouseArea {
                                 id: shH
@@ -1611,7 +1611,7 @@ Variants {
                                 radius: Math.round((Style.marginXL + Style.marginXXS) / 2)
                                 anchors.centerIn: parent
                                 color:        modelData
-                                border.color: overlayWin.drawColor.toString().toUpperCase() === modelData.toUpperCase() ? Color.mPrimary : Qt.rgba(0, 0, 0, 0.15)
+                                border.color: overlayWin.drawColor.toString().toUpperCase() === modelData.toUpperCase() ? AtmoColor.mPrimary : Qt.rgba(0, 0, 0, 0.15)
                                 border.width: overlayWin.drawColor.toString().toUpperCase() === modelData.toUpperCase() ? Style.borderM : Style.borderS
                                 scale: chV.containsMouse ? 1.2 : 1
                                 Behavior on scale { NumberAnimation { duration: 80 } }
@@ -1623,18 +1623,18 @@ Variants {
                             }
                         }
                     }
-                    Rectangle { width: 16; height: Style.borderS; color: Color.mOnSurfaceVariant; opacity: 0.3; anchors.horizontalCenter: parent.horizontalCenter }
+                    Rectangle { width: 16; height: Style.borderS; color: AtmoColor.mOnSurfaceVariant; opacity: 0.3; anchors.horizontalCenter: parent.horizontalCenter }
                     Repeater {
                         model: toolbar.sizeDefs
                         delegate: Rectangle {
                             width: 32; height: 24; radius: Style.radiusS
-                            color: overlayWin.drawSize === modelData.size ? Color.mPrimaryContainer : (shV.containsMouse ? Color.mHover : "transparent")
-                            border.color: overlayWin.drawSize === modelData.size ? Color.mPrimary : "transparent"
+                            color: overlayWin.drawSize === modelData.size ? AtmoColor.mPrimaryContainer : (shV.containsMouse ? AtmoColor.mHover : "transparent")
+                            border.color: overlayWin.drawSize === modelData.size ? AtmoColor.mPrimary : "transparent"
                             border.width: Style.borderS
                             Row {
                                 anchors.centerIn: parent; spacing: Style.marginXS
                                 Rectangle { width: modelData.size * 2; height: modelData.size * 2; radius: modelData.size; color: overlayWin.drawColor; anchors.verticalCenter: parent.verticalCenter }
-                                NText { text: modelData.label; pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant; anchors.verticalCenter: parent.verticalCenter }
+                                NText { text: modelData.label; pointSize: Style.fontSizeXS; color: AtmoColor.mOnSurfaceVariant; anchors.verticalCenter: parent.verticalCenter }
                             }
                             MouseArea {
                                 id: shV

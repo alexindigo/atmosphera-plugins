@@ -31,8 +31,8 @@ ColumnLayout {
       icon: root.editIcon
       pointSize: Style.fontSizeXXL * 2
       color: {
-        let res = Color.resolveColorKeyOptional(root.editIconColor);
-        return res.a > 0 ? res : Color.mOnSurface;
+        let res = AtmoColor.resolveColorKeyOptional(root.editIconColor);
+        return res.a > 0 ? res : AtmoColor.mOnSurface;
       }
     }
     

@@ -27,7 +27,7 @@ Item {
   readonly property real contentWidth: root.isVertical ? root.capsuleHeight : icon.implicitWidth + Style.marginM * 2
   readonly property real contentHeight: root.capsuleHeight
 
-  readonly property color contentColor: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurfaceVariant
+  readonly property color contentColor: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurfaceVariant
 
   readonly property string tooltipText: pluginApi?.tr("bar_widget.tooltip") || "Show Wi-Fi QR code"
 
@@ -42,7 +42,7 @@ Item {
     width: root.contentWidth
     height: root.contentHeight
     radius: Style.radiusL
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
 

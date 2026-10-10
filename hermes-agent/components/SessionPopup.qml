@@ -29,8 +29,8 @@ Popup {
 
   background: Rectangle {
     radius: Style.radiusL
-    color: Color.mSurface
-    border.color: Color.mPrimary
+    color: AtmoColor.mSurface
+    border.color: AtmoColor.mPrimary
     border.width: Style.borderM
   }
 
@@ -45,21 +45,21 @@ Popup {
         text: pluginApi?.tr("panel.sessions")
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
         Layout.fillWidth: true
       }
 
       NText {
         text: root.sessions.length > 0 ? root.sessions.length + " sessions" : ""
         pointSize: Style.fontSizeXXS
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
       }
     }
 
     Rectangle {
       Layout.fillWidth: true
       Layout.preferredHeight: 1
-      color: Color.mOutline
+      color: AtmoColor.mOutline
       Layout.bottomMargin: Style.marginS
     }
 
@@ -80,7 +80,7 @@ Popup {
             Layout.preferredHeight: root.rowHeight
             background: Rectangle {
               radius: Style.radiusM
-              color: hovered ? Qt.alpha(Color.mPrimary, 0.08) : "transparent"
+              color: hovered ? Qt.alpha(AtmoColor.mPrimary, 0.08) : "transparent"
             }
             onClicked: {
               root.sessionSelected(modelData.id);
@@ -94,7 +94,7 @@ Popup {
                 text: String(index + 1) + "."
                 pointSize: Style.fontSizeS
                 font.weight: Style.fontWeightSemiBold
-                color: Color.mPrimary
+                color: AtmoColor.mPrimary
                 Layout.preferredWidth: 30 * Style.uiScaleRatio
               }
 
@@ -102,7 +102,7 @@ Popup {
                 text: modelData.title || modelData.preview || modelData.id?.substring(0, 8) || "Session"
                 pointSize: Style.fontSizeS
                 font.weight: Style.fontWeightSemiBold
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
                 elide: Text.ElideRight
                 Layout.fillWidth: true
               }
@@ -110,7 +110,7 @@ Popup {
               NText {
                 text: _relativeTime(modelData.started_at)
                 pointSize: Style.fontSizeXXS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 Layout.preferredWidth: 48 * Style.uiScaleRatio
               }
             }
@@ -126,7 +126,7 @@ Popup {
             anchors.centerIn: parent
             text: pluginApi?.tr("panel.noSessions")
             pointSize: Style.fontSizeS
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
           }
         }
       }

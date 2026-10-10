@@ -7,7 +7,7 @@ Rectangle {
     width: 64
     height: 64
     radius: Style.radiusM
-    color: !pressed ? Color.mPrimary : Color.mSecondary
+    color: !pressed ? AtmoColor.mPrimary : AtmoColor.mSecondary
 
     property var pluginApi: null
     property bool pressed: false

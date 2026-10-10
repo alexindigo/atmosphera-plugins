@@ -261,8 +261,8 @@ Item {
       AtmoIconButton {
         icon: "add"
         baseSize: 28 * Style.uiScaleRatio
-        colorBg: Color.mPrimary
-        colorFg: Color.mOnPrimary
+        colorBg: AtmoColor.mPrimary
+        colorFg: AtmoColor.mOnPrimary
         customRadius: 14 * Style.uiScaleRatio
         tooltipText: root.pluginApi?.tr("notes.new")
 

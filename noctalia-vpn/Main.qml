@@ -505,10 +505,10 @@ Item {
     }
 
     function pingColor(ms) {
-        if (ms === undefined || ms === null || ms < 0) return Color.mOnSurfaceVariant
-        if (ms < 60)  return Color.mTertiary  // green-ish
-        if (ms < 150) return Color.mSecondary // mid
-        return Color.mError
+        if (ms === undefined || ms === null || ms < 0) return AtmoColor.mOnSurfaceVariant
+        if (ms < 60)  return AtmoColor.mTertiary  // green-ish
+        if (ms < 150) return AtmoColor.mSecondary // mid
+        return AtmoColor.mError
     }
 
     // ── IPC for noctalia ctl ──────────────────────────────────────────────

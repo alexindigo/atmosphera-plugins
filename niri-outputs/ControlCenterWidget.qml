@@ -13,8 +13,8 @@ AtmoIconButton {
     icon: "device-desktop"
 
     // Default styling (inactive)
-    colorBg: Color.mSurfaceVariant
-    colorFg: Color.mOnSurface
+    colorBg: AtmoColor.mSurfaceVariant
+    colorFg: AtmoColor.mOnSurface
 
     onClicked: {
         if (pluginApi) {

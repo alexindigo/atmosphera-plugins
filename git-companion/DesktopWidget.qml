@@ -40,7 +40,7 @@ DraggableDesktopWidget {
         }
         NText {
             Layout.alignment: Qt.AlignHCenter
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             font.pointSize: Style.fontSizeS
             text: root.text
         }

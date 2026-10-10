@@ -64,7 +64,7 @@ Item {
     case "critical":
       return mainInstance?.colorCritical;
     default:
-      return Color.mOnSurface;
+      return AtmoColor.mOnSurface;
     }
   }
 

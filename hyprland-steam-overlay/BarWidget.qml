@@ -25,9 +25,9 @@ AtmoIconButton {
   customRadius: Style.radiusL
 
   colorBg: Style.capsuleColor
-  colorFg: Color.mOnSurface
-  colorBgHover: Color.mHover
-  colorFgHover: Color.mOnHover
+  colorFg: AtmoColor.mOnSurface
+  colorBgHover: AtmoColor.mHover
+  colorFgHover: AtmoColor.mOnHover
   colorBorder: "transparent"
   colorBorderHover: "transparent"
 

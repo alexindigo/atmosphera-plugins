@@ -20,7 +20,7 @@ AtmoIconButton {
   border.color: Style.capsuleBorderColor
   border.width: Style.capsuleBorderWidth
   colorBg: Style.capsuleColor
-  colorFg: Color.resolveColorKey(iconColorKey)
+  colorFg: AtmoColor.resolveColorKey(iconColorKey)
   customRadius: Style.radiusL
   icon: "cards"
   tooltipDirection: BarService.getTooltipDirection(screen?.name)

@@ -26,12 +26,12 @@ Item {
 	readonly property bool installed: main?.installed ?? false
 
 	readonly property color stateColor: {
-		if (!installed) return Color.mError
-		if (vpnState === "connected") return Color.mPrimary
-		if (vpnState === "connecting" || vpnState === "disconnecting") return Color.mTertiary
-		if (locked) return Color.mError
-		if (vpnState === "error") return Color.mError
-		return Color.mOnSurface
+		if (!installed) return AtmoColor.mError
+		if (vpnState === "connected") return AtmoColor.mPrimary
+		if (vpnState === "connecting" || vpnState === "disconnecting") return AtmoColor.mTertiary
+		if (locked) return AtmoColor.mError
+		if (vpnState === "error") return AtmoColor.mError
+		return AtmoColor.mOnSurface
 	}
 
 	property real margins: Style.marginM * 2
@@ -75,7 +75,7 @@ Item {
 					visible: !root.isVertical && (root.main?.showCityName ?? false) && root.vpnState === "connected"
 					text: root.main?.currentLocation?.city || ""
 					pointSize: Style.fontSizeXS
-					color: Color.mOnSurface
+					color: AtmoColor.mOnSurface
 				}
 
 				NText {
@@ -83,7 +83,7 @@ Item {
 					text: root.main?.currentLocation?.ipv4 || ""
 					pointSize: Style.fontSizeXS
 					font.family: Settings.data.ui.fontFixed
-					color: Color.mOnSurface
+					color: AtmoColor.mOnSurface
 				}
 			}
 		}

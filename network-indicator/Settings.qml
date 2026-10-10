@@ -70,10 +70,10 @@ ColumnLayout {
   property bool editCustomFontItalic: cfg.customFontItalic ?? defaults.customFontItalic
 
   property bool editUseCustomColors: cfg.useCustomColors ?? defaults.useCustomColors
-  property color editColorTx: editUseCustomColors && cfg.colorTx || Color.mSecondary
-  property color editColorRx: editUseCustomColors && cfg.colorRx || Color.mPrimary
-  property color editColorSilent: editUseCustomColors && cfg.colorSilent || Color.mSurfaceVariant
-  property color editColorText: editUseCustomColors && cfg.colorText || Color.mOnSurfaceVariant
+  property color editColorTx: editUseCustomColors && cfg.colorTx || AtmoColor.mSecondary
+  property color editColorRx: editUseCustomColors && cfg.colorRx || AtmoColor.mPrimary
+  property color editColorSilent: editUseCustomColors && cfg.colorSilent || AtmoColor.mSurfaceVariant
+  property color editColorText: editUseCustomColors && cfg.colorText || AtmoColor.mOnSurfaceVariant
 
   // ── Helpers ──
 

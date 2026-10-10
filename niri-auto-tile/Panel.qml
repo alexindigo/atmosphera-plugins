@@ -93,14 +93,14 @@ Item {
                         AtmoIcon {
                             icon: "barrier-block"
                             pointSize: Style.fontSizeL
-                            color: Color.mPrimary
+                            color: AtmoColor.mPrimary
                         }
 
                         NText {
                             text: pluginApi?.tr("panel.title")
                             pointSize: Style.fontSizeL
                             font.bold: true
-                            color: Color.mOnSurface
+                            color: AtmoColor.mOnSurface
                             Layout.fillWidth: true
                         }
 
@@ -138,8 +138,8 @@ Item {
                                 Layout.minimumHeight: Math.round(50 * Style.uiScaleRatio)
 
                                 radius: Style.iRadiusM
-                                color: isSelected ? Qt.alpha(Color.mPrimary, 0.15) : Color.mSurfaceVariant
-                                border.color: isSelected ? Color.mPrimary : (optionMouse.containsMouse ? Color.mOutline : "transparent")
+                                color: isSelected ? Qt.alpha(AtmoColor.mPrimary, 0.15) : AtmoColor.mSurfaceVariant
+                                border.color: isSelected ? AtmoColor.mPrimary : (optionMouse.containsMouse ? AtmoColor.mOutline : "transparent")
                                 border.width: isSelected ? Style.borderM : Style.borderS
 
                                 Behavior on color { ColorAnimation { duration: Style.animationFast } }
@@ -170,8 +170,8 @@ Item {
                                                     height: layoutOption.height * 0.45
                                                     radius: Style.iRadiusXXXS
                                                     color: layoutOption.isSelected
-                                                        ? Color.mPrimary
-                                                        : (optionMouse.containsMouse ? Qt.alpha(Color.mOnSurface, 0.4) : Qt.alpha(Color.mOnSurface, 0.25))
+                                                        ? AtmoColor.mPrimary
+                                                        : (optionMouse.containsMouse ? Qt.alpha(AtmoColor.mOnSurface, 0.4) : Qt.alpha(AtmoColor.mOnSurface, 0.25))
 
                                                     Behavior on color { ColorAnimation { duration: Style.animationFast } }
                                                 }
@@ -187,7 +187,7 @@ Item {
                                             : pluginApi?.tr("panel.columns", {"count": layoutOption.columnCount})
                                         pointSize: Style.fontSizeS
                                         font.bold: layoutOption.isSelected
-                                        color: layoutOption.isSelected ? Color.mPrimary : Color.mOnSurface
+                                        color: layoutOption.isSelected ? AtmoColor.mPrimary : AtmoColor.mOnSurface
                                     }
                                 }
 
@@ -215,9 +215,9 @@ Item {
                             height: Math.round(8 * Style.uiScaleRatio)
                             radius: Math.round(4 * Style.uiScaleRatio)
                             color: {
-                                if (!root.isEnabled) return Color.mOutline;
-                                if (root.isRunning) return Color.mPrimary;
-                                return Color.mSecondary;
+                                if (!root.isEnabled) return AtmoColor.mOutline;
+                                if (root.isRunning) return AtmoColor.mPrimary;
+                                return AtmoColor.mSecondary;
                             }
                         }
 
@@ -233,7 +233,7 @@ Item {
                                 return pluginApi?.tr("panel.status-starting");
                             }
                             pointSize: Style.fontSizeS
-                            color: Qt.alpha(Color.mOnSurface, 0.6)
+                            color: Qt.alpha(AtmoColor.mOnSurface, 0.6)
                             Layout.fillWidth: true
                         }
                     }

@@ -42,12 +42,12 @@ Item {
     id: capsule
     anchors.fill: parent
     radius: Math.min(Style.radiusL, width / 2)
-    color: root.hovering ? Color.mHover : Style.capsuleColor
+    color: root.hovering ? AtmoColor.mHover : Style.capsuleColor
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
 
     Behavior on color {
-      enabled: !Color.isTransitioning
+      enabled: !AtmoColor.isTransitioning
       ColorAnimation { duration: Style.animationFast; easing.type: Easing.InOutQuad }
     }
   }
@@ -64,7 +64,7 @@ Item {
     layer.enabled: true
     layer.effect: MultiEffect {
       colorization: 1.0
-      colorizationColor: root.hovering ? Color.mOnHover : Color.mOnSurface
+      colorizationColor: root.hovering ? AtmoColor.mOnHover : AtmoColor.mOnSurface
     }
   }
 

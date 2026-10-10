@@ -40,8 +40,8 @@ Rectangle {
 
     // Helper to safely access Color singleton
     function getColor(propName, fallback) {
-        if (typeof Color !== "undefined" && Color[propName])
-            return Color[propName];
+        if (typeof AtmoColor !== "undefined" && AtmoColor[propName])
+            return AtmoColor[propName];
         return fallback;
     }
 

@@ -29,7 +29,7 @@ Item {
             id: controlCapsule
             Layout.preferredWidth: root.contentPreferredWidth - (Style.marginM * 2)
             Layout.preferredHeight: 140 * Style.uiScaleRatio
-            color: Color.mSurfaceVariant
+            color: AtmoColor.mSurfaceVariant
             radius: Style.radiusM
             border.color: Style.capsuleBorderColor
             border.width: Style.capsuleBorderWidth
@@ -43,7 +43,7 @@ Item {
                     text: pluginApi?.tr("popup.title")
                     font.weight: Font.Bold
                     pointSize: Style.fontSizeS
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                     Layout.alignment: Qt.AlignHCenter
                 }
 
@@ -84,9 +84,9 @@ Item {
             : level === (root.mainWidget?.levelAuto ?? "auto") ? (root.mainWidget?.autoIsNeutral ?? true)
             : (root.mainWidget?.activeIsNeutral ?? false)
         readonly property string stateColor:
-            level === (root.mainWidget?.levelOff ?? "0") ? (root.mainWidget?.colorLevel0 ?? Color.mError)
+            level === (root.mainWidget?.levelOff ?? "0") ? (root.mainWidget?.colorLevel0 ?? AtmoColor.mError)
             : level === (root.mainWidget?.levelAuto ?? "auto") ? (root.mainWidget?.colorAuto ?? Style.capsuleColor)
-            : (root.mainWidget?.colorActive ?? Color.mPrimary)
+            : (root.mainWidget?.colorActive ?? AtmoColor.mPrimary)
 
         implicitWidth: 52 * Style.uiScaleRatio
         implicitHeight: 28 * Style.uiScaleRatio
@@ -102,7 +102,7 @@ Item {
         Rectangle {
             anchors.fill: parent
             radius: Style.radiusS
-            color: parent.isSelected ? parent.stateColor : Color.mSurface
+            color: parent.isSelected ? parent.stateColor : AtmoColor.mSurface
             opacity: parent.isSelected ? 1.0 : (parent.containsMouse ? 0.85 : 0.5)
         }
 
@@ -111,7 +111,7 @@ Item {
             text: parent.text
             font.weight: parent.isSelected ? Font.Bold : Font.Normal
             pointSize: Style.fontSizeS
-            color: (parent.isSelected && !parent.stateNeutral) ? Color.mOnPrimary : Color.mOnSurface
+            color: (parent.isSelected && !parent.stateNeutral) ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface
         }
     }
 }

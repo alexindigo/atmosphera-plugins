@@ -56,7 +56,7 @@ Item {
           AtmoIcon {
             icon: pluginApi?.pluginSettings?.icon || "bookmark"
             pointSize: Style.fontSizeXXL
-            color: Color.mPrimary
+            color: AtmoColor.mPrimary
           }
 
           NLabel {
@@ -129,7 +129,7 @@ Item {
       NText {
         id: saveError
         visible: text !== ""
-        color: Color.mError
+        color: AtmoColor.mError
         pointSize: Style.fontSizeS
         wrapMode: Text.WordWrap
         Layout.fillWidth: true
@@ -153,7 +153,7 @@ Item {
         horizontalPolicy: ScrollBar.AlwaysOff
         verticalPolicy: ScrollBar.AsNeeded
         reserveScrollbarSpace: false
-        gradientColor: Color.mSurface
+        gradientColor: AtmoColor.mSurface
 
         ColumnLayout {
           id: listColumn
@@ -174,14 +174,14 @@ Item {
               AtmoIcon {
                 icon: "bookmark-off"
                 pointSize: Style.fontSizeXXL * 2
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 Layout.alignment: Qt.AlignHCenter
               }
 
               NText {
                 text: pluginApi?.tr("panel.empty")
                 pointSize: Style.fontSizeM
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true

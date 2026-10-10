@@ -247,7 +247,7 @@ ColumnLayout {
   Rectangle {
     Layout.fillWidth: true
     implicitHeight: infoColumn.implicitHeight + Style.marginM * 2
-    color: Color.mSurfaceVariant
+    color: AtmoColor.mSurfaceVariant
     radius: Style.radiusM
 
     ColumnLayout {
@@ -261,7 +261,7 @@ ColumnLayout {
         text: pluginApi?.tr("settings.ipc.title")
         pointSize: Style.fontSizeS
         font.weight: Font.Bold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
       }
 
       NText {
@@ -269,7 +269,7 @@ ColumnLayout {
         text: pluginApi?.tr("settings.ipc.refresh")
         pointSize: Style.fontSizeXS
         font.family: Settings.data.ui.fontFixed
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
         wrapMode: Text.WrapAnywhere
       }
     }

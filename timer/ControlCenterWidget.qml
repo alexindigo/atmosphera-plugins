@@ -25,14 +25,14 @@ AtmoIconButton {
 
     colorFg: {
         if (mainInstance && (mainInstance.cdRunning || mainInstance.swRunning || mainInstance.cdSoundPlaying)) {
-            return Color.mOnPrimary
+            return AtmoColor.mOnPrimary
         }
-        return Color.mPrimary
+        return AtmoColor.mPrimary
     }
 
     colorBg: {
         if (mainInstance && (mainInstance.cdRunning || mainInstance.swRunning || mainInstance.cdSoundPlaying)) {
-            return Color.mPrimary
+            return AtmoColor.mPrimary
         }
         return Style.capsuleColor
     }

@@ -49,7 +49,7 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 icon: "notes"
                 pointSize: 64
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 opacity: 0.5
             }
 
@@ -58,14 +58,14 @@ Item {
                 text: pluginApi?.tr("notecards.empty-state")
                 font.pointSize: Style.fontSizeL
                 font.bold: true
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
             }
 
             NText {
                 Layout.alignment: Qt.AlignHCenter
                 text: pluginApi?.tr("notecards.empty-hint")
                 font.pointSize: Style.fontSizeM
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 opacity: 0.7
             }
 
@@ -144,8 +144,8 @@ Item {
         anchors.margins: 16
         width: contentRow.width + 16
         height: 40
-        color: Color.mSurfaceVariant
-        border.color: Color.mOnSurfaceVariant
+        color: AtmoColor.mSurfaceVariant
+        border.color: AtmoColor.mOnSurfaceVariant
         border.width: 1
         radius: Style.radiusM
         visible: (root.pluginApi && root.pluginApi.mainInstance && root.pluginApi.mainInstance.noteCards) ? root.pluginApi.mainInstance.noteCards.length > 0 : false
@@ -162,10 +162,10 @@ Item {
                 height: 28
                 icon: "add"
                 tooltipText: pluginApi?.tr("notecards.create-note")
-                colorBg: Color.mPrimary
-                colorFg: Color.mOnPrimary
-                colorBgHover: Qt.lighter(Color.mPrimary, 1.2)
-                colorFgHover: Color.mOnPrimary
+                colorBg: AtmoColor.mPrimary
+                colorFg: AtmoColor.mOnPrimary
+                colorBgHover: Qt.lighter(AtmoColor.mPrimary, 1.2)
+                colorFgHover: AtmoColor.mOnPrimary
 
                 onClicked: {
                     if (root.pluginApi && root.pluginApi.mainInstance) {
@@ -185,7 +185,7 @@ Item {
             Rectangle {
                 width: 1
                 height: 24
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 opacity: 0.3
             }
 
@@ -193,7 +193,7 @@ Item {
             AtmoIcon {
                 icon: "note"
                 pointSize: 16
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
             }
 
             // Count text
@@ -208,7 +208,7 @@ Item {
                 color: {
                     const count = (root.pluginApi && root.pluginApi.mainInstance && root.pluginApi.mainInstance.noteCards) ? root.pluginApi.mainInstance.noteCards.length : 0;
                     const max = (root.pluginApi && root.pluginApi.mainInstance) ? (root.pluginApi.mainInstance.maxNoteCards || 20) : 20;
-                    return count >= max ? Color.mError : Color.mOnSurfaceVariant;
+                    return count >= max ? AtmoColor.mError : AtmoColor.mOnSurfaceVariant;
                 }
             }
         }

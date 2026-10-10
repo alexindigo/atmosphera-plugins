@@ -106,7 +106,7 @@ Item {
                     text: pluginApi ? pluginApi.tr("panel.display-configuration") : "Display Configuration"
                     pointSize: Style.fontSizeL
                     font.weight: Font.Medium
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                     Layout.fillWidth: true
                 }
 
@@ -197,8 +197,8 @@ Item {
                     Layout.fillWidth: true
                     text: pluginApi ? pluginApi.tr("panel.apply") : "Apply"
                     icon: "check"
-                    backgroundColor: Color.mPrimary
-                    textColor: Color.mOnPrimary
+                    backgroundColor: AtmoColor.mPrimary
+                    textColor: AtmoColor.mOnPrimary
                     onClicked: root.applyChanges()
                 }
 
@@ -374,7 +374,7 @@ Item {
             positionChanged(outputName, snapResult.x, snapResult.y);
         }
 
-        color: Color.mSurfaceVariant
+        color: AtmoColor.mSurfaceVariant
         radius: Style.radiusM
         clip: true
 
@@ -473,7 +473,7 @@ Item {
             onPaint: {
                 var ctx = getContext("2d");
                 ctx.clearRect(0, 0, width, height);
-                ctx.strokeStyle = Color.mOnSurfaceVariant;
+                ctx.strokeStyle = AtmoColor.mOnSurfaceVariant;
                 ctx.lineWidth = 1;
                 ctx.globalAlpha = 0.5;
 
@@ -541,7 +541,7 @@ Item {
             width: zoomLabel.width + Style.marginS * 2
             height: 20
             radius: Style.radiusS
-            color: Color.mSurface
+            color: AtmoColor.mSurface
             opacity: 0.9
             z: 10
 
@@ -549,7 +549,7 @@ Item {
                 id: zoomLabel
                 anchors.centerIn: parent
                 text: Math.round(preview.totalScale * 100) + "%"
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 pointSize: Style.fontSizeXS
             }
         }
@@ -609,11 +609,11 @@ Item {
 
                     color: {
                         void(preview.localSnappedVersion);
-                        return (isDragging || preview.localSnappedPositions[outputName]) ? Qt.alpha(Color.mTertiary, 0.3) : Qt.alpha(Color.mPrimary, 0.25);
+                        return (isDragging || preview.localSnappedPositions[outputName]) ? Qt.alpha(AtmoColor.mTertiary, 0.3) : Qt.alpha(AtmoColor.mPrimary, 0.25);
                     }
                     border.color: {
                         void(preview.localSnappedVersion);
-                        return (isDragging || preview.localSnappedPositions[outputName]) ? Color.mTertiary : Color.mPrimary;
+                        return (isDragging || preview.localSnappedPositions[outputName]) ? AtmoColor.mTertiary : AtmoColor.mPrimary;
                     }
                     border.width: 1
                     radius: 2
@@ -630,14 +630,14 @@ Item {
                             text: displayRect.outputName
                             font.weight: Font.Bold
                             pointSize: Style.fontSizeM
-                            color: Color.mOnSurface
+                            color: AtmoColor.mOnSurface
                             Layout.alignment: Qt.AlignHCenter
                         }
 
                         NText {
                             text: Math.round(displayRect.x) + ", " + Math.round(displayRect.y)
                             pointSize: Style.fontSizeS
-                            color: Color.mOnSurfaceVariant
+                            color: AtmoColor.mOnSurfaceVariant
                             Layout.alignment: Qt.AlignHCenter
                         }
                     }
@@ -692,7 +692,7 @@ Item {
         signal outputModeChanged(var mode)
 
         implicitHeight: cardContent.implicitHeight + Style.marginM * 2
-        color: Color.mSurfaceVariant
+        color: AtmoColor.mSurfaceVariant
         radius: Style.radiusM
 
         readonly property bool hasPendingChange: {
@@ -726,7 +726,7 @@ Item {
                     width: 4
                     height: parent.height
                     radius: 2
-                    color: card.hasPendingChange ? Color.mTertiary : Color.mPrimary
+                    color: card.hasPendingChange ? AtmoColor.mTertiary : AtmoColor.mPrimary
                 }
 
                 ColumnLayout {
@@ -737,7 +737,7 @@ Item {
                         text: card.outputName
                         font.weight: Font.Medium
                         pointSize: Style.fontSizeM
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                     }
 
                     NText {
@@ -747,7 +747,7 @@ Item {
                             return card.outputData.logical.width + "x" + card.outputData.logical.height + " @ " + scale.toFixed(1) + "x";
                         }
                         pointSize: Style.fontSizeXS
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                     }
                 }
 
@@ -768,7 +768,7 @@ Item {
 
                     NText {
                         text: pluginApi ? pluginApi.tr("panel.scale") : "Scale"
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         pointSize: Style.fontSizeS
                         Layout.preferredWidth: 60
                     }
@@ -786,12 +786,12 @@ Item {
                         width: 36
                         height: 20
                         radius: Style.radiusS
-                        color: Color.mPrimaryContainer || "transparent"
+                        color: AtmoColor.mPrimaryContainer || "transparent"
 
                         NText {
                             anchors.centerIn: parent
                             text: root.getPendingOrDefault("scales", card.outputName, card.currentScale).toFixed(1)
-                            color: Color.mOnPrimaryContainer || Color.mOnSurface
+                            color: AtmoColor.mOnPrimaryContainer || AtmoColor.mOnSurface
                             pointSize: Style.fontSizeXS
                             font.weight: Font.Medium
                         }
@@ -804,7 +804,7 @@ Item {
 
                     NText {
                         text: pluginApi ? pluginApi.tr("panel.rotate") : "Rotate"
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         pointSize: Style.fontSizeS
                         Layout.preferredWidth: 60
                     }
@@ -834,7 +834,7 @@ Item {
                             }
                         }
 
-                        Rectangle { width: 1; height: 24; color: Color.mOutline }
+                        Rectangle { width: 1; height: 24; color: AtmoColor.mOutline }
 
                         Repeater {
                             model: [
@@ -864,7 +864,7 @@ Item {
 
                     NText {
                         text: pluginApi ? pluginApi.tr("panel.mode") : "Mode"
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                         pointSize: Style.fontSizeS
                     }
 
@@ -894,15 +894,15 @@ Item {
                                     return root.getPendingOrDefault("modes", card.outputName, null) !== null;
                                 }
 
-                                color: modeRect.isPending ? Color.mTertiary :
-                                       (modeRect.isCurrent && !modeRect.hasPendingMode ? Color.mPrimary : Color.mSurfaceVariant)
+                                color: modeRect.isPending ? AtmoColor.mTertiary :
+                                       (modeRect.isCurrent && !modeRect.hasPendingMode ? AtmoColor.mPrimary : AtmoColor.mSurfaceVariant)
 
                                 NText {
                                     id: modeLabel
                                     anchors.centerIn: parent
                                     text: modeRect.modeData ? (modeRect.modeData.width + "x" + modeRect.modeData.height + "@" + (modeRect.modeData.refresh_rate / 1000).toFixed(0)) : ""
-                                    color: modeRect.isPending ? Color.mOnTertiary :
-                                           (modeRect.isCurrent && !modeRect.hasPendingMode ? Color.mOnPrimary : Color.mOnSurface)
+                                    color: modeRect.isPending ? AtmoColor.mOnTertiary :
+                                           (modeRect.isCurrent && !modeRect.hasPendingMode ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface)
                                     pointSize: Style.fontSizeXS
                                 }
 
@@ -929,12 +929,12 @@ Item {
         width: 36
         height: 24
         radius: Style.radiusS
-        color: isActive ? Color.mPrimary : Color.mSurfaceVariant
+        color: isActive ? AtmoColor.mPrimary : AtmoColor.mSurfaceVariant
 
         NText {
             anchors.centerIn: parent
             text: label
-            color: isActive ? Color.mOnPrimary : Color.mOnSurface
+            color: isActive ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface
             pointSize: Style.fontSizeXS
         }
 

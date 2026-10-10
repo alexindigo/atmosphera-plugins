@@ -33,19 +33,19 @@ Item {
             width: parent.width
             height: 36
             radius: Style.radiusM
-            color: emptyPalBtn.containsMouse ? Color.mPrimary : Color.mSurface
-            border.color: Color.mPrimary
+            color: emptyPalBtn.containsMouse ? AtmoColor.mPrimary : AtmoColor.mSurface
+            border.color: AtmoColor.mPrimary
             border.width: Style.capsuleBorderWidth
             Row {
                 anchors.centerIn: parent
                 spacing: Style.marginS
                 AtmoIcon {
                     icon: "palette"
-                    color: emptyPalBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
+                    color: emptyPalBtn.containsMouse ? AtmoColor.mOnPrimary : AtmoColor.mPrimary
                 }
                 NText {
                     text: pluginApi?.tr("panel.pickAgain")
-                    color: emptyPalBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
+                    color: emptyPalBtn.containsMouse ? AtmoColor.mOnPrimary : AtmoColor.mPrimary
                     pointSize: Style.fontSizeS
                 }
             }
@@ -65,19 +65,19 @@ Item {
                 width: parent.width
                 height: 36
                 radius: Style.radiusM
-                color: pickAgainPalBtn.containsMouse ? Color.mPrimary : Color.mSurface
-                border.color: Color.mPrimary
+                color: pickAgainPalBtn.containsMouse ? AtmoColor.mPrimary : AtmoColor.mSurface
+                border.color: AtmoColor.mPrimary
                 border.width: Style.capsuleBorderWidth
                 Row {
                     anchors.centerIn: parent
                     spacing: Style.marginS
                     AtmoIcon {
                         icon: "palette"
-                        color: pickAgainPalBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
+                        color: pickAgainPalBtn.containsMouse ? AtmoColor.mOnPrimary : AtmoColor.mPrimary
                     }
                     NText {
                         text: pluginApi?.tr("panel.pickAgain")
-                        color: pickAgainPalBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
+                        color: pickAgainPalBtn.containsMouse ? AtmoColor.mOnPrimary : AtmoColor.mPrimary
                         pointSize: Style.fontSizeS
                     }
                 }
@@ -99,7 +99,7 @@ Item {
                         height: width * 0.7
                         radius: Style.radiusM
                         color: modelData
-                        border.color: swatchBtn.containsMouse ? Color.mPrimary : Style.capsuleBorderColor
+                        border.color: swatchBtn.containsMouse ? AtmoColor.mPrimary : Style.capsuleBorderColor
                         border.width: swatchBtn.containsMouse ? 2 : Style.capsuleBorderWidth
                         NText {
                             anchors.bottom: parent.bottom
@@ -130,7 +130,7 @@ Item {
                 width: parent.width
                 height: 36
                 radius: Style.radiusM
-                color: cssBtn.containsMouse ? Color.mSurfaceVariant : Color.mSurface
+                color: cssBtn.containsMouse ? AtmoColor.mSurfaceVariant : AtmoColor.mSurface
                 border.color: Style.capsuleBorderColor
                 border.width: Style.capsuleBorderWidth
                 Row {
@@ -138,11 +138,11 @@ Item {
                     spacing: Style.marginS
                     AtmoIcon {
                         icon: "copy"
-                        color: cssBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
+                        color: cssBtn.containsMouse ? AtmoColor.mOnSurface : AtmoColor.mOnSurfaceVariant
                     }
                     NText {
                         text: pluginApi?.tr("palette.cssVars")
-                        color: cssBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
+                        color: cssBtn.containsMouse ? AtmoColor.mOnSurface : AtmoColor.mOnSurfaceVariant
                         pointSize: Style.fontSizeS
                     }
                 }
@@ -164,7 +164,7 @@ Item {
                 width: parent.width
                 height: 36
                 radius: Style.radiusM
-                color: hexBtn.containsMouse ? Color.mSurfaceVariant : Color.mSurface
+                color: hexBtn.containsMouse ? AtmoColor.mSurfaceVariant : AtmoColor.mSurface
                 border.color: Style.capsuleBorderColor
                 border.width: Style.capsuleBorderWidth
                 Row {
@@ -172,11 +172,11 @@ Item {
                     spacing: Style.marginS
                     AtmoIcon {
                         icon: "list"
-                        color: hexBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
+                        color: hexBtn.containsMouse ? AtmoColor.mOnSurface : AtmoColor.mOnSurfaceVariant
                     }
                     NText {
                         text: pluginApi?.tr("palette.hexList")
-                        color: hexBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
+                        color: hexBtn.containsMouse ? AtmoColor.mOnSurface : AtmoColor.mOnSurfaceVariant
                         pointSize: Style.fontSizeS
                     }
                 }
@@ -195,19 +195,19 @@ Item {
                 width: parent.width
                 height: 36
                 radius: Style.radiusM
-                color: palClr.containsMouse ? Qt.alpha(Color.mError, 0.15) : Color.mSurface
-                border.color: palClr.containsMouse ? Color.mError : Style.capsuleBorderColor
+                color: palClr.containsMouse ? Qt.alpha(AtmoColor.mError, 0.15) : AtmoColor.mSurface
+                border.color: palClr.containsMouse ? AtmoColor.mError : Style.capsuleBorderColor
                 border.width: Style.capsuleBorderWidth
                 Row {
                     anchors.centerIn: parent
                     spacing: Style.marginS
                     AtmoIcon {
                         icon: "trash"
-                        color: palClr.containsMouse ? Color.mError : Color.mOnSurfaceVariant
+                        color: palClr.containsMouse ? AtmoColor.mError : AtmoColor.mOnSurfaceVariant
                     }
                     NText {
                         text: pluginApi?.tr("panel.clearResult")
-                        color: palClr.containsMouse ? Color.mError : Color.mOnSurfaceVariant
+                        color: palClr.containsMouse ? AtmoColor.mError : AtmoColor.mOnSurfaceVariant
                         pointSize: Style.fontSizeS
                     }
                 }

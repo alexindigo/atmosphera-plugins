@@ -136,7 +136,7 @@ Item {
             anchors.fill: headerEye
             source: headerEye
             colorization: 1.0
-            colorizationColor: root.lit ? Color.mPrimary : Color.mOnSurface
+            colorizationColor: root.lit ? AtmoColor.mPrimary : AtmoColor.mOnSurface
             Behavior on colorizationColor {
               ColorAnimation {
                 duration: Style.animationFast
@@ -153,13 +153,13 @@ Item {
             text: (root.s && root.s.gpuName) ? root.s.gpuName : root.pluginApi?.tr("panel.title-fallback")
             font.weight: Style.fontWeightBold
             pointSize: Style.fontSizeL
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
 
           NText {
             text: root.subtitle()
             pointSize: Style.fontSizeS
-            color: root.needsRestart ? Color.mError : (root.pending === "hdmi" ? Color.mPrimary : Color.mOnSurfaceVariant)
+            color: root.needsRestart ? AtmoColor.mError : (root.pending === "hdmi" ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant)
           }
         }
 
@@ -186,18 +186,18 @@ Item {
           spacing: Style.marginM
           AtmoIcon {
             icon: "device-tv"
-            color: root.ext ? Color.mPrimary : Color.mOnSurfaceVariant
+            color: root.ext ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
             pointSize: Style.fontSizeM
           }
           NText {
             text: root.pluginApi?.tr("panel.external")
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             pointSize: Style.fontSizeS
             Layout.fillWidth: true
           }
           NText {
             text: root.ext ? ((root.s.external || "?") + " · " + (root.s.externalName || "")) : root.pluginApi?.tr("common.none")
-            color: root.ext ? Color.mPrimary : Color.mOnSurface
+            color: root.ext ? AtmoColor.mPrimary : AtmoColor.mOnSurface
             pointSize: Style.fontSizeS
             font.weight: Style.fontWeightBold
           }
@@ -209,18 +209,18 @@ Item {
           visible: root.active
           AtmoIcon {
             icon: "stack"
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             pointSize: Style.fontSizeM
           }
           NText {
             text: root.pluginApi?.tr("panel.gpu-processes")
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             pointSize: Style.fontSizeS
             Layout.fillWidth: true
           }
           NText {
             text: (root.full && root.full.heldBy && root.full.heldBy.length > 0) ? root.full.heldBy : root.pluginApi?.tr("panel.none-reported")
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             pointSize: Style.fontSizeS
             font.weight: Style.fontWeightBold
             elide: Text.ElideRight
@@ -248,18 +248,18 @@ Item {
 
             AtmoIcon {
               icon: modelData.icon
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               pointSize: Style.fontSizeM
             }
             NText {
               text: modelData.label
-              color: Color.mOnSurfaceVariant
+              color: AtmoColor.mOnSurfaceVariant
               pointSize: Style.fontSizeS
               Layout.fillWidth: true
             }
             NText {
               text: modelData.value
-              color: Color.mOnSurface
+              color: AtmoColor.mOnSurface
               pointSize: Style.fontSizeS
               font.weight: Style.fontWeightBold
             }
@@ -283,14 +283,14 @@ Item {
           wrapMode: Text.WordWrap
           text: root.pluginApi?.tr("panel.apply-note")
           pointSize: Style.fontSizeXS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
 
         NButton {
           text: root.pluginApi?.tr("panel.apply-button")
           fontSize: Style.fontSizeS
-          backgroundColor: Color.mError
-          textColor: Color.mOnError
+          backgroundColor: AtmoColor.mError
+          textColor: AtmoColor.mOnError
           onClicked: {
             if (root.main)
               root.main.apply();

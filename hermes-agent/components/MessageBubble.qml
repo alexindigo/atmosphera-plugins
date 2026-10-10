@@ -15,7 +15,7 @@ Rectangle {
 
   Layout.fillWidth: true
   radius: Style.radiusS
-  color: fromUser ? Color.mPrimary : Color.mSurface
+  color: fromUser ? AtmoColor.mPrimary : AtmoColor.mSurface
   implicitHeight: bubbleLayout.implicitHeight + Style.marginM * 2
 
   ColumnLayout {
@@ -35,14 +35,14 @@ Rectangle {
       AtmoIcon {
         icon: root.fromUser ? "user" : "sparkles"
         pointSize: Style.fontSizeM
-        color: root.fromUser ? Color.mOnPrimary : Color.mPrimary
+        color: root.fromUser ? AtmoColor.mOnPrimary : AtmoColor.mPrimary
       }
 
       NText {
         text: root.fromUser ? (pluginApi?.tr("bubble.you")) : (pluginApi?.tr("bubble.hermes"))
         pointSize: Style.fontSizeS
         font.weight: Style.fontWeightSemiBold
-        color: root.fromUser ? Color.mOnPrimary : Color.mOnSurface
+        color: root.fromUser ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface
         Layout.fillWidth: true
       }
     }
@@ -50,7 +50,7 @@ Rectangle {
     NText {
       text: root.content
       pointSize: Style.fontSizeM
-      color: root.fromUser ? Color.mOnPrimary : Color.mOnSurface
+      color: root.fromUser ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface
       wrapMode: Text.Wrap
       Layout.fillWidth: true
     }

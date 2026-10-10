@@ -66,8 +66,8 @@ Item {
       icon: "topology-star-3"
       pointSize: Style.fontSizeL
       color: {
-        if (root.showErrorBadge && root.main?.hasCriticalPod) return Color.mError;
-        return Color.resolveColorKey(root.iconColorKey);
+        if (root.showErrorBadge && root.main?.hasCriticalPod) return AtmoColor.mError;
+        return AtmoColor.resolveColorKey(root.iconColorKey);
       }
     }
 
@@ -81,7 +81,7 @@ Item {
         return ctx + " / " + ns;
       }
       pointSize: Style.fontSizeS
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
       elide: Text.ElideRight
       Layout.maximumWidth: capsuleHeight * 3
     }
@@ -92,7 +92,7 @@ Item {
       width: Math.round(Style.fontSizeS * 0.6)
       height: width
       radius: width / 2
-      color: Color.mError
+      color: AtmoColor.mError
       Layout.alignment: Qt.AlignVCenter
     }
   }

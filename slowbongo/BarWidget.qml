@@ -48,11 +48,11 @@ Item {
 
     function resolveColor(key) {
         switch (key) {
-            case "primary":   return Color.mPrimary
-            case "secondary": return Color.mSecondary
-            case "tertiary":  return Color.mTertiary
-            case "error":     return Color.mError
-            default:          return Color.mOnSurface
+            case "primary":   return AtmoColor.mPrimary
+            case "secondary": return AtmoColor.mSecondary
+            case "tertiary":  return AtmoColor.mTertiary
+            case "error":     return AtmoColor.mError
+            default:          return AtmoColor.mOnSurface
         }
     }
 
@@ -94,7 +94,7 @@ Item {
         Behavior on height {
             NumberAnimation { duration: Style.animationNormal; easing.type: Easing.OutCubic }
         }
-        color: mouseArea.containsMouse ? Color.mHover : (root.paused ? root.resolvedCatColor : Style.capsuleColor)
+        color: mouseArea.containsMouse ? AtmoColor.mHover : (root.paused ? root.resolvedCatColor : Style.capsuleColor)
         border.color: Style.capsuleBorderColor
         border.width: Style.capsuleBorderWidth
 
@@ -110,7 +110,7 @@ Item {
             font.family: bongoFont.name
             font.pixelSize: root.capsuleHeight * root.activeCatSize
             font.weight: Font.Thin
-            color: mouseArea.containsMouse ? Color.mOnHover : (root.paused ? Color.mSurface : root.resolvedCatColor)
+            color: mouseArea.containsMouse ? AtmoColor.mOnHover : (root.paused ? AtmoColor.mSurface : root.resolvedCatColor)
             text: (root.paused || root.waiting) ? root.sleepGlyph : (root.blinking ? root.blinkGlyph : (root.glyphMap[root.catState] ?? "bc"))
 
             Behavior on anchors.horizontalCenterOffset {

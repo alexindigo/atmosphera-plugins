@@ -326,8 +326,8 @@ ColumnLayout {
     if (colorKey === "custom") {
       return customColors[cardType]?.[colorType] || "#888888";
     }
-    if (typeof Color !== "undefined" && Color[colorKey]) {
-      return Color[colorKey];
+    if (typeof AtmoColor !== "undefined" && AtmoColor[colorKey]) {
+      return AtmoColor[colorKey];
     }
     return "#888888";
   }
@@ -492,7 +492,7 @@ ColumnLayout {
           color: {
             const count = pluginApi?.mainInstance?.pinnedItems?.length || 0;
             const max = pluginApi?.mainInstance?.maxPinnedItems || 20;
-            return count >= max ? Color.mError : Color.mOnSurface;
+            return count >= max ? AtmoColor.mError : AtmoColor.mOnSurface;
           }
         }
       }
@@ -551,7 +551,7 @@ ColumnLayout {
           color: {
             const count = pluginApi?.mainInstance?.noteCards?.length || 0;
             const max = pluginApi?.mainInstance?.maxNoteCards || 20;
-            return count >= max ? Color.mError : Color.mOnSurface;
+            return count >= max ? AtmoColor.mError : AtmoColor.mOnSurface;
           }
         }
       }
@@ -616,10 +616,10 @@ ColumnLayout {
         visible: root.valueAutoPaste && !(pluginApi?.mainInstance?.wtypeAvailable ?? false)
         Layout.fillWidth: true
         Layout.preferredHeight: warningText.implicitHeight + Style.marginM * 2
-        color: (typeof Color !== "undefined") ? Qt.rgba(Color.mError.r, Color.mError.g, Color.mError.b, 0.15) : "#33CC0000"
+        color: (typeof AtmoColor !== "undefined") ? Qt.rgba(AtmoColor.mError.r, AtmoColor.mError.g, AtmoColor.mError.b, 0.15) : "#33CC0000"
         radius: Style.radiusS
         border.width: 1
-        border.color: (typeof Color !== "undefined") ? Color.mError : "#CC0000"
+        border.color: (typeof AtmoColor !== "undefined") ? AtmoColor.mError : "#CC0000"
 
         NText {
           id: warningText
@@ -627,7 +627,7 @@ ColumnLayout {
           anchors.margins: Style.marginM
           text: pluginApi?.tr("settings.auto-paste-warning")
           wrapMode: Text.Wrap
-          color: (typeof Color !== "undefined") ? Color.mError : "#CC0000"
+          color: (typeof AtmoColor !== "undefined") ? AtmoColor.mError : "#CC0000"
           font.pointSize: Style.fontSizeS
         }
       }
@@ -709,7 +709,7 @@ ColumnLayout {
       Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: 280
-        color: (typeof Color !== "undefined") ? Color.mSurfaceVariant : "#333333"
+        color: (typeof AtmoColor !== "undefined") ? AtmoColor.mSurfaceVariant : "#333333"
         radius: Style.radiusM
 
         ColumnLayout {
@@ -720,7 +720,7 @@ ColumnLayout {
           NText {
             text: pluginApi?.tr("settings.preview")
             font.bold: true
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
 
           // Preview card

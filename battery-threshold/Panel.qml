@@ -54,21 +54,21 @@ Item {
                     text: pluginApi?.tr("panel.title")
                     pointSize: Style.fontSizeL
                     font.weight: Font.DemiBold
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                 }
 
                 NText {
                     visible: !service.isAvailable || root.batteryModelName !== ""
                     text: !service.isAvailable ? pluginApi?.tr("panel.not-available") : root.batteryModelName
                     pointSize: Style.fontSizeM
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                 }
             }
 
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: Color.mOutline
+                color: AtmoColor.mOutline
                 opacity: 0.3
                 visible: service.isAvailable
             }
@@ -84,7 +84,7 @@ Item {
                     NText {
                         text: pluginApi?.tr("panel.title")
                         pointSize: Style.fontSizeM
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                         Layout.fillWidth: true
                     }
 
@@ -92,7 +92,7 @@ Item {
                         text: service.currentThreshold + "%"
                         pointSize: Style.fontSizeL
                         font.weight: Font.Bold
-                        color: Color.mPrimary
+                        color: AtmoColor.mPrimary
                     }
                 }
 
@@ -103,7 +103,7 @@ Item {
                     NText {
                         text: "40%"
                         pointSize: Style.fontSizeXS
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                     }
 
                     NSlider {
@@ -120,7 +120,7 @@ Item {
                     NText {
                         text: "100%"
                         pointSize: Style.fontSizeXS
-                        color: Color.mOnSurfaceVariant
+                        color: AtmoColor.mOnSurfaceVariant
                     }
                 }
 
@@ -128,7 +128,7 @@ Item {
                     Layout.fillWidth: true
                     text: service.isWritable ? pluginApi?.tr("panel.adjust-limit") : pluginApi?.tr("panel.read-only")
                     pointSize: Style.fontSizeXS
-                    color: service.isWritable ? Color.mOnSurfaceVariant : Color.mTertiary
+                    color: service.isWritable ? AtmoColor.mOnSurfaceVariant : AtmoColor.mTertiary
                     horizontalAlignment: Text.AlignHCenter
                 }
             }

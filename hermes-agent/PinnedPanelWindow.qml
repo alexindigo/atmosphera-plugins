@@ -43,8 +43,8 @@ PanelWindow {
 
   Rectangle {
     anchors.fill: parent
-    color: Color.mSurface
-    border.color: Color.mOutline
+    color: AtmoColor.mSurface
+    border.color: AtmoColor.mOutline
     border.width: Style.borderS
     radius: Style.radiusL
   }

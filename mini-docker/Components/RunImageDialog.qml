@@ -65,7 +65,7 @@ Dialog {
             text: "Run " + runImageDialog.imageRepo + ":" + runImageDialog.imageTag
             font.bold: true
             font.pixelSize: 16
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             Layout.fillWidth: true
             elide: Text.ElideRight
         }
@@ -73,14 +73,14 @@ Dialog {
         Rectangle {
             Layout.fillWidth: true
             height: 1
-            color: Color.mOutline
+            color: AtmoColor.mOutline
             opacity: 0.5
         }
 
         // --- Container Name ---
         Text {
             text: "Container Name (Optional)"
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             font.bold: true
         }
         TextField {
@@ -99,14 +99,14 @@ Dialog {
             // Network Label
             Text {
                 text: "Network:"
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 font.bold: true
             }
 
             // Port Label
              Text {
                 text: "Host Port:"
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 opacity: exposePortCheck.checked ? 1 : 0.5
                 font.bold: true
             }
@@ -141,7 +141,7 @@ Dialog {
         Rectangle {
             Layout.fillWidth: true
             height: 1
-            color: Color.mOutline
+            color: AtmoColor.mOutline
             opacity: 0.5
         }
 
@@ -150,7 +150,7 @@ Dialog {
             Layout.fillWidth: true
             Text {
                 text: "Environment Variables"
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 font.bold: true
                 Layout.fillWidth: true
             }
@@ -181,7 +181,7 @@ Dialog {
                     text: model.key
                     onTextEdited: model.key = text
                 }
-                Text { text: "="; color: Color.mOnSurfaceVariant }
+                Text { text: "="; color: AtmoColor.mOnSurfaceVariant }
                 TextField {
                     Layout.fillWidth: true
                     Layout.preferredWidth: 1 // flexible
@@ -201,7 +201,7 @@ Dialog {
         // --- Footer / Error ---
         Text {
             text: runImageDialog.errorMessage
-            color: Color.mError
+            color: AtmoColor.mError
             visible: text !== ""
             font.bold: true
             Layout.fillWidth: true

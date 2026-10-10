@@ -30,8 +30,8 @@ Item {
   readonly property bool useMonospaceFont: cfg.useMonospaceFont !== undefined ? cfg.useMonospaceFont : true
   readonly property bool usePadding: !compactMode && !isVertical && useMonospaceFont && (cfg.usePadding !== undefined ? cfg.usePadding : false)
   readonly property string fontFamily: useMonospaceFont ? Settings.data.ui.fontFixed : Settings.data.ui.fontDefault
-  readonly property color iconColor: Color.resolveColorKey(iconColorKey === "none" ? "primary" : iconColorKey)
-  readonly property color textColor: Color.resolveColorKey(textColorKey === "none" ? "onSurface" : textColorKey)
+  readonly property color iconColor: AtmoColor.resolveColorKey(iconColorKey === "none" ? "primary" : iconColorKey)
+  readonly property color textColor: AtmoColor.resolveColorKey(textColorKey === "none" ? "onSurface" : textColorKey)
 
   function cfgBool(key, fallback) {
     return cfg[key] !== undefined ? !!cfg[key] : fallback;
@@ -57,9 +57,9 @@ Item {
       return iconColor;
     if (sensor === "junction") {
       if (mon.gpuCritical)
-        return Color.mError;
+        return AtmoColor.mError;
       if (mon.gpuWarning)
-        return Color.mWarning;
+        return AtmoColor.mWarning;
     }
     return iconColor;
   }
@@ -70,9 +70,9 @@ Item {
 
   function gaugeFillColor(ratio, baseColor) {
     if (ratio >= 0.9)
-      return Color.mError;
+      return AtmoColor.mError;
     if (ratio >= 0.75)
-      return Color.mTertiary;
+      return AtmoColor.mTertiary;
     return baseColor;
   }
 
@@ -351,7 +351,7 @@ Item {
           icon: "thermometer"
           pointSize: iconSize
           applyUiScale: false
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
         }
       }
     }
@@ -496,7 +496,7 @@ Item {
       NLinearGauge {
         ratio: 0
         orientation: Qt.Vertical
-        fillColor: Color.mPrimary
+        fillColor: AtmoColor.mPrimary
         width: root.miniGaugeWidth
         height: root.iconSize
       }

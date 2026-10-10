@@ -96,7 +96,7 @@ Item {
                         text: pluginApi?.tr("widget.title")
                         pointSize: Style.fontSizeL
                         font.weight: Style.fontWeightBold
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                         Layout.fillWidth: true
                         elide: Text.ElideRight
                     }
@@ -129,13 +129,13 @@ Item {
                         NText {
                             text: pluginApi?.tr("panel.fan.title")
                             font.weight: Style.fontWeightBold
-                            color: Color.mOnSurface
+                            color: AtmoColor.mOnSurface
                             Layout.fillWidth: true
                         }
 
                         NText {
                             text: root.indexToLabel(root.fanModeIndex)
-                            color: Color.mOnSurfaceVariant
+                            color: AtmoColor.mOnSurfaceVariant
                         }
                     }
 
@@ -166,20 +166,20 @@ Item {
                         AtmoIcon {
                             icon: "moon"
                             pointSize: Style.fontSizeS
-                            color: root.fanModeIndex === 0 ? Color.mPrimary : Color.mOnSurfaceVariant
+                            color: root.fanModeIndex === 0 ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
                         }
 
                         AtmoIcon {
                             icon: "car-fan"
                             pointSize: Style.fontSizeS
-                            color: root.fanModeIndex === 1 ? Color.mPrimary : Color.mOnSurfaceVariant
+                            color: root.fanModeIndex === 1 ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
                             Layout.fillWidth: true
                         }
 
                         AtmoIcon {
                             icon: "flame"
                             pointSize: Style.fontSizeS
-                            color: root.fanModeIndex === 2 ? Color.mPrimary : Color.mOnSurfaceVariant
+                            color: root.fanModeIndex === 2 ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
                         }
                     }
                 }
@@ -196,7 +196,7 @@ Item {
                         text: pluginApi?.tr("panel.fan.mode.dust_cleaning")
                         pointSize: Style.fontSizeM
                         font.weight: Style.fontWeightBold
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                         Layout.fillWidth: true
                     }
 

@@ -193,7 +193,7 @@ ColumnLayout {
     text: pluginApi?.tr("settings.downloads.title")
     pointSize: Style.fontSizeM
     font.weight: Style.fontWeightBold
-    color: Color.mOnSurface
+    color: AtmoColor.mOnSurface
   }
 
   NText {
@@ -201,7 +201,7 @@ ColumnLayout {
     text: pluginApi?.tr("settings.downloads.currentFolder", {"path": root.editDownloadDirectory})
     wrapMode: Text.Wrap
     pointSize: Style.fontSizeS
-    color: Color.mOnSurfaceVariant
+    color: AtmoColor.mOnSurfaceVariant
   }
 
   RowLayout {
@@ -260,7 +260,7 @@ ColumnLayout {
     text: pluginApi?.tr("settings.home.title")
     pointSize: Style.fontSizeM
     font.weight: Style.fontWeightBold
-    color: Color.mOnSurface
+    color: AtmoColor.mOnSurface
   }
 
   NToggle {
@@ -312,7 +312,7 @@ ColumnLayout {
     text: pluginApi?.tr("settings.panel.title")
     pointSize: Style.fontSizeM
     font.weight: Style.fontWeightBold
-    color: Color.mOnSurface
+    color: AtmoColor.mOnSurface
   }
 
   NComboBox {
@@ -455,7 +455,7 @@ ColumnLayout {
     text: pluginApi?.tr("settings.bar.title")
     pointSize: Style.fontSizeM
     font.weight: Style.fontWeightBold
-    color: Color.mOnSurface
+    color: AtmoColor.mOnSurface
   }
 
   NToggle {
@@ -475,7 +475,7 @@ ColumnLayout {
     text: pluginApi?.tr("settings.preview.title")
     pointSize: Style.fontSizeM
     font.weight: Style.fontWeightBold
-    color: Color.mOnSurface
+    color: AtmoColor.mOnSurface
   }
 
   NComboBox {
@@ -505,7 +505,7 @@ ColumnLayout {
     }
     wrapMode: Text.Wrap
     pointSize: Style.fontSizeS
-    color: Color.mOnSurfaceVariant
+    color: AtmoColor.mOnSurfaceVariant
   }
 
   NComboBox {
@@ -539,7 +539,7 @@ ColumnLayout {
     text: pluginApi?.tr("settings.metadata.title")
     pointSize: Style.fontSizeM
     font.weight: Style.fontWeightBold
-    color: Color.mOnSurface
+    color: AtmoColor.mOnSurface
   }
 
   NToggle {

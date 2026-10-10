@@ -187,9 +187,9 @@ Item {
       Rectangle {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        color: Color.mSurfaceVariant
+        color: AtmoColor.mSurfaceVariant
         radius: Style.radiusM
-        border.color: Color.mOutline
+        border.color: AtmoColor.mOutline
         border.width: 1
 
         NScrollView {
@@ -211,7 +211,7 @@ Item {
             placeholderText: pluginApi?.tr("panel.placeholder") || "Start typing your notes here..."
             wrapMode: TextArea.Wrap
             selectByMouse: true
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
             font.pixelSize: root.fontSize
             font.family: root.useMonospace ? Settings.data.ui.fontFixed : Settings.data.ui.fontDefault
             background: Item {}
@@ -240,7 +240,7 @@ Item {
           return chars + " " + charText + " · " + words + " " + wordText;
         }
         pointSize: Style.fontSizeS
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
         Layout.alignment: Qt.AlignRight
       }
     }

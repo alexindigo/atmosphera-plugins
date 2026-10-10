@@ -37,7 +37,7 @@ Item {
         y: Style.pixelAlignCenter(parent.height, height)
         width: root.contentWidth
         height: root.contentHeight
-        color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+        color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
         radius: Style.radiusL
         border.color: Style.capsuleBorderColor
         border.width: Style.capsuleBorderWidth
@@ -49,7 +49,7 @@ Item {
 
             AtmoIcon {
                 icon: "brand-spotify"
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
             }
         }
     }

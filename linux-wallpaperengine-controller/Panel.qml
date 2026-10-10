@@ -311,12 +311,12 @@ Item {
   function propertyCompatibilityBadgeColorForPath(path) {
     const state = propertyCompatibilityStateForPath(path);
     if (state === "limited") {
-      return Color.mSecondary;
+      return AtmoColor.mSecondary;
     }
     if (state === "failed") {
-      return Color.mError;
+      return AtmoColor.mError;
     }
-    return Color.mOnSurfaceVariant;
+    return AtmoColor.mOnSurfaceVariant;
   }
 
   function propertyCompatibilityBadgeBackgroundForPath(path) {
@@ -784,9 +784,9 @@ Item {
         Layout.fillWidth: true
         Layout.fillHeight: true
         radius: Style.radiusL
-        color: Qt.alpha(Color.mSurfaceVariant, 0.35)
+        color: Qt.alpha(AtmoColor.mSurfaceVariant, 0.35)
         border.width: Style.borderS
-        border.color: Qt.alpha(Color.mOutline, 0.35)
+        border.color: Qt.alpha(AtmoColor.mOutline, 0.35)
 
         ColumnLayout {
           anchors.fill: parent
@@ -887,21 +887,21 @@ Item {
           NText {
             visible: !(mainInstance?.engineAvailable ?? false)
             text: pluginApi?.tr("panel.installHint")
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             wrapMode: Text.Wrap
           }
 
           NText {
             visible: !root.folderAccessible
             text: pluginApi?.tr("panel.folderInvalid")
-            color: Color.mError
+            color: AtmoColor.mError
             wrapMode: Text.WrapAnywhere
           }
 
           NText {
             visible: root.scanningWallpapers
             text: pluginApi?.tr("panel.scanning")
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
           }
         }
       }

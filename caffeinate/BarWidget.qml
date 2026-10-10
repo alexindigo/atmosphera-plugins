@@ -208,9 +208,9 @@ Item {
         forceOpen: root.sessionActive
         oppositeDirection: BarService.getPillDirection(root)
         tooltipText: root.tooltip()
-        customIconColor: root.sessionActive ? Color.mPrimary :
-                                              Qt.alpha(Color.mOnSurfaceVariant, 0.38)
-        customTextColor: root.sessionActive ? Color.mOnSurface : Color.mOnSurfaceVariant
+        customIconColor: root.sessionActive ? AtmoColor.mPrimary :
+                                              Qt.alpha(AtmoColor.mOnSurfaceVariant, 0.38)
+        customTextColor: root.sessionActive ? AtmoColor.mOnSurface : AtmoColor.mOnSurfaceVariant
 
         onEntered: {
           if (root.sessionActive && !root.indefinite)
@@ -263,7 +263,7 @@ Item {
             AtmoIcon {
               icon: root.sessionActive ? "coffee" : "coffee-off"
               pointSize: Style.fontSizeXL
-              color: root.sessionActive ? Color.mPrimary : Color.mOnSurfaceVariant
+              color: root.sessionActive ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
             }
 
             ColumnLayout {
@@ -275,14 +275,14 @@ Item {
                 text: root.pluginApi?.tr("panel.title")
                 pointSize: Style.fontSizeL
                 font.weight: Style.fontWeightBold
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
               }
 
               NText {
                 Layout.fillWidth: true
                 text: root.panelStatusText()
                 pointSize: Style.fontSizeS
-                color: Color.mOnSurfaceVariant
+                color: AtmoColor.mOnSurfaceVariant
                 elide: Text.ElideRight
               }
             }
@@ -299,14 +299,14 @@ Item {
                                                           "panel.startSession")
             pointSize: Style.fontSizeM
             font.weight: Style.fontWeightSemiBold
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
 
           NText {
             Layout.fillWidth: true
             text: root.pluginApi?.tr("panel.presetsDescription")
             pointSize: Style.fontSizeS
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             wrapMode: Text.Wrap
           }
         }
@@ -319,7 +319,7 @@ Item {
           visible: root.presetActions.length > 0
           horizontalPolicy: ScrollBar.AlwaysOff
           showScrollbarWhenScrollable: true
-          gradientColor: Color.mSurface
+          gradientColor: AtmoColor.mSurface
 
           GridLayout {
             id: presetsGrid
@@ -354,7 +354,7 @@ Item {
           visible: root.presetActions.length === 0
           text: root.pluginApi?.tr("panel.noPresets")
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
           wrapMode: Text.Wrap
         }
 
@@ -372,8 +372,8 @@ Item {
             icon: "coffee-off"
             enabled: root.sessionActive
             outlined: true
-            backgroundColor: Color.mError
-            textColor: Color.mOnError
+            backgroundColor: AtmoColor.mError
+            textColor: AtmoColor.mOnError
             onClicked: root.cancelSession()
           }
 

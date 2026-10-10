@@ -38,7 +38,7 @@ Item {
     y: Style.pixelAlignCenter(parent.height, height)
     width: root.contentWidth
     height: root.contentHeight
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    color: mouseArea.containsMouse ? AtmoColor.mHover : Style.capsuleColor
     radius: Style.radiusL
 
     RowLayout {
@@ -49,13 +49,13 @@ Item {
       AtmoIcon {
         icon: "paperclip"
         applyUiScale: false
-        color: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+        color: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
       }
 
       NText {
         visible: !barIsVertical && root.showCount
         text: root.noteCount.toString()
-        color: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+        color: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
         font.pointSize: Style.barFontSize
         font.weight: Font.Medium
       }

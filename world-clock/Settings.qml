@@ -105,14 +105,14 @@ ColumnLayout {
     AtmoIcon {
       icon: "history"
       pointSize: Style.fontSizeXL
-      color: Color.mPrimary
+      color: AtmoColor.mPrimary
     }
 
     NText {
       text: pluginApi?.tr("world-clock.title")
       pointSize: Style.fontSizeL
       font.weight: Font.Medium
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
     }
 
     Item { Layout.fillWidth: true }
@@ -121,7 +121,7 @@ ColumnLayout {
   Rectangle {
     Layout.fillWidth: true
     Layout.preferredHeight: 1
-    color: Color.mOutline
+    color: AtmoColor.mOutline
   }
 
   // Display Settings
@@ -133,7 +133,7 @@ ColumnLayout {
       text: pluginApi?.tr("world-clock.display-settings")
       pointSize: Style.fontSizeM
       font.weight: Font.Medium
-      color: Color.mOnSurface
+      color: AtmoColor.mOnSurface
     }
 
     // Rotation Interval
@@ -144,7 +144,7 @@ ColumnLayout {
       NText {
         text: pluginApi?.tr("world-clock.rotation-interval")
         pointSize: Style.fontSizeS
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
         Layout.fillWidth: true
       }
 
@@ -172,7 +172,7 @@ ColumnLayout {
       NText {
         text: pluginApi?.tr("world-clock.time-format")
         pointSize: Style.fontSizeS
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
         Layout.fillWidth: true
       }
 
@@ -199,7 +199,7 @@ ColumnLayout {
   Rectangle {
     Layout.fillWidth: true
     Layout.preferredHeight: 1
-    color: Color.mOutline
+    color: AtmoColor.mOutline
   }
 
   // Timezones Section
@@ -215,7 +215,7 @@ ColumnLayout {
         text: pluginApi?.tr("world-clock.timezones")
         pointSize: Style.fontSizeM
         font.weight: Font.Medium
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
       }
 
       Item { Layout.fillWidth: true }
@@ -255,9 +255,9 @@ ColumnLayout {
           
           Layout.fillWidth: true
           Layout.preferredHeight: timezoneContent.implicitHeight + Style.marginS * 2
-          color: modelData.enabled ? Color.mSurface : Color.mSurfaceVariant
+          color: modelData.enabled ? AtmoColor.mSurface : AtmoColor.mSurfaceVariant
           radius: Style.radiusM
-          border.color: Color.mOutline
+          border.color: AtmoColor.mOutline
           border.width: 1
 
           RowLayout {
@@ -337,7 +337,7 @@ ColumnLayout {
       Layout.fillWidth: true
       text: `${root.availableTimezones.length} ${pluginApi?.tr("world-clock.available-timezones")}`
       pointSize: Style.fontSizeXS
-      color: Color.mOnSurfaceVariant
+      color: AtmoColor.mOnSurfaceVariant
     }
     
     // API info footer
@@ -345,7 +345,7 @@ ColumnLayout {
       Layout.fillWidth: true
       text: pluginApi?.tr("world-clock.api-info")
       pointSize: Style.fontSizeXS
-      color: Color.mOnSurfaceVariant
+      color: AtmoColor.mOnSurfaceVariant
       opacity: 0.7
       horizontalAlignment: Text.AlignHCenter
       Layout.topMargin: Style.marginS

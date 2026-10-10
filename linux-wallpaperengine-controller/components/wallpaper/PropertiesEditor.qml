@@ -18,7 +18,7 @@ ColumnLayout {
 
   NText {
     text: pluginApi?.tr("panel.sectionProperties")
-    color: Color.mOnSurface
+    color: AtmoColor.mOnSurface
     font.weight: Font.Bold
     font.pointSize: Style.fontSizeM
   }
@@ -27,7 +27,7 @@ ColumnLayout {
     visible: root.loadingWallpaperProperties
     Layout.fillWidth: true
     text: pluginApi?.tr("panel.loadingProperties")
-    color: Color.mOnSurfaceVariant
+    color: AtmoColor.mOnSurfaceVariant
     wrapMode: Text.Wrap
   }
 
@@ -35,7 +35,7 @@ ColumnLayout {
     visible: !root.loadingWallpaperProperties && root.wallpaperPropertyError.length > 0
     Layout.fillWidth: true
     text: root.wallpaperPropertyError
-    color: Color.mError
+    color: AtmoColor.mError
     wrapMode: Text.Wrap
   }
 
@@ -43,7 +43,7 @@ ColumnLayout {
     visible: !root.loadingWallpaperProperties && root.wallpaperPropertyError.length === 0 && root.wallpaperPropertyDefinitions.length === 0
     Layout.fillWidth: true
     text: pluginApi?.tr("panel.noEditableProperties")
-    color: Color.mOnSurfaceVariant
+    color: AtmoColor.mOnSurfaceVariant
     wrapMode: Text.Wrap
   }
 
@@ -51,7 +51,7 @@ ColumnLayout {
     visible: !root.loadingWallpaperProperties && root.wallpaperPropertyDefinitions.length > 0
     Layout.fillWidth: true
     text: pluginApi?.tr("panel.propertiesNotice")
-    color: Color.mOnSurfaceVariant
+    color: AtmoColor.mOnSurfaceVariant
     wrapMode: Text.Wrap
   }
 
@@ -169,7 +169,7 @@ ColumnLayout {
         Layout.preferredHeight: visible ? implicitHeight : 0
         visible: modelData.type === "text"
         text: modelData.label
-        color: Color.mPrimary
+        color: AtmoColor.mPrimary
         font.pointSize: Style.fontSizeM
         font.weight: Font.Bold
         wrapMode: Text.Wrap
@@ -187,7 +187,7 @@ ColumnLayout {
           Layout.fillWidth: true
           visible: String(modelData.label || "").trim().length > 0
           text: modelData.label
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           font.pointSize: Style.fontSizeM
           wrapMode: Text.Wrap
         }
@@ -196,9 +196,9 @@ ColumnLayout {
           Layout.fillWidth: true
           Layout.preferredHeight: 160 * Style.uiScaleRatio
           radius: Style.radiusM
-          color: Qt.alpha(Color.mSurfaceVariant, 0.35)
+          color: Qt.alpha(AtmoColor.mSurfaceVariant, 0.35)
           border.width: Style.borderS
-          border.color: Qt.alpha(Color.mOutline, 0.35)
+          border.color: Qt.alpha(AtmoColor.mOutline, 0.35)
           clip: true
 
           Image {
@@ -217,7 +217,7 @@ ColumnLayout {
             anchors.centerIn: parent
             visible: sceneTexturePreview.status === Image.Error || sceneTexturePreview.source.length === 0
             text: propertyEditor.imageValue
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             wrapMode: Text.WrapAnywhere
             width: parent.width - Style.marginM * 2
             horizontalAlignment: Text.AlignHCenter
@@ -228,7 +228,7 @@ ColumnLayout {
           Layout.fillWidth: true
           visible: sceneTexturePreview.status === Image.Error || sceneTexturePreview.source.length === 0
           text: propertyEditor.imageValue
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
           font.pointSize: Style.fontSizeS
           wrapMode: Text.WrapAnywhere
         }
@@ -243,7 +243,7 @@ ColumnLayout {
         NText {
           Layout.fillWidth: true
           text: modelData.label
-          color: Color.mOnSurface
+          color: AtmoColor.mOnSurface
           font.pointSize: Style.fontSizeM
           wrapMode: Text.Wrap
         }
@@ -254,7 +254,7 @@ ColumnLayout {
           radius: Style.radiusM
           color: propertyEditor.colorValue
           border.width: Style.borderS
-          border.color: Qt.alpha(Color.mOutline, 0.35)
+          border.color: Qt.alpha(AtmoColor.mOutline, 0.35)
         }
 
         NColorPicker {
@@ -273,7 +273,7 @@ ColumnLayout {
         NText {
           Layout.fillWidth: true
           text: root.propertyEditorApi?.serializePropertyValue ? root.propertyEditorApi.serializePropertyValue(propertyEditor.colorValue, "color") : ""
-          color: Color.mOnSurfaceVariant
+          color: AtmoColor.mOnSurfaceVariant
           font.pointSize: Style.fontSizeS
         }
       }

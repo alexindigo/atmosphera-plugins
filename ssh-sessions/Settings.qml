@@ -26,7 +26,7 @@ ColumnLayout {
   NText {
     Layout.fillWidth: true
     text: root.detectedTerminal !== "" ? pluginApi?.tr("settings.terminalDetected", { terminal: root.detectedTerminal }) : pluginApi?.tr("settings.terminalNone")
-    color: root.detectedTerminal !== "" ? Color.mPrimary : Color.mError
+    color: root.detectedTerminal !== "" ? AtmoColor.mPrimary : AtmoColor.mError
     pointSize: Style.fontSizeS
     wrapMode: Text.Wrap
   }

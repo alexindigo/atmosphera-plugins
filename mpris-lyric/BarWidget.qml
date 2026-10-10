@@ -81,7 +81,7 @@ Item {
         id: musicIcon
         icon: isActive ? "music" : "music-off"
         applyUiScale: false
-        color: isActive ? Color.mPrimary : Color.mOnSurface
+        color: isActive ? AtmoColor.mPrimary : AtmoColor.mOnSurface
       }
 
       // Lyric container with scroll
@@ -100,7 +100,7 @@ Item {
           family: Settings.data.ui.font || ""
           pointSize: Style.barFontSize
           text: displayText
-          color: isActive ? Color.mPrimary : Color.mOnSurface
+          color: isActive ? AtmoColor.mPrimary : AtmoColor.mOnSurface
 
           x: 0
 

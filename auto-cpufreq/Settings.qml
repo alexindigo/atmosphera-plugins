@@ -50,13 +50,13 @@ ColumnLayout {
             text: pluginApi?.tr("settings.refresh.label")
             pointSize: Style.fontSizeS
             font.weight: Font.Medium
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
         }
 
         NText {
             text: pluginApi?.tr("settings.refresh.desc")
             pointSize: Style.fontSizeXS
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
         }
@@ -78,7 +78,7 @@ ColumnLayout {
                 text: (root.editRefreshInterval / 1000).toFixed(1) + "s"
                 pointSize: Style.fontSizeS
                 font.family: Settings.data?.ui?.fontFixed ?? "monospace"
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
                 Layout.preferredWidth: 36 * Style.uiScaleRatio
                 horizontalAlignment: Text.AlignRight
             }

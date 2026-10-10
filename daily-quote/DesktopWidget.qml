@@ -36,8 +36,8 @@ DraggableDesktopWidget {
     readonly property int _effectiveAlign: textAlign === "center" ? Qt.AlignHCenter : textAlign === "right" ? Qt.AlignRight : Qt.AlignLeft
 
     // --- Resolved colors from color key ---
-    readonly property color resolvedTextColor: Color.resolveColorKey(quoteColor)
-    readonly property color resolvedOnTextColor: Color.resolveOnColorKey(quoteColor)
+    readonly property color resolvedTextColor: AtmoColor.resolveColorKey(quoteColor)
+    readonly property color resolvedOnTextColor: AtmoColor.resolveOnColorKey(quoteColor)
 
     // --- Internal display state ---
     property string displayedQuote: ""
@@ -372,7 +372,7 @@ DraggableDesktopWidget {
         textFormat: Text.RichText
         wrapMode: Text.WordWrap
         horizontalAlignment: root._effectiveAlign
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
         font.pointSize: Math.round(Style.fontSizeM * widgetScale)
         font.family: root.quoteFont || "monospace"
     }

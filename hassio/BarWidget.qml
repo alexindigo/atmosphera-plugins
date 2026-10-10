@@ -57,23 +57,23 @@ AtmoIconButton {
     colorFg: {
         switch (root._status) {
         case "Connected":
-            return Color.mPrimary;
+            return AtmoColor.mPrimary;
         case "Connecting":
-            return Color.mOnError;
+            return AtmoColor.mOnError;
         case "Disconnected":
-            return Color.mError;
+            return AtmoColor.mError;
         case "AuthFailed":
-            return Color.mError;
+            return AtmoColor.mError;
         case "Unconfigured":
-            return Color.mOnSurfaceVariant;
+            return AtmoColor.mOnSurfaceVariant;
         default:
-            return Color.mOnSurfaceVariant;
+            return AtmoColor.mOnSurfaceVariant;
         }
     }
 
-    colorBg: Color.mSurfaceVariant
-    colorBgHover: Color.mHover
-    colorFgHover: Color.mOnHover
+    colorBg: AtmoColor.mSurfaceVariant
+    colorBgHover: AtmoColor.mHover
+    colorFgHover: AtmoColor.mOnHover
     colorBorder: "transparent"
     colorBorderHover: "transparent"
 

@@ -141,7 +141,7 @@ Item {
 
                     AtmoIcon {
                         icon: "arrow-big-down-lines"
-                        color: Color.mPrimary
+                        color: AtmoColor.mPrimary
                         pointSize: Style.fontSizeXL
                     }
 
@@ -150,7 +150,7 @@ Item {
                         text: pluginApi?.tr("panel.title")
                         font.weight: Style.fontWeightBold
                         pointSize: Style.fontSizeXL
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                     }
                     
                     AtmoIconButton {
@@ -183,7 +183,7 @@ Item {
                             text: pluginApi?.tr("panel.name")
                             pointSize: Style.fontSizeL
                             font.weight: Font.Bold
-                            color: Color.mOnSurface
+                            color: AtmoColor.mOnSurface
                             horizontalAlignment: Text.AlignLeft
                         }
                         NText {
@@ -191,7 +191,7 @@ Item {
                             text: pluginApi?.tr("panel.oldVer")
                             pointSize: Style.fontSizeL
                             font.weight: Font.Bold
-                            color: Color.mOnSurface
+                            color: AtmoColor.mOnSurface
                             horizontalAlignment: Text.AlignHCenter
                         }
                         NText {
@@ -199,7 +199,7 @@ Item {
                             text: pluginApi?.tr("panel.newVer")
                             pointSize: Style.fontSizeL
                             font.weight: Font.Bold
-                            color: Color.mOnSurface
+                            color: AtmoColor.mOnSurface
                             horizontalAlignment: Text.AlignHCenter
                         }
                     }
@@ -208,7 +208,7 @@ Item {
                     ClippingRectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        color: Qt.alpha(Color.mSurface, 0.6)
+                        color: Qt.alpha(AtmoColor.mSurface, 0.6)
                         radius: Style.radiusL
 
                         NListView {
@@ -228,7 +228,7 @@ Item {
                                     Layout.preferredWidth: 0.4 * root.tableContentWidth
                                     text: modelData.name
                                     pointSize: Style.fontSizeM
-                                    color: (modelData.source == "flatpak") ? Color.mTertiary : (modelData.source == "system") ? Color.mSecondary : Color.mPrimary
+                                    color: (modelData.source == "flatpak") ? AtmoColor.mTertiary : (modelData.source == "system") ? AtmoColor.mSecondary : AtmoColor.mPrimary
                                     elide: Text.ElideRight
                                     maximumLineCount: 1
                                     
@@ -245,7 +245,7 @@ Item {
                                     Layout.preferredWidth: 0.3 * root.tableContentWidth
                                     text: modelData.oldVer
                                     pointSize: Style.fontSizeM
-                                    color: (modelData.source == "flatpak") ? Color.mTertiary : (modelData.source == "system") ? Color.mSecondary : Color.mPrimary
+                                    color: (modelData.source == "flatpak") ? AtmoColor.mTertiary : (modelData.source == "system") ? AtmoColor.mSecondary : AtmoColor.mPrimary
                                     horizontalAlignment: Text.AlignHCenter
                                     elide: Text.ElideRight
                                     maximumLineCount: 1
@@ -264,7 +264,7 @@ Item {
                                     text: modelData.newVer
                                     pointSize: Style.fontSizeM
                                     font.weight: (pluginApi.pluginSettings.boldVerPanel ?? pluginApi.manifest.metadata.defaultSettings.boldVerPanel) ? Font.Bold : Font.Normal
-                                    color: (modelData.source == "flatpak") ? Color.mTertiary : (modelData.source == "system") ? Color.mSecondary : Color.mPrimary
+                                    color: (modelData.source == "flatpak") ? AtmoColor.mTertiary : (modelData.source == "system") ? AtmoColor.mSecondary : AtmoColor.mPrimary
                                     horizontalAlignment: Text.AlignHCenter
                                     elide: Text.ElideRight
                                     maximumLineCount: 1

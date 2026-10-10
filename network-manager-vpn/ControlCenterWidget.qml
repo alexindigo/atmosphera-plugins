@@ -21,8 +21,8 @@ AtmoIconButtonHot {
 
     colorFg: {
         const key = connectedCount > 0 ? connectedColor : disconnectedColor;
-        if (!key || key === "none") return Color.mPrimary;
-        return Color.resolveColorKeyOptional(key) ?? Color.mPrimary;
+        if (!key || key === "none") return AtmoColor.mPrimary;
+        return AtmoColor.resolveColorKeyOptional(key) ?? AtmoColor.mPrimary;
     }
 
     onClicked: pluginApi?.togglePanel(screen, this)

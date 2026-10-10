@@ -22,7 +22,7 @@ ColumnLayout {
     // https://github.com/noctalia-dev/noctalia-shell/blob/main/Widgets/NText.qml
     NText {
         text: "ROG Control Center"
-        color: Color.mSecondary
+        color: AtmoColor.mSecondary
 
         Layout.topMargin: Style.marginM
         Layout.bottomMargin: Style.marginM
@@ -33,7 +33,7 @@ ColumnLayout {
         AtmoIcon {
             icon: "barrier-block"
             pointSize: Style.fontSizeL
-            color: Color.mTertiary
+            color: AtmoColor.mTertiary
         }
 
         // https://github.com/noctalia-dev/noctalia-shell/blob/main/Widgets/NToggle.qml
@@ -54,7 +54,7 @@ ColumnLayout {
         // https://github.com/noctalia-dev/noctalia-shell/blob/main/Widgets/NText.qml
         NText {
             text: "supergfxctl"
-            color: Color.mSecondary
+            color: AtmoColor.mSecondary
             Layout.topMargin: Style.marginM
             Layout.bottomMargin: Style.marginM
         }
@@ -78,7 +78,7 @@ ColumnLayout {
         AtmoIcon {
             icon: "flask"
             pointSize: Style.fontSizeL
-            color: Color.mTertiary
+            color: AtmoColor.mTertiary
         }
 
         // https://github.com/noctalia-dev/noctalia-shell/blob/main/Widgets/NToggle.qml
@@ -108,7 +108,7 @@ ColumnLayout {
         // https://github.com/noctalia-dev/noctalia-shell/blob/main/Widgets/NText.qml
         NText {
             text: "Miscellaneous"
-            color: Color.mSecondary
+            color: AtmoColor.mSecondary
             Layout.topMargin: Style.marginM
             Layout.bottomMargin: Style.marginM
         }

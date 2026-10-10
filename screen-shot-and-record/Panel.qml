@@ -66,14 +66,14 @@ Item {
               AtmoIcon {
                   icon: "screenshot"
                   pointSize: Style.fontSizeL
-                  color: Color.mPrimary
+                  color: AtmoColor.mPrimary
               }
 
               NText {
                   text: pluginApi?.tr("panel.title")
                   pointSize: Style.fontSizeL
                   font.weight: Style.fontWeightBold
-                  color: Color.mOnSurface
+                  color: AtmoColor.mOnSurface
                   Layout.fillWidth: true
                   wrapMode: Text.WordWrap
               }
@@ -87,8 +87,8 @@ Item {
               NButton {
                   icon: "screenshot"
                   text: pluginApi?.tr("panel.target.screenshot")
-                  backgroundColor: Color.mPrimary
-                  textColor: Color.mOnPrimary
+                  backgroundColor: AtmoColor.mPrimary
+                  textColor: AtmoColor.mOnPrimary
                   Layout.fillWidth: true
                   onClicked: {
                       root.target = "screenshot"
@@ -98,8 +98,8 @@ Item {
               NButton {
                   icon: "text-recognition"
                   text: pluginApi?.tr("panel.target.ocr")
-                  backgroundColor: Color.mPrimary
-                  textColor: Color.mOnPrimary
+                  backgroundColor: AtmoColor.mPrimary
+                  textColor: AtmoColor.mOnPrimary
                   Layout.fillWidth: true
                   onClicked: {
                       root.target = "ocr"
@@ -109,8 +109,8 @@ Item {
               NButton {
                   icon: "photo-search"
                   text: pluginApi?.tr("panel.target.search")
-                  backgroundColor: Color.mPrimary
-                  textColor: Color.mOnPrimary
+                  backgroundColor: AtmoColor.mPrimary
+                  textColor: AtmoColor.mOnPrimary
                   Layout.fillWidth: true
                   onClicked: {
                       root.target = "search"
@@ -120,8 +120,8 @@ Item {
               NButton {
                   icon: "camera"
                   text: pluginApi?.tr("panel.target.record")
-                  backgroundColor: Color.mPrimary
-                  textColor: Color.mOnPrimary
+                  backgroundColor: AtmoColor.mPrimary
+                  textColor: AtmoColor.mOnPrimary
                   Layout.fillWidth: true
                   visible: !root.recording
                   onClicked: {
@@ -132,8 +132,8 @@ Item {
               NButton {
                   icon: "camera-spark"
                   text: pluginApi?.tr("panel.target.recordsound")
-                  backgroundColor: Color.mPrimary
-                  textColor: Color.mOnPrimary
+                  backgroundColor: AtmoColor.mPrimary
+                  textColor: AtmoColor.mOnPrimary
                   Layout.fillWidth: true
                   visible: !root.recording
                   onClicked: {
@@ -144,8 +144,8 @@ Item {
               NButton {
                   icon: "close"
                   text: pluginApi?.tr("panel.target.stop")
-                  backgroundColor: Color.mError
-                  textColor: Color.mOnError
+                  backgroundColor: AtmoColor.mError
+                  textColor: AtmoColor.mOnError
                   Layout.fillWidth: true
                   visible: root.recording
                   onClicked: {

@@ -33,7 +33,7 @@ ColumnLayout {
   readonly property string selectedModelKey: modelKey(valueDefaultProvider, valueDefaultModel)
   property bool showAdvanced: false
   property string testResult: ""
-  property color testResultColor: Color.mOnSurface
+  property color testResultColor: AtmoColor.mOnSurface
 
   spacing: Style.marginL
 
@@ -41,7 +41,7 @@ ColumnLayout {
     text: pluginApi?.tr("settings.title")
     pointSize: Style.fontSizeXL
     font.weight: Style.fontWeightBold
-    color: Color.mOnSurface
+    color: AtmoColor.mOnSurface
     Layout.fillWidth: true
   }
 
@@ -181,7 +181,7 @@ ColumnLayout {
             text: pluginApi?.tr("settings.bridgePort")
             pointSize: Style.fontSizeM
             font.weight: Style.fontWeightSemiBold
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
 
           NSpinBox {
@@ -201,7 +201,7 @@ ColumnLayout {
             text: pluginApi?.tr("settings.statusPollIntervalSec")
             pointSize: Style.fontSizeM
             font.weight: Style.fontWeightSemiBold
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
           }
 
           NSpinBox {
@@ -305,7 +305,7 @@ ColumnLayout {
 
   function testConnection() {
     root.testResult = pluginApi?.tr("settings.testing");
-    root.testResultColor = Color.mOnSurface;
+    root.testResultColor = AtmoColor.mOnSurface;
     var host = root.valueBridgeHost;
     var port = root.valueBridgePort;
     var token = root.valueBridgeTokenManual;
@@ -315,16 +315,16 @@ ColumnLayout {
       if (xhr.readyState !== XMLHttpRequest.DONE) return;
       if (xhr.status === 0) {
         root.testResult = pluginApi?.tr("settings.testFailedUnreachable");
-        root.testResultColor = Color.mError;
+        root.testResultColor = AtmoColor.mError;
       } else if (xhr.status === 403) {
         root.testResult = pluginApi?.tr("settings.testFailedAuth");
-        root.testResultColor = Color.mError;
+        root.testResultColor = AtmoColor.mError;
       } else if (xhr.status >= 200 && xhr.status < 300) {
         root.testResult = pluginApi?.tr("settings.testSuccess");
-        root.testResultColor = Color.mPrimary;
+        root.testResultColor = AtmoColor.mPrimary;
       } else {
         root.testResult = pluginApi?.tr("settings.testFailed") + " " + xhr.status;
-        root.testResultColor = Color.mError;
+        root.testResultColor = AtmoColor.mError;
       }
     };
     xhr.open("GET", url);

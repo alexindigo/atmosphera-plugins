@@ -33,7 +33,7 @@ Item {
                     width: parent.width
                     wrapMode: Text.Wrap
                     font.pointSize: Style.fontSizeM
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                     font.family: Settings.data.ui.fontFixed
                 }
             }

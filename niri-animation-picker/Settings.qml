@@ -36,7 +36,7 @@ ColumnLayout {
 
                 NText {
                     text: root.valueAnimationsFolder
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                     pointSize: Style.fontSizeS
                     elide: Text.ElideLeft
                     Layout.fillWidth: true

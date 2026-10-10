@@ -55,11 +55,11 @@ Item {
 
   readonly property color bgColor: {
     if (transparentBackground) return "transparent";
-    if (hovered && !textInsideIcon) return Color.mHover;
+    if (hovered && !textInsideIcon) return AtmoColor.mHover;
     if (customBackgroundColor.a > 0) return customBackgroundColor;
     return Style.capsuleColor;
   }
-  readonly property color fgColor: hovered ? Color.mOnHover : (customTextIconColor.a > 0) ? customTextIconColor : Color.mOnSurface
+  readonly property color fgColor: hovered ? AtmoColor.mOnHover : (customTextIconColor.a > 0) ? customTextIconColor : AtmoColor.mOnSurface
 
   readonly property real iconSize: Style.toOdd(pillHeight * 0.48)
 
@@ -98,7 +98,7 @@ Item {
 
 
     Behavior on color {
-      enabled: !Color.isTransitioning
+      enabled: !AtmoColor.isTransitioning
       ColorAnimation {
         duration: Style.animationFast
         easing.type: Easing.InOutQuad

@@ -37,7 +37,7 @@ Rectangle {
     }
 
     // ===== APPEARANCE =====
-    color: Color.mSurface
+    color: AtmoColor.mSurface
     radius: Style.radiusM
     implicitHeight: cardLayout.implicitHeight + Style.marginM * 2
 
@@ -60,7 +60,7 @@ Rectangle {
             AtmoIcon {
                 icon: "usb"
                 pointSize: Style.fontSizeL
-                color: device?.isMounted ? Color.mPrimary : Color.mOnSurfaceVariant
+                color: device?.isMounted ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
             }
 
             // Label + subtitle
@@ -73,7 +73,7 @@ Rectangle {
                     text: root.displayLabel
                     pointSize: Style.fontSizeM
                     font.weight: Font.Medium
-                    color: Color.mOnSurface
+                    color: AtmoColor.mOnSurface
                     elide: Text.ElideRight
                 }
 
@@ -81,7 +81,7 @@ Rectangle {
                     Layout.fillWidth: true
                     text: root.displaySubtitle
                     pointSize: Style.fontSizeXS
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                     elide: Text.ElideRight
                 }
             }
@@ -92,14 +92,14 @@ Rectangle {
                 width: statusLabel.implicitWidth + Style.marginS * 2
                 height: statusLabel.implicitHeight + 4
                 radius: height / 2
-                color: Color.mPrimaryContainer
+                color: AtmoColor.mPrimaryContainer
 
                 NText {
                     id: statusLabel
                     anchors.centerIn: parent
                     text: pluginApi?.tr("device.mounted")
                     pointSize: Style.fontSizeXXS
-                    color: Color.mOnPrimaryContainer
+                    color: AtmoColor.mOnPrimaryContainer
                     font.weight: Font.Medium
                 }
             }
@@ -111,7 +111,7 @@ Rectangle {
             Layout.fillWidth: true
             text: device?.mountpoint || ""
             pointSize: Style.fontSizeXS
-            color: Color.mOnSurfaceVariant
+            color: AtmoColor.mOnSurfaceVariant
             elide: Text.ElideMiddle
             font.family: "monospace"
         }
@@ -127,15 +127,15 @@ Rectangle {
                 Layout.fillWidth: true
                 height: Style.marginXS
                 radius: height / 2
-                color: Color.mOutlineVariant
+                color: AtmoColor.mOutlineVariant
 
                 Rectangle {
                     width: parent.width * Math.min((device?.usedPercent ?? 0) / 100, 1)
                     height: parent.height
                     radius: parent.radius
-                    color: (device?.usedPercent ?? 0) > 90 ? Color.mError
-                         : (device?.usedPercent ?? 0) > 75 ? Color.mWarning
-                         : Color.mPrimary
+                    color: (device?.usedPercent ?? 0) > 90 ? AtmoColor.mError
+                         : (device?.usedPercent ?? 0) > 75 ? AtmoColor.mWarning
+                         : AtmoColor.mPrimary
 
                     Behavior on width {
                         NumberAnimation { duration: Style.animationNormal }
@@ -152,7 +152,7 @@ Rectangle {
                         ? pluginApi?.tr("device.used", { size: device?.usedSize ?? "" })
                         : pluginApi?.tr("device.loading")
                     pointSize: Style.fontSizeXXS
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                 }
 
                 Item { Layout.fillWidth: true }
@@ -162,7 +162,7 @@ Rectangle {
                         ? pluginApi?.tr("device.free", { size: device?.freeSize ?? "" })
                         : ""
                     pointSize: Style.fontSizeXXS
-                    color: Color.mOnSurfaceVariant
+                    color: AtmoColor.mOnSurfaceVariant
                 }
             }
         }
@@ -187,10 +187,10 @@ Rectangle {
                 icon: "copy"
                 tooltipText: pluginApi?.tr("device.action-copy-path")
                 baseSize: Style.baseWidgetSize * 0.8
-                colorBg: Color.mSurfaceVariant
-                colorFg: Color.mOnSurfaceVariant
-                colorBgHover: Color.mHover
-                colorFgHover: Color.mOnHover
+                colorBg: AtmoColor.mSurfaceVariant
+                colorFg: AtmoColor.mOnSurfaceVariant
+                colorBgHover: AtmoColor.mHover
+                colorFgHover: AtmoColor.mOnHover
                 colorBorder: "transparent"
                 colorBorderHover: "transparent"
                 onClicked: root.copyPathRequested(device.mountpoint)
@@ -211,10 +211,10 @@ Rectangle {
                 icon: "plug-connected-x"
                 tooltipText: pluginApi?.tr("device.action-unmount")
                 baseSize: Style.baseWidgetSize * 0.8
-                colorBg: Color.mSurfaceVariant
-                colorFg: Color.mOnSurfaceVariant
-                colorBgHover: Color.mHover
-                colorFgHover: Color.mOnHover
+                colorBg: AtmoColor.mSurfaceVariant
+                colorFg: AtmoColor.mOnSurfaceVariant
+                colorBgHover: AtmoColor.mHover
+                colorFgHover: AtmoColor.mOnHover
                 colorBorder: "transparent"
                 colorBorderHover: "transparent"
                 onClicked: root.unmountRequested(device.path, root.displayLabel)
@@ -225,10 +225,10 @@ Rectangle {
                 icon: "player-eject"
                 tooltipText: pluginApi?.tr("device.action-eject")
                 baseSize: Style.baseWidgetSize * 0.8
-                colorBg: Color.mSurfaceVariant
-                colorFg: Color.mOnSurfaceVariant
-                colorBgHover: Color.mError
-                colorFgHover: Color.mOnError
+                colorBg: AtmoColor.mSurfaceVariant
+                colorFg: AtmoColor.mOnSurfaceVariant
+                colorBgHover: AtmoColor.mError
+                colorFgHover: AtmoColor.mOnError
                 colorBorder: "transparent"
                 colorBorderHover: "transparent"
                 onClicked: root.ejectRequested(device.path, device.parentPath, root.displayLabel)

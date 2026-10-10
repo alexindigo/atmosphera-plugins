@@ -282,7 +282,7 @@ ColumnLayout {
     AtmoIcon {
       icon: root.valueWidgetIcon || "building-mosque"
       pointSize: Style.fontSizeXL
-      color: Color.mPrimary
+      color: AtmoColor.mPrimary
       Layout.alignment: Qt.AlignBottom
       Layout.bottomMargin: Style.marginM
     }

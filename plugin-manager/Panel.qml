@@ -152,7 +152,7 @@ Item {
             NScrollView {
               id: installedScrollView
               horizontalPolicy: ScrollBar.AlwaysOff
-              gradientColor: Color.mSurface
+              gradientColor: AtmoColor.mSurface
 
               Item {
                 width: installedScrollView.availableWidth
@@ -176,7 +176,7 @@ Item {
             NScrollView {
               id: availableScrollView
               horizontalPolicy: ScrollBar.AlwaysOff
-              gradientColor: Color.mSurface
+              gradientColor: AtmoColor.mSurface
 
               Item {
                 width: availableScrollView.availableWidth
@@ -200,7 +200,7 @@ Item {
             NScrollView {
               id: sourcesScrollView
               horizontalPolicy: ScrollBar.AlwaysOff
-              gradientColor: Color.mSurface
+              gradientColor: AtmoColor.mSurface
 
               Item {
                 width: sourcesScrollView.availableWidth

@@ -18,7 +18,7 @@ ColumnLayout {
         visible: !service.isAvailable
         text: pluginApi?.tr("settings.no-battery-device")
         pointSize: Style.fontSizeM
-        color: Color.mOnSurfaceVariant
+        color: AtmoColor.mOnSurfaceVariant
     }
 
     NComboBox {

@@ -10,8 +10,8 @@ Item {
   property bool connected: false
   property bool connecting: false
   property bool hovered: false
-  property color litColor: Color.mPrimary
-  property color dimColor: Color.mOnSurface
+  property color litColor: AtmoColor.mPrimary
+  property color dimColor: AtmoColor.mOnSurface
   property real dimOpacity: hovered ? 0.78 : 0.38
 
   readonly property real iconSize: Math.max(1, applyUiScale ? root.pointSize * Style.uiScaleRatio : root.pointSize)

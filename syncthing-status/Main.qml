@@ -118,33 +118,33 @@ Item {
     }
 
     function statusColor(code) {
-        if (!enabled) return Color.mOutline;
-        if (code === "idle") return Color.mPrimary;
-        if (code === "syncing") return Color.mSecondary;
-        if (code === "paused") return Color.mOutline;
-        if (code === "disconnected") return Color.mSecondary;
-        if (code === "offline" || code === "unauthorized" || code === "error") return Color.mError;
-        return Color.mOutline;
+        if (!enabled) return AtmoColor.mOutline;
+        if (code === "idle") return AtmoColor.mPrimary;
+        if (code === "syncing") return AtmoColor.mSecondary;
+        if (code === "paused") return AtmoColor.mOutline;
+        if (code === "disconnected") return AtmoColor.mSecondary;
+        if (code === "offline" || code === "unauthorized" || code === "error") return AtmoColor.mError;
+        return AtmoColor.mOutline;
     }
 
     function statusBadgeBackground(code) {
-        if (!enabled || code === "disabled") return Color.mOutline;
-        if (code === "idle") return Color.mPrimary;
-        if (code === "syncing") return Color.mSecondary;
-        if (code === "paused") return Color.mSurfaceVariant;
-        if (code === "disconnected") return Color.mSecondary;
-        if (code === "offline" || code === "unauthorized" || code === "error") return Color.mError;
-        return Color.mOutline;
+        if (!enabled || code === "disabled") return AtmoColor.mOutline;
+        if (code === "idle") return AtmoColor.mPrimary;
+        if (code === "syncing") return AtmoColor.mSecondary;
+        if (code === "paused") return AtmoColor.mSurfaceVariant;
+        if (code === "disconnected") return AtmoColor.mSecondary;
+        if (code === "offline" || code === "unauthorized" || code === "error") return AtmoColor.mError;
+        return AtmoColor.mOutline;
     }
 
     function statusBadgeForeground(code) {
-        if (!enabled || code === "disabled") return Color.mOnSurface;
-        if (code === "idle") return Color.mOnPrimary;
-        if (code === "syncing") return Color.mOnSecondary;
-        if (code === "paused") return Color.mOnSurfaceVariant;
-        if (code === "disconnected") return Color.mOnSecondary;
-        if (code === "offline" || code === "unauthorized" || code === "error") return Color.mOnError;
-        return Color.mOnSurface;
+        if (!enabled || code === "disabled") return AtmoColor.mOnSurface;
+        if (code === "idle") return AtmoColor.mOnPrimary;
+        if (code === "syncing") return AtmoColor.mOnSecondary;
+        if (code === "paused") return AtmoColor.mOnSurfaceVariant;
+        if (code === "disconnected") return AtmoColor.mOnSecondary;
+        if (code === "offline" || code === "unauthorized" || code === "error") return AtmoColor.mOnError;
+        return AtmoColor.mOnSurface;
     }
 
     function statusBadgeIcon(code) {

@@ -180,13 +180,13 @@ Item {
                         text: pluginApi?.tr("panel.title")
                         pointSize: Style.fontSizeL
                         font.weight: Font.Bold
-                        color: Color.mOnSurface
+                        color: AtmoColor.mOnSurface
                 }
 
                 Rectangle {
                 width: 90
                     height: 30
-                    color: !(root.playlistViewActive) ? Color.mPrimary : searchArea.containsMouse ? Color.mHover : Color.mSurfaceVariant 
+                    color: !(root.playlistViewActive) ? AtmoColor.mPrimary : searchArea.containsMouse ? AtmoColor.mHover : AtmoColor.mSurfaceVariant 
                     radius: Style.radiusS
 
                     RowLayout {
@@ -199,13 +199,13 @@ Item {
                         AtmoIcon {
                             Layout.alignment: Qt.AlignVCenter
                             icon: "search"
-                            color: searchArea.containsMouse ? Color.mSurfaceVariant : !(root.playlistViewActive) ? Color.mSurfaceVariant : Color.mOnSurface
+                            color: searchArea.containsMouse ? AtmoColor.mSurfaceVariant : !(root.playlistViewActive) ? AtmoColor.mSurfaceVariant : AtmoColor.mOnSurface
                         }
                             
                         NText {
                             pointSize: Style.fontSizeM
                             text: pluginApi?.tr("panel.search")
-                            color: searchArea.containsMouse ? Color.mSurfaceVariant : !(root.playlistViewActive) ? Color.mSurfaceVariant : Color.mOnSurface
+                            color: searchArea.containsMouse ? AtmoColor.mSurfaceVariant : !(root.playlistViewActive) ? AtmoColor.mSurfaceVariant : AtmoColor.mOnSurface
                         }
                     }
 
@@ -222,7 +222,7 @@ Item {
                 Rectangle {
                     width: 110
                     height: 30
-                    color: root.playlistViewActive ? Color.mPrimary : playlistArea.containsMouse ? Color.mHover : Color.mSurfaceVariant 
+                    color: root.playlistViewActive ? AtmoColor.mPrimary : playlistArea.containsMouse ? AtmoColor.mHover : AtmoColor.mSurfaceVariant 
                     radius: Style.radiusS
 
                     RowLayout {
@@ -235,13 +235,13 @@ Item {
                         AtmoIcon {
                             Layout.alignment: Qt.AlignVCenter
                             icon: "playlist"
-                            color: playlistArea.containsMouse ? Color.mSurfaceVariant : root.playlistViewActive ? Color.mSurfaceVariant : Color.mOnSurface
+                            color: playlistArea.containsMouse ? AtmoColor.mSurfaceVariant : root.playlistViewActive ? AtmoColor.mSurfaceVariant : AtmoColor.mOnSurface
                         }
                             
                         NText {
                             pointSize: Style.fontSizeM
                             text: pluginApi?.tr("panel.playlist")
-                            color: playlistArea.containsMouse ? Color.mSurfaceVariant : root.playlistViewActive ? Color.mSurfaceVariant : Color.mOnSurface
+                            color: playlistArea.containsMouse ? AtmoColor.mSurfaceVariant : root.playlistViewActive ? AtmoColor.mSurfaceVariant : AtmoColor.mOnSurface
 
                         }
                     }
@@ -274,7 +274,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                color: Color.mSurfaceVariant
+                color: AtmoColor.mSurfaceVariant
                 radius: Style.radiusL
 
                 visible: !playlistViewActive
@@ -318,14 +318,14 @@ Item {
                             text: pluginApi?.tr("panel.search")
                             pointSize: Style.fontSizeL
                             font.weight: Font.Medium
-                            color: Color.mPrimary
+                            color: AtmoColor.mPrimary
                         }
 
                         NText {
                             Layout.alignment: Qt.AlignHCenter
                             text: pluginApi?.tr("panel.search_hint")
                             pointSize: Style.fontSizeM
-                            color: Color.mOnSurfaceVariant
+                            color: AtmoColor.mOnSurfaceVariant
                             horizontalAlignment: Text.AlignHCenter
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
@@ -345,7 +345,7 @@ Item {
                         delegate: Rectangle {
                             width: searchResultsView.width
                             height: 40
-                            color: searchResultsView.selectedIndex === index ? Color.mPrimary : hovering ? Color.mHover : Color.mSurfaceVariant
+                            color: searchResultsView.selectedIndex === index ? AtmoColor.mPrimary : hovering ? AtmoColor.mHover : AtmoColor.mSurfaceVariant
                             radius: Style.radiusS
 
                             property bool hovering: false
@@ -392,7 +392,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                color: Color.mSurfaceVariant
+                color: AtmoColor.mSurfaceVariant
                 radius: Style.radiusL
 
                 visible: playlistViewActive
@@ -408,7 +408,7 @@ Item {
                     delegate: Rectangle {
                         width: playlistList.width
                         height: 40
-                        color: playlistList.selectedIndex === index ? Color.mPrimary : hovering ? Color.mHover : Color.mSurfaceVariant
+                        color: playlistList.selectedIndex === index ? AtmoColor.mPrimary : hovering ? AtmoColor.mHover : AtmoColor.mSurfaceVariant
                         radius: Style.radiusS
 
                         property bool hovering: false

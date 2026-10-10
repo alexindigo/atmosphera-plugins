@@ -21,7 +21,7 @@ ColumnLayout {
         text: pluginApi?.tr("settings.lightbar_color")
         pointSize: Style.fontSizeM
         font.weight: Font.Bold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
     }
 
     NColorPicker {
@@ -40,7 +40,7 @@ ColumnLayout {
             text: pluginApi?.tr("settings.recent_colors")
             pointSize: Style.fontSizeS
             font.weight: Font.Bold
-            color: Color.mOnSurface
+            color: AtmoColor.mOnSurface
         }
 
         GridLayout {
@@ -57,7 +57,7 @@ ColumnLayout {
                     Layout.preferredHeight: 32
                     radius: Style.radiusS
                     color: modelData
-                    border.color: root.valueColor === modelData ? Color.mPrimary : Color.mOutline
+                    border.color: root.valueColor === modelData ? AtmoColor.mPrimary : AtmoColor.mOutline
                     border.width: root.valueColor === modelData ? Style.borderS * 2 : Style.borderS
 
                     MouseArea {
@@ -78,7 +78,7 @@ ColumnLayout {
         text: pluginApi?.tr("settings.widget_settings")
         pointSize: Style.fontSizeM
         font.weight: Font.Bold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
     }
 
     NToggle {
@@ -105,7 +105,7 @@ ColumnLayout {
         text: pluginApi?.tr("settings.info")
         pointSize: Style.fontSizeM
         font.weight: Font.Bold
-        color: Color.mOnSurface
+        color: AtmoColor.mOnSurface
     }
 
     NBox {
@@ -124,7 +124,7 @@ ColumnLayout {
             NText {
                 text: pluginApi?.tr("settings.info_desc1")
                 pointSize: Style.fontSizeS
-                color: Color.mOnSurface
+                color: AtmoColor.mOnSurface
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
             }
@@ -132,7 +132,7 @@ ColumnLayout {
             NText {
                 text: pluginApi?.tr("settings.info_desc2")
                 pointSize: Style.fontSizeS
-                color: Color.mSecondary
+                color: AtmoColor.mSecondary
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
             }

@@ -45,7 +45,7 @@ Item {
                                            timeFormatSetting === "24h" ? false : 
                                            Settings.data.location.use12hourFormat
 
-    readonly property color lineColor: lineColorTypeSetting === "mOnSurfaceVariant" ? Color.mOnSurfaceVariant : Color.mOutline
+    readonly property color lineColor: lineColorTypeSetting === "mOnSurfaceVariant" ? AtmoColor.mOnSurfaceVariant : AtmoColor.mOutline
 
     onWeekStartSettingChanged: if (hasLoadedOnce) Qt.callLater(loadEvents)
     onCurrentDateChanged: Qt.callLater(loadEvents)

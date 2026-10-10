@@ -34,7 +34,7 @@ ColumnLayout {
 
   NText {
     text: pluginApi?.tr("settings.description")
-    color: Color.mSecondary
+    color: AtmoColor.mSecondary
     Layout.fillWidth: true
     wrapMode: Text.Wrap
   }

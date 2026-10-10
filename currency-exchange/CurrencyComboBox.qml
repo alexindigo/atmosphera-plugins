@@ -110,9 +110,9 @@ RowLayout {
     model: root.activeModel
 
     background: Rectangle {
-      border.color: combo.activeFocus ? Color.mSecondary : Color.mOutline
+      border.color: combo.activeFocus ? AtmoColor.mSecondary : AtmoColor.mOutline
       border.width: Style.borderS
-      color: Color.mSurface
+      color: AtmoColor.mSurface
       // implicitWidth: Math.round(Style.baseWidgetSize * 3.75 * Style.uiScaleRatio)
       implicitHeight: Math.round(root.preferredHeight * Style.uiScaleRatio)
       radius: Style.iRadiusM
@@ -129,7 +129,7 @@ RowLayout {
       // Look up current selection directly in source model by key
       readonly property int sourceIndex: root.findIndexByKey(root.currentKey)
 
-      color: hasSelection ? Color.mOnSurface : Color.mOnSurfaceVariant
+      color: hasSelection ? AtmoColor.mOnSurface : AtmoColor.mOnSurfaceVariant
       elide: Text.ElideRight
       leftPadding: Style.marginL
       pointSize: Style.fontSizeM
@@ -150,9 +150,9 @@ RowLayout {
       y: combo.height + Style.marginS
 
       background: Rectangle {
-        border.color: Color.mOutline
+        border.color: AtmoColor.mOutline
         border.width: Style.borderS
-        color: Color.mSurfaceVariant
+        color: AtmoColor.mSurfaceVariant
         radius: Style.iRadiusM
       }
       contentItem: ColumnLayout {
@@ -193,7 +193,7 @@ RowLayout {
 
             background: Rectangle {
               anchors.fill: parent
-              color: highlighted ? Color.mHover : "transparent"
+              color: highlighted ? AtmoColor.mHover : "transparent"
               radius: Style.iRadiusS
 
               Behavior on color {
@@ -203,7 +203,7 @@ RowLayout {
               }
             }
             contentItem: NText {
-              color: highlighted ? Color.mOnHover : Color.mOnSurface
+              color: highlighted ? AtmoColor.mOnHover : AtmoColor.mOnSurface
               elide: Text.ElideRight
               pointSize: Style.fontSizeM
               text: name

@@ -36,9 +36,9 @@ AtmoIconButton {
   
   // Color resolution with transparency protection (Alpha check)
   colorFg: {
-    let resolved = Color.resolveColorKeyOptional(iconColorKey);
-    if (root.containsMouse) return Color.mOnHover;
-    return resolved.a > 0 ? resolved : Color.mOnSurface;
+    let resolved = AtmoColor.resolveColorKeyOptional(iconColorKey);
+    if (root.containsMouse) return AtmoColor.mOnHover;
+    return resolved.a > 0 ? resolved : AtmoColor.mOnSurface;
   }
 
   border.color: Style.capsuleBorderColor

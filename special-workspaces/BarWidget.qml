@@ -144,14 +144,14 @@ Item {
         radius: root.mainPillSize / 2 * root.primaryBorderRadius
         visible: root.showDrawer
         color: {
-            if (mainBtnMouse.containsMouse) return hasPill ? Color.mHover : Color.mTertiary;
+            if (mainBtnMouse.containsMouse) return hasPill ? AtmoColor.mHover : AtmoColor.mTertiary;
             if (root.expanded) {
-                if (root.primaryFocusColor === "none") return Color.mOnSurface;
-                return Color.resolveColorKey(root.primaryFocusColor);
+                if (root.primaryFocusColor === "none") return AtmoColor.mOnSurface;
+                return AtmoColor.resolveColorKey(root.primaryFocusColor);
             }
             if (!hasPill) return "transparent";
-            if (root.priPillColor === "none") return Color.mOnSurface;
-            return Color.resolveColorKey(root.priPillColor);
+            if (root.priPillColor === "none") return AtmoColor.mOnSurface;
+            return AtmoColor.resolveColorKey(root.priPillColor);
         }
 
         Behavior on color { ColorAnimation { duration: Style.animationFast } }
@@ -161,17 +161,17 @@ Item {
             pointSize: root.mainIconSize
             applyUiScale: false
             color: {
-                if (mainBtnMouse.containsMouse) return mainBtn.hasPill ? Color.mOnHover : Color.mOnTertiary;
-                if (root.priSymbolColor !== "none") return Color.resolveColorKey(root.priSymbolColor);
+                if (mainBtnMouse.containsMouse) return mainBtn.hasPill ? AtmoColor.mOnHover : AtmoColor.mOnTertiary;
+                if (root.priSymbolColor !== "none") return AtmoColor.resolveColorKey(root.priSymbolColor);
                 if (root.expanded) {
-                    if (root.primaryFocusColor === "none") return Color.mSurface;
-                    return Color.resolveOnColorKey(root.primaryFocusColor);
+                    if (root.primaryFocusColor === "none") return AtmoColor.mSurface;
+                    return AtmoColor.resolveOnColorKey(root.primaryFocusColor);
                 }
                 if (mainBtn.hasPill) {
-                    if (root.priPillColor === "none") return Color.mSurface;
-                    return Color.resolveOnColorKey(root.priPillColor);
+                    if (root.priPillColor === "none") return AtmoColor.mSurface;
+                    return AtmoColor.resolveOnColorKey(root.priPillColor);
                 }
-                return Color.mOnSurface;
+                return AtmoColor.mOnSurface;
             }
             anchors.centerIn: parent
         }
@@ -221,14 +221,14 @@ Item {
         implicitHeight: wsPillSize
         radius: wsPillSize / 2 * wsBorderRadius
         color: {
-            if (wsPillMouse.containsMouse) return hasPill ? Color.mHover : Color.mTertiary;
+            if (wsPillMouse.containsMouse) return hasPill ? AtmoColor.mHover : AtmoColor.mTertiary;
             if (isFocused) {
-                if (wsFocusColor === "none") return Color.mOnSurface;
-                return Color.resolveColorKey(wsFocusColor);
+                if (wsFocusColor === "none") return AtmoColor.mOnSurface;
+                return AtmoColor.resolveColorKey(wsFocusColor);
             }
             if (!hasPill) return "transparent";
-            if (wsPillColor === "none") return Color.mOnSurface;
-            return Color.resolveColorKey(wsPillColor);
+            if (wsPillColor === "none") return AtmoColor.mOnSurface;
+            return AtmoColor.resolveColorKey(wsPillColor);
         }
 
         readonly property bool isActive: root.activeWorkspaceNames[modelData.name] === true
@@ -243,18 +243,18 @@ Item {
             pointSize: wsPill.wsIconSize
             applyUiScale: false
             color: {
-                if (wsPillMouse.containsMouse) return wsPill.hasPill ? Color.mOnHover : Color.mOnTertiary;
-                if (!wsPill.isActive) return Color.mOnSurface;
-                if (wsPill.wsSymbolColor !== "none") return Color.resolveColorKey(wsPill.wsSymbolColor);
+                if (wsPillMouse.containsMouse) return wsPill.hasPill ? AtmoColor.mOnHover : AtmoColor.mOnTertiary;
+                if (!wsPill.isActive) return AtmoColor.mOnSurface;
+                if (wsPill.wsSymbolColor !== "none") return AtmoColor.resolveColorKey(wsPill.wsSymbolColor);
                 if (wsPill.isFocused) {
-                    if (wsPill.wsFocusColor === "none") return Color.mSurface;
-                    return Color.resolveOnColorKey(wsPill.wsFocusColor);
+                    if (wsPill.wsFocusColor === "none") return AtmoColor.mSurface;
+                    return AtmoColor.resolveOnColorKey(wsPill.wsFocusColor);
                 }
                 if (wsPill.hasPill) {
-                    if (wsPill.wsPillColor === "none") return Color.mSurface;
-                    return Color.resolveOnColorKey(wsPill.wsPillColor);
+                    if (wsPill.wsPillColor === "none") return AtmoColor.mSurface;
+                    return AtmoColor.resolveOnColorKey(wsPill.wsPillColor);
                 }
-                return Color.mOnSurface;
+                return AtmoColor.mOnSurface;
             }
             anchors.centerIn: parent
         }

@@ -22,8 +22,8 @@ AtmoIconButton {
 
     property bool isActive: mainInstance?.isCustomDns || false
 
-    colorBg: isActive ? Color.mPrimary : Color.mSurfaceVariant
-    colorFg: isActive ? Color.mOnPrimary : Color.mOnSurface
+    colorBg: isActive ? AtmoColor.mPrimary : AtmoColor.mSurfaceVariant
+    colorFg: isActive ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface
 
     tooltipText: mainInstance?.currentDnsName || pluginApi?.tr("plugin.title") || "DNS Switcher"
 
