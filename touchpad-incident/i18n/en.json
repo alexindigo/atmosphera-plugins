@@ -1,0 +1,15 @@
+{
+  "tooltip": {
+    "mark": "Mark touchpad incident — preserve available earlier evidence and a 30-second tail",
+    "busy": "Marking touchpad incident…",
+    "cooldown": "Incident marked — collecting the following 30 seconds",
+    "unavailable": "Touchpad incident plugin is not ready"
+  },
+  "toast": {
+    "title": "Touchpad incident",
+    "saved": "Earlier evidence marked for preservation. Collecting the following 30 seconds.",
+    "failed": "Could not mark the incident. Check the touchpad logger and helper permissions.",
+    "invalid-reply": "The marker returned no valid confirmation. Check the local touchpad-incident helper.",
+    "timeout": "The marker did not confirm within 10 seconds. It may have saved the incident; check before retrying."
+  }
+}

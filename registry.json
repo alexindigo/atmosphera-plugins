@@ -2451,6 +2451,23 @@
       "minNoctaliaVersion": "3.7.1"
     },
     {
+      "id": "touchpad-incident",
+      "name": "Touchpad Incident",
+      "author": "Domovoy",
+      "description": "Mark a touchpad jump or phantom click from the bar and preserve evidence through the local touchpad-incident helper.",
+      "license": "GPL-3.0",
+      "version": "1.0.0",
+      "tags": [
+        "Bar",
+        "Input",
+        "Diagnostics"
+      ],
+      "repository": "https://github.com/alexindigo/atmosphera-plugins",
+      "official": false,
+      "lastUpdated": "2026-10-09",
+      "minAtmospheraVersion": "0.7.0"
+    },
+    {
       "id": "translator",
       "name": "Translator",
       "author": "Cleboost",

@@ -1,0 +1,15 @@
+{
+  "id": "touchpad-incident",
+  "name": "Touchpad Incident",
+  "version": "1.0.0",
+  "minAtmospheraVersion": "0.7.0",
+  "author": "Domovoy",
+  "license": "GPL-3.0",
+  "repository": "https://github.com/alexindigo/atmosphera-plugins",
+  "description": "Mark a touchpad jump or phantom click from the bar and preserve evidence through the local touchpad-incident helper.",
+  "tags": ["Bar", "Input", "Diagnostics"],
+  "entryPoints": {
+    "main": "Main.qml",
+    "barWidget": "BarWidget.qml"
+  }
+}
