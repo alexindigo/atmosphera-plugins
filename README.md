@@ -18,15 +18,21 @@ rename below.
 
 Atmosphera renamed the Noctalia icon widgets: `NIcon` → `AtmoIcon`,
 `NIconButton` → `AtmoIconButton`, `NIconButtonHot` → `AtmoIconButtonHot`,
-`NIconPicker` → `AtmoIconPicker`. Everything else (`NBox`, `NText`, `NToggle`,
-services, `Icon.*`, `Style.*`, `Color.*`) is API-identical.
+`NIconPicker` → `AtmoIconPicker`. Since Atmosphera 0.8.0, the palette
+singleton is also renamed: `Color` → `AtmoColor`, avoiding Qt 6.12's
+QtQuick `Color` collision. Other existing APIs (`NBox`, `NText`, `NToggle`,
+services, `Icon.*`, `Style.*`) remain API-identical.
 
-Conversions are verbatim upstream + that rename. When upstream updates a plugin,
-re-copy the directory and re-apply the rename:
+Conversions are verbatim upstream + these renames. When upstream updates a plugin,
+re-copy the directory and re-apply the renames inside a test VM:
 
 ```sh
 sed -i -E 's/\bNIconButtonHot\b/AtmoIconButtonHot/g; s/\bNIconButton\b/AtmoIconButton/g; s/\bNIconPicker\b/AtmoIconPicker/g; s/\bNIcon\b/AtmoIcon/g' <plugin>/**/*.qml
+python3 <atmosphera-checkout>/Scripts/dev/qml-identifiers.py rename --from Color --to AtmoColor <plugin>
 ```
+
+Follow [AUTHORING.md](AUTHORING.md) for palette members, compatibility gates,
+version bumps and verification.
 
 ## Licensing
 
