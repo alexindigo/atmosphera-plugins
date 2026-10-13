@@ -1,0 +1,20 @@
+{
+  "id": "digest-watcher",
+  "name": "Digest Watcher",
+  "version": "1.0.1",
+  "minAtmospheraVersion": "0.8.0",
+  "author": "domovoy#arch",
+  "license": "MIT",
+  "repository": "https://github.com/alexindigo/atmosphera-plugins",
+  "description": "Watch model digests in ~/Digest; highlight new finds and browse their titles and summaries.",
+  "tags": ["Bar", "Digest", "Models"],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml",
+    "panel": "Panel.qml"
+  },
+  "metadata": {
+    "defaultSettings": {
+      "seenMtime": 0
+    }
+  }
+}

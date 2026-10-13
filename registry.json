@@ -1,6 +1,23 @@
 {
   "plugins": [
     {
+      "id": "digest-watcher",
+      "name": "Digest Watcher",
+      "author": "domovoy#arch",
+      "description": "Watch model digests in ~/Digest; highlight new finds and browse their titles and summaries.",
+      "license": "MIT",
+      "version": "1.0.1",
+      "tags": [
+        "Bar",
+        "Digest",
+        "Models"
+      ],
+      "repository": "https://github.com/alexindigo/atmosphera-plugins",
+      "official": false,
+      "lastUpdated": "2026-10-11",
+      "minAtmospheraVersion": "0.8.0"
+    },
+    {
       "id": "niri-windows-map",
       "name": "Niri Windows Map",
       "author": "Atmosphera",
