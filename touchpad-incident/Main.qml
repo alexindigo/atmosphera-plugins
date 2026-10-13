@@ -70,7 +70,7 @@ Item {
   Process {
     id: markerProcess
     // Argument vector, not a shell expression. No label/other command is allowed.
-    command: ["/usr/bin/sudo", "-n", "--", "/usr/local/bin/touchpad-incident"]
+    command: ["/usr/local/bin/touchpad-incident"]
     stdout: StdioCollector {
       id: markerOutput
     }

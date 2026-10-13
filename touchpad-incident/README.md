@@ -1,79 +1,67 @@
 # Touchpad Incident
 
-An Atmosphera-native top-bar button for marking an intermittent pointer jump or
-phantom click without opening a terminal. Requires Atmosphera **0.7.0 or later**.
+An Atmosphera-native bar button for marking a pointer jump or phantom click.
+Requires Atmosphera **0.8.0 or newer** and an installed compatible logger/helper.
 
 ## What it does
 
 - Click the pointer/exclamation icon immediately after noticing a symptom.
-- Runs exactly `sudo -n -- /usr/local/bin/touchpad-incident`, without a shell,
-  arguments, password dialog, screen recording or input injection.
-- Shows a pointer/check icon and a confirmation toast after the helper confirms
-  a saved marker. The underlying logger preserves its available prehistory and
-  collects a 30-second tail.
-- Uses one shared process and a 30-second successful-mark cooldown across all
-  bar instances, avoiding duplicate markers from double/phantom clicks.
-- Reports a failed command, invalid response or timeout instead of pretending
-  evidence was saved. A timeout is ambiguous: inspect existing markers before
-  retrying. Cancelling the helper client never stops the capture service.
+- Calls exactly `/usr/local/bin/touchpad-incident` as the desktop user, with no
+  arguments, shell, sudo or password dialog.
+- Asks the logger to timestamp the incident and preserve its available
+  prehistory plus a30-second tail. Confirmation appears only after the logger
+  reports a saved marker.
+- Uses one shared process and a30-second successful-mark cooldown across bars.
+- Reports denied/unavailable control, invalid replies, failure or timeout.
+  A timeout is ambiguous; inspect existing markers before retrying.
 
-The plugin is a marker frontend, **not the logger itself**. It does not diagnose
-phantom clicks, record keyboard input, or claim sensor coordinates are cursor
-coordinates. Preservation duration and quota are the logger's responsibility.
+The frontend does not record keyboard input, inject events or diagnose the
+hardware. Its coordinates/evidence semantics and retention are the logger's.
 
-## Requirements
+## Backend contract and setup
 
-1. A local, running touchpad-coordinate logger and its root-owned
-   `/usr/local/bin/touchpad-incident` helper. No logger installation or privilege
-   changes are performed automatically by this plugin.
-2. The helper must accept no arguments to mark an incident and print JSON with
-   `{"incident": "...", "status": "collecting"}` on success. Errors should use
-   a nonzero exit code and/or an `error` field.
-3. The desktop user must be allowed to run **only that exact no-argument helper**
-   noninteractively. The helper and every privileged dependency must be
-   root-owned and not writable by the desktop user.
+The privileged input reader owns the evidence and authorizes a normal desktop
+user to send only marker requests. The frontend itself runs unprivileged.
 
-An administrator can use `sudo visudo -f /etc/sudoers.d/touchpad-incident` and
-add the following, replacing `YOUR_USER` with the desktop login:
+1. Install the root-owned logger and `/usr/local/bin/touchpad-incident` helper.
+   The plugin does not install/configure them automatically.
+2. The administrator configures the allowed desktop account in the logger's
+   service. This backend uses `TOUCHPAD_MARKER_USER=YOUR_USER` and named ACLs on
+   its existing Unix control socket/directory. Socket peer credentials enforce
+   the account and restrict unprivileged requests to `mark` and a read-only
+   readiness `check`; detailed status and capture remain administrative.
+3. The helper sends a marker request without sudo and prints JSON containing
+   `{"incident": "...", "status": "collecting"}` on success. It exits nonzero
+   for failures. Keep the helper, backend and their parent paths root-owned and
+   not writable by the desktop user.
 
-```sudoers
-YOUR_USER ALL=(root) NOPASSWD: /usr/local/bin/touchpad-incident ""
-```
+No NOPASSWD sudoers rule is required. An older logger/helper that only accepts
+root must be upgraded alongside version1.0.1 of this frontend; replacing the
+plugin alone cannot change its authorization policy.
 
-The `""` explicitly permits **no command arguments**. Do not replace it with
-`*`, grant broad Python/systemctl access, or make the helper user-writable.
-Validate the administrator-created file with
-`sudo visudo -cf /etc/sudoers.d/touchpad-incident` and keep it root:root 0440.
-This rule does not grant permission to stop/start the logger, change its input
-device, read its private raw files, or run `touchpad-incident status` password-free.
-
-After that setup, invoking the command below **creates a real marker**; use a
-planned check rather than running it repeatedly:
+Readiness can be verified without creating evidence:
 
 ```sh
-sudo -n -- /usr/local/bin/touchpad-incident
+/usr/local/bin/touchpad-incident check
 ```
 
-There is no fallback to a password prompt or terminal: missing permission/helper
-or a stopped logger produces a visible failure.
+It should return `{"ready": true, "can_mark": true}`. Running the helper with
+**no arguments creates a real marker**; use the button when an issue occurs.
+Detailed backend status can be inspected administratively with
+`sudo /usr/local/bin/touchpad-incident status`.
 
-## Installation
+## Installation and IPC
 
-Install **Touchpad Incident** from the Atmosphera plugins source, enable it and
-add its bar widget to the top bar. The source catalog uses the plugin id
-`touchpad-incident`; installed source-backed keys include their source hash.
-Manual/local installation follows Atmosphera's usual plugin workflow.
+Install **Touchpad Incident** from **Settings → Plugins → Available → All**,
+enable it and add its bar widget. Registry source-backed IDs include the
+source hash. The frontend never automatically restarts the shell or logger.
 
-This plugin never restarts or reloads Atmosphera, niri, OpenCode or the logger.
+`plugin:touchpad-incident` exposes:
 
-## Optional IPC
+- `mark`: the same debounced action as clicking the button.
+- `status`: frontend state and last result/error only; creates no marker and
+  does not expose privileged backend counters or raw evidence.
 
-The installed plugin exposes `plugin:touchpad-incident`:
+## License
 
-- `mark` invokes the same debounced action as the button.
-- `status` returns only this frontend's state and latest confirmation/error;
-  it does not query privileged capture status or create a marker.
-
-## Licensing
-
-GPL-3.0, as covered by the repository's LICENSE. Author: Domovoy.
+GPL-3.0, covered by the repository LICENSE. Author: Domovoy.

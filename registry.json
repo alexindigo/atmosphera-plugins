@@ -2582,7 +2582,7 @@
       "author": "Domovoy",
       "description": "Mark a touchpad jump or phantom click from the bar and preserve evidence through the local touchpad-incident helper.",
       "license": "GPL-3.0",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "tags": [
         "Bar",
         "Input",
@@ -2590,7 +2590,7 @@
       ],
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": false,
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-10-11",
       "minAtmospheraVersion": "0.8.0"
     },
     {
