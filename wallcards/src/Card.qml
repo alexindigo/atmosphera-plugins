@@ -44,7 +44,7 @@ Item {
     id: border
 
     anchors.fill: parent
-    border.color: isCenter ? AtmoColor.mOutline : Qt.alpha(AtmoColor.mOutlineVariant, 0.5)
+    border.color: isCenter ? AtmoColor.mOutline : Qt.alpha(AtmoColor.mOutline, 0.5)
     border.width: Style.borderS
     color: "transparent"
     opacity: 0.75

@@ -542,7 +542,7 @@ ColumnLayout {
         Layout.fillHeight: true
     }
 
-    NFilePicker {
+    AtmoFilePicker {
         id: folderPicker
         selectionMode: "folders"
         title: pluginApi.tr("settings.general.output-folder")

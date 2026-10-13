@@ -37,7 +37,7 @@ Item {
             Layout.preferredHeight: 64 * Style.uiScaleRatio
             
             color: AtmoColor.mSurfaceVariant
-            radius: Style.capsuleRadius ?? Style.radiusM
+            radius: Style.radiusM
             border.color: Style.capsuleBorderColor
             border.width: Style.capsuleBorderWidth
 
@@ -119,7 +119,7 @@ Item {
             Layout.preferredHeight: 52 * Style.uiScaleRatio
             
             color: AtmoColor.mSurfaceVariant
-            radius: Style.capsuleRadius ?? Style.radiusM
+            radius: Style.radiusM
             border.color: Style.capsuleBorderColor
             border.width: Style.capsuleBorderWidth
 
@@ -157,7 +157,7 @@ Item {
             Layout.preferredHeight: 52 * Style.uiScaleRatio
             
             color: AtmoColor.mSurfaceVariant
-            radius: Style.capsuleRadius ?? Style.radiusM
+            radius: Style.radiusM
             border.color: Style.capsuleBorderColor
             border.width: Style.capsuleBorderWidth
 

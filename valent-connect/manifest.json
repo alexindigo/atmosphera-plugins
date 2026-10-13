@@ -1,7 +1,7 @@
 {
   "id": "valent-connect",
   "name": "Valent Connect",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "minNoctaliaVersion": "4.6.7",
   "minAtmospheraVersion": "0.8.0",
   "author": "Suyash",

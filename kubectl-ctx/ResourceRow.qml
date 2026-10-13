@@ -33,7 +33,7 @@ Item {
   readonly property color statusColor: {
     var s = root.status.toLowerCase();
     if (s === "running" || s === "active" || s === "bound") return AtmoColor.mTertiary;
-    if (s === "pending" || s === "containercreating") return AtmoColor.mWarning;
+    if (s === "pending" || s === "containercreating") return AtmoColor.mSecondary;
     if (s === "error" || s === "crashloopbackoff" || s === "oomkilled" ||
         s === "failed" || s === "imagepullbackoff" || s === "errimagepull") return AtmoColor.mError;
     if (s === "completed" || s === "succeeded") return AtmoColor.mOnSurfaceVariant;

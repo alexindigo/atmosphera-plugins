@@ -28,10 +28,9 @@ DraggableDesktopWidget {
       : (widgetData?.timeColourPicker ?? "black")
 
   // Font
-  readonly property string customDayFont: widgetData?.customDayFont ?? root.customFont ?? Style.fontFamily
-  readonly property string customDateFont: widgetData?.customDateFont ?? root.customFont ?? Style.fontFamily
-  readonly property string customTimeFont: widgetData?.customTimeFont ?? root.customFont ?? Style.fontFamily
-        ?? root.customFont
+  readonly property string customDayFont: widgetData?.customDayFont ?? root.customFont ?? Settings.data.ui.fontDefault
+  readonly property string customDateFont: widgetData?.customDateFont ?? root.customFont ?? Settings.data.ui.fontDefault
+  readonly property string customTimeFont: widgetData?.customTimeFont ?? root.customFont ?? Settings.data.ui.fontDefault
   readonly property real dayFontSize: widgetData?.dayFontSize ?? 1.0
   readonly property real dateFontSize: widgetData?.dateFontSize ?? 1.0
   readonly property real timeFontSize: widgetData?.timeFontSize ?? 1.0

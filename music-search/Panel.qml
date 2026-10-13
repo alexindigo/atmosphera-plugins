@@ -1088,7 +1088,7 @@ Item {
     readonly property bool active: (root.mainInstance?.currentProvider || "youtube") === providerKey
 
     radius: Style.radiusM
-    color: active ? (AtmoColor.mPrimaryContainer || Qt.alpha(AtmoColor.mPrimary, 0.14) || AtmoColor.mSurfaceVariant) : AtmoColor.mSurfaceVariant
+    color: active ? Qt.tint(AtmoColor.mSurfaceVariant, Qt.alpha(AtmoColor.mPrimary, 0.16)) : AtmoColor.mSurfaceVariant
     border.width: 1
     border.color: active ? AtmoColor.mPrimary : Qt.alpha((AtmoColor.mOutline || AtmoColor.mOnSurfaceVariant || "#888888"), 0.35)
     implicitWidth: providerLabelText.implicitWidth + (Style.marginL * 2)
@@ -1098,7 +1098,7 @@ Item {
       id: providerLabelText
       anchors.centerIn: parent
       text: root.providerLabel(chip.providerKey)
-      color: chip.active ? (AtmoColor.mOnPrimaryContainer || AtmoColor.mOnSurface) : AtmoColor.mOnSurface
+      color: AtmoColor.mOnSurface
       pointSize: Style.fontSizeS
       font.weight: chip.active ? Font.DemiBold : Font.Normal
     }

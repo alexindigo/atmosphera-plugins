@@ -226,7 +226,7 @@ Item {
                                             visible: modelData.mapped !== undefined ? modelData.mapped : (ipcObj !== null && ipcObj.mapped !== undefined ? ipcObj.mapped : true)
                                             
                                             color: AtmoColor.mPrimary
-                                            border.color: AtmoColor.mBackground
+                                            border.color: AtmoColor.mSurface
                                             border.width: Math.max(1, 1 * Style.uiScaleRatio)
                                             radius: 2 * Style.uiScaleRatio
                                             clip: true

@@ -28,7 +28,7 @@ Item {
             case 1: return AtmoColor.mOnSurfaceVariant  // min
             case 2: return AtmoColor.mOnSurfaceVariant  // low
             case 3: return AtmoColor.mOnSurface         // default
-            case 4: return AtmoColor.mWarning ?? "#FB8C00" // high
+            case 4: return "#FB8C00" // high
             case 5: return AtmoColor.mError             // urgent
             default: return AtmoColor.mOnSurface
         }

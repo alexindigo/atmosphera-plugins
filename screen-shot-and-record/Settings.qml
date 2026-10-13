@@ -130,7 +130,7 @@ ColumnLayout {
         }
     }
 
-    NFilePicker {
+    AtmoFilePicker {
         id: screenshotFolderPicker
         selectionMode: "folders"
         title: pluginApi?.tr("settings.savePath.label")
@@ -142,7 +142,7 @@ ColumnLayout {
         }
     }
 
-    NFilePicker {
+    AtmoFilePicker {
         id: recordingFolderPicker
         selectionMode: "folders"
         title: pluginApi?.tr("settings.recordingSavePath.label")

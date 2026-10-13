@@ -446,7 +446,7 @@ Item {
                                                     if (ms < 50)
                                                         return AtmoColor.mPrimary;
                                                     if (ms < 150)
-                                                        return AtmoColor.mWarning || "#FF9800";
+                                                        return "#FF9800";
                                                     return AtmoColor.mError;
                                                 }
                                             }

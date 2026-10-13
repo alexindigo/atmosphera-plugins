@@ -119,7 +119,7 @@ ColumnLayout {
                 onClicked: wallpapersFolderPicker.openFilePicker()
             }
 
-            NFilePicker {
+            AtmoFilePicker {
                 id: wallpapersFolderPicker
                 title: root.pluginApi?.tr("settings.general.wallpapers_folder.file_picker.title")
                 initialPath: root.wallpapersFolder

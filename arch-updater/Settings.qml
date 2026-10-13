@@ -395,7 +395,7 @@ ColumnLayout {
                 }
             }
 
-            NFilePicker {
+            AtmoFilePicker {
                 id: imagePicker
                 title: pluginApi.tr("settings.bar.iconName.selectCustomIcon")
                 selectionMode: "files"

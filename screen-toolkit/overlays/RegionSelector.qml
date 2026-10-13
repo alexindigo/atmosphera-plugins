@@ -251,8 +251,8 @@ Item {
                 z: 10
                 opacity: win.fadeOpacity
                 width: _szText.implicitWidth + Style.marginL
-                height: Style.controlHeightS
-                radius: Style.controlHeightS / 2
+                height: _szText.implicitHeight + Style.marginS * 2
+                radius: height / 2
                 color: Qt.rgba(0, 0, 0, 0.85)
                 border.color: Qt.rgba(1, 1, 1, 0.2)
                 border.width: Style.borderS
@@ -272,7 +272,7 @@ Item {
                 z: 10
                 opacity: win.fadeOpacity
                 width: _coordText.implicitWidth + Style.marginM
-                height: Style.controlHeightXXS
+                height: _coordText.implicitHeight + Style.marginXS * 2
                 radius: Style.radiusS
                 color: Qt.rgba(0, 0, 0, 0.75)
                 x: { var bx = win.mouseX + 20; return bx + width > win.width - 4 ? win.mouseX - width - 20 : bx }
@@ -290,8 +290,8 @@ Item {
                 z: 10
                 opacity: win.fadeOpacity * 0.9
                 width: _hintRow.implicitWidth + Style.marginXL
-                height: Style.controlHeightS
-                radius: Style.controlHeightS / 2
+                height: _hintRow.implicitHeight + Style.marginS * 2
+                radius: height / 2
                 color: Qt.rgba(0, 0, 0, 0.75)
                 border.color: Qt.rgba(1,1,1,0.1)
                 border.width: Style.borderS

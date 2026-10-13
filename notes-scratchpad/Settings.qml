@@ -209,7 +209,7 @@ ColumnLayout {
     }
   }
 
-  NFilePicker {
+  AtmoFilePicker {
     id: filePicker
     selectionMode: "files"
     title: pluginApi?.tr("settings.file_storage.picker_title") || "Choose file for scratchpad"

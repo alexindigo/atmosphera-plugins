@@ -110,7 +110,7 @@ ColumnLayout {
             
             // Hover effect outline
             if (mouseArea.containsMouse) {
-               ctx.strokeStyle = Style.textColor;
+               ctx.strokeStyle = AtmoColor.mOnSurface;
                ctx.lineWidth = 2;
                ctx.stroke();
             }

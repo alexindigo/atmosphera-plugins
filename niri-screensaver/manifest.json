@@ -1,7 +1,7 @@
 {
   "id": "niri-screensaver",
   "name": "Niri Screensaver",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "minNoctaliaVersion": "4.7.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "jfreed-dev",

@@ -1170,7 +1170,7 @@ Variants {
                 width:  _sbRow.implicitWidth + Style.marginL
                 color:  sbHover.containsMouse
                     ? (primary ? AtmoColor.mPrimary : AtmoColor.mSecondary || AtmoColor.mPrimary)
-                    : (primary ? AtmoColor.mPrimaryContainer || AtmoColor.mSurfaceVariant : AtmoColor.mSurfaceVariant)
+                    : (primary ? Qt.tint(AtmoColor.mSurfaceVariant, Qt.alpha(AtmoColor.mPrimary, 0.16)) : AtmoColor.mSurfaceVariant)
                 opacity: overlayWin.isSaving ? 0.5 : 1.0
                 signal clicked()
                 Row {
@@ -1580,7 +1580,7 @@ Variants {
                         model: toolbar.sizeDefs
                         delegate: Rectangle {
                             width: 28; height: 24; radius: Style.radiusS
-                            color: overlayWin.drawSize === modelData.size ? AtmoColor.mPrimaryContainer : (shH.containsMouse ? AtmoColor.mHover : "transparent")
+                            color: overlayWin.drawSize === modelData.size ? Qt.tint(AtmoColor.mSurfaceVariant, Qt.alpha(AtmoColor.mPrimary, 0.16)) : (shH.containsMouse ? AtmoColor.mHover : "transparent")
                             border.color: overlayWin.drawSize === modelData.size ? AtmoColor.mPrimary : "transparent"
                             border.width: Style.borderS
                             Row {
@@ -1628,7 +1628,7 @@ Variants {
                         model: toolbar.sizeDefs
                         delegate: Rectangle {
                             width: 32; height: 24; radius: Style.radiusS
-                            color: overlayWin.drawSize === modelData.size ? AtmoColor.mPrimaryContainer : (shV.containsMouse ? AtmoColor.mHover : "transparent")
+                            color: overlayWin.drawSize === modelData.size ? Qt.tint(AtmoColor.mSurfaceVariant, Qt.alpha(AtmoColor.mPrimary, 0.16)) : (shV.containsMouse ? AtmoColor.mHover : "transparent")
                             border.color: overlayWin.drawSize === modelData.size ? AtmoColor.mPrimary : "transparent"
                             border.width: Style.borderS
                             Row {

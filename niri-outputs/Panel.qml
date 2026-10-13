@@ -786,12 +786,12 @@ Item {
                         width: 36
                         height: 20
                         radius: Style.radiusS
-                        color: AtmoColor.mPrimaryContainer || "transparent"
+                        color: Qt.tint(AtmoColor.mSurfaceVariant, Qt.alpha(AtmoColor.mPrimary, 0.16))
 
                         NText {
                             anchors.centerIn: parent
                             text: root.getPendingOrDefault("scales", card.outputName, card.currentScale).toFixed(1)
-                            color: AtmoColor.mOnPrimaryContainer || AtmoColor.mOnSurface
+                            color: AtmoColor.mOnSurface
                             pointSize: Style.fontSizeXS
                             font.weight: Font.Medium
                         }

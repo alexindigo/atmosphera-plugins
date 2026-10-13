@@ -102,8 +102,8 @@ ColumnLayout {
 
             Text {
                 text: pluginApi?.tr("settings.seconds", "seconds") || "seconds"
-                color: Style.textColorSecondary || "#FFFFFF"
-                font.pixelSize: Style.fontSizeM || 14
+                color: AtmoColor.mOnSurfaceVariant
+                font.pixelSize: Style.fontSizeM
             }
         }
     }
@@ -170,15 +170,15 @@ ColumnLayout {
     Rectangle {
         Layout.fillWidth: true
         height: 1
-        color: Style.borderColor || "#333333"
+        color: AtmoColor.mOutline
     }
 
     // Feeds Management
     Text {
         text: pluginApi?.tr("settings.feeds", "RSS Feeds") || "RSS Feeds"
-        font.pixelSize: Style.fontSizeL || 18
+        font.pixelSize: Style.fontSizeL
         font.bold: true
-        color: Style.textColor || "#FFFFFF"
+        color: AtmoColor.mOnSurface
     }
 
     // Add New Feed
@@ -189,8 +189,8 @@ ColumnLayout {
         Text {
             text: pluginApi?.tr("settings.addFeed", "Add New Feed") || "Add New Feed"
             font.bold: true
-            color: Style.textColor || "#FFFFFF"
-            font.pixelSize: Style.fontSizeM || 14
+            color: AtmoColor.mOnSurface
+            font.pixelSize: Style.fontSizeM
         }
 
         RowLayout {
@@ -203,8 +203,8 @@ ColumnLayout {
 
                 Text {
                     text: pluginApi?.tr("settings.feedName", "Feed Name") || "Feed Name"
-                    font.pixelSize: Style.fontSizeS || 12
-                    color: Style.textColorSecondary || "#FFFFFF"
+                    font.pixelSize: Style.fontSizeS
+                    color: AtmoColor.mOnSurfaceVariant
                 }
 
                 NTextInput {
@@ -221,8 +221,8 @@ ColumnLayout {
 
                 Text {
                     text: pluginApi?.tr("settings.feedUrl", "Feed URL") || "Feed URL"
-                    font.pixelSize: Style.fontSizeS || 12
-                    color: Style.textColorSecondary || "#FFFFFF"
+                    font.pixelSize: Style.fontSizeS
+                    color: AtmoColor.mOnSurfaceVariant
                 }
 
                 NTextInput {
@@ -258,8 +258,8 @@ ColumnLayout {
 
                 width: ListView.view.width
                 height: feedItemLayout.implicitHeight + 16
-                color: Style.fillColorSecondary || "#2A2A2A"
-                radius: Style.radiusM || 8
+                color: AtmoColor.mSurfaceVariant
+                radius: Style.radiusM
 
                 RowLayout {
                     id: feedItemLayout
@@ -273,16 +273,16 @@ ColumnLayout {
 
                         Text {
                             text: modelData.name
-                            font.pixelSize: Style.fontSizeM || 14
+                            font.pixelSize: Style.fontSizeM
                             font.bold: true
-                            color: Style.textColor || "#FFFFFF"
+                            color: AtmoColor.mOnSurface
                             Layout.fillWidth: true
                         }
 
                         Text {
                             text: modelData.url
-                            font.pixelSize: Style.fontSizeS || 12
-                            color: Style.textColorSecondary || "#AAAAAA"
+                            font.pixelSize: Style.fontSizeS
+                            color: AtmoColor.mOnSurfaceVariant
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
@@ -299,8 +299,8 @@ ColumnLayout {
                 visible: feeds.length === 0
                 anchors.centerIn: parent
                 text: pluginApi?.tr("settings.noFeeds", "No feeds configured. Add one above!") || "No feeds configured. Add one above!"
-                font.pixelSize: Style.fontSizeM || 14
-                color: Style.textColorSecondary || "#888888"
+                font.pixelSize: Style.fontSizeM
+                color: AtmoColor.mOnSurfaceVariant
             }
         }
     }

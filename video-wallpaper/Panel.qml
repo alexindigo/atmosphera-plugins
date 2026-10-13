@@ -167,7 +167,7 @@ Item {
         filters: ["*.mp4", "*.avi", "*.mov", "*.webm", "*.gif"]
     }
 
-    NFilePicker {
+    AtmoFilePicker {
         id: wallpapersFolderPicker
         title: root.pluginApi?.tr("panel.file_picker.title")
         initialPath: root.wallpapersFolder

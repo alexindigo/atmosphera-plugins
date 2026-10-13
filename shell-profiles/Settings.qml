@@ -37,7 +37,7 @@ ColumnLayout {
     onButtonClicked: dirPicker.openFilePicker()
   }
 
-  NFilePicker {
+  AtmoFilePicker {
     id: dirPicker
     selectionMode: "folders"
     title: pluginApi?.tr("settings.dir-select")

@@ -27,7 +27,7 @@ Item {
   property var sendTargetPeer: null
   property string searchQuery: ""
 
-  NFilePicker {
+  AtmoFilePicker {
     id: sendFilePicker
     title: pluginApi?.tr("file-picker.title")
     selectionMode: "files"

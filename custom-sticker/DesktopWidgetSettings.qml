@@ -45,7 +45,7 @@ ColumnLayout {
             onClicked: imageSelection.openFilePicker()
         }
 
-        NFilePicker {
+        AtmoFilePicker {
             id: imageSelection
             title: root.pluginApi?.tr("desktopWidgetSettings.selection-title") ?? ""
             selectionMode: "files"

@@ -199,7 +199,7 @@ Item {
     }
 
 
-    NFilePicker {
+    AtmoFilePicker {
         id: wallpapersFolderPicker
         title: pluginApi?.tr("settings.wallpapers_folder.file_picker_title") || "Choose wallpapers folder"
         initialPath: root.wallpapersFolder

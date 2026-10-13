@@ -1,7 +1,7 @@
 {
   "id": "quickemu",
   "name": "Quickemu",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "4.0.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "GughNess",

@@ -1,7 +1,8 @@
 {
   "id": "wallpaper-carousel",
   "name": "Wallpaper Carousel",
-  "version": "0.8.0",
+  "version": "0.8.1",
+  "minAtmospheraVersion": "0.8.0",
   "minNoctaliaVersion": "3.6.0",
   "author": "yngwe",
   "license": "MIT",

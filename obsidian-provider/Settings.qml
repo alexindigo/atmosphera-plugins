@@ -36,7 +36,7 @@ ColumnLayout {
         onToggled: (checked) => root.editIncludeInSearch = checked
     }
 
-    NFilePicker {
+    AtmoFilePicker {
         id: filePicker
         selectionMode: "files"
         title: pluginApi?.tr("settings.configPath.pickerTitle")

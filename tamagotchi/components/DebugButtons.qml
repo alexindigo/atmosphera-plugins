@@ -65,7 +65,7 @@ Row {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: btn.label
                 font.pixelSize: Style.fontSizeXS
-                color: Style.colorOnSurfaceVariant ?? "#aaaaaa"
+                color: AtmoColor.mOnSurfaceVariant
             }
         }
 

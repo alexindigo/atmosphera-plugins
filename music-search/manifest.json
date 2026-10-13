@@ -1,7 +1,7 @@
 {
   "id": "music-search",
   "name": "Music Search",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.8.0",
   "author": "kevichi7",

@@ -3,7 +3,7 @@ import qs.Commons
 import qs.Services.UI
 import qs.Services.Compositor
 
-// Noctalia entry point
+// Atmosphera entry point
 Item {
     id: root
 
@@ -13,7 +13,7 @@ Item {
         id: carousel
         anchors.fill: parent
 
-        wlrNamespace: "noctalia:plugins:wallpaperCarousel"
+        wlrNamespace: "atmosphera:plugins:wallpaperCarousel"
         cfg: pluginApi?.pluginSettings ?? {}
         getFocusedScreen: () => CompositorService.getFocusedScreen()
 
@@ -51,7 +51,7 @@ Item {
             return !(!dir || Settings.data.wallpaper.useSolidColor);
         }
 
-        shellSettingsHint: "Open Noctalia Settings → Wallpaper,\nand select a wallpaper directory."
+        shellSettingsHint: "Open Atmosphera Settings → Wallpaper,\nand select a wallpaper directory."
 
         onWallpaperPicked: (fullPath, screenName) => {
             if (Settings.data.wallpaper.enableMultiMonitorDirectories && screenName)
@@ -62,6 +62,6 @@ Item {
     }
 
     Component.onCompleted: {
-        console.info("WallpaperCarousel: plugin loaded — use 'qs -c noctalia-shell ipc call wallpaperCarousel toggle' to open");
+        console.info("WallpaperCarousel: plugin loaded — use 'qs -c atmosphera ipc call wallpaperCarousel toggle' to open");
     }
 }

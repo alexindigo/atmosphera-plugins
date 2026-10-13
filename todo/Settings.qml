@@ -187,7 +187,7 @@ ColumnLayout {
   }
 
   // Folder picker for selecting export path
-  NFilePicker {
+  AtmoFilePicker {
     id: folderPicker
     selectionMode: "folders"
     title: pluginApi.tr("settings.export_path.label")

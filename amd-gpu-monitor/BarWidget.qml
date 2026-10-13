@@ -59,7 +59,7 @@ Item {
       if (mon.gpuCritical)
         return AtmoColor.mError;
       if (mon.gpuWarning)
-        return AtmoColor.mWarning;
+        return AtmoColor.mTertiary;
     }
     return iconColor;
   }

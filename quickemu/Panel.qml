@@ -40,7 +40,7 @@ Item {
                 color: Qt.alpha(AtmoColor.mError, 0.15)
                 radius: Style.radiusS
                 border.color: Qt.alpha(AtmoColor.mError, 0.4)
-                border.width: Style.borderWidth || 1
+                border.width: Style.borderS
 
                 RowLayout {
                     id: errorRow
@@ -324,7 +324,7 @@ Item {
                             color: AtmoColor.mSurfaceVariant
                             radius: Style.radiusS
                             border.color: osComboBox.activeFocus ? AtmoColor.mPrimary : Qt.alpha(AtmoColor.mOnSurface, 0.1)
-                            border.width: Style.borderWidth || 1
+                            border.width: Style.borderS
                         }
                         contentItem: TextField {
                             text: osComboBox.editText

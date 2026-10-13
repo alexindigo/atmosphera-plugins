@@ -232,7 +232,7 @@ Item {
     //
     //   Idle      — mSurfaceVariant fill, mOutline border
     //   Hover     — mSurfaceVariant fill, mPrimary border
-    //   Selected  — mSecondaryContainer fill, mPrimary border
+    //   Selected  — secondary-tinted surface fill, mPrimary border
     //   Pressed   — mPrimary @ 12% opacity fill, mPrimary border
     //
     // Precedence (highest wins): Pressed > Selected > Hover > Idle.
@@ -257,7 +257,7 @@ Item {
         radius: Style.radiusM
         color: card.pressed
             ? Qt.alpha(AtmoColor.mPrimary, 0.12)
-            : (card.selected ? AtmoColor.mSecondaryContainer : AtmoColor.mSurfaceVariant)
+            : (card.selected ? Qt.tint(AtmoColor.mSurfaceVariant, Qt.alpha(AtmoColor.mSecondary, 0.16)) : AtmoColor.mSurfaceVariant)
         border.color: (cardHover.hovered || card.pressed || card.selected)
             ? AtmoColor.mPrimary
             : Qt.alpha(AtmoColor.mOutline, Style.opacityHeavy)

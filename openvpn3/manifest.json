@@ -1,7 +1,7 @@
 {
   "id": "openvpn3",
   "name": "OpenVPN3",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "4.4.1",
   "minAtmospheraVersion": "0.8.0",
   "author": "minh",

@@ -85,7 +85,7 @@ ColumnLayout {
             }
             NText {
                 text: pluginApi?.tr("settings.color-powersaver-desc")
-                font.pointSize: Style.fontSizeSmall
+                font.pointSize: Style.fontSizeS
                 color: AtmoColor.mOnSurfaceVariant
             }
 
@@ -132,7 +132,7 @@ ColumnLayout {
             }
             NText {
                 text: pluginApi?.tr("settings.color-performance-desc")
-                font.pointSize: Style.fontSizeSmall
+                font.pointSize: Style.fontSizeS
                 color: AtmoColor.mOnSurfaceVariant
             }
 

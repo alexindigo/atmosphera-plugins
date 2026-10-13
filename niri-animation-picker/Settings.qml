@@ -48,7 +48,7 @@ ColumnLayout {
                 }
             }
 
-            NFilePicker {
+            AtmoFilePicker {
                 id: animFolderPicker
                 title: pluginApi?.tr("settings.animationsFolder.pickerTitle")
                 initialPath: root.valueAnimationsFolder

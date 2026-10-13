@@ -210,7 +210,7 @@ Item {
                 Layout.fillWidth: true
               }
 
-              NFilePicker {
+              AtmoFilePicker {
                 id: shareFilePicker
                 title: pluginApi?.tr("panel.send-file-picker")
                 selectionMode: "files"

@@ -447,7 +447,7 @@ ColumnLayout {
   }
 
   // ---- Logo directory picker popup ----
-  NFilePicker {
+  AtmoFilePicker {
     id: logoDirPicker
     title: pluginApi?.tr("settings.logo-dir-picker-title")
     selectionMode: "folders"

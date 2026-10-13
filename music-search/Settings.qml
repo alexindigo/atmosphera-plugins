@@ -598,7 +598,7 @@ ColumnLayout {
     defaultValue: root.defaults.showStatusMetadata ?? true
   }
 
-  NFilePicker {
+  AtmoFilePicker {
     id: downloadFolderPicker
     selectionMode: "folders"
     title: pluginApi?.tr("settings.downloads.folderPickerTitle")

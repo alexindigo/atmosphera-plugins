@@ -71,7 +71,7 @@ ColumnLayout {
 
   }
 
-  NFilePicker {
+  AtmoFilePicker {
       id: filePicker
       selectionMode: "folders"
       title: pluginApi.tr("settings.sessionDir.title")

@@ -155,11 +155,11 @@ Item {
 
         readonly property color currentAccent: isSelected ? AtmoColor.mPrimary : accentColor
 
-        color: isSelected ? Qt.alpha(AtmoColor.mPrimary, Style.stateOpacityActive) : (tabMouse.containsMouse ? Qt.alpha(accentColor, Style.stateOpacityHover) : "transparent")
+        color: isSelected ? Qt.alpha(AtmoColor.mPrimary, 0.12) : (tabMouse.containsMouse ? Qt.alpha(accentColor, 0.08) : "transparent")
         
         border.width: Style.borderS
         
-        border.color: isSelected ? AtmoColor.mPrimary : (tabMouse.containsMouse ? accentColor : Qt.alpha(accentColor, Style.stateOpacityHover))
+        border.color: isSelected ? AtmoColor.mPrimary : (tabMouse.containsMouse ? accentColor : Qt.alpha(accentColor, 0.08))
 
         Behavior on color { ColorAnimation { duration: 150 } }
         Behavior on border.color { ColorAnimation { duration: 150 } }

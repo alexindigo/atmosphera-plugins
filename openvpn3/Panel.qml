@@ -484,7 +484,7 @@ Item {
         }
     }
 
-    NFilePicker {
+    AtmoFilePicker {
         id: filePicker
         title: pluginApi?.tr("import.title")
         selectionMode: "files"
