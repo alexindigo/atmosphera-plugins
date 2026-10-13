@@ -9,8 +9,31 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    env:
+      PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      PUSH_BEFORE: ${{ github.event.before }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Validate registry
-        run: python3 .github/scripts/validate-registry.py
+        with:
+          fetch-depth: 0
+      - name: Read pinned Atmosphera ref
+        id: pin
+        run: echo "ref=$(cat .github/atmosphera-ref)" >> "$GITHUB_OUTPUT"
+      - name: Checkout pinned Atmosphera shell
+        uses: actions/checkout@v4
+        with:
+          repository: alexindigo/atmosphera
+          ref: ${{ steps.pin.outputs.ref }}
+          path: .tooling/atmosphera
+          fetch-depth: 1
+      - name: Resolve plugin lint base
+        run: |
+          zero=0000000000000000000000000000000000000000
+          base="${PR_BASE_SHA:-$PUSH_BEFORE}"
+          if [ -z "$base" ] || [ "$base" = "$zero" ]; then base=HEAD^; fi
+          echo "BASE_REF=$base" >> "$GITHUB_ENV"
+      - name: Checker regressions
+        run: ATMOSPHERA_CONTAINER_ENGINE=docker .tooling/atmosphera/.devcontainer/container-run.sh python3 -B Scripts/dev/plugin-lint-selftest.py
+      - name: Changed plugin compatibility, version bumps and registry
+        run: ATMOSPHERA_CONTAINER_ENGINE=docker .tooling/atmosphera/Scripts/dev/plugin-lint-repo.sh "$GITHUB_WORKSPACE" "$BASE_REF"

@@ -60,6 +60,18 @@ The shadowing check reports Atmosphera names hidden by imported Qt or
 Quickshell modules; expect no `AtmoColor`/`Color` findings. The rename check
 must report **0 pending** code references.
 
-Test plugins and run these checks only inside a test VM, never on a live
-desktop shell. Load each declared entry point on the target shell version
-and inspect its logs and rendered surfaces before publishing.
+Test plugins and run these checks only in an isolated test environment, never
+on a live desktop shell. Load each declared entry point on the target shell
+version and inspect its logs and rendered surfaces before publishing.
+
+### Commit-time compatibility gate
+
+The tracked pre-commit hook checks the staged Git index with the Atmosphera
+shell's checker, at the shell commit pinned in `.github/atmosphera-ref`. It
+checks each changed plugin's QML compatibility and version bump, and audits every
+plugin. CI runs the same runner alongside the registry validator.
+
+See [LINTING.md](LINTING.md) for hook setup, the pinned shell, full-audit
+commands and the CI workflow. A code or asset change must increase the
+plugin's version in both the manifest and catalog; retaining the old version
+prevents existing installations receiving corrected code.

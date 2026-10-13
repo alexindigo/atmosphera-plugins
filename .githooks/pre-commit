@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT=$(git rev-parse --show-toplevel)
+REF=$(git show :.github/atmosphera-ref 2>/dev/null) || { echo "plugin lint: .github/atmosphera-ref missing" >&2; exit 1; }
+REF=${REF%%[[:space:]]*}
+COMMON=$(cd "$(git rev-parse --git-common-dir)" && pwd)
+CACHE="$COMMON/atmosphera-shell/$REF"
+SRC=${ATMOSPHERA_SHELL_SRC:-https://github.com/alexindigo/atmosphera}
+if [ ! -d "$CACHE/.git" ]; then
+  rm -rf "$CACHE.tmp"
+  # Git exports the committing repo's GIT_INDEX_FILE to hooks; clear it here so
+  # the cache clone/checkout never touches the plugins repo's index.
+  if ! ( unset GIT_INDEX_FILE GIT_DIR GIT_WORK_TREE GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+         git clone --quiet --no-checkout "$SRC" "$CACHE.tmp" \
+           && git -C "$CACHE.tmp" checkout --quiet --detach "$REF" ); then
+    echo "plugin lint: cannot get Atmosphera $REF from $SRC (set ATMOSPHERA_SHELL_SRC to a local shell repo)" >&2
+    exit 1
+  fi
+  mv "$CACHE.tmp" "$CACHE"
+fi
+exec "$CACHE/Scripts/dev/plugin-lint-repo.sh" "$ROOT" HEAD
