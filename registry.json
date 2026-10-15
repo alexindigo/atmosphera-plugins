@@ -6,7 +6,7 @@
       "author": "domovoy#arch",
       "description": "Watch model digests in ~/Digest; highlight new finds and browse their titles and summaries.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Digest",

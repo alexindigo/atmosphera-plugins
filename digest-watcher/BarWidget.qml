@@ -54,11 +54,15 @@ AtmoIconButton {
   // Out-of-band additions (files dropped manually): rescan every 2 min.
   // digest-index only rewrites .index.json when content actually changed,
   // so this is cheap and flicker-free.
+  IndexRunner {
+    id: indexRunner
+  }
+
   Timer {
     interval: 120000
     running: true
     repeat: true
     triggeredOnStart: true
-    onTriggered: Quickshell.execDetached(["/usr/local/bin/digest-index"])
+    onTriggered: indexRunner.refresh()
   }
 }

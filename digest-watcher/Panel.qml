@@ -62,6 +62,8 @@ Item {
     ListView {
       Layout.fillWidth: true
       Layout.fillHeight: true
+      Layout.minimumHeight: 0
+      implicitHeight: Math.max(contentHeight, emptyLabel.visible ? emptyLabel.implicitHeight : 0)
       clip: true
       spacing: Style.marginS
       model: root.index.entries
@@ -125,6 +127,7 @@ Item {
       }
 
       NText {
+        id: emptyLabel
         anchors.centerIn: parent
         visible: root.index.count === 0
         text: "No digests yet — the scout runs Fridays 18:00"
