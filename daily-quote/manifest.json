@@ -1,7 +1,7 @@
 {
   "id": "daily-quote",
   "name": "Daily Quote",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "4.7.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "Vikthor",
@@ -17,6 +17,18 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "authorFont": {"type": "String"},
+        "gradientDirection": {"type": "String"},
+        "quoteColor": {"type": "String"},
+        "quoteFont": {"type": "String"},
+        "showBackground": {"type": "Boolean"},
+        "showGradientOverlay": {"type": "Boolean"},
+        "textAlign": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "quoteFont": "",
       "authorFont": "",

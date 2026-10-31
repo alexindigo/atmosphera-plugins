@@ -1,7 +1,7 @@
 {
     "id": "giphy-search",
     "name": "Giphy Search",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "author": "Sergio Mendolia",
     "license": "MIT",
     "description": "Search for GIFs on Giphy from the Launcher.",
@@ -22,6 +22,13 @@
     },
     "metadata": {
         "commandPrefix": "gif",
+        "settingsSchema": {
+          "version": 1,
+          "fields": {
+            "api_key": {"type": "String"},
+            "rating": {"type": "String"}
+          }
+        },
         "defaultSettings": {
             "api_key": "",
             "rating": "g"

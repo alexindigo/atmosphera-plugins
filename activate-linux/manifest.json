@@ -1,7 +1,7 @@
 {
   "id": "activate-linux",
   "name": "Activate Linux Watermark",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": "Preston Corless (pgattic)",
   "contributors": ["outfoxxed"],
   "license": "MIT",
@@ -16,6 +16,14 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "customizeText": {"type": "Boolean"},
+        "firstLine": {"type": "String"},
+        "secondLine": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "customizeText": false,
       "firstLine": "Activate Linux",
@@ -23,4 +31,3 @@
     }
   }
 }
-

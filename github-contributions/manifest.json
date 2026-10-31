@@ -1,7 +1,7 @@
 {
   "id": "github-contributions",
   "name": "GitHub Contributions",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "4.4.1",
   "minAtmospheraVersion": "0.8.0",
   "author": "xevrion",
@@ -18,6 +18,18 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "layout": {"type": "String"},
+        "refreshInterval": {"type": "Real"},
+        "showLabels": {"type": "Boolean"},
+        "showTotal": {"type": "Boolean"},
+        "token": {"type": "String"},
+        "username": {"type": "String"},
+        "weeksShown": {"type": "Real"}
+      }
+    },
     "defaultSettings": {
       "username": "",
       "token": "",

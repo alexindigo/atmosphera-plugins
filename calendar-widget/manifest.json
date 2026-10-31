@@ -1,7 +1,7 @@
 {
   "id": "calendar-widget",
   "name": "Desktop Calendar",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "minNoctaliaVersion": "4.5.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "Simon",
@@ -17,6 +17,13 @@
     "desktopWidgetSettings": "DesktopWidgetSettings.qml"
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "roundedCorners": {"type": "Boolean"},
+        "showBackground": {"type": "Boolean"}
+      }
+    },
     "defaultSettings": {
       "showBackground": true,
       "roundedCorners": true

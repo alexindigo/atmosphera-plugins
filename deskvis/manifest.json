@@ -1,7 +1,7 @@
 {
   "id": "deskvis",
   "name": "DeskVis",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.8.0",
   "author": "HAVEKziad",
@@ -19,6 +19,24 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "barCount": {"type": "Real"},
+        "customHeight": {"type": "Real"},
+        "customPrimaryColor": {"type": "String"},
+        "customSecondaryColor": {"type": "String"},
+        "customWidth": {"type": "Real"},
+        "direction": {"type": "String"},
+        "fadeWhenIdle": {"type": "Boolean"},
+        "fps": {"type": "Real"},
+        "mode": {"type": "String"},
+        "sensitivity": {"type": "Real"},
+        "smoothing": {"type": "Real"},
+        "useCustomColors": {"type": "Boolean"},
+        "useGradient": {"type": "Boolean"}
+      }
+    },
     "defaultSettings": {
       "direction": "up",
       "mode": "bars",

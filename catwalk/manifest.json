@@ -1,7 +1,7 @@
 {
   "id": "catwalk",
   "name": "Catwalk",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "MannuVilasara",
@@ -25,6 +25,13 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "hideBackground": {"type": "Boolean"},
+        "minimumThreshold": {"type": "Real"}
+      }
+    },
     "defaultSettings": {
       "minimumThreshold": 10,
       "hideBackground": false

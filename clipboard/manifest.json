@@ -1,7 +1,7 @@
 {
   "id": "clipboard",
   "name": "Clipboard",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "minNoctaliaVersion": "4.1.2",
   "minAtmospheraVersion": "0.8.0",
   "author": "yanekyuk",
@@ -23,6 +23,14 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "density": {"type": "String"},
+        "maxHistorySize": {"type": "Real"},
+        "showImagePreviews": {"type": "Boolean"}
+      }
+    },
     "defaultSettings": {
       "maxHistorySize": 100,
       "showImagePreviews": true,

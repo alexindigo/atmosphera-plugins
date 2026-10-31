@@ -1,7 +1,7 @@
 {
   "id": "display-settings",
   "name": "Display Settings",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "fstanis",
@@ -19,6 +19,13 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "iconColor": {"type": "String"},
+        "niriConfigPath": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "niriConfigPath": "~/.config/niri/config.kdl",
       "iconColor": "none"
