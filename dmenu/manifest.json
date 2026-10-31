@@ -1,7 +1,7 @@
 {
   "id": "dmenu",
   "name": "Dmenu Provider",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "3.9.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "Ben Hilton",
@@ -18,6 +18,18 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "customInputPrefix": {"type": "String","optional": true},
+        "maxResults": {"type": "Real"},
+        "panelPosition": {"type": "String"},
+        "resultFile": {"type": "String"},
+        "showFooter": {"type": "Boolean"},
+        "showMatchCount": {"type": "Boolean"},
+        "showToastOnSelect": {"type": "Boolean"}
+      }
+    },
     "defaultSettings": {
       "resultFile": "/tmp/noctalia-dmenu-result",
       "showToastOnSelect": false,

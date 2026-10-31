@@ -6,7 +6,7 @@
       "author": "domovoy#arch",
       "description": "Watch model digests in ~/Digest; highlight new finds and browse their titles and summaries.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Digest",
@@ -40,7 +40,7 @@
       "author": "Codex",
       "description": "A Noctalia utility plugin for screen rotation tools on Niri and Hyprland.",
       "license": "MIT",
-      "version": "1.2.3",
+      "version": "1.2.4",
       "tags": [
         "Bar",
         "Control Center",
@@ -115,7 +115,7 @@
       "author": "Dvaxert",
       "description": "AMD discrete GPU monitoring via rocm-smi with graphs and configurable metrics.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel",
@@ -160,7 +160,7 @@
       "author": "j-1in",
       "description": "AI Chat and Translation panel",
       "license": "MIT",
-      "version": "2.1.7",
+      "version": "2.1.8",
       "tags": [
         "Bar",
         "Panel",
@@ -232,7 +232,7 @@
       "author": "Piero-93",
       "description": "A lightweight, efficient battery status bar widget and interactive control popup. This plugin displays real-time battery diagnostics (including dynamic power draw in Watts) and provides desktop controls to switch system power profiles or adjust hardware battery charge thresholds safely without needing root privileges.",
       "license": "GPLv3",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "tags": [
         "Bar",
         "System",
@@ -288,7 +288,7 @@
       "author": "aslauw",
       "description": "Bar widget showing battery levels for wireless peripherals (mouse, keyboard, headset, etc.) via OpenRazer and Solaar.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Indicator",
@@ -307,7 +307,7 @@
       "author": "Jostein Hanssen",
       "description": "Pause idle actions for an arbitrary duration from the Noctalia launcher.",
       "license": "MIT",
-      "version": "1.1.3",
+      "version": "1.1.4",
       "tags": [
         "Bar",
         "Launcher",
@@ -344,7 +344,7 @@
       "author": "Krendil",
       "description": "Search for books in your Calibre library",
       "license": "MIT",
-      "version": "1.3.3",
+      "version": "1.3.4",
       "tags": [
         "Launcher"
       ],
@@ -398,7 +398,7 @@
       "author": "d7om",
       "description": "Claude Code (Anthropic agentic CLI) with full tool access, permission controls, session management, MCP servers, and device integration",
       "license": "MIT",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "tags": [
         "Bar",
         "Panel",
@@ -456,7 +456,7 @@
       "author": "blackbartblues",
       "description": "Advanced clipboard manager with history, search, keyboard navigation, ToDo integration, pinned items, notecards/sticky notes, and selection-to-notecard feature. Fully translated with comprehensive i18n support.",
       "license": "MIT",
-      "version": "2.4.5",
+      "version": "2.4.6",
       "tags": [
         "Utility",
         "Bar",
@@ -492,7 +492,7 @@
       "author": "DanisDeveloper",
       "description": "Simple bar widget with notification about result",
       "license": "MIT",
-      "version": "1.2.3",
+      "version": "1.2.4",
       "minAtmospheraVersion": "0.8.0",
       "tags": [
         "Bar"
@@ -507,7 +507,7 @@
       "author": "Noctalia Team",
       "description": "Create and manage custom predefined color schemes with a visual color editor.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Theming",
         "Utility"
@@ -576,7 +576,7 @@
       "author": "Noctalia Team",
       "description": "Define and run custom shell commands from the launcher",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Launcher"
       ],
@@ -679,7 +679,7 @@
       "author": "Ben Hilton",
       "description": "An IPC-driven dmenu replacement that lets external scripts present choices through a Noctalia panel.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Panel",
         "Productivity",
@@ -716,7 +716,7 @@
       "author": "Hy4ri",
       "description": "Change the lightbar color of your DualShock 4 or DualSense controller with a color picker and recent color history.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Hardware",
         "Gaming",
@@ -785,7 +785,7 @@
       "author": "Thomas Philippo",
       "description": "Monitor your git repositories from the Noctalia bar. See open issues and pull requests at a glance, without leaving your desktop.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Development",
         "Bar",
@@ -861,7 +861,7 @@
       "author": "Pozzoo",
       "description": "Monitor and control Home Assistant entities from the bar. Requires qt6-websockets.",
       "license": "MIT",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "tags": [
         "Bar",
         "Panel",
@@ -915,7 +915,7 @@
       "author": "focky",
       "description": "Use Hermes on a remote server through an interactive SSH terminal.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Panel",
@@ -952,7 +952,7 @@
       "author": "blacku",
       "description": "[DEPRECATED \u2014 not maintained from Hyprland 0.55+] Steam overlay with automatic window management for Hyprland. Due to Hyprland 0.55 deprecating hyprlang in favour of Lua (changing hyprctl dispatch parsing and popup/xdg handling), this plugin is no longer actively maintained. The 2.2.0 release adds a best-effort dual-mode dispatch fix and an optional custom Lua layout, but no further updates are planned. Automatically moves all Steam windows (except fullscreen games) to an overlay workspace; main 3 windows (Friends, Client, Chat) positioned in a row, fully responsive percentage-based layout. Requires Hyprland window manager.",
       "license": "MIT",
-      "version": "2.2.1",
+      "version": "2.2.2",
       "tags": [],
       "lastUpdated": "2026-10-10",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
@@ -966,7 +966,7 @@
       "author": "XimoCP",
       "description": "Elevate your Hyprland experience. A modular plugin to safely inject custom animations, borders, and visual effects on the fly.",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "Panel",
         "Bar",
@@ -988,7 +988,7 @@
       "author": "Christophe Branchereau",
       "description": "Set the battery charging mode for ideapad laptop batteries, to extend battery lifespan",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel",
@@ -1074,7 +1074,7 @@
       "author": "Noam Stolero",
       "description": "Duration+scope Keep Awake with persistent last-choice and partial/full inhibit modes.",
       "license": "MIT",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "tags": [
         "Bar",
         "Panel",
@@ -1092,7 +1092,7 @@
       "author": "blacku",
       "description": "Universal keyboard shortcuts keymap that automatically detects and displays keybindings for Hyprland, Niri, or MangoWC compositors.",
       "license": "MIT",
-      "version": "3.7.5",
+      "version": "3.7.6",
       "tags": [
         "Bar",
         "Panel",
@@ -1150,7 +1150,7 @@
       "author": "Borhaneddine GUEMIDI <guemidiborhane@gmail.com>",
       "description": "Network latency monitor \u2014 multi-host, windowed averages, sparkline graphs",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Bar",
         "Panel",
@@ -1168,7 +1168,7 @@
       "author": "Marco Melletti",
       "description": "Noctalia Launcher gnu pass provider",
       "license": "MIT",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "tags": [
         "Launcher"
       ],
@@ -1183,7 +1183,7 @@
       "author": "PaloMiku",
       "description": "Control linux-wallpaperengine from Noctalia with per-screen wallpaper selection.",
       "license": "MIT",
-      "version": "1.3.2",
+      "version": "1.3.3",
       "tags": [
         "Bar",
         "Panel",
@@ -1201,7 +1201,7 @@
       "author": "Pever3ll",
       "description": "Uses MPRIS data to fetch song lyrics from lrclib.net and displays it in the bar.",
       "license": "GPLv3",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "tags": [
         "Bar",
         "Music"
@@ -1218,7 +1218,7 @@
       "author": "atheeq-rhxn",
       "description": "Switch between different mangowc layouts",
       "license": "MIT",
-      "version": "3.1.1",
+      "version": "3.1.2",
       "tags": [
         "Bar",
         "Panel",
@@ -1253,7 +1253,7 @@
       "author": "Mathew-D",
       "description": "GUI for inspecting MIME handlers and updating default applications in mimeapps.list (requires python3).",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "Bar",
         "Panel",
@@ -1309,7 +1309,7 @@
       "author": "cmptr",
       "description": "Shows AI coding assistant usage stats in the bar with detail panel (Claude Code, Codex, Copilot, Gemini, OpenRouter, Zen)",
       "license": "MIT",
-      "version": "0.3.2",
+      "version": "0.3.3",
       "tags": [
         "Bar",
         "Productivity",

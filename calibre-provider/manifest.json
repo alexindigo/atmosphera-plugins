@@ -1,7 +1,7 @@
 {
     "id": "calibre-provider",
     "name": "Calibre Provider",
-    "version": "1.3.3",
+    "version": "1.3.4",
     "description": "Search for books in your Calibre library",
     "tags": ["Launcher"],
     "minNoctaliaVersion": "4.6.1",
@@ -18,6 +18,15 @@
     },
     "metadata": {
         "commandPrefix": "cb",
+        "settingsSchema": {
+          "version": 1,
+          "fields": {
+            "forceGrid": {"type": "Boolean"},
+            "launcher": {"type": "String"},
+            "recentlyOpenedFiles": {"type": "List", "machineLocal": true, "element": {"type": "Real"}},
+            "recentlyOpenedMax": {"type": "Real"}
+          }
+        },
         "defaultSettings": {
             "launcher": "xdg-open",
             "forceGrid": false,

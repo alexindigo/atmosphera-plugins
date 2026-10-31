@@ -1,7 +1,7 @@
 {
   "id": "mangowc-layout-switcher",
   "name": "mango layout switcher",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "minNoctaliaVersion": "4.1.2",
   "minAtmospheraVersion": "0.8.0",
   "author": "atheeq-rhxn",
@@ -22,6 +22,12 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "monitorOrder": {"type": "List","element": {"type": "String"}}
+      }
+    },
     "defaultSettings": {
       "monitorOrder": []
     }

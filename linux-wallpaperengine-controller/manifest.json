@@ -1,7 +1,7 @@
 {
   "id": "linux-wallpaperengine-controller",
   "name": "Linux WallpaperEngine Controller",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.8.0",
   "author": "PaloMiku",
@@ -23,6 +23,38 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "applyWallpaperColorsOnApply": {"type": "Boolean"},
+        "autoApplyOnStartup": {"type": "Boolean"},
+        "badgeEnabled": {"type": "Map","element": {"type": "Boolean"}},
+        "badgeOrder": {"type": "List","element": {"type": "String"}},
+        "defaultAudioReactiveEffects": {"type": "Boolean"},
+        "defaultClamp": {"type": "String"},
+        "defaultDisableMouse": {"type": "Boolean"},
+        "defaultDisableParallax": {"type": "Boolean"},
+        "defaultFps": {"type": "Real"},
+        "defaultFullscreenPauseOnlyActive": {"type": "Boolean"},
+        "defaultMuted": {"type": "Boolean"},
+        "defaultNoAutomute": {"type": "Boolean"},
+        "defaultNoFullscreenPause": {"type": "Boolean"},
+        "defaultScaling": {"type": "String"},
+        "defaultVolume": {"type": "Real"},
+        "enableExtraPropertiesEditor": {"type": "Boolean"},
+        "iconColor": {"type": "String"},
+        "lastKnownGoodScreens": {"type": "Map", "machineLocal": true, "element": {"type": "Record","fields": {"path": {"type": "String","optional": true},"scaling": {"type": "String","optional": true},"clamp": {"type": "String","optional": true},"volume": {"type": "Real","optional": true},"muted": {"type": "Boolean","optional": true},"audioReactiveEffects": {"type": "Boolean","optional": true},"noAutomute": {"type": "Boolean","optional": true},"disableMouse": {"type": "Boolean","optional": true},"disableParallax": {"type": "Boolean","optional": true}}}},
+        "panelLastSelectedPath": {"type": "String", "machineLocal": true},
+        "panelPageSize": {"type": "Real"},
+        "runtimeRecoveryPending": {"type": "Boolean", "machineLocal": true},
+        "screens": {"type": "Map","element": {"type": "Record","fields": {"path": {"type": "String","optional": true},"scaling": {"type": "String","optional": true},"clamp": {"type": "String","optional": true},"volume": {"type": "Real","optional": true},"muted": {"type": "Boolean","optional": true},"audioReactiveEffects": {"type": "Boolean","optional": true},"noAutomute": {"type": "Boolean","optional": true},"disableMouse": {"type": "Boolean","optional": true},"disableParallax": {"type": "Boolean","optional": true}}}},
+        "showSidebarDescription": {"type": "Boolean"},
+        "wallpaperColorScreenshots": {"type": "Map", "machineLocal": true, "element": {"type": "Record","fields": {"path": {"type": "String","optional": true},"wallpaperPath": {"type": "String","optional": true},"scaling": {"type": "String","optional": true},"updatedAt": {"type": "Real","optional": true}}}},
+        "wallpaperProperties": {"type": "Map","element": {"type": "Map","element": {"type": "String"}}},
+        "wallpaperScanCacheMinutes": {"type": "Real"},
+        "wallpapersFolder": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "wallpapersFolder": "~/.local/share/Steam/steamapps/workshop/content/431960",
       "iconColor": "none",

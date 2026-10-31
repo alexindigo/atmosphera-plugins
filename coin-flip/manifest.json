@@ -1,7 +1,7 @@
 {
   "id": "coin-flip",
   "name": "Coin Flipper",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "minAtmospheraVersion": "0.8.0",
   "author": "DanisDeveloper",
   "description": "Simple bar widget with notification about result",
@@ -19,6 +19,14 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "delay": {"type": "Real"},
+        "iconColor": {"type": "String"},
+        "lastResult": {"type": "String", "optional": true, "machineLocal": true}
+      }
+    },
     "defaultSettings": {
       "iconColor": "mPrimary",
       "delay" : 20

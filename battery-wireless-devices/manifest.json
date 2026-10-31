@@ -1,7 +1,7 @@
 {
   "id": "battery-wireless-devices",
   "name": "Battery for Wireless Devices",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.8.0",
   "author": "aslauw",
@@ -18,6 +18,16 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "deviceOrder": {"type": "List","element": {"type": "String"}},
+        "devices": {"type": "Map","element": {"type": "Record","fields": {"enabled": {"type": "Boolean","optional": true},"icon": {"type": "String","optional": true},"iconColor": {"type": "String","optional": true},"ringColor": {"type": "String","optional": true},"launchCmd": {"type": "String","optional": true},"name": {"type": "String","optional": true},"type": {"type": "String","optional": true}}}},
+        "refreshInterval": {"type": "Real"},
+        "showCharging": {"type": "Boolean"},
+        "showPercentage": {"type": "Boolean"}
+      }
+    },
     "defaultSettings": {
       "refreshInterval": 60,
       "showPercentage": false,

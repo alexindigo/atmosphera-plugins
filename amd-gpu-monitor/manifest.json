@@ -1,7 +1,7 @@
 {
   "id": "amd-gpu-monitor",
   "name": "AMD GPU Monitor",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "minNoctaliaVersion": "4.0.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "Dvaxert",
@@ -18,6 +18,30 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "compactMode": {"type": "Boolean"},
+        "deviceIndex": {"type": "Real"},
+        "iconColor": {"type": "String"},
+        "showDcefclk": {"type": "Boolean"},
+        "showFanSpeed": {"type": "Boolean"},
+        "showFclk": {"type": "Boolean"},
+        "showGpuUse": {"type": "Boolean"},
+        "showMclk": {"type": "Boolean"},
+        "showPower": {"type": "Boolean"},
+        "showSclk": {"type": "Boolean"},
+        "showSocclk": {"type": "Boolean"},
+        "showTempEdge": {"type": "Boolean"},
+        "showTempJunction": {"type": "Boolean"},
+        "showTempMemory": {"type": "Boolean"},
+        "showVram": {"type": "Boolean"},
+        "showVramActivity": {"type": "Boolean"},
+        "textColor": {"type": "String"},
+        "useMonospaceFont": {"type": "Boolean"},
+        "usePadding": {"type": "Boolean"}
+      }
+    },
     "defaultSettings": {
       "deviceIndex": 0,
       "compactMode": true,
