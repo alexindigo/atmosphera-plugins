@@ -1,7 +1,7 @@
 {
   "id": "ramadan-iftar",
   "name": "Ramadan Iftar",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "minNoctaliaVersion": "4.1.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "User",
@@ -21,6 +21,16 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "city": {"type": "String"},
+        "country": {"type": "String"},
+        "method": {"type": "Real"},
+        "showAlways": {"type": "Boolean"},
+        "showCountdown": {"type": "Boolean"}
+      }
+    },
     "defaultSettings": {
       "city": "London",
       "country": "UK",

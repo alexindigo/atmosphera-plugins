@@ -1,7 +1,7 @@
 {
   "id": "niri-screensaver",
   "name": "Niri Screensaver",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "minNoctaliaVersion": "4.7.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "jfreed-dev",
@@ -18,6 +18,34 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "batteryMinPercent": {"type": "Real"},
+        "clockDuration": {"type": "Real"},
+        "clockFont": {"type": "String"},
+        "clockFormat": {"type": "String"},
+        "cursorHide": {"type": "Boolean"},
+        "cursorWarp": {"type": "Boolean"},
+        "dismissOnKey": {"type": "Boolean"},
+        "enabled": {"type": "Boolean"},
+        "excludeEffects": {"type": "String"},
+        "fadeInEffect": {"type": "String"},
+        "fadeOutEffect": {"type": "String"},
+        "frameRate": {"type": "Real"},
+        "idleSeconds": {"type": "Real"},
+        "includeEffects": {"type": "String"},
+        "killCommand": {"type": "String"},
+        "launcherCommand": {"type": "String"},
+        "logoDir": {"type": "String"},
+        "logoPath": {"type": "String"},
+        "multiMonitorMode": {"type": "String"},
+        "nowPlayingDuration": {"type": "Real"},
+        "randomLogo": {"type": "Boolean"},
+        "showClock": {"type": "Boolean"},
+        "showNowPlaying": {"type": "Boolean"}
+      }
+    },
     "defaultSettings": {
       "enabled": true,
       "idleSeconds": 300,

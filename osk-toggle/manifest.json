@@ -1,7 +1,7 @@
 {
   "id": "osk-toggle",
   "name": "OSK Toggle",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "minNoctaliaVersion": "4.4.3",
   "minAtmospheraVersion": "0.8.0",
   "author": "blackteaextract",
@@ -22,6 +22,15 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "backend": {"type": "String"},
+        "disableHoverIcon": {"type": "Boolean"},
+        "hideWhenUnavailable": {"type": "Boolean"},
+        "wvkbdBin": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "backend": "auto",
       "hideWhenUnavailable": false,

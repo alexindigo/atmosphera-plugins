@@ -1,7 +1,7 @@
 {
   "id": "niri-animation-picker",
   "name": "Niri Animation Picker",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "Duncan-Rose",
@@ -24,6 +24,14 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "animationsFolder": {"type": "String"},
+        "iconColor": {"type": "String"},
+        "targetFile": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "animationsFolder": "~/.config/niri/animations",
       "targetFile": "~/.config/niri/config.kdl",

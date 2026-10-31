@@ -1,7 +1,7 @@
 {
   "id": "protonvpn",
   "name": "ProtonVPN Status",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "blessonmathewsam",
@@ -18,6 +18,15 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "connectedColor": {"type": "String"},
+        "disconnectedColor": {"type": "String"},
+        "displayMode": {"type": "String"},
+        "pollInterval": {"type": "Real"}
+      }
+    },
     "defaultSettings": {
       "displayMode": "alwaysShow",
       "connectedColor": "primary",

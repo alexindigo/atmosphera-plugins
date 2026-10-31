@@ -1,7 +1,7 @@
 {
   "id": "privacy-indicator",
   "name": "Privacy Indicator",
-  "version": "1.2.14",
+  "version": "1.2.15",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "Noctalia Team",
@@ -24,6 +24,19 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "activeColor": {"type": "String"},
+        "camFilterRegex": {"type": "String"},
+        "enableToast": {"type": "Boolean"},
+        "hideInactive": {"type": "Boolean"},
+        "iconSpacing": {"type": "Real"},
+        "inactiveColor": {"type": "String"},
+        "micFilterRegex": {"type": "String"},
+        "removeMargins": {"type": "Boolean"}
+      }
+    },
     "defaultSettings": {
       "hideInactive": false,
       "enableToast": true,

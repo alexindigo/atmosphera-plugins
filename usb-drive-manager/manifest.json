@@ -1,7 +1,7 @@
 {
   "id": "usb-drive-manager",
   "name": "USB Drive Manager",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "hennifant",
@@ -24,6 +24,18 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "autoMount": {"type": "Boolean"},
+        "fileBrowser": {"type": "String"},
+        "hideWhenEmpty": {"type": "Boolean"},
+        "iconColor": {"type": "String"},
+        "showBadge": {"type": "Boolean"},
+        "showNotifications": {"type": "Boolean"},
+        "terminalCommand": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "autoMount": false,
       "fileBrowser": "yazi",

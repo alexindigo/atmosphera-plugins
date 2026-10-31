@@ -1,7 +1,7 @@
 {
   "id": "parallax-wallpaper",
   "name": "Parallax Wallpaper",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "4.4.0",
   "author": "Qholin",
   "license": "MIT",
@@ -16,6 +16,20 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "autoZoom": {"type": "Boolean"},
+        "hParallaxAmount": {"type": "Real"},
+        "hParallaxDuration": {"type": "Real"},
+        "invertDirection": {"type": "Boolean"},
+        "parallaxDirection": {"type": "String"},
+        "parallaxEasing": {"type": "String"},
+        "vParallaxAmount": {"type": "Real"},
+        "vParallaxDuration": {"type": "Real"},
+        "zoomAmount": {"type": "Real"}
+      }
+    },
     "defaultSettings": {
       "zoomAmount": 1.2,
       "parallaxDirection": "horizontal",

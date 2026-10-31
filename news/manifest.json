@@ -1,7 +1,7 @@
 {
   "id": "news",
   "name": "News Bar",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "LazarH",
@@ -24,6 +24,19 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "apiKey": {"type": "String"},
+        "category": {"type": "String"},
+        "country": {"type": "String"},
+        "language": {"type": "String"},
+        "maxHeadlines": {"type": "Real"},
+        "refreshInterval": {"type": "Real"},
+        "rollingSpeed": {"type": "Real"},
+        "widgetWidth": {"type": "Real"}
+      }
+    },
     "defaultSettings": {
       "apiKey": "YOUR_API_KEY_HERE",
       "country": "us",

@@ -1,7 +1,7 @@
 {
   "id": "noctalia-vpn",
   "name": "Noctalia VPN",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "Умеджон Базаров",
@@ -19,6 +19,15 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "autoStart": {"type": "Boolean"},
+        "lastActiveServerId": {"type": "String"},
+        "lastMode": {"type": "String"},
+        "lastProxyMode": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "lastActiveServerId": "",
       "lastMode": "rules",

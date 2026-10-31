@@ -1,7 +1,7 @@
 {
   "id": "openvpn3",
   "name": "OpenVPN3",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "minNoctaliaVersion": "4.4.1",
   "minAtmospheraVersion": "0.8.0",
   "author": "minh",
@@ -20,6 +20,18 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "connectedColor": {"type": "String"},
+        "defaultPersistent": {"type": "Boolean"},
+        "disconnectedColor": {"type": "String"},
+        "displayMode": {"type": "String"},
+        "hideWhenInactive": {"type": "Boolean"},
+        "pollInterval": {"type": "Real"},
+        "showNotifications": {"type": "Boolean"}
+      }
+    },
     "defaultSettings": {
       "displayMode": "onhover",
       "connectedColor": "primary",
