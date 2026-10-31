@@ -1,7 +1,7 @@
 {
   "id": "kde-connect",
   "name": "KDE Connect",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "minNoctaliaVersion": "4.4.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "WerWolv",
@@ -26,6 +26,13 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "hideIfNoDeviceConnected": {"type": "Boolean", "optional": true},
+        "mainDeviceId": {"type": "String", "optional": true}
+      }
+    },
     "defaultSettings": {}
   }
 }

@@ -1,7 +1,7 @@
 {
   "id": "custom-sticker",
   "name": "Custom Stickers",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "minNoctaliaVersion": "4.6.6",
   "author": "spiros132",
   "license": "MIT",
@@ -16,6 +16,17 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "image": {"type": "String", "optional": true},
+        "mirror": {"type": "Boolean", "optional": true},
+        "opacity": {"type": "Real", "optional": true},
+        "roundedCorners": {"type": "Boolean", "optional": true},
+        "showBackground": {"type": "Boolean", "optional": true},
+        "verticalMirror": {"type": "Boolean", "optional": true}
+      }
+    },
     "defaultSettings": {}
   }
 }

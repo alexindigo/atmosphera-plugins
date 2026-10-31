@@ -180,7 +180,7 @@
       "author": "ThatOneCalculator",
       "description": "Set the fan state on the ZenBook S 16 UM5606",
       "license": "MIT",
-      "version": "1.1.8",
+      "version": "1.1.9",
       "tags": [
         "Bar",
         "System"
@@ -217,7 +217,7 @@
       "author": "itscrystalline",
       "description": "A plugin that allows you to run custom actions when battery state changes.",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "System"
       ],
@@ -558,7 +558,7 @@
       "author": "ronin ck",
       "description": "A custom battery icon.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "System"
@@ -592,7 +592,7 @@
       "author": "spiros132",
       "description": "Custom stickers (images) that you can put on the desktop as desktop widgets.",
       "license": "MIT",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "tags": [
         "Desktop",
         "Fun"
@@ -699,7 +699,7 @@
       "author": "Ronin-CK",
       "description": "DNS Manager with custom server support for Noctalia.",
       "license": "MIT",
-      "version": "1.2.2",
+      "version": "1.2.3",
       "tags": [
         "Bar",
         "Network"
@@ -935,7 +935,7 @@
       "author": "sapjax",
       "description": "A macOS-style hot corners plugin for Noctalia Shell.",
       "license": "MIT",
-      "version": "0.0.4",
+      "version": "0.0.5",
       "tags": [
         "Desktop",
         "Productivity"
@@ -1039,7 +1039,7 @@
       "author": "Noctalia Team",
       "description": "Browse and search kaomoji emoticons from the launcher",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Launcher",
         "Fun"
@@ -1055,7 +1055,7 @@
       "author": "WerWolv",
       "description": "A Plugin integrating your mobile devices into a panel using KDEConnect",
       "license": "GPLv2",
-      "version": "1.2.3",
+      "version": "1.2.4",
       "tags": [
         "Bar",
         "Panel",
@@ -1114,7 +1114,7 @@
       "author": "Simon",
       "description": "Shows khal agenda.",
       "license": "MIT",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "tags": [
         "Desktop",
         "System"
@@ -1290,7 +1290,7 @@
       "author": "Mathew-D",
       "description": "Mirror one monitor to another using wl-mirror.",
       "license": "MIT",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "tags": [
         "Bar",
         "Panel",
@@ -1587,7 +1587,7 @@
       "author": "adrlau",
       "description": "Manage niri outputs: scale, mode, and more.",
       "license": "MIT",
-      "version": "1.1.4",
+      "version": "1.1.5",
       "tags": [
         "Utility",
         "Bar",
@@ -1606,7 +1606,7 @@
       "author": "eliahreeves",
       "description": "Opens the launcher when typing in niri's overview mode",
       "license": "MIT",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "tags": [
         "System"
       ],
@@ -1621,7 +1621,7 @@
       "author": "J Pablo Puerta <ews@folksonomy.com>",
       "description": "Tracks off-screen windows in niri ribbon",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Utility",
         "Bar",
@@ -1658,7 +1658,7 @@
       "author": "matt-hb",
       "description": "Sets windows to urgent when they receive a notification and sets them back to normal when their notifications are cleared (Niri only!)",
       "license": "MIT",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "tags": [
         "System",
         "Utility",
@@ -1728,7 +1728,7 @@
       "author": "Sourajyoti Basak",
       "description": "Lenovo Vantage for Noctalia Shell",
       "license": "GPL-3.0-or-later",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "tags": [
         "Community"
       ],
@@ -1840,7 +1840,7 @@
       "author": "joniler",
       "description": "Monitor and control an NVIDIA Optimus dGPU on Hyprland \u2014 toggle Battery (dGPU sleeps) vs HDMI-Ready, see live power/VRAM, and list what is holding the GPU awake.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Panel",
@@ -1913,7 +1913,7 @@
       "author": "alxndrv",
       "description": "Plugin for controlling Philips Hue lights from the taskbar",
       "license": "MIT",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "tags": [
         "Bar",
         "Panel"
@@ -1983,7 +1983,7 @@
       "author": "Bojan Jovanovic",
       "description": "Search pass (password-store) from the launcher. Type 'pass <name>' to copy a password or 'po <name>' to copy a TOTP code to clipboard.",
       "license": "MIT",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "tags": [
         "Launcher",
         "Utility"
@@ -2018,7 +2018,7 @@
       "author": "Noctalia Team <team@noctalia.dev>",
       "description": "Provides a Polkit authentication agent.",
       "license": "MIT",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "tags": [
         "System",
         "Security"
@@ -2158,7 +2158,7 @@
       "author": "Kermut572",
       "description": "A simple plugin that fetches the current, past, and future weeks menu for UCLouvain's Restaurants Universitaires",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Panel"
@@ -2491,7 +2491,7 @@
       "author": "Simon",
       "description": "Shows Distribution, Kernel, Uptime and IP addresses.",
       "license": "MIT",
-      "version": "1.0.9",
+      "version": "1.0.10",
       "tags": [
         "Desktop",
         "System"
@@ -2599,7 +2599,7 @@
       "author": "Domovoy",
       "description": "Mark a touchpad jump or phantom click from the bar and preserve evidence through the local touchpad-incident helper.",
       "license": "GPL-3.0",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Input",
@@ -2632,7 +2632,7 @@
       "author": "Daddeffe",
       "description": "Browse and search Unicode characters from the launcher",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Launcher",
         "Utility"
@@ -2721,7 +2721,7 @@
       "author": "c1ph3r-1337",
       "description": "A rotational disc app launcher plugin",
       "license": "unknown",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Launcher"
       ],
@@ -2822,7 +2822,7 @@
       "author": "dodaars",
       "description": "A weekly calendar plugin complementing Noctalia's inbuilt calendar service.",
       "license": "MIT",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "tags": [
         "Bar",
         "Panel",
@@ -2840,7 +2840,7 @@
       "author": "MorphoRust",
       "description": "Show a QR code to join the current Wi-Fi network",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Panel",
@@ -2859,7 +2859,7 @@
       "author": "doughbran",
       "description": "Workspace overview with live window previews and wallpaper backgrounds for Hyprland.",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "Hyprland",
         "Bar",

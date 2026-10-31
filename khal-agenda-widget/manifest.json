@@ -1,7 +1,7 @@
 {
   "id": "khal-agenda-widget",
   "name": "Khal Agenda Info",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.8.0",
   "author": "Simon",
@@ -13,6 +13,10 @@
     "desktopWidget": "DesktopWidget.qml"
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {}
+    },
     "defaultSettings": {}
   }
 }

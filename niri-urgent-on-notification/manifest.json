@@ -1,7 +1,7 @@
 {
   "id": "niri-urgent-on-notification",
   "name": "Set Niri Window to Urgent on Notification",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minNoctaliaVersion": "3.6.0",
   "author": "matt-hb",
   "tags": [
@@ -19,6 +19,10 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {}
+    },
     "defaultSettings": {}
   }
 }

@@ -1,7 +1,7 @@
 {
   "id": "mirror-mirror",
   "name": "Mirror Mirror",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "Mathew-D",
@@ -24,6 +24,10 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {}
+    },
     "defaultSettings": {}
   }
 }

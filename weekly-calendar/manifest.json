@@ -1,7 +1,7 @@
 {
   "id": "weekly-calendar",
   "name": "Weekly Calendar",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "minNoctaliaVersion": "4.2.3",
   "minAtmospheraVersion": "0.8.0",
   "author": "dodaars",
@@ -17,5 +17,18 @@
   },
   "dependencies": {
     "plugins": []
+  },
+  "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "dayLineOpacity": {"type": "Real", "optional": true},
+        "hourLineOpacity": {"type": "Real", "optional": true},
+        "lineColorType": {"type": "String", "optional": true},
+        "panelMode": {"type": "String", "optional": true},
+        "timeFormat": {"type": "String", "optional": true},
+        "weekStart": {"type": "String", "optional": true}
+      }
+    }
   }
 }

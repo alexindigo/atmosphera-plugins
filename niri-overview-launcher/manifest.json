@@ -1,7 +1,7 @@
 {
   "id": "niri-overview-launcher",
   "name": "Niri Overview Launcher",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minNoctaliaVersion": "4.1.2",
   "author": "eliahreeves",
   "license": "MIT",
@@ -17,6 +17,10 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {}
+    },
     "defaultSettings": {}
   }
 }

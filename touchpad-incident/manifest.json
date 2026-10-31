@@ -1,7 +1,7 @@
 {
   "id": "touchpad-incident",
   "name": "Touchpad Incident",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minAtmospheraVersion": "0.8.0",
   "author": "Domovoy",
   "license": "GPL-3.0",
@@ -11,5 +11,11 @@
   "entryPoints": {
     "main": "Main.qml",
     "barWidget": "BarWidget.qml"
+  },
+  "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {}
+    }
   }
 }

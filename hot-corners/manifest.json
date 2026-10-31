@@ -1,7 +1,7 @@
 {
   "id": "hot-corners",
   "name": "Hot Corners",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "sapjax",
@@ -20,5 +20,21 @@
   "dependencies": {
     "plugins": []
   },
-  "metadata": {}
+  "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "corners": {
+          "type": "Record",
+          "optional": true,
+          "fields": {
+            "BottomLeft": {"type": "String", "optional": true},
+            "BottomRight": {"type": "String", "optional": true},
+            "TopLeft": {"type": "String", "optional": true},
+            "TopRight": {"type": "String", "optional": true}
+          }
+        }
+      }
+    }
+  }
 }
