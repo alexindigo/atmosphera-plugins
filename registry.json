@@ -2702,7 +2702,7 @@
       "author": "spiros132",
       "description": "A plugin that uses a backend renderer to play videos as your wallpaper.",
       "license": "MIT",
-      "version": "2.0.11",
+      "version": "2.0.12",
       "tags": [
         "Bar",
         "Panel",
