@@ -1,7 +1,7 @@
 {
   "id": "translator",
   "name": "Translator",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "minNoctaliaVersion": "4.4.1",
   "minAtmospheraVersion": "0.8.0",
   "author": "Cleboost",
@@ -21,6 +21,16 @@
   },
   "metadata": {
     "commandPrefix": "translate",
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "backend": {"type": "String"},
+        "deeplApiKey": {"type": "String", "optional": true, "sensitive": true, "machineLocal": true},
+        "realTime": {"type": "Boolean"},
+        "realTimeTranslation": {"type": "Boolean", "optional": true},
+        "showPreview": {"type": "Boolean", "optional": true}
+      }
+    },
     "defaultSettings": {
       "backend": "google",
       "realTime": true

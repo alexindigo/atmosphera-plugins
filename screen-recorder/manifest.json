@@ -1,7 +1,7 @@
 {
   "id": "screen-recorder",
   "name": "Screen Recorder",
-  "version": "1.3.9",
+  "version": "1.3.10",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "Noctalia Team",
@@ -23,6 +23,31 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "audioCodec": {"type": "String"},
+        "audioSource": {"type": "String"},
+        "colorRange": {"type": "String"},
+        "copyToClipboard": {"type": "Boolean"},
+        "customFrameRate": {"type": "String", "optional": true},
+        "customReplayDuration": {"type": "String"},
+        "directory": {"type": "String"},
+        "filenamePattern": {"type": "String"},
+        "frameRate": {"type": "String"},
+        "hideInactive": {"type": "Boolean"},
+        "iconColor": {"type": "String"},
+        "quality": {"type": "String"},
+        "replayDuration": {"type": "String"},
+        "replayEnabled": {"type": "Boolean"},
+        "replayStorage": {"type": "String"},
+        "resolution": {"type": "String"},
+        "restorePortalSession": {"type": "Boolean"},
+        "showCursor": {"type": "Boolean"},
+        "videoCodec": {"type": "String"},
+        "videoSource": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "hideInactive": false,
       "iconColor": "none",

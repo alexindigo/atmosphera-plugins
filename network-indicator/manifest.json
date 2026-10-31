@@ -1,7 +1,7 @@
 {
   "id": "network-indicator",
   "name": "Network Indicator",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "minNoctaliaVersion": "4.7.6",
   "minAtmospheraVersion": "0.8.0",
   "author": "tonigineer",
@@ -18,6 +18,30 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "byteThresholdActive": {"type": "Real"},
+        "colorRx": {"type": "String", "optional": true},
+        "colorSilent": {"type": "String", "optional": true},
+        "colorText": {"type": "String", "optional": true},
+        "colorTx": {"type": "String", "optional": true},
+        "columnSpacing": {"type": "Real"},
+        "customFontBold": {"type": "Boolean"},
+        "customFontFamily": {"type": "String", "optional": true},
+        "customFontItalic": {"type": "Boolean"},
+        "fontSizeModifier": {"type": "Real"},
+        "iconSizeModifier": {"type": "Real"},
+        "iconType": {"type": "String"},
+        "layout": {"type": "String"},
+        "paddingLeft": {"type": "Real"},
+        "paddingRight": {"type": "Real"},
+        "rowSpacing": {"type": "Real"},
+        "slots": {"type": "List", "element": {"type": "String"}},
+        "useCustomColors": {"type": "Boolean"},
+        "useCustomFont": {"type": "Boolean"}
+      }
+    },
     "defaultSettings": {
       "iconType": "caret",
       "byteThresholdActive": 5000,

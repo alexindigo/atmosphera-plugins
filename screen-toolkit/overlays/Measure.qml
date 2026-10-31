@@ -6,6 +6,7 @@ import qs.Commons
 import qs.Widgets
 import qs.Services.UI
 import "../utils/utils.js" as U
+import "../utils"
 Variants {
     id: measureVariants
     property bool isVisible: false
@@ -65,7 +66,7 @@ Variants {
         function _tr(key, interp) {
             return measureVariants.mainInstance?.pluginApi?.tr(key, interp ?? {})
         }
-        Process {
+        ToolProcess {
             id: shotProc
             stdout: StdioCollector {}
             onExited: (code) => {

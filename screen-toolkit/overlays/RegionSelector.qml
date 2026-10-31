@@ -5,6 +5,7 @@ import Quickshell.Wayland
 import qs.Commons
 import qs.Widgets
 import qs.Services.UI
+import "../utils"
 Item {
     id: root
     signal regionSelected(real x, real y, real w, real h, var screen)
@@ -56,14 +57,14 @@ Item {
         root.isVisible = false
         root.activeScreen = null
     }
-    Process {
+    ToolProcess {
         id: _envCheckProc
         stdout: StdioCollector {}
         onExited: {
             root.isNiri = _envCheckProc.stdout.text.trim() === "1"
         }
     }
-    Process {
+    ToolProcess {
         id: _winFetchProc
         stdout: StdioCollector {}
         onExited: {

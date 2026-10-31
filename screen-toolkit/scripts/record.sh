@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/temp-paths.sh"
 # record.sh <action> [args...]
 #
 # Actions:
-#   thumb        <src>                    — extract mid-frame thumbnail → /tmp/screen-toolkit-record-thumb.png
+#   thumb        <src>                    — extract mid-frame thumbnail in the supplied runtime directory
 #   convert-mp4  <input> <output>         — finalize MP4: stream-copy (fast path)
 #   convert-mp4  <input> <output> --recode — finalize MP4: re-encode audio to AAC 128k + faststart
 #   convert-gif  <input> <output>         — convert MP4 → palette-optimized GIF at 15 fps
@@ -17,8 +18,8 @@
 # Used by: Record.qml
 set -euo pipefail
 ACTION="${1:-}"
-THUMB_OUT="/tmp/screen-toolkit-record-thumb.png"
-PALETTE="/tmp/screen-toolkit-record-palette.png"
+THUMB_OUT="${SCREEN_TOOLKIT_TMPDIR}/screen-toolkit-record-thumb.png"
+PALETTE="${SCREEN_TOOLKIT_TMPDIR}/screen-toolkit-record-palette.png"
 _require() {
     command -v "$1" >/dev/null 2>&1 \
         || { echo "ERROR: missing dependency: $1" >&2; exit 3; }

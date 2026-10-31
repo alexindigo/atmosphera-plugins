@@ -1,7 +1,7 @@
 {
   "id": "zed-provider",
   "name": "Zed Provider",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "author": "justKevv",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -17,8 +17,12 @@
   },
   "metadata": {
     "commandPrefix": "zed",
-    "defaultSettings": {
-      "openCounts": {}
-    }
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "openCounts": {"type": "Map", "machineLocal": true, "element": {"type": "Real"}}
+      }
+    },
+    "defaultSettings": {"openCounts": {}}
   }
 }

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/temp-paths.sh"
 set -euo pipefail
 GX="$1"; GY="$2"; GW="$3"; GH="$4"
-FILE="/tmp/screen-toolkit-lens.png"
+FILE="${SCREEN_TOOLKIT_TMPDIR}/screen-toolkit-lens.png"
 
 # Exit 1 — missing dependency (dep name written to stdout for QML)
 for dep in grim curl jq xdg-open; do

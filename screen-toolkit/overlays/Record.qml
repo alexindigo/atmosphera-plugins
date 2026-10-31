@@ -6,6 +6,7 @@ import qs.Commons
 import qs.Widgets
 import qs.Services.UI
 import "../utils/utils.js" as U
+import "../utils"
 Item {
     id: root
     property var pluginApi: null
@@ -57,7 +58,7 @@ Item {
         root._recorderBin = (pluginApi?.mainInstance?.detectedRecorder === "wf-recorder")
                             ? "wf-recorder" : "wl-screenrec"
         root.region      = regionStr
-        root.mp4Path     = "/tmp/screen-toolkit-record-" + Date.now() + ".mp4"
+        root.mp4Path     = TempPaths.path("screen-toolkit-record-" + Date.now() + ".mp4")
         root.gifPath     = ""
         root.recordState = "recording"
         root._elapsed    = 0
@@ -134,7 +135,7 @@ Item {
         var s = secs % 60
         return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s
     }
-    Process {
+    ToolProcess {
         id: wfRecorderProc
         onExited: (code) => {
             elapsedTimer.stop()
@@ -143,7 +144,7 @@ Item {
             if (isCleanExit) {
                 root.recordState = "converting"
                 var tmpTs    = Qt.formatDateTime(new Date(), "yyyy-MM-dd_HH-mm-ss")
-                var optimOut = "/tmp/screen-toolkit-record-" + tmpTs
+                var optimOut = TempPaths.path("screen-toolkit-record-" + tmpTs)
                 if (root.format === "mp4") {
                     root.gifPath = optimOut + ".mp4"
                     var needsRecode = root.audioOutput || root.audioInput
@@ -163,9 +164,9 @@ Item {
             }
         }
     }
-    Process { id: stopProc }
-    Process { id: clipProc }
-    Process {
+    ToolProcess { id: stopProc }
+    ToolProcess { id: clipProc }
+    ToolProcess {
         id: gifConvertProc
         onExited: (code) => {
             root.recordState = ""
@@ -180,7 +181,7 @@ Item {
             }
         }
     }
-    Process {
+    ToolProcess {
         id: saveProc
         property string savedPath: ""
         onExited: (code) => {

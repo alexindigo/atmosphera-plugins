@@ -1,7 +1,7 @@
 {
     "id": "show-keys",
     "name": "Show Keys",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "minNoctaliaVersion": "3.6.0",
     "minAtmospheraVersion": "0.8.0",
     "author": "onez3r0",
@@ -20,6 +20,20 @@
         "plugins": []
     },
     "metadata": {
+        "settingsSchema": {
+            "version": 1,
+            "fields": {
+                "captureEnabled": {"type": "Boolean"},
+                "disabledScreens": {"type": "List", "element": {"type": "String"}},
+                "evtestDevice": {"type": "String"},
+                "hideDelaySec": {"type": "Real"},
+                "marginPx": {"type": "Real"},
+                "pillBg": {"type": "String", "optional": true},
+                "pillColor": {"type": "String", "optional": true},
+                "position": {"type": "String"},
+                "useCustomColors": {"type": "Boolean", "optional": true}
+            }
+        },
         "defaultSettings": {
             "captureEnabled": true,
             "evtestDevice": "/dev/input/event3",

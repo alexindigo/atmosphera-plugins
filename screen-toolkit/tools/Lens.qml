@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.Services.UI
+import "../utils"
 
 Item {
     id: root
@@ -19,7 +20,7 @@ Item {
         ]})
     }
 
-    Process {
+    ToolProcess {
         id: lensProc
         onExited: (code) => {
             if (code !== 0) { root.failed(); return }
@@ -27,5 +28,4 @@ Item {
         }
     }
 }
-
 

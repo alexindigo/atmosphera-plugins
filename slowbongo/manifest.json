@@ -1,7 +1,7 @@
 {
   "id": "slowbongo",
   "name": "Slow Bongo",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "tui",
@@ -21,6 +21,22 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "catColor": {"type": "String"},
+        "catOffsetY": {"type": "Real"},
+        "catSize": {"type": "Real"},
+        "idleTimeout": {"type": "Real"},
+        "inputDevice": {"type": "String", "optional": true},
+        "inputDevices": {"type": "List", "optional": true, "element": {"type": "String"}},
+        "raveMode": {"type": "Boolean"},
+        "tappyMode": {"type": "Boolean"},
+        "useMprisFilter": {"type": "Boolean"},
+        "waitingTimeout": {"type": "Real"},
+        "widthPadding": {"type": "Real", "optional": true}
+      }
+    },
     "defaultSettings": {
       "idleTimeout": 150,
       "waitingTimeout": 30000,

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/temp-paths.sh"
 # color-picker.sh <output-png>
 # Picks a color from screen, outputs "R G B" to stdout.
 # Uses hyprpicker (preferred) or falls back to slurp+grim.

@@ -4,6 +4,7 @@ import qs.Commons
 import qs.Widgets
 import qs.Services.UI
 import "../utils/utils.js" as U
+import "../utils"
 Item {
     id: root
     property var pluginApi: null
@@ -31,7 +32,7 @@ Item {
         var m = root.qrResult.match(/P:([^;]+)/)
         return m ? m[1] : ""
     }
-    Process { id: clipProc }
+    ToolProcess { id: clipProc }
     function _copy(text) {
         if (!text || text === "") return
         clipProc.exec({

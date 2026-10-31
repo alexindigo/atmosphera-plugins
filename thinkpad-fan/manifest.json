@@ -1,7 +1,7 @@
 {
     "id": "thinkpad-fan",
     "name": "ThinkPad - Fan & Thermal Control",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "minNoctaliaVersion": "4.0.0",
     "minAtmospheraVersion": "0.8.0",
     "author": "Piero-93",
@@ -15,6 +15,16 @@
         "settings": "SettingsView.qml"
     },
     "metadata": {
+        "settingsSchema": {
+            "version": 1,
+            "fields": {
+                "allowPopupOpening": {"type": "Boolean"},
+                "colorActive": {"type": "String", "nullable": true},
+                "colorAuto": {"type": "String", "nullable": true},
+                "colorLevel0": {"type": "String", "nullable": true},
+                "colorizeByStatus": {"type": "Boolean"}
+            }
+        },
         "defaultSettings": {
             "colorizeByStatus": true,
             "allowPopupOpening": true,

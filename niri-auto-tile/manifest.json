@@ -1,7 +1,7 @@
 {
   "id": "niri-auto-tile",
   "name": "Auto-Tile",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "minNoctaliaVersion": "4.4.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "pir0c0pter0",
@@ -22,6 +22,19 @@
   },
 
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "debounceMs": {"type": "Real"},
+        "enabled": {"type": "Boolean"},
+        "language": {"type": "String"},
+        "maxEventsPerSecond": {"type": "Real"},
+        "maxVisible": {"type": "Real"},
+        "onlyAtMax": {"type": "Boolean", "optional": true},
+        "perWorkspace": {"type": "Boolean"},
+        "workspaceMaxVisible": {"type": "Map", "element": {"type": "Real"}}
+      }
+    },
     "defaultSettings": {
       "maxVisible": 4,
       "debounceMs": 300,

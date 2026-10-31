@@ -1,7 +1,7 @@
 {
   "id": "saved-desktop-widgets",
   "name": "Saved Desktop Widgets",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "spiros132",
@@ -17,6 +17,18 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "definitions": {
+        "widget": {"type": "Record", "fields": {"id": {"type": "String"}, "instanceSettings": {"type": "Record", "optional": true, "fields": {}}}},
+        "monitor": {"type": "Record", "fields": {"name": {"type": "String"}, "widgets": {"type": "List", "element": {"ref": "widget"}}}}
+      },
+      "fields": {
+        "loadWidgets": {"type": "Boolean"},
+        "monitorWidgets": {"type": "Map", "optional": true, "machineLocal": true, "element": {"type": "List", "element": {"ref": "monitor"}}},
+        "saveWidgets": {"type": "Boolean"}
+      }
+    },
     "defaultSettings": {
       "saveWidgets": true,
       "loadWidgets": true
