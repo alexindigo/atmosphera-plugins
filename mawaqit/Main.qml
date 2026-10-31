@@ -7,6 +7,15 @@ Item {
   id: root
   property var pluginApi: null
 
+  CalendarCache {
+    id: calendarCache
+    pluginApi: root.pluginApi
+  }
+
+  function calendarRequest(command, callback) {
+    calendarCache.request(command, callback)
+  }
+
   // ── Prayer data ───────────────────────────────────────────────────────────
   property var      prayerTimings:    null
   property string   hijriDateStr:     ""
@@ -280,10 +289,9 @@ Item {
   function forceRefresh() {
     try {
       pluginApi.pluginSettings._cacheData = null
-      const settings = pluginApi.pluginSettings
-      for (const key in settings) { if (key.startsWith("_cal_")) delete settings[key] }
       pluginApi.saveSettings()
     } catch(e) {}
+    calendarRequest({op: "clear"})
     fetchWeek()
   }
 
@@ -504,6 +512,7 @@ Item {
 
   // ── Startup ───────────────────────────────────────────────────────────────
   Component.onCompleted: {
+    calendarRequest({op: "adopt"})
     const cached = getTodayFromCache()
     if (cached) {
       Logger.d("Mawaqit", "Cache hit on startup — loading instantly")

@@ -247,55 +247,13 @@ Item {
     return best
   }
 
-  // ── Calendar persistent cache ────────────────────────────────────────
-  property var memoryCalCache: ({})
+  // Calendar IO is owned by Main's cache command, never by preferences or a
+  // panel-local cache that could outlive invalidation/expiry in the disk owner.
+  property var calendarCommand: mainInstance ? mainInstance.calendarRequest : null
 
-  function saveCalCache(m, y, data) {
-    try {
-      const key = "_cal_" + y + "_" + m
-      pluginApi.pluginSettings[key] = JSON.stringify({ timestamp: Date.now(), data: data })
-      pluginApi.saveSettings()
-      memoryCalCache[key] = data
-    } catch(e) { Logger.w("Mawaqit", "Cal cache save failed:", e.message) }
-  }
-
-  function loadCalCache(m, y) {
-    try {
-      const key = "_cal_" + y + "_" + m
-      if (memoryCalCache[key]) return memoryCalCache[key]
-      const raw = cfg[key]
-      if (!raw) return null
-      const entry = JSON.parse(raw)
-      if (!entry?.data || !entry?.timestamp) return null
-      if (Date.now() - entry.timestamp > 2592000000) return null
-      memoryCalCache[key] = entry.data
-      return entry.data
-    } catch(e) { return null }
-  }
-
-  function invalidateCalCache(m, y) {
-    try {
-      const key = "_cal_" + y + "_" + m
-      delete memoryCalCache[key]
-      delete pluginApi.pluginSettings[key]
-      pluginApi.saveSettings()
-    } catch(e) {}
-  }
-
-  function pruneCalCache() {
-    try {
-      const cutoff = Date.now() - 31536000000
-      const settings = pluginApi.pluginSettings
-      let pruned = 0
-      for (const key in settings) {
-        if (!key.startsWith("_cal_")) continue
-        try {
-          const entry = JSON.parse(settings[key])
-          if (entry?.timestamp && entry.timestamp < cutoff) { delete settings[key]; delete memoryCalCache[key]; pruned++ }
-        } catch(e) { delete settings[key]; pruned++ }
-      }
-      if (pruned > 0) { pluginApi.saveSettings(); Logger.d("Mawaqit", "Pruned", pruned, "cal cache entries") }
-    } catch(e) {}
+  function calendarRequest(command, callback) {
+    if (typeof calendarCommand === "function") calendarCommand(command, callback)
+    else if (typeof callback === "function") callback({status: "failed", error: "cache-owner"})
   }
 
   function formatLastSynced(timestamp) {
@@ -613,30 +571,45 @@ Item {
           }
 
           function fetchCalendar(force) {
-            const key = "_cal_" + viewYear + "_" + viewMonth
-            if (!force && memoryCalCache[key]) { calItem.calData = memoryCalCache[key]; updateGrid(); return }
-            if (!force) {
-              const cached = loadCalCache(viewMonth, viewYear)
-              if (cached) { calItem.calData = cached; updateGrid(); return }
-            } else {
-              invalidateCalCache(viewMonth, viewYear)
-              calItem.calData = null
-            }
             if (calItem.calXhr) { calItem.calXhr.abort(); calItem.calXhr = null }
             calItem.calLoading = true
+            calItem.calTimestamp = 0
             const m = viewMonth, y = viewYear
+            const request = ++calItem.calendarRequestId
+            root.calendarRequest({op: force ? "invalidate" : "load", year: y, month: m}, function(result) {
+              if (request !== calItem.calendarRequestId) return
+              if (!force && result.status === "ready" && result.entry) {
+                calItem.calData = result.entry.data
+                calItem.calTimestamp = result.entry.timestamp
+                calItem.calLoading = false
+                updateGrid()
+                return
+              }
+              if (force) calItem.calData = null
+              calItem.fetchRemoteCalendar(m, y, request)
+            })
+          }
+
+          property int calendarRequestId: 0
+          property real calTimestamp: 0
+
+          function fetchRemoteCalendar(m, y, request) {
             const xhr = new XMLHttpRequest()
             calItem.calXhr = xhr
             xhr.open("GET", `https://api.aladhan.com/v1/hToGCalendar/${m}/${y}`)
             xhr.onreadystatechange = function() {
               if (xhr.readyState !== XMLHttpRequest.DONE) return
+              if (request !== calItem.calendarRequestId) return
               calItem.calXhr = null; calItem.calLoading = false
               if (xhr.status === 200) {
                 try {
                   const res = JSON.parse(xhr.responseText)
                   if (res.code === 200 && res.data) {
                     calItem.calData = res.data
-                    saveCalCache(m, y, res.data)
+                    root.calendarRequest({op: "save", year: y, month: m, data: res.data}, function(result) {
+                      if (request === calItem.calendarRequestId && result.status === "ready")
+                        calItem.calTimestamp = result.entry.timestamp
+                    })
                     updateGrid()
                   }
                 } catch(e) { Logger.e("Mawaqit", "Cal parse error:", e.message) }
@@ -651,7 +624,7 @@ Item {
             const now = new Date()
             const realJDN = toJDN(now.getFullYear(), now.getMonth() + 1, now.getDate())
             if (todayJDN !== realJDN) return
-            if (!prunedOnce) { pruneCalCache(); prunedOnce = true }
+            if (!prunedOnce) { root.calendarRequest({op: "prune"}); prunedOnce = true }
             anchorJDN    = todayJDN - (hijriDay - 1)
             viewFirstJDN = anchorJDN
             viewMonth    = hijriMonth; viewYear = hijriYear; calItem.calData = null
@@ -679,8 +652,6 @@ Item {
             function onHijriDayChanged()         { if (calItem.calReady) Qt.callLater(calItem.initCalendar) }
             function onGregorianDateStrChanged() { if (calItem.calReady) Qt.callLater(calItem.initCalendar) }
             function onHijriDayOffsetChanged()   { if (calItem.calReady) Qt.callLater(calItem.initCalendar) }
-            function onHijriYearChanged()        { root.memoryCalCache = ({}) }
-            function onHijriMonthChanged()       { root.memoryCalCache = ({}) }
           }
 
           implicitWidth:  parent.width
@@ -894,10 +865,7 @@ Item {
               horizontalAlignment: Text.AlignHCenter
               text: {
                 if (calItem.calLoading) return "Syncing..."
-                const key = "_cal_" + calItem.viewYear + "_" + calItem.viewMonth
-                const raw = cfg[key]
-                if (!raw) return ""
-                try { return formatLastSynced(JSON.parse(raw).timestamp) } catch(e) { return "" }
+                return formatLastSynced(calItem.calTimestamp)
               }
               pointSize: Style.fontSizeXS * 0.85
               color: AtmoColor.mSecondary
