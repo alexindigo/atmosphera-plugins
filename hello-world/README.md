@@ -10,3 +10,10 @@ A demonstration plugin for Noctalia Shell that showcases bar widget, desktop wid
 - **Panel**: Shows detailed plugin information and IPC command examples
 - **Main**: Demonstrates custom IPC handlers
 - **Settings**: Plugin settings UI
+
+## Settings schema
+
+The manifest declares the finite `message` and `iconColor` String preferences in
+`metadata.settingsSchema` (format1). Defaults remain in `metadata.defaultSettings`.
+The metadata is additive: the existing shell owner and plugin behavior remain
+compatible. It introduces no user-file migration or new runtime API dependency.
