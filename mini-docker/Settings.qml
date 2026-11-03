@@ -16,6 +16,11 @@ ColumnLayout {
     property string statusState: cfg.statusState ?? defaults.statusState ?? "all"
     property string activeColor: cfg.activeColor ?? defaults.activeColor ?? "success"
     property string inactiveColor: cfg.inactiveColor ?? defaults.inactiveColor ?? "error"
+    readonly property bool settingsDirty: valueRefreshInterval !== (cfg.refreshInterval ?? defaults.refreshInterval ?? 5000)
+                                          || iconColor !== (cfg.iconColor ?? defaults.iconColor ?? "none")
+                                          || statusState !== (cfg.statusState ?? defaults.statusState ?? "all")
+                                          || activeColor !== (cfg.activeColor ?? defaults.activeColor ?? "success")
+                                          || inactiveColor !== (cfg.inactiveColor ?? defaults.inactiveColor ?? "error")
 
     function saveSettings() {
         if (!pluginApi) {
@@ -27,8 +32,10 @@ ColumnLayout {
         pluginApi.pluginSettings.statusState = root.statusState;
         pluginApi.pluginSettings.activeColor = root.activeColor;
         pluginApi.pluginSettings.inactiveColor = root.inactiveColor;
-        pluginApi.saveSettings();
-        Logger.i("MiniDocker", "Settings saved successfully");
+        pluginApi.saveSettings(function (result) {
+            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+                Logger.i("MiniDocker", "Settings saved successfully");
+        });
     }
 
     spacing: Style.marginM

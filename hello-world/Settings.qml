@@ -13,6 +13,8 @@ ColumnLayout {
 
   property string valueMessage: cfg.message ?? defaults.message
   property string valueIconColor: cfg.iconColor ?? defaults.iconColor
+  readonly property bool settingsDirty: valueMessage !== (cfg.message ?? defaults.message)
+                                        || valueIconColor !== (cfg.iconColor ?? defaults.iconColor)
 
   spacing: Style.marginL
 
@@ -50,8 +52,9 @@ ColumnLayout {
 
     pluginApi.pluginSettings.message = root.valueMessage;
     pluginApi.pluginSettings.iconColor = root.valueIconColor;
-    pluginApi.saveSettings();
-
-    Logger.d("HelloWorld", "Settings saved successfully");
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.d("HelloWorld", "Settings saved successfully");
+    });
   }
 }

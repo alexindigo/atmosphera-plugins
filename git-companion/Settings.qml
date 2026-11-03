@@ -13,6 +13,10 @@ ColumnLayout {
     property string valueRepo: cfg.repo ?? defaults.repo ?? ""
     property string valueGroup: cfg.group ?? defaults.group ?? ""
     property int valueRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval
+    readonly property bool settingsDirty: valuePlatform !== (cfg.platform ?? defaults.platform)
+                                          || valueRepo !== (cfg.repo ?? defaults.repo ?? "")
+                                          || valueGroup !== (cfg.group ?? defaults.group ?? "")
+                                          || valueRefreshInterval !== (cfg.refreshInterval ?? defaults.refreshInterval)
 
     function saveSettings() {
         if (!pluginApi) {
@@ -24,9 +28,10 @@ ColumnLayout {
         pluginApi.pluginSettings.repo = root.valueRepo;
         pluginApi.pluginSettings.group = root.valueGroup;
         pluginApi.pluginSettings.refreshInterval = root.valueRefreshInterval;
-        pluginApi.saveSettings();
-
-        Logger.d("Git Companion", "Settings saved successfully");
+        pluginApi.saveSettings(function (result) {
+            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+                Logger.d("Git Companion", "Settings saved successfully");
+        });
     }
 
     spacing: Style.marginL
@@ -69,6 +74,8 @@ ColumnLayout {
 
             onTextChanged: {
                 root.valueRepo = text;
+            }
+            onTextEdited: {
                 pluginApi.pluginSettings.repo = text;
                 pluginApi.saveSettings();
             }
@@ -82,6 +89,8 @@ ColumnLayout {
 
             onTextChanged: {
                 root.valueGroup = text;
+            }
+            onTextEdited: {
                 pluginApi.pluginSettings.group = text;
                 pluginApi.saveSettings();
             }
@@ -94,7 +103,7 @@ ColumnLayout {
             to: 90
             value: root.valueRefreshInterval
 
-            onValueChanged: {
+            onValueModified: {
                 root.valueRefreshInterval = value;
                 pluginApi.pluginSettings.refreshInterval = value;
                 pluginApi.saveSettings();

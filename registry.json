@@ -785,18 +785,18 @@
       "author": "Thomas Philippo",
       "description": "Monitor your git repositories from the Noctalia bar. See open issues and pull requests at a glance, without leaving your desktop.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Development",
         "Bar",
         "Panel",
         "Productivity"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "github-contributions",
@@ -879,15 +879,15 @@
       "author": "Noctalia Team",
       "description": "A simple Hello World plugin demonstrating functionalities. For developers only.",
       "license": "MIT",
-      "version": "1.2.6",
+      "version": "1.2.7",
       "tags": [
         "Development"
       ],
-      "lastUpdated": "2026-10-31",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "hermes-agent",
@@ -1272,17 +1272,17 @@
       "author": "MannuVilasara",
       "description": "Manage Docker containers, images, volumes & networks",
       "license": "MIT",
-      "version": "2.2.2",
+      "version": "2.2.3",
       "tags": [
         "Bar",
         "Panel",
         "Development"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "mirror-mirror",
@@ -1402,16 +1402,16 @@
       "author": "DBeidachazi",
       "description": "Display synchronized lyrics from MPRIS-compatible music players (e.g., go-musicfox) in the bar.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Bar",
         "Music"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.8.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "mpvpaper",
@@ -2563,16 +2563,16 @@
       "author": "Noctalia Team",
       "description": "A timer and stopwatch plugin for the bar & control center.",
       "license": "MIT",
-      "version": "1.1.6",
+      "version": "1.1.7",
       "tags": [
         "Bar",
         "Utility"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.4",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "todo",

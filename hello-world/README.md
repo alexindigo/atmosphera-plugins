@@ -15,5 +15,11 @@ A demonstration plugin for Noctalia Shell that showcases bar widget, desktop wid
 
 The manifest declares the finite `message` and `iconColor` String preferences in
 `metadata.settingsSchema` (format1). Defaults remain in `metadata.defaultSettings`.
-The metadata is additive: the existing shell owner and plugin behavior remain
-compatible. It introduces no user-file migration or new runtime API dependency.
+The shared settings page exposes reactive buffered dirtiness and stages its save
+callback through the popup's editor API. Saved feedback requires an acknowledged
+saved/no-op result with a current refresh; failed/stale results retain the editor.
+The shared popup also owns active native-control dirtiness and commits buffered
+input before gathering Apply or checking Close; pages do not inspect input children
+or duplicate that pending-input owner. This requires Atmosphera0.10.0.
+The separate live desktop settings
+page retains its existing ownership contract. There is no user-file migration.
