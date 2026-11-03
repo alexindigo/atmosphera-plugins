@@ -24,6 +24,10 @@ ColumnLayout {
     pluginApi?.manifest?.metadata?.defaultSettings?.activeColor ||
     "primary"
 
+  readonly property bool settingsDirty: editRefreshInterval !== (pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 3000)
+                                        || editShowProfileLabel !== (pluginApi?.pluginSettings?.showProfileLabel ?? pluginApi?.manifest?.metadata?.defaultSettings?.showProfileLabel ?? false)
+                                        || editActiveColor !== (pluginApi?.pluginSettings?.activeColor || pluginApi?.manifest?.metadata?.defaultSettings?.activeColor || "primary")
+
   spacing: Style.marginM
 
   NText {
@@ -92,7 +96,9 @@ ColumnLayout {
     pluginApi.pluginSettings.activeColor = root.editActiveColor
     pluginApi.pluginSettings.showProfileLabel = root.editShowProfileLabel
 
-    pluginApi.saveSettings()
-    Logger.i("Monique", "Settings saved")
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("Monique", "Settings saved")
+    })
   }
 }

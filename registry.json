@@ -359,18 +359,18 @@
       "author": "MannuVilasara",
       "description": "A cute animated cat for your bar.",
       "license": "MIT",
-      "version": "1.1.9",
+      "version": "1.1.10",
       "tags": [
         "Bar",
         "Desktop",
         "Panel",
         "Fun"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "clamshell",
@@ -474,17 +474,17 @@
       "author": "ToRvaLDz",
       "description": "Toggle Cloudflare WARP from the bar. Shows connection status and mode.",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Bar",
         "Network",
         "Panel"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.0.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "coin-flip",
@@ -679,7 +679,7 @@
       "author": "Ben Hilton",
       "description": "An IPC-driven dmenu replacement that lets external scripts present choices through a Noctalia panel.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Panel",
         "Productivity",
@@ -687,11 +687,11 @@
         "System",
         "Utility"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.9.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "dns-switcher",
@@ -1056,18 +1056,18 @@
       "author": "WerWolv",
       "description": "A Plugin integrating your mobile devices into a panel using KDEConnect",
       "license": "GPLv2",
-      "version": "1.2.4",
+      "version": "1.2.5",
       "tags": [
         "Bar",
         "Panel",
         "Utility",
         "System"
       ],
-      "lastUpdated": "2026-10-11",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "keep-awake-plus",
@@ -1346,17 +1346,17 @@
       "author": "ToRvaLDz",
       "description": "Switch monitor profiles from the bar. Shows the active profile and lets you switch between saved configurations.",
       "license": "MIT",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "tags": [
         "Bar",
         "System",
         "Panel"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.0.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "monitor-layout",
@@ -2509,17 +2509,17 @@
       "author": "nineluj",
       "description": "Show Tailscale status in the menu bar and send/receive files via Taildrop.",
       "license": "MIT",
-      "version": "1.5.5",
+      "version": "1.5.6",
       "tags": [
         "Bar",
         "Network",
         "Panel"
       ],
-      "lastUpdated": "2026-10-11",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.0.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "tamagotchi",

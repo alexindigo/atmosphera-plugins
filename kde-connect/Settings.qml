@@ -11,7 +11,8 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property bool hideIfNoDeviceConnected: pluginApi?.mainInstance?.hideIfNoDeviceConnected ?? (pluginApi?.pluginSettings?.hideIfNoDeviceConnected ?? false)
+  property bool hideIfNoDeviceConnected: cfg.hideIfNoDeviceConnected ?? defaults.hideIfNoDeviceConnected ?? false
+  readonly property bool settingsDirty: hideIfNoDeviceConnected !== (cfg.hideIfNoDeviceConnected ?? defaults.hideIfNoDeviceConnected ?? false)
 
   spacing: Style.marginL
 
@@ -37,8 +38,9 @@ ColumnLayout {
     }
 
     pluginApi.pluginSettings.hideIfNoDeviceConnected = root.hideIfNoDeviceConnected;
-    pluginApi.saveSettings();
-
-    Logger.d("KDEConnect", "Settings saved successfully");
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.d("KDEConnect", "Settings saved successfully");
+    });
   }
 }

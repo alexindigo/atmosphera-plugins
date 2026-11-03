@@ -39,6 +39,13 @@ ColumnLayout {
         ?? pluginApi?.manifest?.metadata?.defaultSettings?.showFooter
         ?? true
 
+    readonly property bool settingsDirty: editResultFile !== (pluginApi?.pluginSettings?.resultFile || pluginApi?.manifest?.metadata?.defaultSettings?.resultFile || "/tmp/noctalia-dmenu-result")
+                                          || editShowToast !== (pluginApi?.pluginSettings?.showToastOnSelect ?? pluginApi?.manifest?.metadata?.defaultSettings?.showToastOnSelect ?? false)
+                                          || editMaxResults !== (pluginApi?.pluginSettings?.maxResults || pluginApi?.manifest?.metadata?.defaultSettings?.maxResults || 200)
+                                          || editPanelPosition !== (pluginApi?.pluginSettings?.panelPosition || pluginApi?.manifest?.metadata?.defaultSettings?.panelPosition || "follow_launcher")
+                                          || editShowMatchCount !== (pluginApi?.pluginSettings?.showMatchCount ?? pluginApi?.manifest?.metadata?.defaultSettings?.showMatchCount ?? true)
+                                          || editShowFooter !== (pluginApi?.pluginSettings?.showFooter ?? pluginApi?.manifest?.metadata?.defaultSettings?.showFooter ?? true)
+
     // Position options
     readonly property var positionOptions: [
         { key: "follow_launcher", name: root.pluginApi?.tr("settings.positionFollowLauncher") },
@@ -163,8 +170,9 @@ ColumnLayout {
         pluginApi.pluginSettings.panelPosition = root.editPanelPosition;
         pluginApi.pluginSettings.showMatchCount = root.editShowMatchCount;
         pluginApi.pluginSettings.showFooter = root.editShowFooter;
-        pluginApi.saveSettings();
-
-        Logger.i("DmenuProvider", "Settings saved");
+        pluginApi.saveSettings(function (result) {
+            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+                Logger.i("DmenuProvider", "Settings saved");
+        });
     }
 }

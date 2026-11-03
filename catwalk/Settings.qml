@@ -10,8 +10,10 @@ ColumnLayout {
     property var pluginApi: null
 
     // Local state - track changes before saving
-    property real valueMinimumThreshold: pluginApi?.mainInstance?.minimumThreshold ?? (pluginApi?.pluginSettings?.minimumThreshold || 10)
-    property bool valueHideBackground: pluginApi?.mainInstance?.hideBackground ?? (pluginApi?.pluginSettings?.hideBackground ?? false)
+    property real valueMinimumThreshold: pluginApi?.pluginSettings?.minimumThreshold || 10
+    property bool valueHideBackground: pluginApi?.pluginSettings?.hideBackground ?? false
+    readonly property bool settingsDirty: valueMinimumThreshold !== (pluginApi?.pluginSettings?.minimumThreshold || 10)
+                                          || valueHideBackground !== (pluginApi?.pluginSettings?.hideBackground ?? false)
 
     spacing: Style.marginM
 
@@ -68,8 +70,9 @@ ColumnLayout {
         pluginApi.pluginSettings.hideBackground = root.valueHideBackground;
 
         // Save to disk
-        pluginApi.saveSettings();
-
-        Logger.i("Catwalk", "Settings saved successfully");
+        pluginApi.saveSettings(function (result) {
+            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+                Logger.i("Catwalk", "Settings saved successfully");
+        });
     }
 }

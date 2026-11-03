@@ -1,9 +1,9 @@
 {
   "id": "tailscale",
   "name": "Tailscale",
-  "version": "1.5.5",
+  "version": "1.5.6",
   "minNoctaliaVersion": "4.0.0",
-  "minAtmospheraVersion": "0.8.0",
+  "minAtmospheraVersion": "0.10.0",
   "author": "nineluj",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

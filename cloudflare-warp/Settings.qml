@@ -24,6 +24,10 @@ ColumnLayout {
     pluginApi?.manifest?.metadata?.defaultSettings?.disconnectedColor ||
     "none"
 
+  readonly property bool settingsDirty: editRefreshInterval !== (pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 5000)
+                                        || editConnectedColor !== (pluginApi?.pluginSettings?.connectedColor || pluginApi?.manifest?.metadata?.defaultSettings?.connectedColor || "primary")
+                                        || editDisconnectedColor !== (pluginApi?.pluginSettings?.disconnectedColor || pluginApi?.manifest?.metadata?.defaultSettings?.disconnectedColor || "none")
+
   spacing: Style.marginM
 
   NText {
@@ -86,7 +90,9 @@ ColumnLayout {
     pluginApi.pluginSettings.connectedColor = root.editConnectedColor
     pluginApi.pluginSettings.disconnectedColor = root.editDisconnectedColor
 
-    pluginApi.saveSettings()
-    Logger.i("CloudflareWarp", "Settings saved")
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("CloudflareWarp", "Settings saved")
+    })
   }
 }
