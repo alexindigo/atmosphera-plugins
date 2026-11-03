@@ -74,6 +74,10 @@ ColumnLayout {
     }
   }
 
+  readonly property bool settingsDirty: root.editTerminalCommand !== (cfg.terminalCommand ?? defaults.terminalCommand ?? "")
+      || root.editPollInterval !== (cfg.pollInterval ?? defaults.pollInterval ?? 10)
+      || root.editShowInactiveHosts !== (cfg.showInactiveHosts ?? defaults.showInactiveHosts ?? true)
+
   function saveSettings() {
     if (!pluginApi) {
       Logger.e("SSH Sessions", "Cannot save: pluginApi is null")
@@ -84,7 +88,9 @@ ColumnLayout {
     pluginApi.pluginSettings.pollInterval = root.editPollInterval
     pluginApi.pluginSettings.showInactiveHosts = root.editShowInactiveHosts
 
-    pluginApi.saveSettings()
-    Logger.i("SSH Sessions", "Settings saved")
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("SSH Sessions", "Settings saved")
+    });
   }
 }

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.Commons
+import qs.Portals
 import qs.Widgets
 
 ColumnLayout {
@@ -48,7 +49,7 @@ ColumnLayout {
                 }
             }
 
-            AtmoFilePicker {
+            PortalFilePicker {
                 id: animFolderPicker
                 title: pluginApi?.tr("settings.animationsFolder.pickerTitle")
                 initialPath: root.valueAnimationsFolder
@@ -80,6 +81,10 @@ ColumnLayout {
         }
     }
 
+    readonly property bool settingsDirty: root.valueAnimationsFolder !== (cfg.animationsFolder ?? defaults.animationsFolder ?? "~/.config/niri/animations")
+        || root.valueTargetFile !== (cfg.targetFile ?? defaults.targetFile ?? "~/.config/niri/animations.kdl")
+        || root.valueIconColor !== (cfg.iconColor ?? defaults.iconColor ?? "none")
+
     function saveSettings() {
         if (!pluginApi) {
             Logger.e("NiriAnimationPicker", "Cannot save settings: pluginApi is null")
@@ -88,7 +93,9 @@ ColumnLayout {
         pluginApi.pluginSettings.animationsFolder = root.valueAnimationsFolder
         pluginApi.pluginSettings.targetFile       = root.valueTargetFile
         pluginApi.pluginSettings.iconColor        = root.valueIconColor
-        pluginApi.saveSettings()
-        Logger.d("NiriAnimationPicker", "Settings saved")
+        pluginApi.saveSettings(function (result) {
+            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+                Logger.d("NiriAnimationPicker", "Settings saved")
+        });
     }
 }

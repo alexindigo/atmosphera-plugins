@@ -12,6 +12,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import qs.Commons
+import qs.Portals
 import qs.Widgets
 import qs.Services.UI
 
@@ -54,6 +55,22 @@ ColumnLayout {
   readonly property bool cliMissing: mainInstance && mainInstance.cliAvailable === false
 
   // ----- Save handler (called by the shell on Apply) -----
+  readonly property bool settingsDirty: root.editEnabled !== (cfg.enabled ?? defaults.enabled ?? true)
+      || root.editIdleSeconds !== (parseInt(cfg.idleSeconds ?? defaults.idleSeconds ?? 300))
+      || root.editBatteryMinPercent !== (parseInt(cfg.batteryMinPercent ?? defaults.batteryMinPercent ?? 0))
+      || root.editIncludeEffects !== (cfg.includeEffects ?? defaults.includeEffects ?? "")
+      || root.editExcludeEffects !== (cfg.excludeEffects ?? defaults.excludeEffects ?? "dev_worm")
+      || root.editFadeInEffect !== (cfg.fadeInEffect ?? defaults.fadeInEffect ?? "")
+      || root.editFadeOutEffect !== (cfg.fadeOutEffect ?? defaults.fadeOutEffect ?? "")
+      || root.editRandomLogo !== (cfg.randomLogo ?? defaults.randomLogo ?? false)
+      || root.editLogoDir !== (cfg.logoDir ?? defaults.logoDir ?? "")
+      || root.editMultiMonitorMode !== (cfg.multiMonitorMode ?? defaults.multiMonitorMode ?? "independent")
+      || root.editLogoPath !== (cfg.logoPath ?? defaults.logoPath ?? "")
+      || root.editShowClock !== (cfg.showClock ?? defaults.showClock ?? false)
+      || root.editClockFormat !== (cfg.clockFormat ?? defaults.clockFormat ?? "%H:%M")
+      || root.editShowNowPlaying !== (cfg.showNowPlaying ?? defaults.showNowPlaying ?? false)
+      || root.editNowPlayingDuration !== (parseInt(cfg.nowPlayingDuration ?? defaults.nowPlayingDuration ?? 3))
+
   function saveSettings() {
     if (!pluginApi) {
       Logger.e("NiriScreensaver", "saveSettings: pluginApi is null")
@@ -74,8 +91,10 @@ ColumnLayout {
     pluginApi.pluginSettings.clockFormat    = root.editClockFormat
     pluginApi.pluginSettings.showNowPlaying = root.editShowNowPlaying
     pluginApi.pluginSettings.nowPlayingDuration = root.editNowPlayingDuration
-    pluginApi.saveSettings()
-    Logger.i("NiriScreensaver", "settings saved")
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("NiriScreensaver", "settings saved")
+    });
   }
 
   // ----- Title -----
@@ -447,7 +466,7 @@ ColumnLayout {
   }
 
   // ---- Logo directory picker popup ----
-  AtmoFilePicker {
+  PortalFilePicker {
     id: logoDirPicker
     title: pluginApi?.tr("settings.logo-dir-picker-title")
     selectionMode: "folders"
@@ -466,13 +485,13 @@ ColumnLayout {
   // comboboxes; an empty key ("(none)") maps to no fade.
   Process {
     id: effectsDetectProcess
-    stdout: StdioCollector {}
+    stdout: StdioCollector { id: effectsOutput }
     onExited: function (code) {
       if (code !== 0) {
         Logger.w("NiriScreensaver", "effects detection exited with code", code)
         return
       }
-      var text = String(stdout.text).trim()
+      var text = String(effectsOutput.text).trim()
       if (!text) return
       var seen = {}
       var names = text.split(/\s+/).filter(function (s) {
@@ -505,13 +524,13 @@ ColumnLayout {
   // out-of-dir editLogoPath the user may already have set.
   Process {
     id: logoDirDetectProcess
-    stdout: StdioCollector {}
+    stdout: StdioCollector { id: logoDirectoryOutput }
     onExited: function (code) {
       if (code !== 0) {
         Logger.w("NiriScreensaver", "logo dir detection exited with code", code)
         return
       }
-      var p = String(stdout.text).trim()
+      var p = String(logoDirectoryOutput.text).trim()
       if (p !== "") root.detectedSystemLogoDir = p
     }
   }

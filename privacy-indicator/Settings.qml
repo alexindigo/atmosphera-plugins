@@ -120,6 +120,15 @@ ColumnLayout {
     }
   }
 
+  readonly property bool settingsDirty: root.hideInactive !== (cfg.hideInactive ?? defaults.hideInactive ?? false)
+      || root.enableToast !== (cfg.enableToast ?? defaults.enableToast ?? true)
+      || root.iconSpacing !== (cfg.iconSpacing ?? defaults.iconSpacing ?? 4)
+      || root.removeMargins !== (cfg.removeMargins ?? defaults.removeMargins ?? false)
+      || root.activeColor !== (cfg.activeColor ?? defaults.activeColor ?? "primary")
+      || root.inactiveColor !== (cfg.inactiveColor ?? defaults.inactiveColor ?? "none")
+      || root.micFilterRegex !== (cfg.micFilterRegex ?? defaults.micFilterRegex)
+      || root.camFilterRegex !== (cfg.camFilterRegex ?? defaults.camFilterRegex)
+
   function saveSettings() {
     if (!pluginApi) {
       Logger.e("PrivacyIndicator", "Cannot save settings: pluginApi is null");
@@ -135,8 +144,9 @@ ColumnLayout {
     pluginApi.pluginSettings.micFilterRegex = root.micFilterRegex;
     pluginApi.pluginSettings.camFilterRegex = root.camFilterRegex;
 
-    pluginApi.saveSettings();
-
-    Logger.i("PrivacyIndicator", "Settings saved successfully");
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("PrivacyIndicator", "Settings saved successfully");
+    });
   }
 }

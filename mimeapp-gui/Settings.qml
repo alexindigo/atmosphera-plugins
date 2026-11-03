@@ -59,6 +59,8 @@ ColumnLayout {
 		}
 	}
 
+	readonly property bool settingsDirty: root.valueIconColor !== (cfg.iconColor ?? defaults.iconColor)
+
 	function saveSettings() {
 		if (!pluginApi) {
 			Logger.e("MimeApp GUI", "Cannot save settings: pluginApi is null");
@@ -66,8 +68,9 @@ ColumnLayout {
 		}
 
 		pluginApi.pluginSettings.iconColor = root.valueIconColor;
-		pluginApi.saveSettings();
-
-		Logger.d("MimeApp GUI", "Settings saved");
+		pluginApi.saveSettings(function (result) {
+			if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+				Logger.d("MimeApp GUI", "Settings saved");
+		});
 	}
 }

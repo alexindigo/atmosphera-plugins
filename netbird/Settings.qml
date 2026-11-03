@@ -206,6 +206,16 @@ ColumnLayout {
         onSelected: key => root.editDefaultPeerAction = key
     }
 
+    readonly property bool settingsDirty: root.editRefreshInterval !== (pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 5000)
+        || root.editCompactMode !== (pluginApi?.pluginSettings?.compactMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ?? false)
+        || root.editShowIpAddress !== (pluginApi?.pluginSettings?.showIpAddress ?? pluginApi?.manifest?.metadata?.defaultSettings?.showIpAddress ?? true)
+        || root.editHideDisconnected !== (pluginApi?.pluginSettings?.hideDisconnected ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideDisconnected ?? false)
+        || root.editShowPing !== (pluginApi?.pluginSettings?.showPing ?? pluginApi?.manifest?.metadata?.defaultSettings?.showPing ?? false)
+        || root.editTerminalCommand !== (pluginApi?.pluginSettings?.terminalCommand || pluginApi?.manifest?.metadata?.defaultSettings?.terminalCommand || "")
+        || root.editManagementUrl !== (pluginApi?.pluginSettings?.managementUrl ?? pluginApi?.manifest?.metadata?.defaultSettings?.managementUrl ?? "")
+        || root.editPingCount !== (pluginApi?.pluginSettings?.pingCount || pluginApi?.manifest?.metadata?.defaultSettings?.pingCount || 5)
+        || root.editDefaultPeerAction !== (pluginApi?.pluginSettings?.defaultPeerAction || pluginApi?.manifest?.metadata?.defaultSettings?.defaultPeerAction || "copy-ip")
+
     function saveSettings() {
         if (!pluginApi) {
             Logger.e("NetBird", "Cannot save: pluginApi is null");
@@ -222,8 +232,9 @@ ColumnLayout {
         pluginApi.pluginSettings.pingCount = root.editPingCount;
         pluginApi.pluginSettings.defaultPeerAction = root.editDefaultPeerAction;
 
-        pluginApi.saveSettings();
-
-        Logger.i("NetBird", "Settings saved successfully");
+        pluginApi.saveSettings(function (result) {
+            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+                Logger.i("NetBird", "Settings saved successfully");
+        });
     }
 }

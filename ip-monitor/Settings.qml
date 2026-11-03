@@ -227,6 +227,12 @@ ColumnLayout {
   }
 
   signal settingsChanged(var settings)
+  readonly property bool settingsDirty: root.valueIconColor !== (cfg.iconColor ?? defaults.iconColor)
+      || root.valueRefreshInterval !== (cfg.refreshInterval ?? defaults.refreshInterval ?? 300)
+      || root.valueSuccessIcon !== (cfg.successIcon ?? defaults.successIcon ?? "hierarchy-2")
+      || root.valueErrorIcon !== (cfg.errorIcon ?? defaults.errorIcon ?? "alert-circle")
+      || root.valueLoadingIcon !== (cfg.loadingIcon ?? defaults.loadingIcon ?? "loader")
+
   function saveSettings() {
     if (!pluginApi) {
       Logger.e("IpMonitor", "Cannot save settings: pluginApi is null");
@@ -238,8 +244,9 @@ ColumnLayout {
     pluginApi.pluginSettings.successIcon = root.valueSuccessIcon;
     pluginApi.pluginSettings.errorIcon = root.valueErrorIcon;
     pluginApi.pluginSettings.loadingIcon = root.valueLoadingIcon;
-    pluginApi.saveSettings();
-
-    Logger.d("IpMonitor", "Settings saved successfully");
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.d("IpMonitor", "Settings saved successfully");
+    });
   }
 }

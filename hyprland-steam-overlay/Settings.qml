@@ -215,6 +215,16 @@ ColumnLayout {
   }
 
   // This function is called by the dialog to save settings
+  readonly property bool settingsDirty: root.valueAutoLaunchSteam !== (cfg.autoLaunchSteam ?? defaults.autoLaunchSteam ?? true)
+      || root.valueUseCustomLayout !== (cfg.useCustomLayout ?? defaults.useCustomLayout ?? false)
+      || root.valueEnableChatNotifications !== (cfg.enableChatNotifications ?? defaults.enableChatNotifications ?? true)
+      || root.valueFriendsWidth !== (cfg.friendsWidthPercent ?? defaults.friendsWidthPercent ?? 10)
+      || root.valueMainWidth !== (cfg.mainWidthPercent ?? defaults.mainWidthPercent ?? 60)
+      || root.valueChatWidth !== (cfg.chatWidthPercent ?? defaults.chatWidthPercent ?? 25)
+      || root.valueGapSize !== (cfg.gapSize ?? defaults.gapSize ?? 10)
+      || root.valueTopMargin !== (cfg.topMarginPercent ?? defaults.topMarginPercent ?? 2.5)
+      || root.valueWindowHeight !== (cfg.windowHeightPercent ?? defaults.windowHeightPercent ?? 95)
+
   function saveSettings() {
     if (!pluginApi) {
       Logger.e("SteamOverlay", "Cannot save settings: pluginApi is null");
@@ -233,8 +243,9 @@ ColumnLayout {
     pluginApi.pluginSettings.windowHeightPercent = root.valueWindowHeight;
 
     // Save to disk
-    pluginApi.saveSettings();
-
-    Logger.i("SteamOverlay", "Settings saved successfully");
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("SteamOverlay", "Settings saved successfully");
+    });
   }
 }

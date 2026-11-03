@@ -1,7 +1,8 @@
 {
     "id": "giphy-search",
     "name": "Giphy Search",
-    "version": "1.0.2",
+  "version": "1.0.3",
+  "minAtmospheraVersion": "0.10.0",
     "author": "Sergio Mendolia",
     "license": "MIT",
     "description": "Search for GIFs on Giphy from the Launcher.",

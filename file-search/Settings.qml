@@ -124,6 +124,12 @@ ColumnLayout {
       }
     }
 
+  readonly property bool settingsDirty: root.valueShowHidden !== (cfg.showHidden ?? defaults.showHidden)
+      || root.valueMaxResults !== (cfg.maxResults ?? defaults.maxResults)
+      || root.valueFileOpener !== (cfg.fileOpener ?? defaults.fileOpener)
+      || root.valueSearchDirectory !== (cfg.searchDirectory ?? defaults.searchDirectory)
+      || root.valueFdCommand !== (cfg.fdCommand ?? defaults.fdCommand)
+
   function saveSettings() {
     if (!pluginApi) {
       Logger.e("FileSearch", "Cannot save settings: pluginApi is null");
@@ -135,8 +141,9 @@ ColumnLayout {
     pluginApi.pluginSettings.fileOpener = root.valueFileOpener;
     pluginApi.pluginSettings.searchDirectory = root.valueSearchDirectory;
     pluginApi.pluginSettings.fdCommand = root.valueFdCommand;
-    pluginApi.saveSettings();
-
-    Logger.d("FileSearch", "Settings saved successfully");
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.d("FileSearch", "Settings saved successfully");
+    });
   }
 }
