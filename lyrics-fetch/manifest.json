@@ -1,7 +1,7 @@
 {
   "id": "lyrics-fetch",
   "name": "Lyrics Fetch/Bar Display",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "Pever3ll",

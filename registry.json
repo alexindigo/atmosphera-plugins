@@ -60,12 +60,13 @@
       "author": "Preston Corless (pgattic)",
       "description": "Adds a watermark to the bottom-right of the screen similar to the one found on unactivated Windows 10/11",
       "license": "MIT",
-      "version": "1.1.1",
+      "version": "1.1.2",
+      "minAtmospheraVersion": "0.10.0",
       "tags": [
         "Desktop",
         "Fun"
       ],
-      "lastUpdated": "2026-02-04T23:08:01-07:00",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true
     },
@@ -197,7 +198,7 @@
       "author": "4rmcyt",
       "description": "Monitor and control auto-cpufreq daemon: governor, turbo boost, CPU stats, and force-override.",
       "license": "MIT",
-      "version": "2.6.2",
+      "version": "2.6.3",
       "tags": [
         "Bar",
         "Panel",
@@ -207,7 +208,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": false,
       "upstreamPR": 914,
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "minNoctaliaVersion": "4.4.1",
       "minAtmospheraVersion": "0.8.0"
     },
@@ -217,11 +218,11 @@
       "author": "itscrystalline",
       "description": "A plugin that allows you to run custom actions when battery state changes.",
       "license": "MIT",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "tags": [
         "System"
       ],
-      "lastUpdated": "2026-04-25T13:10:34+02:00",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.0"
@@ -1169,11 +1170,11 @@
       "author": "Marco Melletti",
       "description": "Noctalia Launcher gnu pass provider",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Launcher"
       ],
-      "lastUpdated": "2026-05-22T12:20:30+02:00",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.7.7"
@@ -1202,12 +1203,12 @@
       "author": "Pever3ll",
       "description": "Uses MPRIS data to fetch song lyrics from lrclib.net and displays it in the bar.",
       "license": "GPLv3",
-      "version": "1.1.3",
+      "version": "1.1.4",
       "tags": [
         "Bar",
         "Music"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
@@ -1364,7 +1365,7 @@
       "author": "Mathew-D",
       "description": "Arrange multiple displays visually and change their resolutions from a Noctalia panel.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel",
@@ -1373,7 +1374,7 @@
         "Sway",
         "Hyprland"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
@@ -1385,13 +1386,13 @@
       "author": "Ido Perlmuter",
       "description": "MPD plugin for Noctalia",
       "license": "MIT",
-      "version": "1.1.3",
+      "version": "1.1.4",
       "tags": [
         "Bar",
         "Audio",
         "Music"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
@@ -1531,18 +1532,18 @@
       "author": "LazarH",
       "description": "Display scrolling news headlines from various sources using NewsAPI.org",
       "license": "MIT",
-      "version": "1.2.8",
+      "version": "1.2.9",
       "tags": [
         "Bar",
         "Panel",
         "Network",
         "Fun"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "niri-animation-picker",

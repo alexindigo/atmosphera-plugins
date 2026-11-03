@@ -1,7 +1,7 @@
 {
   "id": "launcher-pass",
   "name": "Launcher pass",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "4.7.7",
   "author": "Marco Melletti",
   "license": "MIT",

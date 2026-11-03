@@ -16,14 +16,23 @@ ColumnLayout {
     property string draftFontFamily: pluginApi?.pluginSettings?.fontFamily ?? "Inter"
     property bool draftAdaptScrollSpeed: pluginApi?.pluginSettings?.adaptScrollSpeed ?? true
     property bool draftHideWhenPaused: pluginApi?.pluginSettings?.hideWhenPaused ?? true
-    property string draftVerticalRotationDirection: {
-        const savedDirection = pluginApi?.pluginSettings?.verticalRotationDirection;
-        if (savedDirection === "auto" || savedDirection === "cw" || savedDirection === "ccw")
-            return savedDirection;
-        return "auto";
-    }
+    property string draftVerticalRotationDirection: displayedRotation()
 
     readonly property bool isBarVertical: Settings.data.bar.position === "left" || Settings.data.bar.position === "right"
+    readonly property bool settingsDirty: draftWidth !== (pluginApi?.pluginSettings?.widgetWidth ?? 215)
+                                          || draftSpeed !== (pluginApi?.pluginSettings?.scrollSpeed ?? 70)
+                                          || draftMode !== (pluginApi?.pluginSettings?.scrollMode ?? "always")
+                                          || draftFontSize !== (pluginApi?.pluginSettings?.fontSize ?? 10)
+                                          || draftHideWhenEmpty !== (pluginApi?.pluginSettings?.hideWhenEmpty ?? true)
+                                          || draftFontFamily !== (pluginApi?.pluginSettings?.fontFamily ?? "Inter")
+                                          || draftAdaptScrollSpeed !== (pluginApi?.pluginSettings?.adaptScrollSpeed ?? true)
+                                          || draftHideWhenPaused !== (pluginApi?.pluginSettings?.hideWhenPaused ?? true)
+                                          || draftVerticalRotationDirection !== displayedRotation()
+
+    function displayedRotation() {
+        const value = pluginApi?.pluginSettings?.verticalRotationDirection;
+        return value === "auto" || value === "cw" || value === "ccw" ? value : "auto";
+    }
 
     spacing: Style.marginM
 

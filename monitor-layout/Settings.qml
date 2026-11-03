@@ -17,6 +17,12 @@ ColumnLayout {
   property bool editSnapToGrid: cfg.snapToGrid ?? defaults.snapToGrid ?? true
   property string editGridSize: String(cfg.gridSize ?? defaults.gridSize ?? 40)
   property string editIconColor: cfg.iconColor ?? defaults.iconColor ?? "primary"
+  readonly property bool settingsDirty: editBackend !== (cfg.backend ?? defaults.backend ?? "auto")
+                                        || editSwayCommand !== (cfg.swayCommand ?? defaults.swayCommand ?? "swaymsg")
+                                        || editHyprctlCommand !== (cfg.hyprctlCommand ?? defaults.hyprctlCommand ?? "hyprctl")
+                                        || editSnapToGrid !== (cfg.snapToGrid ?? defaults.snapToGrid ?? true)
+                                        || editGridSize !== String(cfg.gridSize ?? defaults.gridSize ?? 40)
+                                        || editIconColor !== (cfg.iconColor ?? defaults.iconColor ?? "primary")
 
   spacing: Style.marginL
 
@@ -87,7 +93,9 @@ ColumnLayout {
     pluginApi.pluginSettings.swayCommand = root.editSwayCommand;
     pluginApi.pluginSettings.hyprctlCommand = root.editHyprctlCommand;
     pluginApi.pluginSettings.snapToGrid = root.editSnapToGrid;
-    pluginApi.pluginSettings.gridSize = Math.max(1, parseInt(root.editGridSize) || 40);
+    const gridSize = Math.max(1, parseInt(root.editGridSize) || 40);
+    root.editGridSize = String(gridSize);
+    pluginApi.pluginSettings.gridSize = gridSize;
     pluginApi.pluginSettings.iconColor = root.editIconColor;
     pluginApi.saveSettings();
   }

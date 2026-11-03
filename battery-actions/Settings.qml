@@ -11,6 +11,8 @@ ColumnLayout {
 
     property string editPluggedInScript: pluginApi?.pluginSettings?.pluggedInScript || ""
     property string editOnBatteryScript: pluginApi?.pluginSettings?.onBatteryScript || ""
+    readonly property bool settingsDirty: editPluggedInScript !== (pluginApi?.pluginSettings?.pluggedInScript || "")
+                                          || editOnBatteryScript !== (pluginApi?.pluginSettings?.onBatteryScript || "")
 
     spacing: Style.marginL
 

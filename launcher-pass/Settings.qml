@@ -15,6 +15,10 @@ ColumnLayout {
   property string editTypeDelay: String(cfg.typeDelay ?? defaults.typeDelay ?? 500)
   property string editWtypeDelay: String(cfg.wtypeDelay ?? defaults.wtypeDelay ?? 12)
   property string editClipTimeout: cfg.clipTimeout ?? defaults.clipTimeout ?? ""
+  readonly property bool settingsDirty: editStorePath !== (cfg.storePath ?? defaults.storePath ?? "")
+                                        || editTypeDelay !== String(cfg.typeDelay ?? defaults.typeDelay ?? 500)
+                                        || editWtypeDelay !== String(cfg.wtypeDelay ?? defaults.wtypeDelay ?? 12)
+                                        || editClipTimeout !== (cfg.clipTimeout ?? defaults.clipTimeout ?? "")
 
   readonly property string envClipTimeout: Quickshell.env("PASSWORD_STORE_CLIP_TIME") || ""
 
@@ -93,10 +97,14 @@ ColumnLayout {
     pluginApi.pluginSettings.storePath = root.editStorePath;
 
     var typeDelayVal = parseFloat(root.editTypeDelay)
-    pluginApi.pluginSettings.typeDelay = isNaN(typeDelayVal) || typeDelayVal < 0 ? 500 : typeDelayVal;
+    typeDelayVal = isNaN(typeDelayVal) || typeDelayVal < 0 ? 500 : typeDelayVal;
+    root.editTypeDelay = String(typeDelayVal);
+    pluginApi.pluginSettings.typeDelay = typeDelayVal;
 
     var wtypeDelayVal = parseInt(root.editWtypeDelay)
-    pluginApi.pluginSettings.wtypeDelay = isNaN(wtypeDelayVal) || wtypeDelayVal < 0 ? 12 : wtypeDelayVal;
+    wtypeDelayVal = isNaN(wtypeDelayVal) || wtypeDelayVal < 0 ? 12 : wtypeDelayVal;
+    root.editWtypeDelay = String(wtypeDelayVal);
+    pluginApi.pluginSettings.wtypeDelay = wtypeDelayVal;
 
     pluginApi.pluginSettings.clipTimeout = root.editClipTimeout;
 

@@ -23,6 +23,10 @@ ColumnLayout {
     pluginApi?.manifest?.metadata?.defaultSettings?.secondLine ||
     "Go to Settings to activate Linux."
 
+  readonly property bool settingsDirty: editCustomizeText !== (pluginApi?.pluginSettings?.customizeText ?? pluginApi?.manifest?.metadata?.defaultSettings?.customizeText ?? false)
+                                        || editFirstLine !== (pluginApi?.pluginSettings?.firstLine || pluginApi?.manifest?.metadata?.defaultSettings?.firstLine || "Activate Linux")
+                                        || editSecondLine !== (pluginApi?.pluginSettings?.secondLine || pluginApi?.manifest?.metadata?.defaultSettings?.secondLine || "Go to Settings to activate Linux.")
+
   spacing: Style.marginM
 
   NToggle {
@@ -44,8 +48,8 @@ ColumnLayout {
     text: root.editFirstLine
     onTextChanged: {
       root.editFirstLine = text;
-      root.saveSettings();
     }
+    onTextEdited: root.saveSettings()
   }
 
   NTextInput {
@@ -56,8 +60,8 @@ ColumnLayout {
     text: root.editSecondLine
     onTextChanged: {
       root.editSecondLine = text;
-      root.saveSettings();
     }
+    onTextEdited: root.saveSettings()
   }
 
   function saveSettings() {
@@ -71,4 +75,3 @@ ColumnLayout {
     pluginApi.saveSettings()
   }
 }
-
