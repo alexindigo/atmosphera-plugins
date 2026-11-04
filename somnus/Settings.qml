@@ -11,44 +11,37 @@ ColumnLayout {
     property var cfg: pluginApi?.pluginSettings || ({})
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    property string editIconColor: cfg.iconColor
-        ?? defaults.iconColor ?? "primary"
+    property string editIconColor: displayBaseline.editIconColor
+    property string editHoverColor: displayBaseline.editHoverColor
+    property real editBtnWidth: displayBaseline.editBtnWidth
+    property real editBtnHeight: displayBaseline.editBtnHeight
+    property real editBtnSpacing: displayBaseline.editBtnSpacing
+    property real editBtnOpacity: displayBaseline.editBtnOpacity
+    property bool editUseOverlay: displayBaseline.editUseOverlay
+    property bool editAnimationsEnabled: displayBaseline.editAnimationsEnabled
+    property bool editLockOnSuspend: displayBaseline.editLockOnSuspend
+    property real editHoverDesaturation: displayBaseline.editHoverDesaturation
+    property real editOverlayBlur: displayBaseline.editOverlayBlur
+    property real editOverlayTint: displayBaseline.editOverlayTint
+    property real editPanelTint: displayBaseline.editPanelTint
 
-    property string editHoverColor: cfg.hoverColor
-        ?? defaults.hoverColor ?? "primary"
-
-    property real editBtnWidth: cfg.buttonWidth
-        ?? defaults.buttonWidth ?? 470
-
-    property real editBtnHeight: cfg.buttonHeight
-        ?? defaults.buttonHeight ?? 280
-
-    property real editBtnSpacing: cfg.buttonSpacing
-        ?? defaults.buttonSpacing ?? 20
-
-    property real editBtnOpacity: cfg.buttonOpacity
-        ?? defaults.buttonOpacity ?? 0.50
-
-    property bool editUseOverlay: cfg.useOverlay
-        ?? defaults.useOverlay ?? true
-
-    property bool editAnimationsEnabled: cfg.animationsEnabled
-        ?? defaults.animationsEnabled ?? true
-
-    property bool editLockOnSuspend: cfg.lockOnSuspend
-        ?? defaults.lockOnSuspend ?? true
-
-    property real editHoverDesaturation: cfg.hoverDesaturation
-        ?? defaults.hoverDesaturation ?? 0.0
-
-    property real editOverlayBlur: cfg.overlayBlur
-        ?? defaults.overlayBlur ?? 0.75
-
-    property real editOverlayTint: cfg.overlayTint
-        ?? defaults.overlayTint ?? 0.6
-
-    property real editPanelTint: cfg.panelTint
-        ?? defaults.panelTint ?? 0.7
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string editIconColor: cfg.iconColor ?? defaults.iconColor ?? "primary"
+        readonly property string editHoverColor: cfg.hoverColor ?? defaults.hoverColor ?? "primary"
+        readonly property real editBtnWidth: cfg.buttonWidth ?? defaults.buttonWidth ?? 470
+        readonly property real editBtnHeight: cfg.buttonHeight ?? defaults.buttonHeight ?? 280
+        readonly property real editBtnSpacing: cfg.buttonSpacing ?? defaults.buttonSpacing ?? 20
+        readonly property real editBtnOpacity: cfg.buttonOpacity ?? defaults.buttonOpacity ?? 0.50
+        readonly property bool editUseOverlay: cfg.useOverlay ?? defaults.useOverlay ?? true
+        readonly property bool editAnimationsEnabled: cfg.animationsEnabled ?? defaults.animationsEnabled ?? true
+        readonly property bool editLockOnSuspend: cfg.lockOnSuspend ?? defaults.lockOnSuspend ?? true
+        readonly property real editHoverDesaturation: cfg.hoverDesaturation ?? defaults.hoverDesaturation ?? 0.0
+        readonly property real editOverlayBlur: cfg.overlayBlur ?? defaults.overlayBlur ?? 0.75
+        readonly property real editOverlayTint: cfg.overlayTint ?? defaults.overlayTint ?? 0.6
+        readonly property real editPanelTint: cfg.panelTint ?? defaults.panelTint ?? 0.7
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editIconColor: root.editIconColor, editHoverColor: root.editHoverColor, editBtnWidth: root.editBtnWidth, editBtnHeight: root.editBtnHeight, editBtnSpacing: root.editBtnSpacing, editBtnOpacity: root.editBtnOpacity, editUseOverlay: root.editUseOverlay, editAnimationsEnabled: root.editAnimationsEnabled, editLockOnSuspend: root.editLockOnSuspend, editHoverDesaturation: root.editHoverDesaturation, editOverlayBlur: root.editOverlayBlur, editOverlayTint: root.editOverlayTint, editPanelTint: root.editPanelTint})
 
     spacing: Style.marginM
 
@@ -264,8 +257,10 @@ ColumnLayout {
             Logger.e("Somnus", "Cannot save settings: pluginApi is null")
             return
         }
-        pluginApi.pluginSettings.iconColor = root.editIconColor || "primary"
-        pluginApi.pluginSettings.hoverColor = root.editHoverColor || "primary"
+        root.editIconColor = root.editIconColor || "primary"
+        root.editHoverColor = root.editHoverColor || "primary"
+        pluginApi.pluginSettings.iconColor = root.editIconColor
+        pluginApi.pluginSettings.hoverColor = root.editHoverColor
         pluginApi.pluginSettings.buttonWidth = root.editBtnWidth
         pluginApi.pluginSettings.buttonHeight = root.editBtnHeight
         pluginApi.pluginSettings.buttonSpacing = root.editBtnSpacing
@@ -277,7 +272,9 @@ ColumnLayout {
         pluginApi.pluginSettings.animationsEnabled = root.editAnimationsEnabled
         pluginApi.pluginSettings.lockOnSuspend = root.editLockOnSuspend
         pluginApi.pluginSettings.hoverDesaturation = root.editHoverDesaturation
-        pluginApi.saveSettings()
-        Logger.i("Somnus", "Settings saved successfully")
+        pluginApi.saveSettings(function (result) {
+            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+                Logger.i("Somnus", "Settings saved successfully")
+        })
     }
 }

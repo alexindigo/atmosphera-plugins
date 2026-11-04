@@ -919,7 +919,7 @@
       "author": "focky",
       "description": "Use Hermes on a remote server through an interactive SSH terminal.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel",
@@ -929,9 +929,9 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": false,
       "upstreamPR": 931,
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-03",
       "minNoctaliaVersion": "4.6.6",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "hot-corners",
@@ -1845,7 +1845,7 @@
       "author": "joniler",
       "description": "Monitor and control an NVIDIA Optimus dGPU on Hyprland \u2014 toggle Battery (dGPU sleeps) vs HDMI-Ready, see live power/VRAM, and list what is holding the GPU awake.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel",
@@ -1857,7 +1857,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": false,
       "upstreamPR": 939,
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-03",
       "minNoctaliaVersion": "4.0.0",
       "minAtmospheraVersion": "0.8.0"
     },
@@ -2349,17 +2349,17 @@
       "author": "tui",
       "description": "A bongo cat that sits in your bar and slaps when you type.",
       "license": "MIT",
-      "version": "0.8.2",
+      "version": "0.8.3",
       "tags": [
         "Bar",
         "Audio",
         "Fun"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-03",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "somnus",
@@ -2367,7 +2367,7 @@
       "author": "yhordi45",
       "description": "A full-screen power menu for Noctalia Shell, inspired by the wlogout design.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel",
@@ -2377,9 +2377,9 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": false,
       "upstreamPR": 908,
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-03",
       "minNoctaliaVersion": "4.7.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "special-workspaces",
@@ -2552,18 +2552,18 @@
       "author": "Piero-93",
       "description": "Monitors system temperatures and provides manual overrides for fan speed profiles via sysfs.",
       "license": "GPLv3",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "tags": [
         "Bar",
         "Indicator",
         "System",
         "Utility"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-03",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.0.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "timer",
