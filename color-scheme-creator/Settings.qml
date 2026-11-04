@@ -11,6 +11,7 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
   property string iconColor: cfg.iconColor ?? defaults.iconColor ?? "none"
+  readonly property bool settingsDirty: iconColor !== (cfg.iconColor ?? defaults.iconColor ?? "none")
 
   spacing: Style.marginL
 

@@ -14,6 +14,9 @@ ColumnLayout {
     property string valueOutputDir: cfg.outputDir ?? defaults.outputDir
     property int valueFps: cfg.fps ?? defaults.fps
     property int valueMaxRecordingSeconds: cfg.maxRecordingSeconds ?? defaults.maxRecordingSeconds
+    readonly property bool settingsDirty: valueOutputDir !== (cfg.outputDir ?? defaults.outputDir)
+                                          || valueFps !== (cfg.fps ?? defaults.fps)
+                                          || valueMaxRecordingSeconds !== (cfg.maxRecordingSeconds ?? defaults.maxRecordingSeconds)
 
     spacing: Style.marginL
 

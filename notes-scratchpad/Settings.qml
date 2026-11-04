@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import qs.Commons
+import qs.Portals
 import qs.Widgets
 
 ColumnLayout {
@@ -17,6 +18,11 @@ ColumnLayout {
   property string filePath: pluginApi?.pluginSettings?.filePath ?? ""
   property bool filePathWritable: true
   property bool useMonospace: pluginApi?.pluginSettings?.useMonospace ?? false
+  readonly property bool settingsDirty: panelWidth !== (pluginApi?.pluginSettings?.panelWidth ?? 600)
+                                        || panelHeight !== (pluginApi?.pluginSettings?.panelHeight ?? 400)
+                                        || fontSize !== (pluginApi?.pluginSettings?.fontSize ?? 14)
+                                        || filePath !== (pluginApi?.pluginSettings?.filePath ?? "")
+                                        || useMonospace !== (pluginApi?.pluginSettings?.useMonospace ?? false)
 
   spacing: Style.marginM
 
@@ -209,7 +215,7 @@ ColumnLayout {
     }
   }
 
-  AtmoFilePicker {
+  PortalFilePicker {
     id: filePicker
     selectionMode: "files"
     title: pluginApi?.tr("settings.file_storage.picker_title") || "Choose file for scratchpad"

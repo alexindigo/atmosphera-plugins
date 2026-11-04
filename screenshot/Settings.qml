@@ -13,6 +13,7 @@ ColumnLayout {
         pluginApi?.manifest?.metadata?.defaultSettings?.mode || 
         "region"
 
+    readonly property bool settingsDirty: editMode !== (pluginApi?.pluginSettings?.mode || pluginApi?.manifest?.metadata?.defaultSettings?.mode || "region")
     spacing: Style.marginM
 
     NComboBox {

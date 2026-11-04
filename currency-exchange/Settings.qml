@@ -65,6 +65,10 @@ ColumnLayout {
 
   // Widget settings
   property string valueWidgetDisplayMode: cfg.widgetDisplayMode || defaults.widgetDisplayMode || "icon"
+  readonly property bool settingsDirty: valueRefreshInterval !== String(cfg.refreshInterval ?? defaults.refreshInterval ?? 60)
+                                        || valueSourceCurrency !== (cfg.sourceCurrency || defaults.sourceCurrency || "USD")
+                                        || valueTargetCurrency !== (cfg.targetCurrency || defaults.targetCurrency || "EUR")
+                                        || valueWidgetDisplayMode !== (cfg.widgetDisplayMode || defaults.widgetDisplayMode || "icon")
 
   function buildTranslatedCurrencyModel() {
     var model = [];

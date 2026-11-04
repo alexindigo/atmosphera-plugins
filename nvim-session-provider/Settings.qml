@@ -2,6 +2,7 @@ import Quickshell
 import QtQuick
 import QtQuick.Layouts
 import qs.Commons
+import qs.Portals
 import qs.Widgets
 
 ColumnLayout {
@@ -25,6 +26,10 @@ ColumnLayout {
       true
 
 
+  readonly property bool settingsDirty: editNvim !== (pluginApi?.pluginSettings?.nvim || pluginApi?.manifest?.metadata?.defaultSettings?.nvim || "nvim")
+                                        || editRunInTerminal !== (pluginApi?.pluginSettings?.runInTerminal ?? pluginApi?.manifest?.metadata?.defaultSettings?.runInTerminal ?? true)
+                                        || editSessionDir !== (pluginApi?.pluginSettings?.sessionDir ?? pluginApi?.manifest?.metadata?.defaultSettings?.sessionDir ?? "~/.local/share/nvim/sessions")
+                                        || editIncludeInSearch !== (pluginApi?.pluginSettings?.includeInSearch ?? pluginApi?.manifest?.metadata?.defaultSettings?.includeInSearch ?? true)
   spacing: Style.marginM
 
   ColumnLayout {
@@ -71,7 +76,7 @@ ColumnLayout {
 
   }
 
-  AtmoFilePicker {
+  PortalFilePicker {
       id: filePicker
       selectionMode: "folders"
       title: pluginApi.tr("settings.sessionDir.title")

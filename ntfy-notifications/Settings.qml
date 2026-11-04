@@ -22,6 +22,15 @@ ColumnLayout {
     property int editPollInterval: cfg.pollInterval ?? defaults.pollInterval ?? 30
     property bool editEnableToasts: cfg.enableToasts ?? defaults.enableToasts ?? true
     property int editMaxMessages: cfg.maxMessages ?? defaults.maxMessages ?? 100
+    readonly property bool settingsDirty: editServerUrl !== (cfg.serverUrl ?? defaults.serverUrl ?? "https://ntfy.sh")
+                                          || editTopics !== (cfg.topics ?? defaults.topics ?? "")
+                                          || editAuthMethod !== (cfg.authMethod ?? defaults.authMethod ?? "none")
+                                          || editAuthToken !== (cfg.authToken ?? defaults.authToken ?? "")
+                                          || editAuthUsername !== (cfg.authUsername ?? defaults.authUsername ?? "")
+                                          || editAuthPassword !== (cfg.authPassword ?? defaults.authPassword ?? "")
+                                          || editPollInterval !== (cfg.pollInterval ?? defaults.pollInterval ?? 30)
+                                          || editEnableToasts !== (cfg.enableToasts ?? defaults.enableToasts ?? true)
+                                          || editMaxMessages !== (cfg.maxMessages ?? defaults.maxMessages ?? 100)
 
     function saveSettings() {
         if (!pluginApi) return;
@@ -126,7 +135,7 @@ ColumnLayout {
         to: 3600
         stepSize: 15
         value: root.editPollInterval
-        onValueChanged: {
+        onValueModified: {
             root.editPollInterval = value;
             root.saveSettings();
         }
@@ -137,7 +146,7 @@ ColumnLayout {
         label: pluginApi?.tr("settings.enableToasts.label")
         description: pluginApi?.tr("settings.enableToasts.desc")
         checked: root.editEnableToasts
-        onCheckedChanged: {
+        onToggled: checked => {
             root.editEnableToasts = checked;
             root.saveSettings();
         }
@@ -151,7 +160,7 @@ ColumnLayout {
         to: 500
         stepSize: 10
         value: root.editMaxMessages
-        onValueChanged: {
+        onValueModified: {
             root.editMaxMessages = value;
             root.saveSettings();
         }

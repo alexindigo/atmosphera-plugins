@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.Commons
+import qs.Portals
 import qs.Widgets
 
 ColumnLayout {
@@ -13,6 +14,8 @@ ColumnLayout {
 
     property string editConfigPath: cfg.obsidianConfigPath ?? defaults.obsidianConfigPath ?? ""
     property bool editIncludeInSearch: cfg.includeInSearch ?? defaults.includeInSearch ?? true
+    readonly property bool settingsDirty: editConfigPath !== (cfg.obsidianConfigPath ?? defaults.obsidianConfigPath ?? "")
+                                          || editIncludeInSearch !== (cfg.includeInSearch ?? defaults.includeInSearch ?? true)
 
     spacing: Style.marginL
 
@@ -36,7 +39,7 @@ ColumnLayout {
         onToggled: (checked) => root.editIncludeInSearch = checked
     }
 
-    AtmoFilePicker {
+    PortalFilePicker {
         id: filePicker
         selectionMode: "files"
         title: pluginApi?.tr("settings.configPath.pickerTitle")

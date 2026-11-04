@@ -19,6 +19,15 @@ ColumnLayout {
     property bool editListEnabled: cfg.listEnabled ?? defaults.listEnabled ?? false
     property string editTextFile: cfg.textFile ?? defaults.textFile ?? ""
     property bool editRefreshOnWallpaper: cfg.refreshOnWallpaper ?? defaults.refreshOnWallpaper ?? true
+    readonly property bool settingsDirty: editText !== (cfg.text ?? defaults.text ?? "")
+                                          || editFortuneEnabled !== (cfg.fortuneEnabled ?? defaults.fortuneEnabled ?? false)
+                                          || editFortuneOffensive !== (cfg.fortuneOffensive ?? defaults.fortuneOffensive ?? false)
+                                          || editFortuneEqual !== (cfg.fortuneEqual ?? defaults.fortuneEqual ?? false)
+                                          || editFortuneCategory !== (cfg.fortuneCategory ?? defaults.fortuneCategory ?? "")
+                                          || editFortuneMaxLength !== (cfg.fortuneMaxLength ?? defaults.fortuneMaxLength ?? 60)
+                                          || editListEnabled !== (cfg.listEnabled ?? defaults.listEnabled ?? false)
+                                          || editTextFile !== (cfg.textFile ?? defaults.textFile ?? "")
+                                          || editRefreshOnWallpaper !== (cfg.refreshOnWallpaper ?? defaults.refreshOnWallpaper ?? true)
 
     spacing: Style.marginL
 

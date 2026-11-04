@@ -12,6 +12,10 @@ ColumnLayout {
     property real editDifficulty: pluginApi?.pluginSettings?.difficulty ?? 50
     property bool editShowDebug: pluginApi?.pluginSettings?.showDebug ?? false
     property bool showPercentage: pluginApi?.pluginSettings?.showPercentage ?? false
+    readonly property bool settingsDirty: editVolume !== (pluginApi?.pluginSettings?.volume ?? 0.5)
+                                          || editDifficulty !== (pluginApi?.pluginSettings?.difficulty ?? 50)
+                                          || editShowDebug !== (pluginApi?.pluginSettings?.showDebug ?? false)
+                                          || showPercentage !== (pluginApi?.pluginSettings?.showPercentage ?? false)
 
     function saveSettings() {
         pluginApi.pluginSettings.volume = root.editVolume;
