@@ -23,7 +23,7 @@
       "author": "Atmosphera",
       "description": "Spatial overview map of niri windows \u2014 workspaces as rows, columns and tiles laid out like niri's scrolling layout. Click a tile to focus it, click a row to switch workspace.",
       "license": "GPL-3.0",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Panel",
         "Niri",
@@ -32,7 +32,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "lastUpdated": "2026-11-03",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "2-in-1-tools",
@@ -509,7 +509,7 @@
       "author": "Noctalia Team",
       "description": "Create and manage custom predefined color schemes with a visual color editor.",
       "license": "MIT",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "tags": [
         "Theming",
         "Utility"
@@ -518,7 +518,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.5.1",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "cookie-clock",
@@ -543,7 +543,7 @@
       "author": "balor",
       "description": "Currency conversion utility via launcher and bar widget",
       "license": "MIT",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "tags": [
         "Launcher",
         "Utility"
@@ -552,7 +552,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.1",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "custom-battery",
@@ -663,7 +663,7 @@
       "author": "fstanis",
       "description": "View live display settings from wlr-randr and permanent niri KDL output configuration",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Bar",
         "Panel",
@@ -674,7 +674,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "dmenu",
@@ -1773,7 +1773,7 @@
       "author": "blackteaextract",
       "description": "Displays custom text, fortune quotes, or a random entry from a user-provided text file in the bar.",
       "license": "MIT",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "tags": [
         "Bar",
         "Fun"
@@ -1782,7 +1782,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.1",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "notes-scratchpad",
@@ -1790,7 +1790,7 @@
       "author": "apt-get",
       "description": "A simple scratchpad for quick notes.",
       "license": "MIT",
-      "version": "1.1.10",
+      "version": "1.1.11",
       "tags": [
         "Bar",
         "Panel",
@@ -1800,7 +1800,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.7.1",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "ntfy-notifications",
@@ -1808,7 +1808,7 @@
       "author": "maxe",
       "description": "Subscribe to ntfy topics and receive push notifications directly in your bar, with full theming support",
       "license": "MIT",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "tags": [
         "Bar",
         "Panel",
@@ -1867,7 +1867,8 @@
       "author": "Krendil",
       "description": "Open Neovim Sessions",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
+      "minAtmospheraVersion": "0.10.0",
       "tags": [
         "Launcher",
         "Development"
@@ -1902,7 +1903,8 @@
       "author": "0b10headedcalf",
       "description": "Switch between Obsidian vaults from the launcher.",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
+      "minAtmospheraVersion": "0.10.0",
       "tags": [
         "Launcher",
         "Productivity"
@@ -1955,7 +1957,7 @@
       "author": "blackteaextract",
       "description": "Toggle an on-screen keyboard (Squeekboard or wvkbd) with live availability detection, hover icons, and configurable settings. Supersedes squeekboard-toggle.",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "System",
         "Bar",
@@ -1965,7 +1967,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.3",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "parallax-wallpaper",
@@ -1973,7 +1975,8 @@
       "author": "Qholin",
       "description": "A customizable parallax effect for the wallpaper based on the active workspace.",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
+      "minAtmospheraVersion": "0.10.0",
       "tags": [
         "Desktop"
       ],
@@ -2253,7 +2256,7 @@
       "author": "mewmewmemw",
       "description": "Hotkey-driven region screencast that produces an animated GIF and copies it to the clipboard. Bar pill turns red while recording. Backed by wf-recorder + gifski.",
       "license": "MIT",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "tags": [
         "Bar",
         "Recording",
@@ -2267,7 +2270,7 @@
       "upstreamPR": 766,
       "lastUpdated": "2026-11-03",
       "minNoctaliaVersion": "4.6.6",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "screenshot",
@@ -2275,7 +2278,7 @@
       "author": "Cleboost",
       "description": "Quick screenshot button in bar for Hyprland, Sway, and Niri",
       "license": "MIT",
-      "version": "1.2.4",
+      "version": "1.2.5",
       "tags": [
         "Bar",
         "Utility"
@@ -2284,7 +2287,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "shell-profiles",
@@ -2421,7 +2424,7 @@
       "author": "blackteaextract",
       "description": "Toggle the Squeekboard on-screen keyboard with live availability detection, hover icons, and configurable settings. Note: This plugin is deprecated and got consolidated in osk-toggle.",
       "license": "MIT",
-      "version": "1.1.3",
+      "version": "1.1.4",
       "tags": [
         "System",
         "Bar",
@@ -2431,7 +2434,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.3",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "ssh-sessions",
@@ -2531,7 +2534,7 @@
       "author": "Joaquin Righetti, Lucia Bollati",
       "description": "A lightweight taskbar Tamagotchi that lives and evolves while you use your computer.",
       "license": "MIT",
-      "version": "1.1.6",
+      "version": "1.1.7",
       "tags": [
         "Bar",
         "Fun",
@@ -2541,7 +2544,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "thinkpad-fan",

@@ -12,24 +12,28 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property real zoomAmount: cfg.zoomAmount ?? defaults.zoomAmount ?? 1.1
-  property string parallaxDirection: cfg.parallaxDirection ?? defaults.parallaxDirection ?? "horizontal"
-  property real hParallaxAmount: cfg.hParallaxAmount ?? defaults.hParallaxAmount ?? 50
-  property int hParallaxDuration: cfg.hParallaxDuration ?? defaults.hParallaxDuration ?? 400
-  property real vParallaxAmount: cfg.vParallaxAmount ?? defaults.vParallaxAmount ?? 50
-  property int vParallaxDuration: cfg.vParallaxDuration ?? defaults.vParallaxDuration ?? 400
-  property bool invertDirection: cfg.invertDirection ?? defaults.invertDirection ?? false
-  property bool autoZoom: cfg.autoZoom ?? defaults.autoZoom ?? false
-  property string parallaxEasing: cfg.parallaxEasing ?? defaults.parallaxEasing ?? "OutCubic"
-  readonly property bool settingsDirty: zoomAmount !== (cfg.zoomAmount ?? defaults.zoomAmount ?? 1.1)
-                                        || parallaxDirection !== (cfg.parallaxDirection ?? defaults.parallaxDirection ?? "horizontal")
-                                        || hParallaxAmount !== (cfg.hParallaxAmount ?? defaults.hParallaxAmount ?? 50)
-                                        || hParallaxDuration !== (cfg.hParallaxDuration ?? defaults.hParallaxDuration ?? 400)
-                                        || vParallaxAmount !== (cfg.vParallaxAmount ?? defaults.vParallaxAmount ?? 50)
-                                        || vParallaxDuration !== (cfg.vParallaxDuration ?? defaults.vParallaxDuration ?? 400)
-                                        || invertDirection !== (cfg.invertDirection ?? defaults.invertDirection ?? false)
-                                        || autoZoom !== (cfg.autoZoom ?? defaults.autoZoom ?? false)
-                                        || parallaxEasing !== (cfg.parallaxEasing ?? defaults.parallaxEasing ?? "OutCubic")
+  property real zoomAmount: displayBaseline.zoomAmount
+  property string parallaxDirection: displayBaseline.parallaxDirection
+  property real hParallaxAmount: displayBaseline.hParallaxAmount
+  property int hParallaxDuration: displayBaseline.hParallaxDuration
+  property real vParallaxAmount: displayBaseline.vParallaxAmount
+  property int vParallaxDuration: displayBaseline.vParallaxDuration
+  property bool invertDirection: displayBaseline.invertDirection
+  property bool autoZoom: displayBaseline.autoZoom
+  property string parallaxEasing: displayBaseline.parallaxEasing
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property real zoomAmount: cfg.zoomAmount ?? defaults.zoomAmount ?? 1.1
+    readonly property string parallaxDirection: cfg.parallaxDirection ?? defaults.parallaxDirection ?? "horizontal"
+    readonly property real hParallaxAmount: cfg.hParallaxAmount ?? defaults.hParallaxAmount ?? 50
+    readonly property int hParallaxDuration: cfg.hParallaxDuration ?? defaults.hParallaxDuration ?? 400
+    readonly property real vParallaxAmount: cfg.vParallaxAmount ?? defaults.vParallaxAmount ?? 50
+    readonly property int vParallaxDuration: cfg.vParallaxDuration ?? defaults.vParallaxDuration ?? 400
+    readonly property bool invertDirection: cfg.invertDirection ?? defaults.invertDirection ?? false
+    readonly property bool autoZoom: cfg.autoZoom ?? defaults.autoZoom ?? false
+    readonly property string parallaxEasing: cfg.parallaxEasing ?? defaults.parallaxEasing ?? "OutCubic"
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({zoomAmount: root.zoomAmount, parallaxDirection: root.parallaxDirection, hParallaxAmount: root.hParallaxAmount, hParallaxDuration: root.hParallaxDuration, vParallaxAmount: root.vParallaxAmount, vParallaxDuration: root.vParallaxDuration, invertDirection: root.invertDirection, autoZoom: root.autoZoom, parallaxEasing: root.parallaxEasing})
 
   readonly property bool showHorizontal: parallaxDirection === "horizontal" || parallaxDirection === "both"
   readonly property bool showVertical: parallaxDirection === "vertical" || parallaxDirection === "both"

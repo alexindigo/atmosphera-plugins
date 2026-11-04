@@ -8,12 +8,12 @@ ColumnLayout {
 
     property var pluginApi: null
 
-    property string editMode: 
-        pluginApi?.pluginSettings?.mode || 
-        pluginApi?.manifest?.metadata?.defaultSettings?.mode || 
-        "region"
-
-    readonly property bool settingsDirty: editMode !== (pluginApi?.pluginSettings?.mode || pluginApi?.manifest?.metadata?.defaultSettings?.mode || "region")
+    property string editMode: displayBaseline.editMode
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string editMode: pluginApi?.pluginSettings?.mode || pluginApi?.manifest?.metadata?.defaultSettings?.mode || "region"
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editMode: root.editMode})
     spacing: Style.marginM
 
     NComboBox {

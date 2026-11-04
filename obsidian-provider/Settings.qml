@@ -12,10 +12,14 @@ ColumnLayout {
     property var cfg: pluginApi?.pluginSettings || ({})
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    property string editConfigPath: cfg.obsidianConfigPath ?? defaults.obsidianConfigPath ?? ""
-    property bool editIncludeInSearch: cfg.includeInSearch ?? defaults.includeInSearch ?? true
-    readonly property bool settingsDirty: editConfigPath !== (cfg.obsidianConfigPath ?? defaults.obsidianConfigPath ?? "")
-                                          || editIncludeInSearch !== (cfg.includeInSearch ?? defaults.includeInSearch ?? true)
+    property string editConfigPath: displayBaseline.editConfigPath
+    property bool editIncludeInSearch: displayBaseline.editIncludeInSearch
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string editConfigPath: cfg.obsidianConfigPath ?? defaults.obsidianConfigPath ?? ""
+        readonly property bool editIncludeInSearch: cfg.includeInSearch ?? defaults.includeInSearch ?? true
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editConfigPath: root.editConfigPath, editIncludeInSearch: root.editIncludeInSearch})
 
     spacing: Style.marginL
 

@@ -13,24 +13,28 @@ ColumnLayout {
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
     // Edit copies
-    property string editServerUrl: cfg.serverUrl ?? defaults.serverUrl ?? "https://ntfy.sh"
-    property string editTopics: cfg.topics ?? defaults.topics ?? ""
-    property string editAuthMethod: cfg.authMethod ?? defaults.authMethod ?? "none"
-    property string editAuthToken: cfg.authToken ?? defaults.authToken ?? ""
-    property string editAuthUsername: cfg.authUsername ?? defaults.authUsername ?? ""
-    property string editAuthPassword: cfg.authPassword ?? defaults.authPassword ?? ""
-    property int editPollInterval: cfg.pollInterval ?? defaults.pollInterval ?? 30
-    property bool editEnableToasts: cfg.enableToasts ?? defaults.enableToasts ?? true
-    property int editMaxMessages: cfg.maxMessages ?? defaults.maxMessages ?? 100
-    readonly property bool settingsDirty: editServerUrl !== (cfg.serverUrl ?? defaults.serverUrl ?? "https://ntfy.sh")
-                                          || editTopics !== (cfg.topics ?? defaults.topics ?? "")
-                                          || editAuthMethod !== (cfg.authMethod ?? defaults.authMethod ?? "none")
-                                          || editAuthToken !== (cfg.authToken ?? defaults.authToken ?? "")
-                                          || editAuthUsername !== (cfg.authUsername ?? defaults.authUsername ?? "")
-                                          || editAuthPassword !== (cfg.authPassword ?? defaults.authPassword ?? "")
-                                          || editPollInterval !== (cfg.pollInterval ?? defaults.pollInterval ?? 30)
-                                          || editEnableToasts !== (cfg.enableToasts ?? defaults.enableToasts ?? true)
-                                          || editMaxMessages !== (cfg.maxMessages ?? defaults.maxMessages ?? 100)
+    property string editServerUrl: displayBaseline.editServerUrl
+    property string editTopics: displayBaseline.editTopics
+    property string editAuthMethod: displayBaseline.editAuthMethod
+    property string editAuthToken: displayBaseline.editAuthToken
+    property string editAuthUsername: displayBaseline.editAuthUsername
+    property string editAuthPassword: displayBaseline.editAuthPassword
+    property int editPollInterval: displayBaseline.editPollInterval
+    property bool editEnableToasts: displayBaseline.editEnableToasts
+    property int editMaxMessages: displayBaseline.editMaxMessages
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string editServerUrl: cfg.serverUrl ?? defaults.serverUrl ?? "https://ntfy.sh"
+        readonly property string editTopics: cfg.topics ?? defaults.topics ?? ""
+        readonly property string editAuthMethod: cfg.authMethod ?? defaults.authMethod ?? "none"
+        readonly property string editAuthToken: cfg.authToken ?? defaults.authToken ?? ""
+        readonly property string editAuthUsername: cfg.authUsername ?? defaults.authUsername ?? ""
+        readonly property string editAuthPassword: cfg.authPassword ?? defaults.authPassword ?? ""
+        readonly property int editPollInterval: cfg.pollInterval ?? defaults.pollInterval ?? 30
+        readonly property bool editEnableToasts: cfg.enableToasts ?? defaults.enableToasts ?? true
+        readonly property int editMaxMessages: cfg.maxMessages ?? defaults.maxMessages ?? 100
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editServerUrl: root.editServerUrl, editTopics: root.editTopics, editAuthMethod: root.editAuthMethod, editAuthToken: root.editAuthToken, editAuthUsername: root.editAuthUsername, editAuthPassword: root.editAuthPassword, editPollInterval: root.editPollInterval, editEnableToasts: root.editEnableToasts, editMaxMessages: root.editMaxMessages})
 
     function saveSettings() {
         if (!pluginApi) return;

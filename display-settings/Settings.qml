@@ -10,10 +10,14 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property string valueNiriConfigPath: cfg.niriConfigPath ?? defaults.niriConfigPath ?? "~/.config/niri/config.kdl"
-  property string valueIconColor: cfg.iconColor ?? defaults.iconColor ?? "none"
-  readonly property bool settingsDirty: valueNiriConfigPath !== (cfg.niriConfigPath ?? defaults.niriConfigPath ?? "~/.config/niri/config.kdl")
-                                        || valueIconColor !== (cfg.iconColor ?? defaults.iconColor ?? "none")
+  property string valueNiriConfigPath: displayBaseline.valueNiriConfigPath
+  property string valueIconColor: displayBaseline.valueIconColor
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string valueNiriConfigPath: cfg.niriConfigPath ?? defaults.niriConfigPath ?? "~/.config/niri/config.kdl"
+    readonly property string valueIconColor: cfg.iconColor ?? defaults.iconColor ?? "none"
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({valueNiriConfigPath: root.valueNiriConfigPath, valueIconColor: root.valueIconColor})
 
   spacing: Style.marginL
 

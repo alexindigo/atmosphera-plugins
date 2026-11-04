@@ -11,14 +11,18 @@ ColumnLayout {
     property var cfg: pluginApi?.pluginSettings || ({})
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    property string editBackend: cfg.backend ?? defaults.backend ?? "auto"
-    property bool editHideWhenUnavailable: cfg.hideWhenUnavailable ?? defaults.hideWhenUnavailable ?? false
-    property bool editDisableHoverIcon: cfg.disableHoverIcon ?? defaults.disableHoverIcon ?? false
-    property string editWvkbdBin: cfg.wvkbdBin ?? defaults.wvkbdBin ?? "wvkbd-mobintl"
-    readonly property bool settingsDirty: editBackend !== (cfg.backend ?? defaults.backend ?? "auto")
-                                          || editHideWhenUnavailable !== (cfg.hideWhenUnavailable ?? defaults.hideWhenUnavailable ?? false)
-                                          || editDisableHoverIcon !== (cfg.disableHoverIcon ?? defaults.disableHoverIcon ?? false)
-                                          || editWvkbdBin !== (cfg.wvkbdBin ?? defaults.wvkbdBin ?? "wvkbd-mobintl")
+    property string editBackend: displayBaseline.editBackend
+    property bool editHideWhenUnavailable: displayBaseline.editHideWhenUnavailable
+    property bool editDisableHoverIcon: displayBaseline.editDisableHoverIcon
+    property string editWvkbdBin: displayBaseline.editWvkbdBin
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string editBackend: cfg.backend ?? defaults.backend ?? "auto"
+        readonly property bool editHideWhenUnavailable: cfg.hideWhenUnavailable ?? defaults.hideWhenUnavailable ?? false
+        readonly property bool editDisableHoverIcon: cfg.disableHoverIcon ?? defaults.disableHoverIcon ?? false
+        readonly property string editWvkbdBin: cfg.wvkbdBin ?? defaults.wvkbdBin ?? "wvkbd-mobintl"
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editBackend: root.editBackend, editHideWhenUnavailable: root.editHideWhenUnavailable, editDisableHoverIcon: root.editDisableHoverIcon, editWvkbdBin: root.editWvkbdBin})
 
     readonly property bool showWvkbdBin: editBackend === "wvkbd" || editBackend === "auto"
 

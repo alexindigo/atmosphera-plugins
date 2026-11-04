@@ -10,24 +10,28 @@ ColumnLayout {
     property var cfg: pluginApi?.pluginSettings || ({})
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    property string editText: cfg.text ?? defaults.text ?? ""
-    property bool editFortuneEnabled: cfg.fortuneEnabled ?? defaults.fortuneEnabled ?? false
-    property bool editFortuneOffensive: cfg.fortuneOffensive ?? defaults.fortuneOffensive ?? false
-    property bool editFortuneEqual: cfg.fortuneEqual ?? defaults.fortuneEqual ?? false
-    property string editFortuneCategory: cfg.fortuneCategory ?? defaults.fortuneCategory ?? ""
-    property int editFortuneMaxLength: cfg.fortuneMaxLength ?? defaults.fortuneMaxLength ?? 60
-    property bool editListEnabled: cfg.listEnabled ?? defaults.listEnabled ?? false
-    property string editTextFile: cfg.textFile ?? defaults.textFile ?? ""
-    property bool editRefreshOnWallpaper: cfg.refreshOnWallpaper ?? defaults.refreshOnWallpaper ?? true
-    readonly property bool settingsDirty: editText !== (cfg.text ?? defaults.text ?? "")
-                                          || editFortuneEnabled !== (cfg.fortuneEnabled ?? defaults.fortuneEnabled ?? false)
-                                          || editFortuneOffensive !== (cfg.fortuneOffensive ?? defaults.fortuneOffensive ?? false)
-                                          || editFortuneEqual !== (cfg.fortuneEqual ?? defaults.fortuneEqual ?? false)
-                                          || editFortuneCategory !== (cfg.fortuneCategory ?? defaults.fortuneCategory ?? "")
-                                          || editFortuneMaxLength !== (cfg.fortuneMaxLength ?? defaults.fortuneMaxLength ?? 60)
-                                          || editListEnabled !== (cfg.listEnabled ?? defaults.listEnabled ?? false)
-                                          || editTextFile !== (cfg.textFile ?? defaults.textFile ?? "")
-                                          || editRefreshOnWallpaper !== (cfg.refreshOnWallpaper ?? defaults.refreshOnWallpaper ?? true)
+    property string editText: displayBaseline.editText
+    property bool editFortuneEnabled: displayBaseline.editFortuneEnabled
+    property bool editFortuneOffensive: displayBaseline.editFortuneOffensive
+    property bool editFortuneEqual: displayBaseline.editFortuneEqual
+    property string editFortuneCategory: displayBaseline.editFortuneCategory
+    property int editFortuneMaxLength: displayBaseline.editFortuneMaxLength
+    property bool editListEnabled: displayBaseline.editListEnabled
+    property string editTextFile: displayBaseline.editTextFile
+    property bool editRefreshOnWallpaper: displayBaseline.editRefreshOnWallpaper
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string editText: cfg.text ?? defaults.text ?? ""
+        readonly property bool editFortuneEnabled: cfg.fortuneEnabled ?? defaults.fortuneEnabled ?? false
+        readonly property bool editFortuneOffensive: cfg.fortuneOffensive ?? defaults.fortuneOffensive ?? false
+        readonly property bool editFortuneEqual: cfg.fortuneEqual ?? defaults.fortuneEqual ?? false
+        readonly property string editFortuneCategory: cfg.fortuneCategory ?? defaults.fortuneCategory ?? ""
+        readonly property int editFortuneMaxLength: cfg.fortuneMaxLength ?? defaults.fortuneMaxLength ?? 60
+        readonly property bool editListEnabled: cfg.listEnabled ?? defaults.listEnabled ?? false
+        readonly property string editTextFile: cfg.textFile ?? defaults.textFile ?? ""
+        readonly property bool editRefreshOnWallpaper: cfg.refreshOnWallpaper ?? defaults.refreshOnWallpaper ?? true
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editText: root.editText, editFortuneEnabled: root.editFortuneEnabled, editFortuneOffensive: root.editFortuneOffensive, editFortuneEqual: root.editFortuneEqual, editFortuneCategory: root.editFortuneCategory, editFortuneMaxLength: root.editFortuneMaxLength, editListEnabled: root.editListEnabled, editTextFile: root.editTextFile, editRefreshOnWallpaper: root.editRefreshOnWallpaper})
 
     spacing: Style.marginL
 
