@@ -9,10 +9,14 @@ ColumnLayout {
 
     property var pluginApi: null
 
-    property string editPluggedInScript: pluginApi?.pluginSettings?.pluggedInScript || ""
-    property string editOnBatteryScript: pluginApi?.pluginSettings?.onBatteryScript || ""
-    readonly property bool settingsDirty: editPluggedInScript !== (pluginApi?.pluginSettings?.pluggedInScript || "")
-                                          || editOnBatteryScript !== (pluginApi?.pluginSettings?.onBatteryScript || "")
+    property string editPluggedInScript: displayBaseline.editPluggedInScript
+    property string editOnBatteryScript: displayBaseline.editOnBatteryScript
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string editPluggedInScript: pluginApi?.pluginSettings?.pluggedInScript || ""
+        readonly property string editOnBatteryScript: pluginApi?.pluginSettings?.onBatteryScript || ""
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editPluggedInScript: root.editPluggedInScript, editOnBatteryScript: root.editOnBatteryScript})
 
     spacing: Style.marginL
 

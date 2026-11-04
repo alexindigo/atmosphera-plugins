@@ -9,24 +9,16 @@ ColumnLayout {
 
   property var pluginApi: null
 
-  property int editRefreshInterval:
-    pluginApi?.pluginSettings?.refreshInterval ||
-    pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval ||
-    3000
-
-  property bool editShowProfileLabel:
-    pluginApi?.pluginSettings?.showProfileLabel ??
-    pluginApi?.manifest?.metadata?.defaultSettings?.showProfileLabel ??
-    false
-
-  property string editActiveColor:
-    pluginApi?.pluginSettings?.activeColor ||
-    pluginApi?.manifest?.metadata?.defaultSettings?.activeColor ||
-    "primary"
-
-  readonly property bool settingsDirty: editRefreshInterval !== (pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 3000)
-                                        || editShowProfileLabel !== (pluginApi?.pluginSettings?.showProfileLabel ?? pluginApi?.manifest?.metadata?.defaultSettings?.showProfileLabel ?? false)
-                                        || editActiveColor !== (pluginApi?.pluginSettings?.activeColor || pluginApi?.manifest?.metadata?.defaultSettings?.activeColor || "primary")
+  property int editRefreshInterval: displayBaseline.editRefreshInterval
+  property bool editShowProfileLabel: displayBaseline.editShowProfileLabel
+  property string editActiveColor: displayBaseline.editActiveColor
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property int editRefreshInterval: pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 3000
+    readonly property bool editShowProfileLabel: pluginApi?.pluginSettings?.showProfileLabel ?? pluginApi?.manifest?.metadata?.defaultSettings?.showProfileLabel ?? false
+    readonly property string editActiveColor: pluginApi?.pluginSettings?.activeColor || pluginApi?.manifest?.metadata?.defaultSettings?.activeColor || "primary"
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editRefreshInterval: root.editRefreshInterval, editShowProfileLabel: root.editShowProfileLabel, editActiveColor: root.editActiveColor})
 
   spacing: Style.marginM
 

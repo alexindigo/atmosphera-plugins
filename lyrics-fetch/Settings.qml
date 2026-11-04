@@ -8,26 +8,30 @@ ColumnLayout {
     id: root
     property var pluginApi: null
 
-    property int draftWidth: pluginApi?.pluginSettings?.widgetWidth ?? 215
-    property int draftSpeed: pluginApi?.pluginSettings?.scrollSpeed ?? 70
-    property string draftMode: pluginApi?.pluginSettings?.scrollMode ?? "always"
-    property int draftFontSize: pluginApi?.pluginSettings?.fontSize ?? 10
-    property bool draftHideWhenEmpty: pluginApi?.pluginSettings?.hideWhenEmpty ?? true
-    property string draftFontFamily: pluginApi?.pluginSettings?.fontFamily ?? "Inter"
-    property bool draftAdaptScrollSpeed: pluginApi?.pluginSettings?.adaptScrollSpeed ?? true
-    property bool draftHideWhenPaused: pluginApi?.pluginSettings?.hideWhenPaused ?? true
-    property string draftVerticalRotationDirection: displayedRotation()
+    property int draftWidth: displayBaseline.draftWidth
+    property int draftSpeed: displayBaseline.draftSpeed
+    property string draftMode: displayBaseline.draftMode
+    property int draftFontSize: displayBaseline.draftFontSize
+    property bool draftHideWhenEmpty: displayBaseline.draftHideWhenEmpty
+    property string draftFontFamily: displayBaseline.draftFontFamily
+    property bool draftAdaptScrollSpeed: displayBaseline.draftAdaptScrollSpeed
+    property bool draftHideWhenPaused: displayBaseline.draftHideWhenPaused
+    property string draftVerticalRotationDirection: displayBaseline.draftVerticalRotationDirection
 
     readonly property bool isBarVertical: Settings.data.bar.position === "left" || Settings.data.bar.position === "right"
-    readonly property bool settingsDirty: draftWidth !== (pluginApi?.pluginSettings?.widgetWidth ?? 215)
-                                          || draftSpeed !== (pluginApi?.pluginSettings?.scrollSpeed ?? 70)
-                                          || draftMode !== (pluginApi?.pluginSettings?.scrollMode ?? "always")
-                                          || draftFontSize !== (pluginApi?.pluginSettings?.fontSize ?? 10)
-                                          || draftHideWhenEmpty !== (pluginApi?.pluginSettings?.hideWhenEmpty ?? true)
-                                          || draftFontFamily !== (pluginApi?.pluginSettings?.fontFamily ?? "Inter")
-                                          || draftAdaptScrollSpeed !== (pluginApi?.pluginSettings?.adaptScrollSpeed ?? true)
-                                          || draftHideWhenPaused !== (pluginApi?.pluginSettings?.hideWhenPaused ?? true)
-                                          || draftVerticalRotationDirection !== displayedRotation()
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property int draftWidth: pluginApi?.pluginSettings?.widgetWidth ?? 215
+        readonly property int draftSpeed: pluginApi?.pluginSettings?.scrollSpeed ?? 70
+        readonly property string draftMode: pluginApi?.pluginSettings?.scrollMode ?? "always"
+        readonly property int draftFontSize: pluginApi?.pluginSettings?.fontSize ?? 10
+        readonly property bool draftHideWhenEmpty: pluginApi?.pluginSettings?.hideWhenEmpty ?? true
+        readonly property string draftFontFamily: pluginApi?.pluginSettings?.fontFamily ?? "Inter"
+        readonly property bool draftAdaptScrollSpeed: pluginApi?.pluginSettings?.adaptScrollSpeed ?? true
+        readonly property bool draftHideWhenPaused: pluginApi?.pluginSettings?.hideWhenPaused ?? true
+        readonly property string draftVerticalRotationDirection: root.displayedRotation()
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({draftWidth: root.draftWidth, draftSpeed: root.draftSpeed, draftMode: root.draftMode, draftFontSize: root.draftFontSize, draftHideWhenEmpty: root.draftHideWhenEmpty, draftFontFamily: root.draftFontFamily, draftAdaptScrollSpeed: root.draftAdaptScrollSpeed, draftHideWhenPaused: root.draftHideWhenPaused, draftVerticalRotationDirection: root.draftVerticalRotationDirection})
 
     function displayedRotation() {
         const value = pluginApi?.pluginSettings?.verticalRotationDirection;

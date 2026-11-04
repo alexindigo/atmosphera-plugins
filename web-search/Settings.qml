@@ -10,10 +10,10 @@ ColumnLayout {
     property var cfg: pluginApi?.pluginSettings || ({})
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    property string valueSearchEngine: cfg.search_engine ?? defaults.search_engine ?? "Google"
-    property bool valueDirectUrl: cfg.direct_url ?? defaults.direct_url ?? true
-    property bool valueShowSuggestions: cfg.show_suggestions ?? defaults.show_suggestions ?? true
-    property int valueMaxResults: cfg.max_results ?? defaults.max_results ?? 5
+    property string valueSearchEngine: displayBaseline.valueSearchEngine
+    property bool valueDirectUrl: displayBaseline.valueDirectUrl
+    property bool valueShowSuggestions: displayBaseline.valueShowSuggestions
+    property int valueMaxResults: displayBaseline.valueMaxResults
 
     spacing: Style.marginL
 
@@ -93,10 +93,14 @@ ColumnLayout {
         }
     }
 
-    readonly property bool settingsDirty: root.valueSearchEngine !== (cfg.search_engine ?? defaults.search_engine ?? "Google")
-        || root.valueDirectUrl !== (cfg.direct_url ?? defaults.direct_url ?? true)
-        || root.valueShowSuggestions !== (cfg.show_suggestions ?? defaults.show_suggestions ?? true)
-        || root.valueMaxResults !== (cfg.max_results ?? defaults.max_results ?? 5)
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string valueSearchEngine: cfg.search_engine ?? defaults.search_engine ?? "Google"
+        readonly property bool valueDirectUrl: cfg.direct_url ?? defaults.direct_url ?? true
+        readonly property bool valueShowSuggestions: cfg.show_suggestions ?? defaults.show_suggestions ?? true
+        readonly property int valueMaxResults: cfg.max_results ?? defaults.max_results ?? 5
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({valueSearchEngine: root.valueSearchEngine, valueDirectUrl: root.valueDirectUrl, valueShowSuggestions: root.valueShowSuggestions, valueMaxResults: root.valueMaxResults})
 
     function saveSettings() {
         if (!pluginApi) {

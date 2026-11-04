@@ -13,22 +13,26 @@ ColumnLayout {
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   // Local state
-  property string apiKeyValue: cfg.apiKey ?? defaults.apiKey ?? "YOUR_API_KEY_HERE"
-  property string countryValue: cfg.country ?? defaults.country ?? "us"
-  property string languageValue: cfg.language ?? defaults.language ?? "en"
-  property string categoryValue: cfg.category ?? defaults.category ?? "general"
-  property int refreshIntervalValue: cfg.refreshInterval ?? defaults.refreshInterval ?? 30
-  property int maxHeadlinesValue: cfg.maxHeadlines ?? defaults.maxHeadlines ?? 10
-  property int widgetWidthValue: cfg.widgetWidth ?? defaults.widgetWidth ?? 300
-  property int rollingSpeedValue: cfg.rollingSpeed ?? defaults.rollingSpeed ?? 50
-  readonly property bool settingsDirty: apiKeyValue !== (cfg.apiKey ?? defaults.apiKey ?? "YOUR_API_KEY_HERE")
-                                        || countryValue !== (cfg.country ?? defaults.country ?? "us")
-                                        || languageValue !== (cfg.language ?? defaults.language ?? "en")
-                                        || categoryValue !== (cfg.category ?? defaults.category ?? "general")
-                                        || refreshIntervalValue !== (cfg.refreshInterval ?? defaults.refreshInterval ?? 30)
-                                        || maxHeadlinesValue !== (cfg.maxHeadlines ?? defaults.maxHeadlines ?? 10)
-                                        || widgetWidthValue !== (cfg.widgetWidth ?? defaults.widgetWidth ?? 300)
-                                        || rollingSpeedValue !== (cfg.rollingSpeed ?? defaults.rollingSpeed ?? 50)
+  property string apiKeyValue: displayBaseline.apiKeyValue
+  property string countryValue: displayBaseline.countryValue
+  property string languageValue: displayBaseline.languageValue
+  property string categoryValue: displayBaseline.categoryValue
+  property int refreshIntervalValue: displayBaseline.refreshIntervalValue
+  property int maxHeadlinesValue: displayBaseline.maxHeadlinesValue
+  property int widgetWidthValue: displayBaseline.widgetWidthValue
+  property int rollingSpeedValue: displayBaseline.rollingSpeedValue
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string apiKeyValue: cfg.apiKey ?? defaults.apiKey ?? "YOUR_API_KEY_HERE"
+    readonly property string countryValue: cfg.country ?? defaults.country ?? "us"
+    readonly property string languageValue: cfg.language ?? defaults.language ?? "en"
+    readonly property string categoryValue: cfg.category ?? defaults.category ?? "general"
+    readonly property int refreshIntervalValue: cfg.refreshInterval ?? defaults.refreshInterval ?? 30
+    readonly property int maxHeadlinesValue: cfg.maxHeadlines ?? defaults.maxHeadlines ?? 10
+    readonly property int widgetWidthValue: cfg.widgetWidth ?? defaults.widgetWidth ?? 300
+    readonly property int rollingSpeedValue: cfg.rollingSpeed ?? defaults.rollingSpeed ?? 50
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({apiKeyValue: root.apiKeyValue, countryValue: root.countryValue, languageValue: root.languageValue, categoryValue: root.categoryValue, refreshIntervalValue: root.refreshIntervalValue, maxHeadlinesValue: root.maxHeadlinesValue, widgetWidthValue: root.widgetWidthValue, rollingSpeedValue: root.rollingSpeedValue})
 
   function saveSettings() {
     if (!pluginApi) return;

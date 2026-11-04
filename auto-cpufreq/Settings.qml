@@ -11,14 +11,18 @@ ColumnLayout {
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
     // Edit copies
-    property int    editRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 3000
-    property bool   editShowGovernor:    cfg.showGovernor    ?? defaults.showGovernor    ?? true
-    property bool   editShowTurbo:       cfg.showTurbo       ?? defaults.showTurbo       ?? true
-    property bool   editCompactMode:     cfg.compactMode     ?? defaults.compactMode     ?? false
-    readonly property bool settingsDirty: editRefreshInterval !== (cfg.refreshInterval ?? defaults.refreshInterval ?? 3000)
-                                          || editShowGovernor !== (cfg.showGovernor ?? defaults.showGovernor ?? true)
-                                          || editShowTurbo !== (cfg.showTurbo ?? defaults.showTurbo ?? true)
-                                          || editCompactMode !== (cfg.compactMode ?? defaults.compactMode ?? false)
+    property int    editRefreshInterval: displayBaseline.editRefreshInterval
+    property bool   editShowGovernor:    displayBaseline.editShowGovernor
+    property bool   editShowTurbo:       displayBaseline.editShowTurbo
+    property bool   editCompactMode:     displayBaseline.editCompactMode
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property int editRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 3000
+        readonly property bool editShowGovernor: cfg.showGovernor ?? defaults.showGovernor ?? true
+        readonly property bool editShowTurbo: cfg.showTurbo ?? defaults.showTurbo ?? true
+        readonly property bool editCompactMode: cfg.compactMode ?? defaults.compactMode ?? false
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editRefreshInterval: root.editRefreshInterval, editShowGovernor: root.editShowGovernor, editShowTurbo: root.editShowTurbo, editCompactMode: root.editCompactMode})
 
     spacing: Style.marginL
 

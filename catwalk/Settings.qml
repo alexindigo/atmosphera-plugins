@@ -10,10 +10,14 @@ ColumnLayout {
     property var pluginApi: null
 
     // Local state - track changes before saving
-    property real valueMinimumThreshold: pluginApi?.pluginSettings?.minimumThreshold || 10
-    property bool valueHideBackground: pluginApi?.pluginSettings?.hideBackground ?? false
-    readonly property bool settingsDirty: valueMinimumThreshold !== (pluginApi?.pluginSettings?.minimumThreshold || 10)
-                                          || valueHideBackground !== (pluginApi?.pluginSettings?.hideBackground ?? false)
+    property real valueMinimumThreshold: displayBaseline.valueMinimumThreshold
+    property bool valueHideBackground: displayBaseline.valueHideBackground
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property real valueMinimumThreshold: pluginApi?.pluginSettings?.minimumThreshold || 10
+        readonly property bool valueHideBackground: pluginApi?.pluginSettings?.hideBackground ?? false
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({valueMinimumThreshold: root.valueMinimumThreshold, valueHideBackground: root.valueHideBackground})
 
     spacing: Style.marginM
 

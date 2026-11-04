@@ -10,9 +10,9 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property string editTerminalCommand: cfg.terminalCommand ?? defaults.terminalCommand ?? ""
-  property int editPollInterval: cfg.pollInterval ?? defaults.pollInterval ?? 10
-  property bool editShowInactiveHosts: cfg.showInactiveHosts ?? defaults.showInactiveHosts ?? true
+  property string editTerminalCommand: displayBaseline.editTerminalCommand
+  property int editPollInterval: displayBaseline.editPollInterval
+  property bool editShowInactiveHosts: displayBaseline.editShowInactiveHosts
 
   spacing: Style.marginM
 
@@ -74,9 +74,13 @@ ColumnLayout {
     }
   }
 
-  readonly property bool settingsDirty: root.editTerminalCommand !== (cfg.terminalCommand ?? defaults.terminalCommand ?? "")
-      || root.editPollInterval !== (cfg.pollInterval ?? defaults.pollInterval ?? 10)
-      || root.editShowInactiveHosts !== (cfg.showInactiveHosts ?? defaults.showInactiveHosts ?? true)
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string editTerminalCommand: cfg.terminalCommand ?? defaults.terminalCommand ?? ""
+    readonly property int editPollInterval: cfg.pollInterval ?? defaults.pollInterval ?? 10
+    readonly property bool editShowInactiveHosts: cfg.showInactiveHosts ?? defaults.showInactiveHosts ?? true
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editTerminalCommand: root.editTerminalCommand, editPollInterval: root.editPollInterval, editShowInactiveHosts: root.editShowInactiveHosts})
 
   function saveSettings() {
     if (!pluginApi) {

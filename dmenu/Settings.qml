@@ -9,42 +9,22 @@ ColumnLayout {
     property var pluginApi: null
 
     // ── Edit state ──
-    property string editResultFile:
-        pluginApi?.pluginSettings?.resultFile
-        || pluginApi?.manifest?.metadata?.defaultSettings?.resultFile
-        || "/tmp/noctalia-dmenu-result"
-
-    property bool editShowToast:
-        pluginApi?.pluginSettings?.showToastOnSelect
-        ?? pluginApi?.manifest?.metadata?.defaultSettings?.showToastOnSelect
-        ?? false
-
-    property int editMaxResults:
-        pluginApi?.pluginSettings?.maxResults
-        || pluginApi?.manifest?.metadata?.defaultSettings?.maxResults
-        || 200
-
-    property string editPanelPosition:
-        pluginApi?.pluginSettings?.panelPosition
-        || pluginApi?.manifest?.metadata?.defaultSettings?.panelPosition
-        || "follow_launcher"
-
-    property bool editShowMatchCount:
-        pluginApi?.pluginSettings?.showMatchCount
-        ?? pluginApi?.manifest?.metadata?.defaultSettings?.showMatchCount
-        ?? true
-
-    property bool editShowFooter:
-        pluginApi?.pluginSettings?.showFooter
-        ?? pluginApi?.manifest?.metadata?.defaultSettings?.showFooter
-        ?? true
-
-    readonly property bool settingsDirty: editResultFile !== (pluginApi?.pluginSettings?.resultFile || pluginApi?.manifest?.metadata?.defaultSettings?.resultFile || "/tmp/noctalia-dmenu-result")
-                                          || editShowToast !== (pluginApi?.pluginSettings?.showToastOnSelect ?? pluginApi?.manifest?.metadata?.defaultSettings?.showToastOnSelect ?? false)
-                                          || editMaxResults !== (pluginApi?.pluginSettings?.maxResults || pluginApi?.manifest?.metadata?.defaultSettings?.maxResults || 200)
-                                          || editPanelPosition !== (pluginApi?.pluginSettings?.panelPosition || pluginApi?.manifest?.metadata?.defaultSettings?.panelPosition || "follow_launcher")
-                                          || editShowMatchCount !== (pluginApi?.pluginSettings?.showMatchCount ?? pluginApi?.manifest?.metadata?.defaultSettings?.showMatchCount ?? true)
-                                          || editShowFooter !== (pluginApi?.pluginSettings?.showFooter ?? pluginApi?.manifest?.metadata?.defaultSettings?.showFooter ?? true)
+    property string editResultFile: displayBaseline.editResultFile
+    property bool editShowToast: displayBaseline.editShowToast
+    property int editMaxResults: displayBaseline.editMaxResults
+    property string editPanelPosition: displayBaseline.editPanelPosition
+    property bool editShowMatchCount: displayBaseline.editShowMatchCount
+    property bool editShowFooter: displayBaseline.editShowFooter
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string editResultFile: pluginApi?.pluginSettings?.resultFile || pluginApi?.manifest?.metadata?.defaultSettings?.resultFile || "/tmp/noctalia-dmenu-result"
+        readonly property bool editShowToast: pluginApi?.pluginSettings?.showToastOnSelect ?? pluginApi?.manifest?.metadata?.defaultSettings?.showToastOnSelect ?? false
+        readonly property int editMaxResults: pluginApi?.pluginSettings?.maxResults || pluginApi?.manifest?.metadata?.defaultSettings?.maxResults || 200
+        readonly property string editPanelPosition: pluginApi?.pluginSettings?.panelPosition || pluginApi?.manifest?.metadata?.defaultSettings?.panelPosition || "follow_launcher"
+        readonly property bool editShowMatchCount: pluginApi?.pluginSettings?.showMatchCount ?? pluginApi?.manifest?.metadata?.defaultSettings?.showMatchCount ?? true
+        readonly property bool editShowFooter: pluginApi?.pluginSettings?.showFooter ?? pluginApi?.manifest?.metadata?.defaultSettings?.showFooter ?? true
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editResultFile: root.editResultFile, editShowToast: root.editShowToast, editMaxResults: root.editMaxResults, editPanelPosition: root.editPanelPosition, editShowMatchCount: root.editShowMatchCount, editShowFooter: root.editShowFooter})
 
     // Position options
     readonly property var positionOptions: [

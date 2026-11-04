@@ -8,10 +8,14 @@ ColumnLayout {
 
     property var pluginApi: null
 
-    property bool valueShowBarValue: pluginApi?.pluginSettings?.showBarValue ?? true
-    property int valuePrecision: pluginApi?.pluginSettings?.precision ?? 8
-    readonly property bool settingsDirty: valueShowBarValue !== (pluginApi?.pluginSettings?.showBarValue ?? true)
-                                          || valuePrecision !== (pluginApi?.pluginSettings?.precision ?? 8)
+    property bool valueShowBarValue: displayBaseline.valueShowBarValue
+    property int valuePrecision: displayBaseline.valuePrecision
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property bool valueShowBarValue: pluginApi?.pluginSettings?.showBarValue ?? true
+        readonly property int valuePrecision: pluginApi?.pluginSettings?.precision ?? 8
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({valueShowBarValue: root.valueShowBarValue, valuePrecision: root.valuePrecision})
 
     spacing: Style.marginM
 

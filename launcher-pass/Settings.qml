@@ -11,14 +11,18 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property string editStorePath: cfg.storePath ?? defaults.storePath ?? ""
-  property string editTypeDelay: String(cfg.typeDelay ?? defaults.typeDelay ?? 500)
-  property string editWtypeDelay: String(cfg.wtypeDelay ?? defaults.wtypeDelay ?? 12)
-  property string editClipTimeout: cfg.clipTimeout ?? defaults.clipTimeout ?? ""
-  readonly property bool settingsDirty: editStorePath !== (cfg.storePath ?? defaults.storePath ?? "")
-                                        || editTypeDelay !== String(cfg.typeDelay ?? defaults.typeDelay ?? 500)
-                                        || editWtypeDelay !== String(cfg.wtypeDelay ?? defaults.wtypeDelay ?? 12)
-                                        || editClipTimeout !== (cfg.clipTimeout ?? defaults.clipTimeout ?? "")
+  property string editStorePath: displayBaseline.editStorePath
+  property string editTypeDelay: displayBaseline.editTypeDelay
+  property string editWtypeDelay: displayBaseline.editWtypeDelay
+  property string editClipTimeout: displayBaseline.editClipTimeout
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string editStorePath: cfg.storePath ?? defaults.storePath ?? ""
+    readonly property string editTypeDelay: String(cfg.typeDelay ?? defaults.typeDelay ?? 500)
+    readonly property string editWtypeDelay: String(cfg.wtypeDelay ?? defaults.wtypeDelay ?? 12)
+    readonly property string editClipTimeout: cfg.clipTimeout ?? defaults.clipTimeout ?? ""
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editStorePath: root.editStorePath, editTypeDelay: root.editTypeDelay, editWtypeDelay: root.editWtypeDelay, editClipTimeout: root.editClipTimeout})
 
   readonly property string envClipTimeout: Quickshell.env("PASSWORD_STORE_CLIP_TIME") || ""
 

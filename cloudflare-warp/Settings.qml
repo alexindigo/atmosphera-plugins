@@ -9,24 +9,16 @@ ColumnLayout {
 
   property var pluginApi: null
 
-  property int editRefreshInterval:
-    pluginApi?.pluginSettings?.refreshInterval ||
-    pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval ||
-    5000
-
-  property string editConnectedColor:
-    pluginApi?.pluginSettings?.connectedColor ||
-    pluginApi?.manifest?.metadata?.defaultSettings?.connectedColor ||
-    "primary"
-
-  property string editDisconnectedColor:
-    pluginApi?.pluginSettings?.disconnectedColor ||
-    pluginApi?.manifest?.metadata?.defaultSettings?.disconnectedColor ||
-    "none"
-
-  readonly property bool settingsDirty: editRefreshInterval !== (pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 5000)
-                                        || editConnectedColor !== (pluginApi?.pluginSettings?.connectedColor || pluginApi?.manifest?.metadata?.defaultSettings?.connectedColor || "primary")
-                                        || editDisconnectedColor !== (pluginApi?.pluginSettings?.disconnectedColor || pluginApi?.manifest?.metadata?.defaultSettings?.disconnectedColor || "none")
+  property int editRefreshInterval: displayBaseline.editRefreshInterval
+  property string editConnectedColor: displayBaseline.editConnectedColor
+  property string editDisconnectedColor: displayBaseline.editDisconnectedColor
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property int editRefreshInterval: pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 5000
+    readonly property string editConnectedColor: pluginApi?.pluginSettings?.connectedColor || pluginApi?.manifest?.metadata?.defaultSettings?.connectedColor || "primary"
+    readonly property string editDisconnectedColor: pluginApi?.pluginSettings?.disconnectedColor || pluginApi?.manifest?.metadata?.defaultSettings?.disconnectedColor || "none"
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editRefreshInterval: root.editRefreshInterval, editConnectedColor: root.editConnectedColor, editDisconnectedColor: root.editDisconnectedColor})
 
   spacing: Style.marginM
 
