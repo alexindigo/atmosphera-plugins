@@ -14,14 +14,18 @@ ColumnLayout {
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   // Editable settings
-  property string editPlayerName: cfg.playerName || defaults.playerName || "musicfox"
-  property int editUpdateInterval: cfg.updateInterval || defaults.updateInterval || 200
-  property int editWidth: cfg.width || defaults.width || 300
-  property bool editHideWhenInactive: cfg.hideWhenInactive ?? defaults.hideWhenInactive ?? true
-  readonly property bool settingsDirty: editPlayerName !== (cfg.playerName || defaults.playerName || "musicfox")
-                                        || editUpdateInterval !== (cfg.updateInterval || defaults.updateInterval || 200)
-                                        || editWidth !== (cfg.width || defaults.width || 300)
-                                        || editHideWhenInactive !== (cfg.hideWhenInactive ?? defaults.hideWhenInactive ?? true)
+  property string editPlayerName: displayBaseline.editPlayerName
+  property int editUpdateInterval: displayBaseline.editUpdateInterval
+  property int editWidth: displayBaseline.editWidth
+  property bool editHideWhenInactive: displayBaseline.editHideWhenInactive
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string editPlayerName: cfg.playerName || defaults.playerName || "musicfox"
+    readonly property int editUpdateInterval: cfg.updateInterval || defaults.updateInterval || 200
+    readonly property int editWidth: cfg.width || defaults.width || 300
+    readonly property bool editHideWhenInactive: cfg.hideWhenInactive ?? defaults.hideWhenInactive ?? true
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editPlayerName: root.editPlayerName, editUpdateInterval: root.editUpdateInterval, editWidth: root.editWidth, editHideWhenInactive: root.editHideWhenInactive})
 
   Component.onCompleted: {
     Logger.i("MprisLyric", "Settings UI loaded")

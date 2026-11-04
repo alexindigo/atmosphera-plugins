@@ -12,15 +12,15 @@ ColumnLayout {
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   // Local state - track changes before saving
-  property bool valueAutoLaunchSteam: cfg.autoLaunchSteam ?? defaults.autoLaunchSteam ?? true
-  property bool valueUseCustomLayout: cfg.useCustomLayout ?? defaults.useCustomLayout ?? false
-  property bool valueEnableChatNotifications: cfg.enableChatNotifications ?? defaults.enableChatNotifications ?? true
-  property int valueFriendsWidth: cfg.friendsWidthPercent ?? defaults.friendsWidthPercent ?? 10
-  property int valueMainWidth: cfg.mainWidthPercent ?? defaults.mainWidthPercent ?? 60
-  property int valueChatWidth: cfg.chatWidthPercent ?? defaults.chatWidthPercent ?? 25
-  property int valueGapSize: cfg.gapSize ?? defaults.gapSize ?? 10
-  property real valueTopMargin: cfg.topMarginPercent ?? defaults.topMarginPercent ?? 2.5
-  property real valueWindowHeight: cfg.windowHeightPercent ?? defaults.windowHeightPercent ?? 95
+  property bool valueAutoLaunchSteam: displayBaseline.valueAutoLaunchSteam
+  property bool valueUseCustomLayout: displayBaseline.valueUseCustomLayout
+  property bool valueEnableChatNotifications: displayBaseline.valueEnableChatNotifications
+  property int valueFriendsWidth: displayBaseline.valueFriendsWidth
+  property int valueMainWidth: displayBaseline.valueMainWidth
+  property int valueChatWidth: displayBaseline.valueChatWidth
+  property int valueGapSize: displayBaseline.valueGapSize
+  property real valueTopMargin: displayBaseline.valueTopMargin
+  property real valueWindowHeight: displayBaseline.valueWindowHeight
 
   spacing: Style.marginM
 
@@ -215,15 +215,19 @@ ColumnLayout {
   }
 
   // This function is called by the dialog to save settings
-  readonly property bool settingsDirty: root.valueAutoLaunchSteam !== (cfg.autoLaunchSteam ?? defaults.autoLaunchSteam ?? true)
-      || root.valueUseCustomLayout !== (cfg.useCustomLayout ?? defaults.useCustomLayout ?? false)
-      || root.valueEnableChatNotifications !== (cfg.enableChatNotifications ?? defaults.enableChatNotifications ?? true)
-      || root.valueFriendsWidth !== (cfg.friendsWidthPercent ?? defaults.friendsWidthPercent ?? 10)
-      || root.valueMainWidth !== (cfg.mainWidthPercent ?? defaults.mainWidthPercent ?? 60)
-      || root.valueChatWidth !== (cfg.chatWidthPercent ?? defaults.chatWidthPercent ?? 25)
-      || root.valueGapSize !== (cfg.gapSize ?? defaults.gapSize ?? 10)
-      || root.valueTopMargin !== (cfg.topMarginPercent ?? defaults.topMarginPercent ?? 2.5)
-      || root.valueWindowHeight !== (cfg.windowHeightPercent ?? defaults.windowHeightPercent ?? 95)
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property bool valueAutoLaunchSteam: cfg.autoLaunchSteam ?? defaults.autoLaunchSteam ?? true
+    readonly property bool valueUseCustomLayout: cfg.useCustomLayout ?? defaults.useCustomLayout ?? false
+    readonly property bool valueEnableChatNotifications: cfg.enableChatNotifications ?? defaults.enableChatNotifications ?? true
+    readonly property int valueFriendsWidth: cfg.friendsWidthPercent ?? defaults.friendsWidthPercent ?? 10
+    readonly property int valueMainWidth: cfg.mainWidthPercent ?? defaults.mainWidthPercent ?? 60
+    readonly property int valueChatWidth: cfg.chatWidthPercent ?? defaults.chatWidthPercent ?? 25
+    readonly property int valueGapSize: cfg.gapSize ?? defaults.gapSize ?? 10
+    readonly property real valueTopMargin: cfg.topMarginPercent ?? defaults.topMarginPercent ?? 2.5
+    readonly property real valueWindowHeight: cfg.windowHeightPercent ?? defaults.windowHeightPercent ?? 95
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({valueAutoLaunchSteam: root.valueAutoLaunchSteam, valueUseCustomLayout: root.valueUseCustomLayout, valueEnableChatNotifications: root.valueEnableChatNotifications, valueFriendsWidth: root.valueFriendsWidth, valueMainWidth: root.valueMainWidth, valueChatWidth: root.valueChatWidth, valueGapSize: root.valueGapSize, valueTopMargin: root.valueTopMargin, valueWindowHeight: root.valueWindowHeight})
 
   function saveSettings() {
     if (!pluginApi) {

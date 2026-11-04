@@ -10,8 +10,8 @@ ColumnLayout {
     property var cfg: pluginApi?.pluginSettings || ({})
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    property string valueApiKey: cfg.api_key ?? defaults.api_key ?? ""
-    property string valueRating: cfg.rating ?? defaults.rating ?? "g"
+    property string valueApiKey: displayBaseline.valueApiKey
+    property string valueRating: displayBaseline.valueRating
 
     spacing: Style.marginL
 
@@ -46,8 +46,12 @@ ColumnLayout {
         }
     }
 
-    readonly property bool settingsDirty: root.valueApiKey !== (cfg.api_key ?? defaults.api_key ?? "")
-        || root.valueRating !== (cfg.rating ?? defaults.rating ?? "g")
+    NSettingsBaseline {
+      id: displayBaseline
+      readonly property string valueApiKey: cfg.api_key ?? defaults.api_key ?? ""
+      readonly property string valueRating: cfg.rating ?? defaults.rating ?? "g"
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({valueApiKey: root.valueApiKey, valueRating: root.valueRating})
 
     function saveSettings() {
         if (!pluginApi) {

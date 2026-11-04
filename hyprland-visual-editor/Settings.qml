@@ -13,10 +13,10 @@ ColumnLayout {
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   // 1. Local state ('edit' convention to avoid unnecessary disk writes)
-  property string editOverlayPath: cfg.overlayPath ?? defaults.overlayPath ?? "~/.cache/noctalia/HVE/overlay.conf"
-  property bool editAutoApply: cfg.autoApply ?? defaults.autoApply ?? true
-  property string editIcon: cfg.icon ?? defaults.icon ?? "adjustments-horizontal"
-  property string editIconColor: cfg.iconColor ?? defaults.iconColor ?? "primary"
+  property string editOverlayPath: displayBaseline.editOverlayPath
+  property bool editAutoApply: displayBaseline.editAutoApply
+  property string editIcon: displayBaseline.editIcon
+  property string editIconColor: displayBaseline.editIconColor
 
   spacing: Style.marginM
 
@@ -86,10 +86,14 @@ ColumnLayout {
   }
 
   // ── Save Function (Required by the Shell) ──────────────────────────
-  readonly property bool settingsDirty: root.editOverlayPath !== (cfg.overlayPath ?? defaults.overlayPath ?? "~/.cache/noctalia/HVE/overlay.conf")
-      || root.editAutoApply !== (cfg.autoApply ?? defaults.autoApply ?? true)
-      || root.editIcon !== (cfg.icon ?? defaults.icon ?? "adjustments-horizontal")
-      || root.editIconColor !== (cfg.iconColor ?? defaults.iconColor ?? "primary")
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string editOverlayPath: cfg.overlayPath ?? defaults.overlayPath ?? "~/.cache/noctalia/HVE/overlay.conf"
+    readonly property bool editAutoApply: cfg.autoApply ?? defaults.autoApply ?? true
+    readonly property string editIcon: cfg.icon ?? defaults.icon ?? "adjustments-horizontal"
+    readonly property string editIconColor: cfg.iconColor ?? defaults.iconColor ?? "primary"
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editOverlayPath: root.editOverlayPath, editAutoApply: root.editAutoApply, editIcon: root.editIcon, editIconColor: root.editIconColor})
 
   function saveSettings() {
     if (!pluginApi) return

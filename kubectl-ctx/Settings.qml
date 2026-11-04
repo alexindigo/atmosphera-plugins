@@ -10,13 +10,13 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property string valueKubeconfigPath: cfg.kubeconfigPath ?? defaults.kubeconfigPath ?? ""
-  property int valuePollInterval: cfg.pollInterval ?? defaults.pollInterval ?? 60
-  property bool valueShowErrorBadge: cfg.showErrorBadge ?? defaults.showErrorBadge ?? true
-  property string valueTerminal: cfg.terminal ?? defaults.terminal ?? ""
-  property string valueIconColor: cfg.iconColor ?? defaults.iconColor ?? "none"
-  property int valuePanelWidth: cfg.panelWidth ?? defaults.panelWidth ?? 620
-  property int valuePanelHeight: cfg.panelHeight ?? defaults.panelHeight ?? 680
+  property string valueKubeconfigPath: displayBaseline.valueKubeconfigPath
+  property int valuePollInterval: displayBaseline.valuePollInterval
+  property bool valueShowErrorBadge: displayBaseline.valueShowErrorBadge
+  property string valueTerminal: displayBaseline.valueTerminal
+  property string valueIconColor: displayBaseline.valueIconColor
+  property int valuePanelWidth: displayBaseline.valuePanelWidth
+  property int valuePanelHeight: displayBaseline.valuePanelHeight
 
   spacing: Style.marginL
 
@@ -98,13 +98,17 @@ ColumnLayout {
     }
   }
 
-  readonly property bool settingsDirty: root.valueKubeconfigPath !== (cfg.kubeconfigPath ?? defaults.kubeconfigPath ?? "")
-      || root.valueTerminal !== (cfg.terminal ?? defaults.terminal ?? "")
-      || root.valuePollInterval !== (cfg.pollInterval ?? defaults.pollInterval ?? 60)
-      || root.valueShowErrorBadge !== (cfg.showErrorBadge ?? defaults.showErrorBadge ?? true)
-      || root.valueIconColor !== (cfg.iconColor ?? defaults.iconColor ?? "none")
-      || root.valuePanelWidth !== (cfg.panelWidth ?? defaults.panelWidth ?? 620)
-      || root.valuePanelHeight !== (cfg.panelHeight ?? defaults.panelHeight ?? 680)
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string valueKubeconfigPath: cfg.kubeconfigPath ?? defaults.kubeconfigPath ?? ""
+    readonly property string valueTerminal: cfg.terminal ?? defaults.terminal ?? ""
+    readonly property int valuePollInterval: cfg.pollInterval ?? defaults.pollInterval ?? 60
+    readonly property bool valueShowErrorBadge: cfg.showErrorBadge ?? defaults.showErrorBadge ?? true
+    readonly property string valueIconColor: cfg.iconColor ?? defaults.iconColor ?? "none"
+    readonly property int valuePanelWidth: cfg.panelWidth ?? defaults.panelWidth ?? 620
+    readonly property int valuePanelHeight: cfg.panelHeight ?? defaults.panelHeight ?? 680
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({valueKubeconfigPath: root.valueKubeconfigPath, valueTerminal: root.valueTerminal, valuePollInterval: root.valuePollInterval, valueShowErrorBadge: root.valueShowErrorBadge, valueIconColor: root.valueIconColor, valuePanelWidth: root.valuePanelWidth, valuePanelHeight: root.valuePanelHeight})
 
   function saveSettings() {
     if (!pluginApi) {

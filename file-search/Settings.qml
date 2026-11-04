@@ -11,11 +11,11 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property bool valueShowHidden: cfg.showHidden ?? defaults.showHidden
-  property int valueMaxResults: cfg.maxResults ?? defaults.maxResults
-  property string valueFileOpener: cfg.fileOpener ?? defaults.fileOpener
-  property string valueFdCommand: cfg.fdCommand ?? defaults.fdCommand
-  property string valueSearchDirectory: cfg.searchDirectory ?? defaults.searchDirectory
+  property bool valueShowHidden: displayBaseline.valueShowHidden
+  property int valueMaxResults: displayBaseline.valueMaxResults
+  property string valueFileOpener: displayBaseline.valueFileOpener
+  property string valueFdCommand: displayBaseline.valueFdCommand
+  property string valueSearchDirectory: displayBaseline.valueSearchDirectory
 
   spacing: Style.marginL
 
@@ -124,11 +124,15 @@ ColumnLayout {
       }
     }
 
-  readonly property bool settingsDirty: root.valueShowHidden !== (cfg.showHidden ?? defaults.showHidden)
-      || root.valueMaxResults !== (cfg.maxResults ?? defaults.maxResults)
-      || root.valueFileOpener !== (cfg.fileOpener ?? defaults.fileOpener)
-      || root.valueSearchDirectory !== (cfg.searchDirectory ?? defaults.searchDirectory)
-      || root.valueFdCommand !== (cfg.fdCommand ?? defaults.fdCommand)
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property bool valueShowHidden: cfg.showHidden ?? defaults.showHidden
+    readonly property int valueMaxResults: cfg.maxResults ?? defaults.maxResults
+    readonly property string valueFileOpener: cfg.fileOpener ?? defaults.fileOpener
+    readonly property string valueSearchDirectory: cfg.searchDirectory ?? defaults.searchDirectory
+    readonly property string valueFdCommand: cfg.fdCommand ?? defaults.fdCommand
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({valueShowHidden: root.valueShowHidden, valueMaxResults: root.valueMaxResults, valueFileOpener: root.valueFileOpener, valueSearchDirectory: root.valueSearchDirectory, valueFdCommand: root.valueFdCommand})
 
   function saveSettings() {
     if (!pluginApi) {

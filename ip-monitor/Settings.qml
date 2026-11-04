@@ -11,11 +11,11 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property string valueIconColor: cfg.iconColor ?? defaults.iconColor
-  property int valueRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 300
-  property string valueSuccessIcon: cfg.successIcon ?? defaults.successIcon ?? "hierarchy-2"
-  property string valueErrorIcon: cfg.errorIcon ?? defaults.errorIcon ?? "alert-circle"
-  property string valueLoadingIcon: cfg.loadingIcon ?? defaults.loadingIcon ?? "loader"
+  property string valueIconColor: displayBaseline.valueIconColor
+  property int valueRefreshInterval: displayBaseline.valueRefreshInterval
+  property string valueSuccessIcon: displayBaseline.valueSuccessIcon
+  property string valueErrorIcon: displayBaseline.valueErrorIcon
+  property string valueLoadingIcon: displayBaseline.valueLoadingIcon
 
   spacing: Style.marginL
 
@@ -227,11 +227,15 @@ ColumnLayout {
   }
 
   signal settingsChanged(var settings)
-  readonly property bool settingsDirty: root.valueIconColor !== (cfg.iconColor ?? defaults.iconColor)
-      || root.valueRefreshInterval !== (cfg.refreshInterval ?? defaults.refreshInterval ?? 300)
-      || root.valueSuccessIcon !== (cfg.successIcon ?? defaults.successIcon ?? "hierarchy-2")
-      || root.valueErrorIcon !== (cfg.errorIcon ?? defaults.errorIcon ?? "alert-circle")
-      || root.valueLoadingIcon !== (cfg.loadingIcon ?? defaults.loadingIcon ?? "loader")
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string valueIconColor: cfg.iconColor ?? defaults.iconColor
+    readonly property int valueRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 300
+    readonly property string valueSuccessIcon: cfg.successIcon ?? defaults.successIcon ?? "hierarchy-2"
+    readonly property string valueErrorIcon: cfg.errorIcon ?? defaults.errorIcon ?? "alert-circle"
+    readonly property string valueLoadingIcon: cfg.loadingIcon ?? defaults.loadingIcon ?? "loader"
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({valueIconColor: root.valueIconColor, valueRefreshInterval: root.valueRefreshInterval, valueSuccessIcon: root.valueSuccessIcon, valueErrorIcon: root.valueErrorIcon, valueLoadingIcon: root.valueLoadingIcon})
 
   function saveSettings() {
     if (!pluginApi) {
