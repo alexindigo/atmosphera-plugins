@@ -11,21 +11,30 @@ ColumnLayout {
     readonly property var cfg: pluginApi?.pluginSettings || ({})
     readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    property bool editEnabled: cfg.enabled !== undefined
-        ? cfg.enabled
-        : (defaults.enabled !== undefined ? defaults.enabled : true)
-    property bool editAlwaysShowBarWidget: cfg.alwaysShowBarWidget !== undefined
-        ? cfg.alwaysShowBarWidget
-        : (defaults.alwaysShowBarWidget !== undefined ? defaults.alwaysShowBarWidget : false)
-    property bool editNotify: cfg.notify !== undefined
-        ? cfg.notify
-        : (defaults.notify !== undefined ? defaults.notify : true)
-    property string editInternalConnectorRegex: cfg.internalConnectorRegex
-        ?? defaults.internalConnectorRegex
-        ?? "^(eDP|LVDS|DSI)"
-    property string editInhibitorWho: cfg.inhibitorWho
-        ?? defaults.inhibitorWho
-        ?? "noctalia-clamshell"
+    property bool editEnabled: displayBaseline.editEnabled
+    property bool editAlwaysShowBarWidget: displayBaseline.editAlwaysShowBarWidget
+    property bool editNotify: displayBaseline.editNotify
+    property string editInternalConnectorRegex: displayBaseline.editInternalConnectorRegex
+    property string editInhibitorWho: displayBaseline.editInhibitorWho
+    property bool _applyEffectPending: false
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property bool editEnabled: cfg.enabled !== undefined ? cfg.enabled : (defaults.enabled !== undefined ? defaults.enabled : true)
+        readonly property bool editAlwaysShowBarWidget: cfg.alwaysShowBarWidget !== undefined ? cfg.alwaysShowBarWidget : (defaults.alwaysShowBarWidget !== undefined ? defaults.alwaysShowBarWidget : false)
+        readonly property bool editNotify: cfg.notify !== undefined ? cfg.notify : (defaults.notify !== undefined ? defaults.notify : true)
+        readonly property string editInternalConnectorRegex: cfg.internalConnectorRegex ?? defaults.internalConnectorRegex ?? "^(eDP|LVDS|DSI)"
+        readonly property string editInhibitorWho: cfg.inhibitorWho ?? defaults.inhibitorWho ?? "noctalia-clamshell"
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editEnabled: root.editEnabled, editAlwaysShowBarWidget: root.editAlwaysShowBarWidget, editNotify: root.editNotify, editInternalConnectorRegex: root.editInternalConnectorRegex, editInhibitorWho: root.editInhibitorWho})
+    Connections {
+        target: root.pluginApi
+        function onSettingsCompleted(result) {
+            if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+            root._applyEffectPending = false;
+            if (root.main.applySettings) root.main.applySettings();
+            Logger.i("Clamshell", "Settings saved successfully");
+        }
+    }
 
     spacing: Style.marginL
 
@@ -136,11 +145,7 @@ ColumnLayout {
         pluginApi.pluginSettings.notify = root.editNotify;
         pluginApi.pluginSettings.internalConnectorRegex = root.editInternalConnectorRegex;
         pluginApi.pluginSettings.inhibitorWho = root.editInhibitorWho;
-        pluginApi.saveSettings();
-
-        if (root.main.applySettings) {
-            root.main.applySettings();
-        }
-        Logger.i("Clamshell", "Settings saved successfully");
+        if (pluginApi.saveSettings() !== false)
+            root._applyEffectPending = true;
     }
 }

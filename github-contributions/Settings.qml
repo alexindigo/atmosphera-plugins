@@ -7,13 +7,33 @@ ColumnLayout {
   id: root
   property var pluginApi: null
 
-  property string editUsername: ""
-  property string editToken: ""
-  property string editLayout: "graph"
-  property int editWeeksShown: 52
-  property int editRefreshInterval: 60
-  property bool editShowTotal: true
-  property bool editShowLabels: true
+  property string editUsername: displayBaseline.editUsername
+  property string editToken: displayBaseline.editToken
+  property string editLayout: displayBaseline.editLayout
+  property int editWeeksShown: displayBaseline.editWeeksShown
+  property int editRefreshInterval: displayBaseline.editRefreshInterval
+  property bool editShowTotal: displayBaseline.editShowTotal
+  property bool editShowLabels: displayBaseline.editShowLabels
+  property bool _applyEffectPending: false
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string editUsername: pluginApi?.pluginSettings?.username || pluginApi?.manifest?.metadata?.defaultSettings?.username || ""
+    readonly property string editToken: pluginApi?.pluginSettings?.token || pluginApi?.manifest?.metadata?.defaultSettings?.token || ""
+    readonly property string editLayout: pluginApi?.pluginSettings?.layout || pluginApi?.manifest?.metadata?.defaultSettings?.layout || "graph"
+    readonly property int editWeeksShown: pluginApi?.pluginSettings?.weeksShown ?? pluginApi?.manifest?.metadata?.defaultSettings?.weeksShown ?? 52
+    readonly property int editRefreshInterval: pluginApi?.pluginSettings?.refreshInterval ?? pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval ?? 60
+    readonly property bool editShowTotal: pluginApi?.pluginSettings?.showTotal ?? pluginApi?.manifest?.metadata?.defaultSettings?.showTotal ?? true
+    readonly property bool editShowLabels: pluginApi?.pluginSettings?.showLabels ?? pluginApi?.manifest?.metadata?.defaultSettings?.showLabels ?? true
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editUsername: root.editUsername, editToken: root.editToken, editLayout: root.editLayout, editWeeksShown: root.editWeeksShown, editRefreshInterval: root.editRefreshInterval, editShowTotal: root.editShowTotal, editShowLabels: root.editShowLabels})
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root._applyEffectPending = false;
+      root.pluginApi.mainInstance?.refresh();
+    }
+  }
 
   spacing: Style.marginM
 
@@ -110,29 +130,16 @@ ColumnLayout {
   function saveSettings() {
     if (!pluginApi) return
 
-    pluginApi.pluginSettings.username = root.editUsername.trim()
-    pluginApi.pluginSettings.token = root.editToken.trim()
+    root.editUsername = root.editUsername.trim()
+    root.editToken = root.editToken.trim()
+    pluginApi.pluginSettings.username = root.editUsername
+    pluginApi.pluginSettings.token = root.editToken
     pluginApi.pluginSettings.layout = root.editLayout
     pluginApi.pluginSettings.weeksShown = root.editWeeksShown
     pluginApi.pluginSettings.refreshInterval = root.editRefreshInterval
     pluginApi.pluginSettings.showTotal = root.editShowTotal
     pluginApi.pluginSettings.showLabels = root.editShowLabels
-    pluginApi.saveSettings()
-
-    if (pluginApi.mainInstance)
-      pluginApi.mainInstance.refresh()
-  }
-
-  Component.onCompleted: {
-    var settings = pluginApi?.pluginSettings
-    var defaults = pluginApi?.manifest?.metadata?.defaultSettings
-
-    root.editUsername = settings?.username || defaults?.username || ""
-    root.editToken = settings?.token || defaults?.token || ""
-    root.editLayout = settings?.layout || defaults?.layout || "graph"
-    root.editWeeksShown = settings?.weeksShown ?? defaults?.weeksShown ?? 52
-    root.editRefreshInterval = settings?.refreshInterval ?? defaults?.refreshInterval ?? 60
-    root.editShowTotal = settings?.showTotal ?? defaults?.showTotal ?? true
-    root.editShowLabels = settings?.showLabels ?? defaults?.showLabels ?? true
+    if (pluginApi.saveSettings() !== false)
+      root._applyEffectPending = true
   }
 }

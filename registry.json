@@ -76,7 +76,7 @@
       "author": "nzlov",
       "description": "Runs a local MCP HTTP service for agents to report session status and shows active sessions in the bar.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel",
@@ -84,11 +84,11 @@
         "Indicator",
         "AI"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-03",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "air-quality",
@@ -380,7 +380,7 @@
       "author": "Sovego",
       "description": "Auto clamshell on external display, with manual override",
       "license": "MIT",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "tags": [
         "Bar",
         "System",
@@ -390,9 +390,9 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": false,
       "upstreamPR": 821,
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-03",
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "claude-code-panel",
@@ -629,13 +629,14 @@
       "author": "DigitallyRefined",
       "description": "Fetches a new daily wallpaper from Bing or NASA",
       "license": "MIT",
-      "version": "1.0.4",
+      "version": "1.0.5",
+      "minAtmospheraVersion": "0.10.0",
       "tags": [
         "Desktop",
         "Fun",
         "Utility"
       ],
-      "lastUpdated": "2026-06-12T23:02:02+02:00",
+      "lastUpdated": "2026-11-03",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6"
@@ -808,7 +809,7 @@
       "author": "xevrion",
       "description": "Displays your GitHub contribution graph as a desktop widget. Works without a token via your public profile, or with a personal access token for private contributions.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Desktop",
         "Development",
@@ -817,9 +818,9 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": false,
       "upstreamPR": 951,
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-03",
       "minNoctaliaVersion": "4.4.1",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "github-feed",
@@ -865,17 +866,17 @@
       "author": "Pozzoo",
       "description": "Monitor and control Home Assistant entities from the bar. Requires qt6-websockets.",
       "license": "MIT",
-      "version": "1.1.3",
+      "version": "1.1.4",
       "tags": [
         "Bar",
         "Panel",
         "Utility"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-03",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "hello-world",
@@ -2060,7 +2061,7 @@
       "author": "adriamartin91",
       "description": "Monitor listening ports and their processes. Shows TCP/UDP ports with process info and kill functionality.",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Bar",
         "Panel",
@@ -2068,11 +2069,11 @@
         "System",
         "Utility"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-03",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "privacy-indicator",
