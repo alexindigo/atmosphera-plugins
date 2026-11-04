@@ -9,6 +9,7 @@ ColumnLayout {
 
     property var pluginApi: null
     property var widgetSettings: null
+    signal settingsChanged(var settings)
     property bool valueShowBackground: false
 
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
@@ -35,30 +36,9 @@ ColumnLayout {
     property string valueTimeColourPicker: widgetSettings?.data?.timeColourPicker ?? defaults.timeColourPicker
     property real valueTimeFontSize: widgetSettings?.data?.timeFontSize ?? 1.0
 
-    function saveSettings() {
-        if (!widgetSettings || !widgetSettings.data) {
-            Logger.e(pluginName, "Cannot save settings: widgetSettings is null");
-            return;
-        }
-        
-        widgetSettings.data.dayColourPicker = root.valueDayColourPicker.toUpperCase();
-        widgetSettings.data.dateColourPicker = root.valueDateColourPicker.toUpperCase();
-        widgetSettings.data.timeColourPicker = root.valueTimeColourPicker.toUpperCase();
-        widgetSettings.data.dayColourChoice = root.valueDayColourChoice;
-        widgetSettings.data.dateColourChoice = root.valueDateColourChoice;
-        widgetSettings.data.timeColourChoice = root.valueTimeColourChoice;
-        widgetSettings.data.colourChoice = root.valueColourChoice;
-        widgetSettings.data.customDayFont = root.valueCustomDayFont;
-        widgetSettings.data.customDateFont = root.valueCustomDateFont;
-        widgetSettings.data.customTimeFont = root.valueCustomTimeFont;
-        widgetSettings.data.dayFontSize = root.valueDayFontSize;
-        widgetSettings.data.dateFontSize = root.valueDateFontSize;
-        widgetSettings.data.timeFontSize = root.valueTimeFontSize;
-        widgetSettings.data.textOpacity = root.valueTextOpacity;
-
-        widgetSettings.save();
-
-        Logger.i(pluginName, "WidgetSettings saved successfully");
+    function saveSettings(fields) {
+        if (fields)
+            settingsChanged(fields);
     }
 
     spacing: Style.marginM
@@ -85,7 +65,7 @@ ColumnLayout {
 
             onToggled: checked => {
                 valueColourChoice = checked;
-                saveSettings();
+                saveSettings({colourChoice: root.valueColourChoice});
             }
         }
         RowLayout {
@@ -102,7 +82,7 @@ ColumnLayout {
 
                 onMoved: function (value) {
                     valueTextOpacity = value;
-                    saveSettings();
+                    saveSettings({textOpacity: root.valueTextOpacity});
                 }
             }
         }
@@ -135,7 +115,7 @@ ColumnLayout {
 
                 onColorSelected: function (color) {
                     valueDayColourPicker = color;
-                    saveSettings();
+                    saveSettings({dayColourPicker: root.valueDayColourPicker.toUpperCase()});
                 }
             }
         }
@@ -148,7 +128,7 @@ ColumnLayout {
 
             onSelected: function (color) {
                 valueDayColourChoice = color;
-                saveSettings();
+                saveSettings({dayColourChoice: root.valueDayColourChoice});
             }
         }
         NSearchableComboBox {
@@ -165,7 +145,7 @@ ColumnLayout {
 
             onSelected: function (key) {
                 valueCustomDayFont = key;
-                saveSettings();
+                saveSettings({customDayFont: root.valueCustomDayFont});
             }
         }
         RowLayout {
@@ -183,7 +163,7 @@ ColumnLayout {
 
                 onMoved: function (value) {
                     valueDayFontSize = value;
-                    saveSettings();
+                    saveSettings({dayFontSize: root.valueDayFontSize});
                 }
             }
         }
@@ -216,7 +196,7 @@ ColumnLayout {
 
                 onColorSelected: function (color) {
                     valueDateColourPicker = color;
-                    saveSettings();
+                    saveSettings({dateColourPicker: root.valueDateColourPicker.toUpperCase()});
                 }
             }
         }
@@ -229,7 +209,7 @@ ColumnLayout {
 
             onSelected: function (color) {
                 valueDateColourChoice = color;
-                saveSettings();
+                saveSettings({dateColourChoice: root.valueDateColourChoice});
             }
         }
         NSearchableComboBox {
@@ -246,7 +226,7 @@ ColumnLayout {
 
             onSelected: function (key) {
                 valueCustomDateFont = key;
-                saveSettings();
+                saveSettings({customDateFont: root.valueCustomDateFont});
             }
         }
         RowLayout {
@@ -264,7 +244,7 @@ ColumnLayout {
 
                 onMoved: function (value) {
                     valueDateFontSize = value;
-                    saveSettings();
+                    saveSettings({dateFontSize: root.valueDateFontSize});
                 }
             }
         }
@@ -297,7 +277,7 @@ ColumnLayout {
 
                 onColorSelected: function (color) {
                     valueTimeColourPicker = color;
-                    saveSettings();
+                    saveSettings({timeColourPicker: root.valueTimeColourPicker.toUpperCase()});
                 }
             }
         }
@@ -310,7 +290,7 @@ ColumnLayout {
 
             onSelected: function (color) {
                 valueTimeColourChoice = color;
-                saveSettings();
+                saveSettings({timeColourChoice: root.valueTimeColourChoice});
             }
         }
         NSearchableComboBox {
@@ -327,7 +307,7 @@ ColumnLayout {
 
             onSelected: function (key) {
                 valueCustomTimeFont = key;
-                saveSettings();
+                saveSettings({customTimeFont: root.valueCustomTimeFont});
             }
         }
         RowLayout {
@@ -345,7 +325,7 @@ ColumnLayout {
 
                 onMoved: function (value) {
                     valueTimeFontSize = value;
-                    saveSettings();
+                    saveSettings({timeFontSize: root.valueTimeFontSize});
                 }
             }
         }

@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import qs.Commons
 import qs.Services.System
+import qs.Portals
 import qs.Widgets
 
 ColumnLayout {
@@ -11,6 +12,7 @@ ColumnLayout {
 
     property var pluginApi: null
     property var widgetSettings: null
+    signal settingsChanged(var settings)
 
     property string widgetImage:          widgetSettings?.data?.image          ?? ""
     property real   widgetOpacity:        widgetSettings?.data?.opacity        ?? 1.0
@@ -19,16 +21,9 @@ ColumnLayout {
     property bool   showBackground:       widgetSettings?.data?.showBackground ?? widgetSettings?.metadata?.showBackground ?? true
     property bool   roundedCorners:       widgetSettings?.data?.roundedCorners ?? widgetSettings?.metadata?.roundedCorners ?? true
 
-    function saveSettings() {
-        if (widgetSettings == undefined || widgetSettings.data == undefined) return;
-
-        widgetSettings.data.image          = widgetImage;
-        widgetSettings.data.opacity        = widgetOpacity;
-        widgetSettings.data.mirror         = widgetMirror;
-        widgetSettings.data.verticalMirror = widgetVerticalMirror;
-        widgetSettings.data.showBackground = showBackground;
-        widgetSettings.data.roundedCorners = roundedCorners;
-        widgetSettings.save();
+    function saveSettings(fields) {
+        if (fields)
+            settingsChanged(fields);
     }
 
     RowLayout {
@@ -45,7 +40,7 @@ ColumnLayout {
             onClicked: imageSelection.openFilePicker()
         }
 
-        AtmoFilePicker {
+        PortalFilePicker {
             id: imageSelection
             title: root.pluginApi?.tr("desktopWidgetSettings.selection-title") ?? ""
             selectionMode: "files"
@@ -53,7 +48,7 @@ ColumnLayout {
             onAccepted: paths => {
                 if (paths.length > 0) {
                     root.widgetImage = paths[0];
-                    root.saveSettings();
+                    root.saveSettings({image: root.widgetImage});
                 }
             }
         }
@@ -74,7 +69,7 @@ ColumnLayout {
             // When slider is let go
             if (!pressed) {
                 root.widgetOpacity = value;
-                root.saveSettings();
+                root.saveSettings({opacity: root.widgetOpacity});
             }
         }
     }
@@ -85,7 +80,7 @@ ColumnLayout {
         checked: root.widgetMirror
         onToggled: checked => {
             root.widgetMirror = checked;
-            root.saveSettings();
+            root.saveSettings({mirror: root.widgetMirror});
         }
         defaultValue: false
     }
@@ -96,7 +91,7 @@ ColumnLayout {
         checked: root.widgetVerticalMirror
         onToggled: checked => {
             root.widgetVerticalMirror = checked;
-            root.saveSettings();
+            root.saveSettings({verticalMirror: root.widgetVerticalMirror});
         }
         defaultValue: false
     }
@@ -107,7 +102,7 @@ ColumnLayout {
         checked: root.showBackground
         onToggled: checked => {
             root.showBackground = checked;
-            root.saveSettings();
+            root.saveSettings({showBackground: root.showBackground});
         }
         defaultValue: root.widgetSettings?.metadata?.showBackground ?? true
     }
@@ -119,7 +114,7 @@ ColumnLayout {
         checked: root.roundedCorners
         onToggled: checked => {
             root.roundedCorners = checked;
-            root.saveSettings();
+            root.saveSettings({roundedCorners: root.roundedCorners});
         }
         defaultValue: root.widgetSettings?.metadata?.roundedCorners ?? true
     }

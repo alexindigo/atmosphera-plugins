@@ -1,7 +1,8 @@
 {
   "id": "custom-sticker",
   "name": "Custom Stickers",
-  "version": "1.0.5",
+  "version": "1.0.6",
+  "minAtmospheraVersion": "0.10.0",
   "minNoctaliaVersion": "4.6.6",
   "author": "spiros132",
   "license": "MIT",

@@ -328,16 +328,16 @@
       "author": "Simon",
       "description": "Monthly calendar with today highlighted.",
       "license": "MIT",
-      "version": "1.0.12",
+      "version": "1.0.13",
       "tags": [
         "Desktop",
         "Utility"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-03",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.5.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "calibre-provider",
@@ -525,16 +525,16 @@
       "author": "elrondforwin",
       "description": "An analog cookie-shaped clock desktop widget. Features a sine-wave cookie background, hour/minute/second hands, dial marks and date bubbless.",
       "license": "GPLv3",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Desktop",
         "Fun"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-03",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "currency-exchange",
@@ -593,12 +593,13 @@
       "author": "spiros132",
       "description": "Custom stickers (images) that you can put on the desktop as desktop widgets.",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
+      "minAtmospheraVersion": "0.10.0",
       "tags": [
         "Desktop",
         "Fun"
       ],
-      "lastUpdated": "2026-10-11",
+      "lastUpdated": "2026-11-03",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6"
@@ -609,7 +610,7 @@
       "author": "Vikthor",
       "description": "Desktop widget that displays a daily quote with a scramble decode animation",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Desktop",
         "Fun"
@@ -617,9 +618,9 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": false,
       "upstreamPR": 826,
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-03",
       "minNoctaliaVersion": "4.7.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "daily-wallpaper",
@@ -644,16 +645,16 @@
       "author": "HAVEKziad",
       "description": "Audio visualizer desktop widget \u2014 bars, wave, or mirror. Supports all directions. Transparent, follows color scheme.",
       "license": "MIT",
-      "version": "2.0.4",
+      "version": "2.0.5",
       "tags": [
         "Desktop",
         "Audio"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-03",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "display-settings",
@@ -735,16 +736,16 @@
       "author": "Noctalia Team",
       "description": "Lemmy's fancy circular audio visualizer.",
       "license": "MIT",
-      "version": "1.1.4",
+      "version": "1.1.5",
       "tags": [
         "Desktop",
         "Audio"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-03",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "file-search",
@@ -881,11 +882,11 @@
       "author": "Noctalia Team",
       "description": "A simple Hello World plugin demonstrating functionalities. For developers only.",
       "license": "MIT",
-      "version": "1.2.7",
+      "version": "1.2.8",
       "tags": [
         "Development"
       ],
-      "lastUpdated": "2026-11-02",
+      "lastUpdated": "2026-11-03",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
@@ -1329,7 +1330,7 @@
       "author": "Screamified",
       "description": "A Modern looking clock desktop widget that will tell you the time. (duh)",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Desktop",
         "Fun"
@@ -1337,9 +1338,9 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": false,
       "upstreamPR": 356,
-      "lastUpdated": "2026-10-11",
+      "lastUpdated": "2026-11-03",
       "minNoctaliaVersion": "4.1.2",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "monique",

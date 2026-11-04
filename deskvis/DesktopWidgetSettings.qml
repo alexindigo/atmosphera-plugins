@@ -9,6 +9,7 @@ ColumnLayout {
 
     property var pluginApi: null
     property var widgetSettings: null
+    signal settingsChanged(var settings)
 
     property string valueDirection:       widgetSettings?.data?.direction             ?? "up"
     property string valueMode:            widgetSettings?.data?.mode                  ?? "bars"
@@ -38,7 +39,7 @@ ColumnLayout {
         currentKey: root.valueDirection
         onSelected: key => {
             root.valueDirection = key
-            root.saveSettings()
+            root.saveSettings({direction: root.valueDirection})
         }
     }
 
@@ -55,7 +56,7 @@ ColumnLayout {
         currentKey: root.valueMode
         onSelected: key => {
             root.valueMode = key
-            root.saveSettings()
+            root.saveSettings({mode: root.valueMode})
         }
     }
 
@@ -74,7 +75,7 @@ ColumnLayout {
         defaultValue: 32
         onMoved: value => _value = Math.round(value)
         onPressedChanged: (pressed, value) => {
-            if (!pressed) { root.valueBarCount = Math.round(value); root.saveSettings() }
+            if (!pressed) { root.valueBarCount = Math.round(value); root.saveSettings({barCount: root.valueBarCount}) }
         }
     }
 
@@ -92,7 +93,7 @@ ColumnLayout {
         defaultValue: 1.5
         onMoved: value => _value = value
         onPressedChanged: (pressed, value) => {
-            if (!pressed) { root.valueSensitivity = value; root.saveSettings() }
+            if (!pressed) { root.valueSensitivity = value; root.saveSettings({sensitivity: root.valueSensitivity}) }
         }
     }
 
@@ -110,7 +111,7 @@ ColumnLayout {
         defaultValue: 0.18
         onMoved: value => _value = value
         onPressedChanged: (pressed, value) => {
-            if (!pressed) { root.valueSmoothing = value; root.saveSettings() }
+            if (!pressed) { root.valueSmoothing = value; root.saveSettings({smoothing: root.valueSmoothing}) }
         }
     }
 
@@ -132,7 +133,7 @@ ColumnLayout {
         currentKey: String(root.valueFps)
         onSelected: key => {
             root.valueFps = parseInt(key)
-            root.saveSettings()
+            root.saveSettings({fps: root.valueFps})
         }
     }
 
@@ -150,7 +151,7 @@ ColumnLayout {
         defaultValue: 0
         onMoved: value => _value = Math.round(value)
         onPressedChanged: (pressed, value) => {
-            if (!pressed) { root.valueCustomWidth = Math.round(value); root.saveSettings() }
+            if (!pressed) { root.valueCustomWidth = Math.round(value); root.saveSettings({customWidth: root.valueCustomWidth}) }
         }
     }
 
@@ -167,7 +168,7 @@ ColumnLayout {
         defaultValue: 0
         onMoved: value => _value = Math.round(value)
         onPressedChanged: (pressed, value) => {
-            if (!pressed) { root.valueCustomHeight = Math.round(value); root.saveSettings() }
+            if (!pressed) { root.valueCustomHeight = Math.round(value); root.saveSettings({customHeight: root.valueCustomHeight}) }
         }
     }
 
@@ -179,7 +180,7 @@ ColumnLayout {
         defaultValue: true
         onToggled: checked => {
             root.valueUseGradient = checked
-            root.saveSettings()
+            root.saveSettings({useGradient: root.valueUseGradient})
         }
     }
 
@@ -190,7 +191,7 @@ ColumnLayout {
         defaultValue: true
         onToggled: checked => {
             root.valueFadeWhenIdle = checked
-            root.saveSettings()
+            root.saveSettings({fadeWhenIdle: root.valueFadeWhenIdle})
         }
     }
 
@@ -201,7 +202,7 @@ ColumnLayout {
         defaultValue: false
         onToggled: checked => {
             root.valueUseCustomColors = checked
-            root.saveSettings()
+            root.saveSettings({useCustomColors: root.valueUseCustomColors})
         }
     }
 
@@ -216,7 +217,7 @@ ColumnLayout {
             selectedColor: root.valueCustomPrimary
             onColorSelected: color => {
                 root.valueCustomPrimary = color
-                root.saveSettings()
+                root.saveSettings({customPrimaryColor: root.valueCustomPrimary.toString()})
             }
         }
     }
@@ -231,27 +232,14 @@ ColumnLayout {
             selectedColor: root.valueCustomSecondary
             onColorSelected: color => {
                 root.valueCustomSecondary = color
-                root.saveSettings()
+                root.saveSettings({customSecondaryColor: root.valueCustomSecondary.toString()})
             }
         }
     }
 
     // ── Save ──────────────────────────────────────────────────────────────────
-    function saveSettings() {
-        if (widgetSettings == undefined || widgetSettings.data == undefined) return;
-        widgetSettings.data.direction            = root.valueDirection;
-        widgetSettings.data.mode                 = root.valueMode;
-        widgetSettings.data.barCount             = root.valueBarCount;
-        widgetSettings.data.fps                  = root.valueFps;
-        widgetSettings.data.sensitivity          = root.valueSensitivity;
-        widgetSettings.data.smoothing            = root.valueSmoothing;
-        widgetSettings.data.useGradient          = root.valueUseGradient;
-        widgetSettings.data.fadeWhenIdle         = root.valueFadeWhenIdle;
-        widgetSettings.data.useCustomColors      = root.valueUseCustomColors;
-        widgetSettings.data.customPrimaryColor   = root.valueCustomPrimary.toString();
-        widgetSettings.data.customSecondaryColor = root.valueCustomSecondary.toString();
-        widgetSettings.data.customWidth          = root.valueCustomWidth;
-        widgetSettings.data.customHeight         = root.valueCustomHeight;
-        widgetSettings.save();
+    function saveSettings(fields) {
+        if (fields)
+            settingsChanged(fields);
     }
 }

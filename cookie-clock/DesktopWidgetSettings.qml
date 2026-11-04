@@ -12,6 +12,7 @@ ColumnLayout {
 
     // Widget settings object (injected by the settings dialog system)
     property var widgetSettings: null
+    signal settingsChanged(var settings)
 
     // Local state - initialize from widgetSettings.data with metadata fallback
     property int valueSides: widgetSettings?.data?.sides ?? pluginApi?.manifest?.metadata?.defaultSettings?.sides ?? 9
@@ -37,7 +38,7 @@ ColumnLayout {
         currentKey: root.valueDialStyle
         onSelected: key => {
             root.valueDialStyle = key;
-            saveSettings();
+            saveSettings({dialStyle: root.valueDialStyle});
         }
     }
 
@@ -54,7 +55,7 @@ ColumnLayout {
         currentKey: root.valueHourHandStyle
         onSelected: key => {
             root.valueHourHandStyle = key;
-            saveSettings();
+            saveSettings({hourHandStyle: root.valueHourHandStyle});
         }
     }
 
@@ -72,7 +73,7 @@ ColumnLayout {
         currentKey: root.valueMinuteHandStyle
         onSelected: key => {
             root.valueMinuteHandStyle = key;
-            saveSettings();
+            saveSettings({minuteHandStyle: root.valueMinuteHandStyle});
         }
     }
     
@@ -89,7 +90,7 @@ ColumnLayout {
         currentKey: root.valueSecondHandStyle
         onSelected: key => {
             root.valueSecondHandStyle = key;
-            saveSettings();
+            saveSettings({secondHandStyle: root.valueSecondHandStyle});
         }
     }
 
@@ -104,7 +105,7 @@ ColumnLayout {
         currentKey: root.valueDateStyle
         onSelected: key => {
             root.valueDateStyle = key;
-            saveSettings();
+            saveSettings({dateStyle: root.valueDateStyle});
         }
     }
 
@@ -121,7 +122,7 @@ ColumnLayout {
         checked: root.valueShowHourMarks
         onToggled: checked => {
             root.valueShowHourMarks = checked;
-            saveSettings();
+            saveSettings({showHourMarks: root.valueShowHourMarks});
         }
         defaultValue: false
     }
@@ -141,7 +142,7 @@ ColumnLayout {
         onPressedChanged: (pressed, value) => {
             if (!pressed) { 
                 root.valueBackgroundOpacity = value / 100; 
-                root.saveSettings(); 
+                root.saveSettings({backgroundOpacity: root.valueBackgroundOpacity});
             }
         }
     }
@@ -161,28 +162,13 @@ ColumnLayout {
         onPressedChanged: (pressed, value) => {
             if (!pressed) { 
                 root.valueSides = Math.round(value); 
-                root.saveSettings(); 
+                root.saveSettings({sides: root.valueSides});
             }
         }
     }
 
-    function saveSettings() {
-        if (!widgetSettings) return;
-        
-        // Use object assignment to ensure data is created properly if null
-        var data = widgetSettings.data || {};
-        
-        data.sides = root.valueSides;
-        data.dialStyle = root.valueDialStyle;
-        data.hourHandStyle = root.valueHourHandStyle;
-        data.minuteHandStyle = root.valueMinuteHandStyle;
-        data.secondHandStyle = root.valueSecondHandStyle;
-        data.dateStyle = root.valueDateStyle;
-        data.showSeconds = root.valueShowSeconds;
-        data.showHourMarks = root.valueShowHourMarks;
-        data.backgroundOpacity = root.valueBackgroundOpacity;
-        
-        widgetSettings.data = data;
-        widgetSettings.save();
+    function saveSettings(fields) {
+        if (fields)
+            settingsChanged(fields);
     }
 }
