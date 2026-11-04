@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.Commons
+import qs.Portals
 import qs.Widgets
 
 ColumnLayout {
@@ -9,17 +10,17 @@ ColumnLayout {
   property var pluginApi: null
 
   // Local state
-  property string editProfilesDir: pluginApi?.pluginSettings?.profilesDir || pluginApi?.manifest?.metadata?.defaultSettings?.profilesDir || ""
+  property string editProfilesDir: displayBaseline.editProfilesDir
 
-  property string editIcon: pluginApi?.pluginSettings?.icon || pluginApi?.manifest?.metadata?.defaultSettings?.icon || "bookmark"
+  property string editIcon: displayBaseline.editIcon
 
-  property bool editIncludeWallpapers: pluginApi?.pluginSettings?.includeWallpapers ?? pluginApi?.manifest?.metadata?.defaultSettings?.includeWallpapers ?? true
+  property bool editIncludeWallpapers: displayBaseline.editIncludeWallpapers
 
-  property string editIconColor: pluginApi?.pluginSettings?.iconColor || pluginApi?.manifest?.metadata?.defaultSettings?.iconColor || "primary"
+  property string editIconColor: displayBaseline.editIconColor
 
-  property bool editBackupEnabled: pluginApi?.pluginSettings?.backupEnabled ?? pluginApi?.manifest?.metadata?.defaultSettings?.backupEnabled ?? true
+  property bool editBackupEnabled: displayBaseline.editBackupEnabled
 
-  property int editBackupCount: pluginApi?.pluginSettings?.backupCount ?? pluginApi?.manifest?.metadata?.defaultSettings?.backupCount ?? 5
+  property int editBackupCount: displayBaseline.editBackupCount
 
   spacing: Style.marginM
 
@@ -37,7 +38,7 @@ ColumnLayout {
     onButtonClicked: dirPicker.openFilePicker()
   }
 
-  AtmoFilePicker {
+  PortalFilePicker {
     id: dirPicker
     selectionMode: "folders"
     title: pluginApi?.tr("settings.dir-select")
@@ -152,16 +153,32 @@ ColumnLayout {
 
   // ── Save ────────────────────────────────
 
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string editProfilesDir: pluginApi?.pluginSettings?.profilesDir || pluginApi?.manifest?.metadata?.defaultSettings?.profilesDir || ""
+    readonly property string editIcon: pluginApi?.pluginSettings?.icon || pluginApi?.manifest?.metadata?.defaultSettings?.icon || "bookmark"
+    readonly property string editIconColor: pluginApi?.pluginSettings?.iconColor || pluginApi?.manifest?.metadata?.defaultSettings?.iconColor || "primary"
+    readonly property bool editIncludeWallpapers: pluginApi?.pluginSettings?.includeWallpapers ?? pluginApi?.manifest?.metadata?.defaultSettings?.includeWallpapers ?? true
+    readonly property bool editBackupEnabled: pluginApi?.pluginSettings?.backupEnabled ?? pluginApi?.manifest?.metadata?.defaultSettings?.backupEnabled ?? true
+    readonly property int editBackupCount: pluginApi?.pluginSettings?.backupCount ?? pluginApi?.manifest?.metadata?.defaultSettings?.backupCount ?? 5
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editProfilesDir: root.editProfilesDir, editIcon: root.editIcon, editIconColor: root.editIconColor, editIncludeWallpapers: root.editIncludeWallpapers, editBackupEnabled: root.editBackupEnabled, editBackupCount: root.editBackupCount})
+
   function saveSettings() {
     if (!pluginApi)
       return;
-    pluginApi.pluginSettings.profilesDir = root.editProfilesDir.trim();
-    pluginApi.pluginSettings.icon = root.editIcon.trim() || "bookmark";
-    pluginApi.pluginSettings.iconColor = root.editIconColor || "primary";
+    root.editProfilesDir = root.editProfilesDir.trim();
+    root.editIcon = root.editIcon.trim() || "bookmark";
+    root.editIconColor = root.editIconColor || "primary";
+    pluginApi.pluginSettings.profilesDir = root.editProfilesDir;
+    pluginApi.pluginSettings.icon = root.editIcon;
+    pluginApi.pluginSettings.iconColor = root.editIconColor;
     pluginApi.pluginSettings.includeWallpapers = root.editIncludeWallpapers;
     pluginApi.pluginSettings.backupEnabled = root.editBackupEnabled;
     pluginApi.pluginSettings.backupCount = root.editBackupCount;
-    pluginApi.saveSettings();
-    Logger.i("ShellProfiles", "Settings saved");
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("ShellProfiles", "Settings saved");
+    });
   }
 }

@@ -10,16 +10,16 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property int valueIntervalSeconds: cfg.intervalSeconds ?? defaults.intervalSeconds
-  property int valueThresholdGood: cfg.thresholdGood ?? defaults.thresholdGood
-  property int valueThresholdWarning: cfg.thresholdWarning ?? defaults.thresholdWarning
-  property bool valueShowHostName: cfg.showHostName ?? defaults.showHostName
-  property string valueBarHost: cfg.barHost ?? defaults.barHost
-  property string valueColorGood: cfg.colorGood ?? defaults.colorGood
-  property string valueColorWarning: cfg.colorWarning ?? defaults.colorWarning
-  property string valueColorCritical: cfg.colorCritical ?? defaults.colorCritical
-  property var valueHosts: cfg.hosts ?? defaults.hosts
-  property bool valueAnimations: cfg.animations ?? defaults.animations
+  property int valueIntervalSeconds: displayBaseline.valueIntervalSeconds
+  property int valueThresholdGood: displayBaseline.valueThresholdGood
+  property int valueThresholdWarning: displayBaseline.valueThresholdWarning
+  property bool valueShowHostName: displayBaseline.valueShowHostName
+  property string valueBarHost: displayBaseline.valueBarHost
+  property string valueColorGood: displayBaseline.valueColorGood
+  property string valueColorWarning: displayBaseline.valueColorWarning
+  property string valueColorCritical: displayBaseline.valueColorCritical
+  property var valueHosts: displayBaseline.valueHosts
+  property bool valueAnimations: displayBaseline.valueAnimations
 
   spacing: Style.marginL
 
@@ -296,6 +296,21 @@ ColumnLayout {
     }
   }
 
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property var valueHosts: cfg.hosts ?? defaults.hosts
+    readonly property int valueIntervalSeconds: cfg.intervalSeconds ?? defaults.intervalSeconds
+    readonly property int valueThresholdGood: cfg.thresholdGood ?? defaults.thresholdGood
+    readonly property int valueThresholdWarning: cfg.thresholdWarning ?? defaults.thresholdWarning
+    readonly property bool valueShowHostName: cfg.showHostName ?? defaults.showHostName
+    readonly property string valueBarHost: cfg.barHost ?? defaults.barHost
+    readonly property string valueColorGood: cfg.colorGood ?? defaults.colorGood
+    readonly property string valueColorWarning: cfg.colorWarning ?? defaults.colorWarning
+    readonly property string valueColorCritical: cfg.colorCritical ?? defaults.colorCritical
+    readonly property bool valueAnimations: cfg.animations ?? defaults.animations
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({valueHosts: root.valueHosts, valueIntervalSeconds: root.valueIntervalSeconds, valueThresholdGood: root.valueThresholdGood, valueThresholdWarning: root.valueThresholdWarning, valueShowHostName: root.valueShowHostName, valueBarHost: root.valueBarHost, valueColorGood: root.valueColorGood, valueColorWarning: root.valueColorWarning, valueColorCritical: root.valueColorCritical, valueAnimations: root.valueAnimations})
+
   function saveSettings() {
     if (!pluginApi)
       return;
@@ -309,7 +324,9 @@ ColumnLayout {
     pluginApi.pluginSettings.colorWarning = root.valueColorWarning;
     pluginApi.pluginSettings.colorCritical = root.valueColorCritical;
     pluginApi.pluginSettings.animations = root.valueAnimations;
-    pluginApi.saveSettings();
-    Logger.d("LatencyMonitor", "Settings saved");
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.d("LatencyMonitor", "Settings saved");
+    });
   }
 }

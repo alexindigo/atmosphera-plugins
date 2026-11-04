@@ -12,17 +12,17 @@ ColumnLayout {
     property var cfg: pluginApi?.pluginSettings ?? ({})
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings ?? ({})
 
-    property string editIconName: cfg.iconName ?? defaults.iconName ?? "rotate-cw"
-    property bool editShowTransformInTooltip: cfg.showTransformInTooltip ?? defaults.showTransformInTooltip ?? true
-    property bool editShowSuccessToast: cfg.showSuccessToast ?? defaults.showSuccessToast ?? true
-    property bool editAutoTabletBarDensity: cfg.autoTabletBarDensity ?? defaults.autoTabletBarDensity ?? false
-    property bool editExclusiveDockInTabletMode: cfg.exclusiveDockInTabletMode ?? defaults.exclusiveDockInTabletMode ?? false
-    property bool editAutoRotateInTabletMode: cfg.autoRotateInTabletMode ?? defaults.autoRotateInTabletMode ?? false
-    property bool editAutoRotateOutsideTabletMode: cfg.autoRotateOutsideTabletMode ?? defaults.autoRotateOutsideTabletMode ?? false
-    property bool editSyncHyprTouchTransform: cfg.syncHyprTouchTransform ?? defaults.syncHyprTouchTransform ?? true
-    property bool editFlipVerticalSensorOrientation: cfg.flipVerticalSensorOrientation ?? defaults.flipVerticalSensorOrientation ?? false
-    property string editButtonBehavior: cfg.buttonBehavior ?? defaults.buttonBehavior ?? "toggle-auto-rotate-lock"
-    property string editTabletBarDensity: cfg.tabletBarDensity ?? defaults.tabletBarDensity ?? "default"
+    property string editIconName: displayBaseline.editIconName
+    property bool editShowTransformInTooltip: displayBaseline.editShowTransformInTooltip
+    property bool editShowSuccessToast: displayBaseline.editShowSuccessToast
+    property bool editAutoTabletBarDensity: displayBaseline.editAutoTabletBarDensity
+    property bool editExclusiveDockInTabletMode: displayBaseline.editExclusiveDockInTabletMode
+    property bool editAutoRotateInTabletMode: displayBaseline.editAutoRotateInTabletMode
+    property bool editAutoRotateOutsideTabletMode: displayBaseline.editAutoRotateOutsideTabletMode
+    property bool editSyncHyprTouchTransform: displayBaseline.editSyncHyprTouchTransform
+    property bool editFlipVerticalSensorOrientation: displayBaseline.editFlipVerticalSensorOrientation
+    property string editButtonBehavior: displayBaseline.editButtonBehavior
+    property string editTabletBarDensity: displayBaseline.editTabletBarDensity
     property bool autoRotateDependencyAvailable: true
     readonly property var barDensityModel: [
         { key: "mini",        name: pluginApi?.tr("settings.tabletBarDensity.options.mini") },
@@ -195,6 +195,22 @@ ColumnLayout {
             root.saveSettings()
         }
     }
+
+    NSettingsBaseline {
+      id: displayBaseline
+      readonly property string editIconName: cfg.iconName ?? defaults.iconName ?? "rotate-cw"
+      readonly property bool editShowTransformInTooltip: cfg.showTransformInTooltip ?? defaults.showTransformInTooltip ?? true
+      readonly property bool editShowSuccessToast: cfg.showSuccessToast ?? defaults.showSuccessToast ?? true
+      readonly property bool editAutoTabletBarDensity: cfg.autoTabletBarDensity ?? defaults.autoTabletBarDensity ?? false
+      readonly property bool editExclusiveDockInTabletMode: cfg.exclusiveDockInTabletMode ?? defaults.exclusiveDockInTabletMode ?? false
+      readonly property bool editAutoRotateInTabletMode: cfg.autoRotateInTabletMode ?? defaults.autoRotateInTabletMode ?? false
+      readonly property bool editAutoRotateOutsideTabletMode: cfg.autoRotateOutsideTabletMode ?? defaults.autoRotateOutsideTabletMode ?? false
+      readonly property bool editSyncHyprTouchTransform: cfg.syncHyprTouchTransform ?? defaults.syncHyprTouchTransform ?? true
+      readonly property bool editFlipVerticalSensorOrientation: cfg.flipVerticalSensorOrientation ?? defaults.flipVerticalSensorOrientation ?? false
+      readonly property string editButtonBehavior: cfg.buttonBehavior ?? defaults.buttonBehavior ?? "toggle-auto-rotate-lock"
+      readonly property string editTabletBarDensity: cfg.tabletBarDensity ?? defaults.tabletBarDensity ?? "default"
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editIconName: root.editIconName, editShowTransformInTooltip: root.editShowTransformInTooltip, editShowSuccessToast: root.editShowSuccessToast, editAutoTabletBarDensity: root.editAutoTabletBarDensity, editExclusiveDockInTabletMode: root.editExclusiveDockInTabletMode, editAutoRotateInTabletMode: root.editAutoRotateInTabletMode, editAutoRotateOutsideTabletMode: root.editAutoRotateOutsideTabletMode, editSyncHyprTouchTransform: root.editSyncHyprTouchTransform, editFlipVerticalSensorOrientation: root.editFlipVerticalSensorOrientation, editButtonBehavior: root.editButtonBehavior, editTabletBarDensity: root.editTabletBarDensity})
 
     function saveSettings() {
         if (!pluginApi) return

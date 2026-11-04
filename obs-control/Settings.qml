@@ -16,24 +16,46 @@ ColumnLayout {
   readonly property var service: root.pluginApi.mainInstance
   readonly property bool durationLabelsSelected: root.valueBarLabelMode === "duration"
 
-  property int valuePollIntervalMs: root.settings.pollIntervalMs ?? root.defaults.pollIntervalMs ?? 2500
-  property string valueLeftClickAction: root.settings.leftClickAction ?? root.defaults.leftClickAction ?? "panel"
-  property string valueLaunchBehavior: root.settings.launchBehavior ?? root.defaults.launchBehavior ?? "minimized-to-tray"
-  property string valueBarLabelMode: root.settings.barLabelMode ?? root.defaults.barLabelMode ?? "short-label"
-  property string valueVideosPath: root.settings.videosPath ?? root.defaults.videosPath ?? ""
-  property string valueVideosOpener: root.settings.videosOpener ?? root.defaults.videosOpener ?? "xdg-open"
-  property bool valueAutoCloseManagedObs: root.settings.autoCloseManagedObs ?? root.defaults.autoCloseManagedObs ?? true
-  property bool valueOpenVideosAfterStop: root.settings.openVideosAfterStop ?? root.defaults.openVideosAfterStop ?? true
-  property bool valueShowBarWhenRecording: root.settings.showBarWhenRecording ?? root.defaults.showBarWhenRecording ?? true
-  property bool valueShowBarWhenReplay: root.settings.showBarWhenReplay ?? root.defaults.showBarWhenReplay ?? false
-  property bool valueShowBarWhenStreaming: root.settings.showBarWhenStreaming ?? root.defaults.showBarWhenStreaming ?? true
+  property int valuePollIntervalMs: displayBaseline.valuePollIntervalMs
+  property string valueLeftClickAction: displayBaseline.valueLeftClickAction
+  property string valueLaunchBehavior: displayBaseline.valueLaunchBehavior
+  property string valueBarLabelMode: displayBaseline.valueBarLabelMode
+  property string valueVideosPath: displayBaseline.valueVideosPath
+  property string valueVideosOpener: displayBaseline.valueVideosOpener
+  property bool valueAutoCloseManagedObs: displayBaseline.valueAutoCloseManagedObs
+  property bool valueOpenVideosAfterStop: displayBaseline.valueOpenVideosAfterStop
+  property bool valueShowBarWhenRecording: displayBaseline.valueShowBarWhenRecording
+  property bool valueShowBarWhenReplay: displayBaseline.valueShowBarWhenReplay
+  property bool valueShowBarWhenStreaming: displayBaseline.valueShowBarWhenStreaming
   // Stored under the legacy showBarWhenReady key for settings compatibility.
-  property bool valueAlwaysShowInBar: root.settings.showBarWhenReady ?? root.defaults.showBarWhenReady ?? true
-  property bool valueShowControlCenterWhenRecording: root.settings.showControlCenterWhenRecording ?? root.defaults.showControlCenterWhenRecording ?? true
-  property bool valueShowControlCenterWhenReplay: root.settings.showControlCenterWhenReplay ?? root.defaults.showControlCenterWhenReplay ?? true
-  property bool valueShowControlCenterWhenStreaming: root.settings.showControlCenterWhenStreaming ?? root.defaults.showControlCenterWhenStreaming ?? true
-  property bool valueShowControlCenterWhenReady: root.settings.showControlCenterWhenReady ?? root.defaults.showControlCenterWhenReady ?? false
-  property bool valueShowElapsedInBar: root.settings.showElapsedInBar ?? root.defaults.showElapsedInBar ?? false
+  property bool valueAlwaysShowInBar: displayBaseline.valueAlwaysShowInBar
+  property bool valueShowControlCenterWhenRecording: displayBaseline.valueShowControlCenterWhenRecording
+  property bool valueShowControlCenterWhenReplay: displayBaseline.valueShowControlCenterWhenReplay
+  property bool valueShowControlCenterWhenStreaming: displayBaseline.valueShowControlCenterWhenStreaming
+  property bool valueShowControlCenterWhenReady: displayBaseline.valueShowControlCenterWhenReady
+  property bool valueShowElapsedInBar: displayBaseline.valueShowElapsedInBar
+
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property int valuePollIntervalMs: root.settings.pollIntervalMs ?? root.defaults.pollIntervalMs ?? 2500
+    readonly property string valueLeftClickAction: root.settings.leftClickAction ?? root.defaults.leftClickAction ?? "panel"
+    readonly property string valueLaunchBehavior: root.settings.launchBehavior ?? root.defaults.launchBehavior ?? "minimized-to-tray"
+    readonly property string valueBarLabelMode: root.settings.barLabelMode ?? root.defaults.barLabelMode ?? "short-label"
+    readonly property string valueVideosPath: root.settings.videosPath ?? root.defaults.videosPath ?? ""
+    readonly property string valueVideosOpener: root.settings.videosOpener ?? root.defaults.videosOpener ?? "xdg-open"
+    readonly property bool valueAutoCloseManagedObs: root.settings.autoCloseManagedObs ?? root.defaults.autoCloseManagedObs ?? true
+    readonly property bool valueOpenVideosAfterStop: root.settings.openVideosAfterStop ?? root.defaults.openVideosAfterStop ?? true
+    readonly property bool valueShowBarWhenRecording: root.settings.showBarWhenRecording ?? root.defaults.showBarWhenRecording ?? true
+    readonly property bool valueShowBarWhenReplay: root.settings.showBarWhenReplay ?? root.defaults.showBarWhenReplay ?? false
+    readonly property bool valueShowBarWhenStreaming: root.settings.showBarWhenStreaming ?? root.defaults.showBarWhenStreaming ?? true
+    readonly property bool valueAlwaysShowInBar: root.settings.showBarWhenReady ?? root.defaults.showBarWhenReady ?? true
+    readonly property bool valueShowControlCenterWhenRecording: root.settings.showControlCenterWhenRecording ?? root.defaults.showControlCenterWhenRecording ?? true
+    readonly property bool valueShowControlCenterWhenReplay: root.settings.showControlCenterWhenReplay ?? root.defaults.showControlCenterWhenReplay ?? true
+    readonly property bool valueShowControlCenterWhenStreaming: root.settings.showControlCenterWhenStreaming ?? root.defaults.showControlCenterWhenStreaming ?? true
+    readonly property bool valueShowControlCenterWhenReady: root.settings.showControlCenterWhenReady ?? root.defaults.showControlCenterWhenReady ?? false
+    readonly property bool valueShowElapsedInBar: root.settings.showElapsedInBar ?? root.defaults.showElapsedInBar ?? false
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({valuePollIntervalMs: root.valuePollIntervalMs, valueLeftClickAction: root.valueLeftClickAction, valueLaunchBehavior: root.valueLaunchBehavior, valueBarLabelMode: root.valueBarLabelMode, valueVideosPath: root.valueVideosPath, valueVideosOpener: root.valueVideosOpener, valueAutoCloseManagedObs: root.valueAutoCloseManagedObs, valueOpenVideosAfterStop: root.valueOpenVideosAfterStop, valueShowBarWhenRecording: root.valueShowBarWhenRecording, valueShowBarWhenReplay: root.valueShowBarWhenReplay, valueShowBarWhenStreaming: root.valueShowBarWhenStreaming, valueAlwaysShowInBar: root.valueAlwaysShowInBar, valueShowControlCenterWhenRecording: root.valueShowControlCenterWhenRecording, valueShowControlCenterWhenReplay: root.valueShowControlCenterWhenReplay, valueShowControlCenterWhenStreaming: root.valueShowControlCenterWhenStreaming, valueShowControlCenterWhenReady: root.valueShowControlCenterWhenReady, valueShowElapsedInBar: root.valueShowElapsedInBar})
 
   function saveSettings() {
     const settings = root.pluginApi.pluginSettings
@@ -42,8 +64,10 @@ ColumnLayout {
     settings.leftClickAction = root.valueLeftClickAction
     settings.launchBehavior = root.valueLaunchBehavior
     settings.barLabelMode = root.valueBarLabelMode
-    settings.videosPath = root.valueVideosPath.trim()
-    settings.videosOpener = root.valueVideosOpener.trim()
+    root.valueVideosPath = root.valueVideosPath.trim()
+    root.valueVideosOpener = root.valueVideosOpener.trim()
+    settings.videosPath = root.valueVideosPath
+    settings.videosOpener = root.valueVideosOpener
     settings.autoCloseManagedObs = root.valueAutoCloseManagedObs
     settings.openVideosAfterStop = root.valueOpenVideosAfterStop
     settings.showBarWhenRecording = root.valueShowBarWhenRecording

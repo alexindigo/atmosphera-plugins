@@ -11,11 +11,11 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property string valueCity: cfg.city ?? defaults.city ?? "London";
-  property string valueCountry: cfg.country ?? defaults.country ?? "UK";
-  property int valueMethod: cfg.method ?? defaults.method ?? 3;
-  property bool valueShowAlways: cfg.showAlways ?? defaults.showAlways ?? true;
-  property bool valueShowCountdown: cfg.showCountdown ?? defaults.showCountdown ?? true;
+  property string valueCity: displayBaseline.valueCity
+  property string valueCountry: displayBaseline.valueCountry
+  property int valueMethod: displayBaseline.valueMethod
+  property bool valueShowAlways: displayBaseline.valueShowAlways
+  property bool valueShowCountdown: displayBaseline.valueShowCountdown
 
   spacing: Style.marginL
 
@@ -88,14 +88,28 @@ ColumnLayout {
     onToggled: checked => root.valueShowAlways = checked
   }
 
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string valueCity: cfg.city ?? defaults.city ?? "London"
+    readonly property string valueCountry: cfg.country ?? defaults.country ?? "UK"
+    readonly property int valueMethod: cfg.method ?? defaults.method ?? 3
+    readonly property bool valueShowAlways: cfg.showAlways ?? defaults.showAlways ?? true
+    readonly property bool valueShowCountdown: cfg.showCountdown ?? defaults.showCountdown ?? true
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({valueCity: root.valueCity, valueCountry: root.valueCountry, valueMethod: root.valueMethod, valueShowAlways: root.valueShowAlways, valueShowCountdown: root.valueShowCountdown})
+
   function saveSettings() {
     if (!pluginApi) return;
-    pluginApi.pluginSettings.city = root.valueCity.trim();
-    pluginApi.pluginSettings.country = root.valueCountry.trim();
+    root.valueCity = root.valueCity.trim();
+    root.valueCountry = root.valueCountry.trim();
+    pluginApi.pluginSettings.city = root.valueCity;
+    pluginApi.pluginSettings.country = root.valueCountry;
     pluginApi.pluginSettings.method = root.valueMethod;
     pluginApi.pluginSettings.showAlways = root.valueShowAlways;
     pluginApi.pluginSettings.showCountdown = root.valueShowCountdown;
-    pluginApi.saveSettings();
-    Logger.d("RamadanIftar", "Settings saved");
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.d("RamadanIftar", "Settings saved");
+    });
   }
 }

@@ -11,15 +11,9 @@ ColumnLayout {
   property var pluginApi: null
 
   // Local state for editing
-  property string command: pluginApi?.pluginSettings?.command ||
-      pluginApi?.manifest?.metadata?.defaultSettings?.command ||
-      "code"
-  property string configName: pluginApi?.pluginSettings?.configName ||
-      pluginApi?.manifest?.metadata?.defaultSettings?.configName ||
-      "Code"
-  property bool includeInSearch: pluginApi?.pluginSettings?.includeInSearch ??
-      pluginApi?.manifest?.metadata?.defaultSettings?.includeInSearch ??
-      true
+  property string command: displayBaseline.command
+  property string configName: displayBaseline.configName
+  property bool includeInSearch: displayBaseline.includeInSearch
   property string forkKey: findCurrentFork()
 
 
@@ -116,6 +110,14 @@ ColumnLayout {
   }
 
   // Required: Save function called by the dialog
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string command: pluginApi?.pluginSettings?.command || pluginApi?.manifest?.metadata?.defaultSettings?.command || "code"
+    readonly property string configName: pluginApi?.pluginSettings?.configName || pluginApi?.manifest?.metadata?.defaultSettings?.configName || "Code"
+    readonly property bool includeInSearch: pluginApi?.pluginSettings?.includeInSearch ?? pluginApi?.manifest?.metadata?.defaultSettings?.includeInSearch ?? true
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({command: root.command, configName: root.configName, includeInSearch: root.includeInSearch})
+
   function saveSettings() {
       pluginApi.pluginSettings.command = root.command;
       pluginApi.pluginSettings.configName = root.configName;

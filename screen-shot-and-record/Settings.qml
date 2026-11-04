@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import qs.Commons
+import qs.Portals
 import qs.Widgets
 
 ColumnLayout {
@@ -11,33 +12,19 @@ ColumnLayout {
     property var pluginApi: null
 
     // Local state for editing
-    property bool enableCross: pluginApi?.pluginSettings?.enableCross
-                               ?? pluginApi?.manifest?.metadata?.defaultSettings?.enableCross
-                               ?? true
+    property bool enableCross: displayBaseline.enableCross
 
-    property bool enableWindowsSelection: pluginApi?.pluginSettings?.enableWindowsSelection
-                                          ?? pluginApi?.manifest?.metadata?.defaultSettings?.enableWindowsSelection
-                                          ?? true
+    property bool enableWindowsSelection: displayBaseline.enableWindowsSelection
 
-    property string screenshotEditor: pluginApi?.pluginSettings?.screenshotEditor
-                                      ?? pluginApi?.manifest?.metadata?.defaultSettings?.screenshotEditor
-                                      ?? "swappy"
+    property string screenshotEditor: displayBaseline.screenshotEditor
 
-    property bool keepSourceScreenshot: pluginApi?.pluginSettings?.keepSourceScreenshot
-                                        ?? pluginApi?.manifest?.metadata?.defaultSettings?.keepSourceScreenshot
-                                        ?? false
+    property bool keepSourceScreenshot: displayBaseline.keepSourceScreenshot
 
-    property string savePath: pluginApi?.pluginSettings?.savePath
-                              ?? pluginApi?.manifest?.metadata?.defaultSettings?.savePath
-                              ?? (Quickshell.env("HOME") + "/Pictures/Screenshots")
+    property string savePath: displayBaseline.savePath
 
-    property string recordingSavePath: pluginApi?.pluginSettings?.recordingSavePath
-                                       ?? pluginApi?.manifest?.metadata?.defaultSettings?.recordingSavePath
-                                       ?? (Quickshell.env("HOME") + "/Videos")
+    property string recordingSavePath: displayBaseline.recordingSavePath
 
-    property bool recordingNotifications: pluginApi?.pluginSettings?.recordingNotifications
-                                          ?? pluginApi?.manifest?.metadata?.defaultSettings?.recordingNotifications
-                                          ?? true
+    property bool recordingNotifications: displayBaseline.recordingNotifications
 
     spacing: Style.marginM
 
@@ -130,7 +117,7 @@ ColumnLayout {
         }
     }
 
-    AtmoFilePicker {
+    PortalFilePicker {
         id: screenshotFolderPicker
         selectionMode: "folders"
         title: pluginApi?.tr("settings.savePath.label")
@@ -142,7 +129,7 @@ ColumnLayout {
         }
     }
 
-    AtmoFilePicker {
+    PortalFilePicker {
         id: recordingFolderPicker
         selectionMode: "folders"
         title: pluginApi?.tr("settings.recordingSavePath.label")
@@ -155,6 +142,18 @@ ColumnLayout {
     }
 
     // Required: Save function called by the dialog
+    NSettingsBaseline {
+      id: displayBaseline
+      readonly property bool enableCross: pluginApi?.pluginSettings?.enableCross ?? pluginApi?.manifest?.metadata?.defaultSettings?.enableCross ?? true
+      readonly property bool enableWindowsSelection: pluginApi?.pluginSettings?.enableWindowsSelection ?? pluginApi?.manifest?.metadata?.defaultSettings?.enableWindowsSelection ?? true
+      readonly property string screenshotEditor: pluginApi?.pluginSettings?.screenshotEditor ?? pluginApi?.manifest?.metadata?.defaultSettings?.screenshotEditor ?? "swappy"
+      readonly property bool keepSourceScreenshot: pluginApi?.pluginSettings?.keepSourceScreenshot ?? pluginApi?.manifest?.metadata?.defaultSettings?.keepSourceScreenshot ?? false
+      readonly property string savePath: pluginApi?.pluginSettings?.savePath ?? pluginApi?.manifest?.metadata?.defaultSettings?.savePath ?? (Quickshell.env("HOME") + "/Pictures/Screenshots")
+      readonly property string recordingSavePath: pluginApi?.pluginSettings?.recordingSavePath ?? pluginApi?.manifest?.metadata?.defaultSettings?.recordingSavePath ?? (Quickshell.env("HOME") + "/Videos")
+      readonly property bool recordingNotifications: pluginApi?.pluginSettings?.recordingNotifications ?? pluginApi?.manifest?.metadata?.defaultSettings?.recordingNotifications ?? true
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({enableCross: root.enableCross, enableWindowsSelection: root.enableWindowsSelection, screenshotEditor: root.screenshotEditor, keepSourceScreenshot: root.keepSourceScreenshot, savePath: root.savePath, recordingSavePath: root.recordingSavePath, recordingNotifications: root.recordingNotifications})
+
     function saveSettings() {
         pluginApi.pluginSettings.enableCross = root.enableCross
         pluginApi.pluginSettings.enableWindowsSelection = root.enableWindowsSelection
@@ -166,4 +165,3 @@ ColumnLayout {
         pluginApi.saveSettings()
     }
 }
-

@@ -38,9 +38,9 @@ ColumnLayout {
     // exactly — drift between the two is a real bug (a plugin instance that
     // predates a defaults change falls back to the QML literal here, not
     // the manifest value).
-    property int valueMaxHistorySize: pluginApi?.pluginSettings?.maxHistorySize ?? 100
-    property bool valueShowImagePreviews: pluginApi?.pluginSettings?.showImagePreviews ?? true
-    property string valueDensity: pluginApi?.pluginSettings?.density ?? "comfortable"
+    property int valueMaxHistorySize: displayBaseline.valueMaxHistorySize
+    property bool valueShowImagePreviews: displayBaseline.valueShowImagePreviews
+    property string valueDensity: displayBaseline.valueDensity
 
     // --- Controls -----------------------------------------------------------
 
@@ -96,6 +96,14 @@ ColumnLayout {
     // Null-guard matches the idiom used in every other entry point — if the
     // shell calls saveSettings() before injecting pluginApi (edge case on
     // rapid open/close), silently return rather than throwing.
+    NSettingsBaseline {
+      id: displayBaseline
+      readonly property int valueMaxHistorySize: pluginApi?.pluginSettings?.maxHistorySize ?? 100
+      readonly property bool valueShowImagePreviews: pluginApi?.pluginSettings?.showImagePreviews ?? true
+      readonly property string valueDensity: pluginApi?.pluginSettings?.density ?? "comfortable"
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({valueMaxHistorySize: root.valueMaxHistorySize, valueShowImagePreviews: root.valueShowImagePreviews, valueDensity: root.valueDensity})
+
     function saveSettings() {
         if (!pluginApi) {
             return;
