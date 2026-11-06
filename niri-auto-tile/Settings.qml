@@ -11,16 +11,36 @@ ColumnLayout {
     readonly property var settings: pluginApi?.pluginSettings ?? ({})
     readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings ?? ({})
 
-    property bool valueEnabled: settings.enabled ?? defaults.enabled ?? true
-    property bool valuePerWorkspace: settings.perWorkspace ?? defaults.perWorkspace ?? false
-    property bool valueOnlyAtMax: settings.onlyAtMax ?? defaults.onlyAtMax ?? true
-    property int valueMaxVisible: settings.maxVisible ?? defaults.maxVisible ?? 4
-    property int valueDebounceMs: settings.debounceMs ?? defaults.debounceMs ?? 300
-    property int valueMaxEventsPerSecond: settings.maxEventsPerSecond ?? defaults.maxEventsPerSecond ?? 20
+    property bool valueEnabled: displayBaseline.valueEnabled
+    property bool valuePerWorkspace: displayBaseline.valuePerWorkspace
+    property bool valueOnlyAtMax: displayBaseline.valueOnlyAtMax
+    property int valueMaxVisible: displayBaseline.project("valueMaxVisible")
+    property int valueDebounceMs: displayBaseline.project("valueDebounceMs")
+    property int valueMaxEventsPerSecond: displayBaseline.project("valueMaxEventsPerSecond")
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property bool valueEnabled: settings.enabled ?? defaults.enabled ?? true
+        readonly property bool valuePerWorkspace: settings.perWorkspace ?? defaults.perWorkspace ?? false
+        readonly property bool valueOnlyAtMax: settings.onlyAtMax ?? defaults.onlyAtMax ?? true
+        readonly property int valueMaxVisible: settings.maxVisible ?? defaults.maxVisible ?? 4
+        readonly property int valueDebounceMs: settings.debounceMs ?? defaults.debounceMs ?? 300
+        readonly property int valueMaxEventsPerSecond: settings.maxEventsPerSecond ?? defaults.maxEventsPerSecond ?? 20
+        ranges: [NSettingsRange { field: "valueMaxVisible"; from: rangeValueMaxVisible.from; to: rangeValueMaxVisible.to }, NSettingsRange { field: "valueDebounceMs"; from: rangeValueDebounceMs.from; to: rangeValueDebounceMs.to }, NSettingsRange { field: "valueMaxEventsPerSecond"; from: rangeValueMaxEventsPerSecond.from; to: rangeValueMaxEventsPerSecond.to }]
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({valueEnabled: root.valueEnabled, valuePerWorkspace: root.valuePerWorkspace, valueOnlyAtMax: root.valueOnlyAtMax, valueMaxVisible: root.valueMaxVisible, valueDebounceMs: root.valueDebounceMs, valueMaxEventsPerSecond: root.valueMaxEventsPerSecond})
+    property bool _restartPending: false
+    Connections {
+        target: root.pluginApi
+        function onSettingsCompleted(result) {
+            if (!root._restartPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+            root._restartPending = false;
+            root.pluginApi.mainInstance?.restartDaemon();
+        }
+    }
 
     spacing: Style.marginM
 
-    function saveSettings() {
+    function saveSettings(restart) {
         if (!pluginApi) return;
         pluginApi.pluginSettings.enabled = root.valueEnabled;
         pluginApi.pluginSettings.perWorkspace = root.valuePerWorkspace;
@@ -28,7 +48,8 @@ ColumnLayout {
         pluginApi.pluginSettings.maxVisible = root.valueMaxVisible;
         pluginApi.pluginSettings.debounceMs = root.valueDebounceMs;
         pluginApi.pluginSettings.maxEventsPerSecond = root.valueMaxEventsPerSecond;
-        pluginApi.saveSettings();
+        if (pluginApi.saveSettings() !== false)
+            root._restartPending = root._restartPending || restart === true;
     }
 
     // ─── Enable / Disable ───
@@ -51,8 +72,7 @@ ColumnLayout {
         checked: root.valuePerWorkspace
         onToggled: checked => {
             root.valuePerWorkspace = checked;
-            root.saveSettings();
-            pluginApi?.mainInstance?.restartDaemon();
+            root.saveSettings(true);
         }
     }
 
@@ -64,8 +84,7 @@ ColumnLayout {
         checked: root.valueOnlyAtMax
         onToggled: checked => {
             root.valueOnlyAtMax = checked;
-            root.saveSettings();
-            pluginApi?.mainInstance?.restartDaemon();
+            root.saveSettings(true);
         }
     }
 
@@ -80,6 +99,8 @@ ColumnLayout {
         }
 
         NSlider {
+            id: rangeValueMaxVisible
+            objectName: "settings-range-valueMaxVisible"
             Layout.fillWidth: true
             from: 1
             to: 8
@@ -87,8 +108,7 @@ ColumnLayout {
             stepSize: 1
             onMoved: {
                 root.valueMaxVisible = Math.round(value);
-                root.saveSettings();
-                pluginApi?.mainInstance?.restartDaemon();
+                root.saveSettings(true);
             }
         }
     }
@@ -104,6 +124,8 @@ ColumnLayout {
         }
 
         NSlider {
+            id: rangeValueDebounceMs
+            objectName: "settings-range-valueDebounceMs"
             Layout.fillWidth: true
             from: 100
             to: 1000
@@ -111,8 +133,7 @@ ColumnLayout {
             stepSize: 50
             onMoved: {
                 root.valueDebounceMs = Math.round(value);
-                root.saveSettings();
-                pluginApi?.mainInstance?.restartDaemon();
+                root.saveSettings(true);
             }
         }
     }
@@ -128,6 +149,8 @@ ColumnLayout {
         }
 
         NSlider {
+            id: rangeValueMaxEventsPerSecond
+            objectName: "settings-range-valueMaxEventsPerSecond"
             Layout.fillWidth: true
             from: 5
             to: 50
@@ -135,8 +158,7 @@ ColumnLayout {
             stepSize: 5
             onMoved: {
                 root.valueMaxEventsPerSecond = Math.round(value);
-                root.saveSettings();
-                pluginApi?.mainInstance?.restartDaemon();
+                root.saveSettings(true);
             }
         }
     }

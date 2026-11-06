@@ -12,8 +12,14 @@ ColumnLayout {
   readonly property var cfg: pluginApi?.pluginSettings ?? ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings ?? ({})
 
-  property bool saveWidgets: cfg.saveWidgets ?? defaults.saveWidgets ?? true
-  property bool loadWidgets: cfg.loadWidgets ?? defaults.loadWidgets ?? true
+  property bool saveWidgets: displayBaseline.saveWidgets
+  property bool loadWidgets: displayBaseline.loadWidgets
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property bool saveWidgets: cfg.saveWidgets ?? defaults.saveWidgets ?? true
+    readonly property bool loadWidgets: cfg.loadWidgets ?? defaults.loadWidgets ?? true
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({saveWidgets: root.saveWidgets, loadWidgets: root.loadWidgets})
 
   readonly property var wallpaperMonitorWidgets: cfg.monitorWidgets ?? ({})
 
@@ -21,15 +27,15 @@ ColumnLayout {
     label: pluginApi?.tr("settings.save_widgets.label")
     description: pluginApi?.tr("settings.save_widgets.description")
     checked: root.saveWidgets
-    onCheckedChanged: root.saveWidgets = checked
+    onToggled: checked => root.saveWidgets = checked
     defaultValue: true
   }
 
   NToggle {
     label: pluginApi?.tr("settings.load_widgets.label")
     description: pluginApi?.tr("settings.load_widgets.description")
-    checked: root.saveWidgets
-    onCheckedChanged: root.saveWidgets = checked
+    checked: root.loadWidgets
+    onToggled: checked => root.loadWidgets = checked
     defaultValue: true
   }
 

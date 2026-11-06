@@ -14,11 +14,30 @@ ColumnLayout {
     property var cfg: pluginApi?.pluginSettings || ({})
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    property var feeds: cfg.feeds || defaults.feeds || []
-    property int updateInterval: (cfg.updateInterval ?? defaults.updateInterval ?? 600)
-    property int maxItemsPerFeed: cfg.maxItemsPerFeed ?? defaults.maxItemsPerFeed ?? 10
-    property bool showOnlyUnread: cfg.showOnlyUnread ?? defaults.showOnlyUnread ?? false
-    property bool markAsReadOnClick: cfg.markAsReadOnClick ?? defaults.markAsReadOnClick ?? true
+    property var feeds: displayBaseline.feeds.slice()
+    property int updateInterval: displayBaseline.project("updateInterval")
+    property int maxItemsPerFeed: displayBaseline.project("maxItemsPerFeed")
+    property bool showOnlyUnread: displayBaseline.showOnlyUnread
+    property bool markAsReadOnClick: displayBaseline.markAsReadOnClick
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property var feeds: cfg.feeds || defaults.feeds || []
+        readonly property int updateInterval: cfg.updateInterval ?? defaults.updateInterval ?? 600
+        readonly property int maxItemsPerFeed: cfg.maxItemsPerFeed ?? defaults.maxItemsPerFeed ?? 10
+        readonly property bool showOnlyUnread: cfg.showOnlyUnread ?? defaults.showOnlyUnread ?? false
+        readonly property bool markAsReadOnClick: cfg.markAsReadOnClick ?? defaults.markAsReadOnClick ?? true
+        ranges: [NSettingsRange { field: "updateInterval"; from: rangeUpdateInterval.from; to: rangeUpdateInterval.to }, NSettingsRange { field: "maxItemsPerFeed"; from: rangeMaxItemsPerFeed.from; to: rangeMaxItemsPerFeed.to }]
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({feeds: root.feeds, updateInterval: root.updateInterval, maxItemsPerFeed: root.maxItemsPerFeed, showOnlyUnread: root.showOnlyUnread, markAsReadOnClick: root.markAsReadOnClick}) || root.newFeedName !== "" || root.newFeedUrl !== ""
+    property bool _savePending: false
+    Connections {
+        target: root.pluginApi
+        function onSettingsCompleted(result) {
+            if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+            root._savePending = false;
+            Logger.d("RSS Feed", "RSS Feed: Settings saved successfully");
+        }
+    }
 
     // Temporary fields for adding new feed
     property string newFeedName: ""
@@ -44,8 +63,8 @@ ColumnLayout {
                     "maxItems:", maxItemsPerFeed, "showOnlyUnread:", showOnlyUnread, 
                     "markAsReadOnClick:", markAsReadOnClick, "feeds:", feeds.length);
         
-        pluginApi.saveSettings();
-        Logger.d("RSS Feed", "RSS Feed: Settings saved successfully");
+        if (pluginApi.saveSettings() !== false)
+            root._savePending = true;
     }
 
     function addFeed() {
@@ -91,10 +110,12 @@ ColumnLayout {
             spacing: Style.marginM
 
             NSpinBox {
+                id: rangeUpdateInterval
+                objectName: "settings-range-updateInterval"
                 from: 60
                 to: 3600
                 value: updateInterval
-                onValueChanged: {
+                onValueModified: {
                     updateInterval = value;
                     saveSettings();
                 }
@@ -119,10 +140,12 @@ ColumnLayout {
         }
 
         NSpinBox {
+            id: rangeMaxItemsPerFeed
+            objectName: "settings-range-maxItemsPerFeed"
             from: 5
             to: 50
             value: maxItemsPerFeed
-            onValueChanged: {
+            onValueModified: {
                 maxItemsPerFeed = value;
                 saveSettings();
             }

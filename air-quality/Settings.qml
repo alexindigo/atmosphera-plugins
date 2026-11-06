@@ -11,14 +11,40 @@ ColumnLayout {
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   // Edit copies of settings
-  property string editAqiScale: cfg.aqiScale ?? defaults.aqiScale ?? "us"
-  property bool editUseNoctaliaLocation: cfg.useNoctaliaLocation ?? defaults.useNoctaliaLocation ?? true
-  property string editCustomLatitude: cfg.customLatitude ?? defaults.customLatitude ?? ""
-  property string editCustomLongitude: cfg.customLongitude ?? defaults.customLongitude ?? ""
-  property int editRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 30
-  property bool editBoldText: cfg.boldText ?? defaults.boldText ?? true
-  property string editDataSource: cfg.dataSource ?? defaults.dataSource ?? "open-meteo"
-  property string editAqicnToken: cfg.aqicnToken ?? defaults.aqicnToken ?? ""
+  property string editAqiScale: displayBaseline.editAqiScale
+  property bool editUseNoctaliaLocation: displayBaseline.editUseNoctaliaLocation
+  property string editCustomLatitude: displayBaseline.editCustomLatitude
+  property string editCustomLongitude: displayBaseline.editCustomLongitude
+  property int editRefreshInterval: displayBaseline.project("editRefreshInterval")
+  property bool editBoldText: displayBaseline.editBoldText
+  property string editDataSource: displayBaseline.editDataSource
+  property string editAqicnToken: displayBaseline.editAqicnToken
+  property bool _refreshPending: false
+  property bool _savePending: false
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string editAqiScale: cfg.aqiScale ?? defaults.aqiScale ?? "us"
+    readonly property bool editUseNoctaliaLocation: cfg.useNoctaliaLocation ?? defaults.useNoctaliaLocation ?? true
+    readonly property string editCustomLatitude: cfg.customLatitude ?? defaults.customLatitude ?? ""
+    readonly property string editCustomLongitude: cfg.customLongitude ?? defaults.customLongitude ?? ""
+    readonly property int editRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 30
+    readonly property bool editBoldText: cfg.boldText ?? defaults.boldText ?? true
+    readonly property string editDataSource: cfg.dataSource ?? defaults.dataSource ?? "open-meteo"
+    readonly property string editAqicnToken: cfg.aqicnToken ?? defaults.aqicnToken ?? ""
+    ranges: [NSettingsRange { field: "editRefreshInterval"; from: rangeEditRefreshInterval.from; to: rangeEditRefreshInterval.to }]
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editAqiScale: root.editAqiScale, editUseNoctaliaLocation: root.editUseNoctaliaLocation, editCustomLatitude: root.editCustomLatitude, editCustomLongitude: root.editCustomLongitude, editRefreshInterval: root.editRefreshInterval, editBoldText: root.editBoldText, editDataSource: root.editDataSource, editAqicnToken: root.editAqicnToken})
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root._savePending = false;
+      var refresh = root._refreshPending;
+      root._refreshPending = false;
+      if (refresh) root.pluginApi.mainInstance?.refresh();
+      Logger.i("Air Quality", "Settings saved");
+    }
+  }
 
   spacing: Style.marginM
 
@@ -151,12 +177,14 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeEditRefreshInterval
+      objectName: "settings-range-editRefreshInterval"
       Layout.fillWidth: true
       from: 5
       to: 120
       stepSize: 5
       value: root.editRefreshInterval
-      onValueChanged: root.editRefreshInterval = value
+      onMoved: root.editRefreshInterval = value
     }
   }
 
@@ -197,13 +225,9 @@ ColumnLayout {
     pluginApi.pluginSettings.refreshInterval = root.editRefreshInterval
     pluginApi.pluginSettings.boldText = root.editBoldText
 
-    pluginApi.saveSettings()
-
-    // Only refresh if location, scale, or data source changed
-    if (locationChanged || scaleChanged || dataSourceChanged) {
-      root.pluginApi.mainInstance?.refresh()
+    if (pluginApi.saveSettings() !== false) {
+      root._savePending = true;
+      root._refreshPending = root._refreshPending || locationChanged || scaleChanged || dataSourceChanged;
     }
-
-    Logger.i("Air Quality", "Settings saved")
   }
 }

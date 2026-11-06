@@ -37,33 +37,65 @@ ColumnLayout {
 
   property int valueDeviceIndex: 0
 
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property bool valueShowGpuUse: root.settingBool("showGpuUse", defaults.showGpuUse ?? true)
+    readonly property bool valueShowTempJunction: root.settingBool("showTempJunction", defaults.showTempJunction ?? true)
+    readonly property bool valueShowTempEdge: root.settingBool("showTempEdge", defaults.showTempEdge ?? false)
+    readonly property bool valueShowTempMemory: root.settingBool("showTempMemory", defaults.showTempMemory ?? false)
+    readonly property bool valueShowVram: root.settingBool("showVram", defaults.showVram ?? true)
+    readonly property bool valueShowVramActivity: root.settingBool("showVramActivity", defaults.showVramActivity ?? false)
+    readonly property bool valueShowFanSpeed: root.settingBool("showFanSpeed", defaults.showFanSpeed ?? false)
+    readonly property bool valueShowPower: root.settingBool("showPower", defaults.showPower ?? true)
+    readonly property bool valueShowSclk: root.settingBool("showSclk", defaults.showSclk ?? true)
+    readonly property bool valueShowMclk: root.settingBool("showMclk", defaults.showMclk ?? true)
+    readonly property bool valueShowFclk: root.settingBool("showFclk", defaults.showFclk ?? false)
+    readonly property bool valueShowSocclk: root.settingBool("showSocclk", defaults.showSocclk ?? false)
+    readonly property bool valueShowDcefclk: root.settingBool("showDcefclk", defaults.showDcefclk ?? false)
+    readonly property bool valueCompactMode: root.settingBool("compactMode", defaults.compactMode ?? true)
+    readonly property string valueIconColor: pluginApi?.pluginSettings?.iconColor ?? defaults.iconColor ?? "primary"
+    readonly property string valueTextColor: pluginApi?.pluginSettings?.textColor ?? defaults.textColor ?? "onSurface"
+    readonly property bool valueUseMonospaceFont: root.settingBool("useMonospaceFont", defaults.useMonospaceFont ?? true)
+    readonly property bool valueUsePadding: root.settingBool("usePadding", defaults.usePadding ?? false)
+    readonly property int valueDeviceIndex: pluginApi?.pluginSettings?.deviceIndex ?? defaults.deviceIndex ?? 0
+    ranges: [NSettingsRange { field: "valueDeviceIndex"; from: rangeValueDeviceIndex.from; to: rangeValueDeviceIndex.to }]
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({valueShowGpuUse: root.valueShowGpuUse, valueShowTempJunction: root.valueShowTempJunction, valueShowTempEdge: root.valueShowTempEdge, valueShowTempMemory: root.valueShowTempMemory, valueShowVram: root.valueShowVram, valueShowVramActivity: root.valueShowVramActivity, valueShowFanSpeed: root.valueShowFanSpeed, valueShowPower: root.valueShowPower, valueShowSclk: root.valueShowSclk, valueShowMclk: root.valueShowMclk, valueShowFclk: root.valueShowFclk, valueShowSocclk: root.valueShowSocclk, valueShowDcefclk: root.valueShowDcefclk, valueCompactMode: root.valueCompactMode, valueIconColor: root.valueIconColor, valueTextColor: root.valueTextColor, valueUseMonospaceFont: root.valueUseMonospaceFont, valueUsePadding: root.valueUsePadding, valueDeviceIndex: root.valueDeviceIndex})
+  property bool _applyEffectPending: false
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root._applyEffectPending = false;
+      root.mainInstance?.refreshNow();
+      Logger.i("AmdGpuMonitor", "Settings saved");
+    }
+  }
+
   spacing: Style.marginL
 
   Component.onCompleted: loadFromPluginSettings()
 
   function loadFromPluginSettings() {
-    const d = defaults;
-    valueShowGpuUse = settingBool("showGpuUse", d.showGpuUse ?? true);
-    valueShowTempJunction = settingBool("showTempJunction", d.showTempJunction ?? true);
-    valueShowTempEdge = settingBool("showTempEdge", d.showTempEdge ?? false);
-    valueShowTempMemory = settingBool("showTempMemory", d.showTempMemory ?? false);
-    valueShowVram = settingBool("showVram", d.showVram ?? true);
-    valueShowVramActivity = settingBool("showVramActivity", d.showVramActivity ?? false);
-    valueShowFanSpeed = settingBool("showFanSpeed", d.showFanSpeed ?? false);
-    valueShowPower = settingBool("showPower", d.showPower ?? true);
-    valueShowSclk = settingBool("showSclk", d.showSclk ?? true);
-    valueShowMclk = settingBool("showMclk", d.showMclk ?? true);
-    valueShowFclk = settingBool("showFclk", d.showFclk ?? false);
-    valueShowSocclk = settingBool("showSocclk", d.showSocclk ?? false);
-    valueShowDcefclk = settingBool("showDcefclk", d.showDcefclk ?? false);
-
-    valueCompactMode = settingBool("compactMode", d.compactMode ?? true);
-    valueIconColor = pluginApi?.pluginSettings?.iconColor ?? d.iconColor ?? "primary";
-    valueTextColor = pluginApi?.pluginSettings?.textColor ?? d.textColor ?? "onSurface";
-    valueUseMonospaceFont = settingBool("useMonospaceFont", d.useMonospaceFont ?? true);
-    valueUsePadding = settingBool("usePadding", d.usePadding ?? false);
-
-    valueDeviceIndex = pluginApi?.pluginSettings?.deviceIndex ?? d.deviceIndex ?? 0;
+    valueShowGpuUse = displayBaseline.valueShowGpuUse;
+    valueShowTempJunction = displayBaseline.valueShowTempJunction;
+    valueShowTempEdge = displayBaseline.valueShowTempEdge;
+    valueShowTempMemory = displayBaseline.valueShowTempMemory;
+    valueShowVram = displayBaseline.valueShowVram;
+    valueShowVramActivity = displayBaseline.valueShowVramActivity;
+    valueShowFanSpeed = displayBaseline.valueShowFanSpeed;
+    valueShowPower = displayBaseline.valueShowPower;
+    valueShowSclk = displayBaseline.valueShowSclk;
+    valueShowMclk = displayBaseline.valueShowMclk;
+    valueShowFclk = displayBaseline.valueShowFclk;
+    valueShowSocclk = displayBaseline.valueShowSocclk;
+    valueShowDcefclk = displayBaseline.valueShowDcefclk;
+    valueCompactMode = displayBaseline.valueCompactMode;
+    valueIconColor = displayBaseline.valueIconColor;
+    valueTextColor = displayBaseline.valueTextColor;
+    valueUseMonospaceFont = displayBaseline.valueUseMonospaceFont;
+    valueUsePadding = displayBaseline.valueUsePadding;
+    valueDeviceIndex = displayBaseline.project("valueDeviceIndex");
   }
 
   NText {
@@ -226,6 +258,8 @@ ColumnLayout {
   }
 
   NSpinBox {
+    id: rangeValueDeviceIndex
+    objectName: "settings-range-valueDeviceIndex"
     Layout.fillWidth: true
     label: pluginApi?.tr("settings.device_index")
     description: pluginApi?.tr("settings.device_index_description")
@@ -261,10 +295,7 @@ ColumnLayout {
     s.showDcefclk = root.valueShowDcefclk;
     s.deviceIndex = root.valueDeviceIndex;
 
-    pluginApi.saveSettings();
-    if (mainInstance)
-      mainInstance.refreshNow();
-    Logger.i("AmdGpuMonitor", "Settings saved");
+    if (pluginApi.saveSettings() !== false)
+      root._applyEffectPending = true;
   }
 }
-

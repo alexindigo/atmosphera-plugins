@@ -96,7 +96,7 @@
       "author": "adriamartin91",
       "description": "Displays real-time air quality data with EPA color coding. Supports Open-Meteo and AQICN data sources. Shows AQI index and pollutant breakdown.",
       "license": "MIT",
-      "version": "1.1.4",
+      "version": "1.1.5",
       "tags": [
         "Bar",
         "Desktop",
@@ -104,11 +104,11 @@
         "System",
         "Utility"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-05",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "amd-gpu-monitor",
@@ -116,7 +116,7 @@
       "author": "Dvaxert",
       "description": "AMD discrete GPU monitoring via rocm-smi with graphs and configurable metrics.",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Bar",
         "Panel",
@@ -130,9 +130,9 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": false,
       "upstreamPR": 940,
-      "lastUpdated": "2026-10-11",
+      "lastUpdated": "2026-11-05",
       "minNoctaliaVersion": "4.0.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "arch-updater",
@@ -272,17 +272,17 @@
       "author": "Wilfred Mallawa",
       "description": "Set the battery threshold for laptop batteries to extend battery lifespan",
       "license": "MIT",
-      "version": "1.2.7",
+      "version": "1.2.8",
       "tags": [
         "Bar",
         "Panel",
         "System"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-05",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "battery-wireless-devices",
@@ -721,17 +721,17 @@
       "author": "Hy4ri",
       "description": "Change the lightbar color of your DualShock 4 or DualSense controller with a color picker and recent color history.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Hardware",
         "Gaming",
         "Bar"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-05",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "fancy-audiovisualizer",
@@ -1575,18 +1575,18 @@
       "author": "pir0c0pter0",
       "description": "Automatically redistributes niri column widths evenly when windows open or close",
       "license": "MIT",
-      "version": "1.4.4",
+      "version": "1.4.5",
       "tags": [
         "Bar",
         "Utility",
         "System",
         "Niri"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-05",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "niri-outputs",
@@ -2045,16 +2045,16 @@
       "author": "notprayasmitra",
       "description": "A pomodoro timer plugin to help boost productivity.",
       "license": "MIT",
-      "version": "1.2.2",
+      "version": "1.2.3",
       "tags": [
         "Bar",
         "Productivity"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-05",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.0.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "port-monitor",
@@ -2154,13 +2154,13 @@
       "author": "Lokize",
       "description": "Monitor and read RSS/Atom feeds directly from your desktop",
       "license": "MIT",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "tags": [],
-      "lastUpdated": "2026-10-11",
+      "lastUpdated": "2026-11-05",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "ru-menu",
@@ -2185,16 +2185,16 @@
       "author": "spiros132",
       "description": "A plugin that allows you to have multiple setups for your desktop widgets based on the wallpaper.",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Fun",
         "System"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-05",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "screen-recorder",
@@ -2658,16 +2658,16 @@
       "author": "BukoMoon",
       "description": "Checks for system updates and shows the update count. Click to run update command in a terminal.",
       "license": "GPLv3",
-      "version": "1.0.16",
+      "version": "1.0.17",
       "tags": [
         "Bar",
         "System"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-05",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "usb-drive-manager",
@@ -2800,15 +2800,15 @@
       "author": "Sovereign",
       "description": "Shows the current weather condition and temperature.",
       "license": "MIT",
-      "version": "1.1.9",
+      "version": "1.1.10",
       "tags": [
         "Bar"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-05",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.8",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "web-search",

@@ -19,6 +19,29 @@ ColumnLayout {
   // --- : Sound Property ---
   property bool editPlaySound: true
 
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property int editWorkDuration: pluginApi?.pluginSettings?.workDuration ?? pluginApi?.manifest?.metadata?.defaultSettings?.workDuration ?? 25
+    readonly property int editShortBreakDuration: pluginApi?.pluginSettings?.shortBreakDuration ?? pluginApi?.manifest?.metadata?.defaultSettings?.shortBreakDuration ?? 5
+    readonly property int editLongBreakDuration: pluginApi?.pluginSettings?.longBreakDuration ?? pluginApi?.manifest?.metadata?.defaultSettings?.longBreakDuration ?? 15
+    readonly property int editSessionsBeforeLongBreak: pluginApi?.pluginSettings?.sessionsBeforeLongBreak ?? pluginApi?.manifest?.metadata?.defaultSettings?.sessionsBeforeLongBreak ?? 4
+    readonly property bool editAutoStartBreaks: pluginApi?.pluginSettings?.autoStartBreaks ?? pluginApi?.manifest?.metadata?.defaultSettings?.autoStartBreaks ?? false
+    readonly property bool editAutoStartWork: pluginApi?.pluginSettings?.autoStartWork ?? pluginApi?.manifest?.metadata?.defaultSettings?.autoStartWork ?? false
+    readonly property bool editCompactMode: pluginApi?.pluginSettings?.compactMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ?? false
+    readonly property bool editPlaySound: pluginApi?.pluginSettings?.playSound ?? pluginApi?.manifest?.metadata?.defaultSettings?.playSound ?? true
+    ranges: [NSettingsRange { field: "editWorkDuration"; from: workDurationSpinBox.from; to: workDurationSpinBox.to }, NSettingsRange { field: "editShortBreakDuration"; from: shortBreakSpinBox.from; to: shortBreakSpinBox.to }, NSettingsRange { field: "editLongBreakDuration"; from: longBreakSpinBox.from; to: longBreakSpinBox.to }, NSettingsRange { field: "editSessionsBeforeLongBreak"; from: sessionsSpinBox.from; to: sessionsSpinBox.to }]
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editWorkDuration: root.editWorkDuration, editShortBreakDuration: root.editShortBreakDuration, editLongBreakDuration: root.editLongBreakDuration, editSessionsBeforeLongBreak: root.editSessionsBeforeLongBreak, editAutoStartBreaks: root.editAutoStartBreaks, editAutoStartWork: root.editAutoStartWork, editCompactMode: root.editCompactMode, editPlaySound: root.editPlaySound})
+  property bool _applyEffectPending: false
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root._applyEffectPending = false;
+      if (root.pluginApi.mainInstance) root.pluginApi.mainInstance.settingsVersion++;
+    }
+  }
+
   spacing: Style.marginM
 
   onPluginApiChanged: {
@@ -35,20 +58,17 @@ ColumnLayout {
   }
 
   function loadSettings() {
-    const settings = pluginApi?.pluginSettings
-    const defaults = pluginApi?.manifest?.metadata?.defaultSettings
-
-    root.editWorkDuration = settings?.workDuration ?? defaults?.workDuration ?? 25
-    root.editShortBreakDuration = settings?.shortBreakDuration ?? defaults?.shortBreakDuration ?? 5
-    root.editLongBreakDuration = settings?.longBreakDuration ?? defaults?.longBreakDuration ?? 15
-    root.editSessionsBeforeLongBreak = settings?.sessionsBeforeLongBreak ?? defaults?.sessionsBeforeLongBreak ?? 4
-    root.editAutoStartBreaks = settings?.autoStartBreaks ?? defaults?.autoStartBreaks ?? false
-    root.editAutoStartWork = settings?.autoStartWork ?? defaults?.autoStartWork ?? false
-    root.editCompactMode = settings?.compactMode ?? defaults?.compactMode ?? false
+    root.editWorkDuration = displayBaseline.project("editWorkDuration")
+    root.editShortBreakDuration = displayBaseline.project("editShortBreakDuration")
+    root.editLongBreakDuration = displayBaseline.project("editLongBreakDuration")
+    root.editSessionsBeforeLongBreak = displayBaseline.project("editSessionsBeforeLongBreak")
+    root.editAutoStartBreaks = displayBaseline.editAutoStartBreaks
+    root.editAutoStartWork = displayBaseline.editAutoStartWork
+    root.editCompactMode = displayBaseline.editCompactMode
 
     
     // --- : Load Sound Setting ---
-    root.editPlaySound = settings?.playSound ?? defaults?.playSound ?? true
+    root.editPlaySound = displayBaseline.editPlaySound
 
     autoStartBreaksToggle.checked = root.editAutoStartBreaks
     autoStartWorkToggle.checked = root.editAutoStartWork
@@ -69,6 +89,7 @@ ColumnLayout {
 
     NSpinBox {
       id: workDurationSpinBox
+      objectName: "settings-range-editWorkDuration"
       from: 5
       to: 180
       stepSize: 5
@@ -88,6 +109,7 @@ ColumnLayout {
 
     NSpinBox {
       id: shortBreakSpinBox
+      objectName: "settings-range-editShortBreakDuration"
       from: 1
       to: 60
       stepSize: 1
@@ -107,6 +129,7 @@ ColumnLayout {
 
     NSpinBox {
       id: longBreakSpinBox
+      objectName: "settings-range-editLongBreakDuration"
       from: 5
       to: 120
       stepSize: 5
@@ -126,6 +149,7 @@ ColumnLayout {
 
     NSpinBox {
       id: sessionsSpinBox
+      objectName: "settings-range-editSessionsBeforeLongBreak"
       from: 1
       to: 10
       stepSize: 1
@@ -246,11 +270,8 @@ ColumnLayout {
     // --- : Save Sound Setting ---
     pluginApi.pluginSettings.playSound = root.editPlaySound
 
-    pluginApi.saveSettings()
-
-    if (pluginApi.mainInstance) {
-      pluginApi.mainInstance.settingsVersion++
-    }
+    if (pluginApi.saveSettings() !== false)
+      root._applyEffectPending = true;
 
 
   }

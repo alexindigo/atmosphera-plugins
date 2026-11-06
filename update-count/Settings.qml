@@ -9,13 +9,35 @@ ColumnLayout {
 
   property var pluginApi: null
 
-  property int updateIntervalMinutes: pluginApi?.pluginSettings?.updateIntervalMinutes || pluginApi?.manifest?.metadata?.defaultSettings?.updateIntervalMinutes
-  property string updateTerminalCommand: pluginApi?.pluginSettings?.updateTerminalCommand || pluginApi?.manifest?.metadata.defaultSettings?.updateTerminalCommand
-  property string currentIconName: pluginApi?.pluginSettings?.currentIconName || pluginApi?.manifest?.metadata?.defaultSettings?.currentIconName
-  property bool hideOnZero: pluginApi?.pluginSettings?.hideOnZero || pluginApi?.manifest?.metadata?.defaultSettings?.hideOnZero
+  property int updateIntervalMinutes: displayBaseline.project("updateIntervalMinutes")
+  property string updateTerminalCommand: displayBaseline.updateTerminalCommand
+  property string currentIconName: displayBaseline.currentIconName
+  property bool hideOnZero: displayBaseline.hideOnZero
 
-  property string customCmdGetNumUpdates: pluginApi?.pluginSettings.customCmdGetNumUpdates || ""
-  property string customCmdDoSystemUpdate: pluginApi?.pluginSettings.customCmdDoSystemUpdate || ""
+  property string customCmdGetNumUpdates: displayBaseline.customCmdGetNumUpdates
+  property string customCmdDoSystemUpdate: displayBaseline.customCmdDoSystemUpdate
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property int updateIntervalMinutes: pluginApi?.pluginSettings?.updateIntervalMinutes || pluginApi?.manifest?.metadata?.defaultSettings?.updateIntervalMinutes
+    readonly property string updateTerminalCommand: pluginApi?.pluginSettings?.updateTerminalCommand || pluginApi?.manifest?.metadata?.defaultSettings?.updateTerminalCommand
+    readonly property string currentIconName: pluginApi?.pluginSettings?.currentIconName || pluginApi?.manifest?.metadata?.defaultSettings?.currentIconName
+    readonly property bool hideOnZero: pluginApi?.pluginSettings?.hideOnZero || pluginApi?.manifest?.metadata?.defaultSettings?.hideOnZero
+    readonly property string customCmdGetNumUpdates: pluginApi?.pluginSettings?.customCmdGetNumUpdates || ""
+    readonly property string customCmdDoSystemUpdate: pluginApi?.pluginSettings?.customCmdDoSystemUpdate || ""
+    ranges: [NSettingsRange { field: "updateIntervalMinutes"; from: rangeUpdateIntervalMinutes.from; to: rangeUpdateIntervalMinutes.to }]
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({updateIntervalMinutes: root.updateIntervalMinutes, updateTerminalCommand: root.updateTerminalCommand, currentIconName: root.currentIconName, hideOnZero: root.hideOnZero, customCmdGetNumUpdates: root.customCmdGetNumUpdates, customCmdDoSystemUpdate: root.customCmdDoSystemUpdate})
+  property bool _applyEffectPending: false
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root._applyEffectPending = false;
+      root.pluginApi.mainInstance?.startGetNumUpdates();
+      Logger.i("UpdateCount", "Settings saved successfully");
+      root.pluginApi.withCurrentScreen(s => root.pluginApi.closePanel(s));
+    }
+  }
 
   spacing: Style.marginL
 
@@ -89,12 +111,14 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeUpdateIntervalMinutes
+      objectName: "settings-range-updateIntervalMinutes"
       Layout.fillWidth: true
       from: 5
       to: 300
       value: root.updateIntervalMinutes
       stepSize: 5
-      onValueChanged: {
+      onMoved: {
         root.updateIntervalMinutes = value;
       }
     }
@@ -155,7 +179,7 @@ ColumnLayout {
       color: Settings.data.colorSchemes.darkMode ? AtmoColor.mSecondary : AtmoColor.mOnSecondary
     }
     NLabel {
-      description: `> ${root.customCmdGetNumUpdates || pluginApi?.mainInstance?.updater.cmdGetNumUpdates || "NA"}`
+      description: `> ${root.customCmdGetNumUpdates || pluginApi?.mainInstance?.updater?.cmdGetNumUpdates || "NA"}`
     }
   }
 
@@ -166,7 +190,7 @@ ColumnLayout {
     }
 
     NLabel {
-      description: `> ${root.customCmdDoSystemUpdate || pluginApi?.mainInstance?.updater.cmdDoSystemUpdate || "NA"}`
+      description: `> ${root.customCmdDoSystemUpdate || pluginApi?.mainInstance?.updater?.cmdDoSystemUpdate || "NA"}`
     }
   }
 
@@ -177,17 +201,15 @@ ColumnLayout {
     }
 
     pluginApi.pluginSettings.updateIntervalMinutes = root.updateIntervalMinutes;
-    pluginApi.pluginSettings.updateTerminalCommand = root.updateTerminalCommand || pluginApi?.manifest?.metadata.defaultSettings?.updateTerminalCommand;
+    root.updateTerminalCommand = root.updateTerminalCommand || pluginApi?.manifest?.metadata.defaultSettings?.updateTerminalCommand;
+    pluginApi.pluginSettings.updateTerminalCommand = root.updateTerminalCommand;
     pluginApi.pluginSettings.currentIconName = root.currentIconName;
     pluginApi.pluginSettings.hideOnZero = root.hideOnZero;
 
     pluginApi.pluginSettings.customCmdGetNumUpdates = root.customCmdGetNumUpdates;
     pluginApi.pluginSettings.customCmdDoSystemUpdate = root.customCmdDoSystemUpdate;
 
-    pluginApi.saveSettings();
-    pluginApi?.mainInstance?.startGetNumUpdates();
-
-    Logger.i("UpdateCount", "Settings saved successfully");
-    pluginApi.closePanel(root.screen);
+    if (pluginApi.saveSettings() !== false)
+      root._applyEffectPending = true;
   }
 }
