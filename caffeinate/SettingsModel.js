@@ -1,9 +1,9 @@
 function copyPresets(source) {
-  if (!Array.isArray(source))
+  if (!source || typeof source !== "object" || typeof source.slice !== "function" || !Number.isSafeInteger(source.length) || source.length < 0)
     return [];
-  return source.map(function (preset) {
-    return String(preset);
-  });
+  var presets = [];
+  for (var index = 0; index < source.length; index++) presets.push(String(source[index]));
+  return presets;
 }
 
 function validate(alias, presets, canonicalPrefix, validateAlias,

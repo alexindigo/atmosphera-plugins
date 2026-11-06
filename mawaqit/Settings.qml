@@ -5,6 +5,45 @@ import qs.Widgets
 
 ColumnLayout {
   id: root
+
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string valueCity: cfg.city ?? defaults.city ?? "London"
+    readonly property string valueCountry: cfg.country ?? defaults.country ?? "UK"
+    readonly property int valueMethod: cfg.method ?? defaults.method ?? 3
+    readonly property var valueFajrAngle: cfg.fajrAngle ?? defaults.fajrAngle ?? null
+    readonly property var valueIshaAngle: cfg.ishaAngle ?? defaults.ishaAngle ?? null
+    readonly property bool valueTune: cfg.tune ?? defaults.tune ?? false
+    readonly property int valueTuneFajr: cfg.tuneFajr ?? defaults.tuneFajr ?? 0
+    readonly property int valueTuneDhuhr: cfg.tuneDhuhr ?? defaults.tuneDhuhr ?? 0
+    readonly property int valueTuneAsr: cfg.tuneAsr ?? defaults.tuneAsr ?? 0
+    readonly property int valueTuneMaghrib: cfg.tuneMaghrib ?? defaults.tuneMaghrib ?? 0
+    readonly property int valueTuneIsha: cfg.tuneIsha ?? defaults.tuneIsha ?? 0
+    readonly property int valueSchool: cfg.school ?? defaults.school ?? 0
+    readonly property bool valueShowCountdown: cfg.showCountdown ?? defaults.showCountdown ?? true
+    readonly property bool valueShowElapsed: cfg.showElapsed ?? defaults.showElapsed ?? false
+    readonly property bool valueHidePrayerName: cfg.hidePrayerName ?? defaults.hidePrayerName ?? false
+    readonly property bool valueShowNotifications: cfg.showNotifications ?? defaults.showNotifications ?? true
+    readonly property bool valuePlayAzan: cfg.playAzan ?? defaults.playAzan ?? false
+    readonly property string valueAzanFile: cfg.azanFile ?? defaults.azanFile ?? "azan1.mp3"
+    readonly property int valueHijriDayOffset: cfg.hijriDayOffset ?? defaults.hijriDayOffset ?? 0
+    readonly property int valueWeekStartDay: cfg.weekStartDay ?? defaults.weekStartDay ?? 1
+    readonly property string valueWidgetIcon: cfg.widgetIcon ?? defaults.widgetIcon ?? "building-mosque"
+    readonly property bool valueDynamicIcon: cfg.dynamicIcon ?? defaults.dynamicIcon ?? false
+    readonly property string valueTextColor: cfg.textColor ?? defaults.textColor ?? "none"
+    readonly property string valueIconColor: cfg.iconColor ?? defaults.iconColor ?? "none"
+    readonly property string valueActiveColor: cfg.activeColor ?? defaults.activeColor ?? "primary"
+  }
+  readonly property bool settingsDirty: { return displayBaseline.differs({valueCity: root.valueCity, valueCountry: root.valueCountry, valueMethod: root.valueMethod, valueFajrAngle: root.valueFajrAngle, valueIshaAngle: root.valueIshaAngle, valueTune: root.valueTune, valueTuneFajr: root.valueTuneFajr, valueTuneDhuhr: root.valueTuneDhuhr, valueTuneAsr: root.valueTuneAsr, valueTuneMaghrib: root.valueTuneMaghrib, valueTuneIsha: root.valueTuneIsha, valueSchool: root.valueSchool, valueShowCountdown: root.valueShowCountdown, valueShowElapsed: root.valueShowElapsed, valueHidePrayerName: root.valueHidePrayerName, valueShowNotifications: root.valueShowNotifications, valuePlayAzan: root.valuePlayAzan, valueAzanFile: root.valueAzanFile, valueHijriDayOffset: root.valueHijriDayOffset, valueWeekStartDay: root.valueWeekStartDay, valueWidgetIcon: root.valueWidgetIcon, valueDynamicIcon: root.valueDynamicIcon, valueTextColor: root.valueTextColor, valueIconColor: root.valueIconColor, valueActiveColor: root.valueActiveColor}); }
+  property bool _savePending: false
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root._savePending = false;
+      Logger.d("Mawaqit", "Settings saved")
+    }
+  }
   property var pluginApi: null
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
@@ -29,31 +68,31 @@ ColumnLayout {
     { "key": "99", "name": "Custom Method" }
   ]
 
-  property string valueCity:              cfg.city              ?? defaults.city              ?? "London"
-  property string valueCountry:           cfg.country           ?? defaults.country           ?? "UK"
-  property int    valueMethod:            cfg.method            ?? defaults.method            ?? 3
-  property var    valueFajrAngle:         cfg.fajrAngle         ?? defaults.fajrAngle         ?? null
-  property var    valueIshaAngle:         cfg.ishaAngle         ?? defaults.ishaAngle         ?? null
-  property bool   valueTune:              cfg.tune              ?? defaults.tune              ?? false
-  property int    valueTuneFajr:          cfg.tuneFajr          ?? defaults.tuneFajr          ?? 0
-  property int    valueTuneDhuhr:         cfg.tuneDhuhr         ?? defaults.tuneDhuhr         ?? 0
-  property int    valueTuneAsr:           cfg.tuneAsr           ?? defaults.tuneAsr           ?? 0
-  property int    valueTuneMaghrib:       cfg.tuneMaghrib       ?? defaults.tuneMaghrib       ?? 0
-  property int    valueTuneIsha:          cfg.tuneIsha          ?? defaults.tuneIsha          ?? 0
-  property int    valueSchool:            cfg.school            ?? defaults.school            ?? 0
-  property bool   valueShowCountdown:     cfg.showCountdown     ?? defaults.showCountdown     ?? true
-  property bool   valueShowElapsed:       cfg.showElapsed       ?? defaults.showElapsed       ?? false
-  property bool   valueHidePrayerName:    cfg.hidePrayerName    ?? defaults.hidePrayerName    ?? false
-  property bool   valueShowNotifications: cfg.showNotifications ?? defaults.showNotifications ?? true
-  property bool   valuePlayAzan:          cfg.playAzan          ?? defaults.playAzan          ?? false
-  property string valueAzanFile:          cfg.azanFile          ?? defaults.azanFile          ?? "azan1.mp3"
-  property int    valueHijriDayOffset:    cfg.hijriDayOffset    ?? defaults.hijriDayOffset    ?? 0
-  property int    valueWeekStartDay:      cfg.weekStartDay      ?? defaults.weekStartDay      ?? 1
-  property string valueWidgetIcon:        cfg.widgetIcon        ?? defaults.widgetIcon        ?? "building-mosque"
-  property bool   valueDynamicIcon:       cfg.dynamicIcon       ?? defaults.dynamicIcon       ?? false
-  property string valueTextColor:         cfg.textColor         ?? defaults.textColor         ?? "none"
-  property string valueIconColor:         cfg.iconColor         ?? defaults.iconColor         ?? "none"
-  property string valueActiveColor:       cfg.activeColor       ?? defaults.activeColor       ?? "primary"
+  property string valueCity: displayBaseline.valueCity
+  property string valueCountry: displayBaseline.valueCountry
+  property int valueMethod: displayBaseline.valueMethod
+  property var valueFajrAngle: displayBaseline.valueFajrAngle
+  property var valueIshaAngle: displayBaseline.valueIshaAngle
+  property bool valueTune: displayBaseline.valueTune
+  property int valueTuneFajr: displayBaseline.valueTuneFajr
+  property int valueTuneDhuhr: displayBaseline.valueTuneDhuhr
+  property int valueTuneAsr: displayBaseline.valueTuneAsr
+  property int valueTuneMaghrib: displayBaseline.valueTuneMaghrib
+  property int valueTuneIsha: displayBaseline.valueTuneIsha
+  property int valueSchool: displayBaseline.valueSchool
+  property bool valueShowCountdown: displayBaseline.valueShowCountdown
+  property bool valueShowElapsed: displayBaseline.valueShowElapsed
+  property bool valueHidePrayerName: displayBaseline.valueHidePrayerName
+  property bool valueShowNotifications: displayBaseline.valueShowNotifications
+  property bool valuePlayAzan: displayBaseline.valuePlayAzan
+  property string valueAzanFile: displayBaseline.valueAzanFile
+  property int valueHijriDayOffset: displayBaseline.valueHijriDayOffset
+  property int valueWeekStartDay: displayBaseline.valueWeekStartDay
+  property string valueWidgetIcon: displayBaseline.valueWidgetIcon
+  property bool valueDynamicIcon: displayBaseline.valueDynamicIcon
+  property string valueTextColor: displayBaseline.valueTextColor
+  property string valueIconColor: displayBaseline.valueIconColor
+  property string valueActiveColor: displayBaseline.valueActiveColor
 
   property bool previewing: false
 
@@ -302,7 +341,6 @@ ColumnLayout {
       initialIcon: root.valueWidgetIcon
       onIconSelected: function (iconName) {
         root.valueWidgetIcon = iconName;
-        wigetIconInput.text = iconName;
       }
     }
   }
@@ -436,8 +474,10 @@ ColumnLayout {
       pluginApi?.mainInstance?.stopAzanFile()
       root.previewing = false
     }
-    pluginApi.pluginSettings.city              = root.valueCity.trim()
-    pluginApi.pluginSettings.country           = root.valueCountry.trim()
+    root.valueCity = root.valueCity.trim()
+    root.valueCountry = root.valueCountry.trim()
+    pluginApi.pluginSettings.city              = root.valueCity
+    pluginApi.pluginSettings.country           = root.valueCountry
     pluginApi.pluginSettings.method            = root.valueMethod
     pluginApi.pluginSettings.showCountdown     = root.valueShowCountdown
     pluginApi.pluginSettings.showElapsed       = root.valueShowElapsed
@@ -461,7 +501,6 @@ ColumnLayout {
     pluginApi.pluginSettings.activeColor       = root.valueActiveColor
     pluginApi.pluginSettings.fajrAngle         = root.valueFajrAngle
     pluginApi.pluginSettings.ishaAngle         = root.valueIshaAngle
-    pluginApi.saveSettings()
-    Logger.d("Mawaqit", "Settings saved")
+    if (pluginApi.saveSettings() !== false) root._savePending = true;
   }
 }

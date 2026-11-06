@@ -10,43 +10,71 @@ import "Constants.js" as Constants
 ColumnLayout {
   id: root
 
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string editProvider: pluginApi?.pluginSettings?.ai?.provider || pluginApi?.manifest?.metadata?.defaultSettings?.ai?.provider || Constants.Providers.GOOGLE
+    readonly property var editModels: pluginApi?.pluginSettings?.ai?.models || {}
+    readonly property var editApiKeys: pluginApi?.pluginSettings?.ai?.apiKeys || {}
+    readonly property string editModel: displayBaseline.editModels[root.editProvider] || ""
+    readonly property string editApiKey: displayBaseline.editApiKeys[root.editProvider] !== undefined ? displayBaseline.editApiKeys[root.editProvider] : pluginApi?.manifest?.metadata?.defaultSettings?.ai?.apiKey || ""
+    readonly property real editTemperature: pluginApi?.pluginSettings?.ai?.temperature || pluginApi?.manifest?.metadata?.defaultSettings?.ai?.temperature || 0.7
+    readonly property string editSystemPrompt: pluginApi?.pluginSettings?.ai?.systemPrompt || pluginApi?.manifest?.metadata?.defaultSettings?.ai?.systemPrompt || ""
+    readonly property string editTranslatorBackend: pluginApi?.pluginSettings?.translator?.backend || pluginApi?.manifest?.metadata?.defaultSettings?.translator?.backend || "google"
+    readonly property bool editRealTimeTranslation: pluginApi?.pluginSettings?.translator?.realTimeTranslation ?? pluginApi?.manifest?.metadata?.defaultSettings?.translator?.realTimeTranslation ?? true
+    readonly property string editDeeplApiKey: pluginApi?.pluginSettings?.translator?.deeplApiKey || pluginApi?.manifest?.metadata?.defaultSettings?.translator?.deeplApiKey || ""
+    readonly property int editMaxHistoryLength: pluginApi?.pluginSettings?.maxHistoryLength || pluginApi?.manifest?.metadata?.defaultSettings?.maxHistoryLength || 100
+    readonly property bool editPanelDetached: pluginApi?.pluginSettings?.panelDetached ?? pluginApi?.manifest?.metadata?.panel?.detached ?? true
+    readonly property string editPanelPosition: pluginApi?.pluginSettings?.panelPosition || pluginApi?.manifest?.metadata?.panel?.defaultPosition || "right"
+    readonly property real editPanelHeightRatio: pluginApi?.pluginSettings?.panelHeightRatio || pluginApi?.manifest?.metadata?.panel?.defaultHeightRatio || 0.85
+    readonly property int editPanelWidth: pluginApi?.pluginSettings?.panelWidth ?? 520
+    readonly property string editAttachmentStyle: pluginApi?.pluginSettings?.attachmentStyle || "connected"
+    readonly property real editScale: pluginApi?.pluginSettings?.scale || pluginApi?.manifest?.metadata?.defaultSettings?.scale || 1
+    readonly property bool editOpenAiLocal: pluginApi?.pluginSettings?.ai?.openaiLocal ?? false
+    readonly property string editOpenAiBaseUrl: pluginApi?.pluginSettings?.ai?.openaiBaseUrl || "https://api.openai.com/v1/chat/completions"
+    ranges: [NSettingsRange { field: "editPanelHeightRatio"; from: rangeEditPanelHeightRatio.from; to: rangeEditPanelHeightRatio.to }, NSettingsRange { field: "editPanelWidth"; from: rangeEditPanelWidth.from; to: rangeEditPanelWidth.to }, NSettingsRange { field: "editScale"; from: rangeEditScale.from; to: rangeEditScale.to }, NSettingsRange { field: "editTemperature"; from: rangeEditTemperature.from; to: rangeEditTemperature.to }, NSettingsRange { field: "editMaxHistoryLength"; from: rangeEditMaxHistoryLength.from; to: rangeEditMaxHistoryLength.to }]
+  }
+  readonly property bool settingsDirty: { return displayBaseline.differs({editProvider: root.editProvider, editModels: root.editModels, editApiKeys: root.editApiKeys, editModel: root.editModel, editApiKey: root.editApiKey, editTemperature: root.editTemperature, editSystemPrompt: root.editSystemPrompt, editTranslatorBackend: root.editTranslatorBackend, editRealTimeTranslation: root.editRealTimeTranslation, editDeeplApiKey: root.editDeeplApiKey, editMaxHistoryLength: root.editMaxHistoryLength, editPanelDetached: root.editPanelDetached, editPanelPosition: root.editPanelPosition, editPanelHeightRatio: root.editPanelHeightRatio, editPanelWidth: root.editPanelWidth, editAttachmentStyle: root.editAttachmentStyle, editScale: root.editScale, editOpenAiLocal: root.editOpenAiLocal, editOpenAiBaseUrl: root.editOpenAiBaseUrl}); }
+  property bool _savePending: false
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root._savePending = false;
+      Logger.i("AssistantPanel", "Settings saved successfully");
+    }
+  }
+
   property var pluginApi: null
 
   // AI Settings - Local state
-  property string editProvider: pluginApi?.pluginSettings?.ai?.provider || pluginApi?.manifest?.metadata?.defaultSettings?.ai?.provider || Constants.Providers.GOOGLE
-  property var editModels: pluginApi?.pluginSettings?.ai?.models || {}
-  property var editApiKeys: pluginApi?.pluginSettings?.ai?.apiKeys || {}
+  property string editProvider: displayBaseline.editProvider
+  property var editModels: displayBaseline.editModels
+  property var editApiKeys: displayBaseline.editApiKeys
   // Use per-provider model if configured (and non-empty), else return empty to show placeholder
-  property string editModel: {
-    var saved = editModels[editProvider];
-    if (saved !== undefined && saved !== "")
-      return saved;
-    return "";  // Empty = use default (shown in placeholder)
-  }
-
-  property string editApiKey: editApiKeys[editProvider] !== undefined ? editApiKeys[editProvider] : pluginApi?.manifest?.metadata?.defaultSettings?.ai?.apiKey || ""
-  property real editTemperature: pluginApi?.pluginSettings?.ai?.temperature || pluginApi?.manifest?.metadata?.defaultSettings?.ai?.temperature || 0.7
-  property string editSystemPrompt: pluginApi?.pluginSettings?.ai?.systemPrompt || pluginApi?.manifest?.metadata?.defaultSettings?.ai?.systemPrompt || ""
+  property string editModel: displayBaseline.editModel
+  property string editApiKey: displayBaseline.editApiKey
+  property real editTemperature: displayBaseline.project("editTemperature")
+  property string editSystemPrompt: displayBaseline.editSystemPrompt
 
   // Translator Settings - Local state
-  property string editTranslatorBackend: pluginApi?.pluginSettings?.translator?.backend || pluginApi?.manifest?.metadata?.defaultSettings?.translator?.backend || "google"
-  property bool editRealTimeTranslation: pluginApi?.pluginSettings?.translator?.realTimeTranslation ?? pluginApi?.manifest?.metadata?.defaultSettings?.translator?.realTimeTranslation ?? true
-  property string editDeeplApiKey: pluginApi?.pluginSettings?.translator?.deeplApiKey || pluginApi?.manifest?.metadata?.defaultSettings?.translator?.deeplApiKey || ""
+  property string editTranslatorBackend: displayBaseline.editTranslatorBackend
+  property bool editRealTimeTranslation: displayBaseline.editRealTimeTranslation
+  property string editDeeplApiKey: displayBaseline.editDeeplApiKey
 
   // General Settings
-  property int editMaxHistoryLength: pluginApi?.pluginSettings?.maxHistoryLength || pluginApi?.manifest?.metadata?.defaultSettings?.maxHistoryLength || 100
+  property int editMaxHistoryLength: displayBaseline.project("editMaxHistoryLength")
 
   // Panel Settings (detached, position, height, offset, width)
-  property bool editPanelDetached: pluginApi?.pluginSettings?.panelDetached ?? pluginApi?.manifest?.metadata?.panel?.detached ?? true
-  property string editPanelPosition: pluginApi?.pluginSettings?.panelPosition || pluginApi?.manifest?.metadata?.panel?.defaultPosition || "right"
-  property real editPanelHeightRatio: pluginApi?.pluginSettings?.panelHeightRatio || pluginApi?.manifest?.metadata?.panel?.defaultHeightRatio || 0.85
-  property int editPanelWidth: pluginApi?.pluginSettings?.panelWidth ?? 520
-  property string editAttachmentStyle: pluginApi?.pluginSettings?.attachmentStyle || "connected"
-  property real editScale: pluginApi?.pluginSettings?.scale || pluginApi?.manifest?.metadata?.defaultSettings?.scale || 1
+  property bool editPanelDetached: displayBaseline.editPanelDetached
+  property string editPanelPosition: displayBaseline.editPanelPosition
+  property real editPanelHeightRatio: displayBaseline.project("editPanelHeightRatio")
+  property int editPanelWidth: displayBaseline.project("editPanelWidth")
+  property string editAttachmentStyle: displayBaseline.editAttachmentStyle
+  property real editScale: displayBaseline.project("editScale")
 
   // OpenAI Compatible specific settings
-  property bool editOpenAiLocal: pluginApi?.pluginSettings?.ai?.openaiLocal ?? false
-  property string editOpenAiBaseUrl: pluginApi?.pluginSettings?.ai?.openaiBaseUrl || "https://api.openai.com/v1/chat/completions"
+  property bool editOpenAiLocal: displayBaseline.editOpenAiLocal
+  property string editOpenAiBaseUrl: displayBaseline.editOpenAiBaseUrl
 
   // Environment variable API keys - check if managed by env
   readonly property var envApiKeys: ({
@@ -161,36 +189,42 @@ ColumnLayout {
       description: pluginApi?.tr("settings.panelHeightRatioDesc")
     }
     NSlider {
+      id: rangeEditPanelHeightRatio
+      objectName: "settings-range-editPanelHeightRatio"
       Layout.fillWidth: true
       from: 0.3
       to: 1.0
       stepSize: 0.01
       value: root.editPanelHeightRatio
-      onValueChanged: root.editPanelHeightRatio = value
+      onMoved: root.editPanelHeightRatio = value
     }
     NLabel {
       label: pluginApi?.tr("settings.panelWidth") + ": " + root.editPanelWidth + "px"
       description: pluginApi?.tr("settings.panelWidthDesc")
     }
     NSlider {
+      id: rangeEditPanelWidth
+      objectName: "settings-range-editPanelWidth"
       Layout.fillWidth: true
       from: 320
       to: 1200
       stepSize: 1
       value: root.editPanelWidth
-      onValueChanged: root.editPanelWidth = value
+      onMoved: root.editPanelWidth = value
     }
     NLabel {
       label: pluginApi?.tr("settings.uiScale") + ": " + (root.editScale * 100).toFixed(0) + "%"
       description: pluginApi?.tr("settings.uiScaleDesc")
     }
     NSlider {
+      id: rangeEditScale
+      objectName: "settings-range-editScale"
       Layout.fillWidth: true
       from: 0.5
       to: 2.0
       stepSize: 0.01
       value: root.editScale
-      onValueChanged: root.editScale = value
+      onMoved: root.editScale = value
     }
   }
 
@@ -251,7 +285,7 @@ ColumnLayout {
     ]
     currentKey: root.editProvider
     onSelected: function (key) {
-      root.editProvider = key;
+      root.selectProvider(key);
     }
     defaultValue: Constants.Providers.GOOGLE
   }
@@ -297,30 +331,18 @@ ColumnLayout {
 
   // Model selection
   NTextInput {
+    objectName: "assistant-model"
     Layout.fillWidth: true
     label: pluginApi?.tr("settings.model")
     description: pluginApi?.tr("settings.modelDesc")
     text: root.editModel
-    onTextChanged: {
-      var modelText = (text || "").trim();
-      var defaultModel = providers[root.editProvider]?.defaultModel || "";
-      // Only save custom values, not empty or default
-      if (modelText !== "" && modelText !== defaultModel) {
-        root.editModels = Object.assign({}, root.editModels, {
-          [root.editProvider]: modelText
-        });
-      } else {
-        // Clear the entry so it falls back to default
-        var updated = Object.assign({}, root.editModels);
-        delete updated[root.editProvider];
-        root.editModels = updated;
-      }
-    }
+    onTextEdited: root.editModel = text
     placeholderText: providers[root.editProvider]?.defaultModel || ""
   }
 
   // API Key input (hidden for Ollama/Local)
   NTextInput {
+    objectName: "assistant-api-key"
     Layout.fillWidth: true
     visible: {
       if (root.editProvider === Constants.Providers.OPENAI_COMPATIBLE && root.editOpenAiLocal)
@@ -342,12 +364,8 @@ ColumnLayout {
     text: root.apiKeyManagedByEnv ? "" : root.editApiKey
     enabled: !root.apiKeyManagedByEnv
     inputMethodHints: Qt.ImhHiddenText
-    onTextChanged: {
-      if (!root.apiKeyManagedByEnv) {
-        root.editApiKeys = Object.assign({}, root.editApiKeys, {
-          [root.editProvider]: text
-        });
-      }
+    onTextEdited: {
+      if (!root.apiKeyManagedByEnv) root.editApiKey = text;
     }
   }
 
@@ -362,12 +380,14 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeEditTemperature
+      objectName: "settings-range-editTemperature"
       Layout.fillWidth: true
       from: 0
       to: 2
       stepSize: 0.1
       value: root.editTemperature
-      onValueChanged: root.editTemperature = value
+      onMoved: root.editTemperature = value
     }
   }
 
@@ -415,12 +435,14 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeEditMaxHistoryLength
+      objectName: "settings-range-editMaxHistoryLength"
       Layout.fillWidth: true
       from: 10
       to: 500
       stepSize: 10
       value: root.editMaxHistoryLength
-      onValueChanged: root.editMaxHistoryLength = value
+      onMoved: root.editMaxHistoryLength = value
     }
   }
 
@@ -491,66 +513,38 @@ ColumnLayout {
     defaultValue: true
   }
 
+  function syncProviderFields() {
+    var modelText = (root.editModel || "").trim();
+    var defaultModel = providers[root.editProvider]?.defaultModel || "";
+    var models = Object.assign(Object.create(null), root.editModels);
+    if (modelText !== "" && modelText !== defaultModel) models[root.editProvider] = modelText;
+    else delete models[root.editProvider];
+    root.editModels = models;
+    root.editModel = models[root.editProvider] || "";
+    if (!root.apiKeyManagedByEnv) root.editApiKeys = Object.assign(Object.create(null), root.editApiKeys, {[root.editProvider]: root.editApiKey});
+  }
+
+  function selectProvider(provider) {
+    root.syncProviderFields();
+    root.editProvider = provider;
+    root.editModel = root.editModels[provider] || "";
+    root.editApiKey = root.editApiKeys[provider] !== undefined ? root.editApiKeys[provider] : pluginApi?.manifest?.metadata?.defaultSettings?.ai?.apiKey || "";
+  }
+
   // Save function called by the settings dialog
   function saveSettings() {
-    // Sync model for current provider before saving
-    var modelInput = root.children.find(child => child && child.label === (pluginApi?.tr("settings.model")));
-    if (modelInput && modelInput.text !== undefined) {
-      var modelText = (modelInput.text || "").trim();
-      var defaultModel = providers[root.editProvider]?.defaultModel || "";
-      // Only save if non-empty and different from provider's default
-      if (modelText !== "" && modelText !== defaultModel) {
-        root.editModels = Object.assign({}, root.editModels, {
-          [root.editProvider]: modelText
-        });
-      } else {
-        // Clear the entry to use default
-        var updated = Object.assign({}, root.editModels);
-        delete updated[root.editProvider];
-        root.editModels = updated;
-      }
-    }
-    // Sync API key for current provider
-    var apiKeyInput = root.children.find(child => child && child.label === (pluginApi?.tr("settings.apiKey")));
-    if (apiKeyInput && apiKeyInput.text !== undefined && !root.apiKeyManagedByEnv) {
-      root.editApiKeys = Object.assign({}, root.editApiKeys, {
-        [root.editProvider]: apiKeyInput.text
-      });
-    }
-    if (!pluginApi) {
-      Logger.e("AssistantPanel", "Cannot save settings: pluginApi is null");
-      return;
-    }
-
-    // Initialize nested objects if needed
-    if (!pluginApi.pluginSettings.ai) {
-      pluginApi.pluginSettings.ai = {};
-    }
-    if (!pluginApi.pluginSettings.translator) {
-      pluginApi.pluginSettings.translator = {};
-    }
-
-    // Save AI settings
-    pluginApi.pluginSettings.ai.provider = root.editProvider;
-    pluginApi.pluginSettings.ai.models = root.editModels;
-    pluginApi.pluginSettings.ai.apiKeys = root.editApiKeys;
-    pluginApi.pluginSettings.ai.temperature = root.editTemperature;
-    pluginApi.pluginSettings.ai.systemPrompt = root.editSystemPrompt;
-
-    // Save OpenAI Compatible specific settings
-    pluginApi.pluginSettings.ai.openaiLocal = root.editOpenAiLocal;
-    pluginApi.pluginSettings.ai.openaiBaseUrl = root.editOpenAiBaseUrl;
-    // Also store legacy single-model value for compatibility
-    try {
-      pluginApi.pluginSettings.ai.model = root.editModels[root.editProvider] || pluginApi.pluginSettings.ai.model || "";
-    } catch (e) {
-      pluginApi.pluginSettings.ai.model = pluginApi.pluginSettings.ai.model || "";
-    }
-
-    // Save translator settings
-    pluginApi.pluginSettings.translator.backend = root.editTranslatorBackend;
-    pluginApi.pluginSettings.translator.deeplApiKey = root.editDeeplApiKey;
-    pluginApi.pluginSettings.translator.realTimeTranslation = root.editRealTimeTranslation;
+    if (!pluginApi) return;
+    root.syncProviderFields();
+    var ai = Object.assign(Object.create(null), pluginApi.pluginSettings.ai || {}, {
+      provider: root.editProvider, models: root.editModels, apiKeys: root.editApiKeys,
+      temperature: root.editTemperature, systemPrompt: root.editSystemPrompt,
+      openaiLocal: root.editOpenAiLocal, openaiBaseUrl: root.editOpenAiBaseUrl
+    });
+    ai.model = root.editModels[root.editProvider] || ai.model || "";
+    pluginApi.pluginSettings.ai = ai;
+    pluginApi.pluginSettings.translator = Object.assign(Object.create(null), pluginApi.pluginSettings.translator || {}, {
+      backend: root.editTranslatorBackend, deeplApiKey: root.editDeeplApiKey, realTimeTranslation: root.editRealTimeTranslation
+    });
 
     // Save general settings
     pluginApi.pluginSettings.maxHistoryLength = root.editMaxHistoryLength;
@@ -563,8 +557,6 @@ ColumnLayout {
     pluginApi.pluginSettings.attachmentStyle = root.editAttachmentStyle;
     pluginApi.pluginSettings.scale = root.editScale;
 
-    pluginApi.saveSettings();
-
-    Logger.i("AssistantPanel", "Settings saved successfully");
+    if (pluginApi.saveSettings() !== false) root._savePending = true;
   }
 }

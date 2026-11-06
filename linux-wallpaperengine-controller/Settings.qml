@@ -12,6 +12,41 @@ import qs.Widgets
 ColumnLayout {
   id: root
 
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string editWallpapersFolder: cfg.wallpapersFolder ?? defaults.wallpapersFolder ?? ""
+    readonly property string editIconColor: cfg.iconColor ?? defaults.iconColor ?? "none"
+    readonly property bool editEnableExtraPropertiesEditor: cfg.enableExtraPropertiesEditor ?? defaults.enableExtraPropertiesEditor ?? true
+    readonly property string editDefaultScaling: cfg.defaultScaling ?? defaults.defaultScaling ?? "fill"
+    readonly property string editDefaultClamp: cfg.defaultClamp ?? defaults.defaultClamp ?? "clamp"
+    readonly property int editDefaultFps: cfg.defaultFps ?? defaults.defaultFps ?? 30
+    readonly property int editDefaultVolume: cfg.defaultVolume ?? defaults.defaultVolume ?? 100
+    readonly property bool editDefaultMuted: cfg.defaultMuted ?? defaults.defaultMuted ?? true
+    readonly property bool editDefaultAudioReactiveEffects: cfg.defaultAudioReactiveEffects ?? defaults.defaultAudioReactiveEffects ?? true
+    readonly property bool editDefaultNoAutomute: cfg.defaultNoAutomute ?? defaults.defaultNoAutomute ?? false
+    readonly property bool editDefaultDisableMouse: cfg.defaultDisableMouse ?? defaults.defaultDisableMouse ?? false
+    readonly property bool editDefaultDisableParallax: cfg.defaultDisableParallax ?? defaults.defaultDisableParallax ?? false
+    readonly property bool editDefaultNoFullscreenPause: cfg.defaultNoFullscreenPause ?? defaults.defaultNoFullscreenPause ?? false
+    readonly property bool editDefaultFullscreenPauseOnlyActive: cfg.defaultFullscreenPauseOnlyActive ?? defaults.defaultFullscreenPauseOnlyActive ?? false
+    readonly property bool editAutoApplyOnStartup: cfg.autoApplyOnStartup ?? defaults.autoApplyOnStartup ?? true
+    readonly property bool editShowSidebarDescription: cfg.showSidebarDescription ?? defaults.showSidebarDescription ?? false
+    readonly property int editWallpaperScanCacheMinutes: cfg.wallpaperScanCacheMinutes ?? defaults.wallpaperScanCacheMinutes ?? 10
+    readonly property var editBadgeOrder: BadgeHelpers.normalizeBadgeOrder(cfg.badgeOrder, defaultBadgeOrder)
+    readonly property var editBadgeEnabled: BadgeHelpers.normalizeBadgeEnabled(cfg.badgeEnabled, defaultBadgeEnabled)
+    ranges: [NSettingsRange { field: "editWallpaperScanCacheMinutes"; from: rangeEditWallpaperScanCacheMinutes.from; to: rangeEditWallpaperScanCacheMinutes.to }, NSettingsRange { field: "editDefaultFps"; from: defaultFpsSpinBox.from; to: defaultFpsSpinBox.to }, NSettingsRange { field: "editDefaultVolume"; from: defaultVolumeSpinBox.from; to: defaultVolumeSpinBox.to }]
+  }
+  readonly property bool settingsDirty: { return displayBaseline.differs({editWallpapersFolder: root.editWallpapersFolder, editIconColor: root.editIconColor, editEnableExtraPropertiesEditor: root.editEnableExtraPropertiesEditor, editDefaultScaling: root.editDefaultScaling, editDefaultClamp: root.editDefaultClamp, editDefaultFps: root.editDefaultFps, editDefaultVolume: root.editDefaultVolume, editDefaultMuted: root.editDefaultMuted, editDefaultAudioReactiveEffects: root.editDefaultAudioReactiveEffects, editDefaultNoAutomute: root.editDefaultNoAutomute, editDefaultDisableMouse: root.editDefaultDisableMouse, editDefaultDisableParallax: root.editDefaultDisableParallax, editDefaultNoFullscreenPause: root.editDefaultNoFullscreenPause, editDefaultFullscreenPauseOnlyActive: root.editDefaultFullscreenPauseOnlyActive, editAutoApplyOnStartup: root.editAutoApplyOnStartup, editShowSidebarDescription: root.editShowSidebarDescription, editWallpaperScanCacheMinutes: root.editWallpaperScanCacheMinutes, editBadgeOrder: root.editBadgeOrder, editBadgeEnabled: root.editBadgeEnabled}); }
+  property bool _savePending: false
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root._savePending = false;
+      var main = root.pluginApi.mainInstance;
+      if (main) { main.refreshWallpaperCache(true, false); if (main.hasAnyConfiguredWallpaper()) main.reload(); }
+    }
+  }
+
   width: parent ? parent.width : 640 * Style.uiScaleRatio
   implicitHeight: 720 * Style.uiScaleRatio
   Layout.fillWidth: true
@@ -21,27 +56,27 @@ ColumnLayout {
   readonly property var cfg: pluginApi?.pluginSettings || ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property string editWallpapersFolder: cfg.wallpapersFolder ?? defaults.wallpapersFolder ?? ""
-  property string editIconColor: cfg.iconColor ?? defaults.iconColor ?? "none"
-  property bool editEnableExtraPropertiesEditor: cfg.enableExtraPropertiesEditor ?? defaults.enableExtraPropertiesEditor ?? true
-  property string editDefaultScaling: cfg.defaultScaling ?? defaults.defaultScaling ?? "fill"
-  property string editDefaultClamp: cfg.defaultClamp ?? defaults.defaultClamp ?? "clamp"
-  property int editDefaultFps: cfg.defaultFps ?? defaults.defaultFps ?? 30
-  property int editDefaultVolume: cfg.defaultVolume ?? defaults.defaultVolume ?? 100
-  property bool editDefaultMuted: cfg.defaultMuted ?? defaults.defaultMuted ?? true
-  property bool editDefaultAudioReactiveEffects: cfg.defaultAudioReactiveEffects ?? defaults.defaultAudioReactiveEffects ?? true
-  property bool editDefaultNoAutomute: cfg.defaultNoAutomute ?? defaults.defaultNoAutomute ?? false
-  property bool editDefaultDisableMouse: cfg.defaultDisableMouse ?? defaults.defaultDisableMouse ?? false
-  property bool editDefaultDisableParallax: cfg.defaultDisableParallax ?? defaults.defaultDisableParallax ?? false
-  property bool editDefaultNoFullscreenPause: cfg.defaultNoFullscreenPause ?? defaults.defaultNoFullscreenPause ?? false
-  property bool editDefaultFullscreenPauseOnlyActive: cfg.defaultFullscreenPauseOnlyActive ?? defaults.defaultFullscreenPauseOnlyActive ?? false
-  property bool editAutoApplyOnStartup: cfg.autoApplyOnStartup ?? defaults.autoApplyOnStartup ?? true
-  property bool editShowSidebarDescription: cfg.showSidebarDescription ?? defaults.showSidebarDescription ?? false
-  property int editWallpaperScanCacheMinutes: cfg.wallpaperScanCacheMinutes ?? defaults.wallpaperScanCacheMinutes ?? 10
+  property string editWallpapersFolder: displayBaseline.editWallpapersFolder
+  property string editIconColor: displayBaseline.editIconColor
+  property bool editEnableExtraPropertiesEditor: displayBaseline.editEnableExtraPropertiesEditor
+  property string editDefaultScaling: displayBaseline.editDefaultScaling
+  property string editDefaultClamp: displayBaseline.editDefaultClamp
+  property int editDefaultFps: displayBaseline.project("editDefaultFps")
+  property int editDefaultVolume: displayBaseline.project("editDefaultVolume")
+  property bool editDefaultMuted: displayBaseline.editDefaultMuted
+  property bool editDefaultAudioReactiveEffects: displayBaseline.editDefaultAudioReactiveEffects
+  property bool editDefaultNoAutomute: displayBaseline.editDefaultNoAutomute
+  property bool editDefaultDisableMouse: displayBaseline.editDefaultDisableMouse
+  property bool editDefaultDisableParallax: displayBaseline.editDefaultDisableParallax
+  property bool editDefaultNoFullscreenPause: displayBaseline.editDefaultNoFullscreenPause
+  property bool editDefaultFullscreenPauseOnlyActive: displayBaseline.editDefaultFullscreenPauseOnlyActive
+  property bool editAutoApplyOnStartup: displayBaseline.editAutoApplyOnStartup
+  property bool editShowSidebarDescription: displayBaseline.editShowSidebarDescription
+  property int editWallpaperScanCacheMinutes: displayBaseline.project("editWallpaperScanCacheMinutes")
   readonly property var defaultBadgeOrder: BadgeHelpers.normalizedDefaultOrder(defaults.badgeOrder)
   readonly property var defaultBadgeEnabled: BadgeHelpers.normalizedDefaultEnabled(defaults.badgeEnabled)
-  property var editBadgeOrder: BadgeHelpers.normalizeBadgeOrder(cfg.badgeOrder, defaultBadgeOrder)
-  property var editBadgeEnabled: BadgeHelpers.normalizeBadgeEnabled(cfg.badgeEnabled, defaultBadgeEnabled)
+  property var editBadgeOrder: displayBaseline.editBadgeOrder
+  property var editBadgeEnabled: displayBaseline.editBadgeEnabled
   property bool scanning: false
   property bool refreshingCacheSize: false
   property bool clearingCache: false
@@ -203,6 +238,7 @@ ColumnLayout {
             implicitHeight: badgeEditorColumn.implicitHeight
 
             property int draggedIndex: -1
+            property string draggedKey: ""
             property int dropTargetIndex: -1
             property bool dragStarted: false
             property bool potentialDrag: false
@@ -253,6 +289,7 @@ ColumnLayout {
 
             function resetDrag() {
               draggedIndex = -1;
+              draggedKey = "";
               dropTargetIndex = -1;
               dragStarted = false;
               potentialDrag = false;
@@ -294,7 +331,7 @@ ColumnLayout {
                 }
 
                 AtmoIcon {
-                  icon: root.badgeIcon(modelData)
+                  icon: root.badgeIcon(badgeEditorContainer.draggedKey)
                   pointSize: Style.fontSizeM
                   color: AtmoColor.mOnPrimary
                 }
@@ -366,6 +403,7 @@ ColumnLayout {
                           const mapped = badgeDragHandleMouseArea.mapToItem(badgeEditorContainer, mouse.x, mouse.y);
                           badgeEditorContainer.startPos = Qt.point(mapped.x, mapped.y);
                           badgeEditorContainer.draggedIndex = index;
+                          badgeEditorContainer.draggedKey = modelData;
                           badgeEditorContainer.dropTargetIndex = index;
                           badgeEditorContainer.dragStarted = false;
                           badgeEditorContainer.potentialDrag = true;
@@ -511,6 +549,8 @@ ColumnLayout {
           }
 
           NSpinBox {
+            id: rangeEditWallpaperScanCacheMinutes
+            objectName: "settings-range-editWallpaperScanCacheMinutes"
             Layout.fillWidth: true
             label: pluginApi?.tr("settings.wallpaperScanCacheMinutes.label")
             description: pluginApi?.tr("settings.wallpaperScanCacheMinutes.description")
@@ -519,7 +559,7 @@ ColumnLayout {
             stepSize: 1
             value: root.editWallpaperScanCacheMinutes
             suffix: pluginApi?.tr("settings.units.minutes")
-            onValueChanged: if (value !== root.editWallpaperScanCacheMinutes) root.editWallpaperScanCacheMinutes = value
+            onValueModified: value => { if (value !== root.editWallpaperScanCacheMinutes) root.editWallpaperScanCacheMinutes = value; }
           }
 
           NText {
@@ -599,6 +639,7 @@ ColumnLayout {
 
           NSpinBox {
             id: defaultFpsSpinBox
+            objectName: "settings-range-editDefaultFps"
             Layout.fillWidth: true
             label: pluginApi?.tr("settings.defaultFps.label")
             description: pluginApi?.tr("settings.defaultFps.description")
@@ -607,7 +648,7 @@ ColumnLayout {
             stepSize: 1
             value: root.editDefaultFps
             suffix: pluginApi?.tr("settings.units.fps")
-            onValueChanged: if (value !== root.editDefaultFps) root.editDefaultFps = value
+            onValueModified: value => { if (value !== root.editDefaultFps) root.editDefaultFps = value; }
           }
 
           NToggle {
@@ -655,6 +696,7 @@ ColumnLayout {
 
           NSpinBox {
             id: defaultVolumeSpinBox
+            objectName: "settings-range-editDefaultVolume"
             Layout.fillWidth: true
             label: pluginApi?.tr("settings.defaultVolume.label")
             description: pluginApi?.tr("settings.defaultVolume.description")
@@ -664,7 +706,7 @@ ColumnLayout {
             suffix: pluginApi?.tr("settings.units.percent")
             value: root.editDefaultVolume
             enabled: !root.editDefaultMuted
-            onValueChanged: if (value !== root.editDefaultVolume) root.editDefaultVolume = value
+            onValueModified: value => { if (value !== root.editDefaultVolume) root.editDefaultVolume = value; }
           }
 
           NToggle {
@@ -768,17 +810,11 @@ ColumnLayout {
     pluginApi.pluginSettings.autoApplyOnStartup = root.editAutoApplyOnStartup;
     pluginApi.pluginSettings.showSidebarDescription = root.editShowSidebarDescription;
     pluginApi.pluginSettings.wallpaperScanCacheMinutes = root.editWallpaperScanCacheMinutes;
-    pluginApi.pluginSettings.badgeOrder = BadgeHelpers.normalizeBadgeOrder(root.editBadgeOrder, root.defaultBadgeOrder);
-    pluginApi.pluginSettings.badgeEnabled = BadgeHelpers.normalizeBadgeEnabled(root.editBadgeEnabled, root.defaultBadgeEnabled);
-
-    pluginApi.saveSettings();
-
-    if (pluginApi.mainInstance) {
-      pluginApi.mainInstance.refreshWallpaperCache(true, false);
-      if (pluginApi.mainInstance.hasAnyConfiguredWallpaper()) {
-        pluginApi.mainInstance.reload();
-      }
-    }
+    root.editBadgeOrder = BadgeHelpers.normalizeBadgeOrder(root.editBadgeOrder, root.defaultBadgeOrder);
+    pluginApi.pluginSettings.badgeOrder = root.editBadgeOrder;
+    root.editBadgeEnabled = BadgeHelpers.normalizeBadgeEnabled(root.editBadgeEnabled, root.defaultBadgeEnabled);
+    pluginApi.pluginSettings.badgeEnabled = root.editBadgeEnabled;
+    if (pluginApi.saveSettings() !== false) root._savePending = true;
   }
 
   Process {
@@ -793,13 +829,13 @@ ColumnLayout {
 
     onExited: function () {
       root.scanning = false;
-      const detected = String(stdout.text || "").trim();
+      const detected = String(scanOutput.text || "").trim();
       if (detected.length > 0 && root.editWallpapersFolder.length === 0) {
         root.editWallpapersFolder = detected;
       }
     }
 
-    stdout: StdioCollector {}
+    stdout: StdioCollector { id: scanOutput }
     stderr: StdioCollector {}
   }
 
@@ -817,7 +853,7 @@ ColumnLayout {
       root.refreshingCacheSize = false;
 
       if (exitCode !== 0) {
-        const errorOutput = String(stderr.text || "").trim();
+        const errorOutput = String(cacheError.text || "").trim();
         if (errorOutput.length > 0) {
           Logger.w("LWEController", "Failed to get cache size", errorOutput);
         }
@@ -825,7 +861,7 @@ ColumnLayout {
         return;
       }
 
-      const output = String(stdout.text || "").trim();
+      const output = String(cacheOutput.text || "").trim();
       const bytes = Number(output);
       if (output.length === 0 || isNaN(bytes) || bytes < 0) {
         root.cacheSizeLabel = pluginApi?.tr("settings.cache.sizeUnknown");
@@ -835,8 +871,8 @@ ColumnLayout {
       root.cacheSizeLabel = root.formatBytes(bytes);
     }
 
-    stdout: StdioCollector {}
-    stderr: StdioCollector {}
+    stdout: StdioCollector { id: cacheOutput }
+    stderr: StdioCollector { id: cacheError }
   }
 
   Process {
@@ -848,7 +884,7 @@ ColumnLayout {
       root.clearingCache = false;
       if (pluginApi) {
         pluginApi.pluginSettings.wallpaperColorScreenshots = root.preservedWallpaperColorScreenshots();
-        pluginApi.saveSettings();
+        if (pluginApi.saveSettings() !== false) root._savePending = true;
       }
       root.refreshCacheSize();
     }
