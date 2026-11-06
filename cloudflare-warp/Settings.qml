@@ -9,10 +9,11 @@ ColumnLayout {
 
   property var pluginApi: null
 
-  property int editRefreshInterval: displayBaseline.editRefreshInterval
+  property int editRefreshInterval: displayBaseline.project("editRefreshInterval")
   property string editConnectedColor: displayBaseline.editConnectedColor
   property string editDisconnectedColor: displayBaseline.editDisconnectedColor
   NSettingsBaseline {
+    ranges: [NSettingsRange { field: "editRefreshInterval"; from: rangeEditRefreshInterval.from; to: rangeEditRefreshInterval.to }]
     id: displayBaseline
     readonly property int editRefreshInterval: pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 5000
     readonly property string editConnectedColor: pluginApi?.pluginSettings?.connectedColor || pluginApi?.manifest?.metadata?.defaultSettings?.connectedColor || "primary"
@@ -67,6 +68,8 @@ ColumnLayout {
   }
 
   NSlider {
+    id: rangeEditRefreshInterval
+    objectName: "settings-range-editRefreshInterval"
     Layout.fillWidth: true
     from: 1000
     to: 60000

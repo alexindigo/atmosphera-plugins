@@ -20,7 +20,7 @@ ColumnLayout {
 
   property bool editBackupEnabled: displayBaseline.editBackupEnabled
 
-  property int editBackupCount: displayBaseline.editBackupCount
+  property int editBackupCount: displayBaseline.project("editBackupCount")
 
   spacing: Style.marginM
 
@@ -134,6 +134,9 @@ ColumnLayout {
   }
 
   NValueSlider {
+    id: rangeEditBackupCount
+    objectName: "settings-range-editBackupCount"
+    onValueChanged: root.editBackupCount = value
     Layout.fillWidth: true
     label: pluginApi?.tr("settings.backup-count-label")
     description: pluginApi?.tr("settings.backup-count-description")
@@ -154,6 +157,7 @@ ColumnLayout {
   // ── Save ────────────────────────────────
 
   NSettingsBaseline {
+    ranges: [NSettingsRange { field: "editBackupCount"; from: rangeEditBackupCount.from; to: rangeEditBackupCount.to }]
     id: displayBaseline
     readonly property string editProfilesDir: pluginApi?.pluginSettings?.profilesDir || pluginApi?.manifest?.metadata?.defaultSettings?.profilesDir || ""
     readonly property string editIcon: pluginApi?.pluginSettings?.icon || pluginApi?.manifest?.metadata?.defaultSettings?.icon || "bookmark"

@@ -11,11 +11,12 @@ ColumnLayout {
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
     // Edit copies
-    property int    editRefreshInterval: displayBaseline.editRefreshInterval
+    property int    editRefreshInterval: displayBaseline.project("editRefreshInterval")
     property bool   editShowGovernor:    displayBaseline.editShowGovernor
     property bool   editShowTurbo:       displayBaseline.editShowTurbo
     property bool   editCompactMode:     displayBaseline.editCompactMode
     NSettingsBaseline {
+      ranges: [NSettingsRange { field: "editRefreshInterval"; from: rangeEditRefreshInterval.from; to: rangeEditRefreshInterval.to }]
         id: displayBaseline
         readonly property int editRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 3000
         readonly property bool editShowGovernor: cfg.showGovernor ?? defaults.showGovernor ?? true
@@ -74,6 +75,9 @@ ColumnLayout {
             spacing: Style.marginM
 
             NSlider {
+                id: rangeEditRefreshInterval
+                objectName: "settings-range-editRefreshInterval"
+                onValueChanged: root.editRefreshInterval = value
                 Layout.fillWidth: true
                 from: 1000
                 to: 10000

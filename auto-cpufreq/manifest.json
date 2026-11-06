@@ -1,7 +1,7 @@
 {
   "id": "auto-cpufreq",
   "name": "auto-cpufreq",
-  "version": "2.6.4",
+  "version": "2.6.5",
   "minNoctaliaVersion": "4.4.1",
   "minAtmospheraVersion": "0.10.0",
   "author": "4rmcyt",

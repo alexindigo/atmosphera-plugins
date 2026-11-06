@@ -9,10 +9,11 @@ ColumnLayout {
 
   property var pluginApi: null
 
-  property int editRefreshInterval: displayBaseline.editRefreshInterval
+  property int editRefreshInterval: displayBaseline.project("editRefreshInterval")
   property bool editShowProfileLabel: displayBaseline.editShowProfileLabel
   property string editActiveColor: displayBaseline.editActiveColor
   NSettingsBaseline {
+    ranges: [NSettingsRange { field: "editRefreshInterval"; from: rangeEditRefreshInterval.from; to: rangeEditRefreshInterval.to }]
     id: displayBaseline
     readonly property int editRefreshInterval: pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 3000
     readonly property bool editShowProfileLabel: pluginApi?.pluginSettings?.showProfileLabel ?? pluginApi?.manifest?.metadata?.defaultSettings?.showProfileLabel ?? false
@@ -73,6 +74,8 @@ ColumnLayout {
   }
 
   NSlider {
+    id: rangeEditRefreshInterval
+    objectName: "settings-range-editRefreshInterval"
     Layout.fillWidth: true
     from: 1000
     to: 30000

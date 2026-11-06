@@ -12,13 +12,14 @@ ColumnLayout {
   property var pluginApi: null
 
   // Local state
-  property int panelWidth: displayBaseline.panelWidth
-  property int panelHeight: displayBaseline.panelHeight
-  property int fontSize: displayBaseline.fontSize
+  property int panelWidth: displayBaseline.project("panelWidth")
+  property int panelHeight: displayBaseline.project("panelHeight")
+  property int fontSize: displayBaseline.project("fontSize")
   property string filePath: displayBaseline.filePath
   property bool filePathWritable: true
   property bool useMonospace: displayBaseline.useMonospace
   NSettingsBaseline {
+    ranges: [NSettingsRange { field: "panelWidth"; from: widthSlider.from; to: widthSlider.to }, NSettingsRange { field: "panelHeight"; from: heightSlider.from; to: heightSlider.to }, NSettingsRange { field: "fontSize"; from: fontSizeSlider.from; to: fontSizeSlider.to }]
     id: displayBaseline
     readonly property int panelWidth: pluginApi?.pluginSettings?.panelWidth ?? 600
     readonly property int panelHeight: pluginApi?.pluginSettings?.panelHeight ?? 400
@@ -89,6 +90,8 @@ ColumnLayout {
       }
 
       NSlider {
+        objectName: "settings-range-panelWidth"
+        onValueChanged: root.panelWidth = value
         id: widthSlider
         Layout.fillWidth: true
         from: 400
@@ -111,6 +114,8 @@ ColumnLayout {
       }
 
       NSlider {
+        objectName: "settings-range-panelHeight"
+        onValueChanged: root.panelHeight = value
         id: heightSlider
         Layout.fillWidth: true
         from: 300
@@ -166,6 +171,8 @@ ColumnLayout {
     }
 
     NSlider {
+      objectName: "settings-range-fontSize"
+      onValueChanged: root.fontSize = value
       id: fontSizeSlider
       Layout.fillWidth: true
       from: 10

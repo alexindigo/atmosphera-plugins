@@ -11,11 +11,12 @@ ColumnLayout {
     // ── Edit state ──
     property string editResultFile: displayBaseline.editResultFile
     property bool editShowToast: displayBaseline.editShowToast
-    property int editMaxResults: displayBaseline.editMaxResults
+    property int editMaxResults: displayBaseline.project("editMaxResults")
     property string editPanelPosition: displayBaseline.editPanelPosition
     property bool editShowMatchCount: displayBaseline.editShowMatchCount
     property bool editShowFooter: displayBaseline.editShowFooter
     NSettingsBaseline {
+        ranges: [NSettingsRange { field: "editMaxResults"; from: rangeEditMaxResults.from; to: rangeEditMaxResults.to }]
         id: displayBaseline
         readonly property string editResultFile: pluginApi?.pluginSettings?.resultFile || pluginApi?.manifest?.metadata?.defaultSettings?.resultFile || "/tmp/noctalia-dmenu-result"
         readonly property bool editShowToast: pluginApi?.pluginSettings?.showToastOnSelect ?? pluginApi?.manifest?.metadata?.defaultSettings?.showToastOnSelect ?? false
@@ -128,6 +129,8 @@ ColumnLayout {
         }
 
         NSlider {
+            id: rangeEditMaxResults
+            objectName: "settings-range-editMaxResults"
             Layout.fillWidth: true
             from: 50
             to: 1000

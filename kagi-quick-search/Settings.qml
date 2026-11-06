@@ -8,7 +8,7 @@ ColumnLayout {
 
   property var pluginApi: null
   property string editToken: displayBaseline.editToken
-  property int editDebounce: displayBaseline.editDebounce
+  property int editDebounce: displayBaseline.project("editDebounce")
 
   spacing: Style.marginM
 
@@ -40,6 +40,7 @@ ColumnLayout {
     }
 
     NSlider {
+      objectName: "settings-range-editDebounce"
         id: debounceSlider
         from: 300
         to: 1500
@@ -59,6 +60,7 @@ ColumnLayout {
   }
 
   NSettingsBaseline {
+    ranges: [NSettingsRange { field: "editDebounce"; from: debounceSlider.from; to: debounceSlider.to }]
     id: displayBaseline
     readonly property string editToken: pluginApi.pluginSettings.kagiSessionToken ?? ""
     readonly property int editDebounce: pluginApi.pluginSettings.debounceMs ?? 500

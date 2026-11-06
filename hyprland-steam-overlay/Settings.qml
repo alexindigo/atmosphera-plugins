@@ -15,12 +15,12 @@ ColumnLayout {
   property bool valueAutoLaunchSteam: displayBaseline.valueAutoLaunchSteam
   property bool valueUseCustomLayout: displayBaseline.valueUseCustomLayout
   property bool valueEnableChatNotifications: displayBaseline.valueEnableChatNotifications
-  property int valueFriendsWidth: displayBaseline.valueFriendsWidth
-  property int valueMainWidth: displayBaseline.valueMainWidth
-  property int valueChatWidth: displayBaseline.valueChatWidth
-  property int valueGapSize: displayBaseline.valueGapSize
-  property real valueTopMargin: displayBaseline.valueTopMargin
-  property real valueWindowHeight: displayBaseline.valueWindowHeight
+  property int valueFriendsWidth: displayBaseline.project("valueFriendsWidth")
+  property int valueMainWidth: displayBaseline.project("valueMainWidth")
+  property int valueChatWidth: displayBaseline.project("valueChatWidth")
+  property int valueGapSize: displayBaseline.project("valueGapSize")
+  property real valueTopMargin: displayBaseline.project("valueTopMargin")
+  property real valueWindowHeight: displayBaseline.project("valueWindowHeight")
 
   spacing: Style.marginM
 
@@ -82,6 +82,8 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeValueFriendsWidth
+      objectName: "settings-range-valueFriendsWidth"
       Layout.fillWidth: true
       from: 5
       to: 30
@@ -101,6 +103,8 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeValueMainWidth
+      objectName: "settings-range-valueMainWidth"
       Layout.fillWidth: true
       from: 40
       to: 80
@@ -120,6 +124,8 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeValueChatWidth
+      objectName: "settings-range-valueChatWidth"
       Layout.fillWidth: true
       from: 10
       to: 40
@@ -151,6 +157,8 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeValueGapSize
+      objectName: "settings-range-valueGapSize"
       Layout.fillWidth: true
       from: 0
       to: 50
@@ -170,6 +178,8 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeValueTopMargin
+      objectName: "settings-range-valueTopMargin"
       Layout.fillWidth: true
       from: 0
       to: 10
@@ -189,6 +199,8 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeValueWindowHeight
+      objectName: "settings-range-valueWindowHeight"
       Layout.fillWidth: true
       from: 70
       to: 100
@@ -216,6 +228,14 @@ ColumnLayout {
 
   // This function is called by the dialog to save settings
   NSettingsBaseline {
+    ranges: [
+      NSettingsRange { field: "valueFriendsWidth"; from: rangeValueFriendsWidth.from; to: rangeValueFriendsWidth.to },
+      NSettingsRange { field: "valueMainWidth"; from: rangeValueMainWidth.from; to: rangeValueMainWidth.to },
+      NSettingsRange { field: "valueChatWidth"; from: rangeValueChatWidth.from; to: rangeValueChatWidth.to },
+      NSettingsRange { field: "valueGapSize"; from: rangeValueGapSize.from; to: rangeValueGapSize.to },
+      NSettingsRange { field: "valueTopMargin"; from: rangeValueTopMargin.from; to: rangeValueTopMargin.to },
+      NSettingsRange { field: "valueWindowHeight"; from: rangeValueWindowHeight.from; to: rangeValueWindowHeight.to }
+    ]
     id: displayBaseline
     readonly property bool valueAutoLaunchSteam: cfg.autoLaunchSteam ?? defaults.autoLaunchSteam ?? true
     readonly property bool valueUseCustomLayout: cfg.useCustomLayout ?? defaults.useCustomLayout ?? false

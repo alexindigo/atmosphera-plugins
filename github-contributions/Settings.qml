@@ -10,12 +10,13 @@ ColumnLayout {
   property string editUsername: displayBaseline.editUsername
   property string editToken: displayBaseline.editToken
   property string editLayout: displayBaseline.editLayout
-  property int editWeeksShown: displayBaseline.editWeeksShown
-  property int editRefreshInterval: displayBaseline.editRefreshInterval
+  property int editWeeksShown: displayBaseline.project("editWeeksShown")
+  property int editRefreshInterval: displayBaseline.project("editRefreshInterval")
   property bool editShowTotal: displayBaseline.editShowTotal
   property bool editShowLabels: displayBaseline.editShowLabels
   property bool _applyEffectPending: false
   NSettingsBaseline {
+    ranges: [NSettingsRange { field: "editWeeksShown"; from: rangeEditWeeksShown.from; to: rangeEditWeeksShown.to }, NSettingsRange { field: "editRefreshInterval"; from: rangeEditRefreshInterval.from; to: rangeEditRefreshInterval.to }]
     id: displayBaseline
     readonly property string editUsername: pluginApi?.pluginSettings?.username || pluginApi?.manifest?.metadata?.defaultSettings?.username || ""
     readonly property string editToken: pluginApi?.pluginSettings?.token || pluginApi?.manifest?.metadata?.defaultSettings?.token || ""
@@ -83,6 +84,8 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeEditWeeksShown
+      objectName: "settings-range-editWeeksShown"
       Layout.fillWidth: true
       from: 4
       to: 53
@@ -102,6 +105,8 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeEditRefreshInterval
+      objectName: "settings-range-editRefreshInterval"
       Layout.fillWidth: true
       from: 15
       to: 360

@@ -15,11 +15,12 @@ ColumnLayout {
     property bool editFortuneOffensive: displayBaseline.editFortuneOffensive
     property bool editFortuneEqual: displayBaseline.editFortuneEqual
     property string editFortuneCategory: displayBaseline.editFortuneCategory
-    property int editFortuneMaxLength: displayBaseline.editFortuneMaxLength
+    property int editFortuneMaxLength: displayBaseline.project("editFortuneMaxLength")
     property bool editListEnabled: displayBaseline.editListEnabled
     property string editTextFile: displayBaseline.editTextFile
     property bool editRefreshOnWallpaper: displayBaseline.editRefreshOnWallpaper
     NSettingsBaseline {
+        ranges: [NSettingsRange { field: "editFortuneMaxLength"; from: rangeEditFortuneMaxLength.from; to: rangeEditFortuneMaxLength.to }]
         id: displayBaseline
         readonly property string editText: cfg.text ?? defaults.text ?? ""
         readonly property bool editFortuneEnabled: cfg.fortuneEnabled ?? defaults.fortuneEnabled ?? false
@@ -96,6 +97,9 @@ ColumnLayout {
         }
 
         NSlider {
+            id: rangeEditFortuneMaxLength
+            objectName: "settings-range-editFortuneMaxLength"
+            onValueChanged: root.editFortuneMaxLength = value
             Layout.fillWidth: true
             from: 10
             to: 200

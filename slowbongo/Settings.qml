@@ -17,14 +17,15 @@ ColumnLayout {
 
     // Editable settings properties
     property string editCatColor: displayBaseline.editCatColor
-    property real editCatSize: displayBaseline.editCatSize
-    property real editCatOffsetY: displayBaseline.editCatOffsetY
+    property real editCatSize: displayBaseline.project("editCatSize")
+    property real editCatOffsetY: displayBaseline.project("editCatOffsetY")
     property var editInputDevices: displayBaseline.editInputDevices
     property bool editRaveMode: displayBaseline.editRaveMode
     property bool editTappyMode: displayBaseline.editTappyMode
     property bool editUseMprisFilter: displayBaseline.editUseMprisFilter
 
     NSettingsBaseline {
+        ranges: [NSettingsRange { field: "editCatSize"; from: rangeEditCatSize.from; to: rangeEditCatSize.to }, NSettingsRange { field: "editCatOffsetY"; from: rangeEditCatOffsetY.from; to: rangeEditCatOffsetY.to }]
         id: displayBaseline
         readonly property string editCatColor: {
             let saved = pluginApi?.pluginSettings?.catColor
@@ -280,6 +281,9 @@ ColumnLayout {
 
     // Cat Size Section
     NValueSlider {
+        id: rangeEditCatSize
+        objectName: "settings-range-editCatSize"
+        onValueChanged: root.editCatSize = value
         Layout.fillWidth: true
         label: pluginApi?.tr("settings.cat-size")
         value: root.editCatSize
@@ -294,6 +298,9 @@ ColumnLayout {
 
     // Vertical Position Section
     NValueSlider {
+        id: rangeEditCatOffsetY
+        objectName: "settings-range-editCatOffsetY"
+        onValueChanged: root.editCatOffsetY = value
         Layout.fillWidth: true
         label: pluginApi?.tr("settings.vertical-position")
         value: root.editCatOffsetY

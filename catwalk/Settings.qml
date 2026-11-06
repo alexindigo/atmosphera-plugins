@@ -10,9 +10,10 @@ ColumnLayout {
     property var pluginApi: null
 
     // Local state - track changes before saving
-    property real valueMinimumThreshold: displayBaseline.valueMinimumThreshold
+    property real valueMinimumThreshold: displayBaseline.project("valueMinimumThreshold")
     property bool valueHideBackground: displayBaseline.valueHideBackground
     NSettingsBaseline {
+        ranges: [NSettingsRange { field: "valueMinimumThreshold"; from: thresholdSlider.from; to: thresholdSlider.to }]
         id: displayBaseline
         readonly property real valueMinimumThreshold: pluginApi?.pluginSettings?.minimumThreshold || 10
         readonly property bool valueHideBackground: pluginApi?.pluginSettings?.hideBackground ?? false
@@ -35,6 +36,7 @@ ColumnLayout {
         }
 
         NSlider {
+            objectName: "settings-range-valueMinimumThreshold"
             id: thresholdSlider
             from: 5
             to: 25

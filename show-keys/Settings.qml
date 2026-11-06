@@ -13,16 +13,30 @@ ColumnLayout {
     property var def: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
     // ── Local edit state ─────────────────────────────────
-    property bool   editCapture:  cfg.captureEnabled ?? def.captureEnabled ?? true
-    property string editDevice:   cfg.evtestDevice   || def.evtestDevice   || "/dev/input/event3"
-    property bool   editUseCustomColors: cfg.useCustomColors ?? def.useCustomColors ?? false
-    property string editPillColor: cfg.pillColor ? cfg.pillColor : (def.pillColor ? def.pillColor : AtmoColor.mPrimary.toString())
-    property string editPillBg:    cfg.pillBg    ? cfg.pillBg    : (def.pillBg    ? def.pillBg    : AtmoColor.mSurface.toString())
-    property string editPosition:  cfg.position   || def.position   || "bottom"
-    property int    editMargin:    cfg.marginPx   ?? def.marginPx   ?? 60
-    property int    editDelay:     cfg.hideDelaySec ?? def.hideDelaySec ?? 2
+    property bool editCapture: displayBaseline.editCapture
+    property string editDevice: displayBaseline.editDevice
+    property bool editUseCustomColors: displayBaseline.editUseCustomColors
+    property string editPillColor: displayBaseline.editPillColor
+    property string editPillBg: displayBaseline.editPillBg
+    property string editPosition: displayBaseline.editPosition
+    property int editMargin: displayBaseline.project("editMargin")
+    property int editDelay: displayBaseline.project("editDelay")
+    property var editDisabledScreens: displayBaseline.editDisabledScreens
 
-    property var editDisabledScreens: cfg.disabledScreens ? cfg.disabledScreens.slice() : (def.disabledScreens ? def.disabledScreens.slice() : [])
+    NSettingsBaseline {
+        ranges: [NSettingsRange { field: "editMargin"; from: rangeEditMargin.from; to: rangeEditMargin.to }, NSettingsRange { field: "editDelay"; from: rangeEditDelay.from; to: rangeEditDelay.to }]
+        id: displayBaseline
+        readonly property bool editCapture: cfg.captureEnabled ?? def.captureEnabled ?? true
+        readonly property string editDevice: cfg.evtestDevice || def.evtestDevice || "/dev/input/event3"
+        readonly property bool editUseCustomColors: cfg.useCustomColors ?? def.useCustomColors ?? false
+        readonly property string editPillColor: cfg.pillColor ? cfg.pillColor : (def.pillColor ? def.pillColor : AtmoColor.mPrimary.toString())
+        readonly property string editPillBg: cfg.pillBg ? cfg.pillBg : (def.pillBg ? def.pillBg : AtmoColor.mSurface.toString())
+        readonly property string editPosition: cfg.position || def.position || "bottom"
+        readonly property int editMargin: cfg.marginPx ?? def.marginPx ?? 60
+        readonly property int editDelay: cfg.hideDelaySec ?? def.hideDelaySec ?? 2
+        readonly property var editDisabledScreens: cfg.disabledScreens ? cfg.disabledScreens.slice() : (def.disabledScreens ? def.disabledScreens.slice() : [])
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editCapture: root.editCapture, editDevice: root.editDevice, editUseCustomColors: root.editUseCustomColors, editPillColor: root.editPillColor, editPillBg: root.editPillBg, editPosition: root.editPosition, editMargin: root.editMargin, editDelay: root.editDelay, editDisabledScreens: root.editDisabledScreens})
 
     spacing: Style.marginL
 
@@ -270,6 +284,8 @@ ColumnLayout {
         }
 
         NSlider {
+            id: rangeEditMargin
+            objectName: "settings-range-editMargin"
             Layout.fillWidth: true
             from: 20
             to: 300
@@ -290,6 +306,8 @@ ColumnLayout {
         }
 
         NSlider {
+            id: rangeEditDelay
+            objectName: "settings-range-editDelay"
             Layout.fillWidth: true
             from: 1
             to: 10

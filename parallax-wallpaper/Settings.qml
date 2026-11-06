@@ -12,16 +12,23 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property real zoomAmount: displayBaseline.zoomAmount
+  property real zoomAmount: displayBaseline.project("zoomAmount")
   property string parallaxDirection: displayBaseline.parallaxDirection
-  property real hParallaxAmount: displayBaseline.hParallaxAmount
-  property int hParallaxDuration: displayBaseline.hParallaxDuration
-  property real vParallaxAmount: displayBaseline.vParallaxAmount
-  property int vParallaxDuration: displayBaseline.vParallaxDuration
+  property real hParallaxAmount: displayBaseline.project("hParallaxAmount")
+  property int hParallaxDuration: displayBaseline.project("hParallaxDuration")
+  property real vParallaxAmount: displayBaseline.project("vParallaxAmount")
+  property int vParallaxDuration: displayBaseline.project("vParallaxDuration")
   property bool invertDirection: displayBaseline.invertDirection
   property bool autoZoom: displayBaseline.autoZoom
   property string parallaxEasing: displayBaseline.parallaxEasing
   NSettingsBaseline {
+    ranges: [
+      NSettingsRange { field: "zoomAmount"; from: rangeZoomAmount.from; to: rangeZoomAmount.to },
+      NSettingsRange { field: "hParallaxAmount"; from: rangeHParallaxAmount.from; to: rangeHParallaxAmount.to },
+      NSettingsRange { field: "hParallaxDuration"; from: rangeHParallaxDuration.from; to: rangeHParallaxDuration.to },
+      NSettingsRange { field: "vParallaxAmount"; from: rangeVParallaxAmount.from; to: rangeVParallaxAmount.to },
+      NSettingsRange { field: "vParallaxDuration"; from: rangeVParallaxDuration.from; to: rangeVParallaxDuration.to }
+    ]
     id: displayBaseline
     readonly property real zoomAmount: cfg.zoomAmount ?? defaults.zoomAmount ?? 1.1
     readonly property string parallaxDirection: cfg.parallaxDirection ?? defaults.parallaxDirection ?? "horizontal"
@@ -43,6 +50,9 @@ ColumnLayout {
   // ── Wallpaper Zoom ──
 
   NValueSlider {
+    id: rangeZoomAmount
+    objectName: "settings-range-zoomAmount"
+    onValueChanged: root.zoomAmount = value
     label: pluginApi.tr("settings.zoom.label")
     description: pluginApi.tr("settings.zoom.desc")
     text: root.zoomAmount.toFixed(2) + "x"
@@ -90,6 +100,9 @@ ColumnLayout {
   }
 
   NValueSlider {
+    id: rangeHParallaxAmount
+    objectName: "settings-range-hParallaxAmount"
+    onValueChanged: root.hParallaxAmount = value
     visible: root.showHorizontal
     label: pluginApi.tr("settings.horizontal.amount")
     text: Math.round(root.hParallaxAmount) + "px"
@@ -106,6 +119,9 @@ ColumnLayout {
   }
 
   NValueSlider {
+    id: rangeHParallaxDuration
+    objectName: "settings-range-hParallaxDuration"
+    onValueChanged: root.hParallaxDuration = value
     visible: root.showHorizontal
     label: pluginApi.tr("settings.horizontal.duration")
     text: Math.round(root.hParallaxDuration) + "ms"
@@ -131,6 +147,9 @@ ColumnLayout {
   }
 
   NValueSlider {
+    id: rangeVParallaxAmount
+    objectName: "settings-range-vParallaxAmount"
+    onValueChanged: root.vParallaxAmount = value
     visible: root.showVertical
     label: pluginApi.tr("settings.vertical.amount")
     text: Math.round(root.vParallaxAmount) + "px"
@@ -147,6 +166,9 @@ ColumnLayout {
   }
 
   NValueSlider {
+    id: rangeVParallaxDuration
+    objectName: "settings-range-vParallaxDuration"
+    onValueChanged: root.vParallaxDuration = value
     visible: root.showVertical
     label: pluginApi.tr("settings.vertical.duration")
     text: Math.round(root.vParallaxDuration) + "ms"

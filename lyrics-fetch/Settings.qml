@@ -8,10 +8,10 @@ ColumnLayout {
     id: root
     property var pluginApi: null
 
-    property int draftWidth: displayBaseline.draftWidth
-    property int draftSpeed: displayBaseline.draftSpeed
+    property int draftWidth: displayBaseline.project("draftWidth")
+    property int draftSpeed: displayBaseline.project("draftSpeed")
     property string draftMode: displayBaseline.draftMode
-    property int draftFontSize: displayBaseline.draftFontSize
+    property int draftFontSize: displayBaseline.project("draftFontSize")
     property bool draftHideWhenEmpty: displayBaseline.draftHideWhenEmpty
     property string draftFontFamily: displayBaseline.draftFontFamily
     property bool draftAdaptScrollSpeed: displayBaseline.draftAdaptScrollSpeed
@@ -20,6 +20,7 @@ ColumnLayout {
 
     readonly property bool isBarVertical: Settings.data.bar.position === "left" || Settings.data.bar.position === "right"
     NSettingsBaseline {
+        ranges: [NSettingsRange { field: "draftFontSize"; from: rangeDraftFontSize.from; to: rangeDraftFontSize.to }, NSettingsRange { field: "draftWidth"; from: rangeDraftWidth.from; to: rangeDraftWidth.to }, NSettingsRange { field: "draftSpeed"; from: rangeDraftSpeed.from; to: rangeDraftSpeed.to }]
         id: displayBaseline
         readonly property int draftWidth: pluginApi?.pluginSettings?.widgetWidth ?? 215
         readonly property int draftSpeed: pluginApi?.pluginSettings?.scrollSpeed ?? 70
@@ -79,6 +80,8 @@ ColumnLayout {
     RowLayout {
         Layout.fillWidth: true
         NSlider {
+            id: rangeDraftFontSize
+            objectName: "settings-range-draftFontSize"
             Layout.fillWidth: true
             from: 8
             to: 32
@@ -100,6 +103,8 @@ ColumnLayout {
     RowLayout {
         Layout.fillWidth: true
         NSlider {
+            id: rangeDraftWidth
+            objectName: "settings-range-draftWidth"
             Layout.fillWidth: true
             from: 100
             to: 500
@@ -117,6 +122,8 @@ ColumnLayout {
     RowLayout {
         Layout.fillWidth: true
         NSlider {
+            id: rangeDraftSpeed
+            objectName: "settings-range-draftSpeed"
             Layout.fillWidth: true
             from: 10
             to: 200

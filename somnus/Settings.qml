@@ -13,19 +13,29 @@ ColumnLayout {
 
     property string editIconColor: displayBaseline.editIconColor
     property string editHoverColor: displayBaseline.editHoverColor
-    property real editBtnWidth: displayBaseline.editBtnWidth
-    property real editBtnHeight: displayBaseline.editBtnHeight
-    property real editBtnSpacing: displayBaseline.editBtnSpacing
-    property real editBtnOpacity: displayBaseline.editBtnOpacity
+    property real editBtnWidth: displayBaseline.project("editBtnWidth")
+    property real editBtnHeight: displayBaseline.project("editBtnHeight")
+    property real editBtnSpacing: displayBaseline.project("editBtnSpacing")
+    property real editBtnOpacity: displayBaseline.project("editBtnOpacity")
     property bool editUseOverlay: displayBaseline.editUseOverlay
     property bool editAnimationsEnabled: displayBaseline.editAnimationsEnabled
     property bool editLockOnSuspend: displayBaseline.editLockOnSuspend
-    property real editHoverDesaturation: displayBaseline.editHoverDesaturation
-    property real editOverlayBlur: displayBaseline.editOverlayBlur
-    property real editOverlayTint: displayBaseline.editOverlayTint
-    property real editPanelTint: displayBaseline.editPanelTint
+    property real editHoverDesaturation: displayBaseline.project("editHoverDesaturation")
+    property real editOverlayBlur: displayBaseline.project("editOverlayBlur")
+    property real editOverlayTint: displayBaseline.project("editOverlayTint")
+    property real editPanelTint: displayBaseline.project("editPanelTint")
 
     NSettingsBaseline {
+        ranges: [
+          NSettingsRange { field: "editBtnWidth"; from: rangeEditBtnWidth.from; to: rangeEditBtnWidth.to },
+          NSettingsRange { field: "editBtnHeight"; from: rangeEditBtnHeight.from; to: rangeEditBtnHeight.to },
+          NSettingsRange { field: "editBtnSpacing"; from: rangeEditBtnSpacing.from; to: rangeEditBtnSpacing.to },
+          NSettingsRange { field: "editBtnOpacity"; from: rangeEditBtnOpacity.from; to: rangeEditBtnOpacity.to },
+          NSettingsRange { field: "editHoverDesaturation"; from: rangeEditHoverDesaturation.from / 100; to: rangeEditHoverDesaturation.to / 100 },
+          NSettingsRange { field: "editOverlayBlur"; from: rangeEditOverlayBlur.from; to: rangeEditOverlayBlur.to },
+          NSettingsRange { field: "editOverlayTint"; from: rangeEditOverlayTint.from; to: rangeEditOverlayTint.to },
+          NSettingsRange { field: "editPanelTint"; from: rangeEditPanelTint.from; to: rangeEditPanelTint.to }
+        ]
         id: displayBaseline
         readonly property string editIconColor: cfg.iconColor ?? defaults.iconColor ?? "primary"
         readonly property string editHoverColor: cfg.hoverColor ?? defaults.hoverColor ?? "primary"
@@ -104,6 +114,9 @@ ColumnLayout {
     }
 
     NValueSlider {
+        id: rangeEditBtnWidth
+        objectName: "settings-range-editBtnWidth"
+        onValueChanged: root.editBtnWidth = value
         Layout.fillWidth: true
         label: pluginApi?.tr("settings.buttonWidth.label")
         from: 200; to: 500; stepSize: 10; snapAlways: true
@@ -115,6 +128,9 @@ ColumnLayout {
     }
 
     NValueSlider {
+        id: rangeEditBtnHeight
+        objectName: "settings-range-editBtnHeight"
+        onValueChanged: root.editBtnHeight = value
         Layout.fillWidth: true
         label: pluginApi?.tr("settings.buttonHeight.label")
         from: 150; to: 400; stepSize: 10; snapAlways: true
@@ -126,6 +142,9 @@ ColumnLayout {
     }
 
     NValueSlider {
+        id: rangeEditBtnSpacing
+        objectName: "settings-range-editBtnSpacing"
+        onValueChanged: root.editBtnSpacing = value
         Layout.fillWidth: true
         label: pluginApi?.tr("settings.buttonSpacing.label")
         description: pluginApi?.tr("settings.buttonSpacing.desc")
@@ -138,6 +157,9 @@ ColumnLayout {
     }
 
     NValueSlider {
+        id: rangeEditBtnOpacity
+        objectName: "settings-range-editBtnOpacity"
+        onValueChanged: root.editBtnOpacity = value
         Layout.fillWidth: true
         label: pluginApi?.tr("settings.buttonOpacity.label")
         from: 0.1; to: 1.0; stepSize: 0.05; snapAlways: true
@@ -157,6 +179,9 @@ ColumnLayout {
     }
 
     NValueSlider {
+        id: rangeEditHoverDesaturation
+        objectName: "settings-range-editHoverDesaturation"
+        onValueChanged: root.editHoverDesaturation = value / 100
         Layout.fillWidth: true
         label: pluginApi?.tr("settings.hoverDesaturation.label")
         description: pluginApi?.tr("settings.hoverDesaturation.desc")
@@ -192,6 +217,9 @@ ColumnLayout {
         spacing: Style.marginM
 
         NValueSlider {
+            id: rangeEditOverlayBlur
+            objectName: "settings-range-editOverlayBlur"
+            onValueChanged: root.editOverlayBlur = value
             Layout.fillWidth: true
             label: pluginApi?.tr("settings.overlayBlur.label")
             description: pluginApi?.tr("settings.overlayBlur.desc")
@@ -204,6 +232,9 @@ ColumnLayout {
         }
 
         NValueSlider {
+            id: rangeEditOverlayTint
+            objectName: "settings-range-editOverlayTint"
+            onValueChanged: root.editOverlayTint = value
             Layout.fillWidth: true
             label: pluginApi?.tr("settings.overlayTint.label")
             description: pluginApi?.tr("settings.overlayTint.desc")
@@ -222,6 +253,9 @@ ColumnLayout {
         spacing: Style.marginM
 
         NValueSlider {
+            id: rangeEditPanelTint
+            objectName: "settings-range-editPanelTint"
+            onValueChanged: root.editPanelTint = value
             Layout.fillWidth: true
             label: pluginApi?.tr("settings.panelTint.label")
             description: pluginApi?.tr("settings.panelTint.desc")

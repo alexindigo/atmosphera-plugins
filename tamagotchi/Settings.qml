@@ -8,11 +8,12 @@ ColumnLayout {
     spacing: Style.marginM
 
     property var pluginApi: null
-    property real editVolume: displayBaseline.editVolume
-    property real editDifficulty: displayBaseline.editDifficulty
+    property real editVolume: displayBaseline.project("editVolume")
+    property real editDifficulty: displayBaseline.project("editDifficulty")
     property bool editShowDebug: displayBaseline.editShowDebug
     property bool showPercentage: displayBaseline.showPercentage
     NSettingsBaseline {
+        ranges: [NSettingsRange { field: "editVolume"; from: rangeEditVolume.from; to: rangeEditVolume.to }, NSettingsRange { field: "editDifficulty"; from: rangeEditDifficulty.from; to: rangeEditDifficulty.to }]
         id: displayBaseline
         readonly property real editVolume: pluginApi?.pluginSettings?.volume ?? 0.5
         readonly property real editDifficulty: pluginApi?.pluginSettings?.difficulty ?? 50
@@ -35,6 +36,8 @@ ColumnLayout {
     }
 
     NSlider {
+        id: rangeEditVolume
+        objectName: "settings-range-editVolume"
         Layout.fillWidth: true
         from: 0
         to: 1
@@ -54,6 +57,8 @@ ColumnLayout {
     }
 
     NSlider {
+        id: rangeEditDifficulty
+        objectName: "settings-range-editDifficulty"
         Layout.fillWidth: true
         from: 0
         to: 100

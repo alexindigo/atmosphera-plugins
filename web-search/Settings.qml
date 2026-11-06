@@ -13,7 +13,7 @@ ColumnLayout {
     property string valueSearchEngine: displayBaseline.valueSearchEngine
     property bool valueDirectUrl: displayBaseline.valueDirectUrl
     property bool valueShowSuggestions: displayBaseline.valueShowSuggestions
-    property int valueMaxResults: displayBaseline.valueMaxResults
+    property int valueMaxResults: displayBaseline.project("valueMaxResults")
 
     spacing: Style.marginL
 
@@ -84,6 +84,9 @@ ColumnLayout {
         }
 
         NSlider {
+            id: rangeValueMaxResults
+            objectName: "settings-range-valueMaxResults"
+            onValueChanged: root.valueMaxResults = value
             Layout.fillWidth: true
             from: 1
             to: 10
@@ -94,6 +97,7 @@ ColumnLayout {
     }
 
     NSettingsBaseline {
+        ranges: [NSettingsRange { field: "valueMaxResults"; from: rangeValueMaxResults.from; to: rangeValueMaxResults.to }]
         id: displayBaseline
         readonly property string valueSearchEngine: cfg.search_engine ?? defaults.search_engine ?? "Google"
         readonly property bool valueDirectUrl: cfg.direct_url ?? defaults.direct_url ?? true

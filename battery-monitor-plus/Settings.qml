@@ -18,7 +18,7 @@ ColumnLayout {
   property bool valueShowNoctaliaPerformance: displayBaseline.valueShowNoctaliaPerformance
   property bool valueHideIfNotDetected: displayBaseline.valueHideIfNotDetected
   property bool valueHideIfIdle: displayBaseline.valueHideIfIdle
-  property int valueRefreshIntervalSeconds: displayBaseline.valueRefreshIntervalSeconds
+  property int valueRefreshIntervalSeconds: displayBaseline.project("valueRefreshIntervalSeconds")
   property bool valueShowPowerInBar: displayBaseline.valueShowPowerInBar
   property bool valueShowTimeInBar: displayBaseline.valueShowTimeInBar
 
@@ -122,6 +122,9 @@ ColumnLayout {
     }
 
     NValueSlider {
+      id: rangeValueRefreshIntervalSeconds
+      objectName: "settings-range-valueRefreshIntervalSeconds"
+      onValueChanged: root.valueRefreshIntervalSeconds = value
       Layout.fillWidth: true
       from: 1
       to: 60
@@ -150,6 +153,7 @@ ColumnLayout {
   }
 
   NSettingsBaseline {
+    ranges: [NSettingsRange { field: "valueRefreshIntervalSeconds"; from: rangeValueRefreshIntervalSeconds.from; to: rangeValueRefreshIntervalSeconds.to }]
     id: displayBaseline
     readonly property string valueDisplayMode: cfg.displayMode ?? defaults.displayMode ?? "graphic-clean"
     readonly property string valueDeviceNativePath: cfg.deviceNativePath ?? defaults.deviceNativePath ?? "__default__"

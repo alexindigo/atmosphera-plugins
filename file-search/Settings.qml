@@ -12,7 +12,7 @@ ColumnLayout {
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   property bool valueShowHidden: displayBaseline.valueShowHidden
-  property int valueMaxResults: displayBaseline.valueMaxResults
+  property int valueMaxResults: displayBaseline.project("valueMaxResults")
   property string valueFileOpener: displayBaseline.valueFileOpener
   property string valueFdCommand: displayBaseline.valueFdCommand
   property string valueSearchDirectory: displayBaseline.valueSearchDirectory
@@ -115,6 +115,9 @@ ColumnLayout {
       }
 
       NSlider {
+        id: rangeValueMaxResults
+        objectName: "settings-range-valueMaxResults"
+        onValueChanged: root.valueMaxResults = value
         Layout.fillWidth: true
         from: 0
         to: 1000
@@ -125,6 +128,7 @@ ColumnLayout {
     }
 
   NSettingsBaseline {
+    ranges: [NSettingsRange { field: "valueMaxResults"; from: rangeValueMaxResults.from; to: rangeValueMaxResults.to }]
     id: displayBaseline
     readonly property bool valueShowHidden: cfg.showHidden ?? defaults.showHidden
     readonly property int valueMaxResults: cfg.maxResults ?? defaults.maxResults

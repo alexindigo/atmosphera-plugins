@@ -11,7 +11,7 @@ ColumnLayout {
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   property string editTerminalCommand: displayBaseline.editTerminalCommand
-  property int editPollInterval: displayBaseline.editPollInterval
+  property int editPollInterval: displayBaseline.project("editPollInterval")
   property bool editShowInactiveHosts: displayBaseline.editShowInactiveHosts
 
   spacing: Style.marginM
@@ -51,6 +51,8 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeEditPollInterval
+      objectName: "settings-range-editPollInterval"
       Layout.fillWidth: true
       from: 5
       to: 30
@@ -75,6 +77,7 @@ ColumnLayout {
   }
 
   NSettingsBaseline {
+    ranges: [NSettingsRange { field: "editPollInterval"; from: rangeEditPollInterval.from; to: rangeEditPollInterval.to }]
     id: displayBaseline
     readonly property string editTerminalCommand: cfg.terminalCommand ?? defaults.terminalCommand ?? ""
     readonly property int editPollInterval: cfg.pollInterval ?? defaults.pollInterval ?? 10

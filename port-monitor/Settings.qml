@@ -10,11 +10,12 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property int editRefreshInterval: displayBaseline.editRefreshInterval
+  property int editRefreshInterval: displayBaseline.project("editRefreshInterval")
   property bool editHideSystemPorts: displayBaseline.editHideSystemPorts
   property bool editHideWhenEmpty: displayBaseline.editHideWhenEmpty
   property bool _applyEffectPending: false
   NSettingsBaseline {
+    ranges: [NSettingsRange { field: "editRefreshInterval"; from: rangeEditRefreshInterval.from; to: rangeEditRefreshInterval.to }]
     id: displayBaseline
     readonly property int editRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 5
     readonly property bool editHideSystemPorts: cfg.hideSystemPorts ?? defaults.hideSystemPorts ?? false
@@ -44,6 +45,8 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeEditRefreshInterval
+      objectName: "settings-range-editRefreshInterval"
       Layout.fillWidth: true
       from: 1
       to: 30
