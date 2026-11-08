@@ -80,7 +80,7 @@ RowLayout {
     visible: row.showLabel
     text: row.labelValue
     placeholderText: row.labelPlaceholder
-    onTextChanged: row.labelEdited(text)
+    onTextEdited: row.labelEdited(text)
   }
 
   Item { Layout.fillWidth: true }

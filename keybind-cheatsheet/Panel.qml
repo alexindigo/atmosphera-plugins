@@ -13,7 +13,7 @@ Item {
   property var pluginApi: null
 
   // Settings
-  property var cfg: pluginApi?.pluginSettings || ({})
+  property var cfg: pluginApi?.settingsView || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   // Settings values

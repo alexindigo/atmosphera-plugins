@@ -13,25 +13,89 @@ ColumnLayout {
   spacing: 0
 
   property var pluginApi: null
-  property var cfg: pluginApi?.pluginSettings || ({})
+  readonly property var cfg: pluginApi?.initialSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  // Live preview + revert-on-cancel pattern (approved deviation from edit-copy).
-  // Color settings apply visually in real time via _applyPreview, but the snapshot
-  // is restored on close if saveSettings() (Apply) was never called.
-  property var _snapshot: null
-  property bool _applied: false
+  // The selected editor owns preview and persistence independently. Baselines
+  // read acknowledged input, so preview never makes a local edit look clean.
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property int editWindowWidth: root.cfg.windowWidth ?? root.defaults.windowWidth ?? 1400
+    readonly property int editWindowHeight: {
+      var height = root.cfg.windowHeight ?? root.defaults.windowHeight ?? 850;
+      return height > 0 ? height : 850;
+    }
+    readonly property bool editAutoHeight: root.cfg.autoHeight ?? root.defaults.autoHeight ?? true
+    readonly property int editColumnCount: root.cfg.columnCount ?? root.defaults.columnCount ?? 3
+    readonly property string editModKeyVariable: root.cfg.modKeyVariable || root.defaults.modKeyVariable || "$mod"
+    readonly property string editHyprlandConfigPath: root.cfg.hyprlandConfigPath || root.defaults.hyprlandConfigPath || "~/.config/hypr/hyprland.conf"
+    readonly property string editHyprlandLuaConfigPath: root.cfg.hyprlandLuaConfigPath || root.defaults.hyprlandLuaConfigPath || "~/.config/hypr/hyprland.lua"
+    readonly property string editHyprlandParserMode: root.cfg.hyprlandParserMode || root.defaults.hyprlandParserMode || "auto"
+    readonly property string editNiriConfigPath: root.cfg.niriConfigPath || root.defaults.niriConfigPath || "~/.config/niri/config.kdl"
+    readonly property string editMangoConfigPath: root.cfg.mangoConfigPath || root.defaults.mangoConfigPath || "~/.config/mango/config.conf"
+    readonly property bool editMergeSequentialBinds: root.cfg.mergeSequentialBinds ?? root.defaults.mergeSequentialBinds ?? true
+    readonly property bool editShowUndescribedBinds: root.cfg.showUndescribedBinds ?? root.defaults.showUndescribedBinds ?? false
+    readonly property bool editSplitLargeWorkspaceCategory: root.cfg.splitLargeWorkspaceCategory ?? root.defaults.splitLargeWorkspaceCategory ?? true
+    readonly property int editWorkspaceSplitThreshold: root.cfg.workspaceSplitThreshold ?? root.defaults.workspaceSplitThreshold ?? 12
+    readonly property var editBindOverrides: root.cfg.bindOverrides || ({})
+    readonly property var editCheatsheetData: root.cfg.cheatsheetData || []
+    readonly property string valueKeyColorSuper: root.cfg.keyColorSuper ?? root.defaults.keyColorSuper ?? ""
+    readonly property string valueKeyColorCtrl: root.cfg.keyColorCtrl ?? root.defaults.keyColorCtrl ?? ""
+    readonly property string valueKeyColorShift: root.cfg.keyColorShift ?? root.defaults.keyColorShift ?? ""
+    readonly property string valueKeyColorAlt: root.cfg.keyColorAlt ?? root.defaults.keyColorAlt ?? "#FF6B6B"
+    readonly property string valueKeyColorXF86: root.cfg.keyColorXF86 ?? root.defaults.keyColorXF86 ?? "#4ECDC4"
+    readonly property string valueKeyColorPrint: root.cfg.keyColorPrint ?? root.defaults.keyColorPrint ?? "#95E1D3"
+    readonly property string valueKeyColorNumeric: root.cfg.keyColorNumeric ?? root.defaults.keyColorNumeric ?? "#A8DADC"
+    readonly property string valueKeyColorMouse: root.cfg.keyColorMouse ?? root.defaults.keyColorMouse ?? "#F38181"
+    readonly property string valueKeyColorDefault: root.cfg.keyColorDefault ?? root.defaults.keyColorDefault ?? "#6C757D"
+    readonly property string valueKeyTextSuper: root.cfg.keyTextSuper ?? root.defaults.keyTextSuper ?? ""
+    readonly property string valueKeyTextCtrl: root.cfg.keyTextCtrl ?? root.defaults.keyTextCtrl ?? ""
+    readonly property string valueKeyTextShift: root.cfg.keyTextShift ?? root.defaults.keyTextShift ?? ""
+    readonly property string valueKeyTextAlt: root.cfg.keyTextAlt ?? root.defaults.keyTextAlt ?? ""
+    readonly property string valueKeyTextXF86: root.cfg.keyTextXF86 ?? root.defaults.keyTextXF86 ?? ""
+    readonly property string valueKeyTextPrint: root.cfg.keyTextPrint ?? root.defaults.keyTextPrint ?? ""
+    readonly property string valueKeyTextNumeric: root.cfg.keyTextNumeric ?? root.defaults.keyTextNumeric ?? ""
+    readonly property string valueKeyTextMouse: root.cfg.keyTextMouse ?? root.defaults.keyTextMouse ?? ""
+    readonly property string valueKeyTextDefault: root.cfg.keyTextDefault ?? root.defaults.keyTextDefault ?? ""
+    readonly property string valueKeyLabelColor: root.cfg.keyLabelColor ?? root.defaults.keyLabelColor ?? "#FFFFFF"
+    readonly property string valueKeyColorMod2: root.cfg.keyColorMod2 ?? root.defaults.keyColorMod2 ?? ""
+    readonly property string valueKeyColorMod3: root.cfg.keyColorMod3 ?? root.defaults.keyColorMod3 ?? ""
+    readonly property string valueKeyColorMod5: root.cfg.keyColorMod5 ?? root.defaults.keyColorMod5 ?? ""
+    readonly property string valueKeyTextMod2: root.cfg.keyTextMod2 ?? root.defaults.keyTextMod2 ?? ""
+    readonly property string valueKeyTextMod3: root.cfg.keyTextMod3 ?? root.defaults.keyTextMod3 ?? ""
+    readonly property string valueKeyTextMod5: root.cfg.keyTextMod5 ?? root.defaults.keyTextMod5 ?? ""
+    readonly property string valueKeyLabelMod2: root.cfg.keyLabelMod2 ?? root.defaults.keyLabelMod2 ?? ""
+    readonly property string valueKeyLabelMod3: root.cfg.keyLabelMod3 ?? root.defaults.keyLabelMod3 ?? ""
+    readonly property string valueKeyLabelMod5: root.cfg.keyLabelMod5 ?? root.defaults.keyLabelMod5 ?? ""
+    readonly property string valueDescriptionTextColor: root.cfg.descriptionTextColor ?? root.defaults.descriptionTextColor ?? ""
+    ranges: [NSettingsRange { field: "editWorkspaceSplitThreshold"; from: workspaceThreshold.from; to: workspaceThreshold.to }]
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editWindowWidth: editWindowWidth, editWindowHeight: editWindowHeight, editAutoHeight: editAutoHeight, editColumnCount: editColumnCount, editModKeyVariable: editModKeyVariable, editHyprlandConfigPath: editHyprlandConfigPath, editHyprlandLuaConfigPath: editHyprlandLuaConfigPath, editHyprlandParserMode: editHyprlandParserMode, editNiriConfigPath: editNiriConfigPath, editMangoConfigPath: editMangoConfigPath, editMergeSequentialBinds: editMergeSequentialBinds, editShowUndescribedBinds: editShowUndescribedBinds, editSplitLargeWorkspaceCategory: editSplitLargeWorkspaceCategory, editWorkspaceSplitThreshold: editWorkspaceSplitThreshold, editBindOverrides: editBindOverrides, editCheatsheetData: editCheatsheetData, valueKeyColorSuper: valueKeyColorSuper, valueKeyColorCtrl: valueKeyColorCtrl, valueKeyColorShift: valueKeyColorShift, valueKeyColorAlt: valueKeyColorAlt, valueKeyColorXF86: valueKeyColorXF86, valueKeyColorPrint: valueKeyColorPrint, valueKeyColorNumeric: valueKeyColorNumeric, valueKeyColorMouse: valueKeyColorMouse, valueKeyColorDefault: valueKeyColorDefault, valueKeyTextSuper: valueKeyTextSuper, valueKeyTextCtrl: valueKeyTextCtrl, valueKeyTextShift: valueKeyTextShift, valueKeyTextAlt: valueKeyTextAlt, valueKeyTextXF86: valueKeyTextXF86, valueKeyTextPrint: valueKeyTextPrint, valueKeyTextNumeric: valueKeyTextNumeric, valueKeyTextMouse: valueKeyTextMouse, valueKeyTextDefault: valueKeyTextDefault, valueKeyLabelColor: valueKeyLabelColor, valueKeyColorMod2: valueKeyColorMod2, valueKeyColorMod3: valueKeyColorMod3, valueKeyColorMod5: valueKeyColorMod5, valueKeyTextMod2: valueKeyTextMod2, valueKeyTextMod3: valueKeyTextMod3, valueKeyTextMod5: valueKeyTextMod5, valueKeyLabelMod2: valueKeyLabelMod2, valueKeyLabelMod3: valueKeyLabelMod3, valueKeyLabelMod5: valueKeyLabelMod5, valueDescriptionTextColor: valueDescriptionTextColor})
+
+  property var editBindOverrides: JSON.parse(JSON.stringify(displayBaseline.editBindOverrides))
+  property var editCheatsheetData: JSON.parse(JSON.stringify(displayBaseline.editCheatsheetData))
+
+  function restoreHidden(clearDescriptions) {
+    var next = JSON.parse(JSON.stringify(editBindOverrides));
+    for (var key in next) {
+      // Absence inherits the shared flag in placement settings. An explicit
+      // false choice restores the bind for either selected owner.
+      if (next[key].hidden === true) next[key].hidden = false;
+      if (clearDescriptions && next[key].desc) next[key].desc = "";
+    }
+    editBindOverrides = next;
+  }
 
   function _applyPreview(key, value) {
     if (!pluginApi) return;
     var patch = {};
     patch[key] = value;
-    pluginApi.pluginSettings = Object.assign({}, pluginApi.pluginSettings, patch);
+    return pluginApi.previewSettings(patch);
   }
 
   // Edit-copy properties for non-preview settings (window, layout, parsing, paths)
   property int editWindowWidth: cfg.windowWidth ?? defaults.windowWidth ?? 1400
-  property int editWindowHeight: cfg.windowHeight ?? defaults.windowHeight ?? 850
+  property int editWindowHeight: displayBaseline.editWindowHeight
   property bool editAutoHeight: cfg.autoHeight ?? defaults.autoHeight ?? true
   property int editColumnCount: cfg.columnCount ?? defaults.columnCount ?? 3
   property string editModKeyVariable: cfg.modKeyVariable || defaults.modKeyVariable || "$mod"
@@ -43,7 +107,7 @@ ColumnLayout {
   property bool editMergeSequentialBinds: cfg.mergeSequentialBinds ?? defaults.mergeSequentialBinds ?? true
   property bool editShowUndescribedBinds: cfg.showUndescribedBinds ?? defaults.showUndescribedBinds ?? false
   property bool editSplitLargeWorkspaceCategory: cfg.splitLargeWorkspaceCategory ?? defaults.splitLargeWorkspaceCategory ?? true
-  property int editWorkspaceSplitThreshold: cfg.workspaceSplitThreshold ?? defaults.workspaceSplitThreshold ?? 12
+  property int editWorkspaceSplitThreshold: displayBaseline.project("editWorkspaceSplitThreshold")
 
   // Live-preview properties for colors (mirror current pluginSettings; written via _applyPreview).
   // All background color fields are stored as string (hex) for empty-string support.
@@ -110,18 +174,9 @@ ColumnLayout {
     }
   }
 
-  Component.onCompleted: {
-    if (pluginApi) {
-      _snapshot = JSON.parse(JSON.stringify(pluginApi.pluginSettings));
-    }
-  }
-
   Component.onDestruction: {
     clipboardTimer.stop();
     if (clipboardProcess.running) clipboardProcess.running = false;
-    if (!_applied && pluginApi && _snapshot) {
-      pluginApi.pluginSettings = Object.assign({}, _snapshot);
-    }
   }
 
   // ============ TAB BAR ============
@@ -251,7 +306,7 @@ ColumnLayout {
               id: heightInput
               Layout.preferredWidth: 100 * Style.uiScaleRatio
               Layout.preferredHeight: Style.baseWidgetSize
-              Component.onCompleted: text = root.editWindowHeight > 0 ? root.editWindowHeight.toString() : "850"
+              text: root.editWindowHeight.toString()
               enabled: !autoHeightToggle.checked
               opacity: enabled ? 1.0 : 0.5
               onTextChanged: {
@@ -382,7 +437,7 @@ ColumnLayout {
             spacing: Style.marginXS
 
             function overrideCount(kind) {
-              var o = root.pluginApi?.pluginSettings?.bindOverrides || ({});
+              var o = root.editBindOverrides;
               var n = 0;
               for (var k in o) {
                 if (kind === "hidden" && o[k] && o[k].hidden === true) n++;
@@ -409,19 +464,7 @@ ColumnLayout {
                 text: pluginApi?.tr("settings.restore-hidden")
                 icon: "eye"
                 onClicked: {
-                  var o = root.pluginApi?.pluginSettings?.bindOverrides || ({});
-                  var next = ({});
-                  for (var k in o) {
-                    var e = ({});
-                    if (o[k] && o[k].desc) e.desc = o[k].desc;
-                    if (Object.keys(e).length > 0) next[k] = e;
-                  }
-                  if (root.pluginApi && root.pluginApi.pluginSettings) {
-                    root.pluginApi.pluginSettings.bindOverrides = next;
-                    root.pluginApi.saveSettings();
-                    root.pluginApi.mainInstance?.refresh();
-                  }
-                  ToastService.showNotice(root.pluginApi?.tr("settings.restore-hidden-message"));
+                  root.restoreHidden();
                 }
               }
 
@@ -429,12 +472,7 @@ ColumnLayout {
                 text: pluginApi?.tr("settings.clear-overrides")
                 icon: "rotate"
                 onClicked: {
-                  if (root.pluginApi && root.pluginApi.pluginSettings) {
-                    root.pluginApi.pluginSettings.bindOverrides = ({});
-                    root.pluginApi.saveSettings();
-                    root.pluginApi.mainInstance?.refresh();
-                  }
-                  ToastService.showNotice(root.pluginApi?.tr("settings.clear-overrides-message"));
+                  root.restoreHidden(true);
                 }
               }
             }
@@ -462,12 +500,14 @@ ColumnLayout {
             }
 
             NSpinBox {
+              id: workspaceThreshold
+              objectName: "settings-range-editWorkspaceSplitThreshold"
               Layout.preferredWidth: 140 * Style.uiScaleRatio
               value: root.editWorkspaceSplitThreshold
               from: 4
               to: 50
               stepSize: 1
-              onValueChanged: {
+              onValueModified: value => {
                 root.editWorkspaceSplitThreshold = value;
               }
             }
@@ -804,12 +844,7 @@ ColumnLayout {
                 niriPathInput.text = root.editNiriConfigPath;
                 mangoPathInput.text = root.editMangoConfigPath;
 
-                if (pluginApi && pluginApi.pluginSettings) {
-                  pluginApi.pluginSettings.cheatsheetData = [];
-                  pluginApi.saveSettings();
-                }
-
-                ToastService.showNotice(pluginApi?.tr("settings.reset-message"));
+                root.editCheatsheetData = [];
               }
             }
           }
@@ -940,90 +975,18 @@ ColumnLayout {
             Layout.fillWidth: true
             spacing: Style.marginS
 
-            Component {
-              id: previewBadge
-              Rectangle {
-                property string label: ""
-                property color bg: "#888888"
-                property color fg: "#FFFFFF"
-                width: badgeText.implicitWidth + Style.marginM * 2
-                height: badgeText.implicitHeight + Style.marginS * 2
-                radius: Style.radiusS
-                color: bg
-                border.color: Qt.darker(bg, 1.4)
-                border.width: Math.max(1, Style.borderS)
-
-                NText {
-                  id: badgeText
-                  anchors.centerIn: parent
-                  text: parent.label
-                  color: parent.fg
-                  pointSize: Style.fontSizeM
-                  font.weight: Style.fontWeightBold
-                }
-              }
-            }
-
-            Loader { sourceComponent: previewBadge; onLoaded: {
-              item.label = "Super";
-              item.bg = Qt.binding(function() { return root.valueKeyColorSuper || AtmoColor.mPrimary });
-              item.fg = Qt.binding(function() { return root.valueKeyTextSuper || root.valueKeyLabelColor });
-            } }
-            Loader { sourceComponent: previewBadge; onLoaded: {
-              item.label = "Ctrl";
-              item.bg = Qt.binding(function() { return root.valueKeyColorCtrl || AtmoColor.mSecondary });
-              item.fg = Qt.binding(function() { return root.valueKeyTextCtrl || root.valueKeyLabelColor });
-            } }
-            Loader { sourceComponent: previewBadge; onLoaded: {
-              item.label = "Shift";
-              item.bg = Qt.binding(function() { return root.valueKeyColorShift || AtmoColor.mTertiary });
-              item.fg = Qt.binding(function() { return root.valueKeyTextShift || root.valueKeyLabelColor });
-            } }
-            Loader { sourceComponent: previewBadge; onLoaded: {
-              item.label = "Alt";
-              item.bg = Qt.binding(function() { return root.valueKeyColorAlt });
-              item.fg = Qt.binding(function() { return root.valueKeyTextAlt || root.valueKeyLabelColor });
-            } }
-            Loader { sourceComponent: previewBadge; onLoaded: {
-              item.label = "XF86Audio";
-              item.bg = Qt.binding(function() { return root.valueKeyColorXF86 });
-              item.fg = Qt.binding(function() { return root.valueKeyTextXF86 || root.valueKeyLabelColor });
-            } }
-            Loader { sourceComponent: previewBadge; onLoaded: {
-              item.label = "Print";
-              item.bg = Qt.binding(function() { return root.valueKeyColorPrint });
-              item.fg = Qt.binding(function() { return root.valueKeyTextPrint || root.valueKeyLabelColor });
-            } }
-            Loader { sourceComponent: previewBadge; onLoaded: {
-              item.label = "1-9";
-              item.bg = Qt.binding(function() { return root.valueKeyColorNumeric });
-              item.fg = Qt.binding(function() { return root.valueKeyTextNumeric || root.valueKeyLabelColor });
-            } }
-            Loader { sourceComponent: previewBadge; onLoaded: {
-              item.label = "mouse:272";
-              item.bg = Qt.binding(function() { return root.valueKeyColorMouse });
-              item.fg = Qt.binding(function() { return root.valueKeyTextMouse || root.valueKeyLabelColor });
-            } }
-            Loader { sourceComponent: previewBadge; onLoaded: {
-              item.label = "Q";
-              item.bg = Qt.binding(function() { return root.valueKeyColorDefault });
-              item.fg = Qt.binding(function() { return root.valueKeyTextDefault || root.valueKeyLabelColor });
-            } }
-            Loader { sourceComponent: previewBadge; onLoaded: {
-              item.label = Qt.binding(function() { return root.valueKeyLabelMod3 || "Mod3" });
-              item.bg = Qt.binding(function() { return root.valueKeyColorMod3 || root.valueKeyColorDefault });
-              item.fg = Qt.binding(function() { return root.valueKeyTextMod3 || root.valueKeyLabelColor });
-            } }
-            Loader { sourceComponent: previewBadge; onLoaded: {
-              item.label = Qt.binding(function() { return root.valueKeyLabelMod2 || "Mod2" });
-              item.bg = Qt.binding(function() { return root.valueKeyColorMod2 || root.valueKeyColorDefault });
-              item.fg = Qt.binding(function() { return root.valueKeyTextMod2 || root.valueKeyLabelColor });
-            } }
-            Loader { sourceComponent: previewBadge; onLoaded: {
-              item.label = Qt.binding(function() { return root.valueKeyLabelMod5 || "Mod5" });
-              item.bg = Qt.binding(function() { return root.valueKeyColorMod5 || root.valueKeyColorDefault });
-              item.fg = Qt.binding(function() { return root.valueKeyTextMod5 || root.valueKeyLabelColor });
-            } }
+            Local.PreviewBadge { label: "Super"; bg: root.valueKeyColorSuper || AtmoColor.mPrimary; fg: root.valueKeyTextSuper || root.valueKeyLabelColor }
+            Local.PreviewBadge { label: "Ctrl"; bg: root.valueKeyColorCtrl || AtmoColor.mSecondary; fg: root.valueKeyTextCtrl || root.valueKeyLabelColor }
+            Local.PreviewBadge { label: "Shift"; bg: root.valueKeyColorShift || AtmoColor.mTertiary; fg: root.valueKeyTextShift || root.valueKeyLabelColor }
+            Local.PreviewBadge { label: "Alt"; bg: root.valueKeyColorAlt; fg: root.valueKeyTextAlt || root.valueKeyLabelColor }
+            Local.PreviewBadge { label: "XF86Audio"; bg: root.valueKeyColorXF86; fg: root.valueKeyTextXF86 || root.valueKeyLabelColor }
+            Local.PreviewBadge { label: "Print"; bg: root.valueKeyColorPrint; fg: root.valueKeyTextPrint || root.valueKeyLabelColor }
+            Local.PreviewBadge { label: "1-9"; bg: root.valueKeyColorNumeric; fg: root.valueKeyTextNumeric || root.valueKeyLabelColor }
+            Local.PreviewBadge { label: "mouse:272"; bg: root.valueKeyColorMouse; fg: root.valueKeyTextMouse || root.valueKeyLabelColor }
+            Local.PreviewBadge { label: "Q"; bg: root.valueKeyColorDefault; fg: root.valueKeyTextDefault || root.valueKeyLabelColor }
+            Local.PreviewBadge { label: root.valueKeyLabelMod3 || "Mod3"; bg: root.valueKeyColorMod3 || root.valueKeyColorDefault; fg: root.valueKeyTextMod3 || root.valueKeyLabelColor }
+            Local.PreviewBadge { label: root.valueKeyLabelMod2 || "Mod2"; bg: root.valueKeyColorMod2 || root.valueKeyColorDefault; fg: root.valueKeyTextMod2 || root.valueKeyLabelColor }
+            Local.PreviewBadge { label: root.valueKeyLabelMod5 || "Mod5"; bg: root.valueKeyColorMod5 || root.valueKeyColorDefault; fg: root.valueKeyTextMod5 || root.valueKeyLabelColor }
           }
 
           // Description preview sample
@@ -1416,7 +1379,7 @@ ColumnLayout {
               root.valueKeyLabelMod2 = ""; root.valueKeyLabelMod3 = ""; root.valueKeyLabelMod5 = "";
 
               if (pluginApi) {
-                pluginApi.pluginSettings = Object.assign({}, pluginApi.pluginSettings, {
+                pluginApi.previewSettings({
                   keyColorSuper: "",
                   keyColorCtrl: "",
                   keyColorShift: "",
@@ -1506,13 +1469,18 @@ ColumnLayout {
     pluginApi.pluginSettings.keyLabelMod3 = root.valueKeyLabelMod3;
     pluginApi.pluginSettings.keyLabelMod5 = root.valueKeyLabelMod5;
 
-    _applied = true;
+    pluginApi.pluginSettings.bindOverrides = JSON.parse(JSON.stringify(root.editBindOverrides));
+    pluginApi.pluginSettings.cheatsheetData = JSON.parse(JSON.stringify(root.editCheatsheetData));
     pluginApi.saveSettings();
+  }
 
-    if (pluginApi.mainInstance) {
-      pluginApi.mainInstance.refresh();
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if ((result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current") {
+        root.pluginApi.mainInstance?.refresh();
+        ToastService.showNotice(root.pluginApi.tr("settings.saved"));
+      }
     }
-
-    ToastService.showNotice(pluginApi?.tr("settings.saved"));
   }
 }
