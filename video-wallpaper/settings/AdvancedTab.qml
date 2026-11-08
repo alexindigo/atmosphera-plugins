@@ -23,10 +23,26 @@ ColumnLayout {
     required property string activeBackend
     required property bool   enabled
     required property string selectedMonitor
+    required property var monitorSettings
+    property alias hardwareAcceleration: mpvpaper.hardwareAcceleration
+    property alias profile: mpvpaper.profile
+    property alias mpvSocket: mpvpaper.mpvSocket
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string fillMode: root.pluginApi?.initialSettings?.[root.selectedMonitor]?.fillMode ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? ""
+        readonly property int orientation: root.pluginApi?.initialSettings?.[root.selectedMonitor]?.orientation ?? 0
+        ranges: [NSettingsRange { field: "orientation"; from: orientationInput.from; to: orientationInput.to }]
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({fillMode: fillMode, orientation: orientation}) || mpvpaper.settingsDirty
 
     // Monitor specific properties
-    property string fillMode: pluginApi?.pluginSettings?.[selectedMonitor]?.fillMode    ?? pluginApi?.manifest?.metadata?.defaultSettings?.fill_mode ?? ""
-    property int orientation: pluginApi?.pluginSettings?.[selectedMonitor]?.orientation ?? 0
+    property string fillMode: monitorSettings.fillMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? ""
+    property int orientation: displayBaseline.project("orientation")
+    function loadMonitor(record) {
+        fillMode = record.fillMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? "";
+        orientation = Math.max(orientationInput.from, Math.min(orientationInput.to, record.orientation ?? 0));
+        mpvpaper.loadMonitor(record);
+    }
 
     // Constants
     readonly property list<string> backends: ["qt6-multimedia", "mpvpaper"]
@@ -65,7 +81,8 @@ ColumnLayout {
 
     // Orientation
     NValueSlider {
-        property real _value: root.orientation
+        id: orientationInput
+        objectName: "settings-range-orientation"
 
         enabled: root.enabled
         from: 0
@@ -73,21 +90,10 @@ ColumnLayout {
         value: root.orientation
         defaultValue: 0
         stepSize: 90
-        text: _value
+        text: root.orientation
         label:       root.pluginApi?.tr("settings.advanced.orientation.label")
         description: root.pluginApi?.tr("settings.advanced.orientation.description")
-        onMoved: value => _value = value
-        onPressedChanged: (pressed, value) => {
-            if(root.pluginApi == null) {
-                Logger.e("video-wallpaper", "Plugin API is null.");
-                return
-            }
-
-            if(!pressed) {
-                root.saveMonitorProperty("orientation", _value);
-                root.pluginApi.saveSettings();
-            }
-        }
+        onMoved: value => root.orientation = value
     }
 
     NTabView {
@@ -104,6 +110,7 @@ ColumnLayout {
             pluginApi: root.pluginApi
             enabled: root.enabled
             selectedMonitor: root.selectedMonitor
+            monitorSettings: root.monitorSettings
 
             onSaveMonitorProperty: (key, value) => root.saveMonitorProperty(key, value);
         }
@@ -111,15 +118,6 @@ ColumnLayout {
         NoBackend {
             pluginApi: root.pluginApi
             enabled: root.enabled
-        }
-    }
-
-    Connections {
-        target: root.pluginApi
-        function onPluginSettingsChanged() {
-            // Update the local properties on change
-            root.fillMode =    root.pluginApi?.pluginSettings?.[root.selectedMonitor]?.fillMode    ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? ""
-            root.orientation = root.pluginApi?.pluginSettings?.[root.selectedMonitor]?.orientation ?? 0
         }
     }
 

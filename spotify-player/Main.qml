@@ -3,33 +3,32 @@ import Quickshell
 import Quickshell.Io
 import qs.Commons
 import qs.Services.UI
+import "Auth.js" as Auth
 
 Item {
+    id: root
     property var pluginApi: null
+    property var _lifetime: ({alive: true})
+    property var _request: null
+    Component.onDestruction: {
+        _lifetime.alive = false;
+        if (_request) _request.abort();
+    }
 
     function refreshAccessToken() {
-
-        const credentials = Qt.btoa(pluginApi?.pluginSettings?.clientId + ":" + pluginApi?.pluginSettings?.clientSecret)
-
-        const xhr = new XMLHttpRequest()
-        xhr.open("POST", "https://accounts.spotify.com/api/token")
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
-        xhr.setRequestHeader("Authorization", "Basic " + credentials)
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                const data = JSON.parse(xhr.responseText)
-                pluginApi.pluginSettings.accessToken = data.access_token
-                if (data.refresh_token) {
-                    pluginApi.pluginSettings.refreshToken = data.refresh_token
-                }
-                pluginApi.pluginSettings.tokenExpiresAt = Date.now() + (data.expires_in * 1000)
-                pluginApi?.saveSettings()
-                Logger.i("spotify-player", "Token refreshed successfully")
-            }
-        }
-        xhr.send(new URLSearchParams({
-            refresh_token: pluginApi?.pluginSettings?.refreshToken,
-            grant_type: "refresh_token"
-        }).toString())
+        if (!pluginApi || _request) return;
+        var api = pluginApi;
+        var lifetime = _lifetime;
+        var input = {clientId: api.pluginSettings.clientId, clientSecret: api.pluginSettings.clientSecret, refreshToken: api.pluginSettings.refreshToken};
+        _request = Auth.requestToken(Qt.btoa(input.clientId + ":" + input.clientSecret), {refresh_token: input.refreshToken, grant_type: "refresh_token"}, function(tokens, error) {
+            if (!lifetime.alive) return;
+            root._request = null;
+            if (error) { Logger.e("spotify-player", "Token refresh failed"); return; }
+            if (root.pluginApi !== api || api.pluginSettings.clientId !== input.clientId || api.pluginSettings.clientSecret !== input.clientSecret || api.pluginSettings.refreshToken !== input.refreshToken) return;
+            api.pluginSettings = Object.assign({}, api.pluginSettings, {accessToken: tokens.accessToken, refreshToken: tokens.refreshToken || input.refreshToken, tokenExpiresAt: tokens.tokenExpiresAt});
+            api.saveSettings(function(result) {
+                if (lifetime.alive && (result.status === "saved" || result.status === "nothing_to_save")) Logger.i("spotify-player", "Token refreshed successfully");
+            });
+        });
     }
 }

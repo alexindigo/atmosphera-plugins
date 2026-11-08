@@ -11,23 +11,31 @@ ColumnLayout {
 
     required property var pluginApi
     required property bool active
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property bool hardwareAcceleration: root.pluginApi?.initialSettings?.hardwareAcceleration || false
+        readonly property string mpvSocket: root.pluginApi?.initialSettings?.mpvSocket || root.pluginApi?.manifest?.metadata?.defaultSettings?.mpvSocket || "/tmp/mpv-socket"
+        readonly property string profile: root.pluginApi?.initialSettings?.profile || root.pluginApi?.manifest?.metadata?.defaultSettings?.profile || "default"
+        readonly property string fillMode: root.pluginApi?.initialSettings?.fillMode || root.pluginApi?.manifest?.metadata?.defaultSettings?.fillMode || "fit"
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({hardwareAcceleration: hardwareAcceleration, mpvSocket: mpvSocket, profile: profile, fillMode: fillMode})
     
     property bool hardwareAcceleration:
-        pluginApi?.pluginSettings?.hardwareAcceleration ||
+        pluginApi?.initialSettings?.hardwareAcceleration ||
         false
 
     property string mpvSocket: 
-        pluginApi?.pluginSettings?.mpvSocket ||
+        pluginApi?.initialSettings?.mpvSocket ||
         pluginApi?.manifest?.metadata?.defaultSettings?.mpvSocket ||
         "/tmp/mpv-socket"
 
     property string profile:
-        pluginApi?.pluginSettings?.profile ||
+        pluginApi?.initialSettings?.profile ||
         pluginApi?.manifest?.metadata?.defaultSettings?.profile ||
         "default"
     
     property string fillMode:
-        pluginApi?.pluginSettings?.fillMode ||
+        pluginApi?.initialSettings?.fillMode ||
         pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ||
         "fit"
 
@@ -106,17 +114,6 @@ ColumnLayout {
         placeholderText: pluginApi?.tr("settings.mpv_socket.input_placeholder") || "Example: /tmp/mpv-socket"
         text: root.mpvSocket
         onTextChanged: root.mpvSocket = text
-    }
-
-    Connections {
-        target: pluginApi
-        function onPluginSettingsChanged() {
-            // Update the local properties on change
-            root.hardwareAcceleration = root.pluginApi.pluginSettings.hardwareAcceleration || false
-            root.mpvSocket = root.pluginApi.pluginSettings.mpvSocket || "/tmp/mpv-socket";
-            root.profile = root.pluginApi.pluginSettings.profile || pluginApi?.manifest?.metadata?.defaultSettings?.profile || "default"
-            root.fillMode = root.pluginApi.pluginSettings.fillMode || pluginApi?.manifest?.metadata?.defaultSettings?.fillMode || "fit"
-        }
     }
 
 

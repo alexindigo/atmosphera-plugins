@@ -1426,7 +1426,7 @@
       "author": "spiros132",
       "description": "A plugin that allows having video wallpapers using mpvpaper.",
       "license": "MIT",
-      "version": "1.6.7",
+      "version": "1.6.8",
       "tags": [
         "Bar",
         "Panel",
@@ -1437,7 +1437,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "mullvad",
@@ -1463,7 +1463,7 @@
       "author": "kevichi7",
       "description": "Search YouTube, play audio in the background with mpv, and save favorites into a persistent library.",
       "license": "MIT",
-      "version": "1.2.5",
+      "version": "1.2.6",
       "tags": [
         "Bar",
         "Panel",
@@ -1475,7 +1475,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "netbird",
@@ -1717,7 +1717,7 @@
       "author": "cod3d <cod3ddot@proton.me>",
       "description": "GPU control with supergfxctl for noctalia.",
       "license": "MIT",
-      "version": "0.0.5",
+      "version": "0.0.6",
       "tags": [
         "Bar",
         "Panel",
@@ -1727,7 +1727,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.8.2",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "noctalia-vantage",
@@ -2407,7 +2407,7 @@
       "author": "suvi",
       "description": "Control spotify_player from a bar widget.",
       "license": "GPL 3.0",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel",
@@ -2418,7 +2418,7 @@
       "upstreamPR": 739,
       "lastUpdated": "2026-10-10",
       "minNoctaliaVersion": "4.7.6",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "squeekboard-toggle",
@@ -2590,7 +2590,7 @@
       "author": "lonerOrz <lonerOrz@qq.com>",
       "description": "A simple todo list manager plugin for Noctalia Shell.",
       "license": "MIT",
-      "version": "1.10.3",
+      "version": "1.10.4",
       "tags": [
         "Bar",
         "Desktop",
@@ -2601,7 +2601,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.7.1",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "touchpad-incident",
@@ -2712,7 +2712,7 @@
       "author": "spiros132",
       "description": "A plugin that uses a backend renderer to play videos as your wallpaper.",
       "license": "MIT",
-      "version": "2.0.12",
+      "version": "2.0.13",
       "tags": [
         "Bar",
         "Panel",
@@ -2723,7 +2723,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "vinyl-launcher",

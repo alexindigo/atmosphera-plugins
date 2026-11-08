@@ -12,17 +12,24 @@ ColumnLayout {
 
     required property var pluginApi
     required property bool active
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property bool automation: root.pluginApi?.initialSettings?.automation || false
+        readonly property string automationMode: root.pluginApi?.initialSettings?.automationMode || "random"
+        readonly property real automationTime: root.pluginApi?.initialSettings?.automationTime || 5 * 60
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({automation: automation, automationMode: automationMode, automationTime: automationTime})
 
     property bool automation:
-        pluginApi?.pluginSettings?.automation ||
+        pluginApi?.initialSettings?.automation ||
         false
 
     property string automationMode:
-        pluginApi?.pluginSettings?.automationMode ||
+        pluginApi?.initialSettings?.automationMode ||
         "random"
 
     property real automationTime:
-        pluginApi?.pluginSettings?.automationTime ||
+        pluginApi?.initialSettings?.automationTime ||
         5 * 60
 
     // Automation Toggle
@@ -104,16 +111,6 @@ ColumnLayout {
                     outlined: root.automationTime === modelData.time
                 }
             }
-        }
-    }
-
-    Connections {
-        target: root.pluginApi
-        function onPluginSettingsChanged() {
-            // Update the local properties on change
-            root.automation = root.pluginApi?.pluginSettings?.automation || false
-            root.automationMode = root.pluginApi?.pluginSettings?.automationMode || "random"
-            root.automationTime = root.pluginApi?.pluginSettings?.automationTime || 60
         }
     }
 

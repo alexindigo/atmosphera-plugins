@@ -4,25 +4,64 @@ import QtQuick.Layouts
 import qs.Commons
 import qs.Services.UI
 import qs.Widgets
+import qs.Portals
+import "Pages.js" as Pages
 
 ColumnLayout {
   id: root
 
   property var pluginApi: null
+  readonly property var initial: pluginApi?.initialSettings || ({})
+  readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property bool valueShowCompleted: root.initial.showCompleted ?? root.defaults.showCompleted ?? true
+    readonly property bool valueShowBackground: root.initial.showBackground ?? root.defaults.showBackground ?? true
+    readonly property bool valueUseCustomColors: root.initial.useCustomColors ?? root.defaults.useCustomColors ?? false
+    readonly property color valueHighPriorityColor: root.initial.priorityColors?.high || root.defaults.priorityColors?.high || AtmoColor.mError.toString()
+    readonly property color valueMediumPriorityColor: root.initial.priorityColors?.medium || root.defaults.priorityColors?.medium || AtmoColor.mPrimary.toString()
+    readonly property color valueLowPriorityColor: root.initial.priorityColors?.low || root.defaults.priorityColors?.low || AtmoColor.mOnSurfaceVariant.toString()
+    readonly property string valueExportPath: root.initial.exportPath ?? root.defaults.exportPath ?? "~/Documents"
+    readonly property string valueExportFormat: root.initial.exportFormat ?? root.defaults.exportFormat ?? "markdown"
+    readonly property bool valueExportEmptySections: root.initial.exportEmptySections ?? root.defaults.exportEmptySections ?? false
+    readonly property var editPages: root.initial.pages || [{id: 0, name: "General"}]
+    readonly property var editTodos: root.initial.todos || []
+    readonly property int editCurrentPage: root.initial.current_page_id ?? 0
+    readonly property var pendingNames: Pages.names(editPages)
+    readonly property string newPageName: ""
+  }
+  property var editPages: Pages.clone(displayBaseline.editPages)
+  property var editTodos: Pages.clone(displayBaseline.editTodos)
+  property int editCurrentPage: displayBaseline.editCurrentPage
+  property var pendingNames: Pages.clone(displayBaseline.pendingNames)
+  property string newPageName: ""
+  readonly property bool settingsDirty: displayBaseline.differs({valueShowCompleted: valueShowCompleted, valueShowBackground: valueShowBackground, valueUseCustomColors: valueUseCustomColors, valueHighPriorityColor: valueHighPriorityColor, valueMediumPriorityColor: valueMediumPriorityColor, valueLowPriorityColor: valueLowPriorityColor, valueExportPath: valueExportPath, valueExportFormat: valueExportFormat, valueExportEmptySections: valueExportEmptySections, editPages: editPages, editTodos: editTodos, editCurrentPage: editCurrentPage, pendingNames: pendingNames, newPageName: newPageName})
 
-  property bool valueShowCompleted: pluginApi?.pluginSettings?.showCompleted !== undefined ? pluginApi.pluginSettings.showCompleted : pluginApi?.manifest?.metadata?.defaultSettings?.showCompleted
-  property bool valueShowBackground: pluginApi?.pluginSettings?.showBackground !== undefined ? pluginApi.pluginSettings.showBackground : pluginApi?.manifest?.metadata?.defaultSettings?.showBackground
+  function setPendingName(id, value) {
+    var next = Object.assign({}, pendingNames); next[String(id)] = value; pendingNames = next;
+  }
+  function renamePage(id, name) {
+    name = name.trim();
+    var index = editPages.findIndex(page => page.id === id);
+    if (!name || !isPageNameUnique(name, index)) return false;
+    editPages = Pages.rename(editPages, id, name);
+    setPendingName(id, name);
+    return true;
+  }
+
+  property bool valueShowCompleted: displayBaseline.valueShowCompleted
+  property bool valueShowBackground: displayBaseline.valueShowBackground
 
   // Priority color properties
-  property bool valueUseCustomColors: pluginApi?.pluginSettings?.useCustomColors !== undefined ? pluginApi.pluginSettings.useCustomColors : pluginApi?.manifest?.metadata?.defaultSettings?.useCustomColors
-  property color valueHighPriorityColor: (pluginApi?.pluginSettings?.priorityColors?.high) || (pluginApi?.manifest?.metadata?.defaultSettings?.priorityColors?.high) || AtmoColor.mError.toString()
-  property color valueMediumPriorityColor: (pluginApi?.pluginSettings?.priorityColors?.medium) || (pluginApi?.manifest?.metadata?.defaultSettings?.priorityColors?.medium) || AtmoColor.mPrimary.toString()
-  property color valueLowPriorityColor: (pluginApi?.pluginSettings?.priorityColors?.low) || (pluginApi?.manifest?.metadata?.defaultSettings?.priorityColors?.low) || AtmoColor.mOnSurfaceVariant.toString()
+  property bool valueUseCustomColors: displayBaseline.valueUseCustomColors
+  property color valueHighPriorityColor: displayBaseline.valueHighPriorityColor
+  property color valueMediumPriorityColor: displayBaseline.valueMediumPriorityColor
+  property color valueLowPriorityColor: displayBaseline.valueLowPriorityColor
 
   // Export path property
-  property string valueExportPath: pluginApi?.pluginSettings?.exportPath !== undefined ? pluginApi?.pluginSettings?.exportPath : pluginApi?.manifest?.metadata?.defaultSettings?.exportPath
-  property string valueExportFormat: pluginApi?.pluginSettings?.exportFormat !== undefined ? pluginApi?.pluginSettings?.exportFormat : pluginApi?.manifest?.metadata?.defaultSettings?.exportFormat
-  property bool valueExportEmptySections: pluginApi?.pluginSettings?.exportEmptySections !== undefined ? pluginApi.pluginSettings.exportEmptySections : pluginApi?.manifest?.metadata?.defaultSettings?.exportEmptySections
+  property string valueExportPath: displayBaseline.valueExportPath
+  property string valueExportFormat: displayBaseline.valueExportFormat
+  property bool valueExportEmptySections: displayBaseline.valueExportEmptySections
 
   // Reference to Main.qml instance for centralized data management
   readonly property var mainInstance: pluginApi?.mainInstance
@@ -164,10 +203,6 @@ ColumnLayout {
     currentKey: root.valueExportFormat
     onSelected: function (key) {
       root.valueExportFormat = key;
-      if (mainInstance && mainInstance.pluginApi) {
-        mainInstance.pluginApi.pluginSettings.exportFormat = key;
-        mainInstance.pluginApi.saveSettings();
-      }
     }
   }
 
@@ -179,15 +214,11 @@ ColumnLayout {
     checked: root.valueExportEmptySections
     onToggled: function (checked) {
       root.valueExportEmptySections = checked;
-      if (mainInstance && mainInstance.pluginApi) {
-        mainInstance.pluginApi.pluginSettings.exportEmptySections = checked;
-        mainInstance.pluginApi.saveSettings();
-      }
     }
   }
 
   // Folder picker for selecting export path
-  AtmoFilePicker {
+  PortalFilePicker {
     id: folderPicker
     selectionMode: "folders"
     title: pluginApi.tr("settings.export_path.label")
@@ -195,8 +226,6 @@ ColumnLayout {
     onAccepted: function (paths) {
       if (paths.length > 0) {
         root.valueExportPath = paths[0];
-        mainInstance.pluginApi.pluginSettings.exportPath = paths[0];
-        mainInstance.pluginApi.saveSettings();
       }
     }
   }
@@ -220,6 +249,8 @@ ColumnLayout {
 
       NTextInput {
         id: newPageInput
+        text: root.newPageName
+        onTextEdited: root.newPageName = text
         placeholderText: pluginApi?.tr("settings.pages.placeholder")
         Layout.fillWidth: true
         Keys.onReturnPressed: addPage()
@@ -257,7 +288,7 @@ ColumnLayout {
           spacing: Style.marginS
 
           Repeater {
-            model: pluginApi?.pluginSettings?.pages || []
+            model: root.editPages
 
             delegate: Item {
               width: parent.width
@@ -285,9 +316,7 @@ ColumnLayout {
                 }
 
                 // Use mainInstance to rename page
-                if (mainInstance) {
-                  mainInstance.renamePageInternal(modelData.id, newName);
-                }
+                root.renamePage(modelData.id, newName);
 
                 originalName = newName;
                 editing = false;
@@ -296,7 +325,7 @@ ColumnLayout {
               // Function to cancel renaming
               function cancelRename() {
                 if (renameInput) {
-                  renameInput.text = originalName;
+                  root.setPendingName(modelData.id, originalName);
                 }
                 editing = false;
               }
@@ -337,9 +366,9 @@ ColumnLayout {
                       icon: "trash"
                       tooltipText: pluginApi?.tr("settings.pages.delete_button_tooltip")
                       colorFg: AtmoColor.mError
-                      enabled: (pluginApi?.pluginSettings?.pages?.length || 0) > 1 && modelData.id !== 0
+                      enabled: root.editPages.length > 1 && modelData.id !== 0
                       onClicked: {
-                        if ((pluginApi?.pluginSettings?.pages?.length || 0) <= 1) {
+                        if (root.editPages.length <= 1) {
                           ToastService.showError(pluginApi?.tr("settings.pages.cannot_delete_last"));
                           return;
                         }
@@ -365,7 +394,8 @@ ColumnLayout {
 
                   NTextInput {
                     id: renameInput
-                    text: originalName
+                    text: root.pendingNames[String(modelData.id)] || ""
+                    onTextEdited: root.setPendingName(modelData.id, text)
                     Layout.fillWidth: true
                     Layout.preferredWidth: 150
                     focus: editing
@@ -375,7 +405,7 @@ ColumnLayout {
 
                     onVisibleChanged: {
                       if (visible && editing) {
-                        text = originalName;
+                        root.setPendingName(modelData.id, originalName);
                         forceActiveFocus();
                       }
                     }
@@ -406,7 +436,7 @@ ColumnLayout {
   }
 
   function isPageNameUnique(name, excludeIndex) {
-    var pages = pluginApi?.pluginSettings?.pages || [];
+    var pages = editPages;
     var lowerName = name.toLowerCase().trim();
     for (var i = 0; i < pages.length; i++) {
       if (i !== excludeIndex && pages[i].name.toLowerCase().trim() === lowerName) {
@@ -417,7 +447,7 @@ ColumnLayout {
   }
 
   function addPage() {
-    var name = newPageInput.text.trim();
+    var name = newPageName.trim();
 
     if (name === "") {
       ToastService.showError(pluginApi?.tr("settings.pages.empty_name"));
@@ -430,11 +460,10 @@ ColumnLayout {
     }
 
     // Use mainInstance to create page
-    if (mainInstance) {
-      mainInstance.createPage(name);
-    }
+    editPages = Pages.create(editPages, name);
+    pendingNames = Pages.names(editPages);
 
-    newPageInput.text = "";
+    newPageName = "";
     newPageInput.forceActiveFocus();
   }
 
@@ -508,7 +537,7 @@ ColumnLayout {
     if (pageIdx < 0)
       return;
 
-    var pages = pluginApi?.pluginSettings?.pages || [];
+    var pages = editPages;
 
     // Prevent deleting default page (id: 0)
     if (pages[pageIdx].id === 0) {
@@ -524,9 +553,11 @@ ColumnLayout {
     var pageToDeleteId = pages[pageIdx].id;
 
     // Use mainInstance to delete page (handles todos migration and current_page_id update)
-    if (mainInstance) {
-      mainInstance.deletePage(pageToDeleteId);
-    }
+    var next = Pages.remove(editPages, editTodos, editCurrentPage, pageToDeleteId);
+    editPages = next.pages;
+    editTodos = next.todos;
+    editCurrentPage = next.current;
+    pendingNames = Pages.names(editPages);
   }
 
   function saveSettings() {
@@ -535,31 +566,40 @@ ColumnLayout {
       return;
     }
 
+    if (newPageName.trim()) {
+      if (!isPageNameUnique(newPageName.trim(), -1)) throw new Error("Duplicate page name");
+      addPage();
+    }
+    for (var page of editPages) {
+      if (!renamePage(page.id, pendingNames[String(page.id)] || "")) throw new Error("Invalid page name");
+    }
+    pendingNames = Pages.names(editPages);
+
     pluginApi.pluginSettings.showCompleted = root.valueShowCompleted;
     pluginApi.pluginSettings.showBackground = root.valueShowBackground;
     pluginApi.pluginSettings.useCustomColors = root.valueUseCustomColors;
 
-    // Only save custom colors if the option is enabled
-    if (root.valueUseCustomColors) {
-      // Save priority colors
-      if (!pluginApi.pluginSettings.priorityColors) {
-        pluginApi.pluginSettings.priorityColors = {};
-      }
-      pluginApi.pluginSettings.priorityColors.high = root.valueHighPriorityColor.toString();
-      pluginApi.pluginSettings.priorityColors.medium = root.valueMediumPriorityColor.toString();
-      pluginApi.pluginSettings.priorityColors.low = root.valueLowPriorityColor.toString();
-    } else {
-      // If custom colors are disabled, reset to defaults
-      pluginApi.pluginSettings.priorityColors = {
-        "high": AtmoColor.mError.toString(),
-        "medium": AtmoColor.mPrimary.toString(),
-        "low": AtmoColor.mOnSurfaceVariant.toString()
-      };
+    if (!valueUseCustomColors) {
+      valueHighPriorityColor = AtmoColor.mError;
+      valueMediumPriorityColor = AtmoColor.mPrimary;
+      valueLowPriorityColor = AtmoColor.mOnSurfaceVariant;
     }
+    pluginApi.pluginSettings.priorityColors = Object.assign({}, pluginApi.pluginSettings.priorityColors, {high: valueHighPriorityColor.toString(), medium: valueMediumPriorityColor.toString(), low: valueLowPriorityColor.toString()});
+    pluginApi.pluginSettings.exportPath = valueExportPath;
+    pluginApi.pluginSettings.exportFormat = valueExportFormat;
+    pluginApi.pluginSettings.exportEmptySections = valueExportEmptySections;
+    pluginApi.pluginSettings.pages = Pages.clone(editPages);
+    pluginApi.pluginSettings.todos = Pages.clone(editTodos);
+    pluginApi.pluginSettings.current_page_id = editCurrentPage;
 
     pluginApi.saveSettings();
 
-    Logger.i("Todo", "Settings saved successfully");
     return;
+  }
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if ((result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current") Logger.i("Todo", "Settings saved successfully");
+    }
   }
 }

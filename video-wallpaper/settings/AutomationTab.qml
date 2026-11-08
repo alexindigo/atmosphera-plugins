@@ -20,14 +20,24 @@ ColumnLayout {
     required property var pluginApi
     required property bool enabled
     required property string selectedMonitor
+    required property var monitorSettings
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property bool automation: root.pluginApi?.initialSettings?.[root.selectedMonitor]?.automation ?? false
+        readonly property string automationMode: root.pluginApi?.initialSettings?.[root.selectedMonitor]?.automationMode ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? ""
+        readonly property real automationTime: root.pluginApi?.initialSettings?.[root.selectedMonitor]?.automationTime ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.automationTime ?? 0
+        readonly property var automationCustomTime: root.pluginApi?.initialSettings?.automationCustomTime || []
+    }
+    property alias customTimeText: customTimeInput.text
+    readonly property bool settingsDirty: displayBaseline.differs({automation: automation, automationMode: automationMode, automationTime: automationTime, automationCustomTime: automationCustomTime}) || customTimeText.length > 0
 
     // Monitor specific properties
-    property bool   automation:     pluginApi?.pluginSettings?.[selectedMonitor]?.automation     ?? false
-    property string automationMode: pluginApi?.pluginSettings?.[selectedMonitor]?.automationMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? ""
-    property real   automationTime: pluginApi?.pluginSettings?.[selectedMonitor]?.automationTime ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationTime ?? 0
+    property bool automation: monitorSettings.automation ?? false
+    property string automationMode: monitorSettings.automationMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? ""
+    property real automationTime: monitorSettings.automationTime ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationTime ?? 0
 
     // Global properties
-    property list<int> automationCustomTime: pluginApi?.pluginSettings?.automationCustomTime ?? []
+    property list<int> automationCustomTime: Array.from(displayBaseline.automationCustomTime)
 
     // Signals
     signal saveMonitorProperty(key: string, value: var);
@@ -35,11 +45,11 @@ ColumnLayout {
     /***************************
     * EVENTS
     ***************************/
-    onSelectedMonitorChanged: {
+    function loadMonitor(record) {
         // Update the local variables
-        automation =     pluginApi?.pluginSettings?.[selectedMonitor]?.automation     ?? false;
-        automationMode = pluginApi?.pluginSettings?.[selectedMonitor]?.automationMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? "";
-        automationTime = pluginApi?.pluginSettings?.[selectedMonitor]?.automationTime ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationTime ?? 0;
+        automation = record.automation ?? false;
+        automationMode = record.automationMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? "";
+        automationTime = record.automationTime ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationTime ?? 0;
     }
 
 
@@ -202,26 +212,15 @@ ColumnLayout {
                 }
 
                 const seconds = hour * 3600 + minute * 60;
-                root.automationCustomTime.push(seconds);
-
-                // Make sure no duplicates exist.
-                let s = new Set(root.automationCustomTime);
-                root.automationCustomTime = [...s];
-                root.automationCustomTime.sort();
+                root.automationCustomTime = Array.from(new Set(Array.from(root.automationCustomTime).concat([seconds]))).sort();
 
                 // Reset the input
                 customTimeInput.text = "";
 
-                // Save the custom time to settings
-                if (root.pluginApi == null) {
-                    Logger.e("video-wallpaper", "Plugin API is null.");
-                    return;
-                }
-                root.pluginApi.pluginSettings.automationCustomTime = root.automationCustomTime;
-                root.pluginApi.saveSettings();
-
                 createCustomTime.close();
+                return true;
             }
+            return false;
         }
 
         ColumnLayout {
@@ -234,7 +233,7 @@ ColumnLayout {
                 description:     root.pluginApi?.tr("settings.automation.time.custom.create.description")
                 placeholderText: root.pluginApi?.tr("settings.automation.time.custom.create.placeholder")
                 Layout.fillWidth: true
-                onEditingFinished: createCustomTime.save();
+                onAccepted: createCustomTime.save();
 
                 function isCorrectFormat() {
                     // Check that : is included and that only one : is included
@@ -266,7 +265,7 @@ ColumnLayout {
 
                 NButton {
                     text: root.pluginApi?.tr("settings.automation.time.custom.create.cancel")
-                    onClicked: createCustomTime.close();
+                    onClicked: { customTimeInput.text = ""; createCustomTime.close(); }
                 }
 
                 NButton {
@@ -298,24 +297,14 @@ ColumnLayout {
                     const index = root.automationCustomTime.indexOf(selectedSeconds);
                     if(index !== -1) {
                         // Remove the element from the list
-                        root.automationCustomTime.splice(index, 1);
-                        root.pluginApi.pluginSettings.automationCustomTime = root.automationCustomTime;
-                        root.pluginApi.saveSettings();
+                        var next = Array.from(root.automationCustomTime);
+                        next.splice(index, 1);
+                        root.automationCustomTime = next;
                     }
                     break;
                 default:
                     Logger.e("video-wallpaper", "Error, action not found:", action);
             }
-        }
-    }
-
-    Connections {
-        target: root.pluginApi
-        function onPluginSettingsChanged() {
-            // Update the local properties on change
-            root.automation =     root.pluginApi?.pluginSettings?.[root.selectedMonitor]?.automation     ?? false;
-            root.automationMode = root.pluginApi?.pluginSettings?.[root.selectedMonitor]?.automationMode ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? "";
-            root.automationTime = root.pluginApi?.pluginSettings?.[root.selectedMonitor]?.automationTime ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.automationTime ?? 0;
         }
     }
 
@@ -328,11 +317,11 @@ ColumnLayout {
             Logger.e("video-wallpaper", "Cannot save, pluginApi is null");
             return;
         }
+        if (customTimeText.trim() && !createCustomTime.save()) throw new Error("Invalid automation time");
 
         saveMonitorProperty("automation", automation);
         saveMonitorProperty("automationMode", automationMode);
         saveMonitorProperty("automationTime", automationTime);
 
-        pluginApi.pluginSettings.automationCustomTime = automationCustomTime;
     }
 }

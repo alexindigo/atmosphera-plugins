@@ -3,6 +3,7 @@ import QtQuick.Layouts
 
 import qs.Commons
 import qs.Widgets
+import qs.Portals
 
 ColumnLayout {
     id: root
@@ -11,6 +12,12 @@ ColumnLayout {
 
     required property var pluginApi
     required property bool active
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string wallpapersFolder: root.pluginApi?.initialSettings?.wallpapersFolder || root.pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder || "~/Pictures/Wallpapers"
+        readonly property string currentWallpaper: root.pluginApi?.initialSettings?.currentWallpaper || ""
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({wallpapersFolder: wallpapersFolder, currentWallpaper: currentWallpaper})
 
     readonly property bool isPlaying: 
         pluginApi.pluginSettings.isPlaying ||
@@ -18,12 +25,12 @@ ColumnLayout {
 
 
     property string wallpapersFolder: 
-        pluginApi?.pluginSettings?.wallpapersFolder ||
+        pluginApi?.initialSettings?.wallpapersFolder ||
         pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ||
         "~/Pictures/Wallpapers"
 
     property string currentWallpaper: 
-        pluginApi?.pluginSettings?.currentWallpaper || 
+        pluginApi?.initialSettings?.currentWallpaper ||
         ""
 
 
@@ -55,7 +62,7 @@ ColumnLayout {
                 onClicked: wallpapersFolderPicker.openFilePicker()
             }
 
-            AtmoFilePicker {
+            PortalFilePicker {
                 id: wallpapersFolderPicker
                 title: pluginApi?.tr("settings.wallpapers_folder.file_picker_title") || "Choose wallpapers folder"
                 initialPath: root.wallpapersFolder
@@ -88,7 +95,7 @@ ColumnLayout {
             onClicked: currentWallpaperPicker.openFilePicker()
         }
 
-        AtmoFilePicker {
+        PortalFilePicker {
             id: currentWallpaperPicker
             title: pluginApi?.tr("settings.select_wallpaper.file_picker_title") || "Choose current wallpaper"
             initialPath: root.wallpapersFolder
@@ -100,15 +107,6 @@ ColumnLayout {
                     root.currentWallpaper = paths[0];
                 }
             }
-        }
-    }
-
-    Connections {
-        target: pluginApi
-        function onPluginSettingsChanged() {
-            // Update the local properties on change
-            root.wallpapersFolder = root.pluginApi.pluginSettings.wallpapersFolder || "~/Pictures/Wallpapers";
-            root.currentWallpaper = root.pluginApi.pluginSettings.currentWallpaper || "";
         }
     }
 

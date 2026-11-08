@@ -6,6 +6,7 @@ import Quickshell
 
 import qs.Commons
 import qs.Widgets
+import qs.Portals
 
 import "../common"
 
@@ -22,14 +23,23 @@ ColumnLayout {
     required property var    pluginApi
     required property bool   enabled
     required property string selectedMonitor
+    required property var monitorSettings
+    required property var toolSettings
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string currentWallpaper: root.pluginApi?.initialSettings?.[root.selectedMonitor]?.currentWallpaper ?? ""
+        readonly property real volume: root.pluginApi?.initialSettings?.[root.selectedMonitor]?.volume ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.volume ?? 1.0
+        ranges: [NSettingsRange { field: "volume"; from: volumeInput.from; to: volumeInput.to }]
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({currentWallpaper: currentWallpaper, volume: volume})
 
     // Monitor specific properties
     readonly property bool isMuted:   pluginApi?.pluginSettings?.[selectedMonitor]?.isMuted   ?? false
     readonly property bool isPlaying: pluginApi?.pluginSettings?.[selectedMonitor]?.isPlaying ?? false
 
-    property string currentWallpaper: pluginApi?.pluginSettings?.[selectedMonitor]?.currentWallpaper ?? ""
+    property string currentWallpaper: monitorSettings.currentWallpaper ?? ""
     property bool   monitorSpecific:  pluginApi?.pluginSettings?.monitorSpecific                     ?? false
-    property double volume:           pluginApi?.pluginSettings?.[selectedMonitor]?.volume           ?? pluginApi?.manifest?.metadata?.defaultSettings?.volume ?? 0
+    property double volume: displayBaseline.project("volume")
 
     // Global properties
     property string wallpapersFolder: pluginApi?.pluginSettings?.wallpapersFolder ?? pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
@@ -41,10 +51,10 @@ ColumnLayout {
     /***************************
     * EVENTS
     ***************************/
-    onSelectedMonitorChanged: {
+    function loadMonitor(record) {
         // Update the local variables
-        currentWallpaper = pluginApi?.pluginSettings?.[selectedMonitor]?.currentWallpaper ?? ""
-        volume =           pluginApi?.pluginSettings?.[selectedMonitor]?.volume           ?? pluginApi?.manifest?.metadata?.defaultSettings?.volume ?? 0
+        currentWallpaper = record.currentWallpaper ?? ""
+        volume = Math.max(volumeInput.from, Math.min(volumeInput.to, record.volume ?? pluginApi?.manifest?.metadata?.defaultSettings?.volume ?? 1.0))
     }
 
 
@@ -68,7 +78,7 @@ ColumnLayout {
             onClicked: currentWallpaperPicker.openFilePicker()
         }
 
-        AtmoFilePicker {
+        PortalFilePicker {
             id: currentWallpaperPicker
             title: root.pluginApi?.tr("settings.general.select_wallpaper.file_picker.title")
             initialPath: root.wallpapersFolder
@@ -85,30 +95,19 @@ ColumnLayout {
 
     // Volume
     NValueSlider {
-        property real _value: root.volume || 1.0
+        id: volumeInput
+        objectName: "settings-range-volume"
 
         enabled: root.enabled
         from: 0.0
         to: 1.0
         defaultValue: 1.0
-        value: _value
+        value: root.volume
         stepSize: (Settings.data.audio.volumeStep / 100.0)
-        text: `${_value * 100.0}%`
+        text: `${root.volume * 100.0}%`
         label:       root.pluginApi?.tr("settings.general.volume.label")
         description: root.pluginApi?.tr("settings.general.volume.description")
-        onMoved: value => _value = value
-        onPressedChanged: (pressed, value) => {
-            if(root.pluginApi == null) {
-                Logger.e("video-wallpaper", "Plugin API is null.");
-                return;
-            }
-
-            // When slider is let go
-            if (!pressed) {
-                root.saveMonitorProperty("volume", value);
-                root.pluginApi.saveSettings();
-            }
-        }
+        onMoved: value => root.volume = value
     }
 
     NDivider {}
@@ -119,19 +118,10 @@ ColumnLayout {
         enabled: root.enabled
         monitorSpecific: root.monitorSpecific
         screenName: root.selectedMonitor
+        settingWriter: (key, value) => root.saveMonitorProperty(key, value)
+        settings: root.toolSettings
     }
 
-
-    Connections {
-        target: pluginApi
-        function onPluginSettingsChanged() {
-            // Update the local properties on change
-            root.currentWallpaper = root.pluginApi?.pluginSettings?.[root.selectedMonitor]?.currentWallpaper ?? ""
-            root.volume =           root.pluginApi?.pluginSettings?.[root.selectedMonitor]?.volume           ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.volume ?? 0
-
-            root.wallpapersFolder = root.pluginApi?.pluginSettings?.wallpapersFolde ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
-        }
-    }
 
     /********************************
     * Save settings functionality
