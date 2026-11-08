@@ -9,17 +9,10 @@ Item {
   property var pluginApi: null
 
   // Panel settings control
-  property bool showCloseButton: false
+  readonly property bool showCloseButton: pluginApi?.settingsView?.showCloseButton ?? false
 
   // Auto-paste support
   property bool wtypeAvailable: false
-
-  // Watch for pluginApi changes and initialize settings
-  onPluginApiChanged: {
-    if (pluginApi) {
-      showCloseButton = pluginApi.pluginSettings?.showCloseButton ?? false;
-    }
-  }
 
   // Pending selected text for ToDo selector
   property string pendingSelectedText: ""
@@ -77,7 +70,7 @@ Item {
   // Process to load all notecards from directory
   Process {
     id: loadNoteCardsProc
-    stdout: StdioCollector {}
+    stdout: StdioCollector { id: loadNoteCardsStdout }
     stderr: StdioCollector {}
 
     onExited: exitCode => {
@@ -89,7 +82,7 @@ Item {
                 }
 
                 try {
-                  const output = String(stdout.text).trim();
+                  const output = String(loadNoteCardsStdout.text).trim();
                   if (!output || output === "[]") {
                     // Empty load result. Only clear in-memory state when it
                     // was already empty; otherwise preserve it. This avoids
@@ -206,7 +199,7 @@ Item {
   // Process to list cliphist items
   Process {
     id: listProc
-    stdout: StdioCollector {}
+    stdout: StdioCollector { id: listStdout }
 
     onExited: exitCode => {
                 if (exitCode !== 0) {
@@ -215,7 +208,7 @@ Item {
                   return;
                 }
 
-                const out = String(stdout.text);
+                const out = String(listStdout.text);
                 const lines = out.split('\n').filter(l => l.length > 0);
 
                 const parsed = lines.map(l => {
@@ -316,7 +309,7 @@ Item {
     id: decodeProc
     property string cliphistId: ""
     property var pinnedItem: null
-    stdout: StdioCollector {}
+    stdout: StdioCollector { id: decodeStdout }
 
     onExited: exitCode => {
                 if (exitCode !== 0) {
@@ -326,7 +319,7 @@ Item {
 
                 if (pinnedItem.isImage) {
                   // For images, stdout.text contains base64-encoded data
-                  const base64 = String(stdout.text).trim();
+                  const base64 = String(decodeStdout.text).trim();
                   if (!base64 || base64.length === 0) {
                     ToastService.showError(pluginApi?.tr("toast.failed-to-pin-image"));
                     return;
@@ -343,7 +336,7 @@ Item {
                   pinnedItem.content = dataUrl;
                 } else {
                   // For text, validate size (max 1MB)
-                  const textContent = String(stdout.text);
+                  const textContent = String(decodeStdout.text);
                   if (textContent.length > root.maxTextSize) {
                     ToastService.showWarning(pluginApi?.tr("toast.text-too-large"));
                     return;
@@ -382,7 +375,7 @@ Item {
     id: atomicWriteProc
     running: false
     stdinEnabled: true
-    stderr: StdioCollector {}
+    stderr: StdioCollector { id: atomicWriteStderr }
 
     onExited: (exitCode, exitStatus) => {
                 const job = root._atomicWriteCurrent;
@@ -393,7 +386,7 @@ Item {
                   Logger.w("Clipper", "atomicWrite FAIL exit=" + exitCode +
                                       " id=" + (job ? job.id : "?") +
                                       " path=" + (job ? job.path : "?") +
-                                      " stderr=" + String(stderr.text).trim());
+                                      " stderr=" + String(atomicWriteStderr.text).trim());
                 }
                 root._drainAtomicWriteQueue();
               }
@@ -807,7 +800,7 @@ Item {
     property string cliphistId: ""
     property string mimeType: "image/png"
     property var callback: null
-    stdout: StdioCollector {}
+    stdout: StdioCollector { id: imageDecodeStdout }
 
     onExited: exitCode => {
                 if (exitCode !== 0) {
@@ -815,7 +808,7 @@ Item {
                 }
 
                 // Read base64-encoded text output
-                const base64 = String(stdout.text).trim();
+                const base64 = String(imageDecodeStdout.text).trim();
                 if (!base64 || base64.length === 0) {
                   return;
                 }
@@ -976,7 +969,7 @@ Item {
 
   // Add selected text to specific page
   function addSelectedToPage(pageId) {
-    if (!pluginApi?.pluginSettings?.enableTodoIntegration) {
+    if (!pluginApi?.settingsView?.enableTodoIntegration) {
       ToastService.showError(pluginApi?.tr("toast.todo-disabled"));
       return;
     }
@@ -1033,7 +1026,7 @@ Item {
     // Show ToDo page selector with current selection
     // Usage: qs -c noctalia-shell ipc call plugin:clipper addSelectionToTodo
     function addSelectionToTodo() {
-      if (!pluginApi?.pluginSettings?.enableTodoIntegration) {
+      if (!root.pluginApi?.settingsView?.enableTodoIntegration) {
         ToastService.showError(pluginApi?.tr("toast.todo-disabled"));
         return;
       }
@@ -1288,7 +1281,7 @@ Item {
   // Timer for auto-paste delay
   Timer {
     id: autoPasteTimer
-    interval: pluginApi?.pluginSettings?.autoPasteDelay ?? 300
+    interval: pluginApi?.settingsView?.autoPasteDelay ?? 300
     repeat: false
     onTriggered: {
       if (root.wtypeAvailable) {
@@ -1312,17 +1305,15 @@ Item {
   }
 
   // Public function called from Panel.qml
-  function triggerAutoPaste() {
+  function triggerAutoPaste(delay) {
+    // Main is shared. Capture the invoking placement's delay with this action.
+    autoPasteTimer.interval = delay === undefined ? (pluginApi?.settingsView?.autoPasteDelay ?? 300) : delay;
     autoPasteTimer.restart();
   }
 
   // Initialize pinned.json and notecards.json if they don't exist
   Component.onCompleted: {
     Logger.d("Clipper", "Component.onCompleted - pluginApi initialized");
-    if (pluginApi) {
-      showCloseButton = pluginApi.pluginSettings?.showCloseButton ?? false;
-    }
-
     // Create empty pinned.json if it doesn't exist
     const pinnedPath = Quickshell.env("HOME") + "/.config/noctalia/plugins/clipper/pinned.json";
     Quickshell.execDetached(["sh", "-c", `[ -f "${pinnedPath}" ] || echo '{"items":[]}' > "${pinnedPath}"`]);
@@ -1347,37 +1338,12 @@ Item {
 
   // Cleanup all running processes on destruction
   Component.onDestruction: {
-    if (listProc.running)
-      listProc.terminate();
-    if (decodeProc.running)
-      decodeProc.terminate();
-    if (copyPinnedImageProc.running)
-      copyPinnedImageProc.terminate();
-    if (copyPinnedTextProc.running)
-      copyPinnedTextProc.terminate();
-    if (imageDecodeProc.running)
-      imageDecodeProc.terminate();
-    if (getSelectionProcess.running)
-      getSelectionProcess.terminate();
-    if (getSelectionForSelectorProcess.running)
-      getSelectionForSelectorProcess.terminate();
-    if (getSelectionForNoteSelectorProcess.running)
-      getSelectionForNoteSelectorProcess.terminate();
-    if (copyToClipboardProc.running)
-      copyToClipboardProc.terminate();
-    if (deleteItemProc.running)
-      deleteItemProc.terminate();
-    if (wipeProc.running)
-      wipeProc.terminate();
-    if (loadNoteCardsProc.running)
-      loadNoteCardsProc.terminate();
-    if (atomicWriteProc.running)
-      atomicWriteProc.terminate();
+    for (var process of [listProc, decodeProc, copyPinnedImageProc, copyPinnedTextProc, imageDecodeProc, getSelectionProcess, getSelectionForSelectorProcess, getSelectionForNoteSelectorProcess, copyToClipboardProc, deleteItemProc, wipeProc, loadNoteCardsProc, atomicWriteProc, autoPasteProc, wtypeCheckProc]) {
+      if (process.running) process.running = false;
+    }
     _atomicWriteQueue = [];
 
     autoPasteTimer.stop();
-    if (autoPasteProc.running) autoPasteProc.terminate();
-    if (wtypeCheckProc.running) wtypeCheckProc.terminate();
 
     // Clear data structures
     pinnedItems = [];

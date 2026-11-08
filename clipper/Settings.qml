@@ -11,33 +11,63 @@ ColumnLayout {
 
   property var pluginApi: null
 
-  // Live preview + revert-on-cancel pattern (approved deviation from AGENTS.md edit-copy).
-  // User-approved 2026-04-20. Settings changes apply visually in real time to Panel/BarWidget
-  // but are only persisted to disk when the shell calls saveSettings() (Apply button).
-  // Closing without Apply restores the snapshot taken on open.
-  property var _snapshot: null
-  property bool _applied: false
+  // Preview belongs to the selected editor, never the persistent preferences.
+  readonly property var initial: pluginApi?.initialSettings || ({})
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property bool valueTodoIntegration: root.initial.enableTodoIntegration ?? false
+    readonly property bool valuePincardsEnabled: root.initial.pincardsEnabled ?? true
+    readonly property bool valueNotecardsEnabled: root.initial.notecardsEnabled ?? true
+    readonly property bool valueShowCloseButton: root.initial.showCloseButton ?? false
+    readonly property bool valueFullscreenMode: root.initial.fullscreenMode ?? false
+    readonly property bool valueHidePanelBackground: root.initial.hidePanelBackground ?? false
+    readonly property bool valueAutoPaste: root.initial.autoPaste ?? false
+    readonly property bool valueAutoPasteOnRightClick: root.initial.autoPasteOnRightClick ?? false
+    readonly property int valueAutoPasteDelay: root.initial.autoPasteDelay ?? 300
+    readonly property int valuePanelWidth: root.initial.panelWidth ?? 1450
+    readonly property int valuePanelHeight: root.initial.panelHeight ?? 0
+    readonly property var pendingCardColors: root.initial.cardColors || root.defaultCardColors
+    readonly property var pendingCustomColors: root.initial.customColors || root.defaultCustomColors
+    readonly property var cardColors: pendingCardColors
+    readonly property var customColors: pendingCustomColors
+    ranges: [NSettingsRange { field: "valuePanelWidth"; from: panelWidthInput.from; to: panelWidthInput.to }, NSettingsRange { field: "valuePanelHeight"; from: panelHeightInput.from; to: panelHeightInput.to }, NSettingsRange { field: "valueAutoPasteDelay"; from: autoPasteDelayInput.from; to: autoPasteDelayInput.to }]
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({valueTodoIntegration: valueTodoIntegration, valuePincardsEnabled: valuePincardsEnabled, valueNotecardsEnabled: valueNotecardsEnabled, valueShowCloseButton: valueShowCloseButton, valueFullscreenMode: valueFullscreenMode, valueHidePanelBackground: valueHidePanelBackground, valueAutoPaste: valueAutoPaste, valueAutoPasteOnRightClick: valueAutoPasteOnRightClick, valueAutoPasteDelay: valueAutoPasteDelay, valuePanelWidth: valuePanelWidth, valuePanelHeight: valuePanelHeight, pendingCardColors: pendingCardColors, pendingCustomColors: pendingCustomColors, cardColors: cardColors, customColors: customColors})
 
   function _applyPreview(key, value) {
     if (!pluginApi) return;
     var patch = {};
     patch[key] = value;
-    pluginApi.pluginSettings = Object.assign({}, pluginApi.pluginSettings, patch);
+    return pluginApi.previewSettings(patch);
   }
 
-  property bool valueTodoIntegration: pluginApi?.pluginSettings?.enableTodoIntegration ?? false
-  property bool valuePincardsEnabled: pluginApi?.pluginSettings?.pincardsEnabled ?? true
-  property bool valueNotecardsEnabled: pluginApi?.pluginSettings?.notecardsEnabled ?? true
-  property bool valueShowCloseButton: pluginApi?.pluginSettings?.showCloseButton ?? false
-  property bool valueFullscreenMode: pluginApi?.pluginSettings?.fullscreenMode ?? false
-  property bool valueHidePanelBackground: pluginApi?.pluginSettings?.hidePanelBackground ?? false
-  property bool valueAutoPaste: pluginApi?.pluginSettings?.autoPaste ?? false
-  property bool valueAutoPasteOnRightClick: pluginApi?.pluginSettings?.autoPasteOnRightClick ?? false
-  property int valueAutoPasteDelay: pluginApi?.pluginSettings?.autoPasteDelay ?? 300
-  property int valuePanelWidth: pluginApi?.pluginSettings?.panelWidth ?? 1450
-  property int valuePanelHeight: pluginApi?.pluginSettings?.panelHeight ?? 0
-  property var pendingCardColors: JSON.parse(JSON.stringify(defaultCardColors))
-  property var pendingCustomColors: {
+  function setCardColor(cardType, part, value, custom) {
+    var next = Object.assign({}, custom ? pendingCustomColors : pendingCardColors);
+    next[cardType] = Object.assign({}, next[cardType]);
+    next[cardType][part] = value;
+    if (custom) {
+      pendingCustomColors = next;
+      customColors = JSON.parse(JSON.stringify(next));
+    } else {
+      pendingCardColors = next;
+      cardColors = JSON.parse(JSON.stringify(next));
+    }
+  }
+
+  property bool valueTodoIntegration: displayBaseline.valueTodoIntegration
+  property bool valuePincardsEnabled: displayBaseline.valuePincardsEnabled
+  property bool valueNotecardsEnabled: displayBaseline.valueNotecardsEnabled
+  property bool valueShowCloseButton: displayBaseline.valueShowCloseButton
+  property bool valueFullscreenMode: displayBaseline.valueFullscreenMode
+  property bool valueHidePanelBackground: displayBaseline.valueHidePanelBackground
+  property bool valueAutoPaste: displayBaseline.valueAutoPaste
+  property bool valueAutoPasteOnRightClick: displayBaseline.valueAutoPasteOnRightClick
+  property int valueAutoPasteDelay: displayBaseline.project("valueAutoPasteDelay")
+  property int valuePanelWidth: displayBaseline.project("valuePanelWidth")
+  property int valuePanelHeight: displayBaseline.project("valuePanelHeight")
+  property var pendingCardColors: JSON.parse(JSON.stringify(displayBaseline.pendingCardColors))
+  property var pendingCustomColors: JSON.parse(JSON.stringify(displayBaseline.pendingCustomColors))
+  readonly property var defaultCustomColors: {
     "Text": {
       bg: "#555555",
       separator: "#000000",
@@ -77,7 +107,6 @@ ColumnLayout {
 
   // ToDo integration
   property bool todoPluginAvailable: false
-  property bool enableTodoIntegration: pluginApi?.pluginSettings?.enableTodoIntegration ?? false
 
   // Available card types
   readonly property var cardTypes: [
@@ -222,46 +251,10 @@ ColumnLayout {
   }
 
   // Current card colors (loaded from settings or defaults)
-  property var cardColors: JSON.parse(JSON.stringify(defaultCardColors))
+  property var cardColors: JSON.parse(JSON.stringify(displayBaseline.cardColors))
 
   // Custom color values (when "custom" is selected)
-  property var customColors: {
-    "Text": {
-      bg: "#555555",
-      separator: "#000000",
-      fg: "#e9e4f0"
-    },
-    "Image": {
-      bg: "#e0b7c9",
-      separator: "#000000",
-      fg: "#20161f"
-    },
-    "Link": {
-      bg: "#c7a1d8",
-      separator: "#000000",
-      fg: "#1a151f"
-    },
-    "Code": {
-      bg: "#a984c4",
-      separator: "#000000",
-      fg: "#f3edf7"
-    },
-    "Color": {
-      bg: "#a984c4",
-      separator: "#000000",
-      fg: "#f3edf7"
-    },
-    "Emoji": {
-      bg: "#e0b7c9",
-      separator: "#000000",
-      fg: "#20161f"
-    },
-    "File": {
-      bg: "#e9899d",
-      separator: "#000000",
-      fg: "#1e1418"
-    }
-  }
+  property var customColors: JSON.parse(JSON.stringify(displayBaseline.customColors))
 
   // Home directory for path resolution
   readonly property string homeDir: Quickshell.env("HOME") || ""
@@ -282,42 +275,6 @@ ColumnLayout {
       } catch (e) {
         root.todoPluginAvailable = false;
       }
-    }
-  }
-
-  Component.onCompleted: {
-    // Snapshot settings on open for revert-on-cancel
-    if (pluginApi) {
-      _snapshot = JSON.parse(JSON.stringify(pluginApi.pluginSettings));
-    }
-
-    // Load saved settings
-    if (pluginApi?.pluginSettings?.enableTodoIntegration !== undefined) {
-      enableTodoIntegration = pluginApi.pluginSettings.enableTodoIntegration;
-    }
-    if (pluginApi?.pluginSettings?.cardColors) {
-      try {
-        const loaded = JSON.parse(JSON.stringify(pluginApi.pluginSettings.cardColors));
-        cardColors = loaded;
-        pendingCardColors = JSON.parse(JSON.stringify(loaded));
-      } catch (e) {
-        Logger.w("Clipper", "Failed to load card colors: " + e);
-      }
-    }
-    if (pluginApi?.pluginSettings?.customColors) {
-      try {
-        const loaded = JSON.parse(JSON.stringify(pluginApi.pluginSettings.customColors));
-        customColors = loaded;
-        pendingCustomColors = JSON.parse(JSON.stringify(loaded));
-      } catch (e) {
-        Logger.w("Clipper", "Failed to load custom colors: " + e);
-      }
-    }
-  }
-
-  Component.onDestruction: {
-    if (!_applied && pluginApi && _snapshot) {
-      pluginApi.pluginSettings = Object.assign({}, _snapshot);
     }
   }
 
@@ -422,6 +379,8 @@ ColumnLayout {
 
       // Panel Width (hidden when fullscreen)
       NSpinBox {
+          id: panelWidthInput
+          objectName: "settings-range-valuePanelWidth"
           Layout.fillWidth: true
           visible: !root.valueFullscreenMode
           label: pluginApi?.tr("settings.panel-width")
@@ -430,7 +389,7 @@ ColumnLayout {
           from: 400
           to: 3840
           stepSize: 50
-          onValueChanged: {
+          onValueModified: value => {
               root.valuePanelWidth = value;
               root._applyPreview("panelWidth", value);
           }
@@ -438,6 +397,8 @@ ColumnLayout {
 
       // Panel Height (hidden when fullscreen)
       NSpinBox {
+          id: panelHeightInput
+          objectName: "settings-range-valuePanelHeight"
           Layout.fillWidth: true
           visible: !root.valueFullscreenMode
           label: pluginApi?.tr("settings.panel-height")
@@ -446,7 +407,7 @@ ColumnLayout {
           from: 0
           to: 2160
           stepSize: 50
-          onValueChanged: {
+          onValueModified: value => {
               root.valuePanelHeight = value;
               root._applyPreview("panelHeight", value);
           }
@@ -652,6 +613,8 @@ ColumnLayout {
         spacing: Style.marginS
 
         NValueSlider {
+          id: autoPasteDelayInput
+          objectName: "settings-range-valueAutoPasteDelay"
           Layout.fillWidth: true
           label: pluginApi?.tr("settings.auto-paste-delay")
           description: pluginApi?.tr("settings.auto-paste-delay-desc")
@@ -817,10 +780,7 @@ ColumnLayout {
         model: root.colorOptions
         currentKey: root.cardColors[root.selectedCardType]?.bg || "mOutline"
         onSelected: key => {
-                      if (!root.pendingCardColors[root.selectedCardType])
-                      root.pendingCardColors[root.selectedCardType] = {};
-                      root.pendingCardColors[root.selectedCardType].bg = key;
-                      root.cardColors = JSON.parse(JSON.stringify(root.pendingCardColors));
+                      root.setCardColor(root.selectedCardType, "bg", key, false);
                     }
       }
 
@@ -830,10 +790,7 @@ ColumnLayout {
         Layout.preferredHeight: Style.baseWidgetSize
         selectedColor: root.customColors[root.selectedCardType]?.bg || "#888888"
         onColorSelected: color => {
-                           if (!root.pendingCustomColors[root.selectedCardType])
-                           root.pendingCustomColors[root.selectedCardType] = {};
-                           root.pendingCustomColors[root.selectedCardType].bg = color.toString();
-                           root.customColors = JSON.parse(JSON.stringify(root.pendingCustomColors));
+                           root.setCardColor(root.selectedCardType, "bg", color.toString(), true);
                          }
       }
 
@@ -844,10 +801,7 @@ ColumnLayout {
         model: root.colorOptions
         currentKey: root.cardColors[root.selectedCardType]?.separator || "mSurface"
         onSelected: key => {
-                      if (!root.pendingCardColors[root.selectedCardType])
-                      root.pendingCardColors[root.selectedCardType] = {};
-                      root.pendingCardColors[root.selectedCardType].separator = key;
-                      root.cardColors = JSON.parse(JSON.stringify(root.pendingCardColors));
+                      root.setCardColor(root.selectedCardType, "separator", key, false);
                     }
       }
 
@@ -857,10 +811,7 @@ ColumnLayout {
         Layout.preferredHeight: Style.baseWidgetSize
         selectedColor: root.customColors[root.selectedCardType]?.separator || "#000000"
         onColorSelected: color => {
-                           if (!root.pendingCustomColors[root.selectedCardType])
-                           root.pendingCustomColors[root.selectedCardType] = {};
-                           root.pendingCustomColors[root.selectedCardType].separator = color.toString();
-                           root.customColors = JSON.parse(JSON.stringify(root.pendingCustomColors));
+                           root.setCardColor(root.selectedCardType, "separator", color.toString(), true);
                          }
       }
 
@@ -871,10 +822,7 @@ ColumnLayout {
         model: root.colorOptions
         currentKey: root.cardColors[root.selectedCardType]?.fg || "mOnSurface"
         onSelected: key => {
-                      if (!root.pendingCardColors[root.selectedCardType])
-                      root.pendingCardColors[root.selectedCardType] = {};
-                      root.pendingCardColors[root.selectedCardType].fg = key;
-                      root.cardColors = JSON.parse(JSON.stringify(root.pendingCardColors));
+                      root.setCardColor(root.selectedCardType, "fg", key, false);
                     }
       }
 
@@ -884,10 +832,7 @@ ColumnLayout {
         Layout.preferredHeight: Style.baseWidgetSize
         selectedColor: root.customColors[root.selectedCardType]?.fg || "#e9e4f0"
         onColorSelected: color => {
-                           if (!root.pendingCustomColors[root.selectedCardType])
-                           root.pendingCustomColors[root.selectedCardType] = {};
-                           root.pendingCustomColors[root.selectedCardType].fg = color.toString();
-                           root.customColors = JSON.parse(JSON.stringify(root.pendingCustomColors));
+                           root.setCardColor(root.selectedCardType, "fg", color.toString(), true);
                          }
       }
 
@@ -949,7 +894,7 @@ ColumnLayout {
     if (!pluginApi)
       return;
 
-    // Belt-and-suspenders: guarantee final state is correct even if a _applyPreview was missed.
+    // Gather local controls; the popup alone applies to the persistent owner.
     pluginApi.pluginSettings.enableTodoIntegration = root.valueTodoIntegration;
     pluginApi.pluginSettings.pincardsEnabled = root.valuePincardsEnabled;
     pluginApi.pluginSettings.notecardsEnabled = root.valueNotecardsEnabled;
@@ -964,11 +909,6 @@ ColumnLayout {
     pluginApi.pluginSettings.cardColors = JSON.parse(JSON.stringify(root.pendingCardColors));
     pluginApi.pluginSettings.customColors = JSON.parse(JSON.stringify(root.pendingCustomColors));
 
-    if (pluginApi.mainInstance) {
-      pluginApi.mainInstance.showCloseButton = root.valueShowCloseButton;
-    }
-
-    _applied = true;
     pluginApi.saveSettings();
   }
 }

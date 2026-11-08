@@ -27,7 +27,7 @@ Item {
         z: -1
 
         onClicked: {
-            const closeButtonOn = root.pluginApi?.pluginSettings?.showCloseButton ?? false;
+            const closeButtonOn = root.pluginApi?.settingsView?.showCloseButton ?? false;
             if (!closeButtonOn && root.pluginApi && root.screen) {
                 root.pluginApi.closePanel(root.screen);
             }

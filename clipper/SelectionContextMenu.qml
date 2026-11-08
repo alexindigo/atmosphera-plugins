@@ -11,7 +11,7 @@ import qs.Widgets
 PanelWindow {
     id: root
 
-    required property ShellScreen screen
+    required screen
     property var pluginApi: null
     property var menuItems: []
 
@@ -113,7 +113,7 @@ PanelWindow {
 
     Component.onDestruction: {
         if (getCursorPositionProcess.running) {
-            getCursorPositionProcess.terminate();
+            getCursorPositionProcess.running = false;
         }
         close();
     }

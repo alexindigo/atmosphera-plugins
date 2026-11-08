@@ -459,17 +459,17 @@
       "author": "blackbartblues",
       "description": "Advanced clipboard manager with history, search, keyboard navigation, ToDo integration, pinned items, notecards/sticky notes, and selection-to-notecard feature. Fully translated with comprehensive i18n support.",
       "license": "MIT",
-      "version": "2.4.6",
+      "version": "2.4.8",
       "tags": [
         "Utility",
         "Bar",
         "Panel"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-07",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.1.2",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "cloudflare-warp",
