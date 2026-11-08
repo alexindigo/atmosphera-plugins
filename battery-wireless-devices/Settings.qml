@@ -4,13 +4,27 @@ import qs.Commons
 import qs.Widgets
 
 // Plugin-wide settings UI (the "settings" entry point). Rendered inside a
-// scroll view by Noctalia's plugin settings popup. Every control applies its
-// change live (debounced) via commit(); the popup's Apply button just calls
-// saveSettings() -> commit() again, so it's effectively redundant.
+// scroll view by the plugin settings popup. Input remains local until Apply.
 ColumnLayout {
     id: root
 
     property var pluginApi: null
+    property var _detectedAtOpen: []
+    readonly property var initialView: deviceView(pluginApi?.initialSettings || ({}), _detectedAtOpen)
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property var editDevices: root.initialView.devices
+        readonly property var deviceList: root.initialView.list
+        readonly property bool showPercentageEdit: root.pluginApi?.initialSettings?.showPercentage === true
+        readonly property bool showChargingEdit: root.pluginApi?.initialSettings?.showCharging === true
+        readonly property int editRefreshInterval: {
+            var value = root.pluginApi?.initialSettings?.refreshInterval;
+            return typeof value === "number" && value > 0 ? value : 60;
+        }
+        ranges: [NSettingsRange { field: "editRefreshInterval"; from: intervalSpin.from; to: intervalSpin.to }]
+    }
+    property int editRefreshInterval: displayBaseline.project("editRefreshInterval")
+    readonly property bool settingsDirty: displayBaseline.differs({editDevices: editDevices, deviceList: deviceList, showPercentageEdit: showPercentageEdit, showChargingEdit: showChargingEdit, editRefreshInterval: editRefreshInterval})
     property real preferredWidth: 540
 
     spacing: Style.marginM
@@ -48,13 +62,14 @@ ColumnLayout {
     // Notifiable mirror of the global "show percentage" setting. NToggle emits
     // toggled(checked) but never updates its own `checked`, so we drive it from
     // this property (same reason the per-device toggle uses enabledLocal).
-    property bool showPercentageEdit: (pluginApi && pluginApi.pluginSettings && pluginApi.pluginSettings.showPercentage === true)
-    property bool showChargingEdit: (pluginApi && pluginApi.pluginSettings && pluginApi.pluginSettings.showCharging === true)
+    property bool showPercentageEdit: displayBaseline.showPercentageEdit
+    property bool showChargingEdit: displayBaseline.showChargingEdit
 
     // Guards against committing during initial population.
     property bool initialized: false
 
     Component.onCompleted: {
+        _detectedAtOpen = JSON.parse(JSON.stringify(liveDevices))
         populateList()
         initialized = true
     }
@@ -69,8 +84,8 @@ ColumnLayout {
     }
 
     // Build editDevices + deviceList from saved settings and live detection.
-    function populateList() {
-        var saved = (pluginApi && pluginApi.pluginSettings && pluginApi.pluginSettings.devices) ? pluginApi.pluginSettings.devices : {}
+    function deviceView(settings, live) {
+        var saved = settings.devices || {}
         var merged = ({})
 
         // Seed from saved config (preserves offline devices).
@@ -78,7 +93,6 @@ ColumnLayout {
             merged[id] = Object.assign(root._defaultCfg(), saved[id])
         }
         // Overlay live detection (updates name/type for known, adds new).
-        var live = root.liveDevices
         var byId = ({})
         for (var i = 0; i < live.length; i++) {
             var d = live[i]
@@ -111,11 +125,10 @@ ColumnLayout {
             }
         }
 
-        root.editDevices = merged
 
         // Build the display list honouring the saved order, appending any
         // newly-detected (online first) then offline devices not yet ordered.
-        var order = (pluginApi && pluginApi.pluginSettings && pluginApi.pluginSettings.deviceOrder) ? pluginApi.pluginSettings.deviceOrder : []
+        var order = settings.deviceOrder || []
         var seen = ({})
         var list = []
         var addId = function (id) {
@@ -138,25 +151,28 @@ ColumnLayout {
             addId(live[j].id)
         for (var sid in merged)
             addId(sid)
-        root.deviceList = list
+        return {devices: merged, list: list}
+    }
 
-        // Persist the dedup so it doesn't reappear.
-        if (changed && pluginApi)
-            commit()
+    function populateList() {
+        var settings = initialized ? {devices: editDevices, deviceOrder: deviceList.map(function(device) { return device.id })} : (pluginApi?.initialSettings || ({}))
+        var view = deviceView(settings, liveDevices)
+        editDevices = view.devices
+        deviceList = view.list
     }
 
     // Remove a device entry entirely (e.g. stale offline cruft). A still-present
     // device will be re-detected with default config on the next scan.
     function removeDevice(id) {
-        if (root.editDevices[id])
-            delete root.editDevices[id]
+        var devices = Object.assign({}, root.editDevices)
+        delete devices[id]
+        root.editDevices = devices
         var nl = []
         for (var i = 0; i < root.deviceList.length; i++) {
             if (root.deviceList[i].id !== id)
                 nl.push(root.deviceList[i])
         }
         root.deviceList = nl
-        commit()
     }
 
     // Reorder the device list (drag-and-drop). Top = left-most in the bar.
@@ -171,26 +187,13 @@ ColumnLayout {
         var item = nl.splice(fromIndex, 1)[0]
         nl.splice(toIndex, 0, item)
         root.deviceList = nl
-        commit()
     }
 
     function set(id, key, value) {
-        if (!root.editDevices[id])
-            root.editDevices[id] = root._defaultCfg()
-        root.editDevices[id][key] = value
-        scheduleCommit()
-    }
-
-    // Coalesce rapid edits (e.g. typing) into a single persist.
-    function scheduleCommit() {
-        if (initialized)
-            commitTimer.restart()
-    }
-
-    Timer {
-        id: commitTimer
-        interval: 200
-        onTriggered: root.commit()
+        var devices = Object.assign({}, root.editDevices)
+        devices[id] = Object.assign(root._defaultCfg(), devices[id])
+        devices[id][key] = value
+        root.editDevices = devices
     }
 
     // Persist the working state to pluginSettings. Rebuilds devices with fresh
@@ -205,7 +208,7 @@ ColumnLayout {
         var order = []
         for (var j = 0; j < root.deviceList.length; j++)
             order.push(root.deviceList[j].id)
-        pluginApi.pluginSettings.refreshInterval = intervalSpin.value
+        pluginApi.pluginSettings.refreshInterval = root.editRefreshInterval
         pluginApi.pluginSettings.showPercentage = root.showPercentageEdit
         pluginApi.pluginSettings.showCharging = root.showChargingEdit
         pluginApi.pluginSettings.devices = devices
@@ -232,7 +235,6 @@ ColumnLayout {
         checked: root.showPercentageEdit
         onToggled: checked => {
             root.showPercentageEdit = checked
-            root.scheduleCommit()
         }
     }
 
@@ -243,12 +245,12 @@ ColumnLayout {
         checked: root.showChargingEdit
         onToggled: checked => {
             root.showChargingEdit = checked
-            root.scheduleCommit()
         }
     }
 
     NSpinBox {
         id: intervalSpin
+        objectName: "settings-range-editRefreshInterval"
         Layout.fillWidth: true
         label: pluginApi?.tr("settings.refreshInterval.label")
         description: pluginApi?.tr("settings.refreshInterval.desc")
@@ -256,11 +258,8 @@ ColumnLayout {
         to: 900
         stepSize: 10
         suffix: "s"
-        value: {
-            var v = (pluginApi && pluginApi.pluginSettings) ? pluginApi.pluginSettings.refreshInterval : 60
-            return (typeof v === "number" && v > 0) ? v : 60
-        }
-        onValueChanged: root.scheduleCommit()
+        value: root.editRefreshInterval
+        onValueModified: value => root.editRefreshInterval = value
     }
 
     RowLayout {
@@ -503,7 +502,7 @@ ColumnLayout {
                         label: pluginApi?.tr("settings.launchCmd.label")
                         text: card.cfg.launchCmd || ""
                         placeholderText: pluginApi?.tr("settings.launchCmd.placeholder")
-                        onTextChanged: root.set(card.modelData.id, "launchCmd", text)
+                        onTextEdited: root.set(card.modelData.id, "launchCmd", text)
                     }
                 }
             }

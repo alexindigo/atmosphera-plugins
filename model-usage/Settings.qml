@@ -11,8 +11,33 @@ ColumnLayout {
 
     property var editSettings: JSON.parse(JSON.stringify(pluginApi?.pluginSettings ?? pluginApi?.manifest?.metadata?.defaultSettings ?? {}))
 
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property var editSettings: pluginApi?.initialSettings ?? pluginApi?.manifest?.metadata?.defaultSettings ?? ({})
+        readonly property int editCycleInterval: displayBaseline.editSettings.barCycleIntervalSec ?? 5
+        readonly property int editRefreshInterval: displayBaseline.editSettings.refreshIntervalSec ?? 30
+        ranges: [NSettingsRange { field: "editCycleInterval"; from: cycleInput.from; to: cycleInput.to }, NSettingsRange { field: "editRefreshInterval"; from: refreshInput.from; to: refreshInput.to }]
+    }
+    property int editCycleInterval: displayBaseline.project("editCycleInterval")
+    property int editRefreshInterval: displayBaseline.project("editRefreshInterval")
+    readonly property bool settingsDirty: displayBaseline.differs({editSettings: editSettings, editCycleInterval: editCycleInterval, editRefreshInterval: editRefreshInterval})
+
+    function setField(key, value) {
+        var next = Object.assign({}, editSettings);
+        next[key] = value;
+        editSettings = next;
+    }
+
+    function setProvider(provider, key, value) {
+        var providers = Object.assign({}, editSettings.providers);
+        providers[provider] = Object.assign({}, providers[provider]);
+        providers[provider][key] = value;
+        setField("providers", providers);
+    }
+
     function saveSettings() {
-        pluginApi.pluginSettings = JSON.parse(JSON.stringify(root.editSettings));
+        root.editSettings = Object.assign({}, root.editSettings, {barCycleIntervalSec: editCycleInterval, refreshIntervalSec: editRefreshInterval});
+        pluginApi.pluginSettings = Object.assign({}, JSON.parse(JSON.stringify(root.editSettings)), {barCycleIntervalSec: editCycleInterval, refreshIntervalSec: editRefreshInterval});
         pluginApi.saveSettings();
     }
 
@@ -79,7 +104,7 @@ ColumnLayout {
                     ]
                     currentKey: editSettings?.barDisplayMode ?? "active"
                     onSelected: key => {
-                        editSettings.barDisplayMode = key;
+                        root.setField("barDisplayMode", key);
                     }
                 }
             }
@@ -97,13 +122,13 @@ ColumnLayout {
                 }
 
                 NSpinBox {
+                    id: cycleInput
+                    objectName: "settings-range-editCycleInterval"
                     from: 2
                     to: 60
-                    value: editSettings?.barCycleIntervalSec ?? 5
+                    value: root.editCycleInterval
                     stepSize: 1
-                    onValueChanged: {
-                        editSettings.barCycleIntervalSec = value;
-                    }
+                    onValueModified: value => root.editCycleInterval = value
                 }
             }
 
@@ -141,7 +166,7 @@ ColumnLayout {
                     ]
                     currentKey: editSettings?.barMetric ?? "prompts"
                     onSelected: key => {
-                        editSettings.barMetric = key;
+                        root.setField("barMetric", key);
                     }
                 }
             }
@@ -163,13 +188,13 @@ ColumnLayout {
                 }
 
                 NSpinBox {
+                    id: refreshInput
+                    objectName: "settings-range-editRefreshInterval"
                     from: 5
                     to: 300
-                    value: editSettings?.refreshIntervalSec ?? 30
+                    value: root.editRefreshInterval
                     stepSize: 5
-                    onValueChanged: {
-                        editSettings.refreshIntervalSec = value;
-                    }
+                    onValueModified: value => root.editRefreshInterval = value
                 }
             }
         }
@@ -204,12 +229,7 @@ ColumnLayout {
                 NToggle {
                     checked: editSettings?.providers?.claude?.enabled ?? true
                     onToggled: value => {
-                        if (!editSettings.providers)
-                            editSettings.providers = {};
-                        if (!editSettings.providers.claude)
-                            editSettings.providers.claude = {};
-                        editSettings.providers.claude.enabled = value;
-                        editSettingsChanged();
+                        root.setProvider("claude", "enabled", value);
                     }
                 }
                 NText {
@@ -231,12 +251,7 @@ ColumnLayout {
                 NToggle {
                     checked: editSettings?.providers?.codex?.enabled ?? true
                     onToggled: value => {
-                        if (!editSettings.providers)
-                            editSettings.providers = {};
-                        if (!editSettings.providers.codex)
-                            editSettings.providers.codex = {};
-                        editSettings.providers.codex.enabled = value;
-                        editSettingsChanged();
+                        root.setProvider("codex", "enabled", value);
                     }
                 }
                 NText {
@@ -258,12 +273,7 @@ ColumnLayout {
                 NToggle {
                     checked: editSettings?.providers?.copilot?.enabled ?? false
                     onToggled: value => {
-                        if (!editSettings.providers)
-                            editSettings.providers = {};
-                        if (!editSettings.providers.copilot)
-                            editSettings.providers.copilot = {};
-                        editSettings.providers.copilot.enabled = value;
-                        editSettingsChanged();
+                        root.setProvider("copilot", "enabled", value);
                     }
                 }
                 NText {
@@ -285,12 +295,7 @@ ColumnLayout {
                 NToggle {
                     checked: editSettings?.providers?.gemini?.enabled ?? false
                     onToggled: value => {
-                        if (!editSettings.providers)
-                            editSettings.providers = {};
-                        if (!editSettings.providers.gemini)
-                            editSettings.providers.gemini = {};
-                        editSettings.providers.gemini.enabled = value;
-                        editSettingsChanged();
+                        root.setProvider("gemini", "enabled", value);
                     }
                 }
                 NText {
@@ -316,12 +321,7 @@ ColumnLayout {
                     NToggle {
                         checked: editSettings?.providers?.openrouter?.enabled ?? false
                         onToggled: value => {
-                            if (!editSettings.providers)
-                                editSettings.providers = {};
-                            if (!editSettings.providers.openrouter)
-                                editSettings.providers.openrouter = {};
-                            editSettings.providers.openrouter.enabled = value;
-                            editSettingsChanged();
+                            root.setProvider("openrouter", "enabled", value);
                         }
                     }
                     NText {
@@ -344,13 +344,7 @@ ColumnLayout {
                     placeholderText: "OPENROUTER_API_KEY env var or enter key here"
                     text: editSettings?.providers?.openrouter?.apiKey ?? ""
 
-                    onTextChanged: {
-                        if (!editSettings.providers)
-                            editSettings.providers = {};
-                        if (!editSettings.providers.openrouter)
-                            editSettings.providers.openrouter = {};
-                        editSettings.providers.openrouter.apiKey = text;
-                    }
+                    onTextEdited: root.setProvider("openrouter", "apiKey", text)
                 }
             }
 
@@ -364,12 +358,7 @@ ColumnLayout {
                     NToggle {
                         checked: editSettings?.providers?.zen?.enabled ?? false
                         onToggled: value => {
-                            if (!editSettings.providers)
-                                editSettings.providers = {};
-                            if (!editSettings.providers.zen)
-                                editSettings.providers.zen = {};
-                            editSettings.providers.zen.enabled = value;
-                            editSettingsChanged();
+                            root.setProvider("zen", "enabled", value);
                         }
                     }
                     NText {
@@ -392,13 +381,7 @@ ColumnLayout {
                     placeholderText: "OPENCODE_ZEN_API_KEY / OPENCODE_API_KEY env var or enter key here"
                     text: editSettings?.providers?.zen?.apiKey ?? ""
 
-                    onTextChanged: {
-                        if (!editSettings.providers)
-                            editSettings.providers = {};
-                        if (!editSettings.providers.zen)
-                            editSettings.providers.zen = {};
-                        editSettings.providers.zen.apiKey = text;
-                    }
+                    onTextEdited: root.setProvider("zen", "apiKey", text)
                 }
             }
         }
@@ -420,6 +403,8 @@ ColumnLayout {
             text: "Reset"
             onClicked: {
                 root.editSettings = JSON.parse(JSON.stringify(pluginApi?.manifest?.metadata?.defaultSettings ?? {}));
+                root.editCycleInterval = 5;
+                root.editRefreshInterval = 30;
             }
         }
     }

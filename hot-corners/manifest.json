@@ -1,9 +1,9 @@
 {
   "id": "hot-corners",
   "name": "Hot Corners",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "minNoctaliaVersion": "3.6.0",
-  "minAtmospheraVersion": "0.8.0",
+  "minAtmospheraVersion": "0.10.0",
   "author": "sapjax",
   "official": false,
   "license": "MIT",

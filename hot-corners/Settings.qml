@@ -16,13 +16,18 @@ ColumnLayout {
     BottomRight: "BottomRight"
   })
 
-  property var currentSettings: pluginApi ? pluginApi.pluginSettings : {}
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property var editCorners: pluginApi?.pluginSettings?.corners || ({})
+  }
+  property var editCorners: JSON.parse(JSON.stringify(displayBaseline.editCorners))
+  readonly property var currentSettings: ({corners: editCorners})
+  readonly property bool settingsDirty: displayBaseline.differs({editCorners: editCorners}) || (popupOverlay.visible && cmdInput.text.trim() !== (editCorners[popupOverlay.targetCorner] || ""))
 
-  Connections {
-    target: pluginApi
-    function onPluginSettingsChanged() {
-      root.currentSettings = pluginApi.pluginSettings;
-    }
+  function saveSettings() {
+    if (popupOverlay.visible) column.saveAndClose();
+    pluginApi.pluginSettings.corners = JSON.parse(JSON.stringify(editCorners));
+    pluginApi.saveSettings();
   }
 
   // Main Settings Layout
@@ -150,7 +155,7 @@ ColumnLayout {
               TooltipService.hide();
             }
             popupOverlay.targetCorner = pos;
-            popupOverlay.initialText = currentCommand;
+              popupOverlay.initialText = currentCommand;
             popupOverlay.visible = true;
           }
         }
@@ -206,7 +211,7 @@ ColumnLayout {
               Layout.fillWidth: true
               placeholderText: "e.g., noctalia-shell ipc call settings toggle"
               text: popupOverlay.initialText
-              inputItem.onEditingFinished: column.saveAndClose()
+              onAccepted: column.saveAndClose()
             }
           }
 
@@ -256,15 +261,8 @@ ColumnLayout {
   function updateCornerSetting(cornerId, value) {
     if (!pluginApi) return;
     
-    var baseSettings = currentSettings || {};
-    var newSettings = JSON.parse(JSON.stringify(baseSettings));
-    if (!newSettings.corners) {
-      newSettings.corners = {};
-    }
-    
-    newSettings.corners[cornerId] = value;
-    
-    pluginApi.pluginSettings = newSettings;
-    pluginApi.saveSettings();
+    var next = Object.assign({}, editCorners);
+    next[cornerId] = value;
+    editCorners = next;
   }
 }
