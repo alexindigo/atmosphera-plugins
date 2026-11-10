@@ -270,6 +270,9 @@ Item {
   readonly property real _leftInset: 12 // 4px bar + 8px gap before the first column
 
   readonly property var _backend: CompositorService.niriBackend
+  // The current window: niri's focused window id (null: none). Window
+  // records carry no focus flag; every focus-derived style reads this id.
+  readonly property var currentWindowId: _backend ? _backend.focusedWindowId : null
   // Pure live view of laid-out windows (never frozen)
   readonly property var _windowsLive: {
     var all = (_backend && _backend.windows) ? _backend.windows : [];
@@ -464,13 +467,11 @@ Item {
     return avail / (sum * _autoScale);
   }
 
-  // Position (workspace + column) of the globally focused window — defines
-  // the "active column" whose windows get the secondary highlight.
-  // Focus id comes from NiriState (C++ singleton, handles WorkspaceActivated
-  // semantics natively); we only scan our window array to locate its tile.
+  // Position (workspace + column) of the current window — defines the
+  // "active column" whose windows get the secondary highlight.
   function focusedWindowPos() {
-    var fid = NiriState.focusedWindowId;
-    if (fid === 0)
+    var fid = root.currentWindowId;
+    if (fid === null || fid === undefined)
       return null;
     for (var i = 0; i < _windows.length; i++) {
       if (_windows[i].id === fid) {
@@ -655,6 +656,7 @@ Item {
           id: winRect
 
           readonly property var _lay: modelData.layout
+          readonly property bool _current: modelData.id === root.currentWindowId
           readonly property int _col: _lay.posInScrollingLayout[0]
           readonly property int _row: _lay.posInScrollingLayout[1] || 0
           readonly property int _wsSlot: root.workspaceSlotIndex(modelData.workspaceId)
@@ -670,7 +672,7 @@ Item {
           // Secondary tier: active window of a non-focused workspace, or any
           // window in the focused window's column. The focused window itself
           // always keeps the primary tier.
-          readonly property bool _secondary: !modelData.isFocused && (_activeInWs || _inActiveCol)
+          readonly property bool _secondary: !winRect._current && (_activeInWs || _inActiveCol)
 
           // Position: row slot top (stride monH + _rowGap) + proportional
           // tile offset within the column
@@ -717,7 +719,7 @@ Item {
             return 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b;
           }
           readonly property color _tileBg: _hovered ? AtmoColor.mTertiary : winColor
-          readonly property real _tileBgOpacity: _hovered ? 1.0 : (modelData.isFocused ? 1.0 : (_secondary ? 0.3 : 0.15))
+          readonly property real _tileBgOpacity: _hovered ? 1.0 : (winRect._current ? 1.0 : (_secondary ? 0.3 : 0.15))
           readonly property real _bgLum: _tileBgOpacity * _lum(_tileBg) + (1 - _tileBgOpacity) * _lum(AtmoColor.mSurface)
           readonly property color _contrastColor: _bgLum > 0.5 ? AtmoColor.mSurface : AtmoColor.mOnSurface
           // Shared by the tile's corner buttons: 50% mOnTertiary preview
@@ -747,14 +749,14 @@ Item {
           Rectangle {
             anchors.fill: parent
             color: winRect._dragged ? "transparent" : (winRect._hovered ? AtmoColor.mTertiary : winRect.winColor)
-            opacity: winRect._dragDim * (winRect._dragged ? 1.0 : (winRect._hovered ? 1.0 : (modelData.isFocused ? 1.0 : (winRect._secondary ? 0.3 : 0.15))))
+            opacity: winRect._dragDim * (winRect._dragged ? 1.0 : (winRect._hovered ? 1.0 : (winRect._current ? 1.0 : (winRect._secondary ? 0.3 : 0.15))))
             Behavior on opacity {
               NumberAnimation {
                 duration: 150
               }
             }
             border.color: winRect._dragged ? AtmoColor.mOutline : (winRect._hovered ? AtmoColor.mTertiary : winRect.winColor)
-            border.width: winRect._dragged ? 1 : ((modelData.isFocused || winRect._secondary || winRect._hovered) ? 2 : 1)
+            border.width: winRect._dragged ? 1 : ((winRect._current || winRect._secondary || winRect._hovered) ? 2 : 1)
           }
 
           // Base app icon (terminal fg-app or window app), with a rounded
@@ -772,7 +774,7 @@ Item {
             // rendered size, so zooming in (Ctrl+scroll) reveals icons as
             // they become readable; user setting hides them entirely
             visible: !root.hideIcons && !winRect._dragged && width * root._userScale >= 14
-            opacity: (modelData.isFocused || winRect._hovered) ? 1.0 : 0.75
+            opacity: (winRect._current || winRect._hovered) ? 1.0 : 0.75
 
             // Badge rect (tile bottom-right, 2px margin) mapped into this
             // item's coordinate space for the cutout
@@ -785,7 +787,7 @@ Item {
               fallbackName: winRect._appIcon
               smooth: true
 
-              layer.enabled: !(modelData.isFocused || winRect._hovered)
+              layer.enabled: !(winRect._current || winRect._hovered)
               layer.effect: ShaderEffect {
                 property color targetColor: AtmoColor.mOnSurface
                 // Mask mode (4.0): flat washed-out color, alpha from luminance —
@@ -848,14 +850,14 @@ Item {
             width: Math.max(4, Math.min(_box * 0.6, Math.min(_favCap, winRect._faviconW) / root._userScale))
             height: width
             visible: !root.hideIcons && !winRect._dragged && winRect._favicon !== "" && iconWrap.visible
-            opacity: (modelData.isFocused || winRect._hovered) ? 1.0 : 0.75
+            opacity: (winRect._current || winRect._hovered) ? 1.0 : 0.75
             source: winRect._favicon
             fillMode: Image.PreserveAspectFit
             smooth: true
             asynchronous: true
             sourceSize: Qt.size(width, height)
 
-            layer.enabled: !(modelData.isFocused || winRect._hovered)
+            layer.enabled: !(winRect._current || winRect._hovered)
             layer.effect: ShaderEffect {
               property color targetColor: AtmoColor.mOnSurface
               property real colorizeMode: 4.0
@@ -976,10 +978,10 @@ Item {
               icon: (winRect._audio && winRect._audio.playing) ? Icon.mediaPause : Icon.mediaPlay
               pointSize: Math.max(5, playButton._box * 0.33)
               applyUiScale: false
-              color: playArea.containsMouse ? AtmoColor.mOnTertiary : ((winRect._hovered || modelData.isFocused) ? winRect._onTertiaryHalf : winRect._contrastColor)
-              opacity: (modelData.isFocused || winRect._hovered) ? 1.0 : 0.75
+              color: playArea.containsMouse ? AtmoColor.mOnTertiary : ((winRect._hovered || winRect._current) ? winRect._onTertiaryHalf : winRect._contrastColor)
+              opacity: (winRect._current || winRect._hovered) ? 1.0 : 0.75
 
-              layer.enabled: !(modelData.isFocused || winRect._hovered)
+              layer.enabled: !(winRect._current || winRect._hovered)
               layer.effect: ShaderEffect {
                 property color targetColor: AtmoColor.mOnSurface
                 property real colorizeMode: 4.0
@@ -1032,10 +1034,10 @@ Item {
               // Icon hover -> mOnTertiary full; active/hovered tile ->
               // same color at 50% opacity (softer preview of the armed
               // state); otherwise luminance-derived contrast
-              color: audioArea.containsMouse ? AtmoColor.mOnTertiary : ((winRect._hovered || modelData.isFocused) ? winRect._onTertiaryHalf : winRect._contrastColor)
-              opacity: (modelData.isFocused || winRect._hovered) ? 1.0 : 0.75
+              color: audioArea.containsMouse ? AtmoColor.mOnTertiary : ((winRect._hovered || winRect._current) ? winRect._onTertiaryHalf : winRect._contrastColor)
+              opacity: (winRect._current || winRect._hovered) ? 1.0 : 0.75
 
-              layer.enabled: !(modelData.isFocused || winRect._hovered)
+              layer.enabled: !(winRect._current || winRect._hovered)
               layer.effect: ShaderEffect {
                 property color targetColor: AtmoColor.mOnSurface
                 property real colorizeMode: 4.0
