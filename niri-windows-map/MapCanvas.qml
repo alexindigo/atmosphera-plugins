@@ -44,6 +44,31 @@ Item {
   // count and tile icon padding scale with it
   property string sizeKey: "regular"
   property real _userScale: 1.0
+  property real _iconPad: sizeKey === "large" ? 16 : 8
+  property real _faviconCap: sizeKey === "large" ? 32 : 16
+  property real _hoverPointSize: sizeKey === "compact" ? 8 : (sizeKey === "large" ? 11 : 9)
+
+  Behavior on _iconPad {
+    NumberAnimation {
+      duration: Style.animationNormal
+    }
+  }
+  Behavior on _faviconCap {
+    NumberAnimation {
+      duration: Style.animationNormal
+    }
+  }
+  Behavior on _hoverPointSize {
+    NumberAnimation {
+      duration: Style.animationNormal
+    }
+  }
+
+  // Raster budgets follow the source, never the animated tile geometry.
+  function _textureSize(pixels) {
+    var px = Math.ceil(pixels * Screen.devicePixelRatio);
+    return Qt.size(px, px);
+  }
 
   // Emitted when a tile's mute button is clicked (NOT navigation — the
   // panel stays open regardless of hide-on-click)
@@ -709,7 +734,7 @@ Item {
 
           // Total padding subtracted from the icon box: 8px/side on Large
           // tiles, 4px/side otherwise
-          readonly property real _iconPad: root.sizeKey === "large" ? 16 : 8
+          readonly property real _iconPad: root._iconPad
 
           // Contrast glyph color derived from the tile's EFFECTIVE
           // background (tile color at its opacity, blended over the panel
@@ -773,8 +798,14 @@ Item {
             // Hide icons on tiles too small to read them — evaluated at the
             // rendered size, so zooming in (Ctrl+scroll) reveals icons as
             // they become readable; user setting hides them entirely
-            visible: !root.hideIcons && !winRect._dragged && width * root._userScale >= 14
-            opacity: (winRect._current || winRect._hovered) ? 1.0 : 0.75
+            property real _reveal: width * root._userScale >= 14 ? 1 : 0
+            Behavior on _reveal {
+              NumberAnimation {
+                duration: Style.animationFast
+              }
+            }
+            visible: !root.hideIcons && !winRect._dragged && _reveal > 0
+            opacity: _reveal * ((winRect._current || winRect._hovered) ? 1.0 : 0.75)
 
             // Badge rect (tile bottom-right, 2px margin) mapped into this
             // item's coordinate space for the cutout
@@ -782,12 +813,15 @@ Item {
             readonly property real _badgeY: (winRect.height - favBadge.height - 2) - y
 
             AtmoAppIcon {
+              id: baseIcon
               anchors.fill: parent
               name: winRect._fgIcon || winRect._appIcon
               fallbackName: winRect._appIcon
               smooth: true
 
               layer.enabled: !(winRect._current || winRect._hovered)
+              layer.textureSize: root._textureSize(baseIcon.pixelSize)
+              layer.smooth: true
               layer.effect: ShaderEffect {
                 property color targetColor: AtmoColor.mOnSurface
                 // Mask mode (4.0): flat washed-out color, alpha from luminance —
@@ -820,6 +854,8 @@ Item {
             }
 
             layer.enabled: favBadge.visible
+            layer.textureSize: root._textureSize(baseIcon.pixelSize)
+            layer.smooth: true
             layer.effect: MultiEffect {
               maskEnabled: true
               maskInverted: true
@@ -828,6 +864,7 @@ Item {
               maskSource: ShaderEffectSource {
                 sourceItem: cutoutMask
                 hideSource: true
+                textureSize: iconWrap.layer.textureSize
               }
             }
           }
@@ -845,19 +882,21 @@ Item {
             anchors.bottomMargin: 2
             readonly property real _box: Math.max(4, Math.min(parent.width, parent.height) - winRect._iconPad)
             // Per-mode rendered px cap: 32 on Large, 16 on Compact/Regular
-            readonly property real _favCap: root.sizeKey === "large" ? 32 : 16
+            readonly property real _favCap: root._faviconCap
             // Native-res clamp with the mode cap on top
             width: Math.max(4, Math.min(_box * 0.6, Math.min(_favCap, winRect._faviconW) / root._userScale))
             height: width
             visible: !root.hideIcons && !winRect._dragged && winRect._favicon !== "" && iconWrap.visible
-            opacity: (winRect._current || winRect._hovered) ? 1.0 : 0.75
+            opacity: iconWrap.opacity
             source: winRect._favicon
             fillMode: Image.PreserveAspectFit
             smooth: true
             asynchronous: true
-            sourceSize: Qt.size(width, height)
+            sourceSize: Qt.size(winRect._faviconW, winRect._faviconW)
 
             layer.enabled: !(winRect._current || winRect._hovered)
+            layer.textureSize: root._textureSize(winRect._faviconW)
+            layer.smooth: true
             layer.effect: ShaderEffect {
               property color targetColor: AtmoColor.mOnSurface
               property real colorizeMode: 4.0
@@ -972,6 +1011,7 @@ Item {
             width: Math.max(5, _box * 0.33)
             height: width
             visible: root.audioIndicators && !winRect._dragged && !!winRect._audio && !!winRect._audio.player && iconWrap.visible
+            opacity: iconWrap._reveal
 
             AtmoIcon {
               anchors.fill: parent
@@ -982,6 +1022,8 @@ Item {
               opacity: (winRect._current || winRect._hovered) ? 1.0 : 0.75
 
               layer.enabled: !(winRect._current || winRect._hovered)
+              layer.textureSize: root._textureSize(baseIcon.pixelSize)
+              layer.smooth: true
               layer.effect: ShaderEffect {
                 property color targetColor: AtmoColor.mOnSurface
                 property real colorizeMode: 4.0
@@ -1025,6 +1067,7 @@ Item {
             width: Math.max(5, _box * 0.33)
             height: width
             visible: root.audioIndicators && !winRect._dragged && !!winRect._audio && iconWrap.visible
+            opacity: iconWrap._reveal
 
             AtmoIcon {
               anchors.fill: parent
@@ -1038,6 +1081,8 @@ Item {
               opacity: (winRect._current || winRect._hovered) ? 1.0 : 0.75
 
               layer.enabled: !(winRect._current || winRect._hovered)
+              layer.textureSize: root._textureSize(baseIcon.pixelSize)
+              layer.smooth: true
               layer.effect: ShaderEffect {
                 property color targetColor: AtmoColor.mOnSurface
                 property real colorizeMode: 4.0
@@ -1115,7 +1160,7 @@ Item {
         text: _lines.join("\n")
         color: AtmoColor.mOnSurfaceVariant
         // Fixed per size preset (independent of content/fitScale)
-        pointSize: root.sizeKey === "compact" ? 8 : (root.sizeKey === "large" ? 11 : 9)
+        pointSize: root._hoverPointSize
         width: mapContent.width - 16
         maximumLineCount: root.sizeKey === "compact" ? 2 : (root.sizeKey === "large" ? 4 : 3)
         wrapMode: Text.WordWrap
