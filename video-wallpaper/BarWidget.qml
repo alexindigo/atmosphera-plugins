@@ -5,10 +5,13 @@ import qs.Commons
 import qs.Modules.Bar.Extras
 import qs.Services.UI
 import qs.Widgets
+import "./common/MonitorCommands.js" as Commands
 
 Item {
     id: root
     property var pluginApi: null
+    readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
+        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); })
 
     property ShellScreen screen
     property string widgetId: ""
@@ -24,38 +27,24 @@ Item {
     * PROPERTIES
     ***************************/
     // Monitor specific properties
-    readonly property bool isPlaying: pluginApi?.pluginSettings?.[screen.name]?.isPlaying ?? false
-    readonly property bool isMuted:   pluginApi?.pluginSettings?.[screen.name]?.isMuted   ?? false
+    readonly property bool isPlaying: Commands.record(pluginApi?.pluginSettings?.monitors, screen?.name)?.isPlaying ?? false
+    readonly property bool isMuted:   Commands.record(pluginApi?.pluginSettings?.monitors, screen?.name)?.isMuted ?? false
 
     // Global properties
-    readonly property bool enabled:         pluginApi?.pluginSettings?.enabled         ?? false
+    readonly property bool wallpaperEnabled: pluginApi?.pluginSettings?.enabled ?? false
     readonly property bool monitorSpecific: pluginApi?.pluginSettings?.monitorSpecific ?? false
 
     /***************************
     * FUNCTIONS
     ***************************/
     function saveMonitorProperty(key: string, value: var): void {
-        function createMonitorSettings(monitor) {
-            // Check if the monitor settings exist and create it if it doesn't exist
-            if (pluginApi.pluginSettings[monitor] === undefined) {
-                pluginApi.pluginSettings[monitor] = {};
-            }
-        }
-
         if(pluginApi == null) {
             Logger.e("video-wallpaper", "PluginAPI is null.");
             return;
         }
 
-        if (monitorSpecific) {
-            createMonitorSettings(screen.name);
-            pluginApi.pluginSettings[screen.name][key] = value;
-        } else {
-            for (const screen of Quickshell.screens) {
-                createMonitorSettings(screen.name);
-                pluginApi.pluginSettings[screen.name][key] = value;
-            }
-        }
+        var names = monitorSpecific ? [screen.name] : Array.from(Quickshell.screens).map(screen => screen.name);
+        if (names.length) monitorCommand.submit(names.map(name => ({op: "set", screen: name, field: key, value: value})));
     }
 
     /***************************
@@ -71,10 +60,10 @@ Item {
                 "icon": "rectangle"
             },
             {
-                "label": root.enabled ?
+                "label": root.wallpaperEnabled ?
                     root.pluginApi?.tr("barWidget.contextMenu.disable") :
                     root.pluginApi?.tr("barWidget.contextMenu.enable"),
-                "action": root.enabled ? "disable" : "enable",
+                "action": root.wallpaperEnabled ? "disable" : "enable",
                 "icon": "power"
             },
             {

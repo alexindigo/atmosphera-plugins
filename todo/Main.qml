@@ -12,11 +12,9 @@ Item {
   property var rawPages: []
   property string currentExportPath: ""
   Connections {
-    target: root.pluginApi
-    function onPluginSettingsChanged() {
-      root.rawTodos = Pages.clone(root.pluginApi.pluginSettings.todos || []);
-      root.rawPages = Pages.clone(root.pluginApi.pluginSettings.pages || []);
-    }
+    target: root.pluginApi ? root.pluginApi.pluginSettings : null
+    function onTodosChanged() {root.rawTodos = Pages.clone(root.pluginApi.pluginSettings.todos || []);}
+    function onPagesChanged() {root.rawPages = Pages.clone(root.pluginApi.pluginSettings.pages || []);}
   }
 
   // Process for exporting todos
@@ -397,7 +395,11 @@ Item {
     var next = Pages.remove(rawPages, rawTodos, pluginApi.pluginSettings.current_page_id, pageId);
     rawPages = next.pages;
     rawTodos = next.todos;
-    pluginApi.pluginSettings = Object.assign({}, pluginApi.pluginSettings, {pages: next.pages, todos: next.todos, current_page_id: next.current, count: next.todos.length, completedCount: next.todos.filter(todo => todo.completed).length});
+    pluginApi.pluginSettings.pages = next.pages;
+    pluginApi.pluginSettings.todos = next.todos;
+    pluginApi.pluginSettings.current_page_id = next.current;
+    pluginApi.pluginSettings.count = next.todos.length;
+    pluginApi.pluginSettings.completedCount = next.todos.filter(todo => todo.completed).length;
     pluginApi.saveSettings();
     return true;
   }

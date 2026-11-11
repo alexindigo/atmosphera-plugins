@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import "../common/MonitorCommands.js" as Commands
 import QtQuick.Controls
 import QtQuick.Layouts
 
@@ -18,14 +19,14 @@ ColumnLayout {
     ***************************/
     // Required properties
     required property var pluginApi
-    required property bool enabled
+    required enabled
     required property string selectedMonitor
     required property var monitorSettings
     NSettingsBaseline {
         id: displayBaseline
-        readonly property bool automation: root.pluginApi?.initialSettings?.[root.selectedMonitor]?.automation ?? false
-        readonly property string automationMode: root.pluginApi?.initialSettings?.[root.selectedMonitor]?.automationMode ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? ""
-        readonly property real automationTime: root.pluginApi?.initialSettings?.[root.selectedMonitor]?.automationTime ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.automationTime ?? 0
+        readonly property bool automation: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.automation ?? false
+        readonly property string automationMode: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.automationMode ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? ""
+        readonly property real automationTime: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.automationTime ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.automationTime ?? 0
         readonly property var automationCustomTime: root.pluginApi?.initialSettings?.automationCustomTime || []
     }
     property alias customTimeText: customTimeInput.text

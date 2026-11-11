@@ -6,7 +6,6 @@ import qs.Services.UI
 
 import "./common"
 import "./main"
-import "./migrations"
 
 Item {
     id: root
@@ -19,6 +18,8 @@ Item {
     readonly property string wallpapersFolder: pluginApi?.pluginSettings?.wallpapersFolder ?? pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
 
     readonly property string thumbCacheFolderPath: ImageCacheService.wpThumbDir + "video-wallpaper"
+    readonly property bool thumbCacheReady: thumbnails.thumbCacheReady
+    readonly property bool thumbnailGenerationFailed: thumbnails.generationFailed
 
 
     /***************************
@@ -158,6 +159,7 @@ Item {
             ColorGeneration {
                 id: colorgen
                 pluginApi: root.pluginApi
+                thumbCacheReady: root.thumbCacheReady
 
                 screenName: screenItem.name
 
@@ -174,15 +176,15 @@ Item {
             ***************************/
             InnerService {
                 pluginApi: root.pluginApi
+                thumbCacheReady: root.thumbCacheReady
 
                 screenName: screenItem.name
 
                 getThumbPath:     root.getThumbPath
                 thumbFolderModel: rootThumbFolderModel
 
-                onOldWallpapersSaved: {
-                    // When the old wallpapers are saved and done, inform the color gen.
-                    colorgen.oldWallpapersSaved = true;
+                onWallpaperBaselineReady: {
+                    colorgen.wallpaperBaselineReady = true;
                 }
             }
         }
@@ -205,11 +207,6 @@ Item {
 
         onRandom:        (screen) => root.random(screen);
         onNextWallpaper: (screen) => root.nextWallpaper(screen);
-    }
-
-    Migrations {
-        id: migrations
-        pluginApi: root.pluginApi
     }
 
     Functions {

@@ -14,7 +14,7 @@ ColumnLayout {
     * PROPERTIES
     ***************************/
     required property var pluginApi
-    required property bool enabled
+    required enabled
 
 
     /***************************

@@ -43,7 +43,8 @@ ColumnLayout {
     readonly property bool settingsDirty: displayBaseline.differs({editWallpaperDirectory: editWallpaperDirectory, editCarouselMode: editCarouselMode, editExpandSelected: editExpandSelected, editEnableHoldExpand: editEnableHoldExpand, editOverlayOpacity: editOverlayOpacity, editBorderWidth: editBorderWidth, editCornerRadius: editCornerRadius, editItemWidth: editItemWidth, editItemHeight: editItemHeight, editSelectedScale: editSelectedScale, editExpandMultiplier: editExpandMultiplier, editHoldExpandRatio: editHoldExpandRatio, editHoldDelay: editHoldDelay})
 
     function saveSettings() {
-        pluginApi.pluginSettings = Object.assign({}, pluginApi.pluginSettings, {wallpaperDirectory: editWallpaperDirectory, carouselMode: editCarouselMode, expandSelected: editExpandSelected, enableHoldExpand: editEnableHoldExpand, overlayOpacity: editOverlayOpacity, borderWidth: editBorderWidth, cornerRadius: editCornerRadius, itemWidth: editItemWidth, itemHeight: editItemHeight, selectedScale: editSelectedScale, expandMultiplier: editExpandMultiplier, holdExpandRatio: editHoldExpandRatio, holdDelay: editHoldDelay});
+        var submitted = {wallpaperDirectory: editWallpaperDirectory, carouselMode: editCarouselMode, expandSelected: editExpandSelected, enableHoldExpand: editEnableHoldExpand, overlayOpacity: editOverlayOpacity, borderWidth: editBorderWidth, cornerRadius: editCornerRadius, itemWidth: editItemWidth, itemHeight: editItemHeight, selectedScale: editSelectedScale, expandMultiplier: editExpandMultiplier, holdExpandRatio: editHoldExpandRatio, holdDelay: editHoldDelay};
+        for (var key of Object.keys(submitted)) pluginApi.pluginSettings[key] = submitted[key];
         pluginApi.saveSettings();
     }
 

@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import "../common/MonitorCommands.js" as Commands
 import Quickshell
 import Quickshell.Io
 
@@ -26,15 +27,16 @@ Item {
     required property FolderModel thumbFolderModel
 
     // Screen specific properties
-    readonly property string currentWallpaper: pluginApi?.pluginSettings?.[screenName]?.currentWallpaper ?? ""
+    readonly property string currentWallpaper: Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.currentWallpaper ?? ""
 
     // Global properties
-    readonly property bool   enabled:          pluginApi?.pluginSettings?.enabled          ?? false
-    readonly property bool   thumbCacheReady:  pluginApi?.pluginSettings?.thumbCacheReady  ?? false
+    readonly property bool wallpaperEnabled: pluginApi?.pluginSettings?.enabled ?? false
+    required property bool thumbCacheReady
     readonly property string wallpapersFolder: pluginApi?.pluginSettings?.wallpapersFolder ?? pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
 
     // Local properties
-    property bool oldWallpapersSaved: false
+    property bool wallpaperBaselineReady: false
+    property bool generationFailed: false
     property int  _thumbGenIndex: 0
 
 
@@ -43,7 +45,7 @@ Item {
     ***************************/
     function startColorGen() {
         // If the folder model isn't ready, or we are still regenerating a thumbnail, or the old wallpapers haven't saved yet, try in a bit
-        if(!thumbFolderModel.ready || proc.running || !oldWallpapersSaved){
+        if(!thumbCacheReady || !thumbFolderModel.ready || proc.running || !wallpaperBaselineReady){
             Qt.callLater(startColorGen);
             return;
         }
@@ -62,7 +64,7 @@ Item {
         }
 
         // Reset the flag
-        oldWallpapersSaved = false;
+        wallpaperBaselineReady = false;
     }
 
 
@@ -70,13 +72,13 @@ Item {
     * EVENTS
     ***************************/
     onCurrentWallpaperChanged: {
-        if (root.enabled && root.currentWallpaper != "") {
+        if (root.wallpaperEnabled && root.currentWallpaper != "") {
             root.startColorGen();
         }
     }
 
-    onEnabledChanged: {
-        if (root.enabled && root.currentWallpaper != "") {
+    onWallpaperEnabledChanged: {
+        if (root.wallpaperEnabled && root.currentWallpaper != "") {
             root.startColorGen();
         }
     }
@@ -88,7 +90,12 @@ Item {
 
     Process {
         id: proc
-        onExited: {
+        onExited: exitCode => {
+            if (exitCode !== 0) {
+                root.generationFailed = true;
+                Logger.e("video-wallpaper", "Color thumbnail generation failed.");
+                return;
+            }
             // When finished recreating the thumbnail, try to apply the colors again
             root.startColorGen();
         }

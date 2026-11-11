@@ -4,6 +4,7 @@ import Quickshell.Io
 
 import qs.Commons
 import qs.Services.UI
+import "../common/MonitorCommands.js" as Commands
 
 Item {
     id: root
@@ -20,17 +21,17 @@ Item {
     required property int    screenHeight
 
     // Monitor specific properties
-    readonly property string currentWallpaper:     pluginApi?.pluginSettings?.[screenName]?.currentWallpaper     ?? ""
-    readonly property bool   hardwareAcceleration: pluginApi?.pluginSettings?.[screenName]?.hardwareAcceleration ?? pluginApi?.manifest?.metadata?.defaultSettings?.hardwareAcceleration ?? false
-    readonly property string fillMode:             pluginApi?.pluginSettings?.[screenName]?.fillMode             ?? pluginApi?.manifest?.metadata?.defaultSettings?.fillMode             ?? ""
-    readonly property bool   isMuted:              pluginApi?.pluginSettings?.[screenName]?.isMuted              ?? false
-    readonly property bool   isPlaying:            pluginApi?.pluginSettings?.[screenName]?.isPlaying            ?? false
-    readonly property int    orientation:          pluginApi?.pluginSettings?.[screenName]?.orientation          ?? 0
-    readonly property string profile:              pluginApi?.pluginSettings?.[screenName]?.profile              ?? pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
-    readonly property double volume:               pluginApi?.pluginSettings?.[screenName]?.volume               ?? pluginApi?.manifest?.metadata?.defaultSettings?.volume  ?? 0
+    readonly property string currentWallpaper:     Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.currentWallpaper ?? ""
+    readonly property bool   hardwareAcceleration: Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.hardwareAcceleration ?? pluginApi?.manifest?.metadata?.defaultSettings?.hardwareAcceleration ?? false
+    readonly property string fillMode:             Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.fillMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? ""
+    readonly property bool   isMuted:              Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.isMuted ?? false
+    readonly property bool   isPlaying:            Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.isPlaying ?? false
+    readonly property int    orientation:          Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.orientation ?? 0
+    readonly property string profile:              Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.profile ?? pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
+    readonly property double volume: Math.max(0, Math.min(1, Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.volume ?? pluginApi?.manifest?.metadata?.defaultSettings?.volume ?? 0))
 
     // Global properties
-    readonly property bool   enabled:   pluginApi?.pluginSettings?.enabled   ?? false
+    readonly property bool wallpaperEnabled: pluginApi?.pluginSettings?.enabled ?? false
     readonly property string mpvSocket: pluginApi?.pluginSettings?.mpvSocket ?? pluginApi?.manifest?.metadata?.defaultSettings?.mpvSocket ?? ""
 
     // Constants
@@ -66,7 +67,7 @@ Item {
     }
 
     function activateMpvpaper() {
-        if (!root.enabled || root.currentWallpaper == "") return;
+        if (!root.wallpaperEnabled || root.currentWallpaper == "") return;
 
         // Just call this again if we are still checking
         if (mpvCheck.running) {
@@ -81,14 +82,8 @@ Item {
         mpvProc.command = buildMpvCommand();
         mpvProc.running = true;
 
-        if(pluginApi?.pluginSettings?.[screenName] === undefined) {
-            pluginApi.pluginSettings[screenName] = {};
-        }
-
-        if (pluginApi.pluginSettings[screenName].isPlaying == undefined || !pluginApi.pluginSettings[screenName].isPlaying) {
-            pluginApi.pluginSettings[screenName].isPlaying = true;
-            pluginApi.saveSettings();
-        }
+        // Loading a backend is not a preference edit. Explicit wallpaper/play
+        // actions record isPlaying through the shared monitor command.
     }
 
     function deactivateMpvpaper() {
@@ -120,7 +115,7 @@ Item {
 
 
     onCurrentWallpaperChanged: {
-        if (!root.enabled) return;
+        if (!root.wallpaperEnabled) return;
 
         Logger.d("video-wallpaper", "Current wallpaper changed from mpvpaper");
 
@@ -141,12 +136,12 @@ Item {
         }
     }
 
-    onEnabledChanged: {
-        if(root.enabled && !mpvProc.running && root.currentWallpaper != "") {
+    onWallpaperEnabledChanged: {
+        if(root.wallpaperEnabled && !mpvProc.running && root.currentWallpaper != "") {
             Logger.d("video-wallpaper", "Turning mpvpaper on.");
 
             activateMpvpaper();
-        } else if(!root.enabled) {
+        } else if(!root.wallpaperEnabled) {
             Logger.d("video-wallpaper", "Turning mpvpaper off.");
 
             deactivateMpvpaper();
@@ -154,7 +149,7 @@ Item {
     }
 
     onHardwareAccelerationChanged: {
-        if(!root.enabled || !mpvProc.running) return;
+        if(!root.wallpaperEnabled || !mpvProc.running) return;
 
         Logger.d("video-wallpaper", "Changing hardware acceleration");
 
@@ -166,7 +161,7 @@ Item {
     }
 
     onFillModeChanged: {
-        if (!root.enabled || !mpvProc.running) return;
+        if (!root.wallpaperEnabled || !mpvProc.running) return;
 
         Logger.d("video-wallpaper", "Changing current fill mode");
 
@@ -186,7 +181,7 @@ Item {
     }
 
     onIsMutedChanged: {
-        if (!root.enabled || !mpvProc.running) return;
+        if (!root.wallpaperEnabled || !mpvProc.running) return;
 
         // This sets the audio id to null or to auto
         if (isMuted) {
@@ -197,7 +192,7 @@ Item {
     }
 
     onIsPlayingChanged: {
-        if (!root.enabled || !mpvProc.running) return;
+        if (!root.wallpaperEnabled || !mpvProc.running) return;
 
         // Pause or unpause the video
         if(isPlaying) {
@@ -208,7 +203,7 @@ Item {
     }
 
     onOrientationChanged: {
-        if (!root.enabled || !mpvProc.running) return;
+        if (!root.wallpaperEnabled || !mpvProc.running) return;
 
         Logger.d("video-wallpaper", "Changing orientation");
 
@@ -216,7 +211,7 @@ Item {
     }
 
     onProfileChanged: {
-        if (!root.enabled || !mpvProc.running) return;
+        if (!root.wallpaperEnabled || !mpvProc.running) return;
 
         Logger.d("video-wallpaper", "Changing current profile");
 
@@ -225,7 +220,7 @@ Item {
 
 
     onVolumeChanged: {
-        if (!root.enabled || !mpvProc.running) return;
+        if (!root.wallpaperEnabled || !mpvProc.running) return;
 
         const clampedVolume = Math.min(Math.max(volume, 0), 1);
         const mpvVolume = clampedVolume * 100;
@@ -233,15 +228,6 @@ Item {
         // Mpv has volume from 0 to 100 instead of 0 to 1
         sendCommandToMPV(`no-osd set volume ${mpvVolume}`)
 
-        // Clamp the volume
-        if(clampedVolume != volume) {
-            if (pluginApi?.pluginSettings?.[screenName] === undefined) {
-                pluginApi.pluginSettings[screenName] = {};
-            }
-
-            pluginApi.pluginSettings[screenName].volume = clampedVolume;
-            pluginApi.saveSettings();
-        }
     }
 
     /***************************

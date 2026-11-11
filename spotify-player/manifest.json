@@ -1,7 +1,7 @@
 {
     "id": "spotify-player",
     "name": "Spotify Player",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "minNoctaliaVersion": "4.7.6",
     "minAtmospheraVersion": "0.10.0",
     "author": "suvi",

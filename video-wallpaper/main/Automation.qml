@@ -4,6 +4,7 @@ import Quickshell.Io
 
 import qs.Commons
 import qs.Services.UI
+import "../common/MonitorCommands.js" as Commands
 
 Item {
     id: root
@@ -28,7 +29,7 @@ Item {
         if(automation) {
             Logger.d("video-wallpaper", "Starting automation timer...");
 
-            timer.restart();
+            if (!monitorSpecific) timer.restart();
         } else {
             Logger.d("video-wallpaper", "Stop automation timer...");
 
@@ -37,7 +38,7 @@ Item {
     }
     
     onAutomationTimeChanged: {
-        if(automation) {
+        if(automation && !monitorSpecific) {
             timer.restart();
         }
     }
@@ -50,6 +51,7 @@ Item {
         id: timer
         interval: root.automationTime * 1000
         repeat: true
+        running: root.automation && !root.monitorSpecific
 
         onTriggered: {
             switch(root.automationMode) {
@@ -71,6 +73,24 @@ Item {
                         root.nextWallpaper(undefined);
                     }
                     break;
+            }
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+        Timer {
+            required property var modelData
+            readonly property bool selectedAutomation: Commands.record(root.pluginApi?.pluginSettings?.monitors, modelData.name)?.automation ?? root.automation
+            readonly property string selectedMode: Commands.record(root.pluginApi?.pluginSettings?.monitors, modelData.name)?.automationMode ?? root.automationMode
+            readonly property real selectedTime: Commands.record(root.pluginApi?.pluginSettings?.monitors, modelData.name)?.automationTime ?? root.automationTime
+            interval: selectedTime * 1000
+            repeat: true
+            running: root.monitorSpecific && selectedAutomation
+            onTriggered: {
+                var name = modelData.name;
+                if (selectedMode === "random") root.random(name);
+                else if (selectedMode === "alphabetically") root.nextWallpaper(name);
             }
         }
     }

@@ -7,6 +7,7 @@ import Quickshell
 import qs.Commons
 import qs.Widgets
 import qs.Services.UI
+import qs.Portals
 
 import "./common"
 import "./panel"
@@ -26,9 +27,9 @@ Item {
     * PROPERTIES
     ***************************/
     readonly property string activeBackend:    pluginApi?.pluginSettings?.activeBackend    ?? pluginApi?.manifest?.metadata?.defaultSettings?.activeBackend ?? ""
-    readonly property bool   enabled:          pluginApi?.pluginSettings?.enabled          ?? false
+    readonly property bool wallpaperEnabled: pluginApi?.pluginSettings?.enabled ?? false
     readonly property bool   monitorSpecific:  pluginApi?.pluginSettings?.monitorSpecific  ?? false
-    readonly property bool   thumbCacheReady:  pluginApi?.pluginSettings?.thumbCacheReady  ?? false
+    readonly property bool thumbCacheReady: pluginApi?.mainInstance?.thumbCacheReady ?? false
     readonly property string wallpapersFolder: pluginApi?.pluginSettings?.wallpapersFolder ?? pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
 
 
@@ -38,7 +39,7 @@ Item {
     onThumbCacheReadyChanged: {
         // When the thumbnail cache is ready, reload the folder model.
         if (thumbCacheReady) {
-            folderModel.forceReload();
+            wallpaperFolderModel.forceReload();
         }
     }
 
@@ -123,7 +124,7 @@ Item {
 
                     Layout.fillWidth: false
 
-                    checked: root.enabled
+                    checked: root.wallpaperEnabled
                     onToggled: checked => {
                         if(root.pluginApi == null) return;
 
@@ -156,18 +157,19 @@ Item {
                     pluginApi: root.pluginApi
                     thumbCacheReady: root.thumbCacheReady
                     screenName: modelData.name
+                    folderModel: wallpaperFolderModel
                 }
             }
         }
     }
 
     FolderModel {
-        id: folderModel
+        id: wallpaperFolderModel
         folder: root.wallpapersFolder
         filters: ["*.mp4", "*.avi", "*.mov", "*.webm", "*.gif"]
     }
 
-    AtmoFilePicker {
+    PortalFilePicker {
         id: wallpapersFolderPicker
         title: root.pluginApi?.tr("panel.file_picker.title")
         initialPath: root.wallpapersFolder

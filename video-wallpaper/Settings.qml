@@ -9,6 +9,7 @@ import qs.Portals
 
 import "./common"
 import "./settings"
+import "./common/MonitorCommands.js" as Commands
 
 ColumnLayout {
     id: root
@@ -19,9 +20,13 @@ ColumnLayout {
         readonly property bool valueEnabled: root.pluginApi?.initialSettings?.enabled ?? false
         readonly property bool monitorSpecific: root.pluginApi?.initialSettings?.monitorSpecific ?? false
         readonly property string wallpapersFolder: root.pluginApi?.initialSettings?.wallpapersFolder ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
-        readonly property var editScreenSettings: root.pluginApi?.initialSettings || ({})
+        readonly property var editScreenSettings: root.pluginApi?.initialSettings?.monitors || ({})
     }
-    property var editScreenSettings: JSON.parse(JSON.stringify(displayBaseline.editScreenSettings))
+    // The display baseline is not a persistence source. Edit an owned native
+    // copy of the actual draft, retaining opaque keys and exact numeric atoms.
+    property var editScreenSettings: Settings.store.copyValue(pluginApi?.pluginSettings?.monitors ?? ({}))
+    readonly property var monitorCommand: Commands.create(function () { return root.editScreenSettings; },
+        function (value) { root.editScreenSettings = value; }, function (value) { return Settings.store.copyValue(value); })
     property alias currentWallpaper: general.currentWallpaper
     property alias volume: general.volume
     property alias automationEnabled: automation.automation
@@ -57,13 +62,8 @@ ColumnLayout {
             return;
         }
 
-        var next = Object.assign({}, editScreenSettings);
         var names = monitorSpecific ? [monitorTabBar.selectedMonitor] : Array.from(Quickshell.screens).map(screen => screen.name);
-        for (var name of names) {
-            next[name] = Object.assign({}, next[name]);
-            next[name][key] = value;
-        }
-        editScreenSettings = next;
+        if (names.length) monitorCommand.submit(names.map(name => ({op: "set", screen: name, field: key, value: value})));
     }
 
 
@@ -166,7 +166,7 @@ ColumnLayout {
             }
             selectedMonitor = Quickshell.screens[currentIndex]?.name || ""
             if (general && automation && advanced) {
-                var record = root.editScreenSettings[selectedMonitor] || ({});
+                var record = Commands.record(root.editScreenSettings, selectedMonitor) || ({});
                 general.loadMonitor(record); automation.loadMonitor(record); advanced.loadMonitor(record);
             }
         }
@@ -209,10 +209,10 @@ ColumnLayout {
             pluginApi: root.pluginApi
             enabled: root.valueEnabled
             selectedMonitor: monitorTabBar.selectedMonitor
-            monitorSettings: root.editScreenSettings[selectedMonitor] || ({})
+            monitorSettings: Settings.store.copyValue(Commands.record(root.editScreenSettings, selectedMonitor) ?? ({}))
             wallpapersFolder: root.wallpapersFolder
             monitorSpecific: root.monitorSpecific
-            toolSettings: root.editScreenSettings
+            toolSettings: ({monitors: root.editScreenSettings, monitorSpecific: root.monitorSpecific})
 
             onSaveMonitorProperty: (key, value) => root.saveMonitorProperty(key, value);
         }
@@ -222,7 +222,7 @@ ColumnLayout {
             pluginApi: root.pluginApi
             enabled: root.valueEnabled
             selectedMonitor: monitorTabBar.selectedMonitor
-            monitorSettings: root.editScreenSettings[selectedMonitor] || ({})
+            monitorSettings: Settings.store.copyValue(Commands.record(root.editScreenSettings, selectedMonitor) ?? ({}))
 
             onSaveMonitorProperty: (key, value) => root.saveMonitorProperty(key, value);
         }
@@ -233,7 +233,7 @@ ColumnLayout {
             activeBackend: root.activeBackend
             enabled: root.valueEnabled
             selectedMonitor: monitorTabBar.selectedMonitor
-            monitorSettings: root.editScreenSettings[selectedMonitor] || ({})
+            monitorSettings: Settings.store.copyValue(Commands.record(root.editScreenSettings, selectedMonitor) ?? ({}))
 
             onSaveMonitorProperty: (key, value) => root.saveMonitorProperty(key, value);
         }
@@ -252,10 +252,13 @@ ColumnLayout {
         automation.saveSettings();
         advanced.saveSettings();
 
-        // The runtime map switch remains coupled to I5. These are selected,
-        // editor-owned copies using the existing on-disk screen paths.
-        editScreenSettings = Object.assign({}, editScreenSettings, {activeBackend: activeBackend, enabled: valueEnabled, monitorSpecific: monitorSpecific, wallpapersFolder: wallpapersFolder, automationCustomTime: Array.from(automationCustomTime), mpvSocket: mpvSocket});
-        pluginApi.pluginSettings = JSON.parse(JSON.stringify(editScreenSettings));
+        pluginApi.pluginSettings.monitors = editScreenSettings;
+        pluginApi.pluginSettings.activeBackend = activeBackend;
+        pluginApi.pluginSettings.enabled = valueEnabled;
+        pluginApi.pluginSettings.monitorSpecific = monitorSpecific;
+        pluginApi.pluginSettings.wallpapersFolder = wallpapersFolder;
+        pluginApi.pluginSettings.automationCustomTime = Array.from(automationCustomTime);
+        pluginApi.pluginSettings.mpvSocket = mpvSocket;
 
         pluginApi.saveSettings();
     }

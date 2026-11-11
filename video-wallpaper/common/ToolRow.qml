@@ -5,6 +5,7 @@ import Quickshell
 
 import qs.Commons
 import qs.Widgets
+import "MonitorCommands.js" as Commands
 
 RowLayout {
     id: root
@@ -20,14 +21,16 @@ RowLayout {
     required property string screenName
 
     // Optional properties
-    property bool enabled:        true
+    // Use the inherited Item.enabled control input, not a shadow property.
     property var monitorSpecific: undefined
     property var settings: pluginApi?.pluginSettings || ({})
     property var settingWriter: null
+    readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
+        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); })
 
     // Monitor specific properties
-    readonly property bool isPlaying: settings[screenName]?.isPlaying || false
-    readonly property bool isMuted: settings[screenName]?.isMuted || false
+    readonly property bool isPlaying: Commands.record(settings.monitors, screenName)?.isPlaying || false
+    readonly property bool isMuted: Commands.record(settings.monitors, screenName)?.isMuted || false
 
     // Global properties
     readonly property bool globalMonitorSpecific: settings.monitorSpecific || false
@@ -71,21 +74,9 @@ RowLayout {
 
     function saveSetting(key: string, value: var) {
         if (typeof settingWriter === "function") { settingWriter(key, value); return; }
-        if (!_monitorSpecific) {
-            for (const screen of Quickshell.screens) {
-                if (pluginApi?.pluginSettings?.[screen.name] === undefined) {
-                    pluginApi.pluginSettings[screen.name] = {};
-                }
-
-                pluginApi.pluginSettings[screen.name][key] = value;
-            }
-        } else {
-            if (pluginApi?.pluginSettings?.[screenName] === undefined) {
-                pluginApi.pluginSettings[screenName] = {};
-            }
-
-            pluginApi.pluginSettings[screenName][key] = value;
-        }
+        var names = _monitorSpecific ? [screenName] : Array.from(Quickshell.screens).map(screen => screen.name);
+        if (!names.length) return;
+        monitorCommand.submit(names.map(name => ({op: "set", screen: name, field: key, value: value})));
 
         pluginApi.saveSettings();
     }

@@ -9,7 +9,7 @@ ColumnLayout {
     property var pluginApi: null
     readonly property color sectionBackgroundColor: AtmoColor.mSurfaceVariant
 
-    property var editSettings: JSON.parse(JSON.stringify(pluginApi?.pluginSettings ?? pluginApi?.manifest?.metadata?.defaultSettings ?? {}))
+    property var editSettings: pluginApi ? pluginApi.copyValue(pluginApi.initialSettings) : ({})
 
     NSettingsBaseline {
         id: displayBaseline
@@ -37,7 +37,8 @@ ColumnLayout {
 
     function saveSettings() {
         root.editSettings = Object.assign({}, root.editSettings, {barCycleIntervalSec: editCycleInterval, refreshIntervalSec: editRefreshInterval});
-        pluginApi.pluginSettings = Object.assign({}, JSON.parse(JSON.stringify(root.editSettings)), {barCycleIntervalSec: editCycleInterval, refreshIntervalSec: editRefreshInterval});
+        var submitted = pluginApi.copyValue(root.editSettings);
+        for (var key of Object.keys(submitted)) pluginApi.pluginSettings[key] = submitted[key];
         pluginApi.saveSettings();
     }
 

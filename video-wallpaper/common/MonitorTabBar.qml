@@ -8,7 +8,7 @@ import qs.Widgets
 NTabBar {
     id: root
 
-    property bool enabled: true
+    // Item.enabled is inherited.
     property bool monitorSpecific: false
 
     readonly property string activeMonitor: Quickshell.screens[currentIndex].name

@@ -1,4 +1,5 @@
 import QtQuick
+import "../common/MonitorCommands.js" as Commands
 import QtQuick.Layouts
 
 import Quickshell
@@ -21,7 +22,7 @@ ColumnLayout {
     required property var pluginApi
 
     required property string activeBackend
-    required property bool   enabled
+    required enabled
     required property string selectedMonitor
     required property var monitorSettings
     property alias hardwareAcceleration: mpvpaper.hardwareAcceleration
@@ -29,8 +30,8 @@ ColumnLayout {
     property alias mpvSocket: mpvpaper.mpvSocket
     NSettingsBaseline {
         id: displayBaseline
-        readonly property string fillMode: root.pluginApi?.initialSettings?.[root.selectedMonitor]?.fillMode ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? ""
-        readonly property int orientation: root.pluginApi?.initialSettings?.[root.selectedMonitor]?.orientation ?? 0
+        readonly property string fillMode: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.fillMode ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? ""
+        readonly property int orientation: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.orientation ?? 0
         ranges: [NSettingsRange { field: "orientation"; from: orientationInput.from; to: orientationInput.to }]
     }
     readonly property bool settingsDirty: displayBaseline.differs({fillMode: fillMode, orientation: orientation}) || mpvpaper.settingsDirty

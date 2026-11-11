@@ -11,7 +11,7 @@ ColumnLayout {
   property var pluginApi: null
   readonly property var mainInstance: pluginApi?.mainInstance ?? null
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings ?? ({})
-  property var editPreferences: JSON.parse(JSON.stringify(pluginApi?.initialSettings || ({})))
+  property var editPreferences: pluginApi ? pluginApi.copyValue(pluginApi.initialSettings) : ({})
   NSettingsBaseline {
     id: displayBaseline
     readonly property var editPreferences: root.pluginApi?.initialSettings || ({})
@@ -136,7 +136,8 @@ ColumnLayout {
 
   function saveSettings() {
     editPreferences = Object.assign({}, editPreferences, {panelDensity: editDensity});
-    pluginApi.pluginSettings = JSON.parse(JSON.stringify(editPreferences));
+    var submitted = pluginApi.copyValue(editPreferences);
+    for (var key of Object.keys(submitted)) pluginApi.pluginSettings[key] = submitted[key];
     pluginApi.saveSettings();
   }
 

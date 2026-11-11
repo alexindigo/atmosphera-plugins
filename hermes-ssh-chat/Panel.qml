@@ -41,8 +41,8 @@ Item {
   Component.onCompleted: Local.HermesSession.setPluginApi(pluginApi)
 
   Connections {
-    target: pluginApi
-    function onPluginSettingsChanged() {
+    target: pluginApi ? pluginApi.pluginSettings : null
+    function refresh() {
       root.cfg = pluginApi?.pluginSettings || ({});
       root.valueHost = cfg.host ?? defaults.host ?? "";
       root.valuePort = cfg.port ?? defaults.port ?? 22;
@@ -52,6 +52,12 @@ Item {
       root.terminalFontSize = cfg.terminalFontSize ?? defaults.terminalFontSize ?? 11;
       Local.HermesSession.setPluginApi(pluginApi);
     }
+    function onHostChanged() {refresh();}
+    function onPortChanged() {refresh();}
+    function onUserChanged() {refresh();}
+    function onTerminalColsChanged() {refresh();}
+    function onTerminalRowsChanged() {refresh();}
+    function onTerminalFontSizeChanged() {refresh();}
   }
 
   ColumnLayout {

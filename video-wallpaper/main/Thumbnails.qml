@@ -1,134 +1,127 @@
 pragma ComponentBehavior: Bound
 import QtQuick
-import Quickshell
 import Quickshell.Io
-
 import qs.Commons
-import qs.Services.UI
-
 import "../common"
 
 Item {
     id: root
     required property var pluginApi
-
-
-    /***************************
-    * PROPERTIES
-    ***************************/
-    // Required properties
-    required property var    getThumbPath
+    required property var getThumbPath
     required property string thumbCacheFolderPath
-
     required property FolderModel folderModel
     required property FolderModel thumbFolderModel
 
-    // Global properties
-    readonly property bool   enabled:          pluginApi?.pluginSettings?.enabled          ?? false
-    readonly property bool   thumbCacheReady:  pluginApi?.pluginSettings?.thumbCacheReady  ?? false
+    // Cache readiness belongs to this generation, never to preference files.
+    readonly property bool thumbCacheReady: internal.ready
+    readonly property bool generationFailed: internal.failed
     readonly property string wallpapersFolder: pluginApi?.pluginSettings?.wallpapersFolder ?? pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
 
-    // Local properties
-    property bool oldWallpapersSaved: false
-    property int  _thumbGenIndex: 0
-
-
-    /***************************
-    * FUNCTIONS
-    ***************************/
-    function clearThumbCacheReady() {
-        if(pluginApi != null && thumbCacheReady) {
-            pluginApi.pluginSettings.thumbCacheReady = false;
-            pluginApi.saveSettings();
-        }
+    QtObject {
+        id: internal
+        property bool ready: false
+        property bool failed: false
+        property bool initialized: false
+        property bool pending: true
+        property bool rebuild: false
+        property bool awaitingCache: false
+        property int generation: 0
+        property int runningGeneration: -1
+        property int index: 0
+        property var paths: []
     }
 
-    function setThumbCacheReady() {
-        if(pluginApi != null && !thumbCacheReady) {
-            pluginApi.pluginSettings.thumbCacheReady = true;
-            pluginApi.saveSettings();
-        }
+    function invalidate(rebuild) {
+        internal.generation++;
+        internal.ready = false;
+        internal.failed = false;
+        internal.pending = true;
+        internal.rebuild = internal.rebuild || rebuild;
+        internal.awaitingCache = false;
+        Qt.callLater(pump);
     }
 
-    function thumbGeneration() {
-        if(pluginApi == null) return;
+    function thumbRegenerate() { invalidate(true); }
 
-        // Try to start in a bit since the folder models aren't ready yet
-        if (!folderModel.ready || !thumbFolderModel.ready) {
-            Qt.callLater(thumbGeneration);
-            return;
-        }
+    function fail() {
+        internal.ready = false;
+        internal.failed = true;
+        internal.awaitingCache = false;
+        Logger.e("video-wallpaper", "Thumbnail generation failed; cache remains unready.");
+    }
 
-        // Reset the state of thumbCacheReady
-        clearThumbCacheReady();
-
-        while(root._thumbGenIndex < folderModel.count) {
-            const videoPath = folderModel.get(root._thumbGenIndex);
-            const thumbPath = root.getThumbPath(videoPath);
-            root._thumbGenIndex++;
-            // Check if file already exists, otherwise create it with ffmpeg
-            if (thumbFolderModel.indexOf(thumbPath) === -1) {
-                Logger.d("video-wallpaper", `Creating thumbnail for video: ${videoPath}`);
-
-                // With scale
-                //thumbProc.command = ["sh", "-c", `ffmpeg -y -i ${videoUrl} -vf "scale=1080:-1" -vframes:v 1 ${thumbUrl}`]
-                thumbGenerationProc.command = ["sh", "-c", `ffmpeg -y -i "${videoPath}" -vf "scale=iw/2:-1, format=rgb24" -vframes:v 1 "${thumbPath}"`]
-                thumbGenerationProc.running = true;
+    function pump() {
+        if (thumbGenerationProc.running || thumbRegenerationProc.running || !internal.initialized || !folderModel.ready || !thumbFolderModel.ready) return;
+        if (internal.pending) {
+            internal.runningGeneration = internal.generation;
+            if (internal.rebuild) {
+                internal.rebuild = false;
+                thumbRegenerationProc.running = true;
                 return;
             }
+            internal.pending = false;
+            internal.paths = Array.from(folderModel.files);
+            internal.index = 0;
+            advance();
+        } else if (internal.awaitingCache) {
+            internal.awaitingCache = false;
+            if (internal.runningGeneration !== internal.generation) return;
+            if (!internal.paths.every(path => thumbFolderModel.indexOf(root.getThumbPath(path)) !== -1)) { fail(); return; }
+            internal.ready = true;
         }
+    }
 
-        // The thumbnail generation has looped over every video and finished the generation
-        // Update the thumbnail folder
+    function advance() {
+        if (internal.runningGeneration !== internal.generation) { pump(); return; }
+        while (internal.index < internal.paths.length) {
+            const videoPath = internal.paths[internal.index++];
+            const thumbPath = getThumbPath(videoPath);
+            if (thumbFolderModel.indexOf(thumbPath) !== -1) continue;
+            thumbGenerationProc.command = ["ffmpeg", "-nostdin", "-y", "-i", videoPath, "-vf", "scale=iw/2:-1, format=rgb24", "-vframes:v", "1", thumbPath];
+            thumbGenerationProc.running = true;
+            return;
+        }
+        internal.awaitingCache = true;
         thumbFolderModel.forceReload();
-
-        root._thumbGenIndex = 0;
-        setThumbCacheReady();
     }
 
-    function thumbRegenerate() {
-        if(pluginApi == null) return;
-
-        clearThumbCacheReady();
-
-        thumbRegenerationProc.command = ["sh", "-c", `rm -rf ${thumbCacheFolderPath} && mkdir -p ${thumbCacheFolderPath}`]
-        thumbRegenerationProc.running = true;
+    onWallpapersFolderChanged: invalidate(false)
+    Connections {
+        target: root.folderModel
+        function onReadyChanged() {
+            if (!root.folderModel.ready) root.invalidate(false);
+            else Qt.callLater(root.pump);
+        }
     }
-
-
-    /***************************
-    * EVENTS
-    ***************************/
-    onWallpapersFolderChanged: {
-        root.thumbGeneration();
+    Connections {
+        target: root.thumbFolderModel
+        function onReadyChanged() { if (root.thumbFolderModel.ready) Qt.callLater(root.pump); }
     }
-
-
-    /***************************
-    * COMPONENTS
-    ***************************/
 
     Process {
-        // Process to create the thumbnail folder
         id: thumbInit
-        command: ["sh", "-c", `mkdir -p ${root.thumbCacheFolderPath}`]
+        command: ["mkdir", "-p", "--", root.thumbCacheFolderPath]
         running: true
+        onExited: exitCode => {
+            if (exitCode !== 0) { root.fail(); return; }
+            internal.initialized = true;
+            root.thumbFolderModel.forceReload();
+        }
     }
-
     Process {
         id: thumbGenerationProc
-
-        // When exiting run the thumbGenerate
-        onExited: root.thumbGeneration();
+        onExited: exitCode => {
+            if (internal.runningGeneration !== internal.generation) { root.pump(); return; }
+            if (exitCode !== 0) { root.fail(); return; }
+            root.advance();
+        }
     }
-
     Process {
         id: thumbRegenerationProc
-        onExited: {
-            // Reload the thumbFolder first
-            root.folderModel.forceReload();
+        command: ["sh", "-c", "rm -rf -- \"$1\" && mkdir -p -- \"$1\"", "thumbnail-cache", root.thumbCacheFolderPath]
+        onExited: exitCode => {
+            if (exitCode !== 0 && internal.runningGeneration === internal.generation) { root.fail(); internal.pending = false; return; }
             root.thumbFolderModel.forceReload();
-            root.thumbGeneration();
         }
     }
 }

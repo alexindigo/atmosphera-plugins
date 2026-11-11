@@ -25,7 +25,9 @@ Item {
             root._request = null;
             if (error) { Logger.e("spotify-player", "Token refresh failed"); return; }
             if (root.pluginApi !== api || api.pluginSettings.clientId !== input.clientId || api.pluginSettings.clientSecret !== input.clientSecret || api.pluginSettings.refreshToken !== input.refreshToken) return;
-            api.pluginSettings = Object.assign({}, api.pluginSettings, {accessToken: tokens.accessToken, refreshToken: tokens.refreshToken || input.refreshToken, tokenExpiresAt: tokens.tokenExpiresAt});
+            api.pluginSettings.accessToken = tokens.accessToken;
+            api.pluginSettings.refreshToken = tokens.refreshToken || input.refreshToken;
+            api.pluginSettings.tokenExpiresAt = tokens.tokenExpiresAt;
             api.saveSettings(function(result) {
                 if (lifetime.alive && (result.status === "saved" || result.status === "nothing_to_save")) Logger.i("spotify-player", "Token refreshed successfully");
             });

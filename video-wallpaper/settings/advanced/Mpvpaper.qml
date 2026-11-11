@@ -1,4 +1,5 @@
 import QtQuick
+import "../../common/MonitorCommands.js" as Commands
 import QtQuick.Layouts
 
 import Quickshell
@@ -17,13 +18,13 @@ ColumnLayout {
     ***************************/
     // Required properties
     required property var    pluginApi
-    required property bool   enabled
+    required enabled
     required property string selectedMonitor
     required property var monitorSettings
     NSettingsBaseline {
         id: displayBaseline
-        readonly property bool hardwareAcceleration: root.pluginApi?.initialSettings?.[root.selectedMonitor]?.hardwareAcceleration ?? false
-        readonly property string profile: root.pluginApi?.initialSettings?.[root.selectedMonitor]?.profile ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
+        readonly property bool hardwareAcceleration: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.hardwareAcceleration ?? false
+        readonly property string profile: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.profile ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
         readonly property string mpvSocket: root.pluginApi?.initialSettings?.mpvSocket ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.mpvSocket ?? ""
     }
     readonly property bool settingsDirty: displayBaseline.differs({hardwareAcceleration: hardwareAcceleration, profile: profile, mpvSocket: mpvSocket})
