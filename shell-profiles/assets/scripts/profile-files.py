@@ -296,6 +296,11 @@ def apply(profile, config, baseline, evidence):
                         lambda state, name=name: published.__setitem__(name, state))
             # Include every unchanged selected preimage and the profile input in
             # the closing check, not just the last replaced file.
+            expected_inventory = sorted(set(ROOT_FILES) | (set(current) - set(names)) |
+                                        {name for name in names
+                                         if published.get(name, captured[name][0])['configured'] is not None})
+            if inventory(config) != expected_inventory:
+                raise Refused('profile-readback-conflict')
             if read_profile(profile, current) != desired:
                 raise Refused('profile-content-conflict')
             for name in names:
@@ -317,7 +322,7 @@ def apply(profile, config, baseline, evidence):
                 except (OSError, Refused):
                     conflicts.append(name)
             # Competing bytes are retained, never overwritten to force rollback.
-            preserve(operation/'observed', capture(config, names))
+            preserve(operation/'observed', capture(config, sorted(set(names) | set(inventory(config)))))
             json_new(operation/'result.json', dict(status='failed', error=str(error) if isinstance(error, Refused) else 'profile-io',
                                                   rollbackConflicts=conflicts))
             raise
