@@ -184,7 +184,12 @@ def snapshot(config, destination, extras):
 
 def read_profile(profile, current):
     if (profile/MANIFEST).exists():
-        manifest = json.loads((profile/MANIFEST).read_bytes())
+        try:
+            manifest = json.loads((profile/MANIFEST).read_bytes())
+        except ValueError as error:
+            # The same parser is used before and after publication. A corrupt
+            # closing input must enter the operation's normal rollback path.
+            raise Refused('profile-manifest') from error
         if (not isinstance(manifest, dict) or manifest.get('format') != 2 or
                 not isinstance(manifest.get('entries'), dict) or
                 not all(selected(name) for name in manifest['entries'])):

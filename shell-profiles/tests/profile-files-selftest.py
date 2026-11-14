@@ -68,6 +68,15 @@ class PublicationRaces(unittest.TestCase):
     def test_created_plugin_file(self):
         self.created_selected_file('settings/plugins/new.json')
 
+    def test_malformed_closing_profile_rolls_back(self):
+        def corrupt_manifest():
+            (self.profile / module.MANIFEST).write_bytes(b'{')
+
+        try:
+            self.race(corrupt_manifest)
+        finally:
+            self.assertEqual((self.config / 'settings.json').read_bytes(), self.original)
+
     def test_complete_inventory_accepts_own_creations_and_removals(self):
         added = self.profile / 'settings/new.json'
         added.parent.mkdir(parents=True)
