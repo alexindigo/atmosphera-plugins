@@ -7,11 +7,14 @@ import qs.Services.Plugins
 Item {
   id: root
   required property var pluginApi
+  readonly property bool ready: !!pluginApi?.pluginDir && !!pluginApi?.pluginId && Settings.isLoaded
   readonly property bool busy: _active !== null
   property var _queue: []
   property var _active: null
   property bool _started: false
   property string _output: ""
+
+  onReadyChanged: if (ready) Qt.callLater(_next)
 
   function request(command, callback) {
     // Capture before queueing, so later caller mutation cannot alter submitted data.
@@ -21,7 +24,9 @@ Item {
   }
 
   function _next() {
-    if (_active || !_queue.length) return;
+    // API injection and Settings initialization can follow Main construction.
+    // An unready dependency never acquires or removes the queued request.
+    if (!ready || _active || !_queue.length) return;
     _active = _queue.shift();
     _started = false;
     _output = "";
