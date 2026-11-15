@@ -2,7 +2,7 @@
 # save-profile.sh <cfg_dir> <profile_dir>
 # Preserve the existing command entrypoint; all selected raw files share one IO owner.
 set -eu
-wallpapers='{}'
+wallpapers='{"screens":[]}'
 meta='{}'
 if [ "$#" -ge 3 ]; then wallpapers=$3; fi
 if [ "$#" -ge 4 ]; then meta=$4; fi

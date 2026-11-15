@@ -33,6 +33,22 @@ class ProfileFixture(unittest.TestCase):
 
 
 class PublicationRaces(ProfileFixture):
+    def test_two_argument_entrypoints_save_apply_valid_wallpaper_metadata(self):
+        scripts = Path(module.__file__).parent
+        saved = self.root / 'two-argument-profile'
+        result = subprocess.run(['sh', str(scripts/'save-profile.sh'), str(self.config), str(saved)],
+                                capture_output=True, timeout=5)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)['status'], 'saved')
+        wallpapers = json.loads((saved/'wallpapers.json').read_bytes())
+        self.assertEqual(wallpapers, {'screens': []})
+        (self.config/'settings.json').write_bytes(b'{"later":true}')
+        applied = subprocess.run(['sh', str(scripts/'apply-profile.sh'), str(saved), str(self.config)],
+                                 capture_output=True, timeout=5)
+        self.assertEqual(applied.returncode, 0, applied.stderr)
+        self.assertEqual(json.loads(applied.stdout)['status'], 'applied')
+        self.assertEqual((self.config/'settings.json').read_bytes(), self.original)
+
     def race(self, callback):
         publish = module.publish
         injected = False
