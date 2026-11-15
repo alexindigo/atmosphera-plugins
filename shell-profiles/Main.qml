@@ -153,6 +153,15 @@ Item {
     })
   }
 
+  function _settingsFailure(receipt, fallback) {
+    if (receipt?.error?.code !== "unresolved-group" || !receipt.preferenceBlockers?.length)
+      return fallback
+    var workflows = receipt.preferenceBlockers.map(function (blocker) {
+      return blocker.ownerKey + "/" + (blocker.requestKey || blocker.groupToken) + " (" + blocker.state + ")"
+    })
+    return "Profile settings blocked by unresolved workflow: " + workflows.join(", ")
+  }
+
   function _pruneBackups(bDir, callback) {
     var maxCount = Math.max(1, Math.min(20, pluginApi?.pluginSettings?.backupCount ?? 5))
     _runCommand(["sh", scriptsDir + "/prune-backups.sh", bDir, String(maxCount)], function(code) {
@@ -207,7 +216,7 @@ Item {
     var metaJson = JSON.stringify({savedAt: new Date().toISOString()})
     isBusy = true
     _settleOwners("save", function (ready, receipt) {
-      if (!ready) { _complete("save", trimmed, false, "profile-settings-receipt", callback, {settings: receipt}); return }
+      if (!ready) { _complete("save", trimmed, false, _settingsFailure(receipt, "profile-settings-receipt"), callback, {settings: receipt}); return }
       _runCommand(["sh", scriptsDir + "/save-profile.sh", Settings.configDir, dirPath,
         wallpapersJson, metaJson], function(code, stdout, stderr) {
         _complete("save", trimmed, code === 0, code === 0 ? "" : stderr.trim() || "profile-copy-failed", callback, {settings: receipt})
@@ -290,7 +299,7 @@ Item {
       // Wallpaper selection may itself submit settings (e.g. solid color mode).
       _settleOwners("save", function (ok, receipt) {
         outcomes.afterEffects = receipt
-        if (!ok) { fail("profile-settings-receipt"); return }
+        if (!ok) { fail(_settingsFailure(receipt, "profile-settings-receipt")); return }
         finish()
       })
     }
@@ -303,7 +312,7 @@ Item {
         if (!outcomes.before.isCurrent()) { fail("profile-concurrent-edit"); return }
         _settleOwners("reload", function (ok, receipt) {
           outcomes.settings = receipt
-          if (!ok) { fail("profile-reload-receipt"); return }
+          if (!ok) { fail(_settingsFailure(receipt, "profile-reload-receipt")); return }
           AtmoColor.reloadFromDisk(function (colors) {
             if (!lifetime.alive) return
             outcomes.colors = colors
@@ -320,7 +329,7 @@ Item {
     }
     _settleOwners("save", function (ok, receipt) {
       outcomes.before = receipt
-      if (!ok) { fail("profile-settings-receipt"); return }
+      if (!ok) { fail(_settingsFailure(receipt, "profile-settings-receipt")); return }
       _createBackup(trimmed, function (backedUp, baseline) {
         if (!backedUp) { fail("profile-backup-failed"); return }
         outcomes.backup = {status: "saved", directory: baseline, automatic: backupEnabled}

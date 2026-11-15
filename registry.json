@@ -2297,14 +2297,14 @@
       "author": "Archlexx",
       "description": "Save, load, and manage Noctalia configuration profiles.",
       "license": "MIT",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "tags": [
         "Bar",
         "Theming",
         "Utility",
         "Panel"
       ],
-      "lastUpdated": "2026-11-14",
+      "lastUpdated": "2026-11-15",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
