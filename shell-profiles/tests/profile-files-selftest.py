@@ -2,7 +2,11 @@
 """Deterministic publication races against the real raw-profile file owner."""
 import importlib.util
 import json
+import os
 from pathlib import Path
+import stat
+import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -12,7 +16,7 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 
-class PublicationRaces(unittest.TestCase):
+class ProfileFixture(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
@@ -27,6 +31,8 @@ class PublicationRaces(unittest.TestCase):
         self.profile = self.root / 'profile'
         module.snapshot(source, self.profile, {})
 
+
+class PublicationRaces(ProfileFixture):
     def race(self, callback):
         publish = module.publish
         injected = False
@@ -101,6 +107,198 @@ class PublicationRaces(unittest.TestCase):
         self.assertEqual(module.apply(self.profile, self.config, None, self.root / 'evidence')['status'], 'applied')
         self.assertTrue(link.is_symlink())
         self.assertFalse(target.exists())
+
+
+class AliasedTargets(ProfileFixture):
+    def setUp(self):
+        super().setUp()
+        (self.config / 'settings').mkdir()
+        (self.config / 'settings.json').unlink()
+        self.target = self.config / 'settings/main.json'
+        self.target.write_bytes(b'{"saved":true}\n')
+        self.target.chmod(0o640)
+        (self.config / 'settings.json').symlink_to('settings/main.json')
+        (self.config / 'colors.json').symlink_to('settings/main.json')
+        self.aliased_profile = self.root / 'aliased-profile'
+        module.snapshot(self.config, self.aliased_profile, {})
+        self.saved = self.target.read_bytes()
+        self.target.write_bytes(b'{"current":true}\n')
+        self.original = self.target.read_bytes()
+        self.baseline = self.root / 'baseline'
+        module.snapshot(self.config, self.baseline, {})
+
+    def publish_calls(self, callback):
+        calls = []
+        publish = module.publish
+
+        def observed(path, *args, **kwargs):
+            calls.append(str(path))
+            return publish(path, *args, **kwargs)
+
+        with patch.object(module, 'publish', observed):
+            callback()
+        return calls
+
+    def check_links(self):
+        for name in ('settings.json', 'colors.json'):
+            self.assertTrue((self.config / name).is_symlink())
+            self.assertEqual(os.readlink(self.config / name), 'settings/main.json')
+
+    def test_saved_aliases_apply_once_with_baseline(self):
+        def apply():
+            self.assertEqual(module.apply(self.aliased_profile, self.config, self.baseline,
+                                          self.root / 'evidence')['status'], 'applied')
+
+        calls = self.publish_calls(apply)
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(self.target.read_bytes(), self.saved)
+        self.assertEqual(stat.S_IMODE(self.target.stat().st_mode), 0o640)
+        self.check_links()
+
+    def test_alias_capture_refuses_mixed_physical_preimages(self):
+        file_state = module.file_state
+        foreign = b'{"foreign":true}'
+        changed = False
+
+        def change_between_aliases(path):
+            nonlocal changed
+            result = file_state(path)
+            if not changed and path == self.config / 'colors.json':
+                changed = True
+                self.target.write_bytes(foreign)
+            return result
+
+        with patch.object(module, 'file_state', change_between_aliases):
+            with self.assertRaisesRegex(module.Refused, 'profile-preimage-conflict'):
+                module.capture(self.config, module.inventory(self.config))
+        self.assertTrue(changed)
+        self.assertEqual(self.target.read_bytes(), foreign)
+        self.check_links()
+
+    def test_conflicting_alias_contents_refuse_before_publication(self):
+        # An earlier, independent target must not publish before a later alias
+        # conflict is discovered by the complete physical-target plan.
+        (self.config / 'colors.json').unlink()
+        colors = b'{"independent":true}'
+        (self.config / 'colors.json').write_bytes(colors)
+        content = b'{"different":true}'
+        (self.aliased_profile / 'settings.json').write_bytes(content)
+        manifest_path = self.aliased_profile / module.MANIFEST
+        manifest = json.loads(manifest_path.read_bytes())
+        manifest['entries']['settings.json']['sha256'] = module.digest(content)
+        manifest_path.write_text(json.dumps(manifest))
+
+        def apply():
+            with self.assertRaisesRegex(module.Refused, 'profile-alias-conflict'):
+                module.apply(self.aliased_profile, self.config, None, self.root / 'evidence')
+
+        self.assertEqual(self.publish_calls(apply), [])
+        self.assertEqual(self.target.read_bytes(), self.original)
+        self.assertEqual((self.config / 'colors.json').read_bytes(), colors)
+        self.assertTrue((self.config / 'settings.json').is_symlink())
+
+    def test_closing_failure_rolls_back_one_physical_target(self):
+        read_profile = module.read_profile
+        reads = 0
+
+        def changed_profile(*args):
+            nonlocal reads
+            reads += 1
+            if reads == 2:
+                raise module.Refused('profile-content-conflict')
+            return read_profile(*args)
+
+        def apply():
+            with patch.object(module, 'read_profile', changed_profile):
+                with self.assertRaisesRegex(module.Refused, 'profile-content-conflict'):
+                    module.apply(self.aliased_profile, self.config, None, self.root / 'evidence')
+
+        self.assertEqual(len(self.publish_calls(apply)), 2)
+        self.assertEqual(self.target.read_bytes(), self.original)
+        self.check_links()
+        receipt = json.loads(next((self.root / 'evidence').glob('*/result.json')).read_bytes())
+        self.assertEqual(receipt['rollbackConflicts'], [])
+
+    def test_post_rename_failure_keeps_alias_rollback_witness(self):
+        fsync = module.os.fsync
+        injected = False
+
+        def fail_directory(fd):
+            nonlocal injected
+            if not injected and stat.S_ISDIR(os.fstat(fd).st_mode):
+                injected = True
+                raise OSError('directory sync fault')
+            return fsync(fd)
+
+        # Fail only after the immutable before-evidence has been retained.
+        publish = module.publish
+
+        def fail_after_rename(*args, **kwargs):
+            with patch.object(module.os, 'fsync', fail_directory):
+                return publish(*args, **kwargs)
+
+        with patch.object(module, 'publish', fail_after_rename):
+            with self.assertRaises(OSError):
+                module.apply(self.aliased_profile, self.config, None, self.root / 'evidence')
+        self.assertTrue(injected)
+        self.assertEqual(self.target.read_bytes(), self.original)
+        self.check_links()
+        receipt = json.loads(next((self.root / 'evidence').glob('*/result.json')).read_bytes())
+        self.assertEqual(receipt['rollbackConflicts'], [])
+
+    def test_alias_deletion_and_recreation(self):
+        self.target.unlink()
+        absent = self.root / 'absent-profile'
+        module.snapshot(self.config, absent, {})
+        self.target.write_bytes(self.original)
+        self.assertEqual(module.apply(absent, self.config, None, self.root / 'delete-evidence')['status'], 'applied')
+        self.assertFalse(self.target.exists())
+        self.check_links()
+        self.assertEqual(module.apply(self.aliased_profile, self.config, None, self.root / 'create-evidence')['status'], 'applied')
+        self.assertEqual(self.target.read_bytes(), self.saved)
+        self.check_links()
+
+
+class SpecialReferents(ProfileFixture):
+    def command(self, operation, profile, *options):
+        return subprocess.run([sys.executable, str(Path(module.__file__)), operation,
+                               str(self.config), str(profile), *map(str, options)],
+                              capture_output=True, timeout=3)
+
+    def test_symlink_to_fifo_refuses_without_waiting_for_writer(self):
+        fifo = self.root / 'fifo'
+        os.mkfifo(fifo)
+        (self.config / 'settings').mkdir()
+        (self.config / 'settings/link.json').symlink_to(fifo)
+        result = self.command('save', self.root / 'fifo-profile')
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(b'profile-files-failed', result.stderr)
+        self.assertEqual((self.config / 'settings.json').read_bytes(), self.original)
+
+    def test_fifo_profile_manifest_refuses_without_waiting(self):
+        manifest = self.profile / module.MANIFEST
+        manifest.unlink()
+        os.mkfifo(manifest)
+        self.assertEqual(self.command('apply', self.profile).returncode, 1)
+        self.assertEqual((self.config / 'settings.json').read_bytes(), self.original)
+
+    def test_fifo_baseline_manifest_refuses_without_waiting(self):
+        baseline = self.root / 'baseline'
+        baseline.mkdir()
+        os.mkfifo(baseline / module.MANIFEST)
+        self.assertEqual(self.command('apply', self.profile, '--baseline', baseline).returncode, 1)
+        self.assertEqual((self.config / 'settings.json').read_bytes(), self.original)
+
+    def test_invalid_baseline_manifest_reports_without_traceback(self):
+        baseline = self.root / 'baseline'
+        baseline.mkdir()
+        for body in (b'null', b'[]', b'{}', b'{'):
+            with self.subTest(body=body):
+                (baseline / module.MANIFEST).write_bytes(body)
+                result = self.command('apply', self.profile, '--baseline', baseline)
+                self.assertEqual(result.returncode, 1)
+                self.assertEqual(result.stderr, b'profile-files-failed\n')
+                self.assertEqual((self.config / 'settings.json').read_bytes(), self.original)
 
 
 if __name__ == '__main__':

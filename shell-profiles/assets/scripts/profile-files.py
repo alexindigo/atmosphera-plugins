@@ -66,7 +66,7 @@ def file_state(path):
     if configured and not (stat.S_ISREG(configured.st_mode) or stat.S_ISLNK(configured.st_mode)):
         raise Refused('profile-file-type')
     try:
-        with resolved.open('rb') as stream:
+        with os.fdopen(os.open(resolved, os.O_RDONLY | os.O_NONBLOCK | os.O_NOFOLLOW), 'rb') as stream:
             before = os.fstat(stream.fileno())
             if not stat.S_ISREG(before.st_mode):
                 raise Refused('profile-file-type')
@@ -94,7 +94,7 @@ def file_state(path):
 @contextmanager
 def lock(path):
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd = os.open(path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+    fd = os.open(path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK, 0o600)
     try:
         if not stat.S_ISREG(os.fstat(fd).st_mode):
             raise Refused('profile-lock-type')
@@ -134,7 +134,14 @@ def json_new(path, value):
 
 
 def capture(root, names):
-    return {name: file_state(root/name) for name in names}
+    captured = {name: file_state(root/name) for name in names}
+    targets = {}
+    for state, data in captured.values():
+        witness = (state['referent'], data)
+        if state['target'] in targets and targets[state['target']] != witness:
+            raise Refused('profile-preimage-conflict')
+        targets[state['target']] = witness
+    return captured
 
 
 def preserve(root, captured, extras=None):
@@ -182,14 +189,22 @@ def snapshot(config, destination, extras):
         return dict(status='saved', files=len(manifest['entries']), retained=str(previous) if previous else None)
 
 
+def read_manifest(path):
+    _, data = file_state(path)
+    if data is None:
+        raise Refused('profile-manifest')
+    try:
+        manifest = json.loads(data)
+    except ValueError as error:
+        raise Refused('profile-manifest') from error
+    if not isinstance(manifest, dict):
+        raise Refused('profile-manifest')
+    return manifest
+
+
 def read_profile(profile, current):
     if (profile/MANIFEST).exists():
-        try:
-            manifest = json.loads((profile/MANIFEST).read_bytes())
-        except ValueError as error:
-            # The same parser is used before and after publication. A corrupt
-            # closing input must enter the operation's normal rollback path.
-            raise Refused('profile-manifest') from error
+        manifest = read_manifest(profile/MANIFEST)
         if (not isinstance(manifest, dict) or manifest.get('format') != 2 or
                 not isinstance(manifest.get('entries'), dict) or
                 not all(selected(name) for name in manifest['entries'])):
@@ -222,6 +237,24 @@ def read_profile(profile, current):
     return desired
 
 
+def publication_state(expected, referent, sha256):
+    after = dict(expected, referent=referent, sha256=sha256)
+    if not expected['configured'] or not stat.S_ISLNK(expected['configured'][4]):
+        after['configured'] = referent
+    return after
+
+
+def target_groups(captured, desired):
+    targets = {}
+    for name in sorted(desired):
+        targets.setdefault(captured[name][0]['target'], []).append(name)
+    # Validate the complete plan before any independent target can publish.
+    for aliases in targets.values():
+        if any(desired[name] != desired[aliases[0]] for name in aliases):
+            raise Refused('profile-alias-conflict')
+    return list(targets.values())
+
+
 def publish(path, data, expected, mode, committed=None):
     if file_state(path)[0] != expected:
         raise Refused('profile-preimage-conflict')
@@ -232,9 +265,7 @@ def publish(path, data, expected, mode, committed=None):
     if data is None:
         if current is not None:
             target.unlink()
-        after = dict(expected, referent=None, sha256=None)
-        if expected['configured'] and not stat.S_ISLNK(expected['configured'][4]):
-            after['configured'] = None
+        after = publication_state(expected, None, None)
         if committed:
             committed(after)
     else:
@@ -252,9 +283,7 @@ def publish(path, data, expected, mode, committed=None):
             os.replace(temporary, target)
             # Record the known committed inode before fsync/readback can fail.
             # Never infer ownership from a later observation of foreign bytes.
-            after = dict(expected, referent=staged, sha256=digest(data))
-            if not expected['configured'] or not stat.S_ISLNK(expected['configured'][4]):
-                after['configured'] = staged
+            after = publication_state(expected, staged, digest(data))
             if committed:
                 committed(after)
         finally:
@@ -286,19 +315,31 @@ def apply(profile, config, baseline, evidence):
         captured = capture(config, names)
         preserve(operation/'before', captured)
         if baseline:
-            expected = json.loads((baseline/MANIFEST).read_bytes())['sourcePreimages']
+            manifest = read_manifest(baseline/MANIFEST)
+            expected = manifest.get('sourcePreimages')
+            if manifest.get('format') != 2 or not isinstance(expected, dict):
+                raise Refused('profile-manifest')
             if inventory(config) != sorted(expected) or any(file_state(config/name)[0] != state for name, state in expected.items()):
                 json_new(operation/'result.json', dict(status='failed', error='profile-preimage-conflict'))
                 raise Refused('profile-preimage-conflict')
         published = {}
+        published_targets = []
         try:
-            for name in names:
+            for aliases in target_groups(captured, desired):
+                name = aliases[0]
                 before, data = captured[name]
                 if data == desired[name]:
                     continue
+                if any(file_state(config/alias)[0] != captured[alias][0] for alias in aliases):
+                    raise Refused('profile-preimage-conflict')
+
+                def committed(state, aliases=aliases):
+                    published_targets.append(aliases[0])
+                    for alias in aliases:
+                        published[alias] = publication_state(captured[alias][0], state['referent'], state['sha256'])
+
                 mode = stat.S_IMODE(before['referent'][4]) if before['referent'] else 0o600
-                publish(config/name, desired[name], before, mode,
-                        lambda state, name=name: published.__setitem__(name, state))
+                publish(config/name, desired[name], before, mode, committed)
             # Include every unchanged selected preimage and the profile input in
             # the closing check, not just the last replaced file.
             expected_inventory = sorted(set(ROOT_FILES) | (set(current) - set(names)) |
@@ -317,7 +358,7 @@ def apply(profile, config, baseline, evidence):
             return receipt
         except (OSError, Refused) as error:
             conflicts = []
-            for name in reversed(published):
+            for name in reversed(published_targets):
                 original, data = captured[name]
                 try:
                     mode = stat.S_IMODE(original['referent'][4]) if original['referent'] else 0o600
