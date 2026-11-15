@@ -1243,7 +1243,7 @@
       "author": "User",
       "description": "Shows prayer times with a live countdown and a Hijri calendar with Islamic events.",
       "license": "MIT",
-      "version": "1.3.9",
+      "version": "1.3.10",
       "tags": [
         "Bar",
         "Panel"
