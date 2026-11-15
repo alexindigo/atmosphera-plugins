@@ -11,10 +11,14 @@ Item {
     required property string thumbCacheFolderPath
     required property FolderModel folderModel
     required property FolderModel thumbFolderModel
+    // Selected files can live outside the browsed directory. They use this
+    // producer too, never a second process owned by a color consumer.
+    property var requestedPaths: []
 
     // Cache readiness belongs to this generation, never to preference files.
     readonly property bool thumbCacheReady: internal.ready
     readonly property bool generationFailed: internal.failed
+    readonly property int generation: internal.generation
     readonly property string wallpapersFolder: pluginApi?.pluginSettings?.wallpapersFolder ?? pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
 
     QtObject {
@@ -43,6 +47,15 @@ Item {
 
     function thumbRegenerate() { invalidate(true); }
 
+    function ownsPath(path) {
+        return path !== "" && path.indexOf(thumbCacheFolderPath + "/") === 0;
+    }
+
+    function pathFor(videoPath) {
+        if (!thumbCacheReady || internal.paths.indexOf(videoPath) === -1) return "";
+        return getThumbPath(videoPath);
+    }
+
     function fail() {
         internal.ready = false;
         internal.failed = true;
@@ -60,7 +73,7 @@ Item {
                 return;
             }
             internal.pending = false;
-            internal.paths = Array.from(folderModel.files);
+            internal.paths = Array.from(new Set(Array.from(folderModel.files).concat(requestedPaths).filter(path => path !== "")));
             internal.index = 0;
             advance();
         } else if (internal.awaitingCache) {
@@ -77,7 +90,8 @@ Item {
             const videoPath = internal.paths[internal.index++];
             const thumbPath = getThumbPath(videoPath);
             if (thumbFolderModel.indexOf(thumbPath) !== -1) continue;
-            thumbGenerationProc.command = ["ffmpeg", "-nostdin", "-y", "-i", videoPath, "-vf", "scale=iw/2:-1, format=rgb24", "-vframes:v", "1", thumbPath];
+            const staging = thumbPath + ".pending.bmp";
+            thumbGenerationProc.command = ["sh", "-c", "trap 'rm -f -- \"$2\"' EXIT; ffmpeg -nostdin -y -i \"$1\" -vf 'scale=iw/2:-1, format=rgb24' -vframes:v 1 \"$2\" && mv -f -- \"$2\" \"$3\"", "video-thumbnail", videoPath, staging, thumbPath];
             thumbGenerationProc.running = true;
             return;
         }
@@ -86,6 +100,7 @@ Item {
     }
 
     onWallpapersFolderChanged: invalidate(false)
+    onRequestedPathsChanged: invalidate(false)
     Connections {
         target: root.folderModel
         function onReadyChanged() {
@@ -111,7 +126,7 @@ Item {
     Process {
         id: thumbGenerationProc
         onExited: exitCode => {
-            if (internal.runningGeneration !== internal.generation) { root.pump(); return; }
+            if (internal.runningGeneration !== internal.generation) { root.thumbFolderModel.forceReload(); return; }
             if (exitCode !== 0) { root.fail(); return; }
             root.advance();
         }

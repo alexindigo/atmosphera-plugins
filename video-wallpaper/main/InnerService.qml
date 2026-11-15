@@ -27,8 +27,12 @@ Item {
     // Global properties
     readonly property bool wallpaperEnabled: pluginApi?.pluginSettings?.enabled ?? false
     required property bool thumbCacheReady
+    property var thumbnailSource: null
     property bool _initialized: false
     property string _runtimeWallpaper: ""
+    property bool baselineReady: false
+    property int revision: 0
+    readonly property bool failed: saveTimer.failed
 
     // Signals
     signal oldWallpapersSaved
@@ -39,12 +43,7 @@ Item {
     * FUNCTIONS
     ***************************/
     function saveOldWallpapers() {
-        if (!_initialized || pluginApi == null || saveTimer.running || !wallpaperEnabled || currentWallpaper === "") return;
-
-        if (!thumbCacheReady || !thumbFolderModel.ready) {
-            Qt.callLater(saveOldWallpapers);
-            return;
-        }
+        if (!_initialized || pluginApi == null || saveTimer.running || saveTimer.busy || saveTimer.failed || !wallpaperEnabled || currentWallpaper === "") return;
 
         const noctaliaWallpaper = WallpaperService.getWallpaper(screenName);
 
@@ -53,13 +52,25 @@ Item {
         const videoExtension = currentWallpaper.split(".").pop();
         const isSimilarToThumbnailGen = noctaliaWallpaper.slice(-8) === `.${videoExtension}.bmp`;
 
-        if (thumbFolderModel.indexOf(noctaliaWallpaper) === -1 && !isSimilarToThumbnailGen) {
+        if (!(thumbnailSource ? thumbnailSource.ownsPath(noctaliaWallpaper) : thumbFolderModel.indexOf(noctaliaWallpaper) !== -1) && !isSimilarToThumbnailGen) {
             _runtimeWallpaper = noctaliaWallpaper;
-            saveTimer.save("noctaliaWallpaper", noctaliaWallpaper);
+            saveTimer.save("noctaliaWallpaper", noctaliaWallpaper, revision);
             return;
         }
 
+        baselineReady = true;
         wallpaperBaselineReady();
+    }
+
+    function retry() { return failed && wallpaperEnabled && currentWallpaper !== "" && saveTimer.retry(); }
+
+    function requestBaseline() {
+        if (!_initialized || pluginApi == null) return;
+        revision++;
+        baselineReady = false;
+        saveTimer.cancelPending();
+        if (wallpaperEnabled && currentWallpaper !== "") Qt.callLater(saveOldWallpapers);
+        else applyOldWallpapers();
     }
 
     function applyOldWallpapers() {
@@ -71,33 +82,18 @@ Item {
     /***************************
     * EVENTS
     ***************************/
-    onCurrentWallpaperChanged: {
-        if (!_initialized || pluginApi == null) return;
-
-        if (root.wallpaperEnabled && root.currentWallpaper != "") {
-            root.saveOldWallpapers();
-        } else {
-            root.applyOldWallpapers();
-        }
-    }
-
-    onWallpaperEnabledChanged: {
-        if (!_initialized || pluginApi == null) return;
-
-        if (root.wallpaperEnabled && root.currentWallpaper != "") {
-            root.saveOldWallpapers();
-        } else {
-            root.applyOldWallpapers();
-        }
-    }
+    onCurrentWallpaperChanged: requestBaseline()
+    onWallpaperEnabledChanged: requestBaseline()
 
     Component.onCompleted: {
         // Attaching an enabled plugin is not a preference action. Capture the
         // current wallpaper for this runtime before color generation, without
         // overwriting historical restoration preferences.
         _runtimeWallpaper = WallpaperService.getWallpaper(screenName);
+        if (thumbnailSource && thumbnailSource.ownsPath(_runtimeWallpaper)) _runtimeWallpaper = noctaliaWallpaper;
         _initialized = true;
-        Qt.callLater(function () { root.wallpaperBaselineReady(); });
+        baselineReady = true;
+        Qt.callLater(function () { if (root.baselineReady) root.wallpaperBaselineReady(); });
     }
     Component.onDestruction: {
         applyOldWallpapers();
@@ -110,8 +106,13 @@ Item {
         id: saveTimer
         pluginApi: root.pluginApi
         screenName: root.screenName
-        onCompleted: result => {
+        onCompleted: (result, context) => {
+            if (context !== root.revision || !root.wallpaperEnabled || root.currentWallpaper === "") {
+                Qt.callLater(root.saveOldWallpapers);
+                return;
+            }
             if (result.status === "saved" || result.status === "nothing_to_save") {
+                root.baselineReady = true;
                 root.oldWallpapersSaved();
                 root.wallpaperBaselineReady();
             }

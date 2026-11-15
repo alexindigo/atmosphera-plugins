@@ -6,6 +6,7 @@ import qs.Services.UI
 
 import "./common"
 import "./main"
+import "./common/MonitorCommands.js" as Commands
 
 Item {
     id: root
@@ -20,6 +21,7 @@ Item {
     readonly property string thumbCacheFolderPath: ImageCacheService.wpThumbDir + "video-wallpaper"
     readonly property bool thumbCacheReady: thumbnails.thumbCacheReady
     readonly property bool thumbnailGenerationFailed: thumbnails.generationFailed
+    readonly property string requestedWallpaperPaths: JSON.stringify(Quickshell.screens.map(screen => Commands.record(root.pluginApi?.pluginSettings?.monitors, screen.name)?.currentWallpaper ?? ""))
 
 
     /***************************
@@ -53,7 +55,10 @@ Item {
 
     function thumbRegenerate() {
         thumbnails.thumbRegenerate();
+        retryBaselines();
     }
+
+    signal retryBaselines()
 
 
     /***************************
@@ -159,15 +164,9 @@ Item {
             ColorGeneration {
                 id: colorgen
                 pluginApi: root.pluginApi
-                thumbCacheReady: root.thumbCacheReady
-
                 screenName: screenItem.name
-
-                getThumbPath:         root.getThumbPath
-                thumbCacheFolderPath: root.thumbCacheFolderPath
-
-                folderModel:      rootFolderModel
-                thumbFolderModel: rootThumbFolderModel
+                thumbnailSource: thumbnails
+                baselineSource: baselineOwner
             }
 
 
@@ -175,17 +174,21 @@ Item {
             * NOCTALIA WALLPAPER
             ***************************/
             InnerService {
+                id: baselineOwner
                 pluginApi: root.pluginApi
                 thumbCacheReady: root.thumbCacheReady
+                thumbnailSource: thumbnails
 
                 screenName: screenItem.name
 
                 getThumbPath:     root.getThumbPath
                 thumbFolderModel: rootThumbFolderModel
 
-                onWallpaperBaselineReady: {
-                    colorgen.wallpaperBaselineReady = true;
-                }
+            }
+
+            Connections {
+                target: root
+                function onRetryBaselines() { baselineOwner.retry(); }
             }
         }
     }
@@ -199,6 +202,7 @@ Item {
 
         folderModel:      rootFolderModel
         thumbFolderModel: rootThumbFolderModel
+        requestedPaths: JSON.parse(root.requestedWallpaperPaths)
     }
 
     Automation {

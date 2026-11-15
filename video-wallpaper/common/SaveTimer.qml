@@ -15,11 +15,11 @@ Item {
     property bool busy: false
     property bool failed: false
     property var _pending: null
-    signal completed(var result)
+    signal completed(var result, var context)
     readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
         function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); })
 
-    function save(key: string, value: var) {
+    function save(key: string, value: var, context: var) {
         if (typeof key !== "string") {
             Logger.e("video-wallpaper", "Saving with wrong type of key:", key);
             return;
@@ -27,9 +27,9 @@ Item {
 
         if (screenName === undefined) {
             if (value !== null && typeof value === "object") throw new Error("timer-scalar-input");
-            _pending = {key: key, value: value};
+            _pending = {key: key, value: value, context: context};
         } else {
-            _pending = {commands: Commands.capture([{op: "set", screen: screenName, field: key, value: value}])};
+            _pending = {commands: Commands.capture([{op: "set", screen: screenName, field: key, value: value}]), context: context};
         }
         failed = false;
         timer.restart();
@@ -40,6 +40,12 @@ Item {
         failed = false;
         timer.restart();
         return true;
+    }
+
+    function cancelPending() {
+        timer.stop();
+        _pending = null;
+        failed = false;
     }
 
     Timer {
@@ -60,8 +66,8 @@ Item {
                 if (root._pending === body) {
                     root.failed = !success;
                     if (success) root._pending = null;
-                } else timer.restart();
-                root.completed(result);
+                } else if (root._pending) timer.restart();
+                root.completed(result, body.context);
             }
             try {
                 if (body.commands) root.monitorCommand.submit(body.commands);
