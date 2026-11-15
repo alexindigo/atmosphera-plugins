@@ -38,7 +38,6 @@ ColumnLayout {
     readonly property bool editSplitLargeWorkspaceCategory: root.cfg.splitLargeWorkspaceCategory ?? root.defaults.splitLargeWorkspaceCategory ?? true
     readonly property int editWorkspaceSplitThreshold: root.cfg.workspaceSplitThreshold ?? root.defaults.workspaceSplitThreshold ?? 12
     readonly property var editBindOverrides: root.cfg.bindOverrides || ({})
-    readonly property var editCheatsheetData: root.cfg.cheatsheetData || []
     readonly property string valueKeyColorSuper: root.cfg.keyColorSuper ?? root.defaults.keyColorSuper ?? ""
     readonly property string valueKeyColorCtrl: root.cfg.keyColorCtrl ?? root.defaults.keyColorCtrl ?? ""
     readonly property string valueKeyColorShift: root.cfg.keyColorShift ?? root.defaults.keyColorShift ?? ""
@@ -70,10 +69,9 @@ ColumnLayout {
     readonly property string valueDescriptionTextColor: root.cfg.descriptionTextColor ?? root.defaults.descriptionTextColor ?? ""
     ranges: [NSettingsRange { field: "editWorkspaceSplitThreshold"; from: workspaceThreshold.from; to: workspaceThreshold.to }]
   }
-  readonly property bool settingsDirty: displayBaseline.differs({editWindowWidth: editWindowWidth, editWindowHeight: editWindowHeight, editAutoHeight: editAutoHeight, editColumnCount: editColumnCount, editModKeyVariable: editModKeyVariable, editHyprlandConfigPath: editHyprlandConfigPath, editHyprlandLuaConfigPath: editHyprlandLuaConfigPath, editHyprlandParserMode: editHyprlandParserMode, editNiriConfigPath: editNiriConfigPath, editMangoConfigPath: editMangoConfigPath, editMergeSequentialBinds: editMergeSequentialBinds, editShowUndescribedBinds: editShowUndescribedBinds, editSplitLargeWorkspaceCategory: editSplitLargeWorkspaceCategory, editWorkspaceSplitThreshold: editWorkspaceSplitThreshold, editBindOverrides: editBindOverrides, editCheatsheetData: editCheatsheetData, valueKeyColorSuper: valueKeyColorSuper, valueKeyColorCtrl: valueKeyColorCtrl, valueKeyColorShift: valueKeyColorShift, valueKeyColorAlt: valueKeyColorAlt, valueKeyColorXF86: valueKeyColorXF86, valueKeyColorPrint: valueKeyColorPrint, valueKeyColorNumeric: valueKeyColorNumeric, valueKeyColorMouse: valueKeyColorMouse, valueKeyColorDefault: valueKeyColorDefault, valueKeyTextSuper: valueKeyTextSuper, valueKeyTextCtrl: valueKeyTextCtrl, valueKeyTextShift: valueKeyTextShift, valueKeyTextAlt: valueKeyTextAlt, valueKeyTextXF86: valueKeyTextXF86, valueKeyTextPrint: valueKeyTextPrint, valueKeyTextNumeric: valueKeyTextNumeric, valueKeyTextMouse: valueKeyTextMouse, valueKeyTextDefault: valueKeyTextDefault, valueKeyLabelColor: valueKeyLabelColor, valueKeyColorMod2: valueKeyColorMod2, valueKeyColorMod3: valueKeyColorMod3, valueKeyColorMod5: valueKeyColorMod5, valueKeyTextMod2: valueKeyTextMod2, valueKeyTextMod3: valueKeyTextMod3, valueKeyTextMod5: valueKeyTextMod5, valueKeyLabelMod2: valueKeyLabelMod2, valueKeyLabelMod3: valueKeyLabelMod3, valueKeyLabelMod5: valueKeyLabelMod5, valueDescriptionTextColor: valueDescriptionTextColor})
+  readonly property bool settingsDirty: displayBaseline.differs({editWindowWidth: editWindowWidth, editWindowHeight: editWindowHeight, editAutoHeight: editAutoHeight, editColumnCount: editColumnCount, editModKeyVariable: editModKeyVariable, editHyprlandConfigPath: editHyprlandConfigPath, editHyprlandLuaConfigPath: editHyprlandLuaConfigPath, editHyprlandParserMode: editHyprlandParserMode, editNiriConfigPath: editNiriConfigPath, editMangoConfigPath: editMangoConfigPath, editMergeSequentialBinds: editMergeSequentialBinds, editShowUndescribedBinds: editShowUndescribedBinds, editSplitLargeWorkspaceCategory: editSplitLargeWorkspaceCategory, editWorkspaceSplitThreshold: editWorkspaceSplitThreshold, editBindOverrides: editBindOverrides, valueKeyColorSuper: valueKeyColorSuper, valueKeyColorCtrl: valueKeyColorCtrl, valueKeyColorShift: valueKeyColorShift, valueKeyColorAlt: valueKeyColorAlt, valueKeyColorXF86: valueKeyColorXF86, valueKeyColorPrint: valueKeyColorPrint, valueKeyColorNumeric: valueKeyColorNumeric, valueKeyColorMouse: valueKeyColorMouse, valueKeyColorDefault: valueKeyColorDefault, valueKeyTextSuper: valueKeyTextSuper, valueKeyTextCtrl: valueKeyTextCtrl, valueKeyTextShift: valueKeyTextShift, valueKeyTextAlt: valueKeyTextAlt, valueKeyTextXF86: valueKeyTextXF86, valueKeyTextPrint: valueKeyTextPrint, valueKeyTextNumeric: valueKeyTextNumeric, valueKeyTextMouse: valueKeyTextMouse, valueKeyTextDefault: valueKeyTextDefault, valueKeyLabelColor: valueKeyLabelColor, valueKeyColorMod2: valueKeyColorMod2, valueKeyColorMod3: valueKeyColorMod3, valueKeyColorMod5: valueKeyColorMod5, valueKeyTextMod2: valueKeyTextMod2, valueKeyTextMod3: valueKeyTextMod3, valueKeyTextMod5: valueKeyTextMod5, valueKeyLabelMod2: valueKeyLabelMod2, valueKeyLabelMod3: valueKeyLabelMod3, valueKeyLabelMod5: valueKeyLabelMod5, valueDescriptionTextColor: valueDescriptionTextColor})
 
   property var editBindOverrides: JSON.parse(JSON.stringify(displayBaseline.editBindOverrides))
-  property var editCheatsheetData: JSON.parse(JSON.stringify(displayBaseline.editCheatsheetData))
 
   function restoreHidden(clearDescriptions) {
     var next = JSON.parse(JSON.stringify(editBindOverrides));
@@ -844,7 +842,7 @@ ColumnLayout {
                 niriPathInput.text = root.editNiriConfigPath;
                 mangoPathInput.text = root.editMangoConfigPath;
 
-                root.editCheatsheetData = [];
+                // Apply refreshes the shared parser cache after these choices save.
               }
             }
           }
@@ -1470,7 +1468,6 @@ ColumnLayout {
     pluginApi.pluginSettings.keyLabelMod5 = root.valueKeyLabelMod5;
 
     pluginApi.pluginSettings.bindOverrides = JSON.parse(JSON.stringify(root.editBindOverrides));
-    pluginApi.pluginSettings.cheatsheetData = JSON.parse(JSON.stringify(root.editCheatsheetData));
     pluginApi.saveSettings();
   }
 

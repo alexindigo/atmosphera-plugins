@@ -26,7 +26,7 @@ Item {
   property int _dataVersion: pluginApi?.mainInstance?.cheatsheetDataVersion ?? 0
   property var rawCategories: {
     var _v = _dataVersion; // force QML dependency on version counter
-    return pluginApi?.pluginSettings?.cheatsheetData || [];
+    return pluginApi?.state?.cheatsheetData ?? pluginApi?.pluginSettings?.cheatsheetData ?? [];
   }
   property var categories: []
 

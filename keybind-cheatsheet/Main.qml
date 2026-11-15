@@ -25,8 +25,8 @@ Item {
   // Check if compositor changed since last parse, and re-parse if needed
   function checkAndParse() {
     var currentCompositor = getCurrentCompositor();
-    var savedCompositor = pluginApi?.pluginSettings?.detectedCompositor || "";
-    var hasData = (pluginApi?.pluginSettings?.cheatsheetData || []).length > 0;
+    var savedCompositor = pluginApi?.state?.detectedCompositor ?? pluginApi?.pluginSettings?.detectedCompositor ?? "";
+    var hasData = (pluginApi?.state?.cheatsheetData ?? pluginApi?.pluginSettings?.cheatsheetData ?? []).length > 0;
 
     // Re-parse if:
     // 1. No data cached yet, OR
@@ -1343,9 +1343,11 @@ Item {
   function saveToDb(data) {
     if (pluginApi) {
       var compositor = getCurrentCompositor();
-      pluginApi.pluginSettings.cheatsheetData = data;
-      pluginApi.pluginSettings.detectedCompositor = compositor;
-      pluginApi.saveSettings();
+      // Parser output is shared runtime state, never preference input. Keep
+      // legacy preference caches readable without writing them back on Apply.
+      pluginApi.state.cheatsheetData = data;
+      pluginApi.state.detectedCompositor = compositor;
+      pluginApi.saveState();
       // Bug 4 fix: bump version counter so Panel.qml re-evaluates its data binding
       cheatsheetDataVersion++;
     }
