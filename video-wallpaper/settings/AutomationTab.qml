@@ -23,7 +23,8 @@ ColumnLayout {
     required property string selectedMonitor
     required property var monitorSettings
     property bool monitorSpecific: pluginApi?.initialSettings?.monitorSpecific ?? false
-    readonly property var initialAutomation: monitorSpecific ? Commands.record(pluginApi?.initialSettings?.monitors, selectedMonitor) ?? ({}) : pluginApi?.initialSettings ?? ({})
+    readonly property var initialAutomation: Commands.automationSettings(pluginApi?.initialSettings,
+        monitorSpecific ? Commands.record(pluginApi?.initialSettings?.monitors, selectedMonitor) : null, pluginApi?.manifest?.metadata?.defaultSettings)
     NSettingsBaseline {
         id: displayBaseline
         readonly property bool automation: Commands.resolve(root.initialAutomation, "automation", root.pluginApi?.manifest?.metadata?.defaultSettings)

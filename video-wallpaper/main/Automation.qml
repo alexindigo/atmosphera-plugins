@@ -14,9 +14,10 @@ Item {
     /***************************
     * PROPERTIES
     ***************************/
-    readonly property bool   automation:      pluginApi?.pluginSettings?.automation      ?? false
-    readonly property string automationMode:  pluginApi?.pluginSettings?.automationMode  ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? ""
-    readonly property real   automationTime:  pluginApi?.pluginSettings?.automationTime  ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationTime ?? 0
+    readonly property var globalSettings: Commands.automationSettings(pluginApi?.pluginSettings, null, pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property bool   automation:      globalSettings.automation
+    readonly property string automationMode:  globalSettings.automationMode
+    readonly property real   automationTime:  globalSettings.automationTime
     readonly property bool   monitorSpecific: pluginApi?.pluginSettings?.monitorSpecific ?? false
 
     signal random(screenName: var)
@@ -81,9 +82,10 @@ Item {
         model: Quickshell.screens
         Timer {
             required property var modelData
-            readonly property bool selectedAutomation: Commands.value(root.pluginApi?.pluginSettings?.monitors, modelData.name, "automation", {automation: root.automation})
-            readonly property string selectedMode: Commands.record(root.pluginApi?.pluginSettings?.monitors, modelData.name)?.automationMode ?? root.automationMode
-            readonly property real selectedTime: Commands.value(root.pluginApi?.pluginSettings?.monitors, modelData.name, "automationTime", {automationTime: root.automationTime})
+            readonly property var selectedSettings: Commands.automationSettings(root.globalSettings, Commands.record(root.pluginApi?.pluginSettings?.monitors, modelData.name))
+            readonly property bool selectedAutomation: selectedSettings.automation
+            readonly property string selectedMode: selectedSettings.automationMode
+            readonly property real selectedTime: selectedSettings.automationTime
             interval: selectedTime * 1000
             repeat: true
             running: root.monitorSpecific && selectedAutomation

@@ -35,6 +35,17 @@ function value(map, screen, field, defaults) {
     return resolve(record(map, screen), field, defaults);
 }
 
+// Automation inherits each absent monitor field from the effective global
+// domain, not directly from manifest defaults. Share this scalar projection
+// across the running timers, selected editor and immutable display baseline.
+function automationSettings(settings, monitor, defaults) {
+    return {
+        automation: own(monitor, "automation") ?? settings?.automation ?? false,
+        automationMode: own(monitor, "automationMode") ?? settings?.automationMode ?? defaults?.automationMode ?? "",
+        automationTime: own(monitor, "automationTime") ?? settings?.automationTime ?? defaults?.automationTime ?? 0
+    };
+}
+
 // Commands contain only finite, declared scalar inputs. Capture at submission,
 // before a timer/caller can change the original array or command object.
 function capture(commands) {

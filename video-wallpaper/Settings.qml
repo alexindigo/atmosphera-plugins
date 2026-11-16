@@ -28,7 +28,8 @@ ColumnLayout {
     readonly property var monitorCommand: Commands.create(function () { return root.editScreenSettings; },
         function (value) { root.editScreenSettings = value; }, function (value) { return Settings.store.copyValue(value); },
         function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
-    readonly property var selectedAutomationSettings: monitorSpecific ? Settings.store.copyValue(Commands.record(editScreenSettings, monitorTabBar.selectedMonitor) ?? ({})) : ({automation: pluginApi?.pluginSettings?.automation, automationMode: pluginApi?.pluginSettings?.automationMode, automationTime: pluginApi?.pluginSettings?.automationTime})
+    readonly property var selectedAutomationSettings: Commands.automationSettings(pluginApi?.pluginSettings,
+        monitorSpecific ? Commands.record(editScreenSettings, monitorTabBar.selectedMonitor) : null, pluginApi?.manifest?.metadata?.defaultSettings)
     property alias currentWallpaper: general.currentWallpaper
     property alias volume: general.volume
     property alias automationEnabled: automation.automation
