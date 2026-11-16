@@ -1,8 +1,11 @@
 // Pure page commands shared by runtime and selected settings editors.
 function clone(value) { return JSON.parse(JSON.stringify(value)); }
-function names(pages) {
+function names(pages, pending) {
   var result = Object.create(null);
-  for (var page of pages) result[String(page.id)] = page.name;
+  for (var page of pages) {
+    var key = String(page.id);
+    result[key] = pending && Object.prototype.hasOwnProperty.call(pending, key) ? pending[key] : page.name;
+  }
   return result;
 }
 function create(pages, name) {

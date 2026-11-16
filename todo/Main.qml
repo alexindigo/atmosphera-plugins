@@ -88,17 +88,24 @@ Item {
       rawPages = Pages.clone(pluginApi.pluginSettings.pages);
 
       // Data migration: add missing fields to existing todos
+      var migrated = false;
       for (var i = 0; i < rawTodos.length; i++) {
-        if (rawTodos[i].pageId === undefined)
+        if (rawTodos[i].pageId === undefined) {
           rawTodos[i].pageId = 0;
+          migrated = true;
+        }
         if (rawTodos[i].priority === undefined || !["high", "medium", "low"].includes(rawTodos[i].priority)) {
           rawTodos[i].priority = "medium";
+          migrated = true;
         }
-        if (rawTodos[i].details === undefined)
+        if (rawTodos[i].details === undefined) {
           rawTodos[i].details = "";
+          migrated = true;
+        }
       }
 
-      pluginApi.saveSettings();
+      if (migrated) saveTodos();
+      else pluginApi.saveSettings();
     }
   }
 

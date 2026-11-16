@@ -405,7 +405,6 @@ ColumnLayout {
 
                     onVisibleChanged: {
                       if (visible && editing) {
-                        root.setPendingName(modelData.id, originalName);
                         forceActiveFocus();
                       }
                     }
@@ -461,7 +460,7 @@ ColumnLayout {
 
     // Use mainInstance to create page
     editPages = Pages.create(editPages, name);
-    pendingNames = Pages.names(editPages);
+    pendingNames = Pages.names(editPages, pendingNames);
 
     newPageName = "";
     newPageInput.forceActiveFocus();
@@ -557,7 +556,7 @@ ColumnLayout {
     editPages = next.pages;
     editTodos = next.todos;
     editCurrentPage = next.current;
-    pendingNames = Pages.names(editPages);
+    pendingNames = Pages.names(editPages, pendingNames);
   }
 
   function saveSettings() {

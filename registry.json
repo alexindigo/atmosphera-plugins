@@ -2590,7 +2590,7 @@
       "author": "lonerOrz <lonerOrz@qq.com>",
       "description": "A simple todo list manager plugin for Noctalia Shell.",
       "license": "MIT",
-      "version": "1.10.5",
+      "version": "1.10.7",
       "tags": [
         "Bar",
         "Desktop",
