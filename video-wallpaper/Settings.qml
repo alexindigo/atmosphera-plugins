@@ -28,6 +28,7 @@ ColumnLayout {
     readonly property var monitorCommand: Commands.create(function () { return root.editScreenSettings; },
         function (value) { root.editScreenSettings = value; }, function (value) { return Settings.store.copyValue(value); },
         function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
+    readonly property var selectedAutomationSettings: monitorSpecific ? Settings.store.copyValue(Commands.record(editScreenSettings, monitorTabBar.selectedMonitor) ?? ({})) : ({automation: pluginApi?.pluginSettings?.automation, automationMode: pluginApi?.pluginSettings?.automationMode, automationTime: pluginApi?.pluginSettings?.automationTime})
     property alias currentWallpaper: general.currentWallpaper
     property alias volume: general.volume
     property alias automationEnabled: automation.automation
@@ -60,6 +61,13 @@ ColumnLayout {
     function saveMonitorProperty(key: string, value: var): void {
         if(pluginApi == null) {
             Logger.e("video-wallpaper", "PluginAPI is null.");
+            return;
+        }
+
+        // Automation has a global owner as well as per-monitor owners. The
+        // selected editor must write the same domain its running timer reads.
+        if (!monitorSpecific && ["automation", "automationMode", "automationTime"].includes(key)) {
+            pluginApi.pluginSettings[key] = value;
             return;
         }
 
@@ -168,7 +176,9 @@ ColumnLayout {
             selectedMonitor = Quickshell.screens[currentIndex]?.name || ""
             if (general && automation && advanced) {
                 var record = Commands.record(root.editScreenSettings, selectedMonitor) || ({});
-                general.loadMonitor(record); automation.loadMonitor(record); advanced.loadMonitor(record);
+                general.loadMonitor(record);
+                automation.loadMonitor(root.selectedAutomationSettings);
+                advanced.loadMonitor(record);
             }
         }
     }
@@ -223,7 +233,8 @@ ColumnLayout {
             pluginApi: root.pluginApi
             enabled: root.valueEnabled
             selectedMonitor: monitorTabBar.selectedMonitor
-            monitorSettings: Settings.store.copyValue(Commands.record(root.editScreenSettings, selectedMonitor) ?? ({}))
+            monitorSpecific: root.monitorSpecific
+            monitorSettings: root.selectedAutomationSettings
 
             onSaveMonitorProperty: (key, value) => root.saveMonitorProperty(key, value);
         }

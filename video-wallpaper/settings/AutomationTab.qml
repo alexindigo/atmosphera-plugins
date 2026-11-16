@@ -22,11 +22,13 @@ ColumnLayout {
     required enabled
     required property string selectedMonitor
     required property var monitorSettings
+    property bool monitorSpecific: pluginApi?.initialSettings?.monitorSpecific ?? false
+    readonly property var initialAutomation: monitorSpecific ? Commands.record(pluginApi?.initialSettings?.monitors, selectedMonitor) ?? ({}) : pluginApi?.initialSettings ?? ({})
     NSettingsBaseline {
         id: displayBaseline
-        readonly property bool automation: Commands.value(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor, "automation", root.pluginApi?.manifest?.metadata?.defaultSettings)
-        readonly property string automationMode: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.automationMode ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? ""
-        readonly property real automationTime: Commands.value(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor, "automationTime", root.pluginApi?.manifest?.metadata?.defaultSettings)
+        readonly property bool automation: Commands.resolve(root.initialAutomation, "automation", root.pluginApi?.manifest?.metadata?.defaultSettings)
+        readonly property string automationMode: root.initialAutomation.automationMode ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? ""
+        readonly property real automationTime: Commands.resolve(root.initialAutomation, "automationTime", root.pluginApi?.manifest?.metadata?.defaultSettings)
         readonly property var automationCustomTime: root.pluginApi?.initialSettings?.automationCustomTime || []
     }
     property alias customTimeText: customTimeInput.text

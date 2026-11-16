@@ -1,7 +1,7 @@
 {
   "id": "video-wallpaper",
   "name": "Video Wallpaper",
-  "version": "3.0.4",
+  "version": "3.0.5",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "spiros132",

@@ -2,7 +2,7 @@
 """Real Main, native preferences and FFmpeg generation consumers. Guest only."""
 import argparse
 import base64
-from contextlib import closing
+from contextlib import closing, contextmanager
 import hashlib
 import json
 import os
@@ -12,6 +12,22 @@ import subprocess
 import sys
 
 CASES = ('failure', 'retry', 'outside', 'replacement', 'disable', 'baseline-retry', 'baseline-obsolete', 'refresh-membership', 'init-retry')
+
+
+@contextmanager
+def recorded_case(output, rows, case):
+    row = dict(case=case, status='FAIL', exit=None)
+    rows.append(row)
+    try:
+        yield row
+    except BaseException as error:
+        row['error'] = type(error).__name__
+        raise
+    else:
+        row['status'] = 'PASS'
+    finally:
+        (output / 'result.json').write_text(json.dumps(dict(
+            status='PASS' if all(r['status'] == 'PASS' for r in rows) else 'FAIL', cases=rows), indent=2) + '\n')
 
 
 def main():
@@ -28,7 +44,8 @@ def main():
     assert profile.uuid == '12f17a02-25e9-474c-9dae-fea092c2d2be' and not profile.console.records
     output.mkdir(parents=True, exist_ok=False)
     rows = []
-    for case in CASES if args.case == 'all' else (args.case,):
+
+    def run_case(case, row):
         work = output / case
         config = work / 'c'
         preferences = config / 'settings/plugins'
@@ -96,11 +113,12 @@ def main():
                 result = subprocess.run(['timeout', '30', 'dbus-run-session', '--', 'qs', '-p', str(probes.probe), '--no-color'],
                     cwd=source, env=env, capture_output=True, text=True, timeout=40)
                 text = result.stdout + result.stderr
+                row['exit'] = result.returncode
                 (work / 'engine.log').write_text(text)
                 print(text, flush=True)
                 passed = result.returncode == 0 and 'WALLPAPER_GENERATION: PASS ' + case in text and not any(
                     token in text for token in ('TypeError:', 'ReferenceError:', 'SyntaxError:', '_ASSERT:'))
-                if passed and not rows:
+                if passed and len(rows) == 1:
                     vfs = list((Path(runtime['XDG_RUNTIME_DIR']) / 'quickshell/vfs').iterdir())
                     assert len(vfs) == 1
                     paths = [plugin / name for name in ('Main.qml', 'main/ColorGeneration.qml', 'main/InnerService.qml',
@@ -119,8 +137,6 @@ def main():
                     observed = json.loads((work / 'observed.json').read_text())
                     assert observed['wallpaper'].endswith('/video-wallpaper/' + selected.name + '.bmp')
                     assert Path(observed['wallpaper']).stat().st_size > 54
-                rows.append(dict(case=case, status='PASS' if passed else 'FAIL', exit=result.returncode))
-                (output / 'result.json').write_text(json.dumps(dict(status='PASS' if all(r['status'] == 'PASS' for r in rows) else 'FAIL', cases=rows), indent=2) + '\n')
                 if not passed:
                     raise SystemExit(2)
         finally:
@@ -128,6 +144,10 @@ def main():
             if case == 'init-retry':
                 thumbnail_parent.chmod(0o755)
             shutil.rmtree(Path(runtime['XDG_RUNTIME_DIR']))
+
+    for case in CASES if args.case == 'all' else (args.case,):
+        with recorded_case(output, rows, case) as row:
+            run_case(case, row)
     profile.verify()
 
 
