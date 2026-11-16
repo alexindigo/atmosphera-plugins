@@ -275,6 +275,69 @@ class AliasedTargets(ProfileFixture):
         self.check_links()
 
 
+class LegacyRootAliases(ProfileFixture):
+    def test_explicit_legacy_root_alias_conflict_refuses_without_publication(self):
+        (self.config/'settings').mkdir()
+        target = self.config/'settings/main.json'
+        target.write_bytes(self.original)
+        (self.config/'settings.json').unlink()
+        (self.config/'settings.json').symlink_to('settings/main.json')
+        (self.config/'colors.json').symlink_to('settings/main.json')
+        legacy = self.root/'conflicting-legacy'
+        legacy.mkdir()
+        (legacy/'settings.json').write_bytes(b'{"settings":true}')
+        (legacy/'colors.json').write_bytes(b'{"colors":true}')
+        with self.assertRaisesRegex(module.Refused, 'profile-alias-conflict'):
+            module.apply(legacy, self.config, None, self.root/'conflict-evidence')
+        self.assertEqual(target.read_bytes(), self.original)
+        for name in ('settings.json', 'colors.json'):
+            self.assertTrue((self.config/name).is_symlink())
+            self.assertEqual(os.readlink(self.config/name), 'settings/main.json')
+
+    def test_legacy_root_restore_preserves_its_shard_aliases(self):
+        legacy = self.root/'legacy'
+        legacy.mkdir()
+        saved = b'{"restored":true}\n'
+        (legacy/'settings.json').write_bytes(saved)
+        for layout in ('relative', 'absolute', 'multiple', 'missing'):
+            with self.subTest(layout=layout):
+                config = self.root/layout
+                (config/'settings/plugins').mkdir(parents=True)
+                target = config/'settings/main.json'
+                if layout != 'missing':
+                    target.write_bytes(self.original)
+                    target.chmod(0o640)
+                root_link = config/'settings.json'
+                root_link.symlink_to(target if layout == 'absolute' else 'settings/main.json')
+                original_link = os.readlink(root_link)
+                alias = config/'settings/alias.json'
+                if layout == 'multiple':
+                    alias.symlink_to('main.json')
+                stale = config/'settings/audio.json'
+                stale.write_bytes(b'{"stale":true}')
+                plugin = config/'settings/plugins/keep.json'
+                plugin.write_bytes(b'{"plugin":true}')
+                baseline = self.root/(layout+'-baseline')
+                module.snapshot(config, baseline, {})
+                result = module.apply(legacy, config, baseline, self.root/(layout+'-evidence'))
+                self.assertEqual(result['status'], 'applied')
+                self.assertTrue(root_link.is_symlink())
+                self.assertEqual(os.readlink(root_link), original_link)
+                self.assertEqual(root_link.read_bytes(), saved)
+                self.assertEqual(target.read_bytes(), saved)
+                self.assertEqual(stat.S_IMODE(target.stat().st_mode), 0o600 if layout == 'missing' else 0o640)
+                if layout == 'multiple':
+                    self.assertTrue(alias.is_symlink())
+                    self.assertEqual(os.readlink(alias), 'main.json')
+                    self.assertEqual(alias.read_bytes(), saved)
+                self.assertFalse(stale.exists())
+                self.assertEqual(plugin.read_bytes(), b'{"plugin":true}')
+                cold = subprocess.run([sys.executable, '-B', '-c',
+                    'import json,sys;from pathlib import Path;assert json.loads(Path(sys.argv[1]).read_bytes())=={"restored":True}',
+                    str(root_link)], capture_output=True, timeout=5)
+                self.assertEqual(cold.returncode, 0, cold.stderr)
+
+
 class SpecialReferents(ProfileFixture):
     def command(self, operation, profile, *options):
         return subprocess.run([sys.executable, str(Path(module.__file__)), operation,

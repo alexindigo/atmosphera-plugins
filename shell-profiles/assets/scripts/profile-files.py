@@ -202,7 +202,7 @@ def read_manifest(path):
     return manifest
 
 
-def read_profile(profile, current):
+def read_profile(profile, current, config):
     if (profile/MANIFEST).exists():
         manifest = read_manifest(profile/MANIFEST)
         if (not isinstance(manifest, dict) or manifest.get('format') != 2 or
@@ -233,7 +233,22 @@ def read_profile(profile, current):
     if not desired:
         raise Refused('profile-empty')
     if 'settings.json' in desired:
-        desired.update({name: None for name in current if len(Path(name).parts) == 2})
+        root_target = file_state(config/'settings.json')[0]['target']
+        for name in current:
+            if len(Path(name).parts) == 2:
+                # A root route may itself be stored in the shard family. Its
+                # aliases witness that restore, not an independent deletion.
+                desired[name] = (desired['settings.json'] if file_state(config/name)[0]['target'] == root_target
+                                 else None)
+        try:
+            root_alias = str(Path(root_target).relative_to(config.resolve(strict=False)))
+        except ValueError:
+            root_alias = ''
+        if selected(root_alias):
+            # Include a currently absent selected referent in the same physical
+            # target plan, so creation is owned by the closing inventory check.
+            # Explicit conflicting legacy root-file content must still refuse.
+            desired.setdefault(root_alias, desired['settings.json'])
     return desired
 
 
@@ -309,7 +324,7 @@ def apply(profile, config, baseline, evidence):
     with ExitStack() as stack:
         stack.enter_context(lock(profile.parent/('.'+profile.name+'.lock')))
         current = inventory(config)
-        desired = read_profile(profile, current)
+        desired = read_profile(profile, current, config)
         names = sorted(desired)
         locked_files(stack, config, names)
         captured = capture(config, names)
@@ -347,7 +362,7 @@ def apply(profile, config, baseline, evidence):
                                          if published.get(name, captured[name][0])['configured'] is not None})
             if inventory(config) != expected_inventory:
                 raise Refused('profile-readback-conflict')
-            if read_profile(profile, current) != desired:
+            if read_profile(profile, current, config) != desired:
                 raise Refused('profile-content-conflict')
             for name in names:
                 expected = published.get(name, captured[name][0])
