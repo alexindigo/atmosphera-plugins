@@ -17,6 +17,20 @@ function create(pages, name) {
 function rename(pages, id, name) {
   return pages.map(function(page) { return page.id === id ? Object.assign({}, page, {name: name}) : clone(page); });
 }
+function withNames(pages, pending, addedName) {
+  var seen = Object.create(null);
+  function validate(name) {
+    name = name.trim();
+    var key = name.toLowerCase();
+    if (!name || seen[key]) throw new Error("Invalid or duplicate page name");
+    seen[key] = true;
+    return name;
+  }
+  var next = pages.map(function(page) {
+    return Object.assign({}, clone(page), {name: validate(pending[String(page.id)] || "")});
+  });
+  return addedName.trim() ? create(next, validate(addedName)) : next;
+}
 function remove(pages, todos, current, id) {
   return {pages: pages.filter(page => page.id !== id).map(clone),
           todos: todos.map(function(todo) { return todo.pageId === id ? Object.assign({}, todo, {pageId: 0}) : clone(todo); }),

@@ -301,7 +301,7 @@ ColumnLayout {
               function saveRename() {
                 var newName = renameInput.text.trim();
                 if (newName === "") {
-                  editing = false;
+                  cancelRename();
                   return;
                 }
 
@@ -565,14 +565,9 @@ ColumnLayout {
       return;
     }
 
-    if (newPageName.trim()) {
-      if (!isPageNameUnique(newPageName.trim(), -1)) throw new Error("Duplicate page name");
-      addPage();
-    }
-    for (var page of editPages) {
-      if (!renamePage(page.id, pendingNames[String(page.id)] || "")) throw new Error("Invalid page name");
-    }
+    editPages = Pages.withNames(editPages, pendingNames, newPageName);
     pendingNames = Pages.names(editPages);
+    newPageName = "";
 
     pluginApi.pluginSettings.showCompleted = root.valueShowCompleted;
     pluginApi.pluginSettings.showBackground = root.valueShowBackground;
