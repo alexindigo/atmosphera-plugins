@@ -17,7 +17,7 @@ ColumnLayout {
     readonly property var editApiKeys: pluginApi?.pluginSettings?.ai?.apiKeys || {}
     readonly property string editModel: displayBaseline.editModels[root.editProvider] || ""
     readonly property string editApiKey: displayBaseline.editApiKeys[root.editProvider] !== undefined ? displayBaseline.editApiKeys[root.editProvider] : pluginApi?.manifest?.metadata?.defaultSettings?.ai?.apiKey || ""
-    readonly property real editTemperature: pluginApi?.pluginSettings?.ai?.temperature || pluginApi?.manifest?.metadata?.defaultSettings?.ai?.temperature || 0.7
+    readonly property real editTemperature: pluginApi?.pluginSettings?.ai?.temperature ?? pluginApi?.manifest?.metadata?.defaultSettings?.ai?.temperature ?? 0.7
     readonly property string editSystemPrompt: pluginApi?.pluginSettings?.ai?.systemPrompt || pluginApi?.manifest?.metadata?.defaultSettings?.ai?.systemPrompt || ""
     readonly property string editTranslatorBackend: pluginApi?.pluginSettings?.translator?.backend || pluginApi?.manifest?.metadata?.defaultSettings?.translator?.backend || "google"
     readonly property bool editRealTimeTranslation: pluginApi?.pluginSettings?.translator?.realTimeTranslation ?? pluginApi?.manifest?.metadata?.defaultSettings?.translator?.realTimeTranslation ?? true

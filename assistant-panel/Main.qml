@@ -73,7 +73,7 @@ Item {
 
   // DeepL translator env var support
   readonly property string envDeeplApiKey: Quickshell.env("NOCTALIA_AP_DEEPL_API_KEY") || ""
-  readonly property real temperature: pluginApi?.pluginSettings?.ai?.temperature || 0.7
+  readonly property real temperature: pluginApi?.pluginSettings?.ai?.temperature ?? pluginApi?.manifest?.metadata?.defaultSettings?.ai?.temperature ?? 0.7
   readonly property string systemPrompt: pluginApi?.pluginSettings?.ai?.systemPrompt || ""
 
   // OpenAI Compatible Settings
