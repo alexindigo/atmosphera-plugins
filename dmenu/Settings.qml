@@ -18,7 +18,7 @@ ColumnLayout {
     NSettingsBaseline {
         ranges: [NSettingsRange { field: "editMaxResults"; from: rangeEditMaxResults.from; to: rangeEditMaxResults.to }]
         id: displayBaseline
-        readonly property string editResultFile: pluginApi?.pluginSettings?.resultFile || pluginApi?.manifest?.metadata?.defaultSettings?.resultFile || "/tmp/noctalia-dmenu-result"
+        readonly property string editResultFile: pluginApi?.pluginSettings?.resultFile ?? pluginApi?.manifest?.metadata?.defaultSettings?.resultFile ?? "/tmp/noctalia-dmenu-result"
         readonly property bool editShowToast: pluginApi?.pluginSettings?.showToastOnSelect ?? pluginApi?.manifest?.metadata?.defaultSettings?.showToastOnSelect ?? false
         readonly property int editMaxResults: pluginApi?.pluginSettings?.maxResults || pluginApi?.manifest?.metadata?.defaultSettings?.maxResults || 200
         readonly property string editPanelPosition: pluginApi?.pluginSettings?.panelPosition || pluginApi?.manifest?.metadata?.defaultSettings?.panelPosition || "follow_launcher"

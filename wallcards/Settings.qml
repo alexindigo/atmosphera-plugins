@@ -8,7 +8,6 @@ ColumnLayout {
   id: root
 
   property int editAnimationCardsDuration: displayBaseline.project("editAnimationCardsDuration")
-  property int editAnimationDuration: pluginApi?.pluginSettings?.animation_duration ?? pluginApi?.manifest?.metadata?.defaultSettings?.animation_window_duration
   property int editAnimationWindowDuration: displayBaseline.project("editAnimationWindowDuration")
   property color editBackgroundColor: displayBaseline.editBackgroundColor
   property real editBackgroundOpacity: displayBaseline.project("editBackgroundOpacity")

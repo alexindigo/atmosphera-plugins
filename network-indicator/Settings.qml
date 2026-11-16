@@ -82,11 +82,11 @@ ColumnLayout {
     readonly property int editByteThresholdActive: cfg.byteThresholdActive ?? defaults.byteThresholdActive
     readonly property real editFontSizeModifier: cfg.fontSizeModifier ?? defaults.fontSizeModifier
     readonly property real editIconSizeModifier: cfg.iconSizeModifier ?? defaults.iconSizeModifier
-    readonly property real editPaddingLeft: cfg.paddingLeft ?? defaults.PaddingLeft
+    readonly property real editPaddingLeft: cfg.paddingLeft ?? defaults.paddingLeft
     readonly property real editPaddingRight: cfg.paddingRight ?? defaults.paddingRight
     readonly property real editColumnSpacing: cfg.columnSpacing ?? defaults.columnSpacing
     readonly property real editRowSpacing: cfg.rowSpacing ?? defaults.rowSpacing
-    readonly property bool editUseCustomFont: cfg.useCustomFont ?? defaults.useCustomFonts
+    readonly property bool editUseCustomFont: cfg.useCustomFont ?? defaults.useCustomFont
     readonly property string editCustomFontFamily: cfg.customFontFamily ?? defaults.customFontFamily
     readonly property bool editCustomFontBold: cfg.customFontBold ?? defaults.customFontBold
     readonly property bool editCustomFontItalic: cfg.customFontItalic ?? defaults.customFontItalic
