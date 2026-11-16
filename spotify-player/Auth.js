@@ -16,7 +16,7 @@ function requestToken(encodedCredentials, values, callback) {
         var data;
         try { data = JSON.parse(xhr.responseText); }
         catch (error) { callback(null, "token-response"); return; }
-        if (xhr.status < 200 || xhr.status >= 300 || typeof data.access_token !== "string" || !data.access_token || typeof data.expires_in !== "number" || !isFinite(data.expires_in)) {
+        if (xhr.status < 200 || xhr.status >= 300 || !data || typeof data !== "object" || Array.isArray(data) || typeof data.access_token !== "string" || !data.access_token || typeof data.expires_in !== "number" || !isFinite(data.expires_in)) {
             callback(null, "token-response"); return;
         }
         callback({accessToken: data.access_token, refreshToken: data.refresh_token, tokenExpiresAt: Date.now() + data.expires_in * 1000}, null);
