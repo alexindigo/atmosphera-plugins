@@ -810,7 +810,7 @@
       "author": "xevrion",
       "description": "Displays your GitHub contribution graph as a desktop widget. Works without a token via your public profile, or with a personal access token for private contributions.",
       "license": "MIT",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "tags": [
         "Desktop",
         "Development",
@@ -829,7 +829,7 @@
       "author": "linuxmobile",
       "description": "Display GitHub activity from users you follow and activity on your repos",
       "license": "MIT",
-      "version": "1.3.4",
+      "version": "1.3.5",
       "tags": [
         "Bar",
         "Panel",
@@ -848,7 +848,7 @@
       "author": "vasqs",
       "description": "Habitica dashboard and task scorer for Noctalia Shell with official avatar sprite rendering.",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Bar",
         "Panel",
@@ -1028,7 +1028,7 @@
       "author": "Kainoa Kanter",
       "description": "Get AI answers from Kagi in your launcher",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Launcher",
         "Productivity"
@@ -2464,7 +2464,7 @@
       "author": "sapjax",
       "description": "A local quick notes plugin with Markdown support.",
       "license": "MIT",
-      "version": "0.0.8",
+      "version": "0.0.9",
       "tags": [
         "Bar",
         "Panel",
