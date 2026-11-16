@@ -2712,14 +2712,14 @@
       "author": "spiros132",
       "description": "A plugin that uses a backend renderer to play videos as your wallpaper.",
       "license": "MIT",
-      "version": "3.0.7",
+      "version": "3.0.8",
       "tags": [
         "Bar",
         "Panel",
         "Fun",
         "System"
       ],
-      "lastUpdated": "2026-10-11",
+      "lastUpdated": "2026-11-16",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",

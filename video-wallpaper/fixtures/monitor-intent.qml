@@ -36,9 +36,11 @@ ShellRoot {
                             consumer = component.createObject(root, {pluginApi: api});
                             check(!!consumer, "actual timer consumer");
                             function tick(name, mode) {
-                                check(Array.from(Quickshell.screens).some(screen => screen.name === name), "configured timer target");
-                                var key = name + ":" + mode;
-                                ticks[key] = (ticks[key] || 0) + 1;
+                                try {
+                                    check(Array.from(Quickshell.screens).some(screen => screen.name === name), "configured timer target");
+                                    var key = name + ":" + mode;
+                                    ticks[key] = (ticks[key] || 0) + 1;
+                                } catch (error) { console.error(String(error)); Qt.exit(2); }
                             }
                             consumer.random.connect(function (name) { tick(name, "random"); });
                             consumer.nextWallpaper.connect(function (name) { tick(name, "alphabetically"); });

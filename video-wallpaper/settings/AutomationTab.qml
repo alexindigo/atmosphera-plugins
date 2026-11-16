@@ -323,15 +323,17 @@ ColumnLayout {
     /********************************
     * Save settings functionality
     ********************************/
-    function saveSettings() {
+    // Navigation stages only this monitor's scalar intent. In-progress custom
+    // input belongs to the global dialog and survives monitor/domain changes.
+    function saveMonitorSettings() {
         if(pluginApi == null) {
             Logger.e("video-wallpaper", "Cannot save, pluginApi is null");
             return;
         }
-        if (customTimeText.trim() && !createCustomTime.save()) throw new Error("Invalid automation time");
-
         return edits.submit((key, value) => root.saveMonitorProperty(key, value));
-
+    }
+    function prepareSave() {
+        if (customTimeText.length > 0 && !createCustomTime.save()) throw new Error("Invalid automation time");
     }
     function acknowledgeSettings(captured) { edits.acknowledge(captured); }
 }

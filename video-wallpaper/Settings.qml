@@ -83,10 +83,18 @@ ColumnLayout {
         advanced.loadMonitor(record);
     }
 
+    function saveSelectedMonitor() {
+        return {
+            general: general.saveSettings(),
+            automation: automation.saveMonitorSettings(),
+            advanced: advanced.saveSettings()
+        };
+    }
+
     function selectMonitorDomain(specific) {
         // Settle buffered intent against the old domain before selecting a new
         // projection. Merely changing the selection must never author fields.
-        general.saveSettings(); automation.saveSettings(); advanced.saveSettings();
+        saveSelectedMonitor();
         monitorSpecific = specific;
         loadSelectedMonitor();
     }
@@ -187,7 +195,7 @@ ColumnLayout {
 
         onCurrentIndexChanged: {
             if (general && automation && advanced && selectedMonitor) {
-                general.saveSettings(); automation.saveSettings(); advanced.saveSettings();
+                root.saveSelectedMonitor();
             }
             selectedMonitor = Quickshell.screens[currentIndex]?.name || ""
             if (general && automation && advanced) {
@@ -273,9 +281,10 @@ ColumnLayout {
             return;
         }
 
-        var generalCapture = general.saveSettings();
-        var automationCapture = automation.saveSettings();
-        var advancedCapture = advanced.saveSettings();
+        // The custom-time dialog owns a global draft, not the selected monitor.
+        // Validate it only for Apply, before staging any selected form fields.
+        automation.prepareSave();
+        var captured = saveSelectedMonitor();
 
         pluginApi.pluginSettings.monitors = editScreenSettings;
         pluginApi.pluginSettings.activeBackend = activeBackend;
@@ -287,9 +296,9 @@ ColumnLayout {
 
         pluginApi.saveSettings(function (result) {
             if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current") {
-                general.acknowledgeSettings(generalCapture);
-                automation.acknowledgeSettings(automationCapture);
-                advanced.acknowledgeSettings(advancedCapture);
+                general.acknowledgeSettings(captured.general);
+                automation.acknowledgeSettings(captured.automation);
+                advanced.acknowledgeSettings(captured.advanced);
             }
         });
     }

@@ -21,7 +21,7 @@ ShellRoot {
                 property var ticks: Object.create(null)
                 property var beforeTicks: Object.create(null)
                 property var expectedByMonitor: Object.create(null)
-                property real observationTime: 0
+                property real observationTime: 500
                 property real since: 0
                 property bool started: false
                 property string phase: "start"
@@ -45,7 +45,8 @@ ShellRoot {
                                     automationTime: api.pluginSettings.automationTime
                                 };
                                 domains[screen.name] = domain;
-                                observationTime = Math.max(observationTime, domain.automationTime * 1000 + 500);
+                                if (domain.automation)
+                                    observationTime = Math.max(observationTime, domain.automationTime * 1000 + 500);
                             }
                             expectedByMonitor = domains;
                             var component = Qt.createComponent("file://" + Registry.getPluginDir("video-wallpaper") + "/main/Automation.qml");
