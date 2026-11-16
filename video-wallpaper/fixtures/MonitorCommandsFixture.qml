@@ -21,6 +21,7 @@ ShellRoot {
                     ConfigValue { key: "currentWallpaper"; valueType: ConfigValue.String; optional: true }
                     ConfigValue { key: "isMuted"; valueType: ConfigValue.Boolean; optional: true }
                     ConfigValue { key: "volume"; valueType: ConfigValue.Real; optional: true }
+                    ConfigValue { key: "automationTime"; valueType: ConfigValue.Real; optional: true }
                 }
             }
         }
@@ -37,6 +38,9 @@ ShellRoot {
         check(Commands.record(data.monitors, "offline/\u03bb.1").currentWallpaper === "offline", "offline Unicode screen consumer");
         check(Commands.record(data.monitors, "remove-me") === undefined, "remove screen consumer");
         check(Commands.own(Commands.record(data.monitors, "__proto__"), "wide") !== undefined, "opaque native number retained");
+        var defaults = Commands.record(data.monitors, "absent-defaults");
+        check(defaults.volume === 0.5 && defaults.automationTime === 930 && defaults.isMuted === false, "absent scalar commands use injected effective defaults");
+        check(Commands.own(defaults, "currentWallpaper") === undefined, "relative edits do not expand unrelated optional defaults");
     }
     function begin() {
         if (started || !store.ready) return;
@@ -59,11 +63,14 @@ ShellRoot {
                 check(Commands.record(root.data.monitors, "__proto__").currentWallpaper === "original", "detached until owning assignment");
                 assignments++;
                 root.data.monitors = value;
-            }, function (value) { return store.copyValue(value); });
+            }, function (value) { return store.copyValue(value); }, function () { return {volume: 0.75, automationTime: 900, isMuted: true}; });
             command.submit([{op: "delta", screen: "constructor", field: "volume", value: 0.25},
                 {op: "toggle", screen: "constructor", field: "isMuted"},
                 {op: "set", screen: "offline/\u03bb.1", field: "currentWallpaper", value: "offline"},
-                {op: "remove", screen: "remove-me"}]);
+                {op: "remove", screen: "remove-me"},
+                {op: "delta", screen: "absent-defaults", field: "volume", value: -0.25},
+                {op: "delta", screen: "absent-defaults", field: "automationTime", value: 30},
+                {op: "toggle", screen: "absent-defaults", field: "isMuted"}]);
             check(assignments === 1, "one complete assignment per batch");
             check(Number(store.info(["monitors"]).latestInput) === Number(prefix) + 1, "one owning input");
             observe();

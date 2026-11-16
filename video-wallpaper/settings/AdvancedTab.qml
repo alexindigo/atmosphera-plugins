@@ -31,7 +31,7 @@ ColumnLayout {
     NSettingsBaseline {
         id: displayBaseline
         readonly property string fillMode: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.fillMode ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? ""
-        readonly property int orientation: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.orientation ?? 0
+        readonly property int orientation: Commands.value(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor, "orientation", root.pluginApi?.manifest?.metadata?.defaultSettings)
         ranges: [NSettingsRange { field: "orientation"; from: orientationInput.from; to: orientationInput.to }]
     }
     readonly property bool settingsDirty: displayBaseline.differs({fillMode: fillMode, orientation: orientation}) || mpvpaper.settingsDirty
@@ -41,7 +41,7 @@ ColumnLayout {
     property int orientation: displayBaseline.project("orientation")
     function loadMonitor(record) {
         fillMode = record.fillMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? "";
-        orientation = Math.max(orientationInput.from, Math.min(orientationInput.to, record.orientation ?? 0));
+        orientation = Math.max(orientationInput.from, Math.min(orientationInput.to, Commands.resolve(record, "orientation", pluginApi?.manifest?.metadata?.defaultSettings)));
         mpvpaper.loadMonitor(record);
     }
 

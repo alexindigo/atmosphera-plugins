@@ -29,14 +29,14 @@ ColumnLayout {
     NSettingsBaseline {
         id: displayBaseline
         readonly property string currentWallpaper: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.currentWallpaper ?? ""
-        readonly property real volume: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.volume ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.volume ?? 1.0
+        readonly property real volume: Commands.value(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor, "volume", root.pluginApi?.manifest?.metadata?.defaultSettings)
         ranges: [NSettingsRange { field: "volume"; from: volumeInput.from; to: volumeInput.to }]
     }
     readonly property bool settingsDirty: displayBaseline.differs({currentWallpaper: currentWallpaper, volume: volume})
 
     // Monitor specific properties
-    readonly property bool isMuted:   Commands.record(pluginApi?.pluginSettings?.monitors, selectedMonitor)?.isMuted ?? false
-    readonly property bool isPlaying: Commands.record(pluginApi?.pluginSettings?.monitors, selectedMonitor)?.isPlaying ?? false
+    readonly property bool isMuted: Commands.value(pluginApi?.pluginSettings?.monitors, selectedMonitor, "isMuted", pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property bool isPlaying: Commands.value(pluginApi?.pluginSettings?.monitors, selectedMonitor, "isPlaying", pluginApi?.manifest?.metadata?.defaultSettings)
 
     property string currentWallpaper: monitorSettings.currentWallpaper ?? ""
     property bool   monitorSpecific:  pluginApi?.pluginSettings?.monitorSpecific                     ?? false
@@ -55,7 +55,7 @@ ColumnLayout {
     function loadMonitor(record) {
         // Update the local variables
         currentWallpaper = record.currentWallpaper ?? ""
-        volume = Math.max(volumeInput.from, Math.min(volumeInput.to, record.volume ?? pluginApi?.manifest?.metadata?.defaultSettings?.volume ?? 1.0))
+        volume = Math.max(volumeInput.from, Math.min(volumeInput.to, Commands.resolve(record, "volume", pluginApi?.manifest?.metadata?.defaultSettings)))
     }
 
 

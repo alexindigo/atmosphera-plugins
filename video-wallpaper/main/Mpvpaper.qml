@@ -22,13 +22,13 @@ Item {
 
     // Monitor specific properties
     readonly property string currentWallpaper:     Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.currentWallpaper ?? ""
-    readonly property bool   hardwareAcceleration: Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.hardwareAcceleration ?? pluginApi?.manifest?.metadata?.defaultSettings?.hardwareAcceleration ?? false
+    readonly property bool hardwareAcceleration: Commands.value(pluginApi?.pluginSettings?.monitors, screenName, "hardwareAcceleration", pluginApi?.manifest?.metadata?.defaultSettings)
     readonly property string fillMode:             Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.fillMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? ""
-    readonly property bool   isMuted:              Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.isMuted ?? false
-    readonly property bool   isPlaying:            Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.isPlaying ?? false
-    readonly property int    orientation:          Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.orientation ?? 0
+    readonly property bool isMuted: Commands.value(pluginApi?.pluginSettings?.monitors, screenName, "isMuted", pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property bool isPlaying: Commands.value(pluginApi?.pluginSettings?.monitors, screenName, "isPlaying", pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property int orientation: Commands.value(pluginApi?.pluginSettings?.monitors, screenName, "orientation", pluginApi?.manifest?.metadata?.defaultSettings)
     readonly property string profile:              Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.profile ?? pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
-    readonly property double volume: Math.max(0, Math.min(1, Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.volume ?? pluginApi?.manifest?.metadata?.defaultSettings?.volume ?? 0))
+    readonly property double volume: Math.max(0, Math.min(1, Commands.value(pluginApi?.pluginSettings?.monitors, screenName, "volume", pluginApi?.manifest?.metadata?.defaultSettings)))
 
     // Global properties
     readonly property bool wallpaperEnabled: pluginApi?.pluginSettings?.enabled ?? false

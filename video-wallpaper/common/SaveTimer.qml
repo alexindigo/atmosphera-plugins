@@ -17,7 +17,8 @@ Item {
     property var _pending: null
     signal completed(var result, var context)
     readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
-        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); })
+        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
+        function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
 
     function save(key: string, value: var, context: var) {
         if (typeof key !== "string") {

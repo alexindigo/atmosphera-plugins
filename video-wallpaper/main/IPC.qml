@@ -8,7 +8,8 @@ Item {
     id: root
     required property var pluginApi
     readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
-        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); })
+        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
+        function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
 
 
     /***************************
@@ -53,7 +54,7 @@ Item {
         if (screen === "") {
             let values = [];
             for (const screen of Quickshell.screens) {
-                var value = Commands.own(Commands.record(root.pluginApi?.pluginSettings?.monitors, screen.name), key);
+                var value = Commands.value(root.pluginApi?.pluginSettings?.monitors, screen.name, key, root.pluginApi?.manifest?.metadata?.defaultSettings);
                 if (value !== undefined) {
                     values.push(`${screen.name}: ${value}\n`);
                 }
@@ -61,7 +62,7 @@ Item {
 
             return values.join(", ");
         } else {
-            var value = Commands.own(Commands.record(pluginApi?.pluginSettings?.monitors, screen), key);
+            var value = Commands.value(pluginApi?.pluginSettings?.monitors, screen, key, pluginApi?.manifest?.metadata?.defaultSettings);
             return value === undefined ? "" : String(value);
         }
     }

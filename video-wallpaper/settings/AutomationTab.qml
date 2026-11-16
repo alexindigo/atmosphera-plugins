@@ -24,18 +24,18 @@ ColumnLayout {
     required property var monitorSettings
     NSettingsBaseline {
         id: displayBaseline
-        readonly property bool automation: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.automation ?? false
+        readonly property bool automation: Commands.value(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor, "automation", root.pluginApi?.manifest?.metadata?.defaultSettings)
         readonly property string automationMode: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.automationMode ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? ""
-        readonly property real automationTime: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.automationTime ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.automationTime ?? 0
+        readonly property real automationTime: Commands.value(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor, "automationTime", root.pluginApi?.manifest?.metadata?.defaultSettings)
         readonly property var automationCustomTime: root.pluginApi?.initialSettings?.automationCustomTime || []
     }
     property alias customTimeText: customTimeInput.text
     readonly property bool settingsDirty: displayBaseline.differs({automation: automation, automationMode: automationMode, automationTime: automationTime, automationCustomTime: automationCustomTime}) || customTimeText.length > 0
 
     // Monitor specific properties
-    property bool automation: monitorSettings.automation ?? false
+    property bool automation: Commands.resolve(monitorSettings, "automation", pluginApi?.manifest?.metadata?.defaultSettings)
     property string automationMode: monitorSettings.automationMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? ""
-    property real automationTime: monitorSettings.automationTime ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationTime ?? 0
+    property real automationTime: Commands.resolve(monitorSettings, "automationTime", pluginApi?.manifest?.metadata?.defaultSettings)
 
     // Global properties
     property list<int> automationCustomTime: Array.from(displayBaseline.automationCustomTime)
@@ -48,9 +48,9 @@ ColumnLayout {
     ***************************/
     function loadMonitor(record) {
         // Update the local variables
-        automation = record.automation ?? false;
+        automation = Commands.resolve(record, "automation", pluginApi?.manifest?.metadata?.defaultSettings);
         automationMode = record.automationMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? "";
-        automationTime = record.automationTime ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationTime ?? 0;
+        automationTime = Commands.resolve(record, "automationTime", pluginApi?.manifest?.metadata?.defaultSettings);
     }
 
 

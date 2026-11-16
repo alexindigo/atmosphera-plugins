@@ -18,6 +18,23 @@ function fieldType(field) {
     throw new Error("monitor-command-field");
 }
 
+// Resolve only the requested scalar, never expand a sparse stored record.
+// Readers and relative commands share the same authored fallback policy.
+function resolve(source, field, defaults) {
+    var current = own(source, field);
+    if (current !== undefined && current !== null) return current;
+    var fallback = own(defaults, field);
+    if (fallback !== undefined && fallback !== null) return fallback;
+    if (field === "volume") return 1.0;
+    if (field === "automationTime") return 300;
+    var type = fieldType(field);
+    return type === "boolean" ? false : type === "number" ? 0 : "";
+}
+
+function value(map, screen, field, defaults) {
+    return resolve(record(map, screen), field, defaults);
+}
+
 // Commands contain only finite, declared scalar inputs. Capture at submission,
 // before a timer/caller can change the original array or command object.
 function capture(commands) {
@@ -38,7 +55,7 @@ function capture(commands) {
     });
 }
 
-function create(readMap, assignMap, copyValue) {
+function create(readMap, assignMap, copyValue, readDefaults) {
     return {
         submit: function (commands) {
             var body = capture(commands);
@@ -53,7 +70,7 @@ function create(readMap, assignMap, copyValue) {
                     continue;
                 }
                 var source = own(next, command.screen);
-                var current = own(source, command.field);
+                var current = resolve(source, command.field, readDefaults ? readDefaults() : undefined);
                 if ((command.op === "delta" && typeof current !== "number") ||
                         (command.op === "toggle" && typeof current !== "boolean")) continue;
                 if (!own(changed, command.screen)) {

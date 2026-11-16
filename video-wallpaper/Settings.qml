@@ -26,7 +26,8 @@ ColumnLayout {
     // copy of the actual draft, retaining opaque keys and exact numeric atoms.
     property var editScreenSettings: Settings.store.copyValue(pluginApi?.pluginSettings?.monitors ?? ({}))
     readonly property var monitorCommand: Commands.create(function () { return root.editScreenSettings; },
-        function (value) { root.editScreenSettings = value; }, function (value) { return Settings.store.copyValue(value); })
+        function (value) { root.editScreenSettings = value; }, function (value) { return Settings.store.copyValue(value); },
+        function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
     property alias currentWallpaper: general.currentWallpaper
     property alias volume: general.volume
     property alias automationEnabled: automation.automation

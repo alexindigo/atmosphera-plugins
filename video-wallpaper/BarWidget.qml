@@ -11,7 +11,8 @@ Item {
     id: root
     property var pluginApi: null
     readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
-        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); })
+        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
+        function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
 
     property ShellScreen screen
     property string widgetId: ""
@@ -27,8 +28,8 @@ Item {
     * PROPERTIES
     ***************************/
     // Monitor specific properties
-    readonly property bool isPlaying: Commands.record(pluginApi?.pluginSettings?.monitors, screen?.name)?.isPlaying ?? false
-    readonly property bool isMuted:   Commands.record(pluginApi?.pluginSettings?.monitors, screen?.name)?.isMuted ?? false
+    readonly property bool isPlaying: Commands.value(pluginApi?.pluginSettings?.monitors, screen?.name, "isPlaying", pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property bool isMuted: Commands.value(pluginApi?.pluginSettings?.monitors, screen?.name, "isMuted", pluginApi?.manifest?.metadata?.defaultSettings)
 
     // Global properties
     readonly property bool wallpaperEnabled: pluginApi?.pluginSettings?.enabled ?? false

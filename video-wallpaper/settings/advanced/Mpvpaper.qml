@@ -23,14 +23,14 @@ ColumnLayout {
     required property var monitorSettings
     NSettingsBaseline {
         id: displayBaseline
-        readonly property bool hardwareAcceleration: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.hardwareAcceleration ?? false
+        readonly property bool hardwareAcceleration: Commands.value(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor, "hardwareAcceleration", root.pluginApi?.manifest?.metadata?.defaultSettings)
         readonly property string profile: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.profile ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
         readonly property string mpvSocket: root.pluginApi?.initialSettings?.mpvSocket ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.mpvSocket ?? ""
     }
     readonly property bool settingsDirty: displayBaseline.differs({hardwareAcceleration: hardwareAcceleration, profile: profile, mpvSocket: mpvSocket})
 
     // Monitor specific properties
-    property bool hardwareAcceleration: monitorSettings.hardwareAcceleration ?? false
+    property bool hardwareAcceleration: Commands.resolve(monitorSettings, "hardwareAcceleration", pluginApi?.manifest?.metadata?.defaultSettings)
     property string profile: monitorSettings.profile ?? pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
 
     // Global properties
@@ -44,7 +44,7 @@ ColumnLayout {
     * EVENTS
     ***************************/
     function loadMonitor(record) {
-        hardwareAcceleration = record.hardwareAcceleration ?? false
+        hardwareAcceleration = Commands.resolve(record, "hardwareAcceleration", pluginApi?.manifest?.metadata?.defaultSettings)
         profile = record.profile ?? pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
     }
 

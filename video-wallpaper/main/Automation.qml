@@ -81,9 +81,9 @@ Item {
         model: Quickshell.screens
         Timer {
             required property var modelData
-            readonly property bool selectedAutomation: Commands.record(root.pluginApi?.pluginSettings?.monitors, modelData.name)?.automation ?? root.automation
+            readonly property bool selectedAutomation: Commands.value(root.pluginApi?.pluginSettings?.monitors, modelData.name, "automation", {automation: root.automation})
             readonly property string selectedMode: Commands.record(root.pluginApi?.pluginSettings?.monitors, modelData.name)?.automationMode ?? root.automationMode
-            readonly property real selectedTime: Commands.record(root.pluginApi?.pluginSettings?.monitors, modelData.name)?.automationTime ?? root.automationTime
+            readonly property real selectedTime: Commands.value(root.pluginApi?.pluginSettings?.monitors, modelData.name, "automationTime", {automationTime: root.automationTime})
             interval: selectedTime * 1000
             repeat: true
             running: root.monitorSpecific && selectedAutomation

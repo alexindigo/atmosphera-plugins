@@ -9,7 +9,8 @@ Item {
     id: root
     required property var pluginApi
     readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
-        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); })
+        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
+        function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
 
 
     /***************************

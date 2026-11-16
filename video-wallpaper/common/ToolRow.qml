@@ -26,11 +26,12 @@ RowLayout {
     property var settings: pluginApi?.pluginSettings || ({})
     property var settingWriter: null
     readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
-        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); })
+        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
+        function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
 
     // Monitor specific properties
-    readonly property bool isPlaying: Commands.record(settings.monitors, screenName)?.isPlaying || false
-    readonly property bool isMuted: Commands.record(settings.monitors, screenName)?.isMuted || false
+    readonly property bool isPlaying: Commands.value(settings.monitors, screenName, "isPlaying", pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property bool isMuted: Commands.value(settings.monitors, screenName, "isMuted", pluginApi?.manifest?.metadata?.defaultSettings)
 
     // Global properties
     readonly property bool globalMonitorSpecific: settings.monitorSpecific || false
