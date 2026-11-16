@@ -1,7 +1,7 @@
 {
   "id": "habitica",
   "name": "Habitica for Noctalia",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "minNoctaliaVersion": "3.7.1",
   "minAtmospheraVersion": "0.8.0",
   "author": "vasqs",
@@ -33,7 +33,7 @@
         "colorizationEnabled": {"type": "Boolean"},
         "colorizationIcon": {"type": "String"},
         "enableTagFilter": {"type": "Boolean"},
-        "habiticaApiToken": {"type": "String"},
+        "habiticaApiToken": {"type": "String", "sensitive": true, "machineLocal": true},
         "habiticaUserId": {"type": "String"},
         "maxDailies": {"type": "Real"},
         "maxHabits": {"type": "Real"},
