@@ -295,7 +295,7 @@ ColumnLayout {
         placeholderText: pluginApi?.tr("settings.placeholder.include-effects")
         text: root.editIncludeEffects
         defaultValue: root.defaults.includeEffects
-        onEditingFinished: root.editIncludeEffects = text
+        onTextEdited: root.editIncludeEffects = text
       }
 
       NTextInput {
@@ -305,7 +305,7 @@ ColumnLayout {
         placeholderText: pluginApi?.tr("settings.placeholder.exclude-effects")
         text: root.editExcludeEffects
         defaultValue: root.defaults.excludeEffects
-        onEditingFinished: root.editExcludeEffects = text
+        onTextEdited: root.editExcludeEffects = text
       }
 
       NComboBox {
@@ -377,7 +377,7 @@ ColumnLayout {
         description: pluginApi?.tr("settings.clock-format-desc")
         text: root.editClockFormat
         defaultValue: root.defaults.clockFormat
-        onEditingFinished: root.editClockFormat = text
+        onTextEdited: root.editClockFormat = text
       }
     }
   }

@@ -15,12 +15,12 @@ Item {
 
   readonly property string firstLine:
     (pluginApi?.pluginSettings?.customizeText || pluginApi?.manifest?.metadata?.defaultSettings?.customizeText || false) ?
-    (pluginApi?.pluginSettings?.firstLine || pluginApi?.manifest?.metadata?.defaultSettings?.firstLine || "Activate Linux") :
+    (pluginApi?.pluginSettings?.firstLine ?? pluginApi?.manifest?.metadata?.defaultSettings?.firstLine ?? "Activate Linux") :
     (pluginApi?.tr("panel.activate", { osName: root.osName }) || `Activate ${root.osName}`)
 
   readonly property string secondLine:
     (pluginApi?.pluginSettings?.customizeText || pluginApi?.manifest?.metadata?.defaultSettings?.customizeText || false) ?
-    (pluginApi?.pluginSettings?.secondLine || pluginApi?.manifest?.metadata?.defaultSettings?.secondLine || "Go to Settings to activate Linux.") :
+    (pluginApi?.pluginSettings?.secondLine ?? pluginApi?.manifest?.metadata?.defaultSettings?.secondLine ?? "Go to Settings to activate Linux.") :
     (pluginApi?.tr("panel.goto_settings", { osName: root.osName }) || `Go to Settings to activate ${root.osName}.`)
 
   Variants {
@@ -58,4 +58,3 @@ Item {
     }
   }
 }
-
