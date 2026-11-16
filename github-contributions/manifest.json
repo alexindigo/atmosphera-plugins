@@ -1,7 +1,7 @@
 {
   "id": "github-contributions",
   "name": "GitHub Contributions",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "minNoctaliaVersion": "4.4.1",
   "minAtmospheraVersion": "0.10.0",
   "author": "xevrion",
@@ -25,7 +25,7 @@
         "refreshInterval": {"type": "Real"},
         "showLabels": {"type": "Boolean"},
         "showTotal": {"type": "Boolean"},
-        "token": {"type": "String"},
+        "token": {"type": "String", "sensitive": true, "machineLocal": true},
         "username": {"type": "String"},
         "weeksShown": {"type": "Real"}
       }
