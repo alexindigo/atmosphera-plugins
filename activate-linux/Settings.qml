@@ -14,8 +14,8 @@ ColumnLayout {
   NSettingsBaseline {
     id: displayBaseline
     readonly property bool editCustomizeText: pluginApi?.pluginSettings?.customizeText ?? pluginApi?.manifest?.metadata?.defaultSettings?.customizeText ?? false
-    readonly property string editFirstLine: pluginApi?.pluginSettings?.firstLine || pluginApi?.manifest?.metadata?.defaultSettings?.firstLine || "Activate Linux"
-    readonly property string editSecondLine: pluginApi?.pluginSettings?.secondLine || pluginApi?.manifest?.metadata?.defaultSettings?.secondLine || "Go to Settings to activate Linux."
+    readonly property string editFirstLine: pluginApi?.pluginSettings?.firstLine ?? pluginApi?.manifest?.metadata?.defaultSettings?.firstLine ?? "Activate Linux"
+    readonly property string editSecondLine: pluginApi?.pluginSettings?.secondLine ?? pluginApi?.manifest?.metadata?.defaultSettings?.secondLine ?? "Go to Settings to activate Linux."
   }
   readonly property bool settingsDirty: displayBaseline.differs({editCustomizeText: root.editCustomizeText, editFirstLine: root.editFirstLine, editSecondLine: root.editSecondLine})
 
