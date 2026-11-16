@@ -49,7 +49,9 @@ ShellRoot {
           var loaded = Object.assign({}, Service.loadedPlugins);
           loaded["keybind-cheatsheet"] = {api: api};
           Service.loadedPlugins = loaded;
-          main = create("Main.qml", {pluginApi: api, parserStarted: true});
+          // Only the warm leg holds startup parsing to control Apply refresh.
+          // The cold leg must exercise Main's normal cache-selection boundary.
+          main = create("Main.qml", Quickshell.env("KEYBIND_CACHE_COLD") === "1" ? {pluginApi: api} : {pluginApi: api, parserStarted: true});
           api.mainInstance = main;
           panel = create("Panel.qml", {pluginApi: api});
           if (Quickshell.env("KEYBIND_CACHE_COLD") === "1") {
@@ -92,6 +94,7 @@ ShellRoot {
       console.log("KEYBIND_CACHE: SAVED_PASS");
       Qt.exit(0);
     } else if (phase === "cold") {
+      check(main.parserStarted && !main.isCurrentlyParsing, "cold startup selected the existing cache without launching the parser");
       check(api.pluginSettings.windowWidth === 1492, "cold preference consumer");
       check(JSON.stringify(panel.rawCategories).includes("Run: fixture-command"), "cold state cache reaches actual Panel");
       check(api.state.detectedCompositor === "niri", "cold compositor state");
