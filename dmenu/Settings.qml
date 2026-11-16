@@ -11,8 +11,8 @@ ColumnLayout {
     // ── Edit state ──
     property string editResultFile:
         pluginApi?.pluginSettings?.resultFile
-        || pluginApi?.manifest?.metadata?.defaultSettings?.resultFile
-        || "/tmp/noctalia-dmenu-result"
+        ?? pluginApi?.manifest?.metadata?.defaultSettings?.resultFile
+        ?? "/tmp/noctalia-dmenu-result"
 
     property bool editShowToast:
         pluginApi?.pluginSettings?.showToastOnSelect
@@ -39,7 +39,7 @@ ColumnLayout {
         ?? pluginApi?.manifest?.metadata?.defaultSettings?.showFooter
         ?? true
 
-    readonly property bool settingsDirty: editResultFile !== (pluginApi?.pluginSettings?.resultFile || pluginApi?.manifest?.metadata?.defaultSettings?.resultFile || "/tmp/noctalia-dmenu-result")
+    readonly property bool settingsDirty: editResultFile !== (pluginApi?.pluginSettings?.resultFile ?? pluginApi?.manifest?.metadata?.defaultSettings?.resultFile ?? "/tmp/noctalia-dmenu-result")
                                           || editShowToast !== (pluginApi?.pluginSettings?.showToastOnSelect ?? pluginApi?.manifest?.metadata?.defaultSettings?.showToastOnSelect ?? false)
                                           || editMaxResults !== (pluginApi?.pluginSettings?.maxResults || pluginApi?.manifest?.metadata?.defaultSettings?.maxResults || 200)
                                           || editPanelPosition !== (pluginApi?.pluginSettings?.panelPosition || pluginApi?.manifest?.metadata?.defaultSettings?.panelPosition || "follow_launcher")

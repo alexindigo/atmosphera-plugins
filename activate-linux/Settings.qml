@@ -14,18 +14,18 @@ ColumnLayout {
     false
 
   property string editFirstLine:
-    pluginApi?.pluginSettings?.firstLine ||
-    pluginApi?.manifest?.metadata?.defaultSettings?.firstLine ||
+    pluginApi?.pluginSettings?.firstLine ??
+    pluginApi?.manifest?.metadata?.defaultSettings?.firstLine ??
     "Activate Linux"
 
   property string editSecondLine:
-    pluginApi?.pluginSettings?.secondLine ||
-    pluginApi?.manifest?.metadata?.defaultSettings?.secondLine ||
+    pluginApi?.pluginSettings?.secondLine ??
+    pluginApi?.manifest?.metadata?.defaultSettings?.secondLine ??
     "Go to Settings to activate Linux."
 
   readonly property bool settingsDirty: editCustomizeText !== (pluginApi?.pluginSettings?.customizeText ?? pluginApi?.manifest?.metadata?.defaultSettings?.customizeText ?? false)
-                                        || editFirstLine !== (pluginApi?.pluginSettings?.firstLine || pluginApi?.manifest?.metadata?.defaultSettings?.firstLine || "Activate Linux")
-                                        || editSecondLine !== (pluginApi?.pluginSettings?.secondLine || pluginApi?.manifest?.metadata?.defaultSettings?.secondLine || "Go to Settings to activate Linux.")
+                                        || editFirstLine !== (pluginApi?.pluginSettings?.firstLine ?? pluginApi?.manifest?.metadata?.defaultSettings?.firstLine ?? "Activate Linux")
+                                        || editSecondLine !== (pluginApi?.pluginSettings?.secondLine ?? pluginApi?.manifest?.metadata?.defaultSettings?.secondLine ?? "Go to Settings to activate Linux.")
 
   spacing: Style.marginM
 
