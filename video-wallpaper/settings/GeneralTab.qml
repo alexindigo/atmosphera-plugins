@@ -32,7 +32,11 @@ ColumnLayout {
         readonly property real volume: Commands.value(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor, "volume", root.pluginApi?.manifest?.metadata?.defaultSettings)
         ranges: [NSettingsRange { field: "volume"; from: volumeInput.from; to: volumeInput.to }]
     }
-    readonly property bool settingsDirty: displayBaseline.differs({currentWallpaper: currentWallpaper, volume: volume})
+    readonly property bool settingsDirty: edits.hasIntent || displayBaseline.differs({currentWallpaper: currentWallpaper, volume: volume})
+    MonitorEdits {
+        id: edits
+        values: ({currentWallpaper: root.currentWallpaper, volume: root.volume})
+    }
 
     // Monitor specific properties
     readonly property bool isMuted: Commands.value(pluginApi?.pluginSettings?.monitors, selectedMonitor, "isMuted", pluginApi?.manifest?.metadata?.defaultSettings)
@@ -56,7 +60,9 @@ ColumnLayout {
         // Update the local variables
         currentWallpaper = record.currentWallpaper ?? ""
         volume = Math.max(volumeInput.from, Math.min(volumeInput.to, Commands.resolve(record, "volume", pluginApi?.manifest?.metadata?.defaultSettings)))
+        edits.reset();
     }
+    Component.onCompleted: loadMonitor(monitorSettings)
 
 
     /***************************
@@ -89,6 +95,7 @@ ColumnLayout {
                 if (paths.length > 0) {
                     Logger.d("video-wallpaper", "Selected the following current wallpaper:", paths[0]);
                     root.currentWallpaper = paths[0];
+                    edits.mark("currentWallpaper");
                 }
             }
         }
@@ -108,7 +115,7 @@ ColumnLayout {
         text: `${root.volume * 100.0}%`
         label:       root.pluginApi?.tr("settings.general.volume.label")
         description: root.pluginApi?.tr("settings.general.volume.description")
-        onMoved: value => root.volume = value
+        onMoved: value => { root.volume = value; edits.mark("volume"); }
     }
 
     NDivider {}
@@ -133,7 +140,7 @@ ColumnLayout {
             return;
         }
 
-        saveMonitorProperty("currentWallpaper", currentWallpaper);
-        saveMonitorProperty("volume", volume);
+        return edits.submit((key, value) => root.saveMonitorProperty(key, value));
     }
+    function acknowledgeSettings(captured) { edits.acknowledge(captured); }
 }

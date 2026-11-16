@@ -76,6 +76,21 @@ ColumnLayout {
         if (names.length) monitorCommand.submit(names.map(name => ({op: "set", screen: name, field: key, value: value})));
     }
 
+    function loadSelectedMonitor() {
+        var record = Commands.record(editScreenSettings, monitorTabBar.selectedMonitor) || ({});
+        general.loadMonitor(record);
+        automation.loadMonitor(selectedAutomationSettings);
+        advanced.loadMonitor(record);
+    }
+
+    function selectMonitorDomain(specific) {
+        // Settle buffered intent against the old domain before selecting a new
+        // projection. Merely changing the selection must never author fields.
+        general.saveSettings(); automation.saveSettings(); advanced.saveSettings();
+        monitorSpecific = specific;
+        loadSelectedMonitor();
+    }
+
 
     /***************************
     * COMPONENTS
@@ -93,7 +108,7 @@ ColumnLayout {
         label:       root.pluginApi?.tr("settings.monitor_specific.label")
         description: root.pluginApi?.tr("settings.monitor_specific.description")
         checked: root.monitorSpecific
-        onToggled: checked => root.monitorSpecific = checked
+        onToggled: checked => root.selectMonitorDomain(checked)
     }
 
     NComboBox {
@@ -176,10 +191,7 @@ ColumnLayout {
             }
             selectedMonitor = Quickshell.screens[currentIndex]?.name || ""
             if (general && automation && advanced) {
-                var record = Commands.record(root.editScreenSettings, selectedMonitor) || ({});
-                general.loadMonitor(record);
-                automation.loadMonitor(root.selectedAutomationSettings);
-                advanced.loadMonitor(record);
+                root.loadSelectedMonitor();
             }
         }
     }
@@ -261,9 +273,9 @@ ColumnLayout {
             return;
         }
 
-        general.saveSettings();
-        automation.saveSettings();
-        advanced.saveSettings();
+        var generalCapture = general.saveSettings();
+        var automationCapture = automation.saveSettings();
+        var advancedCapture = advanced.saveSettings();
 
         pluginApi.pluginSettings.monitors = editScreenSettings;
         pluginApi.pluginSettings.activeBackend = activeBackend;
@@ -273,6 +285,12 @@ ColumnLayout {
         pluginApi.pluginSettings.automationCustomTime = Array.from(automationCustomTime);
         pluginApi.pluginSettings.mpvSocket = mpvSocket;
 
-        pluginApi.saveSettings();
+        pluginApi.saveSettings(function (result) {
+            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current") {
+                general.acknowledgeSettings(generalCapture);
+                automation.acknowledgeSettings(automationCapture);
+                advanced.acknowledgeSettings(advancedCapture);
+            }
+        });
     }
 }

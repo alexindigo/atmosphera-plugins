@@ -18,8 +18,10 @@ ShellRoot {
                 property var receipt: null
                 property var displayed: null
                 property bool initialDirty: false
-                property int ticks: 0
-                property int beforeTicks: 0
+                property var ticks: Object.create(null)
+                property var beforeTicks: Object.create(null)
+                property var expectedByMonitor: Object.create(null)
+                property real observationTime: 0
                 property real since: 0
                 property bool started: false
                 property string phase: "start"
@@ -35,13 +37,27 @@ ShellRoot {
                             api = Service.createPluginAPI("video-wallpaper", JSON.parse(Quickshell.env("MINOR_REVIEW_MANIFEST")), owner, {}, {}, {});
                             var loaded = Object.assign({}, Service.loadedPlugins);
                             loaded["video-wallpaper"] = {api: api}; Service.loadedPlugins = loaded;
+                            var domains = Object.create(null);
+                            for (var screen of Quickshell.screens) {
+                                var domain = screen.name === Quickshell.screens[0].name ? expected : {
+                                    automation: api.pluginSettings.automation,
+                                    automationMode: api.pluginSettings.automationMode,
+                                    automationTime: api.pluginSettings.automationTime
+                                };
+                                domains[screen.name] = domain;
+                                observationTime = Math.max(observationTime, domain.automationTime * 1000 + 500);
+                            }
+                            expectedByMonitor = domains;
                             var component = Qt.createComponent("file://" + Registry.getPluginDir("video-wallpaper") + "/main/Automation.qml");
                             check(component.status === Component.Ready, component.errorString());
                             consumer = component.createObject(root, {pluginApi: api});
                             check(!!consumer, "actual timer consumer");
                             function tick(name, mode) {
-                                check(name === Quickshell.screens[0].name && mode === expected.automationMode, "timer selected domain and mode");
-                                ticks++;
+                                try {
+                                    var domain = Object.getOwnPropertyDescriptor(expectedByMonitor, name)?.value;
+                                    check(name !== undefined && !!domain && domain.automation && mode === domain.automationMode, "timer selected domain and mode");
+                                    ticks[name] = (ticks[name] || 0) + 1;
+                                } catch (error) { console.error(String(error)); Qt.exit(2); }
                             }
                             consumer.random.connect(function (name) { tick(name, "random"); });
                             consumer.nextWallpaper.connect(function (name) { tick(name, "alphabetically"); });
@@ -54,16 +70,19 @@ ShellRoot {
                     if (phase === "page" && popup.opened && page) {
                         displayed = {automation: page.automationEnabled, automationMode: page.automationMode, automationTime: page.automationTime};
                         initialDirty = page.settingsDirty;
-                        if (cold) { beforeTicks = ticks; since = Date.now(); phase = "observing"; return; }
+                        if (cold) { beforeTicks = Object.assign(Object.create(null), ticks); since = Date.now(); phase = "observing"; return; }
                         // Do not edit any automation control. Observe the running
                         // timer after an unrelated native Apply, not just the form.
                         page.wallpapersFolder += "/unrelated";
                         popup.applySettings(); phase = "apply";
                     } else if (phase === "apply" && !popup.busy) {
                         check(receipt && receipt.status !== "failed" && receipt.refreshState === "current", "native Apply current");
-                        beforeTicks = ticks; since = Date.now(); phase = "observing";
-                    } else if (phase === "observing" && Date.now() - since > expected.automationTime * 1000 + 500) {
-                        check(expected.automation ? ticks > beforeTicks : ticks === beforeTicks, "unrelated Apply preserves actual timer action");
+                        beforeTicks = Object.assign(Object.create(null), ticks); since = Date.now(); phase = "observing";
+                    } else if (phase === "observing" && Date.now() - since > observationTime) {
+                        for (var name of Object.keys(expectedByMonitor)) {
+                            var count = (ticks[name] || 0) - (beforeTicks[name] || 0);
+                            check(expectedByMonitor[name].automation ? count > 0 : count === 0, "unrelated Apply preserves actual timer action " + name);
+                        }
                         check(displayed.automation === expected.automation && displayed.automationMode === expected.automationMode && displayed.automationTime === expected.automationTime, "editor inherits each missing field");
                         check(!initialDirty, "display baseline uses the same effective automation");
                         console.log(cold ? "MINOR_REVIEW: COLD_PASS" : "MINOR_REVIEW: SAVED_PASS"); Qt.quit();

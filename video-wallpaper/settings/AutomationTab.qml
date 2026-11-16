@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import "../common"
 import "../common/MonitorCommands.js" as Commands
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -33,7 +34,11 @@ ColumnLayout {
         readonly property var automationCustomTime: root.pluginApi?.initialSettings?.automationCustomTime || []
     }
     property alias customTimeText: customTimeInput.text
-    readonly property bool settingsDirty: displayBaseline.differs({automation: automation, automationMode: automationMode, automationTime: automationTime, automationCustomTime: automationCustomTime}) || customTimeText.length > 0
+    readonly property bool settingsDirty: edits.hasIntent || displayBaseline.differs({automation: automation, automationMode: automationMode, automationTime: automationTime, automationCustomTime: automationCustomTime}) || customTimeText.length > 0
+    MonitorEdits {
+        id: edits
+        values: ({automation: root.automation, automationMode: root.automationMode, automationTime: root.automationTime})
+    }
 
     // Monitor specific properties
     property bool automation: Commands.resolve(monitorSettings, "automation", pluginApi?.manifest?.metadata?.defaultSettings)
@@ -54,7 +59,9 @@ ColumnLayout {
         automation = Commands.resolve(record, "automation", pluginApi?.manifest?.metadata?.defaultSettings);
         automationMode = record.automationMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? "";
         automationTime = Commands.resolve(record, "automationTime", pluginApi?.manifest?.metadata?.defaultSettings);
+        edits.reset();
     }
+    Component.onCompleted: loadMonitor(monitorSettings)
 
 
     /***************************
@@ -67,7 +74,7 @@ ColumnLayout {
         label:       root.pluginApi?.tr("settings.automation.toggle.label")
         description: root.pluginApi?.tr("settings.automation.toggle.description")
         checked: root.automation
-        onToggled: checked => root.automation = checked
+        onToggled: checked => { root.automation = checked; edits.mark("automation"); }
     }
 
     // Automation Mode
@@ -88,7 +95,7 @@ ColumnLayout {
             }
         ]
         currentKey: root.automationMode
-        onSelected: key => root.automationMode = key
+        onSelected: key => { root.automationMode = key; edits.mark("automationMode"); }
     }
 
     ColumnLayout {
@@ -170,7 +177,7 @@ ColumnLayout {
                     }
                 }
                 enabled: root.enabled && root.automation
-                onClicked: root.automationTime = time
+                onClicked: { root.automationTime = time; edits.mark("automationTime"); }
                 outlined: root.automationTime === time
             }
 
@@ -323,9 +330,8 @@ ColumnLayout {
         }
         if (customTimeText.trim() && !createCustomTime.save()) throw new Error("Invalid automation time");
 
-        saveMonitorProperty("automation", automation);
-        saveMonitorProperty("automationMode", automationMode);
-        saveMonitorProperty("automationTime", automationTime);
+        return edits.submit((key, value) => root.saveMonitorProperty(key, value));
 
     }
+    function acknowledgeSettings(captured) { edits.acknowledge(captured); }
 }

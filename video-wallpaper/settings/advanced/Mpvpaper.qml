@@ -1,4 +1,5 @@
 import QtQuick
+import "../../common"
 import "../../common/MonitorCommands.js" as Commands
 import QtQuick.Layouts
 
@@ -27,7 +28,11 @@ ColumnLayout {
         readonly property string profile: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.profile ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
         readonly property string mpvSocket: root.pluginApi?.initialSettings?.mpvSocket ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.mpvSocket ?? ""
     }
-    readonly property bool settingsDirty: displayBaseline.differs({hardwareAcceleration: hardwareAcceleration, profile: profile, mpvSocket: mpvSocket})
+    readonly property bool settingsDirty: edits.hasIntent || displayBaseline.differs({hardwareAcceleration: hardwareAcceleration, profile: profile, mpvSocket: mpvSocket})
+    MonitorEdits {
+        id: edits
+        values: ({hardwareAcceleration: root.hardwareAcceleration, profile: root.profile})
+    }
 
     // Monitor specific properties
     property bool hardwareAcceleration: Commands.resolve(monitorSettings, "hardwareAcceleration", pluginApi?.manifest?.metadata?.defaultSettings)
@@ -46,7 +51,9 @@ ColumnLayout {
     function loadMonitor(record) {
         hardwareAcceleration = Commands.resolve(record, "hardwareAcceleration", pluginApi?.manifest?.metadata?.defaultSettings)
         profile = record.profile ?? pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
+        edits.reset();
     }
+    Component.onCompleted: loadMonitor(monitorSettings)
 
 
     /***************************
@@ -78,7 +85,7 @@ ColumnLayout {
             }
         ]
         currentKey: root.profile
-        onSelected: key => root.profile = key
+        onSelected: key => { root.profile = key; edits.mark("profile"); }
     }
 
     // Hardware Acceleration
@@ -88,7 +95,7 @@ ColumnLayout {
         label:       root.pluginApi?.tr("settings.advanced.hardware_acceleration.label")
         description: root.pluginApi?.tr("settings.advanced.hardware_acceleration.description")
         checked: root.hardwareAcceleration
-        onToggled: checked => root.hardwareAcceleration = checked
+        onToggled: checked => { root.hardwareAcceleration = checked; edits.mark("hardwareAcceleration"); }
         defaultValue: false
     }
 
@@ -113,8 +120,8 @@ ColumnLayout {
             return;
         }
 
-        root.saveMonitorProperty("hardwareAcceleration", hardwareAcceleration);
-        root.saveMonitorProperty("profile", profile);
+        return edits.submit((key, value) => root.saveMonitorProperty(key, value));
 
     }
+    function acknowledgeSettings(captured) { edits.acknowledge(captured); }
 }

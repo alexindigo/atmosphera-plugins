@@ -1,4 +1,5 @@
 import QtQuick
+import "../common"
 import "../common/MonitorCommands.js" as Commands
 import QtQuick.Layouts
 
@@ -34,7 +35,11 @@ ColumnLayout {
         readonly property int orientation: Commands.value(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor, "orientation", root.pluginApi?.manifest?.metadata?.defaultSettings)
         ranges: [NSettingsRange { field: "orientation"; from: orientationInput.from; to: orientationInput.to }]
     }
-    readonly property bool settingsDirty: displayBaseline.differs({fillMode: fillMode, orientation: orientation}) || mpvpaper.settingsDirty
+    readonly property bool settingsDirty: edits.hasIntent || displayBaseline.differs({fillMode: fillMode, orientation: orientation}) || mpvpaper.settingsDirty
+    MonitorEdits {
+        id: edits
+        values: ({fillMode: root.fillMode, orientation: root.orientation})
+    }
 
     // Monitor specific properties
     property string fillMode: monitorSettings.fillMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? ""
@@ -43,7 +48,9 @@ ColumnLayout {
         fillMode = record.fillMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? "";
         orientation = Math.max(orientationInput.from, Math.min(orientationInput.to, Commands.resolve(record, "orientation", pluginApi?.manifest?.metadata?.defaultSettings)));
         mpvpaper.loadMonitor(record);
+        edits.reset();
     }
+    Component.onCompleted: loadMonitor(monitorSettings)
 
     // Constants
     readonly property list<string> backends: ["qt6-multimedia", "mpvpaper"]
@@ -77,7 +84,7 @@ ColumnLayout {
             }
         ]
         currentKey: root.fillMode
-        onSelected: key => root.fillMode = key
+        onSelected: key => { root.fillMode = key; edits.mark("fillMode"); }
     }
 
     // Orientation
@@ -94,7 +101,7 @@ ColumnLayout {
         text: root.orientation
         label:       root.pluginApi?.tr("settings.advanced.orientation.label")
         description: root.pluginApi?.tr("settings.advanced.orientation.description")
-        onMoved: value => root.orientation = value
+        onMoved: value => { root.orientation = value; edits.mark("orientation"); }
     }
 
     NTabView {
@@ -133,9 +140,13 @@ ColumnLayout {
         }
 
         videoWallpaper.saveSettings();
-        mpvpaper.saveSettings();
+        var backend = mpvpaper.saveSettings();
 
-        saveMonitorProperty("fillMode", fillMode);
-        saveMonitorProperty("orientation", orientation);
+        return {selected: edits.submit((key, value) => root.saveMonitorProperty(key, value)), backend: backend};
+    }
+    function acknowledgeSettings(captured) {
+        if (!captured) return;
+        edits.acknowledge(captured.selected);
+        mpvpaper.acknowledgeSettings(captured.backend);
     }
 }
