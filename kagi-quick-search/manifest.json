@@ -1,7 +1,7 @@
 {
   "id": "kagi-quick-search",
   "name": "Kagi Quick Search",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Get AI answers from Kagi in your launcher",
   "tags": ["Launcher", "Productivity"],
   "minNoctaliaVersion": "4.4.1",
@@ -23,7 +23,7 @@
       "version": 1,
       "fields": {
         "debounceMs": {"type": "Real"},
-        "kagiSessionToken": {"type": "String"}
+        "kagiSessionToken": {"type": "String", "sensitive": true, "machineLocal": true}
       }
     },
     "defaultSettings": {
