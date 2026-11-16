@@ -11,10 +11,7 @@ ColumnLayout {
 
     required property var pluginApi
     required property bool active
-
-    readonly property bool isMuted:
-        pluginApi.pluginSettings.isMuted ||
-        false
+    required property bool isMuted
 
     NSettingsBaseline {
         id: displayBaseline

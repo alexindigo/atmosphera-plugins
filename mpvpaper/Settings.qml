@@ -105,6 +105,7 @@ ColumnLayout {
             id: audio
             pluginApi: root.pluginApi
             active: root.active
+            isMuted: root.isMuted
         }
 
         AutomationTab {

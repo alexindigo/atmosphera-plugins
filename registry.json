@@ -290,7 +290,7 @@
       "author": "aslauw",
       "description": "Bar widget showing battery levels for wireless peripherals (mouse, keyboard, headset, etc.) via OpenRazer and Solaar.",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Bar",
         "Indicator",
@@ -1426,7 +1426,7 @@
       "author": "spiros132",
       "description": "A plugin that allows having video wallpapers using mpvpaper.",
       "license": "MIT",
-      "version": "1.6.8",
+      "version": "1.6.9",
       "tags": [
         "Bar",
         "Panel",

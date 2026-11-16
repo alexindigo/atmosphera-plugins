@@ -14,7 +14,7 @@ ColumnLayout {
     NSettingsBaseline {
         id: displayBaseline
         readonly property var editDevices: root.initialView.devices
-        readonly property var deviceList: root.initialView.list
+        readonly property var deviceOrder: root.initialView.list.map(function(device) { return device.id })
         readonly property bool showPercentageEdit: root.pluginApi?.initialSettings?.showPercentage === true
         readonly property bool showChargingEdit: root.pluginApi?.initialSettings?.showCharging === true
         readonly property int editRefreshInterval: {
@@ -24,7 +24,7 @@ ColumnLayout {
         ranges: [NSettingsRange { field: "editRefreshInterval"; from: intervalSpin.from; to: intervalSpin.to }]
     }
     property int editRefreshInterval: displayBaseline.project("editRefreshInterval")
-    readonly property bool settingsDirty: displayBaseline.differs({editDevices: editDevices, deviceList: deviceList, showPercentageEdit: showPercentageEdit, showChargingEdit: showChargingEdit, editRefreshInterval: editRefreshInterval})
+    readonly property bool settingsDirty: displayBaseline.differs({editDevices: editDevices, deviceOrder: deviceList.map(function(device) { return device.id }), showPercentageEdit: showPercentageEdit, showChargingEdit: showChargingEdit, editRefreshInterval: editRefreshInterval})
     property real preferredWidth: 540
 
     spacing: Style.marginM
