@@ -11,7 +11,7 @@ import shutil
 import subprocess
 import sys
 
-CASES = ('failure', 'retry', 'outside', 'replacement', 'disable', 'baseline-retry', 'baseline-obsolete')
+CASES = ('failure', 'retry', 'outside', 'replacement', 'disable', 'baseline-retry', 'baseline-obsolete', 'refresh-membership', 'init-retry')
 
 
 def main():
@@ -68,10 +68,14 @@ def main():
         name = next(iter(outputs))
         user = preferences / 'video-wallpaper.json'
         initial = json.dumps(dict(enabled=not case.startswith('baseline-'), activeBackend='none',
-            wallpapersFolder=str(media), monitors={name: dict(currentWallpaper=str(outside if case == 'outside' else first), noctaliaWallpaper=str(image))}))
+            wallpapersFolder=str(media), monitors={name: dict(currentWallpaper=str(outside if case in ('outside', 'refresh-membership') else first), noctaliaWallpaper=str(image))}))
         user.write_text(initial)
         cache = work / 'cache'
         cache.mkdir()
+        thumbnail_parent = cache / 'images/wallpapers/thumbnails'
+        if case == 'init-retry':
+            thumbnail_parent.mkdir(parents=True)
+            thumbnail_parent.chmod(0o555)
         (cache / 'wallpapers.json').write_text(json.dumps(dict(wallpapers={name: dict(light=str(image), dark=str(image))})))
         binary = work / 'bin'
         binary.mkdir()
@@ -105,12 +109,12 @@ def main():
                         env=dict(env, QS_VFS=str(vfs[0])), capture_output=True, text=True, timeout=60)
                     (work / 'lint.log').write_text(lint.stdout + lint.stderr)
                     assert lint.returncode == 0, (lint.stdout + lint.stderr)[-6000:]
-                if passed and case in ('failure', 'retry', 'outside', 'disable'):
+                if passed and case in ('failure', 'retry', 'outside', 'disable', 'refresh-membership', 'init-retry'):
                     assert user.read_text() == initial, 'startup/generation must not publish preferences'
                 if passed and case == 'baseline-retry':
                     assert json.loads(user.read_text())['monitors'][name]['noctaliaWallpaper'] == str(image)
-                if passed and case in ('retry', 'outside', 'replacement', 'baseline-retry', 'baseline-obsolete'):
-                    selected = outside if case in ('outside', 'replacement', 'baseline-obsolete') else first
+                if passed and case in ('retry', 'outside', 'replacement', 'baseline-retry', 'baseline-obsolete', 'refresh-membership', 'init-retry'):
+                    selected = media / 'added.mp4' if case == 'refresh-membership' else outside if case in ('outside', 'replacement', 'baseline-obsolete') else first
                     # The consumer publishes its actual ImageCacheService path.
                     observed = json.loads((work / 'observed.json').read_text())
                     assert observed['wallpaper'].endswith('/video-wallpaper/' + selected.name + '.bmp')
@@ -121,6 +125,8 @@ def main():
                     raise SystemExit(2)
         finally:
             preferences.chmod(0o755)
+            if case == 'init-retry':
+                thumbnail_parent.chmod(0o755)
             shutil.rmtree(Path(runtime['XDG_RUNTIME_DIR']))
     profile.verify()
 

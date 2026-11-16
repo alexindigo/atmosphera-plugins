@@ -16,6 +16,7 @@ ShellRoot {
                 property var main: null
                 property var colorConsumer: null
                 property var baselineConsumer: null
+                property var producer: null
                 property int attempts: 0
                 property int saves: 0
                 property int calls: 0
@@ -87,10 +88,22 @@ ShellRoot {
                         check(main !== null, "actual Main constructed");
                         colorConsumer = find(main, "ColorGeneration", []);
                         baselineConsumer = find(main, "InnerService", []);
+                        producer = find(main, "Thumbnails", []);
                         check(colorConsumer && baselineConsumer, "actual per-screen consumers");
                         phase = "generation";
                     }
                     if (phase === "generation") {
+                        if (mode === "init-retry") {
+                            if (!main.thumbnailGenerationFailed) return;
+                            check(!main.thumbCacheReady && saves === 0, "failed real mkdir cannot publish cache readiness or preferences");
+                            command(["chmod", "755", ImageCacheService.wpThumbDir], "init-repaired");
+                            return;
+                        }
+                        if (mode === "refresh-membership" && main.thumbCacheReady && WallpaperService.getWallpaper(name) === main.getThumbPath(outside)) {
+                            check(producer.pathFor(first) !== "", "initial directory media was produced");
+                            command(["sh", "-c", "cp -- \"$1\" \"$2\" && rm -- \"$3\"", "refresh-media", work + "/valid.mp4", work + "/media/added.mp4", first], "membership-changed");
+                            return;
+                        }
                         if (mode === "failure" || mode === "retry") {
                             if (!main.thumbnailGenerationFailed) return;
                             check(!main.thumbCacheReady, "failed real FFmpeg never publishes readiness");
@@ -138,8 +151,17 @@ ShellRoot {
                         if (held) { phase = "settle-baseline"; settle.start(); }
                         return;
                     }
-                    var selected = phase === "replacement-released" || phase === "baseline-replaced" ? outside : first;
-                    if (["retrying", "replacement-released", "baseline-retrying", "baseline-replaced"].indexOf(phase) !== -1 && WallpaperService.getWallpaper(name) === main.getThumbPath(selected)) {
+                    if (phase === "refresh-generating") {
+                        check(!main.thumbnailGenerationFailed, "Refresh still uses removed source inventory");
+                        if (!main.thumbCacheReady) return;
+                        var added = work + "/media/added.mp4";
+                        check(producer.folderModel.indexOf(added) !== -1 && producer.folderModel.indexOf(first) === -1, "Refresh observes added and removed real media");
+                        check(producer.pathFor(added) !== "" && producer.pathFor(first) === "", "current thumbnail inventory follows refreshed source membership");
+                        check(producer.thumbFolderModel.indexOf(main.getThumbPath(first)) === -1, "deleted media thumbnail is removed");
+                        select(added); phase = "refresh-selected";
+                    }
+                    var selected = phase === "refresh-selected" ? work + "/media/added.mp4" : phase === "replacement-released" || phase === "baseline-replaced" ? outside : first;
+                    if (["retrying", "replacement-released", "baseline-retrying", "baseline-replaced", "init-retrying", "refresh-selected"].indexOf(phase) !== -1 && WallpaperService.getWallpaper(name) === main.getThumbPath(selected)) {
                         check(!colorConsumer.generationFailed && main.thumbCacheReady, "consumer sees repaired current generation");
                         if (phase === "baseline-replaced") check(effects.indexOf(main.getThumbPath(first)) === -1, "obsolete baseline receipt cannot apply old colors");
                         pass();
@@ -180,6 +202,8 @@ ShellRoot {
                             if (root.phase === "repair-media") { root.phase = "retrying"; root.main.thumbRegenerate(); }
                             else if (root.phase === "baseline-denied") { root.phase = "baseline-failed"; root.api.pluginSettings.enabled = true; }
                             else if (root.phase === "baseline-repaired") { root.phase = "baseline-retrying"; root.main.thumbRegenerate(); }
+                            else if (root.phase === "init-repaired") { root.phase = "init-retrying"; root.main.thumbRegenerate(); }
+                            else if (root.phase === "membership-changed") { root.phase = "refresh-generating"; root.main.thumbRegenerate(); }
                         } catch (error) { root.fail(error); }
                     }
                 }

@@ -45,7 +45,11 @@ Item {
         Qt.callLater(pump);
     }
 
-    function thumbRegenerate() { invalidate(true); }
+    function thumbRegenerate() {
+        invalidate(true);
+        folderModel.forceReload();
+        if (!internal.initialized && !thumbInit.running) thumbInit.running = true;
+    }
 
     function ownsPath(path) {
         return path !== "" && path.indexOf(thumbCacheFolderPath + "/") === 0;
