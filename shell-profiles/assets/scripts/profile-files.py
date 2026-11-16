@@ -133,6 +133,25 @@ def json_new(path, value):
     write_new(path, (json.dumps(value, indent=2, sort_keys=True)+'\n').encode())
 
 
+def receipt_write(path, value):
+    """Only a completely synced receipt may replace the operation's outcome."""
+    fd, temporary = tempfile.mkstemp(prefix=path.name+'.', dir=path.parent)
+    try:
+        with os.fdopen(fd, 'wb') as stream:
+            stream.write((json.dumps(value, indent=2, sort_keys=True)+'\n').encode())
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+        parent = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(parent)
+        finally:
+            os.close(parent)
+    finally:
+        if os.path.lexists(temporary):
+            os.unlink(temporary)
+
+
 def capture(root, names):
     captured = {name: file_state(root/name) for name in names}
     targets = {}
@@ -335,7 +354,7 @@ def apply(profile, config, baseline, evidence):
             if manifest.get('format') != 2 or not isinstance(expected, dict):
                 raise Refused('profile-manifest')
             if inventory(config) != sorted(expected) or any(file_state(config/name)[0] != state for name, state in expected.items()):
-                json_new(operation/'result.json', dict(status='failed', error='profile-preimage-conflict'))
+                receipt_write(operation/'result.json', dict(status='failed', error='profile-preimage-conflict'))
                 raise Refused('profile-preimage-conflict')
         published = {}
         published_targets = []
@@ -369,7 +388,7 @@ def apply(profile, config, baseline, evidence):
                 if file_state(config/name)[0] != expected:
                     raise Refused('profile-readback-conflict')
             receipt = dict(status='applied', files=len(names), evidence=str(operation))
-            json_new(operation/'result.json', receipt)
+            receipt_write(operation/'result.json', receipt)
             return receipt
         except (OSError, Refused) as error:
             conflicts = []
@@ -384,8 +403,8 @@ def apply(profile, config, baseline, evidence):
                     conflicts.append(name)
             # Competing bytes are retained, never overwritten to force rollback.
             preserve(operation/'observed', capture(config, sorted(set(names) | set(inventory(config)))))
-            json_new(operation/'result.json', dict(status='failed', error=str(error) if isinstance(error, Refused) else 'profile-io',
-                                                  rollbackConflicts=conflicts))
+            receipt_write(operation/'result.json', dict(status='failed', error=str(error) if isinstance(error, Refused) else 'profile-io',
+                                                       rollbackConflicts=conflicts))
             raise
 
 

@@ -2297,7 +2297,7 @@
       "author": "Archlexx",
       "description": "Save, load, and manage Noctalia configuration profiles.",
       "license": "MIT",
-      "version": "1.0.14",
+      "version": "1.0.15",
       "tags": [
         "Bar",
         "Theming",

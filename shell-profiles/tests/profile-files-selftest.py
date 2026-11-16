@@ -33,6 +33,29 @@ class ProfileFixture(unittest.TestCase):
 
 
 class PublicationRaces(ProfileFixture):
+    def test_success_receipt_sync_failure_records_rollback(self):
+        fsync = module.os.fsync
+        injected = False
+
+        def fail_success_receipt(fd):
+            nonlocal injected
+            path = Path(os.readlink('/proc/self/fd/' + str(fd)))
+            if not injected and path.name.startswith('result.json'):
+                injected = True
+                raise OSError('receipt sync fault')
+            return fsync(fd)
+
+        with patch.object(module.os, 'fsync', fail_success_receipt):
+            with self.assertRaisesRegex(OSError, 'receipt sync fault'):
+                module.apply(self.profile, self.config, None, self.root / 'evidence')
+        self.assertTrue(injected)
+        self.assertEqual((self.config / 'settings.json').read_bytes(), self.original)
+        results = list((self.root / 'evidence').glob('*/result.json'))
+        self.assertEqual(len(results), 1)
+        receipt = json.loads(results[0].read_text())
+        self.assertEqual(receipt['status'], 'failed')
+        self.assertEqual(receipt['rollbackConflicts'], [])
+
     def test_two_argument_entrypoints_save_apply_valid_wallpaper_metadata(self):
         scripts = Path(module.__file__).parent
         saved = self.root / 'two-argument-profile'
