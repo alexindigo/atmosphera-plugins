@@ -1501,7 +1501,7 @@
       "author": "tonigineer",
       "description": "A `lively` network traffic indicator.",
       "license": "MIT",
-      "version": "2.0.3",
+      "version": "2.0.4",
       "tags": [
         "Bar",
         "Network",
