@@ -44,6 +44,16 @@ least `"0.8.0"`. The shell gates installs and updates using the index.
 Index versions and minimum versions must be plain `x.y.z`, without a `v`
 prefix or prerelease suffix.
 
+## Declaring actions
+
+An optional manifest `actions` list exposes user-facing Main IPC operations to
+the shell's action picker. Only loaded plugins contribute; commands remain
+`atmosphera ipc plugin:<id> <function>`. The compatibility gate checks declared
+actions against Main's actual handlers. See the shell's
+[`docs/plugins/index.md`](https://github.com/alexindigo/atmosphera/blob/main/docs/plugins/index.md#declaring-actions)
+for the action and typed-argument contract. Importing `qs.Services.Actions`
+requires Atmosphera 0.10.0.
+
 ## Checks and test environment
 
 Run these checks against your plugin using the target Atmosphera checkout's
