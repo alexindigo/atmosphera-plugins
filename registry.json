@@ -939,14 +939,14 @@
       "id": "hot-corners",
       "name": "Hot Corners",
       "author": "sapjax",
-      "description": "A macOS-style hot corners plugin for Noctalia Shell.",
+      "description": "A macOS-style hot corners plugin.",
       "license": "MIT",
-      "version": "0.0.6",
+      "version": "0.0.7",
       "tags": [
         "Desktop",
         "Productivity"
       ],
-      "lastUpdated": "2026-10-11",
+      "lastUpdated": "2026-11-17",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",

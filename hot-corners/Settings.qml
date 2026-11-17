@@ -3,266 +3,216 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import qs.Commons
 import qs.Widgets
-import qs.Services.UI
+import qs.Services.Actions
 
 ColumnLayout {
   id: root
+
   property var pluginApi: null
-
-  readonly property var cornerPos: ({
-    TopLeft: "TopLeft",
-    TopRight: "TopRight",
-    BottomLeft: "BottomLeft",
-    BottomRight: "BottomRight"
-  })
-
+  readonly property var corners: [
+    {key: "TopLeft", name: "Top left", icon: "arrow-up-left"},
+    {key: "TopRight", name: "Top right", icon: "arrow-up-right"},
+    {key: "BottomLeft", name: "Bottom left", icon: "arrow-down-left"},
+    {key: "BottomRight", name: "Bottom right", icon: "arrow-down-right"}
+  ]
   NSettingsBaseline {
     id: displayBaseline
-    readonly property var editCorners: pluginApi?.pluginSettings?.corners || ({})
+    readonly property var staged: root.normalizedCorners(root.pluginApi?.pluginSettings?.corners || ({}))
   }
-  property var editCorners: JSON.parse(JSON.stringify(displayBaseline.editCorners))
-  readonly property var currentSettings: ({corners: editCorners})
-  readonly property bool settingsDirty: displayBaseline.differs({editCorners: editCorners}) || (popupOverlay.visible && cmdInput.text.trim() !== (editCorners[popupOverlay.targetCorner] || ""))
+  property var staged: JSON.parse(JSON.stringify(displayBaseline.staged))
+  readonly property bool settingsDirty: {
+    if (displayBaseline.differs({staged: root.staged})) return true;
+    for (var i = 0; i < cornerRows.count; i++) {
+      var row = cornerRows.itemAt(i);
+      if (row && row.customDirty) return true;
+    }
+    return false;
+  }
+  spacing: Style.marginL
+
+  function normalizedCorners(value) {
+    var result = JSON.parse(JSON.stringify(value));
+    root.corners.forEach(function(corner) {
+      if (result[corner.key] === undefined) result[corner.key] = "";
+    });
+    return result;
+  }
+
+  function stage(corner, command) {
+    var next = Object.assign({}, root.staged);
+    next[corner] = command;
+    root.staged = next;
+  }
+
+  function actionByKey(key) {
+    var actions = ActionRegistry.actions;
+    for (var i = 0; i < actions.length; i++)
+      if (actions[i].key === key) return actions[i];
+    return null;
+  }
 
   function saveSettings() {
-    if (popupOverlay.visible) column.saveAndClose();
-    pluginApi.pluginSettings.corners = JSON.parse(JSON.stringify(editCorners));
+    if (!pluginApi?.pluginSettings) return;
+    for (var i = 0; i < cornerRows.count; i++)
+      cornerRows.itemAt(i).commitCustomEditor();
+    pluginApi.pluginSettings.corners = JSON.parse(JSON.stringify(root.staged));
+    // This stages the page API; the popup owns the receipt-backed Apply.
     pluginApi.saveSettings();
   }
 
-  // Main Settings Layout
-  Item {
-    Layout.fillWidth: true
-    Layout.preferredHeight: 400
+  ListModel { id: actionModel }
+  function rebuildModel() {
+    actionModel.clear();
+    ActionRegistry.actions.forEach(function(action) {
+      actionModel.append({key: action.key, name: action.label, description: action.description,
+        icon: action.icon, section: action.section, group: action.group, command: action.command});
+    });
+  }
+  Connections {
+    target: ActionRegistry
+    function onRevisionChanged() { root.rebuildModel(); }
+  }
+  Component.onCompleted: rebuildModel()
 
-    Rectangle {
-      id: screenBox
-      width: parent.width - 40
-      height: 300
-      anchors.centerIn: parent
-      color: "transparent"
-      border.color: Qt.rgba(0.5, 0.5, 0.5, 0.4)
-      border.width: 4
-      radius: Style.radiusL
-      clip: true
+  Repeater {
+    id: cornerRows
+    model: root.corners
+    delegate: ColumnLayout {
+      id: cornerRow
+      required property var modelData
+      readonly property string command: root.staged[modelData.key] || ""
+      readonly property var matched: ActionRegistry.match(command)
+      readonly property string actionKey: matched ? matched.action.key : ""
+      // Keep argument delegates alive while only argument values change.
+      readonly property var action: root.actionByKey(actionKey)
+      readonly property bool customDirty: actionField.customDirty
+      function commitCustomEditor() { actionField.commitCustomEditor(); }
+      function stageArgument(name, value) {
+        if (!matched) return;
+        var values = Object.assign({}, matched.values);
+        values[name] = value;
+        var composed = ActionRegistry.compose(action, values);
+        if (composed !== "") root.stage(modelData.key, composed);
+      }
+      Layout.fillWidth: true
+      Layout.minimumWidth: 0
+      spacing: Style.marginS
 
-      ColumnLayout {
-        anchors.centerIn: parent
+      RowLayout {
+        Layout.fillWidth: true
         spacing: Style.marginS
-        opacity: 0.3
-
+        AtmoIcon { icon: cornerRow.modelData.icon; pointSize: Style.fontSizeM }
         NText {
-          Layout.alignment: Qt.AlignHCenter
-          text: "Screen Corners"
-          font.weight: Font.Bold
-          pointSize: Style.fontSizeXL
-        }
-
-        NText {
-          Layout.alignment: Qt.AlignHCenter
-          text: "Click on the triangle in the corner to set the command"
-          pointSize: Style.fontSizeS
+          text: cornerRow.modelData.name
+          Layout.fillWidth: true
+          Layout.minimumWidth: 0
+          wrapMode: Text.NoWrap
+          elide: Text.ElideRight
         }
       }
-
-      // Reusable Triangle Corner Component
-      component CornerTriangle: Item {
-        id: cTri
-        property string pos: root.cornerPos.TopLeft
-        
-        width: 40
-        height: 40
-        
-        anchors.top: (pos === root.cornerPos.TopLeft || pos === root.cornerPos.TopRight) ? parent.top : undefined
-        anchors.bottom: (pos === root.cornerPos.BottomLeft || pos === root.cornerPos.BottomRight) ? parent.bottom : undefined
-        anchors.left: (pos === root.cornerPos.TopLeft || pos === root.cornerPos.BottomLeft) ? parent.left : undefined
-        anchors.right: (pos === root.cornerPos.TopRight || pos === root.cornerPos.BottomRight) ? parent.right : undefined
-
-        anchors.margins: 4
-        property real r: Style.radiusL - 4
-
-        property string currentCommand: {
-          if (currentSettings && currentSettings.corners && currentSettings.corners[pos]) {
-             return currentSettings.corners[pos] || "";
-          }
-          return "";
+      NSearchableComboBox {
+        id: actionField
+        objectName: "hotCorner-" + cornerRow.modelData.key
+        Layout.fillWidth: true
+        Layout.minimumWidth: 0
+        stacked: true
+        selectOnNavigation: false
+        clearable: true
+        customEntry: true
+        popupHeight: 360
+        model: actionModel
+        currentKey: cornerRow.actionKey
+        displayIcon: cornerRow.matched ? cornerRow.matched.action.icon : cornerRow.command !== "" ? "terminal" : "circle-dashed"
+        displayText: cornerRow.matched ? ActionRegistry.displayLabel(cornerRow.matched.action, cornerRow.matched.values) : cornerRow.command !== "" ? "Custom command" : ""
+        displaySubtitle: cornerRow.command
+        placeholder: "No action"
+        sectionRole: "section"
+        groupRole: "group"
+        searchRoles: ["name", "description", "command"]
+        popupTitle: "Choose corner action"
+        searchPlaceholder: "Search actions or type a command"
+        noMatchLabel: "No matching actions"
+        runCommandLabel: "Run command: %1"
+        customEntryLabel: "Custom command..."
+        customEditorTitle: "Custom command"
+        customEditorConfirmText: "Use command"
+        customEditorCancelText: "Cancel"
+        customText: cornerRow.command
+        onSelected: key => {
+          var action = root.actionByKey(key);
+          if (action) root.stage(cornerRow.modelData.key, ActionRegistry.compose(action, {}));
         }
-        property bool isActive: currentCommand !== ""
-
-        // Custom drawn triangle
-        Canvas {
-          id: canvas
-          anchors.fill: parent
-          onPaint: {
-            var ctx = getContext("2d");
-            ctx.reset();
-            ctx.beginPath();
-            
-            if (pos === root.cornerPos.TopLeft) {
-              ctx.moveTo(0, r); ctx.arcTo(0, 0, r, 0, r); ctx.lineTo(width, 0); ctx.lineTo(0, height);
-            } else if (pos === root.cornerPos.TopRight) {
-              ctx.moveTo(0, 0); ctx.lineTo(width - r, 0); ctx.arcTo(width, 0, width, r, r); ctx.lineTo(width, height);
-            } else if (pos === root.cornerPos.BottomLeft) {
-              ctx.moveTo(0, 0); ctx.lineTo(0, height - r); ctx.arcTo(0, height, r, height, r); ctx.lineTo(width, height);
-            } else if (pos === root.cornerPos.BottomRight) {
-              ctx.moveTo(width, 0); ctx.lineTo(width, height - r); ctx.arcTo(width, height, width - r, height, r); ctx.lineTo(0, height);
-            }
-            
-            ctx.closePath();
-            // Noctalia primary color or gray
-            ctx.fillStyle = isActive ? AtmoColor.mPrimary : Qt.rgba(0.5, 0.5, 0.5, 0.5);
-            ctx.fill();
-            
-            // Hover effect outline
-            if (mouseArea.containsMouse) {
-               ctx.strokeStyle = AtmoColor.mOnSurface;
-               ctx.lineWidth = 2;
-               ctx.stroke();
-            }
-          }
-          
-          Connections {
-             target: cTri
-             function onIsActiveChanged() { canvas.requestPaint(); }
-             function onCurrentCommandChanged() { canvas.requestPaint(); }
-          }
-        }
-
-        Connections {
-           target: root
-           function onCurrentSettingsChanged() { canvas.requestPaint(); }
-        }
-
-        MouseArea {
-          id: mouseArea
-          anchors.fill: parent
-          hoverEnabled: true
-          onEntered: {
-            canvas.requestPaint();
-            if (isActive) {
-              TooltipService.show(cTri, currentCommand);
-            }
-          }
-          onExited: {
-            canvas.requestPaint();
-            TooltipService.hide();
-          }
-          onCanceled: {
-            TooltipService.hide();
-          }
-          onClicked: {
-            if (isActive) {
-              TooltipService.hide();
-            }
-            popupOverlay.targetCorner = pos;
-              popupOverlay.initialText = currentCommand;
-            popupOverlay.visible = true;
-          }
-        }
+        onCustomEntered: text => root.stage(cornerRow.modelData.key, text)
+        onCleared: root.stage(cornerRow.modelData.key, "")
       }
 
-      CornerTriangle { pos: root.cornerPos.TopLeft }
-      CornerTriangle { pos: root.cornerPos.TopRight }
-      CornerTriangle { pos: root.cornerPos.BottomLeft }
-      CornerTriangle { pos: root.cornerPos.BottomRight }
-    }
-
-    // Input Popup Overlay
-    Rectangle {
-      id: popupOverlay
-      anchors.fill: parent
-      color: Qt.rgba(0, 0, 0, 0.5)
-      visible: false
-      
-      property string targetCorner: ""
-      property string initialText: ""
-
-      MouseArea {
-        anchors.fill: parent
-        // Block clicks from passing through
-      }
-
-      Rectangle {
-        width: 400
-        height: column.height + Style.marginL * 2
-        anchors.centerIn: parent
-        color: AtmoColor.mSurfaceVariant
-        border.color: AtmoColor.mOutline
-        border.width: Style.borderM
-        radius: Style.radiusL
-
-        ColumnLayout {
-          id: column
-          anchors.left: parent.left
-          anchors.right: parent.right
-          anchors.top: parent.top
-          anchors.margins: Style.marginL
+      Repeater {
+        model: cornerRow.action ? cornerRow.action.arguments : []
+        delegate: RowLayout {
+          id: argumentRow
+          required property var modelData
+          Layout.fillWidth: true
+          Layout.minimumWidth: 0
           spacing: Style.marginM
-
           NText {
-            text: "Custom Command for " + popupOverlay.targetCorner
-            color: AtmoColor.mOnSurface
+            text: argumentRow.modelData.label
+            Layout.maximumWidth: cornerRow.width / 3
+            wrapMode: Text.NoWrap
+            elide: Text.ElideRight
           }
-
-          RowLayout {
+          Loader {
             Layout.fillWidth: true
-            NTextInput {
-              id: cmdInput
-              Layout.fillWidth: true
-              placeholderText: "e.g., noctalia-shell ipc call settings toggle"
-              text: popupOverlay.initialText
-              onAccepted: column.saveAndClose()
+            Layout.minimumWidth: 0
+            sourceComponent: argumentRow.modelData.type === "choice" ? choiceEditor : valueEditor
+          }
+          Component {
+            id: choiceEditor
+            NSearchableComboBox {
+              objectName: "hotCorner-" + cornerRow.modelData.key + "-" + argumentRow.modelData.name
+              stacked: true
+              searchable: false
+              selectOnNavigation: false
+              popupTitle: argumentRow.modelData.label
+              currentKey: cornerRow.matched ? String(cornerRow.matched.values[argumentRow.modelData.name]) : ""
+              model: ListModel { id: choices }
+              Component.onCompleted: argumentRow.modelData.choices.forEach(function(choice) {
+                choices.append({key: choice.value, name: choice.label});
+              })
+              onSelected: key => cornerRow.stageArgument(argumentRow.modelData.name, key)
             }
           }
-
-          RowLayout {
-            Layout.alignment: Qt.AlignRight
-            NButton {
-              text: "Cancel"
-              outlined: true
-              onClicked: popupOverlay.visible = false
-            }
-            NButton {
-              text: "Save"
-              onClicked: column.saveAndClose()
+          Component {
+            id: valueEditor
+            Rectangle {
+              // The validation frame owns its outline; the input owns editing.
+              objectName: "hotCorner-" + cornerRow.modelData.key + "-" + argumentRow.modelData.name
+              implicitHeight: valueInput.implicitHeight + Style.borderS * 2
+              color: "transparent"
+              radius: Style.iRadiusM
+              border.width: Style.borderS
+              border.color: valueInput.inputItem.acceptableInput ? "transparent" : AtmoColor.mError
+              NTextInput {
+                id: valueInput
+                anchors.fill: parent
+                anchors.margins: Style.borderS
+                minimumInputWidth: 0
+                text: cornerRow.matched ? String(cornerRow.matched.values[argumentRow.modelData.name]) : ""
+                inputItem.validator: argumentRow.modelData.type === "number" ? numberValidator : null
+                inputMethodHints: argumentRow.modelData.type === "number" ? Qt.ImhDigitsOnly : Qt.ImhNone
+                onTextEdited: {
+                  if (inputItem.acceptableInput)
+                    cornerRow.stageArgument(argumentRow.modelData.name, argumentRow.modelData.type === "number" ? Number(text) : text);
+                }
+                IntValidator {
+                  id: numberValidator
+                  bottom: argumentRow.modelData.min === undefined ? -2147483648 : argumentRow.modelData.min
+                  top: argumentRow.modelData.max === undefined ? 2147483647 : argumentRow.modelData.max
+                }
+              }
             }
           }
-          
-          // Local function to handle save specifically
-          function saveAndClose() {
-             var val = cmdInput.text.trim();
-             var corner = popupOverlay.targetCorner;
-             popupOverlay.visible = false;
-             
-             if (corner !== "") {
-                 updateCornerSetting(corner, val);
-             }
-          }
-        }
-      }
-      
-      onVisibleChanged: {
-        if (visible) {
-           cmdInput.text = initialText;
-           cmdInput.forceActiveFocus();
-        } else {
-           // Reset temporary vars on close
-           popupOverlay.targetCorner = "";
-           popupOverlay.initialText = "";
         }
       }
     }
-  }
-
-  Item {
-    Layout.fillHeight: true
-  }
-
-  function updateCornerSetting(cornerId, value) {
-    if (!pluginApi) return;
-    
-    var next = Object.assign({}, editCorners);
-    next[cornerId] = value;
-    editCorners = next;
   }
 }

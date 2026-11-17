@@ -1,11 +1,24 @@
 # Hot Corners
 
-Hot Corners is a macOS-style hot corners plugin for [Noctalia Shell](https://github.com/noctalia-dev/noctalia-shell).
+A macOS-style hot corners plugin for Atmosphera. Move the pointer to a screen
+corner to trigger its action after the dwell delay.
 
-It allows you to quickly trigger actions by moving your mouse to the corners of the screen.
+## Settings
 
-## Features
+Choose an action for each named corner from the searchable Atmosphera and loaded
+plugin groups. Each field shows the action and the exact command it will run.
+Actions with arguments expose labeled choice, number or text controls. Clear a
+field to leave that corner inactive.
 
-- **macOS-style hot corners**: Move your mouse to the corners of the screen to trigger actions
-- **Customizable actions**: Assign any command to each corner
-    - e.g. `noctalia-shell ipc call settings toggle`
+Type a command into search and select "Run command", or use "Custom command..."
+to edit a literal command. For example: `atmosphera ipc controlCenter toggle` or
+`niri msg action toggle-overview`. Changes are staged until Apply; canceling the
+inline editor keeps its previous command. The shell's settings popup handles
+unsaved changes when closing.
+
+Settings remain one plain command string per corner, so existing commands keep
+working. Requires Atmosphera 0.10.0 or newer.
+
+## Credits
+
+Originally written by sapjax for Noctalia Shell. MIT license.
