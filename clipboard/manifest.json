@@ -1,7 +1,7 @@
 {
   "id": "clipboard",
   "name": "Clipboard",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "minNoctaliaVersion": "4.1.2",
   "minAtmospheraVersion": "0.10.0",
   "author": "yanekyuk",
@@ -19,6 +19,10 @@
     "panel": "Panel.qml",
     "settings": "Settings.qml"
   },
+  "actions": [
+    {"id": "toggle", "label": "Clipboard panel", "description": "Toggle the clipboard plugin panel.", "icon": "clipboard", "command": "atmosphera ipc plugin:clipboard toggle"},
+    {"id": "wipe", "label": "Clear clipboard history", "description": "Delete all saved clipboard entries.", "icon": "trash", "command": "atmosphera ipc plugin:clipboard wipe"}
+  ],
   "dependencies": {
     "plugins": []
   },

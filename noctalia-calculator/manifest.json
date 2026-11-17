@@ -1,7 +1,7 @@
 {
   "id": "noctalia-calculator",
   "name": "Calculator",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "minNoctaliaVersion": "4.4.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "pir0c0pter0",
@@ -15,6 +15,9 @@
     "panel": "Panel.qml",
     "settings": "Settings.qml"
   },
+  "actions": [
+    {"id": "toggle", "label": "Calculator", "description": "Toggle the calculator panel.", "icon": "calculator", "command": "atmosphera ipc plugin:noctalia-calculator toggle"}
+  ],
   "dependencies": {
     "plugins": []
   },
