@@ -1,7 +1,7 @@
 {
   "id": "screen-toolkit",
   "name": "Screen Toolkit",
-  "version": "1.3.7",
+  "version": "1.3.8",
   "minNoctaliaVersion": "4.5.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "ycf-anon",
@@ -21,6 +21,24 @@
     "panel": "Panel.qml",
     "settings": "Settings.qml"
   },
+  "actions": [
+    {"id": "toggle", "label": "Screen toolkit", "description": "Toggle screen tools and recent results.", "icon": "tools", "command": "atmosphera ipc plugin:screen-toolkit toggle"},
+    {"id": "mirror", "label": "Webcam mirror", "description": "Open the webcam mirror.", "icon": "camera", "command": "atmosphera ipc plugin:screen-toolkit mirror"},
+    {"id": "measure", "label": "Measure screen region", "description": "Measure a selected area in pixels.", "icon": "ruler", "command": "atmosphera ipc plugin:screen-toolkit measure"},
+    {"id": "color-picker", "label": "Pick a color", "description": "Sample a color from the screen.", "icon": "color-picker", "command": "atmosphera ipc plugin:screen-toolkit colorPicker"},
+    {"id": "annotate", "label": "Annotate a selected region of the screen", "description": "Select and annotate a screen region.", "icon": "pencil", "command": "atmosphera ipc plugin:screen-toolkit annotate"},
+    {"id": "annotate-fullscreen", "label": "Annotate full screen", "description": "Annotate a capture of the full screen.", "icon": "device-desktop", "command": "atmosphera ipc plugin:screen-toolkit annotateFullscreen"},
+    {"id": "pin", "label": "Pin screen region", "description": "Keep a captured region on screen.", "icon": "pin", "command": "atmosphera ipc plugin:screen-toolkit pin"},
+    {"id": "pin-image", "label": "Pin image from file", "description": "Choose an image to keep on screen.", "icon": "photo", "command": "atmosphera ipc plugin:screen-toolkit pinImage"},
+    {"id": "ocr", "label": "Extract text", "description": "Read text from a selected screen region.", "icon": "text-recognition", "command": "atmosphera ipc plugin:screen-toolkit ocr"},
+    {"id": "qr", "label": "Read QR code", "description": "Read a QR code in a selected region.", "icon": "qrcode", "command": "atmosphera ipc plugin:screen-toolkit qr"},
+    {"id": "palette", "label": "Extract palette", "description": "Find colors in a selected region.", "icon": "palette", "command": "atmosphera ipc plugin:screen-toolkit palette"},
+    {"id": "lens", "label": "Screen lens", "description": "Magnify a selected region.", "icon": "zoom-in", "command": "atmosphera ipc plugin:screen-toolkit lens"},
+    {"id": "record", "label": "Record region as GIF", "description": "Select a screen region to record.", "icon": "video", "command": "atmosphera ipc plugin:screen-toolkit record"},
+    {"id": "record-mp4", "label": "Record region as MP4", "description": "Select a screen region to record.", "icon": "video", "command": "atmosphera ipc plugin:screen-toolkit recordMp4"},
+    {"id": "record-fullscreen", "label": "Record full screen as GIF", "description": "Record the current screen.", "icon": "device-desktop", "command": "atmosphera ipc plugin:screen-toolkit recordFullscreen"},
+    {"id": "record-fullscreen-mp4", "label": "Record full screen as MP4", "description": "Record the current screen as MP4.", "icon": "device-desktop", "command": "atmosphera ipc plugin:screen-toolkit recordFullscreenMp4"}
+  ],
   "dependencies": {
     "plugins": []
   },

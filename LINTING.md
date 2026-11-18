@@ -18,6 +18,7 @@ the commit or the CI job.
 - Existing entry-point files (or wallpaper directories), safe paths, minimum
   Atmosphera version. A plugin using `AtmoColor` must declare at least `0.8.0`.
 - Manifest/catalog membership, duplicate IDs and matching versions/minimums.
+- Declared actions match the plugin's Main `IpcHandler` functions, arguments and icons.
 - A strictly higher plugin version when staged runtime code, assets or manifest
   changes. Documentation-only changes do not require a version bump.
 
