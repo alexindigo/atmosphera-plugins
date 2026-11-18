@@ -6,8 +6,10 @@ vendored contributions and Atmosphera-native plugins.
 
 Each top-level plugin directory has a `manifest.json`. The root `registry.json`
 is the catalog fetched by the shell. `hot-corners` is retired: Hot Corners is
-built into Atmosphera 0.10.0 (Settings -> General -> Hot corners), and the shell
-migrates the plugin's settings. Preserve upstream authorship and licenses
+built into Atmosphera 0.10.0 (Settings -> General -> Hot corners). The shell imports
+commands from enabled installs into empty shell corners only. Disabled installs
+do not import commands. The shell backs up the plugin and settings before removing
+them; commands not imported remain in that backup. Preserve upstream authorship and licenses
 when adapting a plugin; native additions declare their own author and license.
 The catalog's `official` flag is a maintainer designation, not an installation
 requirement. Plugins marked `official: false` appear under **Available → All**
