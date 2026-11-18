@@ -99,46 +99,28 @@ Item {
     }
   }
 
-  // Size preset from plugin settings (compact/regular/large). Each is a
-  // FIXED bounding box; content uniform-fits inside without scrolling.
-  //   compact = 300 x 300
-  //   regular = Control Center width x 50% of screen height
-  //   large   = 50% of screen w x 70% of screen h
+  // Presets choose the workspace row height. The shared screen-relative
+  // limits only cap the panel; light desks never grow to fill them.
   readonly property string _sizeKey: pluginApi?.pluginSettings?.panelSize || "regular"
   readonly property real _screenW: root.screen?.width || 1920
   readonly property real _screenH: root.screen?.height || 1080
-  readonly property var _sizePreset: {
-    if (_sizeKey === "large")
-      return {
-        w: Math.round(_screenW * 0.5),
-        h: Math.round(_screenH * 0.7)
-      };
-    if (_sizeKey === "compact")
-      return {
-        w: Math.round(300 * Style.uiScaleRatio),
-        h: Math.round(300 * Style.uiScaleRatio)
-      };
-    // regular: Control Center width x 50% of screen height
-    return {
-      w: Math.round(440 * Style.uiScaleRatio),
-      h: Math.round(_screenH * 0.5)
-    };
-  }
+  readonly property real _panelLimitW: Math.round(_screenW * 0.5)
+  readonly property real _panelLimitH: Math.round(_screenH * 0.7)
 
   // Bounding box is the UPPER LIMIT; the visible panel hugs the content
   // so aspect-mismatch never leaves letterbox gaps around the map.
-  readonly property real contentPreferredWidth: Math.min(_sizePreset.w, mapCanvas.renderedW + 16)
+  readonly property real contentPreferredWidth: Math.min(_panelLimitW, mapCanvas.renderedW + 16)
   // The cap applies to the MAP's budget; the phantom strip adds BEYOND it
   // during a drag (the container grows upward to reveal it, per the design)
-  readonly property real contentPreferredHeight: Math.min(_sizePreset.h, mapCanvas.renderedH + 16) + (mapCanvas.dragActive ? mapCanvas.phantomHeight : 0)
+  readonly property real contentPreferredHeight: Math.min(_panelLimitH, mapCanvas.renderedH + 16) + (mapCanvas.dragActive ? mapCanvas.phantomHeight : 0)
 
   MapCanvas {
     id: mapCanvas
     anchors.fill: parent
     anchors.margins: 8
     screen: root.screen
-    maxPanelW: root._sizePreset.w
-    maxPanelH: root._sizePreset.h
+    maxPanelW: root._panelLimitW
+    maxPanelH: root._panelLimitH
     hideIcons: pluginApi?.pluginSettings?.hideIcons ?? false
     terminalIcons: root.terminalIcons
     terminalInfo: root.terminalInfo
