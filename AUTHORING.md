@@ -50,7 +50,7 @@ An optional manifest `actions` list exposes user-facing Main IPC operations to
 the shell's action picker. Only loaded plugins contribute; commands remain
 `atmosphera ipc plugin:<id> <function>`. The compatibility gate checks declared
 actions against Main's actual handlers. See the shell's
-[`docs/plugins/index.md`](https://github.com/alexindigo/atmosphera/blob/main/docs/plugins/index.md#declaring-actions)
+[`docs/plugins/index.md`](https://github.com/alexindigo/atmosphera/blob/6c003861dbc6d9714f52f8a255964b488a6bb310/docs/plugins/index.md#declaring-actions)
 for the action and typed-argument contract. Importing `qs.Services.Actions`
 requires Atmosphera 0.10.0.
 

@@ -420,7 +420,7 @@
       "author": "yanekyuk",
       "description": "Clipboard history panel with search, pinning, and image previews.",
       "license": "MIT",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "tags": [
         "Utility",
         "Bar",
@@ -2263,7 +2263,7 @@
       "author": "Cleboost",
       "description": "Quick screenshot button in bar for Hyprland, Sway, and Niri",
       "license": "MIT",
-      "version": "1.2.6",
+      "version": "1.2.7",
       "tags": [
         "Bar",
         "Utility"
