@@ -99,6 +99,10 @@ Item {
   property point _pressStart: Qt.point(0, 0)  // press point in mapContent (ghost's position 0)
   property int _dragWinId: 0
   property bool _dragging: false
+  on_DraggingChanged: {
+    if (!root._dragging)
+      Qt.callLater(root._keepCurrentInView);
+  }
 
   // The hold timer STARTS the drag (position 0): ghost appears, source
   // becomes an empty slot, others dim — before any movement
@@ -862,7 +866,8 @@ Item {
             // Hide icons on tiles too small to read them — evaluated at the
             // rendered size, so zooming in (Ctrl+scroll) reveals icons as
             // they become readable; user setting hides them entirely
-            property real _reveal: width * root._userScale >= 14 ? 1 : 0
+            readonly property bool _inputReady: width * root._userScale >= 14
+            property real _reveal: _inputReady ? 1 : 0
             Behavior on _reveal {
               NumberAnimation {
                 duration: Style.animationFast
@@ -1099,6 +1104,7 @@ Item {
 
             MouseArea {
               id: playArea
+              enabled: iconWrap._inputReady
               anchors.fill: parent
               hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
@@ -1158,6 +1164,7 @@ Item {
 
             MouseArea {
               id: audioArea
+              enabled: iconWrap._inputReady
               anchors.fill: parent
               hoverEnabled: true
               cursorShape: Qt.PointingHandCursor

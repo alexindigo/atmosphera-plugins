@@ -24,7 +24,7 @@ ShellRoot {
     check("phantom is visible target",target(50,20),-1);
     check("visible ordinary row",target(50,50),11);
     check("row gap is not painted target",target(50,73),0);
-    check("trailing row uses its actual height",target(50,139),13);
+    check("trailing row uses its actual height",Geometry.targetAt(Qt.point(50,147),Qt.rect(0,40,200,120),phantom,origin,1,rows.slice(0,3),200),13);
     check("hidden ordinary row is not target",target(50,160),0);
     check("outside viewport width is not target",target(201,60),0);
     check("scrolled map uses shared root transform",Geometry.targetAt(Qt.point(50,50),view,phantom,Qt.point(0,6),1,rows,200),12);
