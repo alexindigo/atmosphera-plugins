@@ -5,7 +5,9 @@ including converted [Noctalia plugins](https://github.com/noctalia-dev/noctalia-
 vendored contributions and Atmosphera-native plugins.
 
 Each top-level plugin directory has a `manifest.json`. The root `registry.json`
-is the catalog fetched by the shell. Preserve upstream authorship and licenses
+is the catalog fetched by the shell. `hot-corners` is retired: Hot Corners is
+built into Atmosphera 0.10.0 (Settings -> General -> Hot corners), and the shell
+migrates the plugin's settings. Preserve upstream authorship and licenses
 when adapting a plugin; native additions declare their own author and license.
 The catalog's `official` flag is a maintainer designation, not an installation
 requirement. Plugins marked `official: false` appear under **Available → All**
