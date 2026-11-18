@@ -1,6 +1,7 @@
 import Niri 1.0
 import Niri 1.0
 import QtQuick
+import "MapGeometry.js" as MapGeometry
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
@@ -38,12 +39,49 @@ Item {
   // Top-left speaker badge + top-right mute/unmute button when present.
   property var audioInfo: ({})
   property bool audioIndicators: true
-  // Show the hovered window's identity lines in the empty trailing row
+  // Show the hovered window's identity lines in the reserved info strip
   property bool hoverInfo: true
   // Current panel size preset ("compact"/"regular"/"large") — info line
   // count and tile icon padding scale with it
   property string sizeKey: "regular"
   property real _userScale: 1.0
+  property real _iconPad: sizeKey === "large" ? 16 : 8
+  property real _faviconCap: sizeKey === "large" ? 32 : 16
+  property real _hoverPointSize: sizeKey === "compact" ? 8 : (sizeKey === "large" ? 11 : 9)
+  readonly property int _hoverMaxLines: sizeKey === "compact" ? 2 : (sizeKey === "large" ? 4 : 3)
+  readonly property real _presetRowH: (sizeKey === "compact" ? 32 : (sizeKey === "large" ? 88 : 56)) * Style.uiScaleRatio
+  // Measure the actual NText font, including font/UI scale and line spacing.
+  // This reservation never depends on the hovered text or its visibility.
+  readonly property real _infoStripH: Math.ceil(infoMeasure.implicitHeight)
+
+  NText {
+    id: infoMeasure
+    visible: false
+    pointSize: root._hoverPointSize
+    text: Array(root._hoverMaxLines).fill("Ag").join("\n")
+  }
+
+  Behavior on _iconPad {
+    NumberAnimation {
+      duration: Style.animationNormal
+    }
+  }
+  Behavior on _faviconCap {
+    NumberAnimation {
+      duration: Style.animationNormal
+    }
+  }
+  Behavior on _hoverPointSize {
+    NumberAnimation {
+      duration: Style.animationNormal
+    }
+  }
+
+  // Raster budgets follow the source, never the animated tile geometry.
+  function _textureSize(pixels) {
+    var px = Math.ceil(pixels * Screen.devicePixelRatio);
+    return Qt.size(px, px);
+  }
 
   // Emitted when a tile's mute button is clicked (NOT navigation — the
   // panel stays open regardless of hide-on-click)
@@ -61,6 +99,10 @@ Item {
   property point _pressStart: Qt.point(0, 0)  // press point in mapContent (ghost's position 0)
   property int _dragWinId: 0
   property bool _dragging: false
+  on_DraggingChanged: {
+    if (!root._dragging)
+      Qt.callLater(root._keepCurrentInView);
+  }
 
   // The hold timer STARTS the drag (position 0): ghost appears, source
   // becomes an empty slot, others dim — before any movement
@@ -103,24 +145,24 @@ Item {
     return Qt.point(0, 0);
   }
 
-  // Workspace row under the ghost center. The phantom strip lives ABOVE the
-  // content's top edge (ghostPos.y < 0 during a drag), so that's the
-  // insert-above target; real rows sit in place beneath it (no shifting).
+  // The Flickable's content transform is explicit here so stationary drags
+  // observe viewport/panel movement too. Ghost and hit test share this point.
+  readonly property point _mapOriginInRoot: Qt.point(flick.x + mapContent.x - flick.contentX,
+                                                    flick.y + mapContent.y - flick.contentY)
+  readonly property point _ghostInRoot: Qt.point(_mapOriginInRoot.x + _ghostPos.x * _userScale,
+                                                _mapOriginInRoot.y + _ghostPos.y * _userScale)
+  readonly property var _workspaceRows: workspaceOrder().map(function (ws, index) {
+    return {id: ws.id, y: index * (root._monH * root._autoScale + root._rowGap), height: root.workspaceRowHeight(index)};
+  })
+
+  // Only visible geometry accepts drops: the fixed phantom or clipped rows.
   readonly property int _dragTargetWs: {
     if (!root._dragging)
       return 0;
-    var rowH = _monH * _autoScale;
-    var stride = rowH + _rowGap;
-    var order = workspaceOrder();
-    var y = root._ghostPos.y;
-    // Above the content's top edge = the phantom strip (grown panel area);
-    // tolerate up to one row above the panel before calling it a miss
-    if (y < 0)
-      return (y > -rowH) ? -1 : 0;
-    var slot = Math.floor(y / stride);
-    if (slot >= order.length)
-      slot = (y < order.length * stride + rowH) ? order.length - 1 : order.length;
-    return (slot >= 0 && slot < order.length) ? order[slot].id : 0;
+    return MapGeometry.targetAt(root._ghostInRoot,
+                                Qt.rect(flick.x, flick.y, flick.width, flick.height),
+                                Qt.rect(0, 0, root.width, root._phantomH),
+                                root._mapOriginInRoot, root._userScale, root._workspaceRows, root.renderedW);
   }
 
   function _moveWindowToWorkspace(winId, wsId) {
@@ -196,6 +238,8 @@ Item {
       _hoverCount = 0;
       hoveredWs = 0;
       hoveredWinId = 0;
+    } else {
+      Qt.callLater(root._keepCurrentInView);
     }
   }
 
@@ -270,6 +314,10 @@ Item {
   readonly property real _leftInset: 12 // 4px bar + 8px gap before the first column
 
   readonly property var _backend: CompositorService.niriBackend
+  // The current window: niri's focused window id (null: none). Window
+  // records carry no focus flag; every focus-derived style reads this id.
+  readonly property var currentWindowId: _backend ? _backend.focusedWindowId : null
+  onCurrentWindowIdChanged: Qt.callLater(root._keepCurrentInView)
   // Pure live view of laid-out windows (never frozen)
   readonly property var _windowsLive: {
     var all = (_backend && _backend.windows) ? _backend.windows : [];
@@ -286,6 +334,14 @@ Item {
   // The map's view: frozen during press/drag, live otherwise. No read+write
   // of the cache inside this binding — that was a binding loop.
   readonly property var _windows: (root._pressWinId !== 0 || root._dragging) ? _windowsCache : _windowsLive
+  readonly property rect _focusedRectangle: {
+    for (var i = 0; i < _windows.length; i++) {
+      if (_windows[i].id === currentWindowId)
+        return windowGeometry(_windows[i]);
+    }
+    return Qt.rect(0, 0, 0, 0);
+  }
+  on_FocusedRectangleChanged: Qt.callLater(root._keepCurrentInView)
 
   // Keep the frozen snapshot current only while idle (no gesture)
   on_WindowsLiveChanged: {
@@ -303,7 +359,12 @@ Item {
   // ── Workspaces ──
 
   // All workspaces sorted by niri idx, including empty ones
+  readonly property var _workspaceOrder: _buildWorkspaceOrder()
   function workspaceOrder() {
+    return _workspaceOrder;
+  }
+
+  function _buildWorkspaceOrder() {
     _wsRev; // imperative-refresh dependency
     var list = [];
     for (var i = 0; i < CompositorService.workspaces.count; i++) {
@@ -464,13 +525,22 @@ Item {
     return avail / (sum * _autoScale);
   }
 
-  // Position (workspace + column) of the globally focused window — defines
-  // the "active column" whose windows get the secondary highlight.
-  // Focus id comes from NiriState (C++ singleton, handles WorkspaceActivated
-  // semantics natively); we only scan our window array to locate its tile.
+  // Tiles and focus reveal share one geometry contract in map coordinates.
+  function windowGeometry(w) {
+    var col = w.layout.posInScrollingLayout[0];
+    var row = w.layout.posInScrollingLayout[1] || 0;
+    var cs = columnScale(w.workspaceId, col);
+    return Qt.rect(columnX(w.workspaceId, col) * _autoScale + _leftInset + colCountLeft(w.workspaceId, col) * _colGap,
+                   workspaceSlotIndex(w.workspaceId) * (_monH * _autoScale + _rowGap) + tileY(w.workspaceId, col, row) * _autoScale * cs + tileCountAbove(w.workspaceId, col, row) * _winGap,
+                   Math.max(columnMaxWidth(w.workspaceId, col) * _autoScale, 4),
+                   Math.max(((w.layout.tileSize && w.layout.tileSize[1]) || 50) * _autoScale * cs, 2));
+  }
+
+  // Position (workspace + column) of the current window — defines the
+  // "active column" whose windows get the secondary highlight.
   function focusedWindowPos() {
-    var fid = NiriState.focusedWindowId;
-    if (fid === 0)
+    var fid = root.currentWindowId;
+    if (fid === null || fid === undefined)
       return null;
     for (var i = 0; i < _windows.length; i++) {
       if (_windows[i].id === fid) {
@@ -496,9 +566,12 @@ Item {
     }
     return max > 0 ? max : 100;
   }
-  readonly property real _canvasH: {
-    var n = workspaceOrder().length;
-    return n > 0 ? n * _monH : _monH;
+  // Niri's trailing empty workspace is an info strip, not a monitor-sized
+  // row. It still has its indicator and remains a workspace/drop target.
+  readonly property real _canvasH: Math.max(0, workspaceOrder().length - 1) * _monH
+
+  function workspaceRowHeight(slot) {
+    return slot === workspaceOrder().length - 1 ? _infoStripH : _monH * _autoScale;
   }
 
   readonly property real _maxColsInRow: {
@@ -521,30 +594,47 @@ Item {
   readonly property real _gapsW: _leftInset + Math.max(0, _maxColsInRow - 1) * _colGap
   readonly property real _gapsH: Math.max(0, workspaceOrder().length - 1) * _rowGap
 
-  readonly property real _autoScale: {
-    if (_canvasW <= 0 || _canvasH <= 0)
-      return 1.0;
-    return Math.min((root.width - _gapsW) / _canvasW, (root.height - _gapsH) / _canvasH);
-  }
-
-  // Panel size limits: the panel shrinks to fit the content in BOTH
-  // dimensions up to these caps — they are limits, not the size.
-  // Width matches the ControlCenter panel (440 × uiScaleRatio).
-  property real maxPanelW: Math.round(440 * Style.uiScaleRatio)
-  property real maxPanelH: 200
+  // Panel limits are independent of the animated viewport. First shrink
+  // from the preset to fit, then stop at 60% and let the Flickable scroll.
+  property real maxPanelW: Math.round((screen?.width || 1920) * 0.5)
+  property real maxPanelH: Math.round((screen?.height || 1080) * 0.7)
   readonly property real _panelMargin: 8
-
-  // Scale that fits the whole map within the limits — may exceed 1.0 so
-  // content also EXPANDS to fill the box when it's smaller than the limits
-  readonly property real fitScale: {
-    if (_canvasW <= 0 || _canvasH <= 0)
-      return 1.0;
-    var s = Math.min((maxPanelW - 2 * _panelMargin - _gapsW) / _canvasW, (maxPanelH - 2 * _panelMargin - _gapsH) / _canvasH);
-    return s > 0 ? s : 1.0;
+  property real _autoScale: {
+    var target = _presetRowH / _monH;
+    var fitW = (maxPanelW - 2 * _panelMargin - _gapsW) / _canvasW;
+    var fitH = _canvasH > 0 ? (maxPanelH - 2 * _panelMargin - _gapsH - _infoStripH) / _canvasH : target;
+    return Math.max(target * 0.6, Math.min(target, fitW, fitH));
   }
+  Behavior on _autoScale {
+    NumberAnimation {
+      duration: Style.animationNormal
+    }
+  }
+  on_AutoScaleChanged: Qt.callLater(root._keepCurrentInView)
+  on_UserScaleChanged: Qt.callLater(root._keepCurrentInView)
   // What the map actually renders at that scale (before panel margins)
-  readonly property real renderedW: _canvasW * fitScale + _gapsW
-  readonly property real renderedH: _canvasH * fitScale + _gapsH
+  readonly property real renderedW: _canvasW * _autoScale + _gapsW
+  readonly property real renderedH: _canvasH * _autoScale + _gapsH + _infoStripH
+
+  // Reveal only on opening, focus/layout/scale changes and viewport resize,
+  // not on a polling timer: manual panning remains under the user's control.
+  function _keepCurrentInView() {
+    if (!root.visible || root._dragging)
+      return;
+    for (var i = 0; i < _windows.length; i++) {
+      var w = _windows[i];
+      if (w.id !== currentWindowId)
+        continue;
+      var rect = windowGeometry(w);
+      var left = mapContent.x + rect.x * _userScale;
+      var top = mapContent.y + rect.y * _userScale;
+      var right = left + rect.width * _userScale;
+      var bottom = top + rect.height * _userScale;
+      flick.contentX = MapGeometry.revealOffset(left, right - left, flick.width, flick.contentX, flick.contentWidth);
+      flick.contentY = MapGeometry.revealOffset(top, bottom - top, flick.height, flick.contentY, flick.contentHeight);
+      return;
+    }
+  }
 
   // Single shared context menu instance
   MapWindowContextMenu {
@@ -556,6 +646,10 @@ Item {
   Flickable {
     id: flick
     anchors.fill: parent
+    anchors.topMargin: root._dragging ? root._phantomH : 0
+    clip: true
+    onWidthChanged: Qt.callLater(root._keepCurrentInView)
+    onHeightChanged: Qt.callLater(root._keepCurrentInView)
     contentWidth: mapContent.width * root._userScale
     contentHeight: mapContent.height * root._userScale
     interactive: true
@@ -572,8 +666,8 @@ Item {
 
     Item {
       id: mapContent
-      width: root._canvasW * root._autoScale + root._gapsW
-      height: root._canvasH * root._autoScale + root._gapsH
+      width: root.renderedW
+      height: root.renderedH
       // Center within the Flickable viewport so any residual letterbox
       // distributes equally — EXCEPT during a drag, when the panel grows
       // upward for the phantom strip and the content stays bottom-anchored
@@ -598,7 +692,7 @@ Item {
             x: 0
             y: index * (root._monH * root._autoScale + root._rowGap)
             width: mapContent.width
-            height: root._monH * root._autoScale
+            height: root.workspaceRowHeight(index)
             color: AtmoColor.mPrimary
             opacity: 0.07
             z: -1
@@ -610,7 +704,7 @@ Item {
             x: 0
             y: index * (root._monH * root._autoScale + root._rowGap)
             width: mapContent.width
-            height: root._monH * root._autoScale
+            height: root.workspaceRowHeight(index)
             color: AtmoColor.mPrimary
             opacity: 0.12
             border.color: AtmoColor.mPrimary
@@ -623,7 +717,7 @@ Item {
             x: 0
             y: index * (root._monH * root._autoScale + root._rowGap)
             width: root._barWidth
-            height: root._monH * root._autoScale
+            height: root.workspaceRowHeight(index)
             color: modelData.id === NiriState.focusedWorkspaceId ? AtmoColor.mPrimary : AtmoColor.mOutline
             z: 10
           }
@@ -634,7 +728,7 @@ Item {
             x: 0
             y: index * (root._monH * root._autoScale + root._rowGap)
             width: mapContent.width
-            height: root._monH * root._autoScale
+            height: root.workspaceRowHeight(index)
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             acceptedButtons: Qt.LeftButton
@@ -655,10 +749,11 @@ Item {
           id: winRect
 
           readonly property var _lay: modelData.layout
+          readonly property bool _current: modelData.id === root.currentWindowId
           readonly property int _col: _lay.posInScrollingLayout[0]
           readonly property int _row: _lay.posInScrollingLayout[1] || 0
           readonly property int _wsSlot: root.workspaceSlotIndex(modelData.workspaceId)
-          readonly property real _colScale: root.columnScale(modelData.workspaceId, _col)
+          readonly property rect _geometry: root.windowGeometry(modelData)
           // Active window of this workspace (niri's per-workspace
           // active_window_id) — always shown; it's the "current window of
           // that row" marker, independent of which workspace is focused.
@@ -670,14 +765,14 @@ Item {
           // Secondary tier: active window of a non-focused workspace, or any
           // window in the focused window's column. The focused window itself
           // always keeps the primary tier.
-          readonly property bool _secondary: !modelData.isFocused && (_activeInWs || _inActiveCol)
+          readonly property bool _secondary: !winRect._current && (_activeInWs || _inActiveCol)
 
           // Position: row slot top (stride monH + _rowGap) + proportional
           // tile offset within the column
-          x: root.columnX(modelData.workspaceId, _col) * root._autoScale + root._leftInset + root.colCountLeft(modelData.workspaceId, _col) * root._colGap
-          y: _wsSlot * (root._monH * root._autoScale + root._rowGap) + root.tileY(modelData.workspaceId, _col, _row) * root._autoScale * _colScale + root.tileCountAbove(modelData.workspaceId, _col, _row) * root._winGap
-          width: Math.max(root.columnMaxWidth(modelData.workspaceId, _col) * root._autoScale, 4)
-          height: Math.max(((_lay.tileSize && _lay.tileSize[1]) || 50) * root._autoScale * _colScale, 2)
+          x: _geometry.x
+          y: _geometry.y
+          width: _geometry.width
+          height: _geometry.height
 
           // Visual hierarchy: urgent (mError) > focused global (primary,
           // strongest fill) > secondary (active in workspace or in active
@@ -707,7 +802,7 @@ Item {
 
           // Total padding subtracted from the icon box: 8px/side on Large
           // tiles, 4px/side otherwise
-          readonly property real _iconPad: root.sizeKey === "large" ? 16 : 8
+          readonly property real _iconPad: root._iconPad
 
           // Contrast glyph color derived from the tile's EFFECTIVE
           // background (tile color at its opacity, blended over the panel
@@ -717,7 +812,7 @@ Item {
             return 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b;
           }
           readonly property color _tileBg: _hovered ? AtmoColor.mTertiary : winColor
-          readonly property real _tileBgOpacity: _hovered ? 1.0 : (modelData.isFocused ? 1.0 : (_secondary ? 0.3 : 0.15))
+          readonly property real _tileBgOpacity: _hovered ? 1.0 : (winRect._current ? 1.0 : (_secondary ? 0.3 : 0.15))
           readonly property real _bgLum: _tileBgOpacity * _lum(_tileBg) + (1 - _tileBgOpacity) * _lum(AtmoColor.mSurface)
           readonly property color _contrastColor: _bgLum > 0.5 ? AtmoColor.mSurface : AtmoColor.mOnSurface
           // Shared by the tile's corner buttons: 50% mOnTertiary preview
@@ -747,14 +842,14 @@ Item {
           Rectangle {
             anchors.fill: parent
             color: winRect._dragged ? "transparent" : (winRect._hovered ? AtmoColor.mTertiary : winRect.winColor)
-            opacity: winRect._dragDim * (winRect._dragged ? 1.0 : (winRect._hovered ? 1.0 : (modelData.isFocused ? 1.0 : (winRect._secondary ? 0.3 : 0.15))))
+            opacity: winRect._dragDim * (winRect._dragged ? 1.0 : (winRect._hovered ? 1.0 : (winRect._current ? 1.0 : (winRect._secondary ? 0.3 : 0.15))))
             Behavior on opacity {
               NumberAnimation {
                 duration: 150
               }
             }
             border.color: winRect._dragged ? AtmoColor.mOutline : (winRect._hovered ? AtmoColor.mTertiary : winRect.winColor)
-            border.width: winRect._dragged ? 1 : ((modelData.isFocused || winRect._secondary || winRect._hovered) ? 2 : 1)
+            border.width: winRect._dragged ? 1 : ((winRect._current || winRect._secondary || winRect._hovered) ? 2 : 1)
           }
 
           // Base app icon (terminal fg-app or window app), with a rounded
@@ -771,8 +866,15 @@ Item {
             // Hide icons on tiles too small to read them — evaluated at the
             // rendered size, so zooming in (Ctrl+scroll) reveals icons as
             // they become readable; user setting hides them entirely
-            visible: !root.hideIcons && !winRect._dragged && width * root._userScale >= 14
-            opacity: (modelData.isFocused || winRect._hovered) ? 1.0 : 0.75
+            readonly property bool _inputReady: width * root._userScale >= 14
+            property real _reveal: _inputReady ? 1 : 0
+            Behavior on _reveal {
+              NumberAnimation {
+                duration: Style.animationFast
+              }
+            }
+            visible: !root.hideIcons && !winRect._dragged && _reveal > 0
+            opacity: _reveal * ((winRect._current || winRect._hovered) ? 1.0 : 0.75)
 
             // Badge rect (tile bottom-right, 2px margin) mapped into this
             // item's coordinate space for the cutout
@@ -780,12 +882,15 @@ Item {
             readonly property real _badgeY: (winRect.height - favBadge.height - 2) - y
 
             AtmoAppIcon {
+              id: baseIcon
               anchors.fill: parent
               name: winRect._fgIcon || winRect._appIcon
               fallbackName: winRect._appIcon
               smooth: true
 
-              layer.enabled: !(modelData.isFocused || winRect._hovered)
+              layer.enabled: !(winRect._current || winRect._hovered)
+              layer.textureSize: root._textureSize(baseIcon.pixelSize)
+              layer.smooth: true
               layer.effect: ShaderEffect {
                 property color targetColor: AtmoColor.mOnSurface
                 // Mask mode (4.0): flat washed-out color, alpha from luminance —
@@ -818,6 +923,8 @@ Item {
             }
 
             layer.enabled: favBadge.visible
+            layer.textureSize: root._textureSize(baseIcon.pixelSize)
+            layer.smooth: true
             layer.effect: MultiEffect {
               maskEnabled: true
               maskInverted: true
@@ -826,6 +933,7 @@ Item {
               maskSource: ShaderEffectSource {
                 sourceItem: cutoutMask
                 hideSource: true
+                textureSize: iconWrap.layer.textureSize
               }
             }
           }
@@ -843,19 +951,21 @@ Item {
             anchors.bottomMargin: 2
             readonly property real _box: Math.max(4, Math.min(parent.width, parent.height) - winRect._iconPad)
             // Per-mode rendered px cap: 32 on Large, 16 on Compact/Regular
-            readonly property real _favCap: root.sizeKey === "large" ? 32 : 16
+            readonly property real _favCap: root._faviconCap
             // Native-res clamp with the mode cap on top
             width: Math.max(4, Math.min(_box * 0.6, Math.min(_favCap, winRect._faviconW) / root._userScale))
             height: width
             visible: !root.hideIcons && !winRect._dragged && winRect._favicon !== "" && iconWrap.visible
-            opacity: (modelData.isFocused || winRect._hovered) ? 1.0 : 0.75
+            opacity: iconWrap.opacity
             source: winRect._favicon
             fillMode: Image.PreserveAspectFit
             smooth: true
             asynchronous: true
-            sourceSize: Qt.size(width, height)
+            sourceSize: Qt.size(winRect._faviconW, winRect._faviconW)
 
-            layer.enabled: !(modelData.isFocused || winRect._hovered)
+            layer.enabled: !(winRect._current || winRect._hovered)
+            layer.textureSize: root._textureSize(winRect._faviconW)
+            layer.smooth: true
             layer.effect: ShaderEffect {
               property color targetColor: AtmoColor.mOnSurface
               property real colorizeMode: 4.0
@@ -970,16 +1080,19 @@ Item {
             width: Math.max(5, _box * 0.33)
             height: width
             visible: root.audioIndicators && !winRect._dragged && !!winRect._audio && !!winRect._audio.player && iconWrap.visible
+            opacity: iconWrap._reveal
 
             AtmoIcon {
               anchors.fill: parent
               icon: (winRect._audio && winRect._audio.playing) ? Icon.mediaPause : Icon.mediaPlay
               pointSize: Math.max(5, playButton._box * 0.33)
               applyUiScale: false
-              color: playArea.containsMouse ? AtmoColor.mOnTertiary : ((winRect._hovered || modelData.isFocused) ? winRect._onTertiaryHalf : winRect._contrastColor)
-              opacity: (modelData.isFocused || winRect._hovered) ? 1.0 : 0.75
+              color: playArea.containsMouse ? AtmoColor.mOnTertiary : ((winRect._hovered || winRect._current) ? winRect._onTertiaryHalf : winRect._contrastColor)
+              opacity: (winRect._current || winRect._hovered) ? 1.0 : 0.75
 
-              layer.enabled: !(modelData.isFocused || winRect._hovered)
+              layer.enabled: !(winRect._current || winRect._hovered)
+              layer.textureSize: root._textureSize(baseIcon.pixelSize)
+              layer.smooth: true
               layer.effect: ShaderEffect {
                 property color targetColor: AtmoColor.mOnSurface
                 property real colorizeMode: 4.0
@@ -991,6 +1104,7 @@ Item {
 
             MouseArea {
               id: playArea
+              enabled: iconWrap._inputReady
               anchors.fill: parent
               hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
@@ -1023,6 +1137,7 @@ Item {
             width: Math.max(5, _box * 0.33)
             height: width
             visible: root.audioIndicators && !winRect._dragged && !!winRect._audio && iconWrap.visible
+            opacity: iconWrap._reveal
 
             AtmoIcon {
               anchors.fill: parent
@@ -1032,10 +1147,12 @@ Item {
               // Icon hover -> mOnTertiary full; active/hovered tile ->
               // same color at 50% opacity (softer preview of the armed
               // state); otherwise luminance-derived contrast
-              color: audioArea.containsMouse ? AtmoColor.mOnTertiary : ((winRect._hovered || modelData.isFocused) ? winRect._onTertiaryHalf : winRect._contrastColor)
-              opacity: (modelData.isFocused || winRect._hovered) ? 1.0 : 0.75
+              color: audioArea.containsMouse ? AtmoColor.mOnTertiary : ((winRect._hovered || winRect._current) ? winRect._onTertiaryHalf : winRect._contrastColor)
+              opacity: (winRect._current || winRect._hovered) ? 1.0 : 0.75
 
-              layer.enabled: !(modelData.isFocused || winRect._hovered)
+              layer.enabled: !(winRect._current || winRect._hovered)
+              layer.textureSize: root._textureSize(baseIcon.pixelSize)
+              layer.smooth: true
               layer.effect: ShaderEffect {
                 property color targetColor: AtmoColor.mOnSurface
                 property real colorizeMode: 4.0
@@ -1047,6 +1164,7 @@ Item {
 
             MouseArea {
               id: audioArea
+              enabled: iconWrap._inputReady
               anchors.fill: parent
               hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
@@ -1072,6 +1190,9 @@ Item {
       // another workspace. Semi-transparent chip with the window's icon.
       Item {
         id: dragGhost
+        // Escape the scrolling viewport's clip so the ghost can enter the
+        // phantom row without exposing any of the offscreen map content.
+        parent: root
         visible: root._dragging
         readonly property var _win: {
           for (var i = 0; i < root._windows.length; i++) {
@@ -1082,9 +1203,12 @@ Item {
         }
         width: Math.max(32, 240 * root._autoScale)
         height: width * 0.7
-        x: root._ghostPos.x - width / 2
-        y: root._ghostPos.y - height / 2
-        z: 100
+        readonly property point _position: root._ghostInRoot
+        x: _position.x - width * scale / 2
+        y: _position.y - height * scale / 2
+        scale: root._userScale
+        transformOrigin: Item.TopLeft
+        z: 101
 
         Rectangle {
           anchors.fill: parent
@@ -1102,26 +1226,27 @@ Item {
         }
       }
 
-      // Hover info block — up to 3 small lines centered in the trailing
-      // workspace row (niri's dynamic workspaces guarantee it exists and
-      // never has windows)
-      NText {
-        readonly property int _lastSlot: Math.max(0, root.workspaceOrder().length - 1)
-        readonly property real _rowH: root._monH * root._autoScale
-        readonly property var _lines: root._hoverInfoLines
-        visible: root.hoverInfo && _lines.length > 0
-        text: _lines.join("\n")
-        color: AtmoColor.mOnSurfaceVariant
-        // Fixed per size preset (independent of content/fitScale)
-        pointSize: root.sizeKey === "compact" ? 8 : (root.sizeKey === "large" ? 11 : 9)
-        width: mapContent.width - 16
-        maximumLineCount: root.sizeKey === "compact" ? 2 : (root.sizeKey === "large" ? 4 : 3)
-        wrapMode: Text.WordWrap
-        elide: Text.ElideRight
-        horizontalAlignment: Text.AlignHCenter
-        anchors.horizontalCenter: mapContent.horizontalCenter
-        y: _lastSlot * (_rowH + root._rowGap) + (_rowH - implicitHeight) / 2
-        z: 90
+      // The trailing workspace reserves the maximum text height even when
+      // nothing is hovered. Anchor the text inside that strip structurally.
+      Item {
+        y: Math.max(0, root.workspaceOrder().length - 1) * (root._monH * root._autoScale + root._rowGap)
+        width: mapContent.width
+        height: root._infoStripH
+        NText {
+          readonly property var _lines: root._hoverInfoLines
+          visible: root.hoverInfo && _lines.length > 0
+          text: _lines.join("\n")
+          color: AtmoColor.mOnSurfaceVariant
+          // Fixed per size preset (independent of the map scale)
+          pointSize: root._hoverPointSize
+          width: mapContent.width - 16
+          maximumLineCount: root._hoverMaxLines
+          wrapMode: Text.WordWrap
+          elide: Text.ElideRight
+          horizontalAlignment: Text.AlignHCenter
+          anchors.centerIn: parent
+          z: 90
+        }
       }
     }
   }
