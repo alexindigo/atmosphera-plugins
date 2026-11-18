@@ -1,6 +1,7 @@
 import Niri 1.0
 import Niri 1.0
 import QtQuick
+import "MapGeometry.js" as MapGeometry
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
@@ -140,25 +141,24 @@ Item {
     return Qt.point(0, 0);
   }
 
-  // Workspace row under the ghost center. The phantom strip lives ABOVE the
-  // content's top edge (ghostPos.y < 0 during a drag), so that's the
-  // insert-above target; real rows sit in place beneath it (no shifting).
+  // The Flickable's content transform is explicit here so stationary drags
+  // observe viewport/panel movement too. Ghost and hit test share this point.
+  readonly property point _mapOriginInRoot: Qt.point(flick.x + mapContent.x - flick.contentX,
+                                                    flick.y + mapContent.y - flick.contentY)
+  readonly property point _ghostInRoot: Qt.point(_mapOriginInRoot.x + _ghostPos.x * _userScale,
+                                                _mapOriginInRoot.y + _ghostPos.y * _userScale)
+  readonly property var _workspaceRows: workspaceOrder().map(function (ws, index) {
+    return {id: ws.id, y: index * (root._monH * root._autoScale + root._rowGap), height: root.workspaceRowHeight(index)};
+  })
+
+  // Only visible geometry accepts drops: the fixed phantom or clipped rows.
   readonly property int _dragTargetWs: {
     if (!root._dragging)
       return 0;
-    var rowH = _monH * _autoScale;
-    var stride = rowH + _rowGap;
-    var order = workspaceOrder();
-    var y = root._ghostPos.y;
-    // The phantom is fixed to the panel, not the scrolled map. Hit-test it
-    // in panel coordinates so inserting above first also works while panned.
-    var panelY = mapContent.mapToItem(root, root._ghostPos.x, y).y;
-    if (panelY < root._phantomH)
-      return panelY > -rowH ? -1 : 0;
-    if (y < 0 || y >= renderedH)
-      return 0;
-    var slot = Math.floor(y / stride);
-    return (slot >= 0 && slot < order.length) ? order[slot].id : 0;
+    return MapGeometry.targetAt(root._ghostInRoot,
+                                Qt.rect(flick.x, flick.y, flick.width, flick.height),
+                                Qt.rect(0, 0, root.width, root._phantomH),
+                                root._mapOriginInRoot, root._userScale, root._workspaceRows, root.renderedW);
   }
 
   function _moveWindowToWorkspace(winId, wsId) {
@@ -330,7 +330,14 @@ Item {
   // The map's view: frozen during press/drag, live otherwise. No read+write
   // of the cache inside this binding — that was a binding loop.
   readonly property var _windows: (root._pressWinId !== 0 || root._dragging) ? _windowsCache : _windowsLive
-  on_WindowsChanged: Qt.callLater(root._keepCurrentInView)
+  readonly property rect _focusedRectangle: {
+    for (var i = 0; i < _windows.length; i++) {
+      if (_windows[i].id === currentWindowId)
+        return windowGeometry(_windows[i]);
+    }
+    return Qt.rect(0, 0, 0, 0);
+  }
+  on_FocusedRectangleChanged: Qt.callLater(root._keepCurrentInView)
 
   // Keep the frozen snapshot current only while idle (no gesture)
   on_WindowsLiveChanged: {
@@ -348,7 +355,12 @@ Item {
   // ── Workspaces ──
 
   // All workspaces sorted by niri idx, including empty ones
+  readonly property var _workspaceOrder: _buildWorkspaceOrder()
   function workspaceOrder() {
+    return _workspaceOrder;
+  }
+
+  function _buildWorkspaceOrder() {
     _wsRev; // imperative-refresh dependency
     var list = [];
     for (var i = 0; i < CompositorService.workspaces.count; i++) {
@@ -614,16 +626,8 @@ Item {
       var top = mapContent.y + rect.y * _userScale;
       var right = left + rect.width * _userScale;
       var bottom = top + rect.height * _userScale;
-      if (left < flick.contentX)
-        flick.contentX = left;
-      else if (right > flick.contentX + flick.width)
-        flick.contentX = right - flick.width;
-      if (top < flick.contentY)
-        flick.contentY = top;
-      else if (bottom > flick.contentY + flick.height)
-        flick.contentY = bottom - flick.height;
-      flick.contentX = Math.max(0, Math.min(flick.contentX, flick.contentWidth - flick.width));
-      flick.contentY = Math.max(0, Math.min(flick.contentY, flick.contentHeight - flick.height));
+      flick.contentX = MapGeometry.revealOffset(left, right - left, flick.width, flick.contentX, flick.contentWidth);
+      flick.contentY = MapGeometry.revealOffset(top, bottom - top, flick.height, flick.contentY, flick.contentHeight);
       return;
     }
   }
@@ -1192,7 +1196,7 @@ Item {
         }
         width: Math.max(32, 240 * root._autoScale)
         height: width * 0.7
-        readonly property point _position: mapContent.mapToItem(root, root._ghostPos.x, root._ghostPos.y)
+        readonly property point _position: root._ghostInRoot
         x: _position.x - width * scale / 2
         y: _position.y - height * scale / 2
         scale: root._userScale
