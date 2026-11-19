@@ -4,6 +4,7 @@ import Quickshell.Io
 
 import qs.Commons
 import qs.Services.UI
+import "../common/MonitorCommands.js" as Commands
 
 Item {
     id: root
@@ -13,9 +14,10 @@ Item {
     /***************************
     * PROPERTIES
     ***************************/
-    readonly property bool   automation:      pluginApi?.pluginSettings?.automation      ?? false
-    readonly property string automationMode:  pluginApi?.pluginSettings?.automationMode  ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? ""
-    readonly property real   automationTime:  pluginApi?.pluginSettings?.automationTime  ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationTime ?? 0
+    readonly property var globalSettings: Commands.automationSettings(pluginApi?.pluginSettings, null, pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property bool   automation:      globalSettings.automation
+    readonly property string automationMode:  globalSettings.automationMode
+    readonly property real   automationTime:  globalSettings.automationTime
     readonly property bool   monitorSpecific: pluginApi?.pluginSettings?.monitorSpecific ?? false
 
     signal random(screenName: var)
@@ -28,7 +30,7 @@ Item {
         if(automation) {
             Logger.d("video-wallpaper", "Starting automation timer...");
 
-            timer.restart();
+            if (!monitorSpecific) timer.restart();
         } else {
             Logger.d("video-wallpaper", "Stop automation timer...");
 
@@ -37,7 +39,7 @@ Item {
     }
     
     onAutomationTimeChanged: {
-        if(automation) {
+        if(automation && !monitorSpecific) {
             timer.restart();
         }
     }
@@ -50,6 +52,7 @@ Item {
         id: timer
         interval: root.automationTime * 1000
         repeat: true
+        running: root.automation && !root.monitorSpecific
 
         onTriggered: {
             switch(root.automationMode) {
@@ -71,6 +74,25 @@ Item {
                         root.nextWallpaper(undefined);
                     }
                     break;
+            }
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+        Timer {
+            required property var modelData
+            readonly property var selectedSettings: Commands.automationSettings(root.globalSettings, Commands.record(root.pluginApi?.pluginSettings?.monitors, modelData.name))
+            readonly property bool selectedAutomation: selectedSettings.automation
+            readonly property string selectedMode: selectedSettings.automationMode
+            readonly property real selectedTime: selectedSettings.automationTime
+            interval: selectedTime * 1000
+            repeat: true
+            running: root.monitorSpecific && selectedAutomation
+            onTriggered: {
+                var name = modelData.name;
+                if (selectedMode === "random") root.random(name);
+                else if (selectedMode === "alphabetically") root.nextWallpaper(name);
             }
         }
     }

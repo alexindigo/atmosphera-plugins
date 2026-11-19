@@ -5,13 +5,44 @@ import Quickshell
 
 import qs.Commons
 import qs.Widgets
+import qs.Portals
 
 import "./common"
 import "./settings"
+import "./common/MonitorCommands.js" as Commands
 
 ColumnLayout {
     id: root
     property var pluginApi: null
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string activeBackend: root.pluginApi?.initialSettings?.activeBackend ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.activeBackend ?? ""
+        readonly property bool valueEnabled: root.pluginApi?.initialSettings?.enabled ?? false
+        readonly property bool monitorSpecific: root.pluginApi?.initialSettings?.monitorSpecific ?? false
+        readonly property string wallpapersFolder: root.pluginApi?.initialSettings?.wallpapersFolder ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
+        readonly property var editScreenSettings: root.pluginApi?.initialSettings?.monitors || ({})
+    }
+    // The display baseline is not a persistence source. Edit an owned native
+    // copy of the actual draft, retaining opaque keys and exact numeric atoms.
+    property var editScreenSettings: Settings.store.copyValue(pluginApi?.pluginSettings?.monitors ?? ({}))
+    readonly property var monitorCommand: Commands.create(function () { return root.editScreenSettings; },
+        function (value) { root.editScreenSettings = value; }, function (value) { return Settings.store.copyValue(value); },
+        function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
+    readonly property var selectedAutomationSettings: Commands.automationSettings(pluginApi?.pluginSettings,
+        monitorSpecific ? Commands.record(editScreenSettings, monitorTabBar.selectedMonitor) : null, pluginApi?.manifest?.metadata?.defaultSettings)
+    property alias currentWallpaper: general.currentWallpaper
+    property alias volume: general.volume
+    property alias automationEnabled: automation.automation
+    property alias automationMode: automation.automationMode
+    property alias automationTime: automation.automationTime
+    property alias automationCustomTime: automation.automationCustomTime
+    property alias customTimeText: automation.customTimeText
+    property alias fillMode: advanced.fillMode
+    property alias orientation: advanced.orientation
+    property alias hardwareAcceleration: advanced.hardwareAcceleration
+    property alias profile: advanced.profile
+    property alias mpvSocket: advanced.mpvSocket
+    readonly property bool settingsDirty: displayBaseline.differs({activeBackend: activeBackend, valueEnabled: valueEnabled, monitorSpecific: monitorSpecific, wallpapersFolder: wallpapersFolder, editScreenSettings: editScreenSettings}) || general.settingsDirty || automation.settingsDirty || advanced.settingsDirty
 
     spacing: Style.marginM
 
@@ -19,37 +50,53 @@ ColumnLayout {
     /***************************
     * PROPERTIES
     ***************************/
-    property string activeBackend:    pluginApi?.pluginSettings?.activeBackend    ?? pluginApi?.manifest?.metadata?.defaultSettings?.activeBackend ?? ""
-    property bool   enabled:          pluginApi?.pluginSettings?.enabled          ?? false
-    property bool   monitorSpecific:  pluginApi?.pluginSettings?.monitorSpecific  ?? false
-    property string wallpapersFolder: pluginApi?.pluginSettings?.wallpapersFolder ?? pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
+    property string activeBackend: displayBaseline.activeBackend
+    property bool valueEnabled: displayBaseline.valueEnabled
+    property bool monitorSpecific: displayBaseline.monitorSpecific
+    property string wallpapersFolder: displayBaseline.wallpapersFolder
 
 
     /***************************
     * FUNCTIONS
     ***************************/
     function saveMonitorProperty(key: string, value: var): void {
-        function createMonitorSettings(monitor) {
-            // Check if the monitor settings exist and create it if it doesn't exist
-            if (pluginApi.pluginSettings[monitor] === undefined) {
-                pluginApi.pluginSettings[monitor] = {};
-            }
-        }
-
         if(pluginApi == null) {
             Logger.e("video-wallpaper", "PluginAPI is null.");
             return;
         }
 
-        if (monitorSpecific) {
-            createMonitorSettings(monitorTabBar.selectedMonitor);
-            pluginApi.pluginSettings[monitorTabBar.selectedMonitor][key] = value;
-        } else {
-            for (const screen of Quickshell.screens) {
-                createMonitorSettings(screen.name);
-                pluginApi.pluginSettings[screen.name][key] = value;
-            }
+        // Automation has a global owner as well as per-monitor owners. The
+        // selected editor must write the same domain its running timer reads.
+        if (!monitorSpecific && ["automation", "automationMode", "automationTime"].includes(key)) {
+            pluginApi.pluginSettings[key] = value;
+            return;
         }
+
+        var names = monitorSpecific ? [monitorTabBar.selectedMonitor] : Array.from(Quickshell.screens).map(screen => screen.name);
+        if (names.length) monitorCommand.submit(names.map(name => ({op: "set", screen: name, field: key, value: value})));
+    }
+
+    function loadSelectedMonitor() {
+        var record = Commands.record(editScreenSettings, monitorTabBar.selectedMonitor) || ({});
+        general.loadMonitor(record);
+        automation.loadMonitor(selectedAutomationSettings);
+        advanced.loadMonitor(record);
+    }
+
+    function saveSelectedMonitor() {
+        return {
+            general: general.saveSettings(),
+            automation: automation.saveMonitorSettings(),
+            advanced: advanced.saveSettings()
+        };
+    }
+
+    function selectMonitorDomain(specific) {
+        // Settle buffered intent against the old domain before selecting a new
+        // projection. Merely changing the selection must never author fields.
+        saveSelectedMonitor();
+        monitorSpecific = specific;
+        loadSelectedMonitor();
     }
 
 
@@ -60,8 +107,8 @@ ColumnLayout {
     NToggle {
         label:       root.pluginApi?.tr("settings.toggle.label")
         description: root.pluginApi?.tr("settings.toggle.description")
-        checked: root.enabled
-        onToggled: checked => root.enabled = checked
+        checked: root.valueEnabled
+        onToggled: checked => root.valueEnabled = checked
     }
 
     NToggle {
@@ -69,11 +116,11 @@ ColumnLayout {
         label:       root.pluginApi?.tr("settings.monitor_specific.label")
         description: root.pluginApi?.tr("settings.monitor_specific.description")
         checked: root.monitorSpecific
-        onToggled: checked => root.monitorSpecific = checked
+        onToggled: checked => root.selectMonitorDomain(checked)
     }
 
     NComboBox {
-        enabled: root.enabled
+        enabled: root.valueEnabled
         Layout.fillWidth: true
         label:       root.pluginApi?.tr("settings.backend.label")
         description: root.pluginApi?.tr("settings.backend.description")
@@ -97,7 +144,7 @@ ColumnLayout {
         spacing: Style.marginS
 
         NLabel {
-            enabled: root.enabled
+            enabled: root.valueEnabled
             label:       root.pluginApi?.tr("settings.general.wallpapers_folder.title.label")
             description: root.pluginApi?.tr("settings.general.wallpapers_folder.title.description")
         }
@@ -106,20 +153,20 @@ ColumnLayout {
             spacing: Style.marginS
 
             NTextInput {
-                enabled: root.enabled
+                enabled: root.valueEnabled
                 placeholderText: root.pluginApi?.tr("settings.general.wallpapers_folder.text_input.placeholder")
                 text: root.wallpapersFolder
                 onTextChanged: root.wallpapersFolder = text
             }
 
             AtmoIconButton {
-                enabled: root.enabled
+                enabled: root.valueEnabled
                 icon: "wallpaper-selector"
                 tooltipText: root.pluginApi?.tr("settings.general.wallpapers_folder.icon_button.tooltip")
                 onClicked: wallpapersFolderPicker.openFilePicker()
             }
 
-            AtmoFilePicker {
+            PortalFilePicker {
                 id: wallpapersFolderPicker
                 title: root.pluginApi?.tr("settings.general.wallpapers_folder.file_picker.title")
                 initialPath: root.wallpapersFolder
@@ -141,13 +188,19 @@ ColumnLayout {
     MonitorTabBar {
         id: monitorTabBar
 
-        enabled: root.enabled
+        enabled: root.valueEnabled
         monitorSpecific: root.monitorSpecific
 
         property string selectedMonitor: Quickshell.screens[0].name
 
         onCurrentIndexChanged: {
-            selectedMonitor = Quickshell.screens[currentIndex].name
+            if (general && automation && advanced && selectedMonitor) {
+                root.saveSelectedMonitor();
+            }
+            selectedMonitor = Quickshell.screens[currentIndex]?.name || ""
+            if (general && automation && advanced) {
+                root.loadSelectedMonitor();
+            }
         }
     }
 
@@ -159,19 +212,19 @@ ColumnLayout {
         currentIndex: tabView.currentIndex
 
         NTabButton {
-            enabled: root.enabled
+            enabled: root.valueEnabled
             text: pluginApi?.tr("settings.tab_bar.general")
             tabIndex: 0
             checked: tabBar.currentIndex === 0
         }
         NTabButton {
-            enabled: root.enabled
+            enabled: root.valueEnabled
             text: pluginApi?.tr("settings.tab_bar.automation")
             tabIndex: 1
             checked: tabBar.currentIndex === 1
         }
         NTabButton {
-            enabled: root.enabled
+            enabled: root.valueEnabled
             text: pluginApi?.tr("settings.tab_bar.advanced")
             tabIndex: 2
             checked: tabBar.currentIndex === 2
@@ -186,8 +239,12 @@ ColumnLayout {
         GeneralTab {
             id: general
             pluginApi: root.pluginApi
-            enabled: root.enabled
+            enabled: root.valueEnabled
             selectedMonitor: monitorTabBar.selectedMonitor
+            monitorSettings: Settings.store.copyValue(Commands.record(root.editScreenSettings, selectedMonitor) ?? ({}))
+            wallpapersFolder: root.wallpapersFolder
+            monitorSpecific: root.monitorSpecific
+            toolSettings: ({monitors: root.editScreenSettings, monitorSpecific: root.monitorSpecific})
 
             onSaveMonitorProperty: (key, value) => root.saveMonitorProperty(key, value);
         }
@@ -195,8 +252,10 @@ ColumnLayout {
         AutomationTab {
             id: automation
             pluginApi: root.pluginApi
-            enabled: root.enabled
+            enabled: root.valueEnabled
             selectedMonitor: monitorTabBar.selectedMonitor
+            monitorSpecific: root.monitorSpecific
+            monitorSettings: root.selectedAutomationSettings
 
             onSaveMonitorProperty: (key, value) => root.saveMonitorProperty(key, value);
         }
@@ -205,21 +264,11 @@ ColumnLayout {
             id: advanced
             pluginApi: root.pluginApi
             activeBackend: root.activeBackend
-            enabled: root.enabled
+            enabled: root.valueEnabled
             selectedMonitor: monitorTabBar.selectedMonitor
+            monitorSettings: Settings.store.copyValue(Commands.record(root.editScreenSettings, selectedMonitor) ?? ({}))
 
             onSaveMonitorProperty: (key, value) => root.saveMonitorProperty(key, value);
-        }
-    }
-
-    Connections {
-        target: root.pluginApi
-        function onPluginSettingsChanged() {
-            // Update the local properties on change
-            root.activeBackend =    root.pluginApi?.pluginSettings?.activeBackend    ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.activeBackend ?? ""
-            root.enabled =          root.pluginApi?.pluginSettings?.enabled          ?? false
-            root.monitorSpecific =  root.pluginApi?.pluginSettings?.monitorSpecific  ?? false
-            root.wallpapersFolder = root.pluginApi?.pluginSettings?.wallpapersFolder ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
         }
     }
 
@@ -232,15 +281,25 @@ ColumnLayout {
             return;
         }
 
+        // The custom-time dialog owns a global draft, not the selected monitor.
+        // Validate it only for Apply, before staging any selected form fields.
+        automation.prepareSave();
+        var captured = saveSelectedMonitor();
+
+        pluginApi.pluginSettings.monitors = editScreenSettings;
         pluginApi.pluginSettings.activeBackend = activeBackend;
-        pluginApi.pluginSettings.enabled = enabled;
+        pluginApi.pluginSettings.enabled = valueEnabled;
         pluginApi.pluginSettings.monitorSpecific = monitorSpecific;
         pluginApi.pluginSettings.wallpapersFolder = wallpapersFolder;
+        pluginApi.pluginSettings.automationCustomTime = Array.from(automationCustomTime);
+        pluginApi.pluginSettings.mpvSocket = mpvSocket;
 
-        general.saveSettings();
-        automation.saveSettings();
-        advanced.saveSettings();
-
-        pluginApi.saveSettings();
+        pluginApi.saveSettings(function (result) {
+            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current") {
+                general.acknowledgeSettings(captured.general);
+                automation.acknowledgeSettings(captured.automation);
+                advanced.acknowledgeSettings(captured.advanced);
+            }
+        });
     }
 }

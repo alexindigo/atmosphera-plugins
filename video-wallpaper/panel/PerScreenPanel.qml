@@ -9,10 +9,14 @@ import qs.Services.UI
 import qs.Widgets
 
 import "../common"
+import "../common/MonitorCommands.js" as Commands
 
 ColumnLayout {
     id: root
     required property var pluginApi
+    readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
+        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
+        function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
     anchors.fill: parent
 
 
@@ -21,8 +25,9 @@ ColumnLayout {
     ***************************/
     required property string screenName
     required property bool   thumbCacheReady
+    required property FolderModel folderModel
 
-    readonly property string currentWallpaper: pluginApi?.pluginSettings?.[screenName]?.currentWallpaper ?? ""
+    readonly property string currentWallpaper: Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.currentWallpaper ?? ""
     readonly property bool   monitorSpecific:  pluginApi?.pluginSettings?.monitorSpecific                ?? false
 
 
@@ -30,27 +35,13 @@ ColumnLayout {
     * FUNCTIONS
     ***************************/
     function saveMonitorProperty(key: string, value: var): void {
-        function createMonitorSettings(monitor) {
-            // Check if the monitor settings exist and create it if it doesn't exist
-            if (pluginApi.pluginSettings[monitor] === undefined) {
-                pluginApi.pluginSettings[monitor] = {};
-            }
-        }
-
         if(pluginApi == null) {
             Logger.e("video-wallpaper", "PluginAPI is null.");
             return;
         }
 
-        if (monitorSpecific) {
-            createMonitorSettings(screenName);
-            pluginApi.pluginSettings[screenName][key] = value;
-        } else {
-            for (const screen of Quickshell.screens) {
-                createMonitorSettings(screen.name);
-                pluginApi.pluginSettings[screen.name][key] = value;
-            }
-        }
+        var names = monitorSpecific ? [screenName] : Array.from(Quickshell.screens).map(screen => screen.name);
+        if (names.length) monitorCommand.submit(names.map(name => ({op: "set", screen: name, field: key, value: value})));
     }
 
 
@@ -96,7 +87,7 @@ ColumnLayout {
                 // For now all wallpapers are shown in a 16:9 ratio
                 cellHeight: Math.floor(itemSize * (9/16))
 
-                model: folderModel.ready && root.thumbCacheReady ? folderModel.files : 0
+                model: root.folderModel.ready && root.thumbCacheReady ? root.folderModel.files : 0
 
                 // Wallpaper
                 delegate: Item {

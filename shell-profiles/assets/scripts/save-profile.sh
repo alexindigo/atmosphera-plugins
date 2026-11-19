@@ -1,9 +1,10 @@
 #!/bin/sh
 # save-profile.sh <cfg_dir> <profile_dir>
-# Copies the current config files into a profile directory.
-cfg="$1"
-profile="$2"
-mkdir -p "$profile"
-cp -f "${cfg}settings.json" "${profile}/settings.json"
-cp -f "${cfg}colors.json"   "${profile}/colors.json"
-[ -f "${cfg}plugins.json" ] && cp -f "${cfg}plugins.json" "${profile}/plugins.json" || true
+# Preserve the existing command entrypoint; all selected raw files share one IO owner.
+set -eu
+wallpapers='{"screens":[]}'
+meta='{}'
+if [ "$#" -ge 3 ]; then wallpapers=$3; fi
+if [ "$#" -ge 4 ]; then meta=$4; fi
+exec python3 "$(dirname "$0")/profile-files.py" save "$1" "$2" \
+  --wallpapers "$wallpapers" --meta "$meta"

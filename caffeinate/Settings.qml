@@ -12,14 +12,32 @@ import "SettingsModel.js" as SettingsModel
 ColumnLayout {
   id: root
 
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string editAlias: cfg.alias ?? defaults.alias ?? "c"
+    readonly property bool editIncludeIndefinite: cfg.includeIndefinitePreset ?? defaults.includeIndefinitePreset ?? true
+    readonly property bool editHideInactive: cfg.hideInactiveWidget ?? defaults.hideInactiveWidget ?? false
+    readonly property var presetValues: SettingsModel.copyPresets(cfg.presets ?? defaults.presets ?? [])
+  }
+  readonly property bool settingsDirty: { root._presetsRevision; presetsModel.count; return displayBaseline.differs({editAlias: root.editAlias, editIncludeIndefinite: root.editIncludeIndefinite, editHideInactive: root.editHideInactive, presetValues: root.presetExpressions()}); }
+  property bool _savePending: false
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root._savePending = false;
+      Logger.i("Caffeinate", pluginApi?.tr("settings.saved"));
+    }
+  }
+
   property var pluginApi: null
 
   readonly property var cfg: pluginApi?.pluginSettings || ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property string editAlias: ""
-  property bool editIncludeIndefinite: true
-  property bool editHideInactive: false
+  property string editAlias: displayBaseline.editAlias
+  property bool editIncludeIndefinite: displayBaseline.editIncludeIndefinite
+  property bool editHideInactive: displayBaseline.editHideInactive
   property real preferredWidth: 720 * Style.uiScaleRatio
 
   spacing: Style.marginL
@@ -29,6 +47,18 @@ ColumnLayout {
   ListModel {
     id: presetsModel
   }
+
+  property int _presetsRevision: 0
+  Connections {
+    target: presetsModel
+    function onDataChanged() { root._presetsRevision++; }
+    function onRowsMoved() { root._presetsRevision++; }
+  }
+
+  function setPreset(index, expression) { presetsModel.setProperty(index, "expression", expression); }
+  function movePreset(from, to) { presetsModel.move(from, to, 1); }
+  function removePreset(index) { presetsModel.remove(index); }
+  function addPreset(expression) { presetsModel.append({expression: expression}); }
 
   function replacePresets(source) {
     const presets = SettingsModel.copyPresets(source);
@@ -48,10 +78,10 @@ ColumnLayout {
   }
 
   function loadSettings() {
-    editAlias = cfg.alias ?? defaults.alias ?? "c";
+    editAlias = displayBaseline.editAlias;
     replacePresets(cfg.presets ?? defaults.presets ?? []);
-    editIncludeIndefinite = cfg.includeIndefinitePreset ?? defaults.includeIndefinitePreset ?? true;
-    editHideInactive = cfg.hideInactiveWidget ?? defaults.hideInactiveWidget ?? false;
+    editIncludeIndefinite = displayBaseline.editIncludeIndefinite;
+    editHideInactive = displayBaseline.editHideInactive;
   }
 
   function resetDefaults() {
@@ -107,15 +137,16 @@ ColumnLayout {
     const validated = validatedSettings();
     if (!validated.valid) {
       Logger.w("Caffeinate", pluginApi?.tr("settings.invalidSave"));
-      return;
+      throw new Error("invalid-settings");
     }
 
+    root.editAlias = validated.alias;
+    root.replacePresets(validated.presets);
     pluginApi.pluginSettings.alias = validated.alias;
     pluginApi.pluginSettings.presets = validated.presets;
     pluginApi.pluginSettings.includeIndefinitePreset = editIncludeIndefinite;
     pluginApi.pluginSettings.hideInactiveWidget = editHideInactive;
-    pluginApi.saveSettings();
-    Logger.i("Caffeinate", pluginApi?.tr("settings.saved"));
+    if (pluginApi.saveSettings() !== false) root._savePending = true;
   }
 
   NText {

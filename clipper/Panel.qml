@@ -41,17 +41,17 @@ Item {
     readonly property bool allowAttach: true
 
     // Panel dimensions - fullscreen transparent container
-    property real contentPreferredWidth: (pluginApi?.pluginSettings?.fullscreenMode ?? false)
+    property real contentPreferredWidth: (pluginApi?.settingsView?.fullscreenMode ?? false)
         ? (screen?.width ?? 1920)
-        : (pluginApi?.pluginSettings?.panelWidth ?? 1450) * Style.uiScaleRatio
+        : (pluginApi?.settingsView?.panelWidth ?? 1450) * Style.uiScaleRatio
     property var contentPreferredHeight: {
-        if (pluginApi?.pluginSettings?.fullscreenMode ?? false) return screen?.height ?? 900;
-        var h = pluginApi?.pluginSettings?.panelHeight ?? 0;
+        if (pluginApi?.settingsView?.fullscreenMode ?? false) return screen?.height ?? 900;
+        var h = pluginApi?.settingsView?.panelHeight ?? 0;
         return h > 0 ? h * Style.uiScaleRatio : undefined;
     }
 
     // SmartPanel background color - transparent when hidePanelBackground is enabled
-    property color panelBackgroundColor: (pluginApi?.pluginSettings?.hidePanelBackground ?? false)
+    property color panelBackgroundColor: (pluginApi?.settingsView?.hidePanelBackground ?? false)
         ? "transparent"
         : ((typeof AtmoColor !== "undefined") ? AtmoColor.mSurface : "#222222")
 
@@ -149,7 +149,7 @@ Item {
         MouseArea {
             anchors.fill: parent
             z: -1
-            enabled: pluginApi?.pluginSettings?.hidePanelBackground ?? false
+            enabled: pluginApi?.settingsView?.hidePanelBackground ?? false
             onClicked: {
                 if (root.pluginApi)
                     root.pluginApi.closePanel(screen);
@@ -157,7 +157,7 @@ Item {
         }
 
         AtmoIconButton {
-            visible: pluginApi?.mainInstance?.showCloseButton ?? false
+            visible: pluginApi?.settingsView?.showCloseButton ?? false
             anchors.top: parent.top
             anchors.right: parent.right
             anchors.margins: Style.marginM
@@ -1180,7 +1180,7 @@ Item {
                         panelRoot: root
                         height: listView.height
                         selected: index === root.selectedIndex
-                        enableTodoIntegration: root.pluginApi?.pluginSettings?.enableTodoIntegration || false
+                        enableTodoIntegration: root.pluginApi?.settingsView?.enableTodoIntegration || false
                         isPinned: {
                             // Force re-evaluation when pinnedRevision changes
                             const rev = root.pluginApi?.mainInstance?.pinnedRevision || 0;
@@ -1193,23 +1193,23 @@ Item {
                             root.pluginApi?.mainInstance?.copyToClipboard(clipboardId);
                             if (root.pluginApi) {
                                 root.pluginApi.closePanel(screen);
-                                const autoPaste = root.pluginApi.pluginSettings?.autoPaste ?? false;
-                                const rmbOnly = root.pluginApi.pluginSettings?.autoPasteOnRightClick ?? false;
+                                const autoPaste = root.pluginApi.settingsView?.autoPaste ?? false;
+                                const rmbOnly = root.pluginApi.settingsView?.autoPasteOnRightClick ?? false;
                                 if (autoPaste && !rmbOnly) {
-                                    root.pluginApi.mainInstance?.triggerAutoPaste();
+                                    root.pluginApi.mainInstance?.triggerAutoPaste(root.pluginApi.settingsView?.autoPasteDelay);
                                 }
                             }
                         }
 
                         onRightClicked: {
                             root.selectedIndex = index;
-                            const autoPaste = root.pluginApi?.pluginSettings?.autoPaste ?? false;
-                            const rmbOnly = root.pluginApi?.pluginSettings?.autoPasteOnRightClick ?? false;
+                            const autoPaste = root.pluginApi?.settingsView?.autoPaste ?? false;
+                            const rmbOnly = root.pluginApi?.settingsView?.autoPasteOnRightClick ?? false;
                             if (autoPaste && rmbOnly) {
                                 root.pluginApi?.mainInstance?.copyToClipboard(clipboardId);
                                 if (root.pluginApi) {
                                     root.pluginApi.closePanel(screen);
-                                    root.pluginApi.mainInstance?.triggerAutoPaste();
+                                    root.pluginApi.mainInstance?.triggerAutoPaste(root.pluginApi.settingsView?.autoPasteDelay);
                                 }
                             }
                         }
@@ -1254,7 +1254,7 @@ Item {
         // PINNED PANEL - Left side, vertical
         Rectangle {
             id: pinnedPanel
-            visible: pluginApi?.pluginSettings?.pincardsEnabled ?? true
+            visible: pluginApi?.settingsView?.pincardsEnabled ?? true
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.bottom: clipboardPanel.top
@@ -1318,22 +1318,22 @@ Item {
                             root.pluginApi?.mainInstance?.copyPinnedToClipboard(modelData.id);
                             if (root.pluginApi) {
                                 root.pluginApi.closePanel(screen);
-                                const autoPaste = root.pluginApi.pluginSettings?.autoPaste ?? false;
-                                const rmbOnly = root.pluginApi.pluginSettings?.autoPasteOnRightClick ?? false;
+                                const autoPaste = root.pluginApi.settingsView?.autoPaste ?? false;
+                                const rmbOnly = root.pluginApi.settingsView?.autoPasteOnRightClick ?? false;
                                 if (autoPaste && !rmbOnly) {
-                                    root.pluginApi.mainInstance?.triggerAutoPaste();
+                                    root.pluginApi.mainInstance?.triggerAutoPaste(root.pluginApi.settingsView?.autoPasteDelay);
                                 }
                             }
                         }
 
                         onRightClicked: {
-                            const autoPaste = root.pluginApi?.pluginSettings?.autoPaste ?? false;
-                            const rmbOnly = root.pluginApi?.pluginSettings?.autoPasteOnRightClick ?? false;
+                            const autoPaste = root.pluginApi?.settingsView?.autoPaste ?? false;
+                            const rmbOnly = root.pluginApi?.settingsView?.autoPasteOnRightClick ?? false;
                             if (autoPaste && rmbOnly) {
                                 root.pluginApi?.mainInstance?.copyPinnedToClipboard(modelData.id);
                                 if (root.pluginApi) {
                                     root.pluginApi.closePanel(screen);
-                                    root.pluginApi.mainInstance?.triggerAutoPaste();
+                                    root.pluginApi.mainInstance?.triggerAutoPaste(root.pluginApi.settingsView?.autoPasteDelay);
                                 }
                             }
                         }
@@ -1386,7 +1386,7 @@ Item {
         // NOTECARDS PANEL - Middle space (between pinned and clipboard)
         Item {
             id: noteCardsPanel
-            visible: pluginApi?.pluginSettings?.notecardsEnabled ?? true
+            visible: pluginApi?.settingsView?.notecardsEnabled ?? true
             anchors.left: pinnedPanel.visible ? pinnedPanel.right : parent.left
             anchors.leftMargin: pinnedPanel.visible ? Style.marginM : 0
             anchors.right: parent.right

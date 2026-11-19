@@ -1,5 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import "../common"
+import "../common/MonitorCommands.js" as Commands
 import QtQuick.Controls
 import QtQuick.Layouts
 
@@ -18,16 +20,33 @@ ColumnLayout {
     ***************************/
     // Required properties
     required property var pluginApi
-    required property bool enabled
+    required enabled
     required property string selectedMonitor
+    required property var monitorSettings
+    property bool monitorSpecific: pluginApi?.initialSettings?.monitorSpecific ?? false
+    readonly property var initialAutomation: Commands.automationSettings(pluginApi?.initialSettings,
+        monitorSpecific ? Commands.record(pluginApi?.initialSettings?.monitors, selectedMonitor) : null, pluginApi?.manifest?.metadata?.defaultSettings)
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property bool automation: Commands.resolve(root.initialAutomation, "automation", root.pluginApi?.manifest?.metadata?.defaultSettings)
+        readonly property string automationMode: root.initialAutomation.automationMode ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? ""
+        readonly property real automationTime: Commands.resolve(root.initialAutomation, "automationTime", root.pluginApi?.manifest?.metadata?.defaultSettings)
+        readonly property var automationCustomTime: root.pluginApi?.initialSettings?.automationCustomTime || []
+    }
+    property alias customTimeText: customTimeInput.text
+    readonly property bool settingsDirty: edits.hasIntent || displayBaseline.differs({automation: automation, automationMode: automationMode, automationTime: automationTime, automationCustomTime: automationCustomTime}) || customTimeText.length > 0
+    MonitorEdits {
+        id: edits
+        values: ({automation: root.automation, automationMode: root.automationMode, automationTime: root.automationTime})
+    }
 
     // Monitor specific properties
-    property bool   automation:     pluginApi?.pluginSettings?.[selectedMonitor]?.automation     ?? false
-    property string automationMode: pluginApi?.pluginSettings?.[selectedMonitor]?.automationMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? ""
-    property real   automationTime: pluginApi?.pluginSettings?.[selectedMonitor]?.automationTime ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationTime ?? 0
+    property bool automation: Commands.resolve(monitorSettings, "automation", pluginApi?.manifest?.metadata?.defaultSettings)
+    property string automationMode: monitorSettings.automationMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? ""
+    property real automationTime: Commands.resolve(monitorSettings, "automationTime", pluginApi?.manifest?.metadata?.defaultSettings)
 
     // Global properties
-    property list<int> automationCustomTime: pluginApi?.pluginSettings?.automationCustomTime ?? []
+    property list<int> automationCustomTime: Array.from(displayBaseline.automationCustomTime)
 
     // Signals
     signal saveMonitorProperty(key: string, value: var);
@@ -35,12 +54,14 @@ ColumnLayout {
     /***************************
     * EVENTS
     ***************************/
-    onSelectedMonitorChanged: {
+    function loadMonitor(record) {
         // Update the local variables
-        automation =     pluginApi?.pluginSettings?.[selectedMonitor]?.automation     ?? false;
-        automationMode = pluginApi?.pluginSettings?.[selectedMonitor]?.automationMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? "";
-        automationTime = pluginApi?.pluginSettings?.[selectedMonitor]?.automationTime ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationTime ?? 0;
+        automation = Commands.resolve(record, "automation", pluginApi?.manifest?.metadata?.defaultSettings);
+        automationMode = record.automationMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? "";
+        automationTime = Commands.resolve(record, "automationTime", pluginApi?.manifest?.metadata?.defaultSettings);
+        edits.reset();
     }
+    Component.onCompleted: loadMonitor(monitorSettings)
 
 
     /***************************
@@ -53,7 +74,7 @@ ColumnLayout {
         label:       root.pluginApi?.tr("settings.automation.toggle.label")
         description: root.pluginApi?.tr("settings.automation.toggle.description")
         checked: root.automation
-        onToggled: checked => root.automation = checked
+        onToggled: checked => { root.automation = checked; edits.mark("automation"); }
     }
 
     // Automation Mode
@@ -74,7 +95,7 @@ ColumnLayout {
             }
         ]
         currentKey: root.automationMode
-        onSelected: key => root.automationMode = key
+        onSelected: key => { root.automationMode = key; edits.mark("automationMode"); }
     }
 
     ColumnLayout {
@@ -156,7 +177,7 @@ ColumnLayout {
                     }
                 }
                 enabled: root.enabled && root.automation
-                onClicked: root.automationTime = time
+                onClicked: { root.automationTime = time; edits.mark("automationTime"); }
                 outlined: root.automationTime === time
             }
 
@@ -202,26 +223,15 @@ ColumnLayout {
                 }
 
                 const seconds = hour * 3600 + minute * 60;
-                root.automationCustomTime.push(seconds);
-
-                // Make sure no duplicates exist.
-                let s = new Set(root.automationCustomTime);
-                root.automationCustomTime = [...s];
-                root.automationCustomTime.sort();
+                root.automationCustomTime = Array.from(new Set(Array.from(root.automationCustomTime).concat([seconds]))).sort();
 
                 // Reset the input
                 customTimeInput.text = "";
 
-                // Save the custom time to settings
-                if (root.pluginApi == null) {
-                    Logger.e("video-wallpaper", "Plugin API is null.");
-                    return;
-                }
-                root.pluginApi.pluginSettings.automationCustomTime = root.automationCustomTime;
-                root.pluginApi.saveSettings();
-
                 createCustomTime.close();
+                return true;
             }
+            return false;
         }
 
         ColumnLayout {
@@ -234,7 +244,7 @@ ColumnLayout {
                 description:     root.pluginApi?.tr("settings.automation.time.custom.create.description")
                 placeholderText: root.pluginApi?.tr("settings.automation.time.custom.create.placeholder")
                 Layout.fillWidth: true
-                onEditingFinished: createCustomTime.save();
+                onAccepted: createCustomTime.save();
 
                 function isCorrectFormat() {
                     // Check that : is included and that only one : is included
@@ -266,7 +276,7 @@ ColumnLayout {
 
                 NButton {
                     text: root.pluginApi?.tr("settings.automation.time.custom.create.cancel")
-                    onClicked: createCustomTime.close();
+                    onClicked: { customTimeInput.text = ""; createCustomTime.close(); }
                 }
 
                 NButton {
@@ -298,9 +308,9 @@ ColumnLayout {
                     const index = root.automationCustomTime.indexOf(selectedSeconds);
                     if(index !== -1) {
                         // Remove the element from the list
-                        root.automationCustomTime.splice(index, 1);
-                        root.pluginApi.pluginSettings.automationCustomTime = root.automationCustomTime;
-                        root.pluginApi.saveSettings();
+                        var next = Array.from(root.automationCustomTime);
+                        next.splice(index, 1);
+                        root.automationCustomTime = next;
                     }
                     break;
                 default:
@@ -309,30 +319,21 @@ ColumnLayout {
         }
     }
 
-    Connections {
-        target: root.pluginApi
-        function onPluginSettingsChanged() {
-            // Update the local properties on change
-            root.automation =     root.pluginApi?.pluginSettings?.[root.selectedMonitor]?.automation     ?? false;
-            root.automationMode = root.pluginApi?.pluginSettings?.[root.selectedMonitor]?.automationMode ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.automationMode ?? "";
-            root.automationTime = root.pluginApi?.pluginSettings?.[root.selectedMonitor]?.automationTime ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.automationTime ?? 0;
-        }
-    }
-
     
     /********************************
     * Save settings functionality
     ********************************/
-    function saveSettings() {
+    // Navigation stages only this monitor's scalar intent. In-progress custom
+    // input belongs to the global dialog and survives monitor/domain changes.
+    function saveMonitorSettings() {
         if(pluginApi == null) {
             Logger.e("video-wallpaper", "Cannot save, pluginApi is null");
             return;
         }
-
-        saveMonitorProperty("automation", automation);
-        saveMonitorProperty("automationMode", automationMode);
-        saveMonitorProperty("automationTime", automationTime);
-
-        pluginApi.pluginSettings.automationCustomTime = automationCustomTime;
+        return edits.submit((key, value) => root.saveMonitorProperty(key, value));
     }
+    function prepareSave() {
+        if (customTimeText.length > 0 && !createCustomTime.save()) throw new Error("Invalid automation time");
+    }
+    function acknowledgeSettings(captured) { edits.acknowledge(captured); }
 }

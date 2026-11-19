@@ -1,4 +1,6 @@
 import QtQuick
+import "../../common"
+import "../../common/MonitorCommands.js" as Commands
 import QtQuick.Layouts
 
 import Quickshell
@@ -17,15 +19,27 @@ ColumnLayout {
     ***************************/
     // Required properties
     required property var    pluginApi
-    required property bool   enabled
+    required enabled
     required property string selectedMonitor
+    required property var monitorSettings
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property bool hardwareAcceleration: Commands.value(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor, "hardwareAcceleration", root.pluginApi?.manifest?.metadata?.defaultSettings)
+        readonly property string profile: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.profile ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
+        readonly property string mpvSocket: root.pluginApi?.initialSettings?.mpvSocket ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.mpvSocket ?? ""
+    }
+    readonly property bool settingsDirty: edits.hasIntent || displayBaseline.differs({hardwareAcceleration: hardwareAcceleration, profile: profile, mpvSocket: mpvSocket})
+    MonitorEdits {
+        id: edits
+        values: ({hardwareAcceleration: root.hardwareAcceleration, profile: root.profile})
+    }
 
     // Monitor specific properties
-    property bool   hardwareAcceleration: pluginApi?.pluginSettings?.[selectedMonitor]?.hardwareAcceleration ?? false
-    property string profile:              pluginApi?.pluginSettings?.[selectedMonitor]?.profile              ?? pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
+    property bool hardwareAcceleration: Commands.resolve(monitorSettings, "hardwareAcceleration", pluginApi?.manifest?.metadata?.defaultSettings)
+    property string profile: monitorSettings.profile ?? pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
 
     // Global properties
-    property string mpvSocket: pluginApi?.pluginSettings?.mpvSocket ?? pluginApi?.manifest?.metadata?.defaultSettings?.mpvSocket ?? ""
+    property string mpvSocket: displayBaseline.mpvSocket
 
     // Signals
     signal saveMonitorProperty(key: string, value: var);
@@ -34,10 +48,12 @@ ColumnLayout {
     /***************************
     * EVENTS
     ***************************/
-    onSelectedMonitorChanged: {
-        hardwareAcceleration = pluginApi?.pluginSettings?.[selectedMonitor]?.hardwareAcceleration ?? false
-        profile =              pluginApi?.pluginSettings?.[selectedMonitor]?.profile              ?? pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
+    function loadMonitor(record) {
+        hardwareAcceleration = Commands.resolve(record, "hardwareAcceleration", pluginApi?.manifest?.metadata?.defaultSettings)
+        profile = record.profile ?? pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
+        edits.reset();
     }
+    Component.onCompleted: loadMonitor(monitorSettings)
 
 
     /***************************
@@ -69,7 +85,7 @@ ColumnLayout {
             }
         ]
         currentKey: root.profile
-        onSelected: key => root.profile = key
+        onSelected: key => { root.profile = key; edits.mark("profile"); }
     }
 
     // Hardware Acceleration
@@ -79,7 +95,7 @@ ColumnLayout {
         label:       root.pluginApi?.tr("settings.advanced.hardware_acceleration.label")
         description: root.pluginApi?.tr("settings.advanced.hardware_acceleration.description")
         checked: root.hardwareAcceleration
-        onToggled: checked => root.hardwareAcceleration = checked
+        onToggled: checked => { root.hardwareAcceleration = checked; edits.mark("hardwareAcceleration"); }
         defaultValue: false
     }
 
@@ -94,16 +110,6 @@ ColumnLayout {
         onTextChanged: root.mpvSocket = text
     }
 
-    Connections {
-        target: root.pluginApi
-        function onPluginSettingsChanged() {
-            // Update the local properties on change
-            root.hardwareAcceleration = root.pluginApi?.pluginSettings?.[root.selectedMonitor]?.hardwareAcceleration ?? false
-            root.mpvSocket =            root.pluginApi?.pluginSettings?.mpvSocket                                    ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.mpvSocket ?? ""
-            root.profile =              root.pluginApi?.pluginSettings?.[root.selectedMonitor]?.profile              ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.profile   ?? ""
-        }
-    }
-
 
     /********************************
     * Save settings functionality
@@ -114,9 +120,8 @@ ColumnLayout {
             return;
         }
 
-        root.saveMonitorProperty("hardwareAcceleration", hardwareAcceleration);
-        root.saveMonitorProperty("profile", profile);
+        return edits.submit((key, value) => root.saveMonitorProperty(key, value));
 
-        pluginApi.pluginSettings.mpvSocket = mpvSocket;
     }
+    function acknowledgeSettings(captured) { edits.acknowledge(captured); }
 }

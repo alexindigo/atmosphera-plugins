@@ -3,44 +3,85 @@ import QtQuick.Layouts
 import Quickshell
 import qs.Commons
 import qs.Services.UI
+import qs.Portals
 import qs.Widgets
 
 ColumnLayout {
     id: root
 
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string systemCmd: pluginApi.pluginSettings.systemCmd || pluginApi.manifest.metadata.defaultSettings.systemCmd
+    readonly property string aurCmd: pluginApi.pluginSettings.aurCmd || pluginApi.manifest.metadata.defaultSettings.aurCmd
+    readonly property string updateCmd: pluginApi.pluginSettings.updateCmd || pluginApi.manifest.metadata.defaultSettings.updateCmd
+    readonly property string aurHomepageCmd: pluginApi.pluginSettings.aurHomepageCmd || pluginApi.manifest.metadata.defaultSettings.aurHomepageCmd
+    readonly property bool flatpak: pluginApi.pluginSettings.flatpak ?? pluginApi.manifest.metadata.defaultSettings.flatpak
+    readonly property bool toast: pluginApi.pluginSettings.toast ?? pluginApi.manifest.metadata.defaultSettings.toast
+    readonly property bool refreshTimer: pluginApi.pluginSettings.refreshTimer ?? pluginApi.manifest.metadata.defaultSettings.refreshTimer
+    readonly property int refreshInterval: pluginApi.pluginSettings.refreshInterval || pluginApi.manifest.metadata.defaultSettings.refreshInterval
+    readonly property bool noctalia: pluginApi.pluginSettings.noctalia ?? pluginApi.manifest.metadata.defaultSettings.noctalia
+    readonly property bool tooltip: pluginApi.pluginSettings.tooltip ?? pluginApi.manifest.metadata.defaultSettings.tooltip
+    readonly property bool hideOnEmpty: pluginApi.pluginSettings.hideOnEmpty ?? pluginApi.manifest.metadata.defaultSettings.hideOnEmpty
+    readonly property bool boldText: pluginApi.pluginSettings.boldText ?? pluginApi.manifest.metadata.defaultSettings.boldText
+    readonly property bool useDistroLogo: pluginApi.pluginSettings.useDistroLogo ?? pluginApi.manifest.metadata.defaultSettings.useDistroLogo
+    readonly property bool enableColorization: pluginApi.pluginSettings.enableColorization ?? pluginApi.manifest.metadata.defaultSettings.enableColorization
+    readonly property string iconColor: pluginApi.pluginSettings.iconColor ?? pluginApi.manifest.metadata.defaultSettings.iconColor
+    readonly property string iconName: pluginApi.pluginSettings.iconName || pluginApi.manifest.metadata.defaultSettings.iconName
+    readonly property string customIconPath: pluginApi.pluginSettings.customIconPath ?? pluginApi.manifest.metadata.defaultSettings.customIconPath
+    readonly property bool boldVerPanel: pluginApi.pluginSettings.boldVerPanel ?? pluginApi.manifest.metadata.defaultSettings.boldVerPanel
+    readonly property bool panelTooltip: pluginApi.pluginSettings.panelTooltip ?? pluginApi.manifest.metadata.defaultSettings.panelTooltip
+    readonly property bool panelContext: pluginApi.pluginSettings.panelContext ?? pluginApi.manifest.metadata.defaultSettings.panelContext
+    readonly property bool closeButton: pluginApi.pluginSettings.closeButton ?? pluginApi.manifest.metadata.defaultSettings.closeButton
+    readonly property bool closeOnSettings: pluginApi.pluginSettings.closeOnSettings ?? pluginApi.manifest.metadata.defaultSettings.closeOnSettings
+    readonly property bool boldVerDesktop: pluginApi.pluginSettings.boldVerDesktop ?? pluginApi.manifest.metadata.defaultSettings.boldVerDesktop
+    readonly property bool hoverTip: pluginApi.pluginSettings.hoverTip ?? pluginApi.manifest.metadata.defaultSettings.hoverTip
+    ranges: [NSettingsRange { field: "refreshInterval"; from: rangeRefreshInterval.from; to: rangeRefreshInterval.to }]
+  }
+  readonly property bool settingsDirty: { return displayBaseline.differs({systemCmd: root.systemCmd, aurCmd: root.aurCmd, updateCmd: root.updateCmd, aurHomepageCmd: root.aurHomepageCmd, flatpak: root.flatpak, toast: root.toast, refreshTimer: root.refreshTimer, refreshInterval: root.refreshInterval, noctalia: root.noctalia, tooltip: root.tooltip, hideOnEmpty: root.hideOnEmpty, boldText: root.boldText, useDistroLogo: root.useDistroLogo, enableColorization: root.enableColorization, iconColor: root.iconColor, iconName: root.iconName, customIconPath: root.customIconPath, boldVerPanel: root.boldVerPanel, panelTooltip: root.panelTooltip, panelContext: root.panelContext, closeButton: root.closeButton, closeOnSettings: root.closeOnSettings, boldVerDesktop: root.boldVerDesktop, hoverTip: root.hoverTip}); }
+  property bool _savePending: false
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root._savePending = false;
+      root.pluginApi.mainInstance?.refresh();
+      Logger.i("Arch Updater", "Settings saved successfully")
+    }
+  }
+
     property var pluginApi: null
 
     // General
-    property string systemCmd: pluginApi.pluginSettings.systemCmd || pluginApi.manifest.metadata.defaultSettings.systemCmd
-    property string aurCmd: pluginApi.pluginSettings.aurCmd || pluginApi.manifest.metadata.defaultSettings.aurCmd
-    property string updateCmd: pluginApi.pluginSettings.updateCmd || pluginApi.manifest.metadata.defaultSettings.updateCmd
-    property string aurHomepageCmd: pluginApi.pluginSettings.aurHomepageCmd || pluginApi.manifest.metadata.defaultSettings.aurHomepageCmd
-    property bool flatpak: pluginApi.pluginSettings.flatpak ?? pluginApi.manifest.metadata.defaultSettings.flatpak
-    property bool toast: pluginApi.pluginSettings.toast ?? pluginApi.manifest.metadata.defaultSettings.toast
-    property bool refreshTimer: pluginApi.pluginSettings.refreshTimer ?? pluginApi.manifest.metadata.defaultSettings.refreshTimer
-    property int refreshInterval: pluginApi.pluginSettings.refreshInterval || pluginApi.manifest.metadata.defaultSettings.refreshInterval
+    property string systemCmd: displayBaseline.systemCmd
+    property string aurCmd: displayBaseline.aurCmd
+    property string updateCmd: displayBaseline.updateCmd
+    property string aurHomepageCmd: displayBaseline.aurHomepageCmd
+    property bool flatpak: displayBaseline.flatpak
+    property bool toast: displayBaseline.toast
+    property bool refreshTimer: displayBaseline.refreshTimer
+    property int refreshInterval: displayBaseline.project("refreshInterval")
 
     // Bar
-    property bool noctalia: pluginApi.pluginSettings.noctalia ?? pluginApi.manifest.metadata.defaultSettings.noctalia
-    property bool tooltip: pluginApi.pluginSettings.tooltip ?? pluginApi.manifest.metadata.defaultSettings.tooltip
-    property bool hideOnEmpty: pluginApi.pluginSettings.hideOnEmpty ?? pluginApi.manifest.metadata.defaultSettings.hideOnEmpty
-    property bool boldText: pluginApi.pluginSettings.boldText ?? pluginApi.manifest.metadata.defaultSettings.boldText
-    property bool useDistroLogo: pluginApi.pluginSettings.useDistroLogo ?? pluginApi.manifest.metadata.defaultSettings.useDistroLogo
-    property bool enableColorization: pluginApi.pluginSettings.enableColorization ?? pluginApi.manifest.metadata.defaultSettings.enableColorization
-    property string iconColor: pluginApi.pluginSettings.iconColor ?? pluginApi.manifest.metadata.defaultSettings.iconColor
-    property string iconName: pluginApi.pluginSettings.iconName || pluginApi.manifest.metadata.defaultSettings.iconName
-    property string customIconPath: pluginApi.pluginSettings.customIconPath ?? pluginApi.manifest.metadata.defaultSettings.customIconPath
+    property bool noctalia: displayBaseline.noctalia
+    property bool tooltip: displayBaseline.tooltip
+    property bool hideOnEmpty: displayBaseline.hideOnEmpty
+    property bool boldText: displayBaseline.boldText
+    property bool useDistroLogo: displayBaseline.useDistroLogo
+    property bool enableColorization: displayBaseline.enableColorization
+    property string iconColor: displayBaseline.iconColor
+    property string iconName: displayBaseline.iconName
+    property string customIconPath: displayBaseline.customIconPath
 
     // Panel
-    property bool boldVerPanel: pluginApi.pluginSettings.boldVerPanel ?? pluginApi.manifest.metadata.defaultSettings.boldVerPanel
-    property bool panelTooltip: pluginApi.pluginSettings.panelTooltip ?? pluginApi.manifest.metadata.defaultSettings.panelTooltip
-    property bool panelContext: pluginApi.pluginSettings.panelContext ?? pluginApi.manifest.metadata.defaultSettings.panelContext
-    property bool closeButton: pluginApi.pluginSettings.closeButton ?? pluginApi.manifest.metadata.defaultSettings.closeButton
-    property bool closeOnSettings: pluginApi.pluginSettings.closeOnSettings ?? pluginApi.manifest.metadata.defaultSettings.closeOnSettings
+    property bool boldVerPanel: displayBaseline.boldVerPanel
+    property bool panelTooltip: displayBaseline.panelTooltip
+    property bool panelContext: displayBaseline.panelContext
+    property bool closeButton: displayBaseline.closeButton
+    property bool closeOnSettings: displayBaseline.closeOnSettings
 
     // Desktop Widget
-    property bool boldVerDesktop: pluginApi.pluginSettings.boldVerDesktop ?? pluginApi.manifest.metadata.defaultSettings.boldVerDesktop
-    property bool hoverTip: pluginApi.pluginSettings.hoverTip ?? pluginApi.manifest.metadata.defaultSettings.hoverTip
+    property bool boldVerDesktop: displayBaseline.boldVerDesktop
+    property bool hoverTip: displayBaseline.hoverTip
 
     spacing: Style.marginM
 
@@ -219,12 +260,14 @@ ColumnLayout {
                     description: pluginApi.tr("settings.general.interval.desc") + root.refreshInterval
                 }
                 NSlider {
+                  id: rangeRefreshInterval
+                  objectName: "settings-range-refreshInterval"
                     Layout.fillWidth: true
                     from: 30
                     to: 720
                     stepSize: 10
                     value: root.refreshInterval
-                    onValueChanged: {
+                    onMoved: {
                         root.refreshInterval = value
                         Logger.d("Arch Updater", "Refresh interval set to: " + root.refreshInterval)
                     }
@@ -395,7 +438,7 @@ ColumnLayout {
                 }
             }
 
-            AtmoFilePicker {
+            PortalFilePicker {
                 id: imagePicker
                 title: pluginApi.tr("settings.bar.iconName.selectCustomIcon")
                 selectionMode: "files"
@@ -589,9 +632,6 @@ ColumnLayout {
         pluginApi.pluginSettings.boldVerDesktop = root.boldVerDesktop
         pluginApi.pluginSettings.hoverTip = root.hoverTip
 
-        pluginApi.saveSettings()
-        root.pluginApi.mainInstance.refresh()
-
-        Logger.i("Arch Updater", "Settings saved successfully")
+        if (pluginApi.saveSettings() !== false) root._savePending = true;
     }
 }

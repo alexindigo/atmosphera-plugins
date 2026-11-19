@@ -10,10 +10,27 @@ ColumnLayout {
     readonly property var cfg: pluginApi?.pluginSettings || ({})
     readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    property string valueColor: cfg.color ?? defaults.color ?? "#0064ff"
-    property bool valueColorIcon: cfg.colorIcon ?? defaults.colorIcon ?? false
-    property bool valueHideOnEmpty: cfg.hideOnEmpty ?? defaults.hideOnEmpty ?? false
+    property string valueColor: displayBaseline.valueColor
+    property bool valueColorIcon: displayBaseline.valueColorIcon
+    property bool valueHideOnEmpty: displayBaseline.valueHideOnEmpty
     property var valueRecentColors: cfg.recentColors ?? defaults.recentColors ?? []
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string valueColor: cfg.color ?? defaults.color ?? "#0064ff"
+        readonly property bool valueColorIcon: cfg.colorIcon ?? defaults.colorIcon ?? false
+        readonly property bool valueHideOnEmpty: cfg.hideOnEmpty ?? defaults.hideOnEmpty ?? false
+        readonly property var valueRecentColors: cfg.recentColors ?? defaults.recentColors ?? []
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({valueColor: root.valueColor, valueColorIcon: root.valueColorIcon, valueHideOnEmpty: root.valueHideOnEmpty, valueRecentColors: root.valueRecentColors})
+    property bool _applyEffectPending: false
+    Connections {
+        target: root.pluginApi
+        function onSettingsCompleted(result) {
+            if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+            root._applyEffectPending = false;
+            root.pluginApi.mainInstance?.applyColors();
+        }
+    }
 
     spacing: Style.marginL
 
@@ -153,9 +170,7 @@ ColumnLayout {
         pluginApi.pluginSettings.hideOnEmpty = root.valueHideOnEmpty
         pluginApi.pluginSettings.recentColors = next
         root.valueRecentColors = next
-        pluginApi.saveSettings()
-
-        // Apply the new color to the controller immediately
-        pluginApi.mainInstance?.applyColors()
+        if (pluginApi.saveSettings() !== false)
+            root._applyEffectPending = true;
     }
 }

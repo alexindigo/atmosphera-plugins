@@ -18,7 +18,34 @@ Item {
   implicitHeight: 560
   property var pluginApi: null
 
-  readonly property var cs: pluginApi?.pluginSettings?.claude || ({})
+  readonly property var initialClaude: Object.assign({}, pluginApi?.manifest?.metadata?.defaultSettings?.claude || ({}), pluginApi?.initialSettings?.claude || ({}))
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property var editClaude: root.initialClaude
+    readonly property string editAdditionalDirsText: (root.initialClaude.additionalDirs || []).join("\n")
+    readonly property string editAllowedToolsText: (root.initialClaude.allowedTools || []).join(",")
+    readonly property string editDisallowedToolsText: (root.initialClaude.disallowedTools || []).join(",")
+    readonly property string editAppendSystemPrompt: root.initialClaude.appendSystemPrompt || ""
+    readonly property int editMaxTurns: root.initialClaude.maxTurns || 0
+    readonly property string editPanelPosition: root.pluginApi?.initialSettings?.panelPosition || "right"
+    readonly property bool editPanelDetached: root.pluginApi?.initialSettings?.panelDetached ?? true
+    readonly property int editPanelWidth: root.pluginApi?.initialSettings?.panelWidth ?? 620
+    readonly property int editPanelHeightPercent: Math.round((root.pluginApi?.initialSettings?.panelHeightRatio ?? 0.9) * 100)
+    ranges: [NSettingsRange { field: "editMaxTurns"; from: maxTurnsInput.from; to: maxTurnsInput.to }, NSettingsRange { field: "editPanelWidth"; from: panelWidthInput.from; to: panelWidthInput.to }, NSettingsRange { field: "editPanelHeightPercent"; from: panelHeightInput.from; to: panelHeightInput.to }]
+  }
+  property var editClaude: JSON.parse(JSON.stringify(displayBaseline.editClaude))
+  readonly property var cs: editClaude
+  property string editAdditionalDirsText: displayBaseline.editAdditionalDirsText
+  property string editAllowedToolsText: displayBaseline.editAllowedToolsText
+  property string editDisallowedToolsText: displayBaseline.editDisallowedToolsText
+  property string editAppendSystemPrompt: displayBaseline.editAppendSystemPrompt
+  property int editMaxTurns: displayBaseline.project("editMaxTurns")
+  property string editPanelPosition: displayBaseline.editPanelPosition
+  property bool editPanelDetached: displayBaseline.editPanelDetached
+  property int editPanelWidth: displayBaseline.project("editPanelWidth")
+  property int editPanelHeightPercent: displayBaseline.project("editPanelHeightPercent")
+  readonly property bool settingsDirty: displayBaseline.differs({editClaude: editClaude, editAdditionalDirsText: editAdditionalDirsText, editAllowedToolsText: editAllowedToolsText, editDisallowedToolsText: editDisallowedToolsText, editAppendSystemPrompt: editAppendSystemPrompt, editMaxTurns: editMaxTurns, editPanelPosition: editPanelPosition, editPanelDetached: editPanelDetached, editPanelWidth: editPanelWidth, editPanelHeightPercent: editPanelHeightPercent})
+  property bool _bypassPending: false
 
   // ---- Save indicator state -------------------------------------------------
   // Each effectful set()/setTop() flips `_saveBlinking` true and starts the
@@ -30,8 +57,6 @@ Item {
   //                    the same value (during binding setup, after a host
   //                    Apply, etc.) doesn't trigger a flash.
   property bool _saveBlinking: false
-  property bool _initialized: false
-  Component.onCompleted: Qt.callLater(function () { root._initialized = true; })
 
   Timer {
     id: _saveTimer
@@ -39,38 +64,39 @@ Item {
     onTriggered: root._saveBlinking = false
   }
   function _flashSaved() {
-    if (!_initialized) { return; }
     _saveBlinking = true;
     _saveTimer.restart();
   }
 
-  // Loose equality check that handles arrays + objects without bringing in a
-  // deep-equal helper. Sufficient for the simple value shapes in claudeSettings.
-  function _same(a, b) {
-    if (a === b) { return true; }
-    if (Array.isArray(a) && Array.isArray(b)) {
-      if (a.length !== b.length) { return false; }
-      for (var i = 0; i < a.length; i++) { if (a[i] !== b[i]) { return false; } }
-      return true;
-    }
-    return false;
-  }
-
   function set(key, value) {
     if (!pluginApi) { return; }
-    if (!pluginApi.pluginSettings.claude) { pluginApi.pluginSettings.claude = {}; }
-    if (_same(pluginApi.pluginSettings.claude[key], value)) { return; }
-    pluginApi.pluginSettings.claude[key] = value;
-    pluginApi.saveSettings();
-    _flashSaved();
+    var next = Object.assign({}, editClaude);
+    next[key] = value;
+    editClaude = next;
   }
 
-  function setTop(key, value) {
-    if (!pluginApi) { return; }
-    if (_same(pluginApi.pluginSettings[key], value)) { return; }
-    pluginApi.pluginSettings[key] = value;
+  function saveSettings() {
+    editAdditionalDirsText = parseList(editAdditionalDirsText).join("\n");
+    editAllowedToolsText = parseList(editAllowedToolsText).join(",");
+    editDisallowedToolsText = parseList(editDisallowedToolsText).join(",");
+    editClaude = Object.assign({}, editClaude, {additionalDirs: parseList(editAdditionalDirsText), allowedTools: parseList(editAllowedToolsText), disallowedTools: parseList(editDisallowedToolsText), appendSystemPrompt: editAppendSystemPrompt, maxTurns: editMaxTurns});
+    pluginApi.pluginSettings.claude = JSON.parse(JSON.stringify(editClaude));
+    pluginApi.pluginSettings.panelPosition = editPanelPosition;
+    pluginApi.pluginSettings.panelDetached = editPanelDetached;
+    pluginApi.pluginSettings.panelWidth = editPanelWidth;
+    pluginApi.pluginSettings.panelHeightRatio = editPanelHeightPercent / 100;
     pluginApi.saveSettings();
-    _flashSaved();
+  }
+
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if ((result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current") {
+        root._flashSaved();
+        if (root._bypassPending && (root.cs.dangerouslySkipPermissions === true || root.cs.permissionMode === "bypassPermissions")) ToastService.showError(root.pluginApi.tr("toast.bypassEnabled"));
+        root._bypassPending = false;
+      }
+    }
   }
 
   function parseList(raw) {
@@ -169,6 +195,7 @@ Item {
         Repeater {
           model: root._tabs
           delegate: Rectangle {
+            id: tabItem
             Layout.fillWidth: true
             Layout.preferredHeight: Math.round(38 * Style.uiScaleRatio)
             radius: Style.radiusM
@@ -190,15 +217,15 @@ Item {
               AtmoIcon {
                 icon: modelData.icon
                 pointSize: Style.fontSizeS
-                color: parent.parent.active
-                         ? (parent.parent.danger ? AtmoColor.mError : AtmoColor.mPrimary)
+                color: tabItem.active
+                         ? (tabItem.danger ? AtmoColor.mError : AtmoColor.mPrimary)
                          : AtmoColor.mOnSurfaceVariant
               }
               NText {
                 text: modelData.label
                 pointSize: Style.fontSizeS
-                font.weight: parent.parent.active ? Font.DemiBold : Font.Normal
-                color: parent.parent.danger && !parent.parent.active
+                font.weight: tabItem.active ? Font.DemiBold : Font.Normal
+                color: tabItem.danger && !tabItem.active
                          ? AtmoColor.mError
                          : AtmoColor.mOnSurface
                 Layout.fillWidth: true
@@ -277,7 +304,7 @@ Item {
               Layout.fillWidth: true
               label: pluginApi?.tr("settings.binary")
               text: cs.binary || "claude"
-              onEditingFinished: set("binary", text)
+              onTextEdited: root.set("binary", text)
             }
           }
 
@@ -289,7 +316,7 @@ Item {
               description: pluginApi?.tr("settings.workingDirHelp")
               text: cs.workingDir 
               placeholderText: "/home/you/project"
-              onEditingFinished: set("workingDir", text)
+              onTextEdited: root.set("workingDir", text)
             }
             ColumnLayout {
               Layout.fillWidth: true
@@ -302,14 +329,12 @@ Item {
                 id: addlDirsArea
                 Layout.fillWidth: true
                 Layout.preferredHeight: Math.round(72 * Style.uiScaleRatio)
-                text: (cs.additionalDirs || []).join("\n")
+                text: root.editAdditionalDirsText
                 placeholderText: "/home/you/notes\n/tmp/scratch"
                 // QtQuick.Controls.TextArea has no editingFinished — commit on
                 // focus loss instead. Without this, multi-line edits silently
                 // never save.
-                onActiveFocusChanged: {
-                  if (!activeFocus) { set("additionalDirs", parseList(text)); }
-                }
+                onTextChanged: root.editAdditionalDirsText = text
               }
             }
           }
@@ -383,16 +408,16 @@ Item {
               Layout.fillWidth: true
               label: pluginApi?.tr("settings.allowedTools")
               description: pluginApi?.tr("settings.allowedToolsHelp")
-              text: (cs.allowedTools || []).join(",")
+              text: root.editAllowedToolsText
               placeholderText: "Read,Edit,Bash(git:*),WebFetch"
-              onEditingFinished: set("allowedTools", parseList(text))
+              onTextEdited: root.editAllowedToolsText = text
             }
             NTextInput {
               Layout.fillWidth: true
               label: pluginApi?.tr("settings.disallowedTools")
-              text: (cs.disallowedTools || []).join(",")
+              text: root.editDisallowedToolsText
               placeholderText: "Bash(rm:*),WebFetch"
-              onEditingFinished: set("disallowedTools", parseList(text))
+              onTextEdited: root.editDisallowedToolsText = text
             }
           }
         }
@@ -415,14 +440,14 @@ Item {
                 description: pluginApi?.tr("settings.modelHelp")
                 text: cs.model 
                 placeholderText: "claude-opus-4-7"
-                onEditingFinished: set("model", text)
+                onTextEdited: root.set("model", text)
               }
               NTextInput {
                 Layout.fillWidth: true
                 label: pluginApi?.tr("settings.fallbackModel")
                 text: cs.fallbackModel 
                 placeholderText: "claude-sonnet-4-6"
-                onEditingFinished: set("fallbackModel", text)
+                onTextEdited: root.set("fallbackModel", text)
               }
             }
           }
@@ -436,13 +461,15 @@ Item {
               onToggled: checked => set("autoResume", checked)
             }
             NSpinBox {
+              id: maxTurnsInput
+              objectName: "settings-range-editMaxTurns"
               Layout.fillWidth: true
               label: pluginApi?.tr("settings.maxTurns")
               from: 0
               to: 9999
               stepSize: 1
-              value: cs.maxTurns || 0
-              onValueChanged: set("maxTurns", value)
+              value: root.editMaxTurns
+              onValueModified: value => root.editMaxTurns = value
             }
             NCheckbox {
               Layout.fillWidth: true
@@ -468,10 +495,8 @@ Item {
               TextArea {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Math.round(80 * Style.uiScaleRatio)
-                text: cs.appendSystemPrompt 
-                onActiveFocusChanged: {
-                  if (!activeFocus) { set("appendSystemPrompt", text); }
-                }
+                text: root.editAppendSystemPrompt
+                onTextChanged: root.editAppendSystemPrompt = text
               }
             }
           }
@@ -489,7 +514,7 @@ Item {
               label: pluginApi?.tr("settings.mcpConfigPath")
               text: cs.mcpConfigPath 
               placeholderText: "/home/you/.config/claude/mcp.json"
-              onEditingFinished: set("mcpConfigPath", text)
+              onTextEdited: root.set("mcpConfigPath", text)
             }
             NCheckbox {
               Layout.fillWidth: true
@@ -517,36 +542,40 @@ Item {
                 { key: "top",    name: "top" },
                 { key: "bottom", name: "bottom" }
               ]
-              currentKey: pluginApi?.pluginSettings?.panelPosition || "right"
-              onSelected: key => setTop("panelPosition", key)
+              currentKey: root.editPanelPosition
+              onSelected: key => root.editPanelPosition = key
             }
             NCheckbox {
               Layout.fillWidth: true
               label: pluginApi?.tr("settings.panelDetached")
-              checked: pluginApi?.pluginSettings?.panelDetached ?? true
-              onToggled: checked => setTop("panelDetached", checked)
+              checked: root.editPanelDetached
+              onToggled: checked => root.editPanelDetached = checked
             }
           }
 
           Section {
             title: pluginApi?.tr("settings.groupSize") 
             NSpinBox {
+              id: panelWidthInput
+              objectName: "settings-range-editPanelWidth"
               Layout.fillWidth: true
               label: pluginApi?.tr("settings.panelWidth")
               from: 320
               to: 1600
               stepSize: 10
-              value: pluginApi?.pluginSettings?.panelWidth ?? 620
-              onValueChanged: setTop("panelWidth", value)
+              value: root.editPanelWidth
+              onValueModified: value => root.editPanelWidth = value
             }
             NSpinBox {
+              id: panelHeightInput
+              objectName: "settings-range-editPanelHeightPercent"
               Layout.fillWidth: true
               label: pluginApi?.tr("settings.panelHeightRatio")
               from: 30
               to: 100
               stepSize: 1
-              value: Math.round((pluginApi?.pluginSettings?.panelHeightRatio ?? 0.9) * 100)
-              onValueChanged: setTop("panelHeightRatio", value / 100)
+              value: root.editPanelHeightPercent
+              onValueModified: value => root.editPanelHeightPercent = value
             }
           }
         }
@@ -616,6 +645,7 @@ Item {
       // fades out after the timer. Anchored as a sibling of the NScrollView so
       // it overlays content without affecting layout.
       Rectangle {
+        id: savedIndicator
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.rightMargin: Style.marginM
@@ -628,7 +658,7 @@ Item {
         // a bound property and animate that.
         property real _slideY: root._saveBlinking ? 0 : 6
         Behavior on _slideY { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-        transform: Translate { y: _slideY }
+        transform: Translate { y: savedIndicator._slideY }
 
         implicitWidth: savedRow.implicitWidth + Style.marginM * 2
         implicitHeight: savedRow.implicitHeight + Style.marginS * 2
@@ -688,10 +718,10 @@ Item {
     onAccepted: {
       if (forSkip) {
         set("dangerouslySkipPermissions", true);
-        ToastService.showError(pluginApi?.tr("toast.bypassEnabled"));
+        root._bypassPending = true;
       } else {
         set("permissionMode", "bypassPermissions");
-        ToastService.showError(pluginApi?.tr("toast.bypassEnabled"));
+        root._bypassPending = true;
       }
       forSkip = false;
     }
@@ -714,8 +744,12 @@ Item {
     onAccepted: {
       // Wipe the claude block and known top-level overrides; saveSettings()
       // re-emits defaults from the manifest schema.
-      pluginApi.pluginSettings.claude = {};
-      pluginApi.saveSettings();
+      root.editClaude = Object.assign({}, root.editClaude, pluginApi.manifest.metadata.defaultSettings.claude);
+      root.editAdditionalDirsText = (root.editClaude.additionalDirs || []).join("\n");
+      root.editAllowedToolsText = (root.editClaude.allowedTools || []).join(",");
+      root.editDisallowedToolsText = (root.editClaude.disallowedTools || []).join(",");
+      root.editAppendSystemPrompt = root.editClaude.appendSystemPrompt || "";
+      root.editMaxTurns = root.editClaude.maxTurns || 0;
     }
   }
 }

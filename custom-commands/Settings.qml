@@ -6,13 +6,28 @@ import qs.Widgets
 ColumnLayout {
     id: root
 
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property var commands: root.displayCommands()
+  }
+  readonly property bool settingsDirty: { root.commandsRevision; return displayBaseline.differs({commands: root.commands}); }
+  property bool _savePending: false
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root._savePending = false;
+      Logger.i("CustomCommands", "Settings saved");
+    }
+  }
+
     property var pluginApi: null
 
     property var cfg: pluginApi?.pluginSettings || ({})
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
     // Local mutable copy for editing
-    property var commands: []
+    property var commands: displayBaseline.commands
     property int commandsRevision: 0
 
     property real preferredWidth: 800 * Style.uiScaleRatio
@@ -23,18 +38,39 @@ ColumnLayout {
     }
 
     function loadCommands() {
-        var src = cfg.commands ?? defaults.commands;
-        if (!src || !Array.isArray(src)) src = [];
-        var copy = [];
-        for (var i = 0; i < src.length; i++) {
-            copy.push({
-                "name": src[i].name || "",
-                "command": src[i].command || "",
-                "icon": src[i].icon || "terminal-2"
-            });
-        }
-        commands = copy;
-        commandsRevision++;
+      commands = root.displayCommands();
+      commandsRevision++;
+    }
+
+    function displayCommands() {
+        var source = cfg.commands ?? defaults.commands ?? [];
+        return Array.prototype.map.call(source, function (row) {
+            return Object.assign(Object.create(null), row, {name: row.name || "", command: row.command || "", icon: row.icon || "terminal-2"});
+        });
+    }
+
+    function moveCommand(from, to) {
+        if (from < 0 || to < 0 || from >= root.commands.length || to >= root.commands.length || from === to) return;
+        var rows = root.commands.slice();
+        rows.splice(to, 0, rows.splice(from, 1)[0]);
+        root.commands = rows; root.commandsRevision++;
+    }
+    function removeCommand(index) {
+        if (index < 0 || index >= root.commands.length) return;
+        var rows = root.commands.slice(); rows.splice(index, 1);
+        root.commands = rows; root.commandsRevision++;
+    }
+    function addCommand() {
+        root.commands = root.commands.concat([{name: "", command: "", icon: "terminal-2"}]);
+        root.commandsRevision++;
+    }
+
+    function setCommandField(index, key, value) {
+        if (index < 0 || index >= root.commands.length) return;
+        var rows = root.commands.slice();
+        rows[index] = Object.assign(Object.create(null), rows[index], {[key]: value});
+        root.commands = rows;
+        root.commandsRevision++;
     }
 
     function saveSettings() {
@@ -44,21 +80,28 @@ ColumnLayout {
         }
 
         var valid = [];
+        var displayed = [];
         for (var i = 0; i < commands.length; i++) {
             var name = commands[i].name.trim();
             var command = commands[i].command.trim();
             if (name !== "" || command !== "") {
-                valid.push({
+                var row = Object.assign(Object.create(null), commands[i], {
                     "name": name,
                     "command": command,
                     "icon": commands[i].icon || "terminal-2"
                 });
+                valid.push(row);
+                displayed.push(row);
+            } else {
+                // Filtered input is still the user's unfinished local work.
+                displayed.push(commands[i]);
             }
         }
 
+        root.commands = displayed;
+        root.commandsRevision++;
         pluginApi.pluginSettings.commands = valid;
-        pluginApi.saveSettings();
-        Logger.i("CustomCommands", "Settings saved");
+        if (pluginApi.saveSettings() !== false) root._savePending = true;
     }
 
     NText {
@@ -131,7 +174,7 @@ ColumnLayout {
                             text: cmdDelegate.cmd ? cmdDelegate.cmd.name : ""
                             onTextChanged: {
                                 if (cmdDelegate.cmd && text !== cmdDelegate.cmd.name) {
-                                    root.commands[cmdDelegate.index].name = text;
+                                    root.setCommandField(cmdDelegate.index, "name", text);
                                 }
                             }
                         }
@@ -143,7 +186,7 @@ ColumnLayout {
                             text: cmdDelegate.cmd ? cmdDelegate.cmd.command : ""
                             onTextChanged: {
                                 if (cmdDelegate.cmd && text !== cmdDelegate.cmd.command) {
-                                    root.commands[cmdDelegate.index].command = text;
+                                    root.setCommandField(cmdDelegate.index, "command", text);
                                 }
                             }
                         }
@@ -153,10 +196,7 @@ ColumnLayout {
                             tooltipText: pluginApi.tr("settings.moveUp")
                             enabled: cmdDelegate.index > 0
                             onClicked: {
-                                var tmp = root.commands[cmdDelegate.index];
-                                root.commands[cmdDelegate.index] = root.commands[cmdDelegate.index - 1];
-                                root.commands[cmdDelegate.index - 1] = tmp;
-                                root.commandsRevision++;
+                                root.moveCommand(cmdDelegate.index, cmdDelegate.index - 1);
                             }
                         }
 
@@ -165,10 +205,7 @@ ColumnLayout {
                             tooltipText: pluginApi.tr("settings.moveDown")
                             enabled: cmdDelegate.index < root.commands.length - 1
                             onClicked: {
-                                var tmp = root.commands[cmdDelegate.index];
-                                root.commands[cmdDelegate.index] = root.commands[cmdDelegate.index + 1];
-                                root.commands[cmdDelegate.index + 1] = tmp;
-                                root.commandsRevision++;
+                                root.moveCommand(cmdDelegate.index, cmdDelegate.index + 1);
                             }
                         }
 
@@ -176,8 +213,7 @@ ColumnLayout {
                             icon: "trash"
                             tooltipText: pluginApi.tr("settings.remove")
                             onClicked: {
-                                root.commands.splice(cmdDelegate.index, 1);
-                                root.commandsRevision++;
+                                root.removeCommand(cmdDelegate.index);
                             }
                         }
                     }
@@ -192,8 +228,7 @@ ColumnLayout {
         initialIcon: "terminal-2"
         onIconSelected: function (iconName) {
             if (activeIndex >= 0 && activeIndex < root.commands.length) {
-                root.commands[activeIndex].icon = iconName;
-                root.commandsRevision++;
+                root.setCommandField(activeIndex, "icon", iconName);
             }
         }
     }
@@ -202,8 +237,7 @@ ColumnLayout {
         text: pluginApi.tr("settings.add")
         icon: "plus"
         onClicked: {
-            root.commands.push({ "name": "", "command": "", "icon": "terminal-2" });
-            root.commandsRevision++;
+            root.addCommand();
         }
     }
 }

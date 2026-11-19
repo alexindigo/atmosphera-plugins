@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.Commons
+import qs.Services.Plugins
 import qs.Services.UI
 
 Item {
@@ -12,8 +13,11 @@ Item {
   // Reactive state consumed by BarWidget and Panel
   property var profiles: []
   property var profileMeta: ({})
-  property string lastAppliedProfile: pluginApi?.pluginSettings?.lastAppliedProfile || ""
+  property string lastAppliedProfile: ""
   property bool isBusy: false
+  property var _lifetime: ({alive: true})
+  signal operationCompleted(var result)
+  Component.onDestruction: _lifetime.alive = false
 
   // ─── Reactive derived properties ────────────────────────────────────────────
 
@@ -65,13 +69,13 @@ Item {
 
   Process {
     id: listProc
-    stdout: StdioCollector {}
+    stdout: StdioCollector { id: listOutput }
     stderr: StdioCollector {}
     onExited: function(exitCode, exitStatus) {
       var names = []
       var meta = {}
       if (exitCode === 0) {
-        var lines = listProc.stdout.text.split('\n')
+        var lines = listOutput.text.split('\n')
         for (var i = 0; i < lines.length; i++) {
           var line = lines[i]
           if (line.trim() === "") continue
@@ -94,67 +98,74 @@ Item {
 
   Process {
     id: cmdProc
-    stdout: StdioCollector {}
-    stderr: StdioCollector {}
+    stdout: StdioCollector { id: commandOutput }
+    stderr: StdioCollector { id: commandErrors }
     property var pendingCallback: null
     onExited: function(exitCode, exitStatus) {
       var cb = pendingCallback
       pendingCallback = null
-      if (cb) cb(exitCode, cmdProc.stdout.text, cmdProc.stderr.text)
+      if (cb) cb(exitCode, commandOutput.text, commandErrors.text)
     }
   }
 
   function _runCommand(cmd, callback) {
+    if (cmdProc.running || cmdProc.pendingCallback) {
+      Qt.callLater(function () { callback(1, "", "profile-command-busy") })
+      return false
+    }
     cmdProc.pendingCallback = callback
     cmdProc.command = cmd
     cmdProc.running = true
+    return true
   }
 
   // ─── Backup helpers ──────────────────────────────────────────────────────────
 
-  function _createBackup(beforeProfileName, callback) {
-    var bDir = backupsDir
-    var ts = _timestamp()
-    var backupDir = bDir + ts
-    var cfg = Settings.configDir
+  function _createBackup(beforeProfileName, callback, hidden) {
+    var base = hidden ? Settings.configDir + ".profile-operations/baselines/" : backupsDir
+    var backupDir = base + _timestamp() + "-" + Date.now()
     var metaJson = JSON.stringify({
       "savedAt": new Date().toISOString(),
       "description": "auto-backup before applying: " + beforeProfileName
     })
-
-    // Build wallpapers JSON from current state
-    var screens = []
-    try {
-      var wmap = WallpaperService.currentWallpapers
-      for (var wkey in wmap) {
-        var we = wmap[wkey]
-        if (!we) continue
-        var wl = (typeof we === "string") ? we : (we.light || "")
-        var wd = (typeof we === "string") ? we : (we.dark  || "")
-        screens.push({ "name": wkey, "light": wl, "dark": wd })
-      }
-    } catch (e) {}
-    var wallJson = JSON.stringify({ "screens": screens }, null, 2)
-
-    var copyCmd = ["sh", scriptsDir + "/backup-configs.sh", cfg, backupDir]
-    _runCommand(copyCmd, function(code) {
-      if (code !== 0) { if (callback) callback(); return }
-      // Write wallpapers
-      _runCommand(["sh", scriptsDir + "/write-file.sh", wallJson, backupDir + "/wallpapers.json"], function() {
-        // Write meta
-        _runCommand(["sh", scriptsDir + "/write-file.sh", metaJson, backupDir + "/meta.json"], function() {
-          Logger.i("ShellProfiles", "Backup created:", ts)
-          _pruneBackups(bDir, callback)
-        })
-      })
+    _runCommand(["sh", scriptsDir + "/backup-configs.sh", Settings.configDir, backupDir,
+      _wallpapersJson(), metaJson], function(code, stdout, stderr) {
+      callback(code === 0, code === 0 ? backupDir : "", stderr)
     })
+  }
+
+  function _wallpapersJson() {
+    var screens = []
+    var map = WallpaperService.currentWallpapers
+    for (var key of Object.keys(map)) {
+      var entry = map[key]
+      if (!entry) continue
+      screens.push({name: key, light: typeof entry === "string" ? entry : entry.light || "",
+        dark: typeof entry === "string" ? entry : entry.dark || ""})
+    }
+    return JSON.stringify({screens: screens})
+  }
+
+  function _settleOwners(operation, callback) {
+    var lifetime = _lifetime
+    Service.synchronizePreferences(operation, function (result) {
+      if (lifetime.alive) callback(result.status === "current" && result.refreshState === "current", result)
+    })
+  }
+
+  function _settingsFailure(receipt, fallback) {
+    if (receipt?.error?.code !== "unresolved-group" || !receipt.preferenceBlockers?.length)
+      return fallback
+    var workflows = receipt.preferenceBlockers.map(function (blocker) {
+      return blocker.ownerKey + "/" + (blocker.requestKey || blocker.groupToken) + " (" + blocker.state + ")"
+    })
+    return "Profile settings blocked by unresolved workflow: " + workflows.join(", ")
   }
 
   function _pruneBackups(bDir, callback) {
     var maxCount = Math.max(1, Math.min(20, pluginApi?.pluginSettings?.backupCount ?? 5))
     _runCommand(["sh", scriptsDir + "/prune-backups.sh", bDir, String(maxCount)], function(code) {
-      Logger.i("ShellProfiles", "Pruned backups in:", bDir)
-      if (callback) callback()
+      if (callback) callback(code === 0)
     })
   }
 
@@ -184,6 +195,7 @@ Item {
     Quickshell.execDetached(["mkdir", "-p", profilesDir])
     Quickshell.execDetached(["mkdir", "-p", backupsDir])
     listProfiles()
+    lastAppliedProfile = pluginApi?.pluginSettings?.lastAppliedProfile || ""
   }
 
   // ─── Public API ──────────────────────────────────────────────────────────────
@@ -197,170 +209,164 @@ Item {
   function saveProfile(name, callback) {
     var err = validateName(name)
     if (err) { if (callback) callback(false, err); return }
-
+    if (isBusy) { if (callback) callback(false, "profile-busy"); return }
     var trimmed = name.trim()
     var dirPath = _profilePath(trimmed)
-    var cfg = Settings.configDir
-    var savedAt = new Date().toISOString()
-
-    // Build wallpapers JSON from current WallpaperService state
-    var screens = []
-    try {
-      var map = WallpaperService.currentWallpapers
-      for (var key in map) {
-        var entry = map[key]
-        if (!entry) continue
-        var light = (typeof entry === "string") ? entry : (entry.light || "")
-        var dark  = (typeof entry === "string") ? entry : (entry.dark  || "")
-        screens.push({ "name": key, "light": light, "dark": dark })
-      }
-    } catch (e) {
-      Logger.w("ShellProfiles", "Could not read WallpaperService:", e)
-    }
-    var wallpapersJson = JSON.stringify({ "screens": screens }, null, 2)
-    var metaJson = JSON.stringify({ "savedAt": savedAt })
-
-    var copyCmd = ["sh", scriptsDir + "/save-profile.sh", cfg, dirPath]
-
+    var wallpapersJson = _wallpapersJson()
+    var metaJson = JSON.stringify({savedAt: new Date().toISOString()})
     isBusy = true
-    _runCommand(copyCmd, function(code, stdout, stderr) {
-      if (code !== 0) {
-        root.isBusy = false
-        var msg = stderr.trim() || pluginApi?.tr("error.save-failed")
-        Logger.e("ShellProfiles", "Save failed:", msg)
-        ToastService.showError(pluginApi?.tr("panel.title"), msg)
-        if (callback) callback(false, msg)
-        return
-      }
-      // Write wallpapers.json
-      _runCommand(["sh", scriptsDir + "/write-file.sh", wallpapersJson, dirPath + "/wallpapers.json"], function(wCode, wStdout, wStderr) {
-        if (wCode !== 0) {
-          root.isBusy = false
-          var wmsg = wStderr.trim() || pluginApi?.tr("error.save-failed")
-          Logger.e("ShellProfiles", "Save failed (wallpapers):", wmsg)
-          ToastService.showError(pluginApi?.tr("panel.title"), wmsg)
-          if (callback) callback(false, wmsg)
-          return
-        }
-        // Write meta.json
-        _runCommand(["sh", scriptsDir + "/write-file.sh", metaJson, dirPath + "/meta.json"], function() {
-          root.isBusy = false
-          Logger.i("ShellProfiles", "Saved profile:", trimmed)
-          root.listProfiles()
-          ToastService.showNotice(
-            pluginApi?.tr("panel.title"),
-            pluginApi?.tr("toast.saved", { "name": trimmed }),
-            pluginIcon
-          )
-          if (callback) callback(true, "")
-        })
+    _settleOwners("save", function (ready, receipt) {
+      if (!ready) { _complete("save", trimmed, false, _settingsFailure(receipt, "profile-settings-receipt"), callback, {settings: receipt}); return }
+      _runCommand(["sh", scriptsDir + "/save-profile.sh", Settings.configDir, dirPath,
+        wallpapersJson, metaJson], function(code, stdout, stderr) {
+        _complete("save", trimmed, code === 0, code === 0 ? "" : stderr.trim() || "profile-copy-failed", callback, {settings: receipt})
       })
+    })
+  }
+
+  function _complete(operation, name, success, message, callback, outcomes) {
+    isBusy = false
+    var result = {operation: operation, name: name, status: success ? "completed" : "failed", outcomes: outcomes || {}}
+    operationCompleted(result)
+    if (success) {
+      listProfiles()
+      var key = {save: "toast.saved", apply: "toast.applied", delete: "toast.deleted"}[operation]
+      if (key) ToastService.showNotice(pluginApi?.tr("panel.title"), pluginApi?.tr(key, {name: name}), pluginIcon)
+    } else {
+      ToastService.showError(pluginApi?.tr("panel.title"), message)
+    }
+    if (callback) callback(success, message, result)
+  }
+
+  function _rememberProfile(name, callback) {
+    if (!pluginApi?.settingsReady) { callback(false, {status: "failed", error: {code: "profile-plugin-owner"}}); return }
+    var lifetime = _lifetime
+    pluginApi.pluginSettings.lastAppliedProfile = name
+    var input = pluginApi.settingsHandle.info(["lastAppliedProfile"]).latestInput
+    pluginApi.saveSettings(function (receipt) {
+      if (!lifetime.alive) return
+      var ok = ["saved", "nothing_to_save"].indexOf(receipt.status) !== -1 &&
+        pluginApi.settingsHandle.info(["lastAppliedProfile"]).latestInput === input &&
+        (!receipt.unresolvedGroups || !receipt.unresolvedGroups.length)
+      if (ok) root.lastAppliedProfile = name
+      callback(ok, receipt)
     })
   }
 
   function applyProfile(name, includeWallpapers, callback) {
     var err = validateName(name)
     if (err) { if (callback) callback(false, err); return }
-
+    if (isBusy) { if (callback) callback(false, "profile-busy"); return }
     var trimmed = name.trim()
     var dirPath = _profilePath(trimmed)
     var cfg = Settings.configDir
-
-    var copyConfigFiles = function() {
-      var cmd = ["sh", scriptsDir + "/apply-profile.sh", dirPath, cfg]
-      _runCommand(cmd, function(code, stdout, stderr) {
-        root.isBusy = false
-        if (code === 0) {
-          // Persist the last applied profile name
-          root.lastAppliedProfile = trimmed
-          if (pluginApi) {
-            pluginApi.pluginSettings.lastAppliedProfile = trimmed
-            pluginApi.saveSettings()
-          }
-          Logger.i("ShellProfiles", "Applied profile:", trimmed)
-          ToastService.showNotice(
-            pluginApi?.tr("panel.title"),
-            pluginApi?.tr("toast.applied", { "name": trimmed }),
-            pluginIcon
-          )
-          if (callback) callback(true, "")
-        } else {
-          var msg = stderr.trim() || pluginApi?.tr("error.apply-failed")
-          Logger.e("ShellProfiles", "Apply failed:", msg)
-          ToastService.showError(pluginApi?.tr("panel.title"), msg)
-          if (callback) callback(false, msg)
-        }
+    var backupEnabled = pluginApi?.pluginSettings?.backupEnabled ?? true
+    var pruneDirectory = backupsDir
+    var lifetime = _lifetime
+    var outcomes = {settings: {status: "not_requested"}, wallpapers: {status: "not_requested"}}
+    isBusy = true
+    function fail(code) {
+      if (lifetime.alive) root._complete("apply", trimmed, false, code, callback, outcomes)
+    }
+    function remember() {
+      _rememberProfile(trimmed, function (ok, receipt) {
+        outcomes.lastApplied = receipt
+        if (!ok) { fail("profile-last-applied-receipt"); return }
+        root._complete("apply", trimmed, true, "", callback, outcomes)
       })
     }
-
-    var doApply = function() {
-      if (includeWallpapers) {
-        _runCommand(["cat", dirPath + "/wallpapers.json"], function(wCode, wStdout) {
-          if (wCode === 0) {
-            try {
-              var data = JSON.parse(wStdout)
-              if (data && data.screens && Array.isArray(data.screens)) {
-                for (var i = 0; i < data.screens.length; i++) {
-                  var entry = data.screens[i]
-                  if (!entry || !entry.name) continue
-                  if (entry.light)
-                    WallpaperService.changeWallpaper(entry.light, entry.name, "light")
-                  if (entry.dark && entry.dark !== entry.light)
-                    WallpaperService.changeWallpaper(entry.dark, entry.name, "dark")
-                }
-              }
-            } catch (e) {
-              Logger.w("ShellProfiles", "Could not parse wallpapers.json:", e)
-            }
+    function finish() {
+      if (!backupEnabled) { remember(); return }
+      _pruneBackups(pruneDirectory, function (ok) {
+        if (!ok) { fail("profile-backup-prune"); return }
+        remember()
+      })
+    }
+    function wallpapers(entries) {
+      try {
+        for (var entry of entries) {
+          if (entry.light) WallpaperService.changeWallpaper(entry.light, entry.name, "light")
+          if (entry.dark) WallpaperService.changeWallpaper(entry.dark, entry.name, "dark")
+        }
+        for (var entry of entries) {
+          if ((entry.light && WallpaperService.getWallpaperPathForSlot(entry.name, "light") !== entry.light) ||
+              (entry.dark && WallpaperService.getWallpaperPathForSlot(entry.name, "dark") !== entry.dark)) {
+            throw new Error("profile-wallpaper-consumer")
           }
-          copyConfigFiles()
+        }
+        outcomes.wallpapers = {status: includeWallpapers ? "changed" : "not_requested", screens: entries.length}
+      } catch (error) { fail("profile-wallpaper-consumer"); return }
+      // Wallpaper selection may itself submit settings (e.g. solid color mode).
+      _settleOwners("save", function (ok, receipt) {
+        outcomes.afterEffects = receipt
+        if (!ok) { fail(_settingsFailure(receipt, "profile-settings-receipt")); return }
+        finish()
+      })
+    }
+    function publish(baseline, entries) {
+      if (!outcomes.before.isCurrent()) { fail("profile-concurrent-edit"); return }
+      _runCommand(["sh", scriptsDir + "/apply-profile.sh", dirPath, cfg, baseline, cfg + ".profile-operations"], function(code, stdout) {
+        if (code !== 0) { fail("profile-copy-failed"); return }
+        try { outcomes.files = JSON.parse(stdout) }
+        catch (error) { fail("profile-copy-receipt"); return }
+        if (!outcomes.before.isCurrent()) { fail("profile-concurrent-edit"); return }
+        _settleOwners("reload", function (ok, receipt) {
+          outcomes.settings = receipt
+          if (!ok) { fail(_settingsFailure(receipt, "profile-reload-receipt")); return }
+          AtmoColor.reloadFromDisk(function (colors) {
+            if (!lifetime.alive) return
+            outcomes.colors = colors
+            if (colors.status !== "reloaded") { fail("profile-colors-reload"); return }
+            Registry.reloadFromDisk(function (registry) {
+              if (!lifetime.alive) return
+              outcomes.registry = registry
+              if (registry.status !== "reloaded") { fail("profile-registry-reload"); return }
+              wallpapers(entries)
+            })
+          })
         })
-      } else {
-        copyConfigFiles()
-      }
+      })
     }
-
-    isBusy = true
-
-    // Create auto-backup before applying, if enabled
-    var backupEnabled = pluginApi?.pluginSettings?.backupEnabled ?? true
-    if (backupEnabled) {
-      _createBackup(trimmed, doApply)
-    } else {
-      doApply()
-    }
+    _settleOwners("save", function (ok, receipt) {
+      outcomes.before = receipt
+      if (!ok) { fail(_settingsFailure(receipt, "profile-settings-receipt")); return }
+      _createBackup(trimmed, function (backedUp, baseline) {
+        if (!backedUp) { fail("profile-backup-failed"); return }
+        outcomes.backup = {status: "saved", directory: baseline, automatic: backupEnabled}
+        if (!includeWallpapers) { publish(baseline, []); return }
+        _runCommand(["cat", dirPath + "/wallpapers.json"], function (code, text) {
+          try {
+            if (code !== 0) throw new Error("profile-wallpapers-read")
+            var data = JSON.parse(text)
+            if (!data || !Array.isArray(data.screens) || !data.screens.every(function (entry) {
+              return entry && typeof entry.name === "string" && entry.name.length &&
+                typeof entry.light === "string" && typeof entry.dark === "string"
+            })) throw new Error("profile-wallpapers-shape")
+            publish(baseline, data.screens)
+          } catch (error) { fail("profile-wallpapers-read") }
+        })
+      }, !backupEnabled)
+    })
   }
 
   function deleteProfile(name, callback) {
     var err = validateName(name)
     if (err) { if (callback) callback(false, err); return }
+    if (isBusy) { if (callback) callback(false, "profile-busy"); return }
 
     var trimmed = name.trim()
     isBusy = true
     _runCommand(["rm", "-rf", _profilePath(trimmed)], function(code, stdout, stderr) {
-      root.isBusy = false
       if (code === 0) {
-        // Clear active profile indicator if we deleted the active one
         if (root.lastAppliedProfile === trimmed) {
-          root.lastAppliedProfile = ""
-          if (pluginApi) {
-            pluginApi.pluginSettings.lastAppliedProfile = ""
-            pluginApi.saveSettings()
-          }
+          _rememberProfile("", function (ok, receipt) {
+            _complete("delete", trimmed, ok, ok ? "" : "profile-last-applied-receipt", callback, {lastApplied: receipt})
+          })
+        } else {
+          _complete("delete", trimmed, true, "", callback)
         }
-        Logger.i("ShellProfiles", "Deleted profile:", trimmed)
-        root.listProfiles()
-        ToastService.showNotice(
-          pluginApi?.tr("panel.title"),
-          pluginApi?.tr("toast.deleted", { "name": trimmed }),
-          pluginIcon
-        )
-        if (callback) callback(true, "")
       } else {
-        var msg = stderr.trim() || pluginApi?.tr("error.delete-failed")
-        Logger.e("ShellProfiles", "Delete failed:", msg)
-        ToastService.showError(pluginApi?.tr("panel.title"), msg)
-        if (callback) callback(false, msg)
+        _complete("delete", trimmed, false, stderr.trim() || "profile-delete-failed", callback)
       }
     })
   }
@@ -368,6 +374,7 @@ Item {
   function renameProfile(oldName, newName, callback) {
     var err = validateName(oldName) || validateName(newName)
     if (err) { if (callback) callback(false, err); return }
+    if (isBusy) { if (callback) callback(false, "profile-busy"); return }
 
     var oldT = oldName.trim()
     var newT = newName.trim()
@@ -375,24 +382,16 @@ Item {
 
     isBusy = true
     _runCommand(["mv", _profilePath(oldT), _profilePath(newT)], function(code, stdout, stderr) {
-      root.isBusy = false
       if (code === 0) {
-        // Keep active profile in sync after rename
         if (root.lastAppliedProfile === oldT) {
-          root.lastAppliedProfile = newT
-          if (pluginApi) {
-            pluginApi.pluginSettings.lastAppliedProfile = newT
-            pluginApi.saveSettings()
-          }
+          _rememberProfile(newT, function (ok, receipt) {
+            _complete("rename", newT, ok, ok ? "" : "profile-last-applied-receipt", callback, {lastApplied: receipt})
+          })
+        } else {
+          _complete("rename", newT, true, "", callback)
         }
-        Logger.i("ShellProfiles", "Renamed:", oldT, "->", newT)
-        root.listProfiles()
-        if (callback) callback(true, "")
       } else {
-        var msg = stderr.trim() || pluginApi?.tr("error.rename-failed")
-        Logger.e("ShellProfiles", "Rename failed:", msg)
-        ToastService.showError(pluginApi?.tr("panel.title"), msg)
-        if (callback) callback(false, msg)
+        _complete("rename", newT, false, stderr.trim() || "profile-rename-failed", callback)
       }
     })
   }

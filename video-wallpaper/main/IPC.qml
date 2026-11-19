@@ -2,10 +2,14 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.Commons
+import "../common/MonitorCommands.js" as Commands
 
 Item {
     id: root
     required property var pluginApi
+    readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
+        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
+        function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
 
 
     /***************************
@@ -22,92 +26,22 @@ Item {
     * FUNCTIONS
     ***************************/
     function deltaChangeMonitorProperty(key: string, delta: double, screen: string): void {
-        function createMonitorSettings(monitor) {
-            // Check if the monitor settings exist and create it if it doesn't exist
-            if (pluginApi.pluginSettings[monitor] === undefined) {
-                pluginApi.pluginSettings[monitor] = {};
-            }
-        }
-
-        if(pluginApi == null) {
-            Logger.e("video-wallpaper", "PluginAPI is null.");
-            return;
-        }
-
-        if (screen === "") {
-            for (const screen of Quickshell.screens) {
-                createMonitorSettings(screen.name);
-                const currentValue = pluginApi.pluginSettings[screen.name][key];
-                if (typeof currentValue === "number") {
-                    pluginApi.pluginSettings[screen.name][key] = currentValue + delta;
-                }
-            }
-        } else {
-            createMonitorSettings(screen);
-            const currentValue = pluginApi.pluginSettings[screen][key];
-            if (typeof currentValue === "number") {
-                pluginApi.pluginSettings[screen.name][key] = currentValue + delta;
-            }
-        }
-
-        pluginApi.saveSettings();
+        submitMonitorCommand("delta", key, delta, screen);
     }
 
     function toggleMonitorProperty(key: string, screen: string): void {
-        function createMonitorSettings(monitor) {
-            // Check if the monitor settings exist and create it if it doesn't exist
-            if (pluginApi.pluginSettings[monitor] === undefined) {
-                pluginApi.pluginSettings[monitor] = {};
-            }
-        }
-
-        if(pluginApi == null) {
-            Logger.e("video-wallpaper", "PluginAPI is null.");
-            return;
-        }
-
-        if (screen === "") {
-            for (const screen of Quickshell.screens) {
-                createMonitorSettings(screen.name);
-                const currentValue = pluginApi.pluginSettings[screen.name][key];
-                if (typeof currentValue === "boolean") {
-                    pluginApi.pluginSettings[screen.name][key] = !currentValue;
-                }
-            }
-        } else {
-            createMonitorSettings(screen);
-            const currentValue = pluginApi.pluginSettings[screen][key];
-            if (typeof currentValue === "boolean") {
-                pluginApi.pluginSettings[screen.name][key] = !currentValue;
-            }
-        }
-
-        pluginApi.saveSettings();
+        submitMonitorCommand("toggle", key, undefined, screen);
     }
 
     function saveMonitorProperty(key: string, value: var, screen: string): void {
-        function createMonitorSettings(monitor) {
-            // Check if the monitor settings exist and create it if it doesn't exist
-            if (pluginApi.pluginSettings[monitor] === undefined) {
-                pluginApi.pluginSettings[monitor] = {};
-            }
-        }
+        submitMonitorCommand("set", key, value, screen);
+    }
 
-        if(pluginApi == null) {
-            Logger.e("video-wallpaper", "PluginAPI is null.");
-            return;
-        }
-
-        if (screen === "") {
-            for (const screen of Quickshell.screens) {
-                createMonitorSettings(screen.name);
-                pluginApi.pluginSettings[screen.name][key] = value;
-            }
-        } else {
-            createMonitorSettings(screen);
-            pluginApi.pluginSettings[screen][key] = value;
-        }
-
+    function submitMonitorCommand(op, key, value, screen) {
+        if (!pluginApi) return;
+        var names = screen === "" ? Array.from(Quickshell.screens).map(screen => screen.name) : [screen];
+        if (!names.length) return;
+        monitorCommand.submit(names.map(name => ({op: op, screen: name, field: key, value: value})));
         pluginApi.saveSettings();
     }
 
@@ -120,14 +54,16 @@ Item {
         if (screen === "") {
             let values = [];
             for (const screen of Quickshell.screens) {
-                if (root.pluginApi?.pluginSettings?.[screen.name]?.[key] !== undefined) {
-                    values.push(`${screen.name}: ${root.pluginApi.pluginSettings[screen.name][key]}\n`);
+                var value = Commands.value(root.pluginApi?.pluginSettings?.monitors, screen.name, key, root.pluginApi?.manifest?.metadata?.defaultSettings);
+                if (value !== undefined) {
+                    values.push(`${screen.name}: ${value}\n`);
                 }
             }
 
             return values.join(", ");
         } else {
-            return pluginApi?.pluginSettings?.[screen]?.[key] || "";
+            var value = Commands.value(pluginApi?.pluginSettings?.monitors, screen, key, pluginApi?.manifest?.metadata?.defaultSettings);
+            return value === undefined ? "" : String(value);
         }
     }
 

@@ -14,8 +14,22 @@ ColumnLayout {
     id: root
 
     // noctalia plugin api, injected dynamically
-    property QtObject pluginApi: null
-    readonly property QtObject pluginSettings: pluginApi?.mainInstance.pluginSettings
+    property var pluginApi: null
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property bool editDebug: root.pluginApi?.initialSettings?.debug ?? false
+        readonly property bool editListen: root.pluginApi?.initialSettings?.rogcc?.listenToNotifications ?? false
+        readonly property bool editPatchPending: root.pluginApi?.initialSettings?.supergfxctl?.patchPending ?? true
+        readonly property bool editPolling: root.pluginApi?.initialSettings?.supergfxctl?.polling ?? false
+        readonly property int editPollingInterval: root.pluginApi?.initialSettings?.supergfxctl?.pollingInterval ?? 3000
+        ranges: [NSettingsRange { field: "editPollingInterval"; from: pollingInput.from; to: pollingInput.to }]
+    }
+    property bool editDebug: displayBaseline.editDebug
+    property bool editListen: displayBaseline.editListen
+    property bool editPatchPending: displayBaseline.editPatchPending
+    property bool editPolling: displayBaseline.editPolling
+    property int editPollingInterval: displayBaseline.project("editPollingInterval")
+    readonly property bool settingsDirty: displayBaseline.differs({editDebug: editDebug, editListen: editListen, editPatchPending: editPatchPending, editPolling: editPolling, editPollingInterval: editPollingInterval})
 
     spacing: Style.marginM
 
@@ -43,8 +57,8 @@ ColumnLayout {
             enabled: false
             label: root.pluginApi.tr("settings.rogcc.listenToNotifications.label")
             description: root.pluginApi.tr("settings.rogcc.listenToNotifications.description")
-            checked: root.pluginSettings.rogcc.listenToNotifications
-            onToggled: checked => root.pluginSettings.rogcc.listenToNotifications = checked
+            checked: root.editListen
+            onToggled: checked => root.editListen = checked
         }
     }
 
@@ -69,8 +83,8 @@ ColumnLayout {
         Layout.fillWidth: true
         label: root.pluginApi.tr("settings.supergfxctl.patchPending.label")
         description: root.pluginApi.tr("settings.supergfxctl.patchPending.description")
-        checked: root.pluginSettings.supergfxctl.patchPending
-        onToggled: checked => root.pluginSettings.supergfxctl.patchPending = checked
+        checked: root.editPatchPending
+        onToggled: checked => root.editPatchPending = checked
     }
 
     RowLayout {
@@ -86,20 +100,21 @@ ColumnLayout {
             Layout.fillWidth: true
             label: root.pluginApi.tr("settings.supergfxctl.polling.label")
             description: root.pluginApi.tr("settings.supergfxctl.polling.description")
-            checked: root.pluginSettings.supergfxctl.polling
-            onToggled: checked => root.pluginSettings.supergfxctl.polling = checked
+            checked: root.editPolling
+            onToggled: checked => root.editPolling = checked
         }
     }
 
     NValueSlider {
-        isSettings: true
-        text: root.pluginSettings.supergfxctl.pollingInterval + "ms"
-        enabled: root.pluginSettings.supergfxctl.polling
+        id: pollingInput
+        objectName: "settings-range-editPollingInterval"
+        text: root.editPollingInterval + "ms"
+        enabled: root.editPolling
         from: 1000
         to: 5000
         stepSize: 250
-        value: root.pluginSettings.supergfxctl.pollingInterval
-        onMoved: value => root.pluginSettings.supergfxctl.pollingInterval = value
+        value: root.editPollingInterval
+        onMoved: value => root.editPollingInterval = value
     }
 
     RowLayout {
@@ -123,36 +138,22 @@ ColumnLayout {
         Layout.fillWidth: true
         label: root.pluginApi.tr("settings.debug.label")
         description: root.pluginApi.tr("settings.debug.description")
-        checked: root.pluginSettings.debug
-        onToggled: checked => root.pluginSettings.debug = checked
+        checked: root.editDebug
+        onToggled: checked => root.editDebug = checked
     }
 
     // This function is called by noctalia dialog
     function saveSettings(): void {
-        if (!root.pluginSettings) {
-            return console.error("supergfxctl", "[Settings]: plugin core (Main.qml) is not loaded");
-        }
-
         if (!root.pluginApi) {
             return console.error("supergfxctl", "[Settings]: cannot save settings: pluginApi is null");
         }
 
-        // TODO: move to pluginCore.pluginSettings
-        root.pluginApi.pluginSettings = {
-            debug: root.pluginSettings.debug,
-            rogcc: {
-                listenToNotifications: root.pluginSettings.rogcc.listenToNotifications
-            },
-            supergfxctl: {
-                patchPending: root.pluginSettings.supergfxctl.patchPending,
-                polling: root.pluginSettings.supergfxctl.polling,
-                pollingInterval: root.pluginSettings.supergfxctl.pollingInterval
-            }
-        };
+        root.pluginApi.pluginSettings.debug = editDebug;
+        root.pluginApi.pluginSettings.rogcc = Object.assign({}, root.pluginApi.pluginSettings.rogcc, {listenToNotifications: editListen});
+        root.pluginApi.pluginSettings.supergfxctl = Object.assign({}, root.pluginApi.pluginSettings.supergfxctl, {patchPending: editPatchPending, polling: editPolling, pollingInterval: editPollingInterval});
 
         // Persist to disk
         root.pluginApi.saveSettings();
 
-        root.pluginCore?.log("saved settings");
     }
 }

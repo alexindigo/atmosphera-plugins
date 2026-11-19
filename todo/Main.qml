@@ -3,12 +3,19 @@ import Quickshell
 import Quickshell.Io
 import qs.Commons
 import qs.Services.UI
+import "Pages.js" as Pages
 
 Item {
+  id: root
   property var pluginApi: null
   property var rawTodos: []
   property var rawPages: []
   property string currentExportPath: ""
+  Connections {
+    target: root.pluginApi ? root.pluginApi.pluginSettings : null
+    function onTodosChanged() {root.rawTodos = Pages.clone(root.pluginApi.pluginSettings.todos || []);}
+    function onPagesChanged() {root.rawPages = Pages.clone(root.pluginApi.pluginSettings.pages || []);}
+  }
 
   // Process for exporting todos
   Process {
@@ -77,21 +84,28 @@ Item {
 
       // Always create copies to avoid reference issues
       // Panel.qml may reassign pluginApi.pluginSettings.todos
-      rawTodos = pluginApi.pluginSettings.todos.slice();
-      rawPages = pluginApi.pluginSettings.pages.slice();
+      rawTodos = Pages.clone(pluginApi.pluginSettings.todos);
+      rawPages = Pages.clone(pluginApi.pluginSettings.pages);
 
       // Data migration: add missing fields to existing todos
+      var migrated = false;
       for (var i = 0; i < rawTodos.length; i++) {
-        if (rawTodos[i].pageId === undefined)
+        if (rawTodos[i].pageId === undefined) {
           rawTodos[i].pageId = 0;
+          migrated = true;
+        }
         if (rawTodos[i].priority === undefined || !["high", "medium", "low"].includes(rawTodos[i].priority)) {
           rawTodos[i].priority = "medium";
+          migrated = true;
         }
-        if (rawTodos[i].details === undefined)
+        if (rawTodos[i].details === undefined) {
           rawTodos[i].details = "";
+          migrated = true;
+        }
       }
 
-      pluginApi.saveSettings();
+      if (migrated) saveTodos();
+      else pluginApi.saveSettings();
     }
   }
 
@@ -371,38 +385,29 @@ Item {
 
   // Create new page
   function createPage(name) {
-    var newId = rawPages.length > 0 ? Math.max(...rawPages.map(p => p.id)) + 1 : 0;
-    rawPages.push({
-                    id: newId,
-                    name: name
-                  });
+    rawPages = Pages.create(rawPages, name);
     savePages();
     return true;
   }
 
   // Rename page (internal)
   function renamePageInternal(pageId, newName) {
-    for (var i = 0; i < rawPages.length; i++) {
-      if (rawPages[i].id === pageId) {
-        rawPages[i].name = newName;
-        break;
-      }
-    }
+    rawPages = Pages.rename(rawPages, pageId, newName);
     savePages();
     return true;
   }
 
   // Delete page (moves associated todos to default page)
   function deletePage(pageId) {
-    for (var i = 0; i < rawTodos.length; i++) {
-      if (rawTodos[i].pageId === pageId)
-        rawTodos[i].pageId = 0;
-    }
-    rawPages.splice(0, rawPages.length, ...rawPages.filter(p => p.id !== pageId));
-    if (pluginApi.pluginSettings.current_page_id === pageId)
-      pluginApi.pluginSettings.current_page_id = 0;
-    saveTodos();
-    savePages();
+    var next = Pages.remove(rawPages, rawTodos, pluginApi.pluginSettings.current_page_id, pageId);
+    rawPages = next.pages;
+    rawTodos = next.todos;
+    pluginApi.pluginSettings.pages = next.pages;
+    pluginApi.pluginSettings.todos = next.todos;
+    pluginApi.pluginSettings.current_page_id = next.current;
+    pluginApi.pluginSettings.count = next.todos.length;
+    pluginApi.pluginSettings.completedCount = next.todos.filter(todo => todo.completed).length;
+    pluginApi.saveSettings();
     return true;
   }
 

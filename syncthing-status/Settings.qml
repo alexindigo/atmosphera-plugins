@@ -6,23 +6,46 @@ import qs.Widgets
 ColumnLayout {
     id: root
 
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property bool valueEnabled: pluginApi?.pluginSettings?.enabled ?? true
+    readonly property string valueApiUrl: pluginApi?.pluginSettings?.apiUrl ?? ""
+    readonly property string valueApiKey: pluginApi?.pluginSettings?.apiKey ?? ""
+    readonly property string valueConfigPath: pluginApi?.pluginSettings?.configPath ?? ""
+    readonly property bool valueVerifyTls: pluginApi?.pluginSettings?.verifyTls ?? false
+    readonly property int valuePollIntervalMs: pluginApi?.pluginSettings?.pollIntervalMs ?? 10000
+    readonly property var valueFolderIds: {
+      const raw = pluginApi?.pluginSettings?.folderIds ?? [];
+      try { return Array.from(raw); } catch (e) { return []; }
+    }
+    ranges: [NSettingsRange { field: "valuePollIntervalMs"; from: rangeValuePollIntervalMs.from; to: rangeValuePollIntervalMs.to }]
+  }
+  readonly property bool settingsDirty: { return displayBaseline.differs({valueEnabled: root.valueEnabled, valueApiUrl: root.valueApiUrl, valueApiKey: root.valueApiKey, valueConfigPath: root.valueConfigPath, valueVerifyTls: root.valueVerifyTls, valuePollIntervalMs: root.valuePollIntervalMs, valueFolderIds: root.valueFolderIds}); }
+  property bool _savePending: false
+  property bool _refreshPending: false
+  property bool _feedbackPending: false
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root._savePending = false;
+      var refresh = root._refreshPending, feedback = root._feedbackPending;
+      root._refreshPending = false; root._feedbackPending = false;
+      if (refresh) root.mainInst?.requestPoll(true);
+      if (feedback) { saveStatus.text = root.tr("settings.saved"); saveStatusTimer.restart(); }
+    }
+  }
+
     property var pluginApi: null
     readonly property var mainInst: pluginApi?.mainInstance ?? null
 
-    property bool valueEnabled: pluginApi?.pluginSettings?.enabled ?? true
-    property string valueApiUrl: pluginApi?.pluginSettings?.apiUrl ?? ""
-    property string valueApiKey: pluginApi?.pluginSettings?.apiKey ?? ""
-    property string valueConfigPath: pluginApi?.pluginSettings?.configPath ?? ""
-    property bool valueVerifyTls: pluginApi?.pluginSettings?.verifyTls ?? false
-    property int valuePollIntervalMs: pluginApi?.pluginSettings?.pollIntervalMs ?? 10000
-    property var valueFolderIds: {
-        const raw = pluginApi?.pluginSettings?.folderIds ?? [];
-        try {
-            return Array.from(raw);
-        } catch (e) {
-            return [];
-        }
-    }
+    property bool valueEnabled: displayBaseline.valueEnabled
+    property string valueApiUrl: displayBaseline.valueApiUrl
+    property string valueApiKey: displayBaseline.valueApiKey
+    property string valueConfigPath: displayBaseline.valueConfigPath
+    property bool valueVerifyTls: displayBaseline.valueVerifyTls
+    property int valuePollIntervalMs: displayBaseline.project("valuePollIntervalMs")
+    property var valueFolderIds: displayBaseline.valueFolderIds
 
     function tr(key, params) {
         return pluginApi?.tr(key, params);
@@ -47,12 +70,17 @@ ColumnLayout {
         valueFolderIds = updated;
     }
 
-    function saveSettings(triggerRefresh) {
+    function requestRefresh() { root.saveSettings(true, true); }
+
+    function saveSettings(triggerRefresh, feedback) {
         if (!pluginApi) return;
         let url = valueApiUrl.trim();
         if (url && !url.startsWith("http://") && !url.startsWith("https://")) {
             url = "http://" + url;
         }
+        root.valueApiUrl = url;
+        root.valueApiKey = root.valueApiKey.trim();
+        root.valueConfigPath = root.valueConfigPath.trim();
         pluginApi.pluginSettings.enabled = valueEnabled;
         pluginApi.pluginSettings.apiUrl = url;
         pluginApi.pluginSettings.apiKey = valueApiKey.trim();
@@ -60,9 +88,10 @@ ColumnLayout {
         pluginApi.pluginSettings.verifyTls = valueVerifyTls;
         pluginApi.pluginSettings.pollIntervalMs = valuePollIntervalMs;
         pluginApi.pluginSettings.folderIds = Array.from(valueFolderIds);
-        pluginApi.saveSettings();
-        if (triggerRefresh) {
-            mainInst?.requestPoll(true);
+        if (pluginApi.saveSettings() !== false) {
+            root._savePending = true;
+            root._refreshPending = root._refreshPending || triggerRefresh === true;
+            root._feedbackPending = root._feedbackPending || feedback === true;
         }
     }
 
@@ -212,6 +241,8 @@ ColumnLayout {
         }
 
         NSlider {
+          id: rangeValuePollIntervalMs
+          objectName: "settings-range-valuePollIntervalMs"
             Layout.fillWidth: true
             from: 2000
             to: 60000
@@ -297,9 +328,7 @@ ColumnLayout {
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    root.saveSettings(false);
-                    saveStatus.text = tr("settings.saved");
-                    saveStatusTimer.restart();
+                    root.saveSettings(false, true);
                 }
             }
         }
@@ -324,9 +353,7 @@ ColumnLayout {
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    root.saveSettings(true);
-                    saveStatus.text = tr("settings.saved");
-                    saveStatusTimer.restart();
+                    root.requestRefresh();
                 }
             }
         }

@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import qs.Commons
 import qs.Widgets
+import qs.Portals
 
 ColumnLayout {
   id: root
@@ -10,107 +11,116 @@ ColumnLayout {
   property var pluginApi: null
   readonly property var mainInstance: pluginApi?.mainInstance ?? null
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings ?? ({})
+  property var editPreferences: pluginApi ? pluginApi.copyValue(pluginApi.initialSettings) : ({})
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property var editPreferences: root.pluginApi?.initialSettings || ({})
+    readonly property string editDensity: root.pluginApi?.initialSettings?.panelDensity ?? root.defaults.panelDensity ?? "balanced"
+    readonly property string editDownloadDirectory: root.currentDownloadDirectory
+    readonly property int editDownloadCacheMaxMb: root.currentDownloadCacheMaxMb
+    ranges: [NSettingsRange { field: "editDownloadCacheMaxMb"; from: cacheInput.from; to: cacheInput.to }]
+  }
+  property string editDensity: displayBaseline.editDensity
+  readonly property bool settingsDirty: displayBaseline.differs({editPreferences: editPreferences, editDensity: editDensity, editDownloadDirectory: editDownloadDirectory, editDownloadCacheMaxMb: editDownloadCacheMaxMb})
   readonly property string defaultDownloadDirectory: Quickshell.env("HOME") + "/Music/Noctalia"
   readonly property string currentProvider: root.mainInstance?.currentProvider ?? "youtube"
   readonly property string currentSortBy: root.mainInstance?.currentSortBy ?? "date"
   readonly property string currentYtPlayerClient: root.mainInstance?.ytPlayerClient ?? "android"
   readonly property string currentDownloadDirectory: root.mainInstance?.downloadDirectory ?? root.defaultDownloadDirectory
   readonly property int currentDownloadCacheMaxMb: root.mainInstance?.downloadCacheMaxMb ?? 0
-  readonly property string previewMetadataMode: pluginApi?.pluginSettings?.previewMetadataMode
+  readonly property string previewMetadataMode: editPreferences.previewMetadataMode
       ?? root.defaults.previewMetadataMode
       ?? "always"
-  readonly property bool showUploaderMetadata: pluginApi?.pluginSettings?.showUploaderMetadata
+  readonly property bool showUploaderMetadata: editPreferences.showUploaderMetadata
       ?? root.defaults.showUploaderMetadata
       ?? true
-  readonly property bool showAlbumMetadata: pluginApi?.pluginSettings?.showAlbumMetadata
+  readonly property bool showAlbumMetadata: editPreferences.showAlbumMetadata
       ?? root.defaults.showAlbumMetadata
       ?? true
-  readonly property bool showDurationMetadata: pluginApi?.pluginSettings?.showDurationMetadata
+  readonly property bool showDurationMetadata: editPreferences.showDurationMetadata
       ?? root.defaults.showDurationMetadata
       ?? true
-  readonly property bool showRatingMetadata: pluginApi?.pluginSettings?.showRatingMetadata
+  readonly property bool showRatingMetadata: editPreferences.showRatingMetadata
       ?? root.defaults.showRatingMetadata
       ?? true
-  readonly property bool showTagMetadata: pluginApi?.pluginSettings?.showTagMetadata
+  readonly property bool showTagMetadata: editPreferences.showTagMetadata
       ?? root.defaults.showTagMetadata
       ?? true
-  readonly property bool showPlayStatsMetadata: pluginApi?.pluginSettings?.showPlayStatsMetadata
+  readonly property bool showPlayStatsMetadata: editPreferences.showPlayStatsMetadata
       ?? root.defaults.showPlayStatsMetadata
       ?? true
-  readonly property bool showStatusMetadata: pluginApi?.pluginSettings?.showStatusMetadata
+  readonly property bool showStatusMetadata: editPreferences.showStatusMetadata
       ?? root.defaults.showStatusMetadata
       ?? true
-  readonly property bool showPreviewChips: pluginApi?.pluginSettings?.showPreviewChips
+  readonly property bool showPreviewChips: editPreferences.showPreviewChips
       ?? root.defaults.showPreviewChips
       ?? true
-  readonly property string previewThumbnailSize: pluginApi?.pluginSettings?.previewThumbnailSize
+  readonly property string previewThumbnailSize: editPreferences.previewThumbnailSize
       ?? root.defaults.previewThumbnailSize
       ?? "comfortable"
-  readonly property bool showHomeRecent: pluginApi?.pluginSettings?.showHomeRecent
+  readonly property bool showHomeRecent: editPreferences.showHomeRecent
       ?? root.defaults.showHomeRecent
       ?? true
-  readonly property bool showHomeTop: pluginApi?.pluginSettings?.showHomeTop
+  readonly property bool showHomeTop: editPreferences.showHomeTop
       ?? root.defaults.showHomeTop
       ?? true
-  readonly property bool showHomeTags: pluginApi?.pluginSettings?.showHomeTags
+  readonly property bool showHomeTags: editPreferences.showHomeTags
       ?? root.defaults.showHomeTags
       ?? true
-  readonly property bool showHomeArtists: pluginApi?.pluginSettings?.showHomeArtists
+  readonly property bool showHomeArtists: editPreferences.showHomeArtists
       ?? root.defaults.showHomeArtists
       ?? true
-  readonly property bool showHomePlaylists: pluginApi?.pluginSettings?.showHomePlaylists
+  readonly property bool showHomePlaylists: editPreferences.showHomePlaylists
       ?? root.defaults.showHomePlaylists
       ?? true
-  readonly property string defaultPanelTab: pluginApi?.pluginSettings?.defaultPanelTab
+  readonly property string defaultPanelTab: editPreferences.defaultPanelTab
       ?? root.defaults.defaultPanelTab
       ?? "search"
-  readonly property string defaultPanelLibrarySection: pluginApi?.pluginSettings?.defaultPanelLibrarySection
+  readonly property string defaultPanelLibrarySection: editPreferences.defaultPanelLibrarySection
       ?? root.defaults.defaultPanelLibrarySection
       ?? "tracks"
-  readonly property string panelDensity: pluginApi?.pluginSettings?.panelDensity
-      ?? root.defaults.panelDensity
-      ?? "balanced"
-  readonly property bool showPanelHeader: pluginApi?.pluginSettings?.showPanelHeader
+  readonly property string panelDensity: editDensity
+  readonly property bool showPanelHeader: editPreferences.showPanelHeader
       ?? root.defaults.showPanelHeader
       ?? true
-  readonly property bool showPanelNowPlaying: pluginApi?.pluginSettings?.showPanelNowPlaying
+  readonly property bool showPanelNowPlaying: editPreferences.showPanelNowPlaying
       ?? root.defaults.showPanelNowPlaying
       ?? true
-  readonly property bool showPanelPlaybackProgress: pluginApi?.pluginSettings?.showPanelPlaybackProgress
+  readonly property bool showPanelPlaybackProgress: editPreferences.showPanelPlaybackProgress
       ?? root.defaults.showPanelPlaybackProgress
       ?? true
-  readonly property bool showPanelProviderChips: pluginApi?.pluginSettings?.showPanelProviderChips
+  readonly property bool showPanelProviderChips: editPreferences.showPanelProviderChips
       ?? root.defaults.showPanelProviderChips
       ?? true
-  readonly property bool showPanelRecentTracks: pluginApi?.pluginSettings?.showPanelRecentTracks
+  readonly property bool showPanelRecentTracks: editPreferences.showPanelRecentTracks
       ?? root.defaults.showPanelRecentTracks
       ?? true
-  readonly property bool showPanelSearchHelper: pluginApi?.pluginSettings?.showPanelSearchHelper
+  readonly property bool showPanelSearchHelper: editPreferences.showPanelSearchHelper
       ?? root.defaults.showPanelSearchHelper
       ?? true
-  readonly property bool showPanelPreview: pluginApi?.pluginSettings?.showPanelPreview
+  readonly property bool showPanelPreview: editPreferences.showPanelPreview
       ?? root.defaults.showPanelPreview
       ?? true
-  readonly property bool showPanelUrlActions: pluginApi?.pluginSettings?.showPanelUrlActions
+  readonly property bool showPanelUrlActions: editPreferences.showPanelUrlActions
       ?? root.defaults.showPanelUrlActions
       ?? true
-  readonly property bool showPanelSpeedControls: pluginApi?.pluginSettings?.showPanelSpeedControls
+  readonly property bool showPanelSpeedControls: editPreferences.showPanelSpeedControls
       ?? root.defaults.showPanelSpeedControls
       ?? true
-  readonly property bool showPanelQueueControls: pluginApi?.pluginSettings?.showPanelQueueControls
+  readonly property bool showPanelQueueControls: editPreferences.showPanelQueueControls
       ?? root.defaults.showPanelQueueControls
       ?? true
-  readonly property bool showPanelStatusBanner: pluginApi?.pluginSettings?.showPanelStatusBanner
+  readonly property bool showPanelStatusBanner: editPreferences.showPanelStatusBanner
       ?? root.defaults.showPanelStatusBanner
       ?? true
-  readonly property bool showBarHoverTrackTitle: pluginApi?.pluginSettings?.showBarHoverTrackTitle
+  readonly property bool showBarHoverTrackTitle: editPreferences.showBarHoverTrackTitle
       ?? root.defaults.showBarHoverTrackTitle
       ?? true
-  readonly property bool autoSaveMp3AfterPlayback: pluginApi?.pluginSettings?.autoSaveMp3AfterPlayback
+  readonly property bool autoSaveMp3AfterPlayback: editPreferences.autoSaveMp3AfterPlayback
       ?? root.defaults.autoSaveMp3AfterPlayback
       ?? false
   property string editDownloadDirectory: root.currentDownloadDirectory
-  property int editDownloadCacheMaxMb: root.currentDownloadCacheMaxMb
+  property int editDownloadCacheMaxMb: displayBaseline.project("editDownloadCacheMaxMb")
 
   spacing: Style.marginL
 
@@ -120,7 +130,14 @@ ColumnLayout {
       return;
     }
 
-    pluginApi.pluginSettings[key] = value;
+    if (key === "panelDensity") { editDensity = value; return; }
+    var next = Object.assign({}, editPreferences); next[key] = value; editPreferences = next;
+  }
+
+  function saveSettings() {
+    editPreferences = Object.assign({}, editPreferences, {panelDensity: editDensity});
+    var submitted = pluginApi.copyValue(editPreferences);
+    for (var key of Object.keys(submitted)) pluginApi.pluginSettings[key] = submitted[key];
     pluginApi.saveSettings();
   }
 
@@ -129,6 +146,7 @@ ColumnLayout {
     if (target.length === 0) {
       return;
     }
+    editDownloadDirectory = target;
     pluginApi?.mainInstance?.setDownloadDirectory(target);
   }
 
@@ -138,8 +156,16 @@ ColumnLayout {
     pluginApi?.mainInstance?.setDownloadCacheMaxMb(target);
   }
 
-  onCurrentDownloadDirectoryChanged: root.editDownloadDirectory = root.currentDownloadDirectory
-  onCurrentDownloadCacheMaxMbChanged: root.editDownloadCacheMaxMb = root.currentDownloadCacheMaxMb
+  property string _lastDirectory: currentDownloadDirectory
+  property int _lastCacheLimit: currentDownloadCacheMaxMb
+  onCurrentDownloadDirectoryChanged: {
+    if (editDownloadDirectory === _lastDirectory) editDownloadDirectory = currentDownloadDirectory;
+    _lastDirectory = currentDownloadDirectory;
+  }
+  onCurrentDownloadCacheMaxMbChanged: {
+    if (editDownloadCacheMaxMb === _lastCacheLimit) editDownloadCacheMaxMb = displayBaseline.project("editDownloadCacheMaxMb");
+    _lastCacheLimit = currentDownloadCacheMaxMb;
+  }
 
   NComboBox {
     Layout.fillWidth: true
@@ -210,7 +236,7 @@ ColumnLayout {
 
     NButton {
       text: pluginApi?.tr("settings.downloads.chooseFolder")
-      onClicked: downloadFolderPicker.open()
+      onClicked: downloadFolderPicker.openFilePicker()
     }
 
     NButton {
@@ -230,11 +256,12 @@ ColumnLayout {
     }
 
     NSpinBox {
+      id: cacheInput
       from: 0
       to: 500000
       stepSize: 128
       value: root.editDownloadCacheMaxMb
-      onValueChanged: if (value !== root.editDownloadCacheMaxMb) root.editDownloadCacheMaxMb = value
+      onValueModified: value => root.editDownloadCacheMaxMb = value
     }
 
     NButton {
@@ -598,7 +625,7 @@ ColumnLayout {
     defaultValue: root.defaults.showStatusMetadata ?? true
   }
 
-  AtmoFilePicker {
+  PortalFilePicker {
     id: downloadFolderPicker
     selectionMode: "folders"
     title: pluginApi?.tr("settings.downloads.folderPickerTitle")

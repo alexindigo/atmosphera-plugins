@@ -12,13 +12,18 @@ RowLayout {
     
     Layout.fillWidth: true
 
-    readonly property bool isPlaying:
+    property bool isPlaying:
         pluginApi.pluginSettings.isPlaying ||
         false
 
-    readonly property bool isMuted:
+    property bool isMuted:
         pluginApi.pluginSettings.isMuted ||
         false
+
+    // A settings consumer injects local preference intents; runtime callers keep
+    // the existing immediate writer when no local callback is connected.
+    property var playingWriter: null
+    property var muteWriter: null
 
 
     NButton {
@@ -78,14 +83,14 @@ RowLayout {
     function togglePlaying() {
         if (pluginApi == null) return;
 
-        pluginApi.pluginSettings.isPlaying = !root.isPlaying;
-        pluginApi.saveSettings();
+        if (typeof playingWriter === "function") playingWriter(!root.isPlaying);
+        else { pluginApi.pluginSettings.isPlaying = !root.isPlaying; pluginApi.saveSettings(); }
     }
 
     function toggleMute() {
         if(pluginApi == null) return;
 
-        pluginApi.pluginSettings.isMuted = !root.isMuted;
-        pluginApi.saveSettings();
+        if (typeof muteWriter === "function") muteWriter(!root.isMuted);
+        else { pluginApi.pluginSettings.isMuted = !root.isMuted; pluginApi.saveSettings(); }
     }
 }

@@ -3,10 +3,14 @@ import Quickshell
 import qs.Commons
 
 import "../common"
+import "../common/MonitorCommands.js" as Commands
 
 Item {
     id: root
     required property var pluginApi
+    readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
+        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
+        function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
 
 
     /***************************
@@ -55,7 +59,8 @@ Item {
         Logger.d("video-wallpaper", "Choosing next wallpaper...");
 
         // Even if the file is not in wallpapers folder, aka -1, it sets the nextIndex to 0 then
-        const currentIndex = folderModel.indexOf(pluginApi?.pluginSettings?.[screen]?.currentWallpaper);
+        const name = typeof screen === "string" ? screen : Quickshell.screens[0]?.name;
+        const currentIndex = folderModel.indexOf(Commands.record(pluginApi?.pluginSettings?.monitors, name)?.currentWallpaper);
         const nextIndex = (currentIndex + 1) % folderModel.count;
         const url = folderModel.get(nextIndex);
         setWallpaper(url, screen);
@@ -67,23 +72,14 @@ Item {
             return;
         }
 
-        function createMonitorSettings(monitor) {
-            if (pluginApi.pluginSettings[monitor] === undefined) {
-                pluginApi.pluginSettings[monitor] = {};
-            }
+        var names = monitorSpecific && typeof screen === "string" ? [screen] : Array.from(Quickshell.screens).map(value => value.name);
+        if (!names.length) return;
+        var edits = [];
+        for (var name of names) {
+            edits.push({op: "set", screen: name, field: "currentWallpaper", value: path});
+            edits.push({op: "set", screen: name, field: "isPlaying", value: true});
         }
-
-        if(monitorSpecific) {
-            createMonitorSettings(screen);
-            pluginApi.pluginSettings[screen].currentWallpaper = path;
-            pluginApi.pluginSettings[screen].isPlaying = true;
-        } else {
-            for(const screen of Quickshell.screens) {
-                createMonitorSettings(screen.name);
-                pluginApi.pluginSettings[screen.name].currentWallpaper = path;
-                pluginApi.pluginSettings[screen.name].isPlaying = true;
-            }
-        }
+        monitorCommand.submit(edits);
 
         pluginApi.saveSettings();
     }

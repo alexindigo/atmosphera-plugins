@@ -7,14 +7,33 @@ import qs.Widgets
 ColumnLayout {
   id: root
 
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property bool valueSyncEnabled: cfg.syncEnabled ?? defaults.syncEnabled ?? false
+    readonly property string valueGithubToken: cfg.githubToken ?? defaults.githubToken ?? ""
+  }
+  readonly property bool settingsDirty: { return displayBaseline.differs({valueSyncEnabled: root.valueSyncEnabled, valueGithubToken: root.valueGithubToken}); }
+  property bool _savePending: false
+  property bool _syncPending: false
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root._savePending = false;
+      var sync = root._syncPending; root._syncPending = false;
+      ToastService.showNotice(root.pluginApi?.tr("settings.saved"));
+      if (sync) root.mainInstance?.manualSync();
+    }
+  }
+
   property var pluginApi: null
 
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
   property var mainInstance: pluginApi?.mainInstance || null
 
-  property bool valueSyncEnabled: cfg.syncEnabled ?? defaults.syncEnabled ?? false
-  property string valueGithubToken: cfg.githubToken ?? defaults.githubToken ?? ""
+  property bool valueSyncEnabled: displayBaseline.valueSyncEnabled
+  property string valueGithubToken: displayBaseline.valueGithubToken
 
   spacing: Style.marginL
 
@@ -52,12 +71,7 @@ ColumnLayout {
       text: pluginApi?.tr("settings.syncNow")
       icon: "refresh"
       enabled: !mainInstance?.syncInProgress
-      onClicked: {
-        root.saveSettings();
-        if (mainInstance) {
-          mainInstance.manualSync();
-        }
-      }
+      onClicked: root.requestSync()
     }
 
     Item { Layout.fillWidth: true }
@@ -77,15 +91,19 @@ ColumnLayout {
     }
   }
 
+  function requestSync() {
+    root._syncPending = true;
+    root.saveSettings();
+  }
+
   function saveSettings() {
     if (!pluginApi) {
       return;
     }
 
     pluginApi.pluginSettings.syncEnabled = root.valueSyncEnabled;
-    pluginApi.pluginSettings.githubToken = root.valueGithubToken.trim();
-    pluginApi.saveSettings();
-
-    ToastService.showNotice(pluginApi?.tr("settings.saved"));
+    root.valueGithubToken = root.valueGithubToken.trim();
+    pluginApi.pluginSettings.githubToken = root.valueGithubToken;
+    if (pluginApi.saveSettings() !== false) root._savePending = true;
   }
 }

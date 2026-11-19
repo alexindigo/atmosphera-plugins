@@ -4,9 +4,8 @@ import Quickshell.Io
 import Quickshell.Wayland
 import qs.Commons
 
-Item {
+Scope {
   id: root
-  visible: false
 
   property var pluginApi: null
 
@@ -195,7 +194,6 @@ Item {
       if (data.model && data.model.provider) s.defaultProvider = data.model.provider;
       s.configured = true;
       if (pluginApi) {
-        pluginApi.pluginSettings = s;
         pluginApi.saveSettings();
       }
       if (data.hermesHome && data.hermesHome !== root.expandedHermesHome) {

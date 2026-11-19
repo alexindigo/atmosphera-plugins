@@ -5,6 +5,7 @@ import Quickshell
 
 import qs.Commons
 import qs.Widgets
+import "MonitorCommands.js" as Commands
 
 RowLayout {
     id: root
@@ -20,15 +21,20 @@ RowLayout {
     required property string screenName
 
     // Optional properties
-    property bool enabled:        true
+    // Use the inherited Item.enabled control input, not a shadow property.
     property var monitorSpecific: undefined
+    property var settings: pluginApi?.pluginSettings || ({})
+    property var settingWriter: null
+    readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
+        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
+        function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
 
     // Monitor specific properties
-    readonly property bool isPlaying: pluginApi?.pluginSettings?.[screenName]?.isPlaying || false
-    readonly property bool isMuted:   pluginApi?.pluginSettings?.[screenName]?.isMuted   || false
+    readonly property bool isPlaying: Commands.value(settings.monitors, screenName, "isPlaying", pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property bool isMuted: Commands.value(settings.monitors, screenName, "isMuted", pluginApi?.manifest?.metadata?.defaultSettings)
 
     // Global properties
-    readonly property bool globalMonitorSpecific: pluginApi?.pluginSettings?.monitorSpecific || false
+    readonly property bool globalMonitorSpecific: settings.monitorSpecific || false
 
     // Local properties
     readonly property bool _monitorSpecific: monitorSpecific === undefined ? globalMonitorSpecific : (typeof monitorSpecific === "boolean" ? monitorSpecific : false);
@@ -68,21 +74,10 @@ RowLayout {
     }
 
     function saveSetting(key: string, value: var) {
-        if (!_monitorSpecific) {
-            for (const screen of Quickshell.screens) {
-                if (pluginApi?.pluginSettings?.[screen.name] === undefined) {
-                    pluginApi.pluginSettings[screen.name] = {};
-                }
-
-                pluginApi.pluginSettings[screen.name][key] = value;
-            }
-        } else {
-            if (pluginApi?.pluginSettings?.[screenName] === undefined) {
-                pluginApi.pluginSettings[screenName] = {};
-            }
-
-            pluginApi.pluginSettings[screenName][key] = value;
-        }
+        if (typeof settingWriter === "function") { settingWriter(key, value); return; }
+        var names = _monitorSpecific ? [screenName] : Array.from(Quickshell.screens).map(screen => screen.name);
+        if (!names.length) return;
+        monitorCommand.submit(names.map(name => ({op: "set", screen: name, field: key, value: value})));
 
         pluginApi.saveSettings();
     }

@@ -6,6 +6,41 @@ import qs.Widgets
 ColumnLayout {
   id: root
 
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string valueBridgeHost: cfg.bridgeHost ?? defaults.bridgeHost ?? "127.0.0.1"
+    readonly property int valueBridgePort: cfg.bridgePort ?? defaults.bridgePort ?? 19777
+    readonly property string valueStateFile: cfg.stateFile ?? defaults.stateFile ?? "~/.cache/noctalia-hermes/state.json"
+    readonly property string valueHermesHome: cfg.hermesHome ?? defaults.hermesHome ?? "~/.hermes"
+    readonly property string valueHermesCommand: cfg.hermesCommand ?? defaults.hermesCommand ?? "hermes"
+    readonly property bool valueAutoStartBridge: cfg.autoStartBridge ?? defaults.autoStartBridge ?? true
+    readonly property bool valueAutoStartGateway: cfg.autoStartGateway ?? defaults.autoStartGateway ?? true
+    readonly property bool valueClientOnlyMode: cfg.clientOnlyMode ?? defaults.clientOnlyMode ?? false
+    readonly property string valueBridgeTokenManual: cfg.bridgeTokenManual ?? defaults.bridgeTokenManual ?? ""
+    readonly property int valueStatusPollIntervalSec: cfg.statusPollIntervalSec ?? defaults.statusPollIntervalSec ?? 30
+    readonly property bool valueHideWhenIdle: cfg.hideWhenIdle ?? defaults.hideWhenIdle ?? false
+    readonly property string valueLauncherPrefix: cfg.launcherPrefix ?? defaults.launcherPrefix ?? ">hermes"
+    readonly property bool valuePanelPinned: cfg.panelPinned ?? defaults.panelPinned ?? false
+    readonly property bool valueShowToolActivity: cfg.showToolActivity ?? defaults.showToolActivity ?? false
+    readonly property string valueDefaultProvider: (detectedModel.provider || cfg.defaultProvider || defaults.defaultProvider || "")
+    readonly property string valueDefaultModel: (detectedModel.name || cfg.defaultModel || defaults.defaultModel || "")
+    ranges: [NSettingsRange { field: "valueBridgePort"; from: rangeValueBridgePort.from; to: rangeValueBridgePort.to }, NSettingsRange { field: "valueStatusPollIntervalSec"; from: rangeValueStatusPollIntervalSec.from; to: rangeValueStatusPollIntervalSec.to }]
+  }
+  readonly property bool settingsDirty: { return displayBaseline.differs({valueBridgeHost: root.valueBridgeHost, valueBridgePort: root.valueBridgePort, valueStateFile: root.valueStateFile, valueHermesHome: root.valueHermesHome, valueHermesCommand: root.valueHermesCommand, valueAutoStartBridge: root.valueAutoStartBridge, valueAutoStartGateway: root.valueAutoStartGateway, valueClientOnlyMode: root.valueClientOnlyMode, valueBridgeTokenManual: root.valueBridgeTokenManual, valueStatusPollIntervalSec: root.valueStatusPollIntervalSec, valueHideWhenIdle: root.valueHideWhenIdle, valueLauncherPrefix: root.valueLauncherPrefix, valuePanelPinned: root.valuePanelPinned, valueShowToolActivity: root.valueShowToolActivity, valueDefaultProvider: root.valueDefaultProvider, valueDefaultModel: root.valueDefaultModel}); }
+  property bool _savePending: false
+  property bool _trimModelPending: false
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root._savePending = false;
+      var cfg = root.pluginApi.pluginSettings;
+      var trim = root._trimModelPending; root._trimModelPending = false;
+      root.mainInstance?.setPinnedPanelRequested(cfg.panelPinned);
+      root.mainInstance?.setModel(trim ? cfg.defaultProvider.trim() : cfg.defaultProvider, trim ? cfg.defaultModel.trim() : cfg.defaultModel, false);
+    }
+  }
+
   property var pluginApi: null
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
@@ -14,22 +49,22 @@ ColumnLayout {
   readonly property var detectedModel: summary.model || ({})
   readonly property var availableModels: summary.models || []
 
-  property string valueBridgeHost: cfg.bridgeHost ?? defaults.bridgeHost ?? "127.0.0.1"
-  property int valueBridgePort: cfg.bridgePort ?? defaults.bridgePort ?? 19777
-  property string valueStateFile: cfg.stateFile ?? defaults.stateFile ?? "~/.cache/noctalia-hermes/state.json"
-  property string valueHermesHome: cfg.hermesHome ?? defaults.hermesHome ?? "~/.hermes"
-  property string valueHermesCommand: cfg.hermesCommand ?? defaults.hermesCommand ?? "hermes"
-  property bool valueAutoStartBridge: cfg.autoStartBridge ?? defaults.autoStartBridge ?? true
-  property bool valueAutoStartGateway: cfg.autoStartGateway ?? defaults.autoStartGateway ?? true
-  property bool valueClientOnlyMode: cfg.clientOnlyMode ?? defaults.clientOnlyMode ?? false
-  property string valueBridgeTokenManual: cfg.bridgeTokenManual ?? defaults.bridgeTokenManual ?? ""
-  property int valueStatusPollIntervalSec: cfg.statusPollIntervalSec ?? defaults.statusPollIntervalSec ?? 30
-  property bool valueHideWhenIdle: cfg.hideWhenIdle ?? defaults.hideWhenIdle ?? false
-  property string valueLauncherPrefix: cfg.launcherPrefix ?? defaults.launcherPrefix ?? ">hermes"
-  property bool valuePanelPinned: cfg.panelPinned ?? defaults.panelPinned ?? false
-  property bool valueShowToolActivity: cfg.showToolActivity ?? defaults.showToolActivity ?? false
-  property string valueDefaultProvider: (detectedModel.provider || cfg.defaultProvider || defaults.defaultProvider || "")
-  property string valueDefaultModel: (detectedModel.name || cfg.defaultModel || defaults.defaultModel || "")
+  property string valueBridgeHost: displayBaseline.valueBridgeHost
+  property int valueBridgePort: displayBaseline.project("valueBridgePort")
+  property string valueStateFile: displayBaseline.valueStateFile
+  property string valueHermesHome: displayBaseline.valueHermesHome
+  property string valueHermesCommand: displayBaseline.valueHermesCommand
+  property bool valueAutoStartBridge: displayBaseline.valueAutoStartBridge
+  property bool valueAutoStartGateway: displayBaseline.valueAutoStartGateway
+  property bool valueClientOnlyMode: displayBaseline.valueClientOnlyMode
+  property string valueBridgeTokenManual: displayBaseline.valueBridgeTokenManual
+  property int valueStatusPollIntervalSec: displayBaseline.project("valueStatusPollIntervalSec")
+  property bool valueHideWhenIdle: displayBaseline.valueHideWhenIdle
+  property string valueLauncherPrefix: displayBaseline.valueLauncherPrefix
+  property bool valuePanelPinned: displayBaseline.valuePanelPinned
+  property bool valueShowToolActivity: displayBaseline.valueShowToolActivity
+  property string valueDefaultProvider: displayBaseline.valueDefaultProvider
+  property string valueDefaultModel: displayBaseline.valueDefaultModel
   readonly property string selectedModelKey: modelKey(valueDefaultProvider, valueDefaultModel)
   property bool showAdvanced: false
   property string testResult: ""
@@ -87,10 +122,7 @@ ColumnLayout {
       text: pluginApi?.tr("settings.applyModel")
       icon: "refresh"
       enabled: root.valueDefaultModel.trim() !== ""
-      onClicked: {
-        root.saveSettings();
-        root.mainInstance?.setModel(root.valueDefaultProvider.trim(), root.valueDefaultModel.trim(), false);
-      }
+      onClicked: root.applyModel()
     }
 
     NToggle {
@@ -185,11 +217,13 @@ ColumnLayout {
           }
 
           NSpinBox {
+            id: rangeValueBridgePort
+            objectName: "settings-range-valueBridgePort"
             from: 1024
             to: 65535
             value: root.valueBridgePort
             stepSize: 1
-            onValueChanged: root.valueBridgePort = value
+            onValueModified: value => root.valueBridgePort = value
           }
         }
 
@@ -205,11 +239,13 @@ ColumnLayout {
           }
 
           NSpinBox {
+            id: rangeValueStatusPollIntervalSec
+            objectName: "settings-range-valueStatusPollIntervalSec"
             from: 5
             to: 300
             value: root.valueStatusPollIntervalSec
             stepSize: 5
-            onValueChanged: root.valueStatusPollIntervalSec = value
+            onValueModified: value => root.valueStatusPollIntervalSec = value
           }
         }
       }
@@ -279,6 +315,11 @@ ColumnLayout {
     }
   }
 
+  function applyModel() {
+    root._trimModelPending = true;
+    root.saveSettings();
+  }
+
   function saveSettings() {
     if (!pluginApi) return;
     Logger.i("hermes-agent", "saveSettings: tokenManual len:", root.valueBridgeTokenManual.length, "clientOnlyMode:", root.valueClientOnlyMode);
@@ -298,9 +339,7 @@ ColumnLayout {
     pluginApi.pluginSettings.showToolActivity = root.valueShowToolActivity;
     pluginApi.pluginSettings.defaultProvider = root.valueDefaultProvider;
     pluginApi.pluginSettings.defaultModel = root.valueDefaultModel;
-    pluginApi.saveSettings();
-    root.mainInstance?.setPinnedPanelRequested(root.valuePanelPinned);
-    root.mainInstance?.setModel(root.valueDefaultProvider, root.valueDefaultModel, false);
+    if (pluginApi.saveSettings() !== false) root._savePending = true;
   }
 
   function testConnection() {

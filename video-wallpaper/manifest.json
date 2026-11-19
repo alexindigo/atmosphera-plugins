@@ -1,9 +1,9 @@
 {
   "id": "video-wallpaper",
   "name": "Video Wallpaper",
-  "version": "2.0.12",
+  "version": "3.0.8",
   "minNoctaliaVersion": "3.6.0",
-  "minAtmospheraVersion": "0.8.0",
+  "minAtmospheraVersion": "0.10.0",
   "author": "spiros132",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -39,6 +39,7 @@
       "definitions": {
         "monitor": {
           "type": "Record",
+          "open": true,
           "fields": {
             "automation": {"type": "Boolean", "optional": true},
             "automationMode": {"type": "String", "optional": true},
@@ -51,7 +52,6 @@
             "noctaliaWallpaper": {"type": "String", "optional": true, "machineLocal": true},
             "orientation": {"type": "Real", "optional": true},
             "profile": {"type": "String", "optional": true},
-            "thumbCacheReady": {"type": "Boolean", "optional": true, "machineLocal": true},
             "volume": {"type": "Real", "optional": true}
           }
         }
@@ -73,7 +73,6 @@
         "mpvSocket": {"type": "String"},
         "orientation": {"type": "Real", "optional": true},
         "profile": {"type": "String"},
-        "thumbCacheReady": {"type": "Boolean", "optional": true, "machineLocal": true},
         "volume": {"type": "Real"},
         "wallpapersFolder": {"type": "String"}
       }

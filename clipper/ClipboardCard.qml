@@ -100,8 +100,8 @@ Rectangle {
 
     // Get color setting for current card type
     function getCardColorSetting(colorType) {
-        const settings = pluginApi?.pluginSettings?.cardColors;
-        const customColors = pluginApi?.pluginSettings?.customColors;
+        const settings = pluginApi?.settingsView?.cardColors;
+        const customColors = pluginApi?.settingsView?.customColors;
         const cardType = typeLabel;
 
         if (settings && settings[cardType] && settings[cardType][colorType]) {
@@ -292,7 +292,7 @@ Rectangle {
                     }
                 }
                 AtmoIconButton {
-                    visible: !root.isPinned && (pluginApi?.pluginSettings?.pincardsEnabled ?? true)  // Hide pin button if pinned or if feature disabled
+                    visible: !root.isPinned && (pluginApi?.settingsView?.pincardsEnabled ?? true)  // Hide pin button if pinned or if feature disabled
                     icon: "pin"
                     tooltipText: pluginApi?.tr("card.pin")
                     colorFg: root.accentFgColor

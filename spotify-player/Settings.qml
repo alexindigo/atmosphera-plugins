@@ -5,13 +5,39 @@ import qs.Commons
 import qs.Widgets
 import qs.Services.UI
 import Quickshell.Io
+import "Auth.js" as Auth
 
 ColumnLayout {
     id: root
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string editClientId: root.pluginApi?.initialSettings?.clientId || root.pluginApi?.manifest?.metadata?.defaultSettings?.clientId || ""
+        readonly property string editClientSecret: root.pluginApi?.initialSettings?.clientSecret || root.pluginApi?.manifest?.metadata?.defaultSettings?.clientSecret || ""
+        readonly property string editPlayerId: root.pluginApi?.initialSettings?.playerId ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.playerId ?? ""
+        readonly property int editCallbackPort: root.pluginApi?.initialSettings?.callbackPort ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.callbackPort ?? 8888
+        readonly property string editAccessToken: root.pluginApi?.initialSettings?.accessToken || ""
+        readonly property string editRefreshToken: root.pluginApi?.initialSettings?.refreshToken || ""
+        readonly property double editTokenExpiresAt: root.pluginApi?.initialSettings?.tokenExpiresAt || 0
+        ranges: [NSettingsRange { field: "editCallbackPort"; from: portInput.from; to: portInput.to }]
+    }
+    property string editAccessToken: displayBaseline.editAccessToken
+    property string editRefreshToken: displayBaseline.editRefreshToken
+    property double editTokenExpiresAt: displayBaseline.editTokenExpiresAt
+    readonly property bool settingsDirty: displayBaseline.differs({editClientId: editClientId, editClientSecret: editClientSecret, editPlayerId: editPlayerId, editCallbackPort: editCallbackPort, editAccessToken: editAccessToken, editRefreshToken: editRefreshToken, editTokenExpiresAt: editTokenExpiresAt})
+    property var _lifetime: ({alive: true})
+    property var _tokenRequest: null
+    property var _authInput: null
+    Component.onDestruction: {
+        _lifetime.alive = false;
+        if (_tokenRequest) _tokenRequest.abort();
+        callbackServer.running = false;
+        getAvailableDevices.running = false;
+        authProcess.running = false;
+    }
 
     Process {
         id: callbackServer
-        command: ["python3", pluginApi?.pluginDir + "/callback_server.py", pluginApi?.pluginSettings?.callbackPort.toString()]
+        command: ["python3", pluginApi?.pluginDir + "/callback_server.py", String(root.editCallbackPort)]
         stdout: SplitParser {
             onRead: result => {
                 const [code, state, error] = result.split(":")
@@ -20,7 +46,7 @@ ColumnLayout {
                     return
                 }
                 else if (state !== expectedState) {
-                    Logger.w("spotify-player", "State mismatch, possible CSRF - Expected state:", expectedState, "State returned:", state)
+                    Logger.w("spotify-player", "State mismatch in auth response")
                     return
                 }
                 else {
@@ -37,11 +63,13 @@ ColumnLayout {
 
     Process {
         id: getAvailableDevices
-        command: ["curl", "https://api.spotify.com/v1/me/player/devices", "-H", "Authorization: Bearer " + pluginApi?.pluginSettings?.accessToken]
+        command: ["curl", "https://api.spotify.com/v1/me/player/devices", "-H", "Authorization: Bearer " + root.editAccessToken]
 
         stdout: StdioCollector {
             onStreamFinished: {
-                const devices = JSON.parse(text).devices
+                var response;
+                try { response = JSON.parse(text); } catch (error) { Logger.e("spotify-player", "Invalid device response"); return; }
+                const devices = response.devices || []
                 availableDevices = ""
                 for (const device of devices) {
                     availableDevices = availableDevices + device.name + ": " + device.id + "\n"
@@ -57,25 +85,10 @@ ColumnLayout {
 
     onAvailableDevicesChanged: deviceList.text = availableDevices
 
-    property string editClientId:
-        pluginApi?.pluginSettings?.clientId ||
-        pluginApi?.manifest?.metadata?.defaultSettings?.clientId ||
-        ""
-
-    property string editClientSecret:
-        pluginApi?.pluginSettings?.clientSecret ||
-        pluginApi?.manifest?.metadata?.defaultSettings?.clientSecret ||
-        ""
-
-    property string editPlayerId:
-        pluginApi?.pluginSettings?.playerId ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.playerId ??
-        ""
-
-    property int editCallbackPort:
-        pluginApi?.pluginSettings?.callbackPort ||
-        pluginApi?.manifest?.metadata?.defaultSettings?.callbackPort ||
-        8888
+    property string editClientId: displayBaseline.editClientId
+    property string editClientSecret: displayBaseline.editClientSecret
+    property string editPlayerId: displayBaseline.editPlayerId
+    property int editCallbackPort: displayBaseline.project("editCallbackPort")
 
     // state will be checked when running auth process
     property string expectedState: ""
@@ -85,7 +98,6 @@ ColumnLayout {
 
     Component.onCompleted: {
         Logger.i("spotify-player", "Settings UI loaded")
-        pluginApi?.mainInstance.refreshAccessToken()
     }
 
     // Text input
@@ -115,10 +127,12 @@ ColumnLayout {
         }
 
         NSpinBox {
+            id: portInput
+            objectName: "settings-range-editCallbackPort"
             from: 0
             to: 65535
             value: root.editCallbackPort
-            onValueChanged: root.editCallbackPort = value
+            onValueModified: value => root.editCallbackPort = value
         }
 
         NText {
@@ -146,7 +160,7 @@ ColumnLayout {
     }
     NButton {
         text: pluginApi?.tr("settings.devicelist_btn")
-        onClicked: getAvailableDevices.running = true
+        onClicked: root.requestDevices()
     }
 
     TextArea {
@@ -161,7 +175,7 @@ ColumnLayout {
         }
 
         text: root.availableDevices
-        onTextChanged: text = root.availableDevices
+        readOnly: true
     }
 
     // Text input
@@ -186,59 +200,57 @@ ColumnLayout {
     }
 
     function startAuth() {
-        // save plugin settings to avoid issues
-        Logger.i("spotify-player", "Auth started, saving settings")
-        pluginApi.pluginSettings.clientId = root.editClientId
-        pluginApi.pluginSettings.clientSecret = root.editClientSecret
-        pluginApi.pluginSettings.callbackPort = root.editCallbackPort
-        pluginApi.saveSettings()
+        if (_tokenRequest || callbackServer.running) return;
+        Logger.i("spotify-player", "Auth started")
+        _authInput = {clientId: editClientId, clientSecret: editClientSecret, callbackPort: editCallbackPort};
     
         const state = randomString(16)
         expectedState = state
         const scope = "user-read-playback-state user-modify-playback-state playlist-read-private"
-        const redirectUri = "http://127.0.0.1:" + pluginApi?.pluginSettings?.callbackPort + "/callback"
+        const redirectUri = "http://127.0.0.1:" + _authInput.callbackPort + "/callback"
 
-        const params = new URLSearchParams({
+        const params = Auth.formEncode({
             response_type: "code",
-            client_id: pluginApi?.pluginSettings?.clientId,
+            client_id: _authInput.clientId,
             scope: scope,
             redirect_uri: redirectUri,
             state: state
         })
 
-        const url = "https://accounts.spotify.com/authorize?" + params.toString()
+        const url = "https://accounts.spotify.com/authorize?" + params
 
         Logger.i("spotify-player", "Starting auth")
 
-        callbackServer.command = ["python3", pluginApi?.pluginDir + "/callback_server.py", pluginApi?.pluginSettings?.callbackPort.toString()]
+        callbackServer.command = ["python3", pluginApi?.pluginDir + "/callback_server.py", String(_authInput.callbackPort)]
         callbackServer.running = true
         authProcess.command = ["xdg-open", url]
         authProcess.running = true
     }
 
     function exchangeCodeForToken(code) {
-        Logger.i("spotify-player", "Found code:", code)
+        if (!_authInput || _tokenRequest) return;
+        callbackServer.running = false;
+        requestToken(_authInput, {code: code, redirect_uri: "http://127.0.0.1:" + _authInput.callbackPort + "/callback", grant_type: "authorization_code"}, null);
+    }
 
-        const credentials = Qt.btoa(pluginApi?.pluginSettings?.clientId + ":" + pluginApi?.pluginSettings?.clientSecret)
+    function requestToken(input, values, after) {
+        var lifetime = _lifetime;
+        _tokenRequest = Auth.requestToken(Qt.btoa(input.clientId + ":" + input.clientSecret), values, function(tokens, error) {
+            if (!lifetime.alive) return;
+            root._tokenRequest = null;
+            if (input.clientId !== root.editClientId || input.clientSecret !== root.editClientSecret || input.callbackPort !== root.editCallbackPort) return;
+            if (error) { Logger.e("spotify-player", "Token request failed"); return; }
+            root.editAccessToken = tokens.accessToken;
+            if (tokens.refreshToken) root.editRefreshToken = tokens.refreshToken;
+            root.editTokenExpiresAt = tokens.tokenExpiresAt;
+            if (typeof after === "function") after();
+        });
+    }
 
-        const xhr = new XMLHttpRequest()
-        xhr.open("POST", "https://accounts.spotify.com/api/token")
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
-        xhr.setRequestHeader("Authorization", "Basic " + credentials)
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                const data = JSON.parse(xhr.responseText)
-                pluginApi.pluginSettings.accessToken = data.access_token
-                pluginApi.pluginSettings.refreshToken = data.refresh_token
-                pluginApi.pluginSettings.tokenExpiresAt = Date.now() + (data.expires_in * 1000)
-                pluginApi.saveSettings()
-            }
-        }
-        xhr.send(new URLSearchParams({
-            code: code,
-            redirect_uri: "http://127.0.0.1:" + pluginApi?.pluginSettings?.callbackPort + "/callback",
-            grant_type: "authorization_code"
-        }).toString())
+    function requestDevices() {
+        if (_tokenRequest || getAvailableDevices.running) return;
+        if (editTokenExpiresAt > Date.now() || !editRefreshToken) getAvailableDevices.running = true;
+        else requestToken({clientId: editClientId, clientSecret: editClientSecret, callbackPort: editCallbackPort}, {refresh_token: editRefreshToken, grant_type: "refresh_token"}, function() { getAvailableDevices.running = true; });
     }
 
 
@@ -253,9 +265,17 @@ ColumnLayout {
         pluginApi.pluginSettings.clientSecret = root.editClientSecret
         pluginApi.pluginSettings.playerId = root.editPlayerId
         pluginApi.pluginSettings.callbackPort = root.editCallbackPort
+        pluginApi.pluginSettings.accessToken = root.editAccessToken
+        pluginApi.pluginSettings.refreshToken = root.editRefreshToken
+        pluginApi.pluginSettings.tokenExpiresAt = root.editTokenExpiresAt
 
         pluginApi.saveSettings()
 
-        Logger.i("spotify-player", "Settings saved successfully")
+    }
+    Connections {
+        target: root.pluginApi
+        function onSettingsCompleted(result) {
+            if ((result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current") Logger.i("spotify-player", "Settings saved successfully");
+        }
     }
 }

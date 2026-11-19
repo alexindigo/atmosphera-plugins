@@ -64,13 +64,14 @@ Item {
     function initializePluginSettings() {
         if (!pluginApi) return
         if (!pluginApi.pluginSettings.weekStart) {
-            pluginApi.pluginSettings = {
+            var submitted = {
                 weekStart: "1", 
                 timeFormat: "24h",
                 lineColorType: "mOutline",
                 hourLineOpacity: 0.5,
                 dayLineOpacity: 1.0
             }
+            for (var key of Object.keys(submitted)) pluginApi.pluginSettings[key] = submitted[key]
             pluginApi.saveSettings()
         }
     }
@@ -465,7 +466,7 @@ Item {
         const month = date.getMonth() + 1;
         const day = date.getDate();
         const year = date.getFullYear();
-        const dateWithSlashes = `${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}/${year.toString().substring(2)}`;
+        const dateWithSlashes = `${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${String(year).substring(2)}`;
         if (ProgramCheckerService.gnomeCalendarAvailable) {
             Quickshell.execDetached(["gnome-calendar", "--date", dateWithSlashes]);
         }

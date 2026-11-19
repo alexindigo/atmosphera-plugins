@@ -6,25 +6,51 @@ import qs.Widgets
 ColumnLayout {
     id: root
 
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string mainIcon: cfg.mainIcon ?? defaults.mainIcon
+    readonly property string expandDirection: cfg.expandDirection ?? defaults.expandDirection
+    readonly property bool drawer: cfg.drawer ?? defaults.drawer
+    readonly property bool hideEmpty: cfg.hideEmptyWorkspaces ?? defaults.hideEmptyWorkspaces
+    readonly property string primarySymbolColor: cfg.primarySymbolColor ?? defaults.primarySymbolColor
+    readonly property bool primaryShowPill: cfg.primaryShowPill ?? defaults.primaryShowPill ?? true
+    readonly property string primaryPillColor: cfg.primaryPillColor ?? defaults.primaryPillColor
+    readonly property real primarySize: cfg.primarySize ?? defaults.primarySize
+    readonly property real primaryBorderRadius: cfg.primaryBorderRadius ?? defaults.primaryBorderRadius ?? 1.0
+    readonly property string primaryFocusColor: cfg.primaryFocusColor ?? defaults.primaryFocusColor ?? "primary"
+    readonly property string panelBackgroundColor: cfg.panelBackgroundColor ?? defaults.panelBackgroundColor ?? "none"
+    readonly property bool panelBackgroundEnabled: cfg.panelBackgroundEnabled ?? defaults.panelBackgroundEnabled ?? true
+    readonly property var workspaces: root.displayWorkspaces()
+    ranges: [NSettingsRange { field: "primaryBorderRadius"; from: rangePrimaryBorderRadius.from; to: rangePrimaryBorderRadius.to }, NSettingsRange { field: "primarySize"; from: rangePrimarySize.from; to: rangePrimarySize.to }]
+  }
+  readonly property bool settingsDirty: { root.workspacesRevision; return displayBaseline.differs({mainIcon: root.mainIcon, expandDirection: root.expandDirection, drawer: root.drawer, hideEmpty: root.hideEmpty, primarySymbolColor: root.primarySymbolColor, primaryShowPill: root.primaryShowPill, primaryPillColor: root.primaryPillColor, primarySize: root.primarySize, primaryBorderRadius: root.primaryBorderRadius, primaryFocusColor: root.primaryFocusColor, panelBackgroundColor: root.panelBackgroundColor, panelBackgroundEnabled: root.panelBackgroundEnabled, workspaces: root.workspaces}); }
+  property bool _savePending: false
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root._savePending = false;
+      Logger.i("SpecialWorkspaces", "Settings saved");
+    }
+  }
+
     property var pluginApi: null
 
     property var cfg: pluginApi?.pluginSettings || ({})
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    property string mainIcon: cfg.mainIcon ?? defaults.mainIcon
-    property string expandDirection: cfg.expandDirection ?? defaults.expandDirection
-    property bool   drawer: cfg.drawer ?? defaults.drawer
-    property bool   hideEmpty: cfg.hideEmptyWorkspaces ?? defaults.hideEmptyWorkspaces
-
-    property string primarySymbolColor: cfg.primarySymbolColor ?? defaults.primarySymbolColor
-    property bool primaryShowPill: cfg.primaryShowPill ?? defaults.primaryShowPill ?? true
-    property string primaryPillColor: cfg.primaryPillColor ?? defaults.primaryPillColor
-    property real primarySize: cfg.primarySize ?? defaults.primarySize
-    property real primaryBorderRadius: cfg.primaryBorderRadius ?? defaults.primaryBorderRadius ?? 1.0
-    property string primaryFocusColor: cfg.primaryFocusColor ?? defaults.primaryFocusColor ?? "primary"
-
-    property string panelBackgroundColor: cfg.panelBackgroundColor ?? defaults.panelBackgroundColor ?? "none"
-    property bool panelBackgroundEnabled: cfg.panelBackgroundEnabled ?? defaults.panelBackgroundEnabled ?? true
+    property string mainIcon: displayBaseline.mainIcon
+    property string expandDirection: displayBaseline.expandDirection
+    property bool drawer: displayBaseline.drawer
+    property bool hideEmpty: displayBaseline.hideEmpty
+    property string primarySymbolColor: displayBaseline.primarySymbolColor
+    property bool primaryShowPill: displayBaseline.primaryShowPill
+    property string primaryPillColor: displayBaseline.primaryPillColor
+    property real primarySize: displayBaseline.project("primarySize")
+    property real primaryBorderRadius: displayBaseline.project("primaryBorderRadius")
+    property string primaryFocusColor: displayBaseline.primaryFocusColor
+    property string panelBackgroundColor: displayBaseline.panelBackgroundColor
+    property bool panelBackgroundEnabled: displayBaseline.panelBackgroundEnabled
 
     readonly property string barPosition: Settings.getBarPositionForScreen()
     readonly property bool isBarVertical: barPosition === "left" || barPosition === "right"
@@ -32,13 +58,11 @@ ColumnLayout {
                                             (!isBarVertical && (root.expandDirection === "up" || root.expandDirection === "down"))
 
     // Local mutable copy for editing
-    property var workspaces: []
+    property var workspaces: displayBaseline.workspaces
     property int workspacesRevision: 0
 
     // Track which workspace rows are expanded
     property var expandedIndices: ({})
-    // Track showPill state per workspace (QML-trackable)
-    property var showPillStates: ({})
 
     spacing: Style.marginL
 
@@ -46,29 +70,45 @@ ColumnLayout {
         loadWorkspaces();
     }
 
+    NSettingsRange { id: workspaceSizeRange; field: "workspace-size"; from: 0.3; to: 1.0 }
+    NSettingsRange { id: workspaceRadiusRange; field: "workspace-radius"; from: 0; to: 1.0 }
+
+    function setWorkspaceField(index, key, value) {
+        if (index < 0 || index >= root.workspaces.length) return;
+        var rows = root.workspaces.slice();
+        rows[index] = Object.assign(Object.create(null), rows[index], {[key]: value});
+        root.workspaces = rows;
+        root.workspacesRevision++;
+    }
+
+    function workspaceRow(row) {
+        return Object.assign(Object.create(null), row, {
+            name: row.name || "", icon: row.icon || "star", symbolColor: row.symbolColor ?? "none",
+            showPill: row.showPill ?? true, pillColor: row.pillColor ?? "primary",
+            size: workspaceSizeRange.project(row.size ?? 0.9),
+            borderRadius: workspaceRadiusRange.project(row.borderRadius ?? 1.0), focusColor: row.focusColor ?? "primary"
+        });
+    }
+    function addWorkspace() {
+        root.workspaces = root.workspaces.concat([root.workspaceRow({})]); root.workspacesRevision++;
+    }
+    function removeWorkspace(index) {
+        if (index < 0 || index >= root.workspaces.length) return;
+        var rows = root.workspaces.slice(); rows.splice(index, 1);
+        root.workspaces = rows; root.workspacesRevision++;
+    }
+
+    function displayWorkspaces() {
+      var src = cfg.workspaces ?? defaults.workspaces ?? [];
+      if (!src || typeof src.slice !== "function") return [];
+      var rows = [];
+      for (var index = 0; index < src.length; index++) rows.push(root.workspaceRow(src[index]));
+      return rows;
+    }
+
     function loadWorkspaces() {
-        var src = cfg.workspaces ?? defaults.workspaces;
-        if (!src || !Array.isArray(src)) src = [];
-        var copy = [];
-        for (var i = 0; i < src.length; i++) {
-            copy.push({
-                "name": src[i].name || "",
-                "icon": src[i].icon || "star",
-                "symbolColor": src[i].symbolColor ?? "none",
-                "showPill": src[i].showPill ?? true,
-                "pillColor": src[i].pillColor ?? "primary",
-                "size": src[i].size ?? 0.9,
-                "borderRadius": src[i].borderRadius ?? 1.0,
-                "focusColor": src[i].focusColor ?? "primary"
-            });
-        }
-        var pills = {};
-        for (var j = 0; j < copy.length; j++) {
-            pills[j] = copy[j].showPill;
-        }
-        workspaces = copy;
-        showPillStates = pills;
-        workspacesRevision++;
+      workspaces = root.displayWorkspaces();
+      workspacesRevision++;
     }
 
     function saveSettings() {
@@ -78,19 +118,16 @@ ColumnLayout {
         }
 
         var valid = [];
-        for (var i = 0; i < workspaces.length; i++) {
-            var name = workspaces[i].name.trim();
-            if (name !== "") {
-                valid.push({
-                    "name": name,
-                    "icon": workspaces[i].icon || "star",
-                    "symbolColor": workspaces[i].symbolColor ?? "none",
-                    "showPill": workspaces[i].showPill ?? true,
-                    "pillColor": workspaces[i].pillColor ?? "primary",
-                    "size": workspaces[i].size ?? 0.9,
-                    "borderRadius": workspaces[i].borderRadius ?? 1.0,
-                    "focusColor": workspaces[i].focusColor ?? "primary"
-                });
+        var displayed = [];
+        for (var index = 0; index < root.workspaces.length; index++) {
+            var row = root.workspaceRow(root.workspaces[index]);
+            row.name = row.name.trim();
+            if (row.name !== "") {
+                valid.push(row);
+                displayed.push(row);
+            } else {
+                // An unnamed row may contain styles the user is still editing.
+                displayed.push(root.workspaces[index]);
             }
         }
 
@@ -106,9 +143,10 @@ ColumnLayout {
         pluginApi.pluginSettings.primaryFocusColor = root.primaryFocusColor;
         pluginApi.pluginSettings.panelBackgroundColor = root.panelBackgroundColor;
         pluginApi.pluginSettings.panelBackgroundEnabled = root.panelBackgroundEnabled;
+        root.workspaces = displayed;
+        root.workspacesRevision++;
         pluginApi.pluginSettings.workspaces = valid;
-        pluginApi.saveSettings();
-        Logger.i("SpecialWorkspaces", "Settings saved");
+        if (pluginApi.saveSettings() !== false) root._savePending = true;
     }
 
     // ── Title ──
@@ -233,6 +271,8 @@ ColumnLayout {
         }
 
         NSlider {
+          id: rangePrimaryBorderRadius
+          objectName: "settings-range-primaryBorderRadius"
             Layout.fillWidth: true
             from: 0
             to: 1.0
@@ -253,6 +293,8 @@ ColumnLayout {
         }
 
         NSlider {
+          id: rangePrimarySize
+          objectName: "settings-range-primarySize"
             Layout.fillWidth: true
             from: 0.3
             to: 1.0
@@ -359,7 +401,7 @@ ColumnLayout {
                     text: wsRow.ws ? wsRow.ws.name : ""
                     onTextChanged: {
                         if (wsRow.ws && text !== wsRow.ws.name) {
-                            root.workspaces[wsRow.index].name = text;
+                            root.setWorkspaceField(wsRow.index, "name", text);
                         }
                     }
                 }
@@ -371,8 +413,7 @@ ColumnLayout {
                     text: wsRow.ws ? wsRow.ws.icon : ""
                     onTextChanged: {
                         if (wsRow.ws && text !== wsRow.ws.icon) {
-                            root.workspaces[wsRow.index].icon = text;
-                            root.workspacesRevision++;
+                            root.setWorkspaceField(wsRow.index, "icon", text);
                         }
                     }
 
@@ -414,8 +455,7 @@ ColumnLayout {
                         var copy = Object.assign({}, root.expandedIndices);
                         delete copy[wsRow.index];
                         root.expandedIndices = copy;
-                        root.workspaces.splice(wsRow.index, 1);
-                        root.workspacesRevision++;
+                        root.removeWorkspace(wsRow.index);
                     }
                 }
             }
@@ -433,8 +473,7 @@ ColumnLayout {
                     description: pluginApi?.tr("settings.workspaces.symbolColor.description")
                     currentKey: wsRow.ws ? wsRow.ws.symbolColor ?? "none" : "none"
                     onSelected: key => {
-                        root.workspaces[wsRow.index].symbolColor = key;
-                        root.workspacesRevision++;
+                        root.setWorkspaceField(wsRow.index, "symbolColor", key);
                     }
                     defaultValue: "none"
                 }
@@ -444,25 +483,21 @@ ColumnLayout {
                     Layout.fillWidth: true
                     label: pluginApi?.tr("settings.workspaces.showPill.label")
                     description: pluginApi?.tr("settings.workspaces.showPill.description")
-                    checked: root.showPillStates[wsRow.index] ?? true
+                    checked: (wsRow.ws ? wsRow.ws.showPill ?? true : true)
                     onToggled: checked => {
-                        root.workspaces[wsRow.index].showPill = checked;
-                        var copy = Object.assign({}, root.showPillStates);
-                        copy[wsRow.index] = checked;
-                        root.showPillStates = copy;
+                        root.setWorkspaceField(wsRow.index, "showPill", checked);
                     }
                     defaultValue: true
                 }
 
                 NColorChoice {
-                    visible: root.showPillStates[wsRow.index] ?? true
+                    visible: (wsRow.ws ? wsRow.ws.showPill ?? true : true)
                     Layout.fillWidth: true
                     label: pluginApi?.tr("settings.workspaces.pillColor.label")
                     description: pluginApi?.tr("settings.workspaces.pillColor.description")
                     currentKey: wsRow.ws ? wsRow.ws.pillColor ?? "primary" : "primary"
                     onSelected: key => {
-                        root.workspaces[wsRow.index].pillColor = key;
-                        root.workspacesRevision++;
+                        root.setWorkspaceField(wsRow.index, "pillColor", key);
                     }
                     defaultValue: "primary"
                 }
@@ -477,14 +512,14 @@ ColumnLayout {
                     }
 
                     NSlider {
+                        objectName: "workspace-size-" + wsRow.index
                         Layout.fillWidth: true
-                        from: 0.3
-                        to: 1.0
+                        from: workspaceSizeRange.from
+                        to: workspaceSizeRange.to
                         stepSize: 0.05
                         value: wsRow.ws ? wsRow.ws.size ?? 0.9 : 0.9
                         onMoved: {
-                            root.workspaces[wsRow.index].size = value;
-                            root.workspacesRevision++;
+                            root.setWorkspaceField(wsRow.index, "size", value);
                         }
                     }
                 }
@@ -495,8 +530,7 @@ ColumnLayout {
                     description: pluginApi?.tr("settings.workspaces.focusColor.description")
                     currentKey: wsRow.ws ? wsRow.ws.focusColor ?? "primary" : "primary"
                     onSelected: key => {
-                        root.workspaces[wsRow.index].focusColor = key;
-                        root.workspacesRevision++;
+                        root.setWorkspaceField(wsRow.index, "focusColor", key);
                     }
                     defaultValue: "primary"
                 }
@@ -511,14 +545,14 @@ ColumnLayout {
                     }
 
                     NSlider {
+                        objectName: "workspace-radius-" + wsRow.index
                         Layout.fillWidth: true
-                        from: 0
-                        to: 1.0
+                        from: workspaceRadiusRange.from
+                        to: workspaceRadiusRange.to
                         stepSize: 0.05
                         value: wsRow.ws ? wsRow.ws.borderRadius ?? 1.0 : 1.0
                         onMoved: {
-                            root.workspaces[wsRow.index].borderRadius = value;
-                            root.workspacesRevision++;
+                            root.setWorkspaceField(wsRow.index, "borderRadius", value);
                         }
                     }
                 }
@@ -532,8 +566,7 @@ ColumnLayout {
         initialIcon: "star"
         onIconSelected: function (iconName) {
             if (activeIndex >= 0 && activeIndex < root.workspaces.length) {
-                root.workspaces[activeIndex].icon = iconName;
-                root.workspacesRevision++;
+                root.setWorkspaceField(activeIndex, "icon", iconName);
             }
         }
     }
@@ -542,20 +575,7 @@ ColumnLayout {
         text: pluginApi?.tr("settings.workspaces.add")
         icon: "plus"
         onClicked: {
-            root.workspaces.push({
-                "name": "",
-                "icon": "star",
-                "symbolColor": "none",
-                "showPill": true,
-                "pillColor": "primary",
-                "size": 0.9,
-                "borderRadius": 1.0,
-                "focusColor": "primary"
-            });
-            var pills = Object.assign({}, root.showPillStates);
-            pills[root.workspaces.length - 1] = true;
-            root.showPillStates = pills;
-            root.workspacesRevision++;
+            root.addWorkspace();
         }
     }
 }

@@ -1,6 +1,7 @@
 
 import Qt.labs.folderlistmodel
 import QtQuick
+import "../common/MonitorCommands.js" as Commands
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -25,12 +26,12 @@ PanelWindow {
     required property int    screenHeight
 
     // Monitor specific properties
-    readonly property string currentWallpaper: pluginApi?.pluginSettings?.[screenName]?.currentWallpaper ?? ""
-    readonly property string fillMode:         pluginApi?.pluginSettings?.[screenName]?.fillMode         ?? pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? ""
-    readonly property bool   isMuted:          pluginApi?.pluginSettings?.[screenName]?.isMuted          ?? false
-    readonly property bool   isPlaying:        pluginApi?.pluginSettings?.[screenName]?.isPlaying        ?? false
-    readonly property int    orientation:      pluginApi?.pluginSettings?.[screenName]?.orientation      ?? 0
-    readonly property double volume:           pluginApi?.pluginSettings?.[screenName]?.volume           ?? pluginApi?.manifest?.metadata?.defaultSettings?.volume ?? 0
+    readonly property string currentWallpaper: Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.currentWallpaper ?? ""
+    readonly property string fillMode:         Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.fillMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? ""
+    readonly property bool isMuted: Commands.value(pluginApi?.pluginSettings?.monitors, screenName, "isMuted", pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property bool isPlaying: Commands.value(pluginApi?.pluginSettings?.monitors, screenName, "isPlaying", pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property int orientation: Commands.value(pluginApi?.pluginSettings?.monitors, screenName, "orientation", pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property double volume: Commands.value(pluginApi?.pluginSettings?.monitors, screenName, "volume", pluginApi?.manifest?.metadata?.defaultSettings)
 
     // Global properties
     readonly property bool enabled: pluginApi?.pluginSettings?.enabled ?? false

@@ -12,11 +12,30 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property bool showTempValue: cfg.showTempValue ?? defaults.showTempValue
-  property bool showConditionIcon: cfg.showConditionIcon ?? defaults.showConditionIcon
-  property bool showTempUnit: cfg.showTempUnit ?? defaults.showTempUnit
-  property string tooltipOption: cfg.tooltipOption ?? defaults.tooltipOption
-  property string customColor: cfg.customColor ?? defaults.customColor
+  property bool showTempValue: displayBaseline.showTempValue
+  property bool showConditionIcon: displayBaseline.showConditionIcon
+  property bool showTempUnit: displayBaseline.showTempUnit
+  property string tooltipOption: displayBaseline.tooltipOption
+  property string customColor: displayBaseline.customColor
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property bool showTempValue: cfg.showTempValue ?? defaults.showTempValue
+    readonly property bool showConditionIcon: cfg.showConditionIcon ?? defaults.showConditionIcon
+    readonly property bool showTempUnit: cfg.showTempUnit ?? defaults.showTempUnit
+    readonly property string tooltipOption: cfg.tooltipOption ?? defaults.tooltipOption
+    readonly property string customColor: cfg.customColor ?? defaults.customColor
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({showTempValue: root.showTempValue, showConditionIcon: root.showConditionIcon, showTempUnit: root.showTempUnit, tooltipOption: root.tooltipOption, customColor: root.customColor})
+  property bool _applyEffectPending: false
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root._applyEffectPending = false;
+      Logger.i("WeatherIndicator", "Settings saved successfully");
+      root.pluginApi.withCurrentScreen(s => root.pluginApi.closePanel(s));
+    }
+  }
   spacing: Style.marginL
 
   Component.onCompleted: {
@@ -108,9 +127,7 @@ ColumnLayout {
     pluginApi.pluginSettings.showTempUnit = root.showTempUnit;
     pluginApi.pluginSettings.tooltipOption = root.tooltipOption;
     pluginApi.pluginSettings.customColor = root.customColor;
-    pluginApi.saveSettings();
-
-    Logger.i("WeatherIndicator", "Settings saved successfully");
-    pluginApi.closePanel(root.screen);
+    if (pluginApi.saveSettings() !== false)
+      root._applyEffectPending = true;
   }
 }

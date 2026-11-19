@@ -1,4 +1,6 @@
 import QtQuick
+import "../common"
+import "../common/MonitorCommands.js" as Commands
 import QtQuick.Layouts
 
 import Quickshell
@@ -21,12 +23,34 @@ ColumnLayout {
     required property var pluginApi
 
     required property string activeBackend
-    required property bool   enabled
+    required enabled
     required property string selectedMonitor
+    required property var monitorSettings
+    property alias hardwareAcceleration: mpvpaper.hardwareAcceleration
+    property alias profile: mpvpaper.profile
+    property alias mpvSocket: mpvpaper.mpvSocket
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string fillMode: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.fillMode ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? ""
+        readonly property int orientation: Commands.value(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor, "orientation", root.pluginApi?.manifest?.metadata?.defaultSettings)
+        ranges: [NSettingsRange { field: "orientation"; from: orientationInput.from; to: orientationInput.to }]
+    }
+    readonly property bool settingsDirty: edits.hasIntent || displayBaseline.differs({fillMode: fillMode, orientation: orientation}) || mpvpaper.settingsDirty
+    MonitorEdits {
+        id: edits
+        values: ({fillMode: root.fillMode, orientation: root.orientation})
+    }
 
     // Monitor specific properties
-    property string fillMode: pluginApi?.pluginSettings?.[selectedMonitor]?.fillMode    ?? pluginApi?.manifest?.metadata?.defaultSettings?.fill_mode ?? ""
-    property int orientation: pluginApi?.pluginSettings?.[selectedMonitor]?.orientation ?? 0
+    property string fillMode: monitorSettings.fillMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? ""
+    property int orientation: displayBaseline.project("orientation")
+    function loadMonitor(record) {
+        fillMode = record.fillMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? "";
+        orientation = Math.max(orientationInput.from, Math.min(orientationInput.to, Commands.resolve(record, "orientation", pluginApi?.manifest?.metadata?.defaultSettings)));
+        mpvpaper.loadMonitor(record);
+        edits.reset();
+    }
+    Component.onCompleted: loadMonitor(monitorSettings)
 
     // Constants
     readonly property list<string> backends: ["qt6-multimedia", "mpvpaper"]
@@ -60,12 +84,13 @@ ColumnLayout {
             }
         ]
         currentKey: root.fillMode
-        onSelected: key => root.fillMode = key
+        onSelected: key => { root.fillMode = key; edits.mark("fillMode"); }
     }
 
     // Orientation
     NValueSlider {
-        property real _value: root.orientation
+        id: orientationInput
+        objectName: "settings-range-orientation"
 
         enabled: root.enabled
         from: 0
@@ -73,21 +98,10 @@ ColumnLayout {
         value: root.orientation
         defaultValue: 0
         stepSize: 90
-        text: _value
+        text: root.orientation
         label:       root.pluginApi?.tr("settings.advanced.orientation.label")
         description: root.pluginApi?.tr("settings.advanced.orientation.description")
-        onMoved: value => _value = value
-        onPressedChanged: (pressed, value) => {
-            if(root.pluginApi == null) {
-                Logger.e("video-wallpaper", "Plugin API is null.");
-                return
-            }
-
-            if(!pressed) {
-                root.saveMonitorProperty("orientation", _value);
-                root.pluginApi.saveSettings();
-            }
-        }
+        onMoved: value => { root.orientation = value; edits.mark("orientation"); }
     }
 
     NTabView {
@@ -104,6 +118,7 @@ ColumnLayout {
             pluginApi: root.pluginApi
             enabled: root.enabled
             selectedMonitor: root.selectedMonitor
+            monitorSettings: root.monitorSettings
 
             onSaveMonitorProperty: (key, value) => root.saveMonitorProperty(key, value);
         }
@@ -111,15 +126,6 @@ ColumnLayout {
         NoBackend {
             pluginApi: root.pluginApi
             enabled: root.enabled
-        }
-    }
-
-    Connections {
-        target: root.pluginApi
-        function onPluginSettingsChanged() {
-            // Update the local properties on change
-            root.fillMode =    root.pluginApi?.pluginSettings?.[root.selectedMonitor]?.fillMode    ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? ""
-            root.orientation = root.pluginApi?.pluginSettings?.[root.selectedMonitor]?.orientation ?? 0
         }
     }
 
@@ -134,9 +140,13 @@ ColumnLayout {
         }
 
         videoWallpaper.saveSettings();
-        mpvpaper.saveSettings();
+        var backend = mpvpaper.saveSettings();
 
-        saveMonitorProperty("fillMode", fillMode);
-        saveMonitorProperty("orientation", orientation);
+        return {selected: edits.submit((key, value) => root.saveMonitorProperty(key, value)), backend: backend};
+    }
+    function acknowledgeSettings(captured) {
+        if (!captured) return;
+        edits.acknowledge(captured.selected);
+        mpvpaper.acknowledgeSettings(captured.backend);
     }
 }
