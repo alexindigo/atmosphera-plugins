@@ -10,7 +10,7 @@ ColumnLayout {
     
     property var pluginApi: null
 
-    property int editRefreshInterval: displayBaseline.editRefreshInterval
+    property int editRefreshInterval: displayBaseline.project("editRefreshInterval")
 
     property bool editCompactMode: displayBaseline.editCompactMode
 
@@ -20,7 +20,7 @@ ColumnLayout {
 
     property bool editShowPing: displayBaseline.editShowPing
 
-    property int editPingCount: displayBaseline.editPingCount
+    property int editPingCount: displayBaseline.project("editPingCount")
 
     property string editTerminalCommand: displayBaseline.editTerminalCommand
 
@@ -55,6 +55,8 @@ ColumnLayout {
     }
 
     NSlider {
+        id: rangeEditRefreshInterval
+        objectName: "settings-range-editRefreshInterval"
         Layout.fillWidth: true
         from: 1000
         to: 60000
@@ -164,6 +166,8 @@ ColumnLayout {
     }
 
     NSlider {
+        id: rangeEditPingCount
+        objectName: "settings-range-editPingCount"
         Layout.fillWidth: true
         from: 1
         to: 20
@@ -207,6 +211,7 @@ ColumnLayout {
     }
 
     NSettingsBaseline {
+      ranges: [NSettingsRange { field: "editRefreshInterval"; from: rangeEditRefreshInterval.from; to: rangeEditRefreshInterval.to }, NSettingsRange { field: "editPingCount"; from: rangeEditPingCount.from; to: rangeEditPingCount.to }]
       id: displayBaseline
       readonly property int editRefreshInterval: pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 5000
       readonly property bool editCompactMode: pluginApi?.pluginSettings?.compactMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ?? false

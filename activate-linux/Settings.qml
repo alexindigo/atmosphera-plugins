@@ -8,24 +8,16 @@ ColumnLayout {
 
   property var pluginApi: null
 
-  property bool editCustomizeText:
-    pluginApi?.pluginSettings?.customizeText ??
-    pluginApi?.manifest?.metadata?.defaultSettings?.customizeText ??
-    false
-
-  property string editFirstLine:
-    pluginApi?.pluginSettings?.firstLine ??
-    pluginApi?.manifest?.metadata?.defaultSettings?.firstLine ??
-    "Activate Linux"
-
-  property string editSecondLine:
-    pluginApi?.pluginSettings?.secondLine ??
-    pluginApi?.manifest?.metadata?.defaultSettings?.secondLine ??
-    "Go to Settings to activate Linux."
-
-  readonly property bool settingsDirty: editCustomizeText !== (pluginApi?.pluginSettings?.customizeText ?? pluginApi?.manifest?.metadata?.defaultSettings?.customizeText ?? false)
-                                        || editFirstLine !== (pluginApi?.pluginSettings?.firstLine ?? pluginApi?.manifest?.metadata?.defaultSettings?.firstLine ?? "Activate Linux")
-                                        || editSecondLine !== (pluginApi?.pluginSettings?.secondLine ?? pluginApi?.manifest?.metadata?.defaultSettings?.secondLine ?? "Go to Settings to activate Linux.")
+  property bool editCustomizeText: displayBaseline.editCustomizeText
+  property string editFirstLine: displayBaseline.editFirstLine
+  property string editSecondLine: displayBaseline.editSecondLine
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property bool editCustomizeText: pluginApi?.pluginSettings?.customizeText ?? pluginApi?.manifest?.metadata?.defaultSettings?.customizeText ?? false
+    readonly property string editFirstLine: pluginApi?.pluginSettings?.firstLine ?? pluginApi?.manifest?.metadata?.defaultSettings?.firstLine ?? "Activate Linux"
+    readonly property string editSecondLine: pluginApi?.pluginSettings?.secondLine ?? pluginApi?.manifest?.metadata?.defaultSettings?.secondLine ?? "Go to Settings to activate Linux."
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editCustomizeText: root.editCustomizeText, editFirstLine: root.editFirstLine, editSecondLine: root.editSecondLine})
 
   spacing: Style.marginM
 

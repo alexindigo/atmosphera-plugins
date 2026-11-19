@@ -10,9 +10,27 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property int editRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 5
-  property bool editHideSystemPorts: cfg.hideSystemPorts ?? defaults.hideSystemPorts ?? false
-  property bool editHideWhenEmpty: cfg.hideWhenEmpty ?? defaults.hideWhenEmpty ?? false
+  property int editRefreshInterval: displayBaseline.project("editRefreshInterval")
+  property bool editHideSystemPorts: displayBaseline.editHideSystemPorts
+  property bool editHideWhenEmpty: displayBaseline.editHideWhenEmpty
+  property bool _applyEffectPending: false
+  NSettingsBaseline {
+    ranges: [NSettingsRange { field: "editRefreshInterval"; from: rangeEditRefreshInterval.from; to: rangeEditRefreshInterval.to }]
+    id: displayBaseline
+    readonly property int editRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 5
+    readonly property bool editHideSystemPorts: cfg.hideSystemPorts ?? defaults.hideSystemPorts ?? false
+    readonly property bool editHideWhenEmpty: cfg.hideWhenEmpty ?? defaults.hideWhenEmpty ?? false
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editRefreshInterval: root.editRefreshInterval, editHideSystemPorts: root.editHideSystemPorts, editHideWhenEmpty: root.editHideWhenEmpty})
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root._applyEffectPending = false;
+      root.pluginApi.mainInstance?.refresh();
+      Logger.i("Port Monitor", "Settings saved");
+    }
+  }
 
   spacing: Style.marginM
 
@@ -27,6 +45,8 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeEditRefreshInterval
+      objectName: "settings-range-editRefreshInterval"
       Layout.fillWidth: true
       from: 1
       to: 30
@@ -74,8 +94,7 @@ ColumnLayout {
     pluginApi.pluginSettings.hideSystemPorts = root.editHideSystemPorts
     pluginApi.pluginSettings.hideWhenEmpty = root.editHideWhenEmpty
 
-    pluginApi.saveSettings()
-    root.pluginApi.mainInstance?.refresh()
-    Logger.i("Port Monitor", "Settings saved")
+    if (pluginApi.saveSettings() !== false)
+      root._applyEffectPending = true
   }
 }

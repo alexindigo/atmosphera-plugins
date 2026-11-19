@@ -12,24 +12,35 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property real zoomAmount: cfg.zoomAmount ?? defaults.zoomAmount ?? 1.1
-  property string parallaxDirection: cfg.parallaxDirection ?? defaults.parallaxDirection ?? "horizontal"
-  property real hParallaxAmount: cfg.hParallaxAmount ?? defaults.hParallaxAmount ?? 50
-  property int hParallaxDuration: cfg.hParallaxDuration ?? defaults.hParallaxDuration ?? 400
-  property real vParallaxAmount: cfg.vParallaxAmount ?? defaults.vParallaxAmount ?? 50
-  property int vParallaxDuration: cfg.vParallaxDuration ?? defaults.vParallaxDuration ?? 400
-  property bool invertDirection: cfg.invertDirection ?? defaults.invertDirection ?? false
-  property bool autoZoom: cfg.autoZoom ?? defaults.autoZoom ?? false
-  property string parallaxEasing: cfg.parallaxEasing ?? defaults.parallaxEasing ?? "OutCubic"
-  readonly property bool settingsDirty: zoomAmount !== (cfg.zoomAmount ?? defaults.zoomAmount ?? 1.1)
-                                        || parallaxDirection !== (cfg.parallaxDirection ?? defaults.parallaxDirection ?? "horizontal")
-                                        || hParallaxAmount !== (cfg.hParallaxAmount ?? defaults.hParallaxAmount ?? 50)
-                                        || hParallaxDuration !== (cfg.hParallaxDuration ?? defaults.hParallaxDuration ?? 400)
-                                        || vParallaxAmount !== (cfg.vParallaxAmount ?? defaults.vParallaxAmount ?? 50)
-                                        || vParallaxDuration !== (cfg.vParallaxDuration ?? defaults.vParallaxDuration ?? 400)
-                                        || invertDirection !== (cfg.invertDirection ?? defaults.invertDirection ?? false)
-                                        || autoZoom !== (cfg.autoZoom ?? defaults.autoZoom ?? false)
-                                        || parallaxEasing !== (cfg.parallaxEasing ?? defaults.parallaxEasing ?? "OutCubic")
+  property real zoomAmount: displayBaseline.project("zoomAmount")
+  property string parallaxDirection: displayBaseline.parallaxDirection
+  property real hParallaxAmount: displayBaseline.project("hParallaxAmount")
+  property int hParallaxDuration: displayBaseline.project("hParallaxDuration")
+  property real vParallaxAmount: displayBaseline.project("vParallaxAmount")
+  property int vParallaxDuration: displayBaseline.project("vParallaxDuration")
+  property bool invertDirection: displayBaseline.invertDirection
+  property bool autoZoom: displayBaseline.autoZoom
+  property string parallaxEasing: displayBaseline.parallaxEasing
+  NSettingsBaseline {
+    ranges: [
+      NSettingsRange { field: "zoomAmount"; from: rangeZoomAmount.from; to: rangeZoomAmount.to },
+      NSettingsRange { field: "hParallaxAmount"; from: rangeHParallaxAmount.from; to: rangeHParallaxAmount.to },
+      NSettingsRange { field: "hParallaxDuration"; from: rangeHParallaxDuration.from; to: rangeHParallaxDuration.to },
+      NSettingsRange { field: "vParallaxAmount"; from: rangeVParallaxAmount.from; to: rangeVParallaxAmount.to },
+      NSettingsRange { field: "vParallaxDuration"; from: rangeVParallaxDuration.from; to: rangeVParallaxDuration.to }
+    ]
+    id: displayBaseline
+    readonly property real zoomAmount: cfg.zoomAmount ?? defaults.zoomAmount ?? 1.1
+    readonly property string parallaxDirection: cfg.parallaxDirection ?? defaults.parallaxDirection ?? "horizontal"
+    readonly property real hParallaxAmount: cfg.hParallaxAmount ?? defaults.hParallaxAmount ?? 50
+    readonly property int hParallaxDuration: cfg.hParallaxDuration ?? defaults.hParallaxDuration ?? 400
+    readonly property real vParallaxAmount: cfg.vParallaxAmount ?? defaults.vParallaxAmount ?? 50
+    readonly property int vParallaxDuration: cfg.vParallaxDuration ?? defaults.vParallaxDuration ?? 400
+    readonly property bool invertDirection: cfg.invertDirection ?? defaults.invertDirection ?? false
+    readonly property bool autoZoom: cfg.autoZoom ?? defaults.autoZoom ?? false
+    readonly property string parallaxEasing: cfg.parallaxEasing ?? defaults.parallaxEasing ?? "OutCubic"
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({zoomAmount: root.zoomAmount, parallaxDirection: root.parallaxDirection, hParallaxAmount: root.hParallaxAmount, hParallaxDuration: root.hParallaxDuration, vParallaxAmount: root.vParallaxAmount, vParallaxDuration: root.vParallaxDuration, invertDirection: root.invertDirection, autoZoom: root.autoZoom, parallaxEasing: root.parallaxEasing})
 
   readonly property bool showHorizontal: parallaxDirection === "horizontal" || parallaxDirection === "both"
   readonly property bool showVertical: parallaxDirection === "vertical" || parallaxDirection === "both"
@@ -39,6 +50,9 @@ ColumnLayout {
   // ── Wallpaper Zoom ──
 
   NValueSlider {
+    id: rangeZoomAmount
+    objectName: "settings-range-zoomAmount"
+    onValueChanged: root.zoomAmount = value
     label: pluginApi.tr("settings.zoom.label")
     description: pluginApi.tr("settings.zoom.desc")
     text: root.zoomAmount.toFixed(2) + "x"
@@ -86,6 +100,9 @@ ColumnLayout {
   }
 
   NValueSlider {
+    id: rangeHParallaxAmount
+    objectName: "settings-range-hParallaxAmount"
+    onValueChanged: root.hParallaxAmount = value
     visible: root.showHorizontal
     label: pluginApi.tr("settings.horizontal.amount")
     text: Math.round(root.hParallaxAmount) + "px"
@@ -102,6 +119,9 @@ ColumnLayout {
   }
 
   NValueSlider {
+    id: rangeHParallaxDuration
+    objectName: "settings-range-hParallaxDuration"
+    onValueChanged: root.hParallaxDuration = value
     visible: root.showHorizontal
     label: pluginApi.tr("settings.horizontal.duration")
     text: Math.round(root.hParallaxDuration) + "ms"
@@ -127,6 +147,9 @@ ColumnLayout {
   }
 
   NValueSlider {
+    id: rangeVParallaxAmount
+    objectName: "settings-range-vParallaxAmount"
+    onValueChanged: root.vParallaxAmount = value
     visible: root.showVertical
     label: pluginApi.tr("settings.vertical.amount")
     text: Math.round(root.vParallaxAmount) + "px"
@@ -143,6 +166,9 @@ ColumnLayout {
   }
 
   NValueSlider {
+    id: rangeVParallaxDuration
+    objectName: "settings-range-vParallaxDuration"
+    onValueChanged: root.vParallaxDuration = value
     visible: root.showVertical
     label: pluginApi.tr("settings.vertical.duration")
     text: Math.round(root.vParallaxDuration) + "ms"

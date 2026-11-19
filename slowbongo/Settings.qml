@@ -16,49 +16,56 @@ ColumnLayout {
     property string currentUser: ""
 
     // Editable settings properties
-    property string editCatColor: {
-        let saved = pluginApi?.pluginSettings?.catColor
-        if (saved && saved.length > 0) return saved
-        return pluginApi?.manifest?.metadata?.defaultSettings?.catColor ?? "none"
-    }
+    property string editCatColor: displayBaseline.editCatColor
+    property real editCatSize: displayBaseline.project("editCatSize")
+    property real editCatOffsetY: displayBaseline.project("editCatOffsetY")
+    property var editInputDevices: displayBaseline.editInputDevices
+    property bool editRaveMode: displayBaseline.editRaveMode
+    property bool editTappyMode: displayBaseline.editTappyMode
+    property bool editUseMprisFilter: displayBaseline.editUseMprisFilter
 
-    property real editCatSize: {
-        let saved = pluginApi?.pluginSettings?.catSize
-        if (saved !== undefined && saved !== null) return saved
-        return pluginApi?.manifest?.metadata?.defaultSettings?.catSize ?? 1.0
+    NSettingsBaseline {
+        ranges: [NSettingsRange { field: "editCatSize"; from: rangeEditCatSize.from; to: rangeEditCatSize.to }, NSettingsRange { field: "editCatOffsetY"; from: rangeEditCatOffsetY.from; to: rangeEditCatOffsetY.to }]
+        id: displayBaseline
+        readonly property string editCatColor: {
+            let saved = pluginApi?.pluginSettings?.catColor
+            if (saved && saved.length > 0) return saved
+            return pluginApi?.manifest?.metadata?.defaultSettings?.catColor ?? "none"
+        }
+        readonly property real editCatSize: {
+            let saved = pluginApi?.pluginSettings?.catSize
+            if (saved !== undefined && saved !== null) return saved
+            return pluginApi?.manifest?.metadata?.defaultSettings?.catSize ?? 1.0
+        }
+        readonly property real editCatOffsetY: {
+            let saved = pluginApi?.pluginSettings?.catOffsetY
+            if (saved !== undefined && saved !== null) return saved
+            return pluginApi?.manifest?.metadata?.defaultSettings?.catOffsetY ?? 0.11
+        }
+        readonly property var editInputDevices: {
+            let saved = pluginApi?.pluginSettings?.inputDevices
+            if (saved && saved.length > 0) return saved
+            let legacy = pluginApi?.pluginSettings?.inputDevice
+                ?? pluginApi?.manifest?.metadata?.defaultSettings?.inputDevice
+            return legacy ? [legacy] : []
+        }
+        readonly property bool editRaveMode: {
+            let saved = pluginApi?.pluginSettings?.raveMode
+            if (saved !== undefined && saved !== null) return saved
+            return pluginApi?.manifest?.metadata?.defaultSettings?.raveMode ?? false
+        }
+        readonly property bool editTappyMode: {
+            let saved = pluginApi?.pluginSettings?.tappyMode
+            if (saved !== undefined && saved !== null) return saved
+            return pluginApi?.manifest?.metadata?.defaultSettings?.tappyMode ?? false
+        }
+        readonly property bool editUseMprisFilter: {
+            let saved = pluginApi?.pluginSettings?.useMprisFilter
+            if (saved !== undefined && saved !== null) return saved
+            return pluginApi?.manifest?.metadata?.defaultSettings?.useMprisFilter ?? false
+        }
     }
-
-    property real editCatOffsetY: {
-        let saved = pluginApi?.pluginSettings?.catOffsetY
-        if (saved !== undefined && saved !== null) return saved
-        return pluginApi?.manifest?.metadata?.defaultSettings?.catOffsetY ?? 0.11
-    }
-
-    property var editInputDevices: {
-        let saved = pluginApi?.pluginSettings?.inputDevices
-        if (saved && saved.length > 0) return saved
-        let legacy = pluginApi?.pluginSettings?.inputDevice
-            ?? pluginApi?.manifest?.metadata?.defaultSettings?.inputDevice
-        return legacy ? [legacy] : []
-    }
-
-    property bool editRaveMode: {
-        let saved = pluginApi?.pluginSettings?.raveMode
-        if (saved !== undefined && saved !== null) return saved
-        return pluginApi?.manifest?.metadata?.defaultSettings?.raveMode ?? false
-    }
-
-    property bool editTappyMode: {
-        let saved = pluginApi?.pluginSettings?.tappyMode
-        if (saved !== undefined && saved !== null) return saved
-        return pluginApi?.manifest?.metadata?.defaultSettings?.tappyMode ?? false
-    }
-
-    property bool editUseMprisFilter: {
-        let saved = pluginApi?.pluginSettings?.useMprisFilter
-        if (saved !== undefined && saved !== null) return saved
-        return pluginApi?.manifest?.metadata?.defaultSettings?.useMprisFilter ?? false
-    }
+    readonly property bool settingsDirty: displayBaseline.differs({editCatColor: root.editCatColor, editCatSize: root.editCatSize, editCatOffsetY: root.editCatOffsetY, editInputDevices: root.editInputDevices, editRaveMode: root.editRaveMode, editTappyMode: root.editTappyMode, editUseMprisFilter: root.editUseMprisFilter})
 
     // Status colors (with fallback for theme compatibility)
     readonly property color statusSuccessColor: AtmoColor.mPrimary
@@ -274,6 +281,9 @@ ColumnLayout {
 
     // Cat Size Section
     NValueSlider {
+        id: rangeEditCatSize
+        objectName: "settings-range-editCatSize"
+        onValueChanged: root.editCatSize = value
         Layout.fillWidth: true
         label: pluginApi?.tr("settings.cat-size")
         value: root.editCatSize
@@ -288,6 +298,9 @@ ColumnLayout {
 
     // Vertical Position Section
     NValueSlider {
+        id: rangeEditCatOffsetY
+        objectName: "settings-range-editCatOffsetY"
+        onValueChanged: root.editCatOffsetY = value
         Layout.fillWidth: true
         label: pluginApi?.tr("settings.vertical-position")
         value: root.editCatOffsetY
@@ -355,6 +368,7 @@ ColumnLayout {
                 model: root.inputDevices
 
                 Rectangle {
+                    id: deviceDelegate
                     required property var modelData
 
                     property bool isChecked: root.isSelected(modelData.key)
@@ -389,8 +403,8 @@ ColumnLayout {
                             implicitWidth: Math.round(Style.baseWidgetSize * 0.7)
                             implicitHeight: Math.round(Style.baseWidgetSize * 0.7)
                             radius: Style.iRadiusXS
-                            color: parent.parent.isChecked ? AtmoColor.mPrimary : AtmoColor.mSurface
-                            border.color: parent.parent.isHovered ? AtmoColor.mPrimary : AtmoColor.mOutline
+                            color: deviceDelegate.isChecked ? AtmoColor.mPrimary : AtmoColor.mSurface
+                            border.color: deviceDelegate.isHovered ? AtmoColor.mPrimary : AtmoColor.mOutline
                             border.width: Style.borderS
 
                             Behavior on color {
@@ -401,7 +415,7 @@ ColumnLayout {
                             }
 
                             AtmoIcon {
-                                visible: parent.parent.parent.isChecked
+                                visible: deviceDelegate.isChecked
                                 anchors.centerIn: parent
                                 anchors.horizontalCenterOffset: -1
                                 icon: "check"
@@ -415,7 +429,7 @@ ColumnLayout {
                             spacing: 2
 
                             Text {
-                                text: parent.parent.parent.modelData.name
+                                text: deviceDelegate.modelData.name
                                 color: AtmoColor.mOnSurface
                                 font.pointSize: Style.fontSizeM
                                 elide: Text.ElideRight
@@ -423,7 +437,7 @@ ColumnLayout {
                             }
 
                             Text {
-                                text: parent.parent.parent.modelData.eventDev
+                                text: deviceDelegate.modelData.eventDev
                                 color: AtmoColor.mOnSurfaceVariant
                                 font.pointSize: Style.fontSizeS
                                 visible: text !== ""
@@ -449,7 +463,9 @@ ColumnLayout {
         pluginApi.pluginSettings.raveMode = root.editRaveMode
         pluginApi.pluginSettings.tappyMode = root.editTappyMode
         pluginApi.pluginSettings.useMprisFilter = root.editUseMprisFilter
-        pluginApi.saveSettings()
-        Logger.i("Slow Bongo", "Settings saved successfully")
+        pluginApi.saveSettings(function (result) {
+            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+                Logger.i("Slow Bongo", "Settings saved successfully")
+        })
     }
 }

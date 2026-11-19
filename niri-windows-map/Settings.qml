@@ -8,10 +8,14 @@ ColumnLayout {
 
   property var pluginApi: null
 
-  property string editPanelSize: pluginApi?.pluginSettings?.panelSize || pluginApi?.manifest?.metadata?.defaultSettings?.panelSize || "regular"
-  property string editCorner: pluginApi?.pluginSettings?.corner || pluginApi?.manifest?.metadata?.defaultSettings?.corner || "bottomRight"
-  readonly property bool settingsDirty: editPanelSize !== (pluginApi?.pluginSettings?.panelSize || pluginApi?.manifest?.metadata?.defaultSettings?.panelSize || "regular")
-                                        || editCorner !== (pluginApi?.pluginSettings?.corner || pluginApi?.manifest?.metadata?.defaultSettings?.corner || "bottomRight")
+  property string editPanelSize: displayBaseline.editPanelSize
+  property string editCorner: displayBaseline.editCorner
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string editPanelSize: pluginApi?.pluginSettings?.panelSize || pluginApi?.manifest?.metadata?.defaultSettings?.panelSize || "regular"
+    readonly property string editCorner: pluginApi?.pluginSettings?.corner || pluginApi?.manifest?.metadata?.defaultSettings?.corner || "bottomRight"
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editPanelSize: root.editPanelSize, editCorner: root.editCorner})
 
   NText {
     text: "Panel"

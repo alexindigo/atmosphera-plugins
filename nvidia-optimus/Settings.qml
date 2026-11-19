@@ -8,6 +8,7 @@ Item {
   id: root
 
   property var pluginApi: null
+  readonly property bool settingsDirty: false
 
   implicitHeight: col.implicitHeight
 

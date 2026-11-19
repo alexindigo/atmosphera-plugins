@@ -1,9 +1,9 @@
 {
   "id": "slowbongo",
   "name": "Slow Bongo",
-  "version": "0.8.2",
+  "version": "0.8.4",
   "minNoctaliaVersion": "3.6.0",
-  "minAtmospheraVersion": "0.8.0",
+  "minAtmospheraVersion": "0.10.0",
   "author": "tui",
   "description": "A bongo cat that sits in your bar and slaps when you type.",
   "license": "MIT",

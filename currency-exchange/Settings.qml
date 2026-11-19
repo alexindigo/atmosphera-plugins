@@ -57,18 +57,22 @@ ColumnLayout {
       "name": pluginApi?.tr("settings.intervals.720") || "12 hours"
     }
   ]
-  property string valueRefreshInterval: String(cfg.refreshInterval ?? defaults.refreshInterval ?? 60)
+  property string valueRefreshInterval: displayBaseline.valueRefreshInterval
 
   // Global currency settings (used by launcher, widget, and panel)
-  property string valueSourceCurrency: cfg.sourceCurrency || defaults.sourceCurrency || "USD"
-  property string valueTargetCurrency: cfg.targetCurrency || defaults.targetCurrency || "EUR"
+  property string valueSourceCurrency: displayBaseline.valueSourceCurrency
+  property string valueTargetCurrency: displayBaseline.valueTargetCurrency
 
   // Widget settings
-  property string valueWidgetDisplayMode: cfg.widgetDisplayMode || defaults.widgetDisplayMode || "icon"
-  readonly property bool settingsDirty: valueRefreshInterval !== String(cfg.refreshInterval ?? defaults.refreshInterval ?? 60)
-                                        || valueSourceCurrency !== (cfg.sourceCurrency || defaults.sourceCurrency || "USD")
-                                        || valueTargetCurrency !== (cfg.targetCurrency || defaults.targetCurrency || "EUR")
-                                        || valueWidgetDisplayMode !== (cfg.widgetDisplayMode || defaults.widgetDisplayMode || "icon")
+  property string valueWidgetDisplayMode: displayBaseline.valueWidgetDisplayMode
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string valueRefreshInterval: String(cfg.refreshInterval ?? defaults.refreshInterval ?? 60)
+    readonly property string valueSourceCurrency: cfg.sourceCurrency || defaults.sourceCurrency || "USD"
+    readonly property string valueTargetCurrency: cfg.targetCurrency || defaults.targetCurrency || "EUR"
+    readonly property string valueWidgetDisplayMode: cfg.widgetDisplayMode || defaults.widgetDisplayMode || "icon"
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({valueRefreshInterval: root.valueRefreshInterval, valueSourceCurrency: root.valueSourceCurrency, valueTargetCurrency: root.valueTargetCurrency, valueWidgetDisplayMode: root.valueWidgetDisplayMode})
 
   function buildTranslatedCurrencyModel() {
     var model = [];

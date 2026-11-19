@@ -10,18 +10,35 @@ ColumnLayout {
   property var pluginApi: null
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-  property string valueHost: cfg.host ?? defaults.host ?? ""
-  property int valuePort: cfg.port ?? defaults.port ?? 22
-  property string valueUser: cfg.user ?? defaults.user ?? ""
-  property bool valueRememberLastTarget: cfg.rememberLastTarget ?? defaults.rememberLastTarget ?? true
-  property bool valueAutoConnectOnStartup: cfg.autoConnectOnStartup ?? defaults.autoConnectOnStartup ?? false
-  property int valuePanelWidth: cfg.panelWidth ?? defaults.panelWidth ?? 1200
-  property int valuePanelHeight: cfg.panelHeight ?? defaults.panelHeight ?? 760
-  property int valueTerminalCols: cfg.terminalCols ?? defaults.terminalCols ?? 180
-  property int valueTerminalRows: cfg.terminalRows ?? defaults.terminalRows ?? 32
-  property int valueTerminalFontSize: cfg.terminalFontSize ?? defaults.terminalFontSize ?? 11
-  property bool valueShowBarText: cfg.showBarText ?? defaults.showBarText ?? true
-  property string valueToggleShortcutName: cfg.toggleShortcutName ?? defaults.toggleShortcutName ?? "hermes-toggle"
+  property string valueHost: displayBaseline.valueHost
+  property int valuePort: displayBaseline.valuePort
+  property string valueUser: displayBaseline.valueUser
+  property bool valueRememberLastTarget: displayBaseline.valueRememberLastTarget
+  property bool valueAutoConnectOnStartup: displayBaseline.valueAutoConnectOnStartup
+  property int valuePanelWidth: displayBaseline.valuePanelWidth
+  property int valuePanelHeight: displayBaseline.valuePanelHeight
+  property int valueTerminalCols: displayBaseline.valueTerminalCols
+  property int valueTerminalRows: displayBaseline.valueTerminalRows
+  property int valueTerminalFontSize: displayBaseline.valueTerminalFontSize
+  property bool valueShowBarText: displayBaseline.valueShowBarText
+  property string valueToggleShortcutName: displayBaseline.valueToggleShortcutName
+
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string valueHost: cfg.host ?? defaults.host ?? ""
+    readonly property int valuePort: cfg.port ?? defaults.port ?? 22
+    readonly property string valueUser: cfg.user ?? defaults.user ?? ""
+    readonly property bool valueRememberLastTarget: cfg.rememberLastTarget ?? defaults.rememberLastTarget ?? true
+    readonly property bool valueAutoConnectOnStartup: cfg.autoConnectOnStartup ?? defaults.autoConnectOnStartup ?? false
+    readonly property int valuePanelWidth: cfg.panelWidth ?? defaults.panelWidth ?? 1200
+    readonly property int valuePanelHeight: cfg.panelHeight ?? defaults.panelHeight ?? 760
+    readonly property int valueTerminalCols: cfg.terminalCols ?? defaults.terminalCols ?? 180
+    readonly property int valueTerminalRows: cfg.terminalRows ?? defaults.terminalRows ?? 32
+    readonly property int valueTerminalFontSize: cfg.terminalFontSize ?? defaults.terminalFontSize ?? 11
+    readonly property bool valueShowBarText: cfg.showBarText ?? defaults.showBarText ?? true
+    readonly property string valueToggleShortcutName: cfg.toggleShortcutName ?? defaults.toggleShortcutName ?? "hermes-toggle"
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({valueHost: root.valueHost, valuePort: root.valuePort, valueUser: root.valueUser, valueRememberLastTarget: root.valueRememberLastTarget, valueAutoConnectOnStartup: root.valueAutoConnectOnStartup, valuePanelWidth: root.valuePanelWidth, valuePanelHeight: root.valuePanelHeight, valueTerminalCols: root.valueTerminalCols, valueTerminalRows: root.valueTerminalRows, valueTerminalFontSize: root.valueTerminalFontSize, valueShowBarText: root.valueShowBarText, valueToggleShortcutName: root.valueToggleShortcutName})
 
   function saveSettings() {
     if (!pluginApi)

@@ -11,12 +11,16 @@ ColumnLayout {
     property var cfg: pluginApi?.pluginSettings || ({})
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    property string valueOutputDir: cfg.outputDir ?? defaults.outputDir
-    property int valueFps: cfg.fps ?? defaults.fps
-    property int valueMaxRecordingSeconds: cfg.maxRecordingSeconds ?? defaults.maxRecordingSeconds
-    readonly property bool settingsDirty: valueOutputDir !== (cfg.outputDir ?? defaults.outputDir)
-                                          || valueFps !== (cfg.fps ?? defaults.fps)
-                                          || valueMaxRecordingSeconds !== (cfg.maxRecordingSeconds ?? defaults.maxRecordingSeconds)
+    property string valueOutputDir: displayBaseline.valueOutputDir
+    property int valueFps: displayBaseline.valueFps
+    property int valueMaxRecordingSeconds: displayBaseline.valueMaxRecordingSeconds
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string valueOutputDir: cfg.outputDir ?? defaults.outputDir
+        readonly property int valueFps: cfg.fps ?? defaults.fps
+        readonly property int valueMaxRecordingSeconds: cfg.maxRecordingSeconds ?? defaults.maxRecordingSeconds
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({valueOutputDir: root.valueOutputDir, valueFps: root.valueFps, valueMaxRecordingSeconds: root.valueMaxRecordingSeconds})
 
     spacing: Style.marginL
 

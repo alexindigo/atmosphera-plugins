@@ -12,22 +12,13 @@ ColumnLayout {
     property string timeFormat: displayBaseline.timeFormat
     property string lineColorType: displayBaseline.lineColorType
     property string panelMode: displayBaseline.panelMode
-    property real hourLineOpacity: displayBaseline.hourLineOpacity
-    property real dayLineOpacity: displayBaseline.dayLineOpacity
+    property real hourLineOpacity: displayBaseline.project("hourLineOpacity")
+    property real dayLineOpacity: displayBaseline.project("dayLineOpacity")
     
     spacing: Style.marginL
     
     Component.onCompleted: {
         Logger.i("WeeklyCalendar", "Settings UI loaded")
-        
-        if (pluginApi?.pluginSettings) {
-            panelMode = pluginApi.pluginSettings.panelMode || "attached"
-            weekStart = pluginApi.pluginSettings.weekStart || "1"
-            timeFormat = pluginApi.pluginSettings.timeFormat || "24h"
-            lineColorType = pluginApi.pluginSettings.lineColorType || "mOutline"
-            hourLineOpacity = pluginApi.pluginSettings.hourLineOpacity || 0.5
-            dayLineOpacity = pluginApi.pluginSettings.dayLineOpacity || 0.9
-        }
     }
 
     // Time Format toggle
@@ -96,6 +87,8 @@ ColumnLayout {
         }
 
         NSlider {
+            id: rangeHourLineOpacity
+            objectName: "settings-range-hourLineOpacity"
             Layout.fillWidth: true
             from: 0.1
             to: 1
@@ -130,6 +123,8 @@ ColumnLayout {
         }
 
         NSlider {
+            id: rangeDayLineOpacity
+            objectName: "settings-range-dayLineOpacity"
             Layout.fillWidth: true
             from: 0.1
             to: 1
@@ -159,6 +154,7 @@ ColumnLayout {
     }
     
     NSettingsBaseline {
+      ranges: [NSettingsRange { field: "hourLineOpacity"; from: rangeHourLineOpacity.from; to: rangeHourLineOpacity.to }, NSettingsRange { field: "dayLineOpacity"; from: rangeDayLineOpacity.from; to: rangeDayLineOpacity.to }]
       id: displayBaseline
       readonly property string panelMode: pluginApi?.pluginSettings?.panelMode || "attached"
       readonly property string weekStart: pluginApi?.pluginSettings?.weekStart || "1"

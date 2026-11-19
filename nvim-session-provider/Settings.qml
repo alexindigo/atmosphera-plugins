@@ -12,24 +12,18 @@ ColumnLayout {
   property var pluginApi: null
 
   // Local state for editing
-  property string editNvim: pluginApi?.pluginSettings?.nvim ||
-      pluginApi?.manifest?.metadata?.defaultSettings?.nvim ||
-      "nvim"
-  property bool editRunInTerminal: pluginApi?.pluginSettings?.runInTerminal ??
-      pluginApi?.manifest?.metadata?.defaultSettings?.runInTerminal ??
-      true
-  property string editSessionDir: pluginApi?.pluginSettings?.sessionDir ??
-      pluginApi?.manifest?.metadata?.defaultSettings?.sessionDir ??
-      "~/.local/share/nvim/sessions"
-  property bool editIncludeInSearch: pluginApi?.pluginSettings?.includeInSearch ??
-      pluginApi?.manifest?.metadata?.defaultSettings?.includeInSearch ??
-      true
-
-
-  readonly property bool settingsDirty: editNvim !== (pluginApi?.pluginSettings?.nvim || pluginApi?.manifest?.metadata?.defaultSettings?.nvim || "nvim")
-                                        || editRunInTerminal !== (pluginApi?.pluginSettings?.runInTerminal ?? pluginApi?.manifest?.metadata?.defaultSettings?.runInTerminal ?? true)
-                                        || editSessionDir !== (pluginApi?.pluginSettings?.sessionDir ?? pluginApi?.manifest?.metadata?.defaultSettings?.sessionDir ?? "~/.local/share/nvim/sessions")
-                                        || editIncludeInSearch !== (pluginApi?.pluginSettings?.includeInSearch ?? pluginApi?.manifest?.metadata?.defaultSettings?.includeInSearch ?? true)
+  property string editNvim: displayBaseline.editNvim
+  property bool editRunInTerminal: displayBaseline.editRunInTerminal
+  property string editSessionDir: displayBaseline.editSessionDir
+  property bool editIncludeInSearch: displayBaseline.editIncludeInSearch
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string editNvim: pluginApi?.pluginSettings?.nvim || pluginApi?.manifest?.metadata?.defaultSettings?.nvim || "nvim"
+    readonly property bool editRunInTerminal: pluginApi?.pluginSettings?.runInTerminal ?? pluginApi?.manifest?.metadata?.defaultSettings?.runInTerminal ?? true
+    readonly property string editSessionDir: pluginApi?.pluginSettings?.sessionDir ?? pluginApi?.manifest?.metadata?.defaultSettings?.sessionDir ?? "~/.local/share/nvim/sessions"
+    readonly property bool editIncludeInSearch: pluginApi?.pluginSettings?.includeInSearch ?? pluginApi?.manifest?.metadata?.defaultSettings?.includeInSearch ?? true
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editNvim: root.editNvim, editRunInTerminal: root.editRunInTerminal, editSessionDir: root.editSessionDir, editIncludeInSearch: root.editIncludeInSearch})
   spacing: Style.marginM
 
   ColumnLayout {

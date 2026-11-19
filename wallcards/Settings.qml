@@ -7,26 +7,38 @@ import Quickshell
 ColumnLayout {
   id: root
 
-  property int editAnimationCardsDuration: displayBaseline.editAnimationCardsDuration
-  property int editAnimationWindowDuration: displayBaseline.editAnimationWindowDuration
+  property int editAnimationCardsDuration: displayBaseline.project("editAnimationCardsDuration")
+  property int editAnimationWindowDuration: displayBaseline.project("editAnimationWindowDuration")
   property color editBackgroundColor: displayBaseline.editBackgroundColor
-  property real editBackgroundOpacity: displayBaseline.editBackgroundOpacity
-  property int editCardHeight: displayBaseline.editCardHeight
-  property int editCardSpacing: displayBaseline.editCardSpacing
-  property int editCardStripWidth: displayBaseline.editCardStripWidth
-  property int editCardsShown: displayBaseline.editCardsShown
-  property real editCenterWidthRatio: displayBaseline.editCenterWidthRatio
+  property real editBackgroundOpacity: displayBaseline.project("editBackgroundOpacity")
+  property int editCardHeight: displayBaseline.project("editCardHeight")
+  property int editCardSpacing: displayBaseline.project("editCardSpacing")
+  property int editCardStripWidth: displayBaseline.project("editCardStripWidth")
+  property int editCardsShown: displayBaseline.project("editCardsShown")
+  property real editCenterWidthRatio: displayBaseline.project("editCenterWidthRatio")
   property bool editHideHelp: displayBaseline.editHideHelp
   property bool editHideTopBar: displayBaseline.editHideTopBar
   property bool editAnimateWindow: displayBaseline.editAnimateWindow
   property string editIconColor: displayBaseline.editIconColor
   property bool editLivePreview: displayBaseline.editLivePreview
   property string editSelectedFilter: displayBaseline.editSelectedFilter
-  property real editShearFactor: displayBaseline.editShearFactor
-  property int editTopBarHeight: displayBaseline.editTopBarHeight
+  property real editShearFactor: displayBaseline.project("editShearFactor")
+  property int editTopBarHeight: displayBaseline.project("editTopBarHeight")
   property var pluginApi: null
 
   NSettingsBaseline {
+    ranges: [
+      NSettingsRange { field: "editCenterWidthRatio"; from: rangeEditCenterWidthRatio.from; to: rangeEditCenterWidthRatio.to },
+      NSettingsRange { field: "editCardHeight"; from: rangeEditCardHeight.from; to: rangeEditCardHeight.to },
+      NSettingsRange { field: "editCardStripWidth"; from: rangeEditCardStripWidth.from; to: rangeEditCardStripWidth.to },
+      NSettingsRange { field: "editCardSpacing"; from: rangeEditCardSpacing.from; to: rangeEditCardSpacing.to },
+      NSettingsRange { field: "editCardsShown"; from: rangeEditCardsShown.from; to: rangeEditCardsShown.to },
+      NSettingsRange { field: "editShearFactor"; from: rangeEditShearFactor.from; to: rangeEditShearFactor.to },
+      NSettingsRange { field: "editAnimationCardsDuration"; from: rangeEditAnimationCardsDuration.from; to: rangeEditAnimationCardsDuration.to },
+      NSettingsRange { field: "editBackgroundOpacity"; from: rangeEditBackgroundOpacity.from; to: rangeEditBackgroundOpacity.to },
+      NSettingsRange { field: "editAnimationWindowDuration"; from: rangeEditAnimationWindowDuration.from; to: rangeEditAnimationWindowDuration.to },
+      NSettingsRange { field: "editTopBarHeight"; from: rangeEditTopBarHeight.from; to: rangeEditTopBarHeight.to }
+    ]
     id: displayBaseline
     readonly property int editAnimationCardsDuration: pluginApi?.pluginSettings?.animation_cards_duration ?? pluginApi?.manifest?.metadata?.defaultSettings?.animation_cards_duration
     readonly property int editAnimationWindowDuration: pluginApi?.pluginSettings?.animation_window_duration ?? pluginApi?.manifest?.metadata?.defaultSettings?.animation_window_duration
@@ -160,6 +172,9 @@ ColumnLayout {
       label: root.pluginApi?.tr("settings.center-card-width.label")
     }
     NValueSlider {
+      id: rangeEditCenterWidthRatio
+      objectName: "settings-range-editCenterWidthRatio"
+      onValueChanged: root.editCenterWidthRatio = value
       Layout.fillWidth: true
       from: 0.20
       stepSize: 0.01
@@ -179,6 +194,9 @@ ColumnLayout {
       label: root.pluginApi?.tr("settings.card-height.label")
     }
     NValueSlider {
+      id: rangeEditCardHeight
+      objectName: "settings-range-editCardHeight"
+      onValueChanged: root.editCardHeight = value
       Layout.fillWidth: true
       from: 100
       stepSize: 10
@@ -198,6 +216,9 @@ ColumnLayout {
       label: root.pluginApi?.tr("settings.strip-width.label")
     }
     NValueSlider {
+      id: rangeEditCardStripWidth
+      objectName: "settings-range-editCardStripWidth"
+      onValueChanged: root.editCardStripWidth = value
       Layout.fillWidth: true
       from: 20
       stepSize: 5
@@ -217,6 +238,9 @@ ColumnLayout {
       label: root.pluginApi?.tr("settings.card-spacing.label")
     }
     NValueSlider {
+      id: rangeEditCardSpacing
+      objectName: "settings-range-editCardSpacing"
+      onValueChanged: root.editCardSpacing = value
       Layout.fillWidth: true
       from: 0
       stepSize: 1
@@ -236,6 +260,9 @@ ColumnLayout {
       label: root.pluginApi?.tr("settings.cards-shown.label")
     }
     NValueSlider {
+      id: rangeEditCardsShown
+      objectName: "settings-range-editCardsShown"
+      onValueChanged: root.editCardsShown = value
       Layout.fillWidth: true
       from: 5
       stepSize: 2
@@ -259,6 +286,9 @@ ColumnLayout {
         label: root.pluginApi?.tr("settings.shear-factor.label")
       }
       NValueSlider {
+        id: rangeEditShearFactor
+        objectName: "settings-range-editShearFactor"
+        onValueChanged: root.editShearFactor = value
         Layout.fillWidth: true
         from: -0.3
         stepSize: 0.01
@@ -279,6 +309,9 @@ ColumnLayout {
       label: root.pluginApi?.tr("settings.card-animation.label")
     }
     NValueSlider {
+      id: rangeEditAnimationCardsDuration
+      objectName: "settings-range-editAnimationCardsDuration"
+      onValueChanged: root.editAnimationCardsDuration = value
       Layout.fillWidth: true
       from: 0
       stepSize: 100
@@ -315,6 +348,9 @@ ColumnLayout {
       label: root.pluginApi?.tr("settings.background-opacity.label")
     }
     NValueSlider {
+      id: rangeEditBackgroundOpacity
+      objectName: "settings-range-editBackgroundOpacity"
+      onValueChanged: root.editBackgroundOpacity = value
       Layout.fillWidth: true
       from: 0
       stepSize: 0.05
@@ -334,6 +370,9 @@ ColumnLayout {
       label: root.pluginApi?.tr("settings.window-animation-speed.label")
     }
     NValueSlider {
+      id: rangeEditAnimationWindowDuration
+      objectName: "settings-range-editAnimationWindowDuration"
+      onValueChanged: root.editAnimationWindowDuration = value
       Layout.fillWidth: true
       from: 0
       stepSize: 100
@@ -366,6 +405,9 @@ ColumnLayout {
       label: root.pluginApi?.tr("settings.top-bar-height.label")
     }
     NValueSlider {
+      id: rangeEditTopBarHeight
+      objectName: "settings-range-editTopBarHeight"
+      onValueChanged: root.editTopBarHeight = value
       Layout.fillWidth: true
       from: 10
       stepSize: 2

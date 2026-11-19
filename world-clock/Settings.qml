@@ -15,9 +15,17 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property var timezones: cfg.timezones ?? defaults.timezones ?? []
-  property int rotationInterval: (cfg.rotationInterval ?? defaults.rotationInterval ?? 5000) / 1000
-  property string timeFormat: cfg.timeFormat ?? defaults.timeFormat ?? "HH:mm"
+  property var timezones: displayBaseline.timezones
+  property int rotationInterval: displayBaseline.rotationInterval
+  property string timeFormat: displayBaseline.timeFormat
+
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property var timezones: cfg.timezones ?? defaults.timezones ?? []
+    readonly property int rotationInterval: (cfg.rotationInterval ?? defaults.rotationInterval ?? 5000) / 1000
+    readonly property string timeFormat: cfg.timeFormat ?? defaults.timeFormat ?? "HH:mm"
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({timezones: root.timezones, rotationInterval: root.rotationInterval, timeFormat: root.timeFormat})
 
   Component.onCompleted: {
     if (pluginApi) {
@@ -38,9 +46,10 @@ ColumnLayout {
     pluginApi.pluginSettings.timeFormat = timeFormat;
 
     // Save to disk
-    pluginApi.saveSettings();
-
-    Logger.i("WorldClock", "Settings saved successfully");
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("WorldClock", "Settings saved successfully");
+    });
   }
 
   function updateTimezones(newTimezones) {
@@ -154,7 +163,7 @@ ColumnLayout {
         to: 60
         value: root.rotationInterval
         suffix: " s"
-        onValueChanged: {
+        onValueModified: {
           root.rotationInterval = value;
           if (pluginApi) {
             pluginApi.pluginSettings.rotationInterval = value * 1000;
@@ -272,7 +281,7 @@ ColumnLayout {
               checked: modelData.enabled
               onToggled: checked => {
                 var tzs = root.timezones.slice();
-                tzs[index].enabled = checked;
+                tzs[index] = Object.assign({}, tzs[index], { enabled: checked });
                 root.updateTimezones(tzs);
               }
             }
@@ -311,8 +320,7 @@ ColumnLayout {
                 var selectedTz = root.availableTimezones[selectedIndex];
                 
                 var tzs = root.timezones.slice();
-                tzs[index].name = selectedTz.name;
-                tzs[index].timezone = selectedTz.timezone;
+                tzs[index] = Object.assign({}, tzs[index], { name: selectedTz.name, timezone: selectedTz.timezone });
                 root.updateTimezones(tzs);
               }
             }

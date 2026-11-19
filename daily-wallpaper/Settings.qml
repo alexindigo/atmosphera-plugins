@@ -13,10 +13,23 @@ ColumnLayout {
     readonly property string systemLocale: Qt.locale().name.replace("_", "-")
     readonly property string configuredLocale: cfg.locale ?? defaults.locale ?? ""
 
-    property string selectedSource: cfg.source ?? defaults.source ?? "bing"
-    property string localeText: configuredLocale && configuredLocale.trim().length > 0
-                              ? configuredLocale
-                              : systemLocale
+    property string selectedSource: displayBaseline.selectedSource
+    property string localeText: displayBaseline.localeText
+    property bool _applyEffectPending: false
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string selectedSource: cfg.source ?? defaults.source ?? "bing"
+        readonly property string localeText: configuredLocale && configuredLocale.trim().length > 0 ? configuredLocale : systemLocale
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({selectedSource: root.selectedSource, localeText: root.localeText})
+    Connections {
+        target: root.pluginApi
+        function onSettingsCompleted(result) {
+            if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+            root._applyEffectPending = false;
+            root.pluginApi.mainInstance?.checkAndFetchWallpaper();
+        }
+    }
 
     spacing: Style.marginL
 
@@ -68,8 +81,7 @@ ColumnLayout {
 
         pluginApi.pluginSettings.source = root.selectedSource;
         pluginApi.pluginSettings.locale = root.localeText;
-        pluginApi.saveSettings();
-
-        pluginApi.mainInstance?.checkAndFetchWallpaper();
+        if (pluginApi.saveSettings() !== false)
+            root._applyEffectPending = true;
     }
 }

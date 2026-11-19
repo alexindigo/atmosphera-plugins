@@ -8,14 +8,19 @@ ColumnLayout {
     spacing: Style.marginM
 
     property var pluginApi: null
-    property real editVolume: pluginApi?.pluginSettings?.volume ?? 0.5
-    property real editDifficulty: pluginApi?.pluginSettings?.difficulty ?? 50
-    property bool editShowDebug: pluginApi?.pluginSettings?.showDebug ?? false
-    property bool showPercentage: pluginApi?.pluginSettings?.showPercentage ?? false
-    readonly property bool settingsDirty: editVolume !== (pluginApi?.pluginSettings?.volume ?? 0.5)
-                                          || editDifficulty !== (pluginApi?.pluginSettings?.difficulty ?? 50)
-                                          || editShowDebug !== (pluginApi?.pluginSettings?.showDebug ?? false)
-                                          || showPercentage !== (pluginApi?.pluginSettings?.showPercentage ?? false)
+    property real editVolume: displayBaseline.project("editVolume")
+    property real editDifficulty: displayBaseline.project("editDifficulty")
+    property bool editShowDebug: displayBaseline.editShowDebug
+    property bool showPercentage: displayBaseline.showPercentage
+    NSettingsBaseline {
+        ranges: [NSettingsRange { field: "editVolume"; from: rangeEditVolume.from; to: rangeEditVolume.to }, NSettingsRange { field: "editDifficulty"; from: rangeEditDifficulty.from; to: rangeEditDifficulty.to }]
+        id: displayBaseline
+        readonly property real editVolume: pluginApi?.pluginSettings?.volume ?? 0.5
+        readonly property real editDifficulty: pluginApi?.pluginSettings?.difficulty ?? 50
+        readonly property bool editShowDebug: pluginApi?.pluginSettings?.showDebug ?? false
+        readonly property bool showPercentage: pluginApi?.pluginSettings?.showPercentage ?? false
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editVolume: root.editVolume, editDifficulty: root.editDifficulty, editShowDebug: root.editShowDebug, showPercentage: root.showPercentage})
 
     function saveSettings() {
         pluginApi.pluginSettings.volume = root.editVolume;
@@ -31,6 +36,8 @@ ColumnLayout {
     }
 
     NSlider {
+        id: rangeEditVolume
+        objectName: "settings-range-editVolume"
         Layout.fillWidth: true
         from: 0
         to: 1
@@ -50,6 +57,8 @@ ColumnLayout {
     }
 
     NSlider {
+        id: rangeEditDifficulty
+        objectName: "settings-range-editDifficulty"
         Layout.fillWidth: true
         from: 0
         to: 100

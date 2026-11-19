@@ -11,14 +11,18 @@ ColumnLayout {
   readonly property var cfg: pluginApi?.pluginSettings || ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property string editLeftButton:           cfg.leftButton           ?? defaults.leftButton           ?? "next"
-  property string editRightButton:          cfg.rightButton          ?? defaults.rightButton          ?? "toggle"
-  property string editMiddleButton:         cfg.middleButton         ?? defaults.middleButton         ?? "shuffle"
-  property bool   editShuffleStopsPlayback: cfg.shuffleStopsPlayback ?? defaults.shuffleStopsPlayback ?? true
-  readonly property bool settingsDirty: editLeftButton !== (cfg.leftButton ?? defaults.leftButton ?? "next")
-                                        || editRightButton !== (cfg.rightButton ?? defaults.rightButton ?? "toggle")
-                                        || editMiddleButton !== (cfg.middleButton ?? defaults.middleButton ?? "shuffle")
-                                        || editShuffleStopsPlayback !== (cfg.shuffleStopsPlayback ?? defaults.shuffleStopsPlayback ?? true)
+  property string editLeftButton:           displayBaseline.editLeftButton
+  property string editRightButton:          displayBaseline.editRightButton
+  property string editMiddleButton:         displayBaseline.editMiddleButton
+  property bool   editShuffleStopsPlayback: displayBaseline.editShuffleStopsPlayback
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string editLeftButton: cfg.leftButton ?? defaults.leftButton ?? "next"
+    readonly property string editRightButton: cfg.rightButton ?? defaults.rightButton ?? "toggle"
+    readonly property string editMiddleButton: cfg.middleButton ?? defaults.middleButton ?? "shuffle"
+    readonly property bool editShuffleStopsPlayback: cfg.shuffleStopsPlayback ?? defaults.shuffleStopsPlayback ?? true
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editLeftButton: root.editLeftButton, editRightButton: root.editRightButton, editMiddleButton: root.editMiddleButton, editShuffleStopsPlayback: root.editShuffleStopsPlayback})
 
   spacing: Style.marginL
 

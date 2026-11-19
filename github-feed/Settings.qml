@@ -9,32 +9,34 @@ ColumnLayout {
 
     property var pluginApi: null
 
-    property string editUsername: ""
-    property string editToken: ""
-    property string editGithubUrl: ""
-    property int editRefreshInterval: 1800
-    property int editMaxEvents: 50
-    property bool editShowStars: true
-    property bool editShowForks: true
-    property bool editShowPRs: true
-    property bool editShowRepoCreations: true
-    property bool editShowMyRepoStars: true
-    property bool editShowMyRepoForks: true
-    property bool editShowNotificationBadge: true
-    property bool editColorizationEnabled: false
-    property string editColorizationIcon: "Primary"
-    property string editColorizationBadge: "Primary"
-    property string editColorizationBadgeText: "Primary"
-    property int editDefaultTab: 0
-    property bool editOpenInBrowser: true
-    property bool editEnableSystemNotifications: false
-    property bool editNotifyGitHubNotifications: true
-    property bool editNotifyStars: true
-    property bool editNotifyForks: true
-    property bool editNotifyPRs: true
-    property bool editNotifyRepoCreations: true
-    property bool editNotifyMyRepoStars: true
-    property bool editNotifyMyRepoForks: true
+    property string editUsername: displayBaseline.editUsername
+    property string editToken: displayBaseline.editToken
+    property string editGithubUrl: displayBaseline.editGithubUrl
+    property int editRefreshInterval: displayBaseline.project("editRefreshInterval")
+    property int editMaxEvents: displayBaseline.project("editMaxEvents")
+    property bool editShowStars: displayBaseline.editShowStars
+    property bool editShowForks: displayBaseline.editShowForks
+    property bool editShowPRs: displayBaseline.editShowPRs
+    property bool editShowRepoCreations: displayBaseline.editShowRepoCreations
+    property bool editShowMyRepoStars: displayBaseline.editShowMyRepoStars
+    property bool editShowMyRepoForks: displayBaseline.editShowMyRepoForks
+    property bool editShowNotificationBadge: displayBaseline.editShowNotificationBadge
+    property bool editColorizationEnabled: displayBaseline.editColorizationEnabled
+    property string editColorizationIcon: displayBaseline.editColorizationIcon
+    property string editColorizationBadge: displayBaseline.editColorizationBadge
+    property string editColorizationBadgeText: displayBaseline.editColorizationBadgeText
+    property int editDefaultTab: displayBaseline.editDefaultTab
+    property bool editOpenInBrowser: displayBaseline.editOpenInBrowser
+    property bool editEnableSystemNotifications: displayBaseline.editEnableSystemNotifications
+    property bool editNotifyGitHubNotifications: displayBaseline.editNotifyGitHubNotifications
+    property bool editNotifyStars: displayBaseline.editNotifyStars
+    property bool editNotifyForks: displayBaseline.editNotifyForks
+    property bool editNotifyPRs: displayBaseline.editNotifyPRs
+    property bool editNotifyRepoCreations: displayBaseline.editNotifyRepoCreations
+    property bool editNotifyMyRepoStars: displayBaseline.editNotifyMyRepoStars
+    property bool editNotifyMyRepoForks: displayBaseline.editNotifyMyRepoForks
+
+    readonly property bool settingsDirty: displayBaseline.differs({editUsername: root.editUsername, editToken: root.editToken, editGithubUrl: root.editGithubUrl, editRefreshInterval: root.editRefreshInterval, editMaxEvents: root.editMaxEvents, editShowStars: root.editShowStars, editShowForks: root.editShowForks, editShowPRs: root.editShowPRs, editShowRepoCreations: root.editShowRepoCreations, editShowMyRepoStars: root.editShowMyRepoStars, editShowMyRepoForks: root.editShowMyRepoForks, editShowNotificationBadge: root.editShowNotificationBadge, editColorizationEnabled: root.editColorizationEnabled, editColorizationIcon: root.editColorizationIcon, editColorizationBadge: root.editColorizationBadge, editColorizationBadgeText: root.editColorizationBadgeText, editDefaultTab: root.editDefaultTab, editOpenInBrowser: root.editOpenInBrowser, editEnableSystemNotifications: root.editEnableSystemNotifications, editNotifyGitHubNotifications: root.editNotifyGitHubNotifications, editNotifyStars: root.editNotifyStars, editNotifyForks: root.editNotifyForks, editNotifyPRs: root.editNotifyPRs, editNotifyRepoCreations: root.editNotifyRepoCreations, editNotifyMyRepoStars: root.editNotifyMyRepoStars, editNotifyMyRepoForks: root.editNotifyMyRepoForks})
 
     spacing: Style.marginM
 
@@ -101,6 +103,8 @@ ColumnLayout {
         }
 
         NSlider {
+            id: rangeEditRefreshInterval
+            objectName: "settings-range-editRefreshInterval"
             Layout.fillWidth: true
             from: 300
             to: 7200
@@ -120,6 +124,8 @@ ColumnLayout {
         }
 
         NSlider {
+            id: rangeEditMaxEvents
+            objectName: "settings-range-editMaxEvents"
             Layout.fillWidth: true
             from: 10
             to: 100
@@ -454,9 +460,12 @@ ColumnLayout {
             return
         }
 
-        pluginApi.pluginSettings.username = root.editUsername.trim()
-        pluginApi.pluginSettings.token = root.editToken.trim()
-        pluginApi.pluginSettings.githubUrl = root.editGithubUrl.trim()
+        root.editUsername = root.editUsername.trim()
+        root.editToken = root.editToken.trim()
+        root.editGithubUrl = root.editGithubUrl.trim()
+        pluginApi.pluginSettings.username = root.editUsername
+        pluginApi.pluginSettings.token = root.editToken
+        pluginApi.pluginSettings.githubUrl = root.editGithubUrl
         pluginApi.pluginSettings.refreshInterval = root.editRefreshInterval
         pluginApi.pluginSettings.maxEvents = root.editMaxEvents
         pluginApi.pluginSettings.showStars = root.editShowStars
@@ -481,43 +490,46 @@ ColumnLayout {
         pluginApi.pluginSettings.notifyMyRepoStars = root.editNotifyMyRepoStars
         pluginApi.pluginSettings.notifyMyRepoForks = root.editNotifyMyRepoForks
 
-        pluginApi.saveSettings()
-
-        Logger.i("GitHubFeed", "Settings saved")
-        ToastService.showNotice("GitHub Feed settings saved")
+        pluginApi.saveSettings(function (result) {
+            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current") {
+                Logger.i("GitHubFeed", "Settings saved")
+                ToastService.showNotice("GitHub Feed settings saved")
+            }
+        })
     }
 
-    Component.onCompleted: {
-        Logger.i("GitHubFeed", "Settings UI loaded")
+    Component.onCompleted: Logger.i("GitHubFeed", "Settings UI loaded")
 
-        var settings = pluginApi?.pluginSettings
-        var defaults = pluginApi?.manifest?.metadata?.defaultSettings
-
-        root.editUsername = settings?.username || defaults?.username || ""
-        root.editToken = settings?.token || defaults?.token || ""
-        root.editGithubUrl = settings?.githubUrl || defaults?.githubUrl || ""
-        root.editRefreshInterval = settings?.refreshInterval || defaults?.refreshInterval || 1800
-        root.editMaxEvents = settings?.maxEvents || defaults?.maxEvents || 50
-        root.editShowStars = settings?.showStars ?? defaults?.showStars ?? true
-        root.editShowForks = settings?.showForks ?? defaults?.showForks ?? true
-        root.editShowPRs = settings?.showPRs ?? defaults?.showPRs ?? true
-        root.editShowRepoCreations = settings?.showRepoCreations ?? defaults?.showRepoCreations ?? true
-        root.editShowMyRepoStars = settings?.showMyRepoStars ?? defaults?.showMyRepoStars ?? true
-        root.editShowMyRepoForks = settings?.showMyRepoForks ?? defaults?.showMyRepoForks ?? true
-        root.editShowNotificationBadge = settings?.showNotificationBadge ?? defaults?.showNotificationBadge ?? true
-        root.editColorizationEnabled = settings?.colorizationEnabled ?? defaults?.colorizationEnabled ?? false
-        root.editColorizationIcon = settings?.colorizationIcon || defaults?.colorizationIcon || "Primary"
-        root.editColorizationBadge = settings?.colorizationBadge || defaults?.colorizationBadge || "Primary"
-        root.editColorizationBadgeText = settings?.colorizationBadgeText || defaults?.colorizationBadgeText || "Primary"
-        root.editDefaultTab = settings?.defaultTab ?? defaults?.defaultTab ?? 0
-        root.editOpenInBrowser = settings?.openInBrowser ?? defaults?.openInBrowser ?? true
-        root.editEnableSystemNotifications = settings?.enableSystemNotifications ?? defaults?.enableSystemNotifications ?? false
-        root.editNotifyGitHubNotifications = settings?.notifyGitHubNotifications ?? defaults?.notifyGitHubNotifications ?? true
-        root.editNotifyStars = settings?.notifyStars ?? defaults?.notifyStars ?? true
-        root.editNotifyForks = settings?.notifyForks ?? defaults?.notifyForks ?? true
-        root.editNotifyPRs = settings?.notifyPRs ?? defaults?.notifyPRs ?? true
-        root.editNotifyRepoCreations = settings?.notifyRepoCreations ?? defaults?.notifyRepoCreations ?? true
-        root.editNotifyMyRepoStars = settings?.notifyMyRepoStars ?? defaults?.notifyMyRepoStars ?? true
-        root.editNotifyMyRepoForks = settings?.notifyMyRepoForks ?? defaults?.notifyMyRepoForks ?? true
+    NSettingsBaseline {
+        ranges: [NSettingsRange { field: "editRefreshInterval"; from: rangeEditRefreshInterval.from; to: rangeEditRefreshInterval.to }, NSettingsRange { field: "editMaxEvents"; from: rangeEditMaxEvents.from; to: rangeEditMaxEvents.to }]
+        id: displayBaseline
+        readonly property var settings: root.pluginApi?.pluginSettings
+        readonly property var defaults: root.pluginApi?.manifest?.metadata?.defaultSettings
+        readonly property string editUsername: settings?.username || defaults?.username || ""
+        readonly property string editToken: settings?.token || defaults?.token || ""
+        readonly property string editGithubUrl: settings?.githubUrl || defaults?.githubUrl || ""
+        readonly property int editRefreshInterval: settings?.refreshInterval || defaults?.refreshInterval || 1800
+        readonly property int editMaxEvents: settings?.maxEvents || defaults?.maxEvents || 50
+        readonly property bool editShowStars: settings?.showStars ?? defaults?.showStars ?? true
+        readonly property bool editShowForks: settings?.showForks ?? defaults?.showForks ?? true
+        readonly property bool editShowPRs: settings?.showPRs ?? defaults?.showPRs ?? true
+        readonly property bool editShowRepoCreations: settings?.showRepoCreations ?? defaults?.showRepoCreations ?? true
+        readonly property bool editShowMyRepoStars: settings?.showMyRepoStars ?? defaults?.showMyRepoStars ?? true
+        readonly property bool editShowMyRepoForks: settings?.showMyRepoForks ?? defaults?.showMyRepoForks ?? true
+        readonly property bool editShowNotificationBadge: settings?.showNotificationBadge ?? defaults?.showNotificationBadge ?? true
+        readonly property bool editColorizationEnabled: settings?.colorizationEnabled ?? defaults?.colorizationEnabled ?? false
+        readonly property string editColorizationIcon: settings?.colorizationIcon || defaults?.colorizationIcon || "Primary"
+        readonly property string editColorizationBadge: settings?.colorizationBadge || defaults?.colorizationBadge || "Primary"
+        readonly property string editColorizationBadgeText: settings?.colorizationBadgeText || defaults?.colorizationBadgeText || "Primary"
+        readonly property int editDefaultTab: settings?.defaultTab ?? defaults?.defaultTab ?? 0
+        readonly property bool editOpenInBrowser: settings?.openInBrowser ?? defaults?.openInBrowser ?? true
+        readonly property bool editEnableSystemNotifications: settings?.enableSystemNotifications ?? defaults?.enableSystemNotifications ?? false
+        readonly property bool editNotifyGitHubNotifications: settings?.notifyGitHubNotifications ?? defaults?.notifyGitHubNotifications ?? true
+        readonly property bool editNotifyStars: settings?.notifyStars ?? defaults?.notifyStars ?? true
+        readonly property bool editNotifyForks: settings?.notifyForks ?? defaults?.notifyForks ?? true
+        readonly property bool editNotifyPRs: settings?.notifyPRs ?? defaults?.notifyPRs ?? true
+        readonly property bool editNotifyRepoCreations: settings?.notifyRepoCreations ?? defaults?.notifyRepoCreations ?? true
+        readonly property bool editNotifyMyRepoStars: settings?.notifyMyRepoStars ?? defaults?.notifyMyRepoStars ?? true
+        readonly property bool editNotifyMyRepoForks: settings?.notifyMyRepoForks ?? defaults?.notifyMyRepoForks ?? true
     }
 }

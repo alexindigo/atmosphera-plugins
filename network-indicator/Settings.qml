@@ -2,6 +2,7 @@ import qs.Commons
 import qs.Widgets
 import qs.Services.System
 import QtQuick
+import QtQuick as Quick
 import QtQuick.Layouts
 
 ColumnLayout {
@@ -52,28 +53,50 @@ ColumnLayout {
 
   // ── Edit state ──
 
-  property string editLayout: cfg.layout ?? defaults.layout
-  property var editSlots: cfg.slots ?? defaults.slots
-  property string editIconType: cfg.iconType ?? defaults.iconType
-  property int editByteThresholdActive: cfg.byteThresholdActive ?? defaults.byteThresholdActive
+  property string editLayout: displayBaseline.editLayout
+  property var editSlots: displayBaseline.editSlots
+  property string editIconType: displayBaseline.editIconType
+  property int editByteThresholdActive: displayBaseline.editByteThresholdActive
+  property real editFontSizeModifier: displayBaseline.project("editFontSizeModifier")
+  property real editIconSizeModifier: displayBaseline.project("editIconSizeModifier")
+  property real editPaddingLeft: displayBaseline.editPaddingLeft
+  property real editPaddingRight: displayBaseline.editPaddingRight
+  property real editColumnSpacing: displayBaseline.editColumnSpacing
+  property real editRowSpacing: displayBaseline.editRowSpacing
+  property bool editUseCustomFont: displayBaseline.editUseCustomFont
+  property string editCustomFontFamily: displayBaseline.editCustomFontFamily
+  property bool editCustomFontBold: displayBaseline.editCustomFontBold
+  property bool editCustomFontItalic: displayBaseline.editCustomFontItalic
+  property bool editUseCustomColors: displayBaseline.editUseCustomColors
+  property color editColorTx: displayBaseline.editColorTx
+  property color editColorRx: displayBaseline.editColorRx
+  property color editColorSilent: displayBaseline.editColorSilent
+  property color editColorText: displayBaseline.editColorText
 
-  property real editFontSizeModifier: cfg.fontSizeModifier ?? defaults.fontSizeModifier
-  property real editIconSizeModifier: cfg.iconSizeModifier ?? defaults.iconSizeModifier
-  property real editPaddingLeft: cfg.paddingLeft ?? defaults.PaddingLeft
-  property real editPaddingRight: cfg.paddingRight ?? defaults.paddingRight
-  property real editColumnSpacing: cfg.columnSpacing ?? defaults.columnSpacing
-  property real editRowSpacing: cfg.rowSpacing ?? defaults.rowSpacing
-
-  property bool editUseCustomFont: cfg.useCustomFont ?? defaults.useCustomFonts
-  property string editCustomFontFamily: cfg.customFontFamily ?? defaults.customFontFamily
-  property bool editCustomFontBold: cfg.customFontBold ?? defaults.customFontBold
-  property bool editCustomFontItalic: cfg.customFontItalic ?? defaults.customFontItalic
-
-  property bool editUseCustomColors: cfg.useCustomColors ?? defaults.useCustomColors
-  property color editColorTx: editUseCustomColors && cfg.colorTx || AtmoColor.mSecondary
-  property color editColorRx: editUseCustomColors && cfg.colorRx || AtmoColor.mPrimary
-  property color editColorSilent: editUseCustomColors && cfg.colorSilent || AtmoColor.mSurfaceVariant
-  property color editColorText: editUseCustomColors && cfg.colorText || AtmoColor.mOnSurfaceVariant
+  NSettingsBaseline {
+    ranges: [NSettingsRange { field: "editFontSizeModifier"; from: rangeEditFontSizeModifier.from; to: rangeEditFontSizeModifier.to }, NSettingsRange { field: "editIconSizeModifier"; from: rangeEditIconSizeModifier.from; to: rangeEditIconSizeModifier.to }]
+    id: displayBaseline
+    readonly property string editLayout: cfg.layout ?? defaults.layout
+    readonly property var editSlots: cfg.slots ?? defaults.slots
+    readonly property string editIconType: cfg.iconType ?? defaults.iconType
+    readonly property int editByteThresholdActive: cfg.byteThresholdActive ?? defaults.byteThresholdActive
+    readonly property real editFontSizeModifier: cfg.fontSizeModifier ?? defaults.fontSizeModifier
+    readonly property real editIconSizeModifier: cfg.iconSizeModifier ?? defaults.iconSizeModifier
+    readonly property real editPaddingLeft: cfg.paddingLeft ?? defaults.paddingLeft
+    readonly property real editPaddingRight: cfg.paddingRight ?? defaults.paddingRight
+    readonly property real editColumnSpacing: cfg.columnSpacing ?? defaults.columnSpacing
+    readonly property real editRowSpacing: cfg.rowSpacing ?? defaults.rowSpacing
+    readonly property bool editUseCustomFont: cfg.useCustomFont ?? defaults.useCustomFont
+    readonly property string editCustomFontFamily: cfg.customFontFamily ?? defaults.customFontFamily
+    readonly property bool editCustomFontBold: cfg.customFontBold ?? defaults.customFontBold
+    readonly property bool editCustomFontItalic: cfg.customFontItalic ?? defaults.customFontItalic
+    readonly property bool editUseCustomColors: cfg.useCustomColors ?? defaults.useCustomColors
+    readonly property color editColorTx: root.editUseCustomColors && cfg.colorTx || AtmoColor.mSecondary
+    readonly property color editColorRx: root.editUseCustomColors && cfg.colorRx || AtmoColor.mPrimary
+    readonly property color editColorSilent: root.editUseCustomColors && cfg.colorSilent || AtmoColor.mSurfaceVariant
+    readonly property color editColorText: root.editUseCustomColors && cfg.colorText || AtmoColor.mOnSurfaceVariant
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editLayout: root.editLayout, editSlots: root.editSlots, editIconType: root.editIconType, editByteThresholdActive: root.editByteThresholdActive, editFontSizeModifier: root.editFontSizeModifier, editIconSizeModifier: root.editIconSizeModifier, editPaddingLeft: root.editPaddingLeft, editPaddingRight: root.editPaddingRight, editColumnSpacing: root.editColumnSpacing, editRowSpacing: root.editRowSpacing, editUseCustomFont: root.editUseCustomFont, editCustomFontFamily: root.editCustomFontFamily, editCustomFontBold: root.editCustomFontBold, editCustomFontItalic: root.editCustomFontItalic, editUseCustomColors: root.editUseCustomColors, editColorTx: root.editColorTx, editColorRx: root.editColorRx, editColorSilent: root.editColorSilent, editColorText: root.editColorText})
 
   // ── Helpers ──
 
@@ -133,8 +156,10 @@ ColumnLayout {
       s.colorText = root.editColorText.toString();
     }
 
-    pluginApi.saveSettings();
-    Logger.i("NetworkIndicator", "Settings saved");
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("NetworkIndicator", "Settings saved");
+    });
   }
 
   // ── UI ──
@@ -220,6 +245,9 @@ ColumnLayout {
     }
 
     NValueSlider {
+      id: rangeEditFontSizeModifier
+      objectName: "settings-range-editFontSizeModifier"
+      onValueChanged: root.editFontSizeModifier = value
       Layout.fillWidth: true
       from: 0.5
       to: 1.5
@@ -240,6 +268,9 @@ ColumnLayout {
     }
 
     NValueSlider {
+      id: rangeEditIconSizeModifier
+      objectName: "settings-range-editIconSizeModifier"
+      onValueChanged: root.editIconSizeModifier = value
       Layout.fillWidth: true
       from: 0.5
       to: 1.5
@@ -311,12 +342,12 @@ ColumnLayout {
       label: pluginApi?.tr("settings.customFontFamily.label")
       description: pluginApi?.tr("settings.customFontFamily.desc")
       model: FontService.availableFonts
-      currentKey: root.editCustomFontFamily || Qt.application.font.family
+      currentKey: root.editCustomFontFamily || Quick.Application.font.family
       placeholder: pluginApi?.tr("settings.customFontFamily.placeholder")
       searchPlaceholder: pluginApi?.tr("settings.customFontFamily.searchPlaceholder")
       popupHeight: 420
       onSelected: key => {
-        root.editCustomFontFamily = (key === Qt.application.font.family) ? "" : key;
+        root.editCustomFontFamily = (key === Quick.Application.font.family) ? "" : key;
       }
     }
 

@@ -12,17 +12,22 @@ ColumnLayout {
   property var pluginApi: null
 
   // Local state
-  property int panelWidth: pluginApi?.pluginSettings?.panelWidth ?? 600
-  property int panelHeight: pluginApi?.pluginSettings?.panelHeight ?? 400
-  property int fontSize: pluginApi?.pluginSettings?.fontSize ?? 14
-  property string filePath: pluginApi?.pluginSettings?.filePath ?? ""
+  property int panelWidth: displayBaseline.project("panelWidth")
+  property int panelHeight: displayBaseline.project("panelHeight")
+  property int fontSize: displayBaseline.project("fontSize")
+  property string filePath: displayBaseline.filePath
   property bool filePathWritable: true
-  property bool useMonospace: pluginApi?.pluginSettings?.useMonospace ?? false
-  readonly property bool settingsDirty: panelWidth !== (pluginApi?.pluginSettings?.panelWidth ?? 600)
-                                        || panelHeight !== (pluginApi?.pluginSettings?.panelHeight ?? 400)
-                                        || fontSize !== (pluginApi?.pluginSettings?.fontSize ?? 14)
-                                        || filePath !== (pluginApi?.pluginSettings?.filePath ?? "")
-                                        || useMonospace !== (pluginApi?.pluginSettings?.useMonospace ?? false)
+  property bool useMonospace: displayBaseline.useMonospace
+  NSettingsBaseline {
+    ranges: [NSettingsRange { field: "panelWidth"; from: widthSlider.from; to: widthSlider.to }, NSettingsRange { field: "panelHeight"; from: heightSlider.from; to: heightSlider.to }, NSettingsRange { field: "fontSize"; from: fontSizeSlider.from; to: fontSizeSlider.to }]
+    id: displayBaseline
+    readonly property int panelWidth: pluginApi?.pluginSettings?.panelWidth ?? 600
+    readonly property int panelHeight: pluginApi?.pluginSettings?.panelHeight ?? 400
+    readonly property int fontSize: pluginApi?.pluginSettings?.fontSize ?? 14
+    readonly property string filePath: pluginApi?.pluginSettings?.filePath ?? ""
+    readonly property bool useMonospace: pluginApi?.pluginSettings?.useMonospace ?? false
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({panelWidth: root.panelWidth, panelHeight: root.panelHeight, fontSize: root.fontSize, filePath: root.filePath, useMonospace: root.useMonospace})
 
   spacing: Style.marginM
 
@@ -85,6 +90,8 @@ ColumnLayout {
       }
 
       NSlider {
+        objectName: "settings-range-panelWidth"
+        onValueChanged: root.panelWidth = value
         id: widthSlider
         Layout.fillWidth: true
         from: 400
@@ -107,6 +114,8 @@ ColumnLayout {
       }
 
       NSlider {
+        objectName: "settings-range-panelHeight"
+        onValueChanged: root.panelHeight = value
         id: heightSlider
         Layout.fillWidth: true
         from: 300
@@ -162,6 +171,8 @@ ColumnLayout {
     }
 
     NSlider {
+      objectName: "settings-range-fontSize"
+      onValueChanged: root.fontSize = value
       id: fontSizeSlider
       Layout.fillWidth: true
       from: 10

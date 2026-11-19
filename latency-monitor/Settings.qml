@@ -10,9 +10,9 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property int valueIntervalSeconds: displayBaseline.valueIntervalSeconds
-  property int valueThresholdGood: displayBaseline.valueThresholdGood
-  property int valueThresholdWarning: displayBaseline.valueThresholdWarning
+  property int valueIntervalSeconds: displayBaseline.project("valueIntervalSeconds")
+  property int valueThresholdGood: displayBaseline.project("valueThresholdGood")
+  property int valueThresholdWarning: displayBaseline.project("valueThresholdWarning")
   property bool valueShowHostName: displayBaseline.valueShowHostName
   property string valueBarHost: displayBaseline.valueBarHost
   property string valueColorGood: displayBaseline.valueColorGood
@@ -168,6 +168,9 @@ ColumnLayout {
   }
 
   NSlider {
+    id: rangeValueIntervalSeconds
+    objectName: "settings-range-valueIntervalSeconds"
+    onValueChanged: root.valueIntervalSeconds = value
     Layout.fillWidth: true
     from: 1
     to: 30
@@ -202,6 +205,9 @@ ColumnLayout {
     }
   }
   NSlider {
+    id: rangeValueThresholdGood
+    objectName: "settings-range-valueThresholdGood"
+    onValueChanged: root.valueThresholdGood = value
     Layout.fillWidth: true
     from: 5
     to: 100
@@ -227,6 +233,9 @@ ColumnLayout {
     }
   }
   NSlider {
+    id: rangeValueThresholdWarning
+    objectName: "settings-range-valueThresholdWarning"
+    onValueChanged: root.valueThresholdWarning = value
     Layout.fillWidth: true
     from: root.valueThresholdGood + 5   // can't go below good threshold
     to: 500
@@ -297,6 +306,7 @@ ColumnLayout {
   }
 
   NSettingsBaseline {
+    ranges: [NSettingsRange { field: "valueIntervalSeconds"; from: rangeValueIntervalSeconds.from; to: rangeValueIntervalSeconds.to }, NSettingsRange { field: "valueThresholdGood"; from: rangeValueThresholdGood.from; to: rangeValueThresholdGood.to }, NSettingsRange { field: "valueThresholdWarning"; from: rangeValueThresholdWarning.from; to: rangeValueThresholdWarning.to }]
     id: displayBaseline
     readonly property var valueHosts: cfg.hosts ?? defaults.hosts
     readonly property int valueIntervalSeconds: cfg.intervalSeconds ?? defaults.intervalSeconds

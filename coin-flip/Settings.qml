@@ -12,7 +12,7 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property int delay: displayBaseline.delay
+  property int delay: displayBaseline.project("delay")
   property string valueIconColor: cfg.iconColor ?? defaults.iconColor
 
   spacing: Style.marginL
@@ -27,6 +27,9 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeDelay
+      objectName: "settings-range-delay"
+      onValueChanged: root.delay = value
       Layout.fillWidth: true
       from: 1
       to: 36
@@ -40,6 +43,7 @@ ColumnLayout {
   }
 
   NSettingsBaseline {
+    ranges: [NSettingsRange { field: "delay"; from: rangeDelay.from; to: rangeDelay.to }]
     id: displayBaseline
     readonly property int delay: cfg.delay ?? defaults.delay
   }

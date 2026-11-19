@@ -11,15 +11,18 @@ ColumnLayout {
   property var pluginApi: null
 
   // Local state for editing
-  property string editLauncher: pluginApi?.pluginSettings?.launcher ||
-      pluginApi?.manifest?.metadata?.defaultSettings?.launcher ||
-      "xdg-open"
-  property bool editForceGrid: pluginApi?.pluginSettings?.forceGrid ??
-      pluginApi?.manifest?.metadata?.defaultSettings?.editForceGrid ??
-      false
-  property int editRecentlyOpenedMax: pluginApi?.pluginSettings?.recentlyOpenedMax ??
-      pluginApi?.manifest?.metadata?.defaultSettings?.recentlyOpenedMax ??
-      36
+  property string editLauncher: displayBaseline.editLauncher
+  property bool editForceGrid: displayBaseline.editForceGrid
+  property int editRecentlyOpenedMax: displayBaseline.project("editRecentlyOpenedMax")
+
+  NSettingsBaseline {
+    ranges: [NSettingsRange { field: "editRecentlyOpenedMax"; from: rangeEditRecentlyOpenedMax.from; to: rangeEditRecentlyOpenedMax.to }]
+    id: displayBaseline
+    readonly property string editLauncher: pluginApi?.pluginSettings?.launcher || pluginApi?.manifest?.metadata?.defaultSettings?.launcher || "xdg-open"
+    readonly property bool editForceGrid: pluginApi?.pluginSettings?.forceGrid ?? pluginApi?.manifest?.metadata?.defaultSettings?.editForceGrid ?? false
+    readonly property int editRecentlyOpenedMax: pluginApi?.pluginSettings?.recentlyOpenedMax ?? pluginApi?.manifest?.metadata?.defaultSettings?.recentlyOpenedMax ?? 36
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editLauncher: root.editLauncher, editForceGrid: root.editForceGrid, editRecentlyOpenedMax: root.editRecentlyOpenedMax})
 
   spacing: Style.marginM
 
@@ -65,6 +68,8 @@ ColumnLayout {
         }
 
         NSlider {
+          id: rangeEditRecentlyOpenedMax
+          objectName: "settings-range-editRecentlyOpenedMax"
           Layout.fillWidth: true
           from: 1
           to: 100
@@ -83,7 +88,7 @@ ColumnLayout {
     pluginApi.pluginSettings.launcher = root.editLauncher;
     pluginApi.pluginSettings.forceGrid = root.editForceGrid;
     pluginApi.pluginSettings.recentlyOpenedMax = root.editRecentlyOpenedMax;
-    const mru = pluginApi.pluginSettings.recentlyOpenedFiles ?? [];
+    const mru = (pluginApi.pluginSettings.recentlyOpenedFiles ?? []).slice();
     mru.length = Math.min(
         mru.length,
         pluginApi.pluginSettings.recentlyOpenedMax

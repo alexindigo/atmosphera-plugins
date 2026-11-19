@@ -10,96 +10,41 @@ ColumnLayout {
   property var pluginApi: null
 
   // Local state - initialized from saved settings or defaults
-  property int editRefreshInterval:
-    pluginApi?.pluginSettings?.refreshInterval ||
-    pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval ||
-    5000
-
-  property bool editCompactMode:
-    pluginApi?.pluginSettings?.compactMode ??
-    pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ??
-    false
-
-  property bool editShowIpAddress:
-    pluginApi?.pluginSettings?.showIpAddress ??
-    pluginApi?.manifest?.metadata?.defaultSettings?.showIpAddress ??
-    true
-
-  property bool editShowPeerCount:
-    pluginApi?.pluginSettings?.showPeerCount ??
-    pluginApi?.manifest?.metadata?.defaultSettings?.showPeerCount ??
-    true
-
-  property bool editHideDisconnected:
-    pluginApi?.pluginSettings?.hideDisconnected ??
-    pluginApi?.manifest?.metadata?.defaultSettings?.hideDisconnected ??
-    false
-
-  property bool editHideMullvadExitNodes:
-    pluginApi?.pluginSettings?.hideMullvadExitNodes ??
-    pluginApi?.manifest?.metadata?.defaultSettings?.hideMullvadExitNodes ??
-    true
-
-  property bool editShowSearchBar:
-    pluginApi?.pluginSettings?.showSearchBar ??
-    pluginApi?.manifest?.metadata?.defaultSettings?.showSearchBar ??
-    false
-
-  property string editTerminalCommand:
-    pluginApi?.pluginSettings?.terminalCommand ||
-    pluginApi?.manifest?.metadata?.defaultSettings?.terminalCommand ||
-    ""
-
-  property string editSshUsername:
-    pluginApi?.pluginSettings?.sshUsername ||
-    pluginApi?.manifest?.metadata?.defaultSettings?.sshUsername ||
-    ""
-
-  property int editPingCount:
-    pluginApi?.pluginSettings?.pingCount ||
-    pluginApi?.manifest?.metadata?.defaultSettings?.pingCount ||
-    5
-
-  property string editDefaultPeerAction:
-    pluginApi?.pluginSettings?.defaultPeerAction ||
-    pluginApi?.manifest?.metadata?.defaultSettings?.defaultPeerAction ||
-    "copy-ip"
-
-  property bool editTaildropEnabled:
-    pluginApi?.pluginSettings?.taildropEnabled ??
-    pluginApi?.manifest?.metadata?.defaultSettings?.taildropEnabled ??
-    true
-
-  property string editTaildropDownloadDir:
-    pluginApi?.pluginSettings?.taildropDownloadDir ||
-    pluginApi?.manifest?.metadata?.defaultSettings?.taildropDownloadDir ||
-    "~/Downloads"
-
-  property string editTaildropReceiveMode:
-    pluginApi?.pluginSettings?.taildropReceiveMode ||
-    pluginApi?.manifest?.metadata?.defaultSettings?.taildropReceiveMode ||
-    "operator"
-
-  property string editLoginServer:
-    pluginApi?.pluginSettings?.loginServer ||
-    pluginApi?.manifest?.metadata?.defaultSettings?.loginServer ||
-    ""
-
-  readonly property bool settingsDirty: editRefreshInterval !== (pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 5000)
-                                        || editCompactMode !== (pluginApi?.pluginSettings?.compactMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ?? false)
-                                        || editShowIpAddress !== (pluginApi?.pluginSettings?.showIpAddress ?? pluginApi?.manifest?.metadata?.defaultSettings?.showIpAddress ?? true)
-                                        || editShowPeerCount !== (pluginApi?.pluginSettings?.showPeerCount ?? pluginApi?.manifest?.metadata?.defaultSettings?.showPeerCount ?? true)
-                                        || editHideDisconnected !== (pluginApi?.pluginSettings?.hideDisconnected ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideDisconnected ?? false)
-                                        || editHideMullvadExitNodes !== (pluginApi?.pluginSettings?.hideMullvadExitNodes ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideMullvadExitNodes ?? true)
-                                        || editShowSearchBar !== (pluginApi?.pluginSettings?.showSearchBar ?? pluginApi?.manifest?.metadata?.defaultSettings?.showSearchBar ?? false)
-                                        || editTerminalCommand !== (pluginApi?.pluginSettings?.terminalCommand || pluginApi?.manifest?.metadata?.defaultSettings?.terminalCommand || "")
-                                        || editSshUsername !== (pluginApi?.pluginSettings?.sshUsername || pluginApi?.manifest?.metadata?.defaultSettings?.sshUsername || "")
-                                        || editPingCount !== (pluginApi?.pluginSettings?.pingCount || pluginApi?.manifest?.metadata?.defaultSettings?.pingCount || 5)
-                                        || editDefaultPeerAction !== (pluginApi?.pluginSettings?.defaultPeerAction || pluginApi?.manifest?.metadata?.defaultSettings?.defaultPeerAction || "copy-ip")
-                                        || editTaildropEnabled !== (pluginApi?.pluginSettings?.taildropEnabled ?? pluginApi?.manifest?.metadata?.defaultSettings?.taildropEnabled ?? true)
-                                        || editTaildropDownloadDir !== (pluginApi?.pluginSettings?.taildropDownloadDir || pluginApi?.manifest?.metadata?.defaultSettings?.taildropDownloadDir || "~/Downloads")
-                                        || editTaildropReceiveMode !== (pluginApi?.pluginSettings?.taildropReceiveMode || pluginApi?.manifest?.metadata?.defaultSettings?.taildropReceiveMode || "operator")
-                                        || editLoginServer !== (pluginApi?.pluginSettings?.loginServer || pluginApi?.manifest?.metadata?.defaultSettings?.loginServer || "")
+  property int editRefreshInterval: displayBaseline.project("editRefreshInterval")
+  property bool editCompactMode: displayBaseline.editCompactMode
+  property bool editShowIpAddress: displayBaseline.editShowIpAddress
+  property bool editShowPeerCount: displayBaseline.editShowPeerCount
+  property bool editHideDisconnected: displayBaseline.editHideDisconnected
+  property bool editHideMullvadExitNodes: displayBaseline.editHideMullvadExitNodes
+  property bool editShowSearchBar: displayBaseline.editShowSearchBar
+  property string editTerminalCommand: displayBaseline.editTerminalCommand
+  property string editSshUsername: displayBaseline.editSshUsername
+  property int editPingCount: displayBaseline.project("editPingCount")
+  property string editDefaultPeerAction: displayBaseline.editDefaultPeerAction
+  property bool editTaildropEnabled: displayBaseline.editTaildropEnabled
+  property string editTaildropDownloadDir: displayBaseline.editTaildropDownloadDir
+  property string editTaildropReceiveMode: displayBaseline.editTaildropReceiveMode
+  property string editLoginServer: displayBaseline.editLoginServer
+  NSettingsBaseline {
+    ranges: [NSettingsRange { field: "editRefreshInterval"; from: rangeEditRefreshInterval.from; to: rangeEditRefreshInterval.to }, NSettingsRange { field: "editPingCount"; from: rangeEditPingCount.from; to: rangeEditPingCount.to }]
+    id: displayBaseline
+    readonly property int editRefreshInterval: pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 5000
+    readonly property bool editCompactMode: pluginApi?.pluginSettings?.compactMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ?? false
+    readonly property bool editShowIpAddress: pluginApi?.pluginSettings?.showIpAddress ?? pluginApi?.manifest?.metadata?.defaultSettings?.showIpAddress ?? true
+    readonly property bool editShowPeerCount: pluginApi?.pluginSettings?.showPeerCount ?? pluginApi?.manifest?.metadata?.defaultSettings?.showPeerCount ?? true
+    readonly property bool editHideDisconnected: pluginApi?.pluginSettings?.hideDisconnected ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideDisconnected ?? false
+    readonly property bool editHideMullvadExitNodes: pluginApi?.pluginSettings?.hideMullvadExitNodes ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideMullvadExitNodes ?? true
+    readonly property bool editShowSearchBar: pluginApi?.pluginSettings?.showSearchBar ?? pluginApi?.manifest?.metadata?.defaultSettings?.showSearchBar ?? false
+    readonly property string editTerminalCommand: pluginApi?.pluginSettings?.terminalCommand || pluginApi?.manifest?.metadata?.defaultSettings?.terminalCommand || ""
+    readonly property string editSshUsername: pluginApi?.pluginSettings?.sshUsername || pluginApi?.manifest?.metadata?.defaultSettings?.sshUsername || ""
+    readonly property int editPingCount: pluginApi?.pluginSettings?.pingCount || pluginApi?.manifest?.metadata?.defaultSettings?.pingCount || 5
+    readonly property string editDefaultPeerAction: pluginApi?.pluginSettings?.defaultPeerAction || pluginApi?.manifest?.metadata?.defaultSettings?.defaultPeerAction || "copy-ip"
+    readonly property bool editTaildropEnabled: pluginApi?.pluginSettings?.taildropEnabled ?? pluginApi?.manifest?.metadata?.defaultSettings?.taildropEnabled ?? true
+    readonly property string editTaildropDownloadDir: pluginApi?.pluginSettings?.taildropDownloadDir || pluginApi?.manifest?.metadata?.defaultSettings?.taildropDownloadDir || "~/Downloads"
+    readonly property string editTaildropReceiveMode: pluginApi?.pluginSettings?.taildropReceiveMode || pluginApi?.manifest?.metadata?.defaultSettings?.taildropReceiveMode || "operator"
+    readonly property string editLoginServer: pluginApi?.pluginSettings?.loginServer || pluginApi?.manifest?.metadata?.defaultSettings?.loginServer || ""
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editRefreshInterval: root.editRefreshInterval, editCompactMode: root.editCompactMode, editShowIpAddress: root.editShowIpAddress, editShowPeerCount: root.editShowPeerCount, editHideDisconnected: root.editHideDisconnected, editHideMullvadExitNodes: root.editHideMullvadExitNodes, editShowSearchBar: root.editShowSearchBar, editTerminalCommand: root.editTerminalCommand, editSshUsername: root.editSshUsername, editPingCount: root.editPingCount, editDefaultPeerAction: root.editDefaultPeerAction, editTaildropEnabled: root.editTaildropEnabled, editTaildropDownloadDir: root.editTaildropDownloadDir, editTaildropReceiveMode: root.editTaildropReceiveMode, editLoginServer: root.editLoginServer})
 
   spacing: Style.marginM
 
@@ -130,6 +75,8 @@ ColumnLayout {
   }
 
   NSlider {
+    id: rangeEditRefreshInterval
+    objectName: "settings-range-editRefreshInterval"
     Layout.fillWidth: true
     from: 1000
     to: 60000
@@ -275,6 +222,8 @@ ColumnLayout {
   }
 
   NSlider {
+    id: rangeEditPingCount
+    objectName: "settings-range-editPingCount"
     Layout.fillWidth: true
     from: 1
     to: 20

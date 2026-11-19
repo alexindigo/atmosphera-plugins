@@ -11,14 +11,14 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property bool hideInactive: cfg.hideInactive ?? defaults.hideInactive ?? false
-  property bool enableToast: cfg.enableToast ?? defaults.enableToast ?? true
-  property bool removeMargins: cfg.removeMargins ?? defaults.removeMargins ?? false
-  property int iconSpacing: cfg.iconSpacing ?? defaults.iconSpacing ?? 4
-  property string activeColor: cfg.activeColor ?? defaults.activeColor ?? "primary"
-  property string inactiveColor: cfg.inactiveColor ?? defaults.inactiveColor ?? "none"
-  property string micFilterRegex: cfg.micFilterRegex ?? defaults.micFilterRegex
-  property string camFilterRegex: cfg.camFilterRegex ?? defaults.camFilterRegex
+  property bool hideInactive: displayBaseline.hideInactive
+  property bool enableToast: displayBaseline.enableToast
+  property bool removeMargins: displayBaseline.removeMargins
+  property int iconSpacing: displayBaseline.iconSpacing
+  property string activeColor: displayBaseline.activeColor
+  property string inactiveColor: displayBaseline.inactiveColor
+  property string micFilterRegex: displayBaseline.micFilterRegex
+  property string camFilterRegex: displayBaseline.camFilterRegex
 
   spacing: Style.marginL
 
@@ -120,14 +120,18 @@ ColumnLayout {
     }
   }
 
-  readonly property bool settingsDirty: root.hideInactive !== (cfg.hideInactive ?? defaults.hideInactive ?? false)
-      || root.enableToast !== (cfg.enableToast ?? defaults.enableToast ?? true)
-      || root.iconSpacing !== (cfg.iconSpacing ?? defaults.iconSpacing ?? 4)
-      || root.removeMargins !== (cfg.removeMargins ?? defaults.removeMargins ?? false)
-      || root.activeColor !== (cfg.activeColor ?? defaults.activeColor ?? "primary")
-      || root.inactiveColor !== (cfg.inactiveColor ?? defaults.inactiveColor ?? "none")
-      || root.micFilterRegex !== (cfg.micFilterRegex ?? defaults.micFilterRegex)
-      || root.camFilterRegex !== (cfg.camFilterRegex ?? defaults.camFilterRegex)
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property bool hideInactive: cfg.hideInactive ?? defaults.hideInactive ?? false
+    readonly property bool enableToast: cfg.enableToast ?? defaults.enableToast ?? true
+    readonly property bool removeMargins: cfg.removeMargins ?? defaults.removeMargins ?? false
+    readonly property int iconSpacing: cfg.iconSpacing ?? defaults.iconSpacing ?? 4
+    readonly property string activeColor: cfg.activeColor ?? defaults.activeColor ?? "primary"
+    readonly property string inactiveColor: cfg.inactiveColor ?? defaults.inactiveColor ?? "none"
+    readonly property string micFilterRegex: cfg.micFilterRegex ?? defaults.micFilterRegex
+    readonly property string camFilterRegex: cfg.camFilterRegex ?? defaults.camFilterRegex
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({hideInactive: root.hideInactive, enableToast: root.enableToast, removeMargins: root.removeMargins, iconSpacing: root.iconSpacing, activeColor: root.activeColor, inactiveColor: root.inactiveColor, micFilterRegex: root.micFilterRegex, camFilterRegex: root.camFilterRegex})
 
   function saveSettings() {
     if (!pluginApi) {

@@ -12,21 +12,47 @@ ColumnLayout {
   readonly property var cfg: pluginApi?.pluginSettings || ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property string editHabiticaUserId: cfg.habiticaUserId ?? defaults.habiticaUserId ?? ""
-  property string editHabiticaApiToken: cfg.habiticaApiToken ?? defaults.habiticaApiToken ?? ""
-  property int editRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 300
-  property int editMaxDailies: cfg.maxDailies ?? defaults.maxDailies ?? 8
-  property int editMaxTodos: cfg.maxTodos ?? defaults.maxTodos ?? 8
-  property int editMaxHabits: cfg.maxHabits ?? defaults.maxHabits ?? 8
-  property bool editShowHabits: cfg.showHabits ?? defaults.showHabits ?? false
-  property bool editShowChecklistItems: cfg.showChecklistItems ?? defaults.showChecklistItems ?? false
-  property bool editEnableTagFilter: cfg.enableTagFilter ?? defaults.enableTagFilter ?? false
-  property string editSelectedTagId: cfg.selectedTagId ?? defaults.selectedTagId ?? ""
-  property bool editShowNotificationBadge: cfg.showNotificationBadge ?? defaults.showNotificationBadge ?? true
-  property bool editColorizationEnabled: cfg.colorizationEnabled ?? defaults.colorizationEnabled ?? false
-  property string editColorizationIcon: cfg.colorizationIcon ?? defaults.colorizationIcon ?? "Primary"
-  property string editColorizationBadge: cfg.colorizationBadge ?? defaults.colorizationBadge ?? "Error"
-  property string editColorizationBadgeText: cfg.colorizationBadgeText ?? defaults.colorizationBadgeText ?? "Primary"
+  property string editHabiticaUserId: displayBaseline.editHabiticaUserId
+  property string editHabiticaApiToken: displayBaseline.editHabiticaApiToken
+  property int editRefreshInterval: displayBaseline.project("editRefreshInterval")
+  property int editMaxDailies: displayBaseline.project("editMaxDailies")
+  property int editMaxTodos: displayBaseline.project("editMaxTodos")
+  property int editMaxHabits: displayBaseline.project("editMaxHabits")
+  property bool editShowHabits: displayBaseline.editShowHabits
+  property bool editShowChecklistItems: displayBaseline.editShowChecklistItems
+  property bool editEnableTagFilter: displayBaseline.editEnableTagFilter
+  property string editSelectedTagId: displayBaseline.editSelectedTagId
+  property bool editShowNotificationBadge: displayBaseline.editShowNotificationBadge
+  property bool editColorizationEnabled: displayBaseline.editColorizationEnabled
+  property string editColorizationIcon: displayBaseline.editColorizationIcon
+  property string editColorizationBadge: displayBaseline.editColorizationBadge
+  property string editColorizationBadgeText: displayBaseline.editColorizationBadgeText
+
+  NSettingsBaseline {
+    ranges: [
+      NSettingsRange { field: "editRefreshInterval"; from: rangeEditRefreshInterval.from; to: rangeEditRefreshInterval.to },
+      NSettingsRange { field: "editMaxDailies"; from: rangeEditMaxDailies.from; to: rangeEditMaxDailies.to },
+      NSettingsRange { field: "editMaxTodos"; from: rangeEditMaxTodos.from; to: rangeEditMaxTodos.to },
+      NSettingsRange { field: "editMaxHabits"; from: rangeEditMaxHabits.from; to: rangeEditMaxHabits.to }
+    ]
+    id: displayBaseline
+    readonly property string editHabiticaUserId: cfg.habiticaUserId ?? defaults.habiticaUserId ?? ""
+    readonly property string editHabiticaApiToken: cfg.habiticaApiToken ?? defaults.habiticaApiToken ?? ""
+    readonly property int editRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 300
+    readonly property int editMaxDailies: cfg.maxDailies ?? defaults.maxDailies ?? 8
+    readonly property int editMaxTodos: cfg.maxTodos ?? defaults.maxTodos ?? 8
+    readonly property int editMaxHabits: cfg.maxHabits ?? defaults.maxHabits ?? 8
+    readonly property bool editShowHabits: cfg.showHabits ?? defaults.showHabits ?? false
+    readonly property bool editShowChecklistItems: cfg.showChecklistItems ?? defaults.showChecklistItems ?? false
+    readonly property bool editEnableTagFilter: cfg.enableTagFilter ?? defaults.enableTagFilter ?? false
+    readonly property string editSelectedTagId: cfg.selectedTagId ?? defaults.selectedTagId ?? ""
+    readonly property bool editShowNotificationBadge: cfg.showNotificationBadge ?? defaults.showNotificationBadge ?? true
+    readonly property bool editColorizationEnabled: cfg.colorizationEnabled ?? defaults.colorizationEnabled ?? false
+    readonly property string editColorizationIcon: cfg.colorizationIcon ?? defaults.colorizationIcon ?? "Primary"
+    readonly property string editColorizationBadge: cfg.colorizationBadge ?? defaults.colorizationBadge ?? "Error"
+    readonly property string editColorizationBadgeText: cfg.colorizationBadgeText ?? defaults.colorizationBadgeText ?? "Primary"
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editHabiticaUserId: root.editHabiticaUserId, editHabiticaApiToken: root.editHabiticaApiToken, editRefreshInterval: root.editRefreshInterval, editMaxDailies: root.editMaxDailies, editMaxTodos: root.editMaxTodos, editMaxHabits: root.editMaxHabits, editShowHabits: root.editShowHabits, editShowChecklistItems: root.editShowChecklistItems, editEnableTagFilter: root.editEnableTagFilter, editSelectedTagId: root.editSelectedTagId, editShowNotificationBadge: root.editShowNotificationBadge, editColorizationEnabled: root.editColorizationEnabled, editColorizationIcon: root.editColorizationIcon, editColorizationBadge: root.editColorizationBadge, editColorizationBadgeText: root.editColorizationBadgeText})
 
   spacing: Style.marginM
 
@@ -79,6 +105,8 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeEditRefreshInterval
+      objectName: "settings-range-editRefreshInterval"
       Layout.fillWidth: true
       from: 60
       to: 3600
@@ -103,6 +131,8 @@ ColumnLayout {
       }
 
       NSlider {
+        id: rangeEditMaxDailies
+        objectName: "settings-range-editMaxDailies"
         Layout.fillWidth: true
         from: 1
         to: 25
@@ -121,6 +151,8 @@ ColumnLayout {
       }
 
       NSlider {
+        id: rangeEditMaxTodos
+        objectName: "settings-range-editMaxTodos"
         Layout.fillWidth: true
         from: 1
         to: 25
@@ -166,6 +198,8 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeEditMaxHabits
+      objectName: "settings-range-editMaxHabits"
       Layout.fillWidth: true
       from: 1
       to: 25
@@ -286,8 +320,10 @@ ColumnLayout {
   function saveSettings() {
     if (!pluginApi) return
 
-    pluginApi.pluginSettings.habiticaUserId = root.editHabiticaUserId.trim()
-    pluginApi.pluginSettings.habiticaApiToken = root.editHabiticaApiToken.trim()
+    root.editHabiticaUserId = root.editHabiticaUserId.trim()
+    root.editHabiticaApiToken = root.editHabiticaApiToken.trim()
+    pluginApi.pluginSettings.habiticaUserId = root.editHabiticaUserId
+    pluginApi.pluginSettings.habiticaApiToken = root.editHabiticaApiToken
     pluginApi.pluginSettings.refreshInterval = root.editRefreshInterval
     pluginApi.pluginSettings.maxDailies = root.editMaxDailies
     pluginApi.pluginSettings.maxTodos = root.editMaxTodos
@@ -295,15 +331,19 @@ ColumnLayout {
     pluginApi.pluginSettings.showHabits = root.editShowHabits
     pluginApi.pluginSettings.showChecklistItems = root.editShowChecklistItems
     pluginApi.pluginSettings.enableTagFilter = root.editEnableTagFilter
-    pluginApi.pluginSettings.selectedTagId = root.editSelectedTagId.trim()
+    root.editSelectedTagId = root.editSelectedTagId.trim()
+    pluginApi.pluginSettings.selectedTagId = root.editSelectedTagId
     pluginApi.pluginSettings.showNotificationBadge = root.editShowNotificationBadge
     pluginApi.pluginSettings.colorizationEnabled = root.editColorizationEnabled
     pluginApi.pluginSettings.colorizationIcon = root.editColorizationIcon
     pluginApi.pluginSettings.colorizationBadge = root.editColorizationBadge
     pluginApi.pluginSettings.colorizationBadgeText = root.editColorizationBadgeText
 
-    pluginApi.saveSettings()
-    Logger.i("Habitica", "Settings saved")
-    ToastService.showNotice(pluginApi?.tr("settings.saved"))
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current") {
+        Logger.i("Habitica", "Settings saved")
+        ToastService.showNotice(pluginApi?.tr("settings.saved"))
+      }
+    })
   }
 }

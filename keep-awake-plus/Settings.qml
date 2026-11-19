@@ -9,12 +9,23 @@ ColumnLayout {
 
   readonly property var cfg: pluginApi?.pluginSettings ?? ({})
 
-  property string defaultScope: cfg.defaultScope ?? "partial"
-  property bool showRemainingText: cfg.showRemainingText ?? true
-  property bool activateOnLeftClick: cfg.activateOnLeftClick ?? false
-  property int quickExtendMinutes: cfg.quickExtendMinutes ?? 30
-  property bool includeUnlimited: cfg.includeUnlimited ?? true
-  property string durationsCsv: (cfg.durations ?? []).join(", ")
+  property string defaultScope: displayBaseline.defaultScope
+  property bool showRemainingText: displayBaseline.showRemainingText
+  property bool activateOnLeftClick: displayBaseline.activateOnLeftClick
+  property int quickExtendMinutes: displayBaseline.quickExtendMinutes
+  property bool includeUnlimited: displayBaseline.includeUnlimited
+  property string durationsCsv: displayBaseline.durationsCsv
+
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string defaultScope: cfg.defaultScope ?? "partial"
+    readonly property bool showRemainingText: cfg.showRemainingText ?? true
+    readonly property bool activateOnLeftClick: cfg.activateOnLeftClick ?? false
+    readonly property int quickExtendMinutes: cfg.quickExtendMinutes ?? 30
+    readonly property bool includeUnlimited: cfg.includeUnlimited ?? true
+    readonly property string durationsCsv: (cfg.durations ?? []).join(", ")
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({defaultScope: root.defaultScope, showRemainingText: root.showRemainingText, activateOnLeftClick: root.activateOnLeftClick, quickExtendMinutes: root.quickExtendMinutes, includeUnlimited: root.includeUnlimited, durationsCsv: root.durationsCsv})
 
   spacing: Style.marginL
 
@@ -57,7 +68,7 @@ ColumnLayout {
     Layout.fillWidth: true
     label: pluginApi?.tr("settings.durations.label")
     text: root.durationsCsv
-    onEditingFinished: root.durationsCsv = text
+    onTextEdited: root.durationsCsv = text
   }
 
   NToggle {
@@ -84,9 +95,14 @@ ColumnLayout {
       .split(/\s*,\s*/)
       .map(s => parseInt(s, 10))
       .filter(n => !isNaN(n) && n > 0);
-    if (arr.length > 0) pluginApi.pluginSettings.durations = arr;
+    if (arr.length > 0) {
+      root.durationsCsv = arr.join(", ");
+      pluginApi.pluginSettings.durations = arr;
+    }
 
-    pluginApi.saveSettings();
-    Logger.i("keep-awake-plus", "Settings saved");
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("keep-awake-plus", "Settings saved");
+    });
   }
 }

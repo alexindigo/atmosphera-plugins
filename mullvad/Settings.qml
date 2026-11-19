@@ -12,16 +12,30 @@ ColumnLayout {
 	readonly property var cfg: pluginApi?.pluginSettings || ({})
 	readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-	property int refreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 3000
+	property int refreshInterval: displayBaseline.refreshInterval
 	property bool showCountryFlag: cfg.showCountryFlag ?? defaults.showCountryFlag ?? false
-	property bool showCityName: cfg.showCityName ?? defaults.showCityName ?? false
-	property bool showIp: cfg.showIp ?? defaults.showIp ?? false
-	property bool compactMode: cfg.compactMode ?? defaults.compactMode ?? false
-	property string clickAction: cfg.clickAction ?? defaults.clickAction ?? "panel"
-	property bool relayClickConnects: cfg.relayClickConnects ?? defaults.relayClickConnects ?? true
-	property bool confirmDisconnectInLockdown: cfg.confirmDisconnectInLockdown ?? defaults.confirmDisconnectInLockdown ?? true
-	property int expiryWarningDays: cfg.expiryWarningDays ?? defaults.expiryWarningDays ?? 7
-	property string favoriteCountriesText: ((cfg.favoriteCountries ?? defaults.favoriteCountries ?? []).join(","))
+	property bool showCityName: displayBaseline.showCityName
+	property bool showIp: displayBaseline.showIp
+	property bool compactMode: displayBaseline.compactMode
+	property string clickAction: displayBaseline.clickAction
+	property bool relayClickConnects: displayBaseline.relayClickConnects
+	property bool confirmDisconnectInLockdown: displayBaseline.confirmDisconnectInLockdown
+	property int expiryWarningDays: displayBaseline.expiryWarningDays
+	property string favoriteCountriesText: displayBaseline.favoriteCountriesText
+
+	NSettingsBaseline {
+		id: displayBaseline
+		readonly property int refreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 3000
+		readonly property bool showCityName: cfg.showCityName ?? defaults.showCityName ?? false
+		readonly property bool showIp: cfg.showIp ?? defaults.showIp ?? false
+		readonly property bool compactMode: cfg.compactMode ?? defaults.compactMode ?? false
+		readonly property string clickAction: cfg.clickAction ?? defaults.clickAction ?? "panel"
+		readonly property bool relayClickConnects: cfg.relayClickConnects ?? defaults.relayClickConnects ?? true
+		readonly property bool confirmDisconnectInLockdown: cfg.confirmDisconnectInLockdown ?? defaults.confirmDisconnectInLockdown ?? true
+		readonly property int expiryWarningDays: cfg.expiryWarningDays ?? defaults.expiryWarningDays ?? 7
+		readonly property string favoriteCountriesText: (cfg.favoriteCountries ?? defaults.favoriteCountries ?? []).join(",")
+	}
+	readonly property bool settingsDirty: displayBaseline.differs({refreshInterval: root.refreshInterval, showCityName: root.showCityName, showIp: root.showIp, compactMode: root.compactMode, clickAction: root.clickAction, relayClickConnects: root.relayClickConnects, confirmDisconnectInLockdown: root.confirmDisconnectInLockdown, expiryWarningDays: root.expiryWarningDays, favoriteCountriesText: root.favoriteCountriesText})
 
 	function saveSettings() {
 		if (!pluginApi) {
@@ -40,9 +54,12 @@ ColumnLayout {
 			.split(",")
 			.map(function (s) { return s.trim().toLowerCase() })
 			.filter(function (s) { return s.length === 2 })
+		root.favoriteCountriesText = fav.join(",")
 		pluginApi.pluginSettings.favoriteCountries = fav
-		pluginApi.saveSettings()
-		Logger.i("Mullvad", "Settings saved")
+		pluginApi.saveSettings(function (result) {
+			if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+				Logger.i("Mullvad", "Settings saved")
+		})
 	}
 
 	NSpinBox {

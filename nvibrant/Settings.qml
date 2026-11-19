@@ -10,6 +10,15 @@ ColumnLayout {
   readonly property var cfg: pluginApi?.pluginSettings ?? ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings ?? ({})
 
+  property alias editVibranceValue: vibranceSpinBox.value
+  property alias editDisplayIndex: displayIndexSpinBox.value
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property int editVibranceValue: root.cfg.vibranceValue ?? root.defaults.vibranceValue ?? 512
+    readonly property int editDisplayIndex: root.cfg.displayIndex ?? root.defaults.displayIndex ?? 1
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editVibranceValue: root.editVibranceValue, editDisplayIndex: root.editDisplayIndex})
+
   spacing: Style.marginM
 
   ColumnLayout {
@@ -26,7 +35,7 @@ ColumnLayout {
       from: 0
       to: 1023
       stepSize: 64
-      value: root.cfg.vibranceValue ?? root.defaults.vibranceValue ?? 512
+      value: displayBaseline.editVibranceValue
     }
   }
 
@@ -50,7 +59,7 @@ ColumnLayout {
       from: 1
       to: 8
       stepSize: 1
-      value: root.cfg.displayIndex ?? root.defaults.displayIndex ?? 1
+      value: displayBaseline.editDisplayIndex
     }
   }
 

@@ -1,9 +1,9 @@
 {
   "id": "port-monitor",
   "name": "Port Monitor",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "minNoctaliaVersion": "3.6.0",
-  "minAtmospheraVersion": "0.8.0",
+  "minAtmospheraVersion": "0.10.0",
   "author": "adriamartin91",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

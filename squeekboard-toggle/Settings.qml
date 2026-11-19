@@ -11,10 +11,14 @@ ColumnLayout {
     property var cfg: pluginApi?.pluginSettings || ({})
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    property bool editHideWhenUnavailable: cfg.hideWhenUnavailable ?? defaults.hideWhenUnavailable ?? false
-    property bool editDisableHoverIcon: cfg.disableHoverIcon ?? defaults.disableHoverIcon ?? false
-    readonly property bool settingsDirty: editHideWhenUnavailable !== (cfg.hideWhenUnavailable ?? defaults.hideWhenUnavailable ?? false)
-                                          || editDisableHoverIcon !== (cfg.disableHoverIcon ?? defaults.disableHoverIcon ?? false)
+    property bool editHideWhenUnavailable: displayBaseline.editHideWhenUnavailable
+    property bool editDisableHoverIcon: displayBaseline.editDisableHoverIcon
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property bool editHideWhenUnavailable: cfg.hideWhenUnavailable ?? defaults.hideWhenUnavailable ?? false
+        readonly property bool editDisableHoverIcon: cfg.disableHoverIcon ?? defaults.disableHoverIcon ?? false
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editHideWhenUnavailable: root.editHideWhenUnavailable, editDisableHoverIcon: root.editDisableHoverIcon})
 
     spacing: Style.marginL
 

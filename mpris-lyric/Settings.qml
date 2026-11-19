@@ -15,10 +15,11 @@ ColumnLayout {
 
   // Editable settings
   property string editPlayerName: displayBaseline.editPlayerName
-  property int editUpdateInterval: displayBaseline.editUpdateInterval
-  property int editWidth: displayBaseline.editWidth
+  property int editUpdateInterval: displayBaseline.project("editUpdateInterval")
+  property int editWidth: displayBaseline.project("editWidth")
   property bool editHideWhenInactive: displayBaseline.editHideWhenInactive
   NSettingsBaseline {
+    ranges: [NSettingsRange { field: "editUpdateInterval"; from: rangeEditUpdateInterval.from; to: rangeEditUpdateInterval.to }, NSettingsRange { field: "editWidth"; from: rangeEditWidth.from; to: rangeEditWidth.to }]
     id: displayBaseline
     readonly property string editPlayerName: cfg.playerName || defaults.playerName || "musicfox"
     readonly property int editUpdateInterval: cfg.updateInterval || defaults.updateInterval || 200
@@ -84,6 +85,8 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeEditUpdateInterval
+      objectName: "settings-range-editUpdateInterval"
       Layout.fillWidth: true
       from: 50
       to: 500
@@ -106,6 +109,8 @@ ColumnLayout {
     }
 
     NSlider {
+      id: rangeEditWidth
+      objectName: "settings-range-editWidth"
       Layout.fillWidth: true
       from: 100
       to: 600

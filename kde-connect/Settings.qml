@@ -11,8 +11,12 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property bool hideIfNoDeviceConnected: cfg.hideIfNoDeviceConnected ?? defaults.hideIfNoDeviceConnected ?? false
-  readonly property bool settingsDirty: hideIfNoDeviceConnected !== (cfg.hideIfNoDeviceConnected ?? defaults.hideIfNoDeviceConnected ?? false)
+  property bool hideIfNoDeviceConnected: displayBaseline.hideIfNoDeviceConnected
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property bool hideIfNoDeviceConnected: cfg.hideIfNoDeviceConnected ?? defaults.hideIfNoDeviceConnected ?? false
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({hideIfNoDeviceConnected: root.hideIfNoDeviceConnected})
 
   spacing: Style.marginL
 

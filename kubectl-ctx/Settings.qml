@@ -11,12 +11,12 @@ ColumnLayout {
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   property string valueKubeconfigPath: displayBaseline.valueKubeconfigPath
-  property int valuePollInterval: displayBaseline.valuePollInterval
+  property int valuePollInterval: displayBaseline.project("valuePollInterval")
   property bool valueShowErrorBadge: displayBaseline.valueShowErrorBadge
   property string valueTerminal: displayBaseline.valueTerminal
   property string valueIconColor: displayBaseline.valueIconColor
-  property int valuePanelWidth: displayBaseline.valuePanelWidth
-  property int valuePanelHeight: displayBaseline.valuePanelHeight
+  property int valuePanelWidth: displayBaseline.project("valuePanelWidth")
+  property int valuePanelHeight: displayBaseline.project("valuePanelHeight")
 
   spacing: Style.marginL
 
@@ -43,6 +43,9 @@ ColumnLayout {
     }
 
     NValueSlider {
+      id: rangeValuePollInterval
+      objectName: "settings-range-valuePollInterval"
+      onValueChanged: root.valuePollInterval = value
       Layout.fillWidth: true
       label: pluginApi?.tr("settings.pollInterval.label")
       description: pluginApi?.tr("settings.pollInterval.desc")
@@ -70,6 +73,9 @@ ColumnLayout {
     }
 
     NValueSlider {
+      id: rangeValuePanelWidth
+      objectName: "settings-range-valuePanelWidth"
+      onValueChanged: root.valuePanelWidth = value
       Layout.fillWidth: true
       label: pluginApi?.tr("settings.panelWidth.label")
       description: pluginApi?.tr("settings.panelWidth.desc")
@@ -84,6 +90,9 @@ ColumnLayout {
     }
 
     NValueSlider {
+      id: rangeValuePanelHeight
+      objectName: "settings-range-valuePanelHeight"
+      onValueChanged: root.valuePanelHeight = value
       Layout.fillWidth: true
       label: pluginApi?.tr("settings.panelHeight.label")
       description: pluginApi?.tr("settings.panelHeight.desc")
@@ -99,6 +108,7 @@ ColumnLayout {
   }
 
   NSettingsBaseline {
+    ranges: [NSettingsRange { field: "valuePollInterval"; from: rangeValuePollInterval.from; to: rangeValuePollInterval.to }, NSettingsRange { field: "valuePanelWidth"; from: rangeValuePanelWidth.from; to: rangeValuePanelWidth.to }, NSettingsRange { field: "valuePanelHeight"; from: rangeValuePanelHeight.from; to: rangeValuePanelHeight.to }]
     id: displayBaseline
     readonly property string valueKubeconfigPath: cfg.kubeconfigPath ?? defaults.kubeconfigPath ?? ""
     readonly property string valueTerminal: cfg.terminal ?? defaults.terminal ?? ""

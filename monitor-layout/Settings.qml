@@ -11,18 +11,22 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property string editBackend: cfg.backend ?? defaults.backend ?? "auto"
-  property string editSwayCommand: cfg.swayCommand ?? defaults.swayCommand ?? "swaymsg"
-  property string editHyprctlCommand: cfg.hyprctlCommand ?? defaults.hyprctlCommand ?? "hyprctl"
-  property bool editSnapToGrid: cfg.snapToGrid ?? defaults.snapToGrid ?? true
-  property string editGridSize: String(cfg.gridSize ?? defaults.gridSize ?? 40)
-  property string editIconColor: cfg.iconColor ?? defaults.iconColor ?? "primary"
-  readonly property bool settingsDirty: editBackend !== (cfg.backend ?? defaults.backend ?? "auto")
-                                        || editSwayCommand !== (cfg.swayCommand ?? defaults.swayCommand ?? "swaymsg")
-                                        || editHyprctlCommand !== (cfg.hyprctlCommand ?? defaults.hyprctlCommand ?? "hyprctl")
-                                        || editSnapToGrid !== (cfg.snapToGrid ?? defaults.snapToGrid ?? true)
-                                        || editGridSize !== String(cfg.gridSize ?? defaults.gridSize ?? 40)
-                                        || editIconColor !== (cfg.iconColor ?? defaults.iconColor ?? "primary")
+  property string editBackend: displayBaseline.editBackend
+  property string editSwayCommand: displayBaseline.editSwayCommand
+  property string editHyprctlCommand: displayBaseline.editHyprctlCommand
+  property bool editSnapToGrid: displayBaseline.editSnapToGrid
+  property string editGridSize: displayBaseline.editGridSize
+  property string editIconColor: displayBaseline.editIconColor
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string editBackend: cfg.backend ?? defaults.backend ?? "auto"
+    readonly property string editSwayCommand: cfg.swayCommand ?? defaults.swayCommand ?? "swaymsg"
+    readonly property string editHyprctlCommand: cfg.hyprctlCommand ?? defaults.hyprctlCommand ?? "hyprctl"
+    readonly property bool editSnapToGrid: cfg.snapToGrid ?? defaults.snapToGrid ?? true
+    readonly property string editGridSize: String(cfg.gridSize ?? defaults.gridSize ?? 40)
+    readonly property string editIconColor: cfg.iconColor ?? defaults.iconColor ?? "primary"
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editBackend: root.editBackend, editSwayCommand: root.editSwayCommand, editHyprctlCommand: root.editHyprctlCommand, editSnapToGrid: root.editSnapToGrid, editGridSize: root.editGridSize, editIconColor: root.editIconColor})
 
   spacing: Style.marginL
 

@@ -10,31 +10,23 @@ ColumnLayout {
     property var pluginApi: null
 
     // ===== EDIT STATE =====
-    property bool editColorizeByStatus:
-        pluginApi?.pluginSettings?.colorizeByStatus ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.colorizeByStatus ??
-        true
-
-    property bool editAllowPopupOpening:
-        pluginApi?.pluginSettings?.allowPopupOpening ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.allowPopupOpening ??
-        true
-
-    property string editColorLevel0:
-        pluginApi?.pluginSettings?.colorLevel0 ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.colorLevel0 ??
-        AtmoColor.mError
-
-    property string editColorActive:
-        pluginApi?.pluginSettings?.colorActive ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.colorActive ??
-        AtmoColor.mPrimary
+    property bool editColorizeByStatus: displayBaseline.editColorizeByStatus
+    property bool editAllowPopupOpening: displayBaseline.editAllowPopupOpening
+    property string editColorLevel0: displayBaseline.editColorLevel0
+    property string editColorActive: displayBaseline.editColorActive
 
     // Empty = unset → automatic mode stays neutral
-    property string editColorAuto:
-        pluginApi?.pluginSettings?.colorAuto ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.colorAuto ??
-        ""
+    property string editColorAuto: displayBaseline.editColorAuto
+
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property bool editColorizeByStatus: pluginApi?.pluginSettings?.colorizeByStatus ?? pluginApi?.manifest?.metadata?.defaultSettings?.colorizeByStatus ?? true
+        readonly property bool editAllowPopupOpening: pluginApi?.pluginSettings?.allowPopupOpening ?? pluginApi?.manifest?.metadata?.defaultSettings?.allowPopupOpening ?? true
+        readonly property string editColorLevel0: pluginApi?.pluginSettings?.colorLevel0 ?? pluginApi?.manifest?.metadata?.defaultSettings?.colorLevel0 ?? AtmoColor.mError
+        readonly property string editColorActive: pluginApi?.pluginSettings?.colorActive ?? pluginApi?.manifest?.metadata?.defaultSettings?.colorActive ?? AtmoColor.mPrimary
+        readonly property string editColorAuto: pluginApi?.pluginSettings?.colorAuto ?? pluginApi?.manifest?.metadata?.defaultSettings?.colorAuto ?? ""
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editColorizeByStatus: root.editColorizeByStatus, editAllowPopupOpening: root.editAllowPopupOpening, editColorLevel0: root.editColorLevel0, editColorActive: root.editColorActive, editColorAuto: root.editColorAuto})
 
     // ===== SAVE =====
     function saveSettings() {

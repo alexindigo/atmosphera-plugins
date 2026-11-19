@@ -8,17 +8,17 @@ ColumnLayout {
     property var pluginApi: null
     spacing: Style.marginL
 
-    property string screenshotPath:         ""
-    property string videoPath:              ""
-    property string filenameFormat:         ""
-    property string x02ApiKey:             ""
-    property string x02Expiry:             "7d"
-    property bool   shareSkipPopover:      false
-    property bool   recordSkipConfirmation: false
-    property bool   recordCopyToClipboard:  false
-    property int    gifMaxSeconds:          30
-    property string searchEngineUrl:        ""
-    property bool   _loaded: false
+    property string screenshotPath: displayBaseline.screenshotPath
+    property string videoPath: displayBaseline.videoPath
+    property string filenameFormat: displayBaseline.filenameFormat
+    property string x02ApiKey: displayBaseline.x02ApiKey
+    property string x02Expiry: displayBaseline.x02Expiry
+    property bool shareSkipPopover: displayBaseline.shareSkipPopover
+    property bool recordSkipConfirmation: displayBaseline.recordSkipConfirmation
+    property bool recordCopyToClipboard: displayBaseline.recordCopyToClipboard
+    property string gifMaxSeconds: displayBaseline.gifMaxSeconds
+    property string searchEngineUrl: displayBaseline.searchEngineUrl
+    readonly property bool settingsDirty: displayBaseline.differs({screenshotPath: root.screenshotPath, videoPath: root.videoPath, filenameFormat: root.filenameFormat, x02ApiKey: root.x02ApiKey, x02Expiry: root.x02Expiry, shareSkipPopover: root.shareSkipPopover, recordSkipConfirmation: root.recordSkipConfirmation, recordCopyToClipboard: root.recordCopyToClipboard, gifMaxSeconds: root.gifMaxSeconds, searchEngineUrl: root.searchEngineUrl})
     property string _previewNow: ""
 
     Timer {
@@ -27,27 +27,23 @@ ColumnLayout {
         onTriggered: root._previewNow = new Date().toString()
     }
 
-    function _load() {
-        if (!pluginApi?.pluginSettings) return
-        _loaded = false
-        screenshotPath         = pluginApi.pluginSettings.screenshotPath         || ""
-        videoPath              = pluginApi.pluginSettings.videoPath              || ""
-        filenameFormat         = pluginApi.pluginSettings.filenameFormat         || ""
-        x02ApiKey              = pluginApi.pluginSettings.x02ApiKey              || ""
-        x02Expiry              = pluginApi.pluginSettings.x02Expiry              || "7d"
-        shareSkipPopover       = pluginApi.pluginSettings.shareSkipPopover       ?? false
-        recordSkipConfirmation = pluginApi.pluginSettings.recordSkipConfirmation ?? false
-        recordCopyToClipboard  = pluginApi.pluginSettings.recordCopyToClipboard  ?? false
-        gifMaxSeconds          = pluginApi.pluginSettings.gifMaxSeconds          ?? 30
-        searchEngineUrl        = pluginApi.pluginSettings.searchEngineUrl        || ""
-        _loaded = true
+    NSettingsBaseline {
+        id: displayBaseline
+        readonly property string screenshotPath: root.pluginApi?.pluginSettings?.screenshotPath || ""
+        readonly property string videoPath: root.pluginApi?.pluginSettings?.videoPath || ""
+        readonly property string filenameFormat: root.pluginApi?.pluginSettings?.filenameFormat || ""
+        readonly property string x02ApiKey: root.pluginApi?.pluginSettings?.x02ApiKey || ""
+        readonly property string x02Expiry: root.pluginApi?.pluginSettings?.x02Expiry || "7d"
+        readonly property bool shareSkipPopover: root.pluginApi?.pluginSettings?.shareSkipPopover ?? false
+        readonly property bool recordSkipConfirmation: root.pluginApi?.pluginSettings?.recordSkipConfirmation ?? false
+        readonly property bool recordCopyToClipboard: root.pluginApi?.pluginSettings?.recordCopyToClipboard ?? false
+        readonly property int sourceGifMaxSeconds: root.pluginApi?.pluginSettings?.gifMaxSeconds ?? 30
+        readonly property string gifMaxSeconds: String(Math.max(5, Math.min(300, sourceGifMaxSeconds)))
+        readonly property string searchEngineUrl: root.pluginApi?.pluginSettings?.searchEngineUrl || ""
     }
 
-    Component.onCompleted: _load()
-    onPluginApiChanged:    _load()
-
     function saveSettings() {
-        if (!pluginApi || !_loaded) return
+        if (!pluginApi) return
         pluginApi.pluginSettings.screenshotPath         = root.screenshotPath
         pluginApi.pluginSettings.videoPath              = root.videoPath
         pluginApi.pluginSettings.filenameFormat         = root.filenameFormat
@@ -56,7 +52,12 @@ ColumnLayout {
         pluginApi.pluginSettings.shareSkipPopover       = root.shareSkipPopover
         pluginApi.pluginSettings.recordSkipConfirmation = root.recordSkipConfirmation
         pluginApi.pluginSettings.recordCopyToClipboard  = root.recordCopyToClipboard
-        pluginApi.pluginSettings.gifMaxSeconds          = root.gifMaxSeconds
+        var seconds = parseInt(root.gifMaxSeconds)
+        if (!isNaN(seconds)) {
+            seconds = Math.max(5, Math.min(300, seconds))
+            root.gifMaxSeconds = String(seconds)
+            pluginApi.pluginSettings.gifMaxSeconds = seconds
+        }
         pluginApi.pluginSettings.searchEngineUrl        = root.searchEngineUrl
         pluginApi.saveSettings()
     }
@@ -82,7 +83,7 @@ ColumnLayout {
         description:     pluginApi?.tr("settings.screenshotPathDesc")
         placeholderText: "~/Pictures/Screenshots"
         text:            root.screenshotPath
-        onTextChanged:   { root.screenshotPath = text; saveSettings() }
+        onTextEdited:   { root.screenshotPath = text; saveSettings() }
     }
 
     NTextInput {
@@ -91,7 +92,7 @@ ColumnLayout {
         description:     pluginApi?.tr("settings.videoPathDesc")
         placeholderText: "~/Videos"
         text:            root.videoPath
-        onTextChanged:   { root.videoPath = text; saveSettings() }
+        onTextEdited:   { root.videoPath = text; saveSettings() }
     }
 
     NDivider { Layout.fillWidth: true; Layout.topMargin: Style.marginM; Layout.bottomMargin: Style.marginM }
@@ -158,7 +159,8 @@ ColumnLayout {
                             var input = filenameInput.inputItem
                             var cur   = input.cursorPosition
                             var txt   = input.text
-                            input.text = txt.substring(0, cur) + modelData.value + txt.substring(cur)
+                            root.filenameFormat = txt.substring(0, cur) + modelData.value + txt.substring(cur)
+                            root.saveSettings()
                             input.cursorPosition = cur + modelData.value.length
                             input.forceActiveFocus()
                         }
@@ -172,7 +174,7 @@ ColumnLayout {
             Layout.fillWidth: true
             placeholderText: "%Y-%m-%dT%H-%M-%S"
             text:            root.filenameFormat
-            onTextChanged:   { root.filenameFormat = text; saveSettings() }
+            onTextEdited:   { root.filenameFormat = text; saveSettings() }
         }
 
         Rectangle {
@@ -225,7 +227,7 @@ ColumnLayout {
             description:     pluginApi?.tr("settings.x02ApiKeyDesc")
             placeholderText: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
             text:            root.x02ApiKey
-            onTextChanged:   { root.x02ApiKey = text; saveSettings() }
+            onTextEdited:   { root.x02ApiKey = text; saveSettings() }
         }
 
         // Expiry — only relevant when API key is set
@@ -326,10 +328,10 @@ ColumnLayout {
         description:     pluginApi?.tr("settings.gifMaxSecondsDesc")
         placeholderText: "30"
         text:            root.gifMaxSeconds
-        onTextChanged: {
+        onTextEdited: {
+            root.gifMaxSeconds = text
             var val = parseInt(text)
             if (!isNaN(val)) {
-                root.gifMaxSeconds = Math.max(5, Math.min(300, val))
                 saveSettings()
             }
         }
@@ -354,8 +356,7 @@ ColumnLayout {
             description:     pluginApi?.tr("settings.searchEngineUrlDesc")
             placeholderText: "https://www.google.com/search?q="
             text:            root.searchEngineUrl
-            onTextChanged:   { root.searchEngineUrl = text; saveSettings() }
+            onTextEdited:   { root.searchEngineUrl = text; saveSettings() }
         }
     }
 }
-

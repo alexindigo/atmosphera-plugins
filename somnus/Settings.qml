@@ -11,44 +11,47 @@ ColumnLayout {
     property var cfg: pluginApi?.pluginSettings || ({})
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    property string editIconColor: cfg.iconColor
-        ?? defaults.iconColor ?? "primary"
+    property string editIconColor: displayBaseline.editIconColor
+    property string editHoverColor: displayBaseline.editHoverColor
+    property real editBtnWidth: displayBaseline.project("editBtnWidth")
+    property real editBtnHeight: displayBaseline.project("editBtnHeight")
+    property real editBtnSpacing: displayBaseline.project("editBtnSpacing")
+    property real editBtnOpacity: displayBaseline.project("editBtnOpacity")
+    property bool editUseOverlay: displayBaseline.editUseOverlay
+    property bool editAnimationsEnabled: displayBaseline.editAnimationsEnabled
+    property bool editLockOnSuspend: displayBaseline.editLockOnSuspend
+    property real editHoverDesaturation: displayBaseline.project("editHoverDesaturation")
+    property real editOverlayBlur: displayBaseline.project("editOverlayBlur")
+    property real editOverlayTint: displayBaseline.project("editOverlayTint")
+    property real editPanelTint: displayBaseline.project("editPanelTint")
 
-    property string editHoverColor: cfg.hoverColor
-        ?? defaults.hoverColor ?? "primary"
-
-    property real editBtnWidth: cfg.buttonWidth
-        ?? defaults.buttonWidth ?? 470
-
-    property real editBtnHeight: cfg.buttonHeight
-        ?? defaults.buttonHeight ?? 280
-
-    property real editBtnSpacing: cfg.buttonSpacing
-        ?? defaults.buttonSpacing ?? 20
-
-    property real editBtnOpacity: cfg.buttonOpacity
-        ?? defaults.buttonOpacity ?? 0.50
-
-    property bool editUseOverlay: cfg.useOverlay
-        ?? defaults.useOverlay ?? true
-
-    property bool editAnimationsEnabled: cfg.animationsEnabled
-        ?? defaults.animationsEnabled ?? true
-
-    property bool editLockOnSuspend: cfg.lockOnSuspend
-        ?? defaults.lockOnSuspend ?? true
-
-    property real editHoverDesaturation: cfg.hoverDesaturation
-        ?? defaults.hoverDesaturation ?? 0.0
-
-    property real editOverlayBlur: cfg.overlayBlur
-        ?? defaults.overlayBlur ?? 0.75
-
-    property real editOverlayTint: cfg.overlayTint
-        ?? defaults.overlayTint ?? 0.6
-
-    property real editPanelTint: cfg.panelTint
-        ?? defaults.panelTint ?? 0.7
+    NSettingsBaseline {
+        ranges: [
+          NSettingsRange { field: "editBtnWidth"; from: rangeEditBtnWidth.from; to: rangeEditBtnWidth.to },
+          NSettingsRange { field: "editBtnHeight"; from: rangeEditBtnHeight.from; to: rangeEditBtnHeight.to },
+          NSettingsRange { field: "editBtnSpacing"; from: rangeEditBtnSpacing.from; to: rangeEditBtnSpacing.to },
+          NSettingsRange { field: "editBtnOpacity"; from: rangeEditBtnOpacity.from; to: rangeEditBtnOpacity.to },
+          NSettingsRange { field: "editHoverDesaturation"; from: rangeEditHoverDesaturation.from / 100; to: rangeEditHoverDesaturation.to / 100 },
+          NSettingsRange { field: "editOverlayBlur"; from: rangeEditOverlayBlur.from; to: rangeEditOverlayBlur.to },
+          NSettingsRange { field: "editOverlayTint"; from: rangeEditOverlayTint.from; to: rangeEditOverlayTint.to },
+          NSettingsRange { field: "editPanelTint"; from: rangeEditPanelTint.from; to: rangeEditPanelTint.to }
+        ]
+        id: displayBaseline
+        readonly property string editIconColor: cfg.iconColor ?? defaults.iconColor ?? "primary"
+        readonly property string editHoverColor: cfg.hoverColor ?? defaults.hoverColor ?? "primary"
+        readonly property real editBtnWidth: cfg.buttonWidth ?? defaults.buttonWidth ?? 470
+        readonly property real editBtnHeight: cfg.buttonHeight ?? defaults.buttonHeight ?? 280
+        readonly property real editBtnSpacing: cfg.buttonSpacing ?? defaults.buttonSpacing ?? 20
+        readonly property real editBtnOpacity: cfg.buttonOpacity ?? defaults.buttonOpacity ?? 0.50
+        readonly property bool editUseOverlay: cfg.useOverlay ?? defaults.useOverlay ?? true
+        readonly property bool editAnimationsEnabled: cfg.animationsEnabled ?? defaults.animationsEnabled ?? true
+        readonly property bool editLockOnSuspend: cfg.lockOnSuspend ?? defaults.lockOnSuspend ?? true
+        readonly property real editHoverDesaturation: cfg.hoverDesaturation ?? defaults.hoverDesaturation ?? 0.0
+        readonly property real editOverlayBlur: cfg.overlayBlur ?? defaults.overlayBlur ?? 0.75
+        readonly property real editOverlayTint: cfg.overlayTint ?? defaults.overlayTint ?? 0.6
+        readonly property real editPanelTint: cfg.panelTint ?? defaults.panelTint ?? 0.7
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editIconColor: root.editIconColor, editHoverColor: root.editHoverColor, editBtnWidth: root.editBtnWidth, editBtnHeight: root.editBtnHeight, editBtnSpacing: root.editBtnSpacing, editBtnOpacity: root.editBtnOpacity, editUseOverlay: root.editUseOverlay, editAnimationsEnabled: root.editAnimationsEnabled, editLockOnSuspend: root.editLockOnSuspend, editHoverDesaturation: root.editHoverDesaturation, editOverlayBlur: root.editOverlayBlur, editOverlayTint: root.editOverlayTint, editPanelTint: root.editPanelTint})
 
     spacing: Style.marginM
 
@@ -111,6 +114,9 @@ ColumnLayout {
     }
 
     NValueSlider {
+        id: rangeEditBtnWidth
+        objectName: "settings-range-editBtnWidth"
+        onValueChanged: root.editBtnWidth = value
         Layout.fillWidth: true
         label: pluginApi?.tr("settings.buttonWidth.label")
         from: 200; to: 500; stepSize: 10; snapAlways: true
@@ -122,6 +128,9 @@ ColumnLayout {
     }
 
     NValueSlider {
+        id: rangeEditBtnHeight
+        objectName: "settings-range-editBtnHeight"
+        onValueChanged: root.editBtnHeight = value
         Layout.fillWidth: true
         label: pluginApi?.tr("settings.buttonHeight.label")
         from: 150; to: 400; stepSize: 10; snapAlways: true
@@ -133,6 +142,9 @@ ColumnLayout {
     }
 
     NValueSlider {
+        id: rangeEditBtnSpacing
+        objectName: "settings-range-editBtnSpacing"
+        onValueChanged: root.editBtnSpacing = value
         Layout.fillWidth: true
         label: pluginApi?.tr("settings.buttonSpacing.label")
         description: pluginApi?.tr("settings.buttonSpacing.desc")
@@ -145,6 +157,9 @@ ColumnLayout {
     }
 
     NValueSlider {
+        id: rangeEditBtnOpacity
+        objectName: "settings-range-editBtnOpacity"
+        onValueChanged: root.editBtnOpacity = value
         Layout.fillWidth: true
         label: pluginApi?.tr("settings.buttonOpacity.label")
         from: 0.1; to: 1.0; stepSize: 0.05; snapAlways: true
@@ -164,6 +179,9 @@ ColumnLayout {
     }
 
     NValueSlider {
+        id: rangeEditHoverDesaturation
+        objectName: "settings-range-editHoverDesaturation"
+        onValueChanged: root.editHoverDesaturation = value / 100
         Layout.fillWidth: true
         label: pluginApi?.tr("settings.hoverDesaturation.label")
         description: pluginApi?.tr("settings.hoverDesaturation.desc")
@@ -199,6 +217,9 @@ ColumnLayout {
         spacing: Style.marginM
 
         NValueSlider {
+            id: rangeEditOverlayBlur
+            objectName: "settings-range-editOverlayBlur"
+            onValueChanged: root.editOverlayBlur = value
             Layout.fillWidth: true
             label: pluginApi?.tr("settings.overlayBlur.label")
             description: pluginApi?.tr("settings.overlayBlur.desc")
@@ -211,6 +232,9 @@ ColumnLayout {
         }
 
         NValueSlider {
+            id: rangeEditOverlayTint
+            objectName: "settings-range-editOverlayTint"
+            onValueChanged: root.editOverlayTint = value
             Layout.fillWidth: true
             label: pluginApi?.tr("settings.overlayTint.label")
             description: pluginApi?.tr("settings.overlayTint.desc")
@@ -229,6 +253,9 @@ ColumnLayout {
         spacing: Style.marginM
 
         NValueSlider {
+            id: rangeEditPanelTint
+            objectName: "settings-range-editPanelTint"
+            onValueChanged: root.editPanelTint = value
             Layout.fillWidth: true
             label: pluginApi?.tr("settings.panelTint.label")
             description: pluginApi?.tr("settings.panelTint.desc")
@@ -264,8 +291,10 @@ ColumnLayout {
             Logger.e("Somnus", "Cannot save settings: pluginApi is null")
             return
         }
-        pluginApi.pluginSettings.iconColor = root.editIconColor || "primary"
-        pluginApi.pluginSettings.hoverColor = root.editHoverColor || "primary"
+        root.editIconColor = root.editIconColor || "primary"
+        root.editHoverColor = root.editHoverColor || "primary"
+        pluginApi.pluginSettings.iconColor = root.editIconColor
+        pluginApi.pluginSettings.hoverColor = root.editHoverColor
         pluginApi.pluginSettings.buttonWidth = root.editBtnWidth
         pluginApi.pluginSettings.buttonHeight = root.editBtnHeight
         pluginApi.pluginSettings.buttonSpacing = root.editBtnSpacing
@@ -277,7 +306,9 @@ ColumnLayout {
         pluginApi.pluginSettings.animationsEnabled = root.editAnimationsEnabled
         pluginApi.pluginSettings.lockOnSuspend = root.editLockOnSuspend
         pluginApi.pluginSettings.hoverDesaturation = root.editHoverDesaturation
-        pluginApi.saveSettings()
-        Logger.i("Somnus", "Settings saved successfully")
+        pluginApi.saveSettings(function (result) {
+            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+                Logger.i("Somnus", "Settings saved successfully")
+        })
     }
 }
