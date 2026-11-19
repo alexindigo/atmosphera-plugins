@@ -15,6 +15,10 @@ ColumnLayout {
     property bool editHideWhenUnavailable: cfg.hideWhenUnavailable ?? defaults.hideWhenUnavailable ?? false
     property bool editDisableHoverIcon: cfg.disableHoverIcon ?? defaults.disableHoverIcon ?? false
     property string editWvkbdBin: cfg.wvkbdBin ?? defaults.wvkbdBin ?? "wvkbd-mobintl"
+    readonly property bool settingsDirty: editBackend !== (cfg.backend ?? defaults.backend ?? "auto")
+                                          || editHideWhenUnavailable !== (cfg.hideWhenUnavailable ?? defaults.hideWhenUnavailable ?? false)
+                                          || editDisableHoverIcon !== (cfg.disableHoverIcon ?? defaults.disableHoverIcon ?? false)
+                                          || editWvkbdBin !== (cfg.wvkbdBin ?? defaults.wvkbdBin ?? "wvkbd-mobintl")
 
     readonly property bool showWvkbdBin: editBackend === "wvkbd" || editBackend === "auto"
 

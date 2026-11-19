@@ -10,23 +10,23 @@ ColumnLayout {
     
     property var pluginApi: null
 
-    property int editRefreshInterval: pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 5000
+    property int editRefreshInterval: displayBaseline.editRefreshInterval
 
-    property bool editCompactMode: pluginApi?.pluginSettings?.compactMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ?? false
+    property bool editCompactMode: displayBaseline.editCompactMode
 
-    property bool editShowIpAddress: pluginApi?.pluginSettings?.showIpAddress ?? pluginApi?.manifest?.metadata?.defaultSettings?.showIpAddress ?? true
+    property bool editShowIpAddress: displayBaseline.editShowIpAddress
 
-    property bool editHideDisconnected: pluginApi?.pluginSettings?.hideDisconnected ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideDisconnected ?? false
+    property bool editHideDisconnected: displayBaseline.editHideDisconnected
 
-    property bool editShowPing: pluginApi?.pluginSettings?.showPing ?? pluginApi?.manifest?.metadata?.defaultSettings?.showPing ?? false
+    property bool editShowPing: displayBaseline.editShowPing
 
-    property int editPingCount: pluginApi?.pluginSettings?.pingCount || pluginApi?.manifest?.metadata?.defaultSettings?.pingCount || 5
+    property int editPingCount: displayBaseline.editPingCount
 
-    property string editTerminalCommand: pluginApi?.pluginSettings?.terminalCommand || pluginApi?.manifest?.metadata?.defaultSettings?.terminalCommand || ""
+    property string editTerminalCommand: displayBaseline.editTerminalCommand
 
-    property string editManagementUrl: pluginApi?.pluginSettings?.managementUrl ?? pluginApi?.manifest?.metadata?.defaultSettings?.managementUrl ?? ""
+    property string editManagementUrl: displayBaseline.editManagementUrl
 
-    property string editDefaultPeerAction: pluginApi?.pluginSettings?.defaultPeerAction || pluginApi?.manifest?.metadata?.defaultSettings?.defaultPeerAction || "copy-ip"
+    property string editDefaultPeerAction: displayBaseline.editDefaultPeerAction
 
     spacing: Style.marginM
 
@@ -206,15 +206,19 @@ ColumnLayout {
         onSelected: key => root.editDefaultPeerAction = key
     }
 
-    readonly property bool settingsDirty: root.editRefreshInterval !== (pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 5000)
-        || root.editCompactMode !== (pluginApi?.pluginSettings?.compactMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ?? false)
-        || root.editShowIpAddress !== (pluginApi?.pluginSettings?.showIpAddress ?? pluginApi?.manifest?.metadata?.defaultSettings?.showIpAddress ?? true)
-        || root.editHideDisconnected !== (pluginApi?.pluginSettings?.hideDisconnected ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideDisconnected ?? false)
-        || root.editShowPing !== (pluginApi?.pluginSettings?.showPing ?? pluginApi?.manifest?.metadata?.defaultSettings?.showPing ?? false)
-        || root.editTerminalCommand !== (pluginApi?.pluginSettings?.terminalCommand || pluginApi?.manifest?.metadata?.defaultSettings?.terminalCommand || "")
-        || root.editManagementUrl !== (pluginApi?.pluginSettings?.managementUrl ?? pluginApi?.manifest?.metadata?.defaultSettings?.managementUrl ?? "")
-        || root.editPingCount !== (pluginApi?.pluginSettings?.pingCount || pluginApi?.manifest?.metadata?.defaultSettings?.pingCount || 5)
-        || root.editDefaultPeerAction !== (pluginApi?.pluginSettings?.defaultPeerAction || pluginApi?.manifest?.metadata?.defaultSettings?.defaultPeerAction || "copy-ip")
+    NSettingsBaseline {
+      id: displayBaseline
+      readonly property int editRefreshInterval: pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 5000
+      readonly property bool editCompactMode: pluginApi?.pluginSettings?.compactMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ?? false
+      readonly property bool editShowIpAddress: pluginApi?.pluginSettings?.showIpAddress ?? pluginApi?.manifest?.metadata?.defaultSettings?.showIpAddress ?? true
+      readonly property bool editHideDisconnected: pluginApi?.pluginSettings?.hideDisconnected ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideDisconnected ?? false
+      readonly property bool editShowPing: pluginApi?.pluginSettings?.showPing ?? pluginApi?.manifest?.metadata?.defaultSettings?.showPing ?? false
+      readonly property string editTerminalCommand: pluginApi?.pluginSettings?.terminalCommand || pluginApi?.manifest?.metadata?.defaultSettings?.terminalCommand || ""
+      readonly property string editManagementUrl: pluginApi?.pluginSettings?.managementUrl ?? pluginApi?.manifest?.metadata?.defaultSettings?.managementUrl ?? ""
+      readonly property int editPingCount: pluginApi?.pluginSettings?.pingCount || pluginApi?.manifest?.metadata?.defaultSettings?.pingCount || 5
+      readonly property string editDefaultPeerAction: pluginApi?.pluginSettings?.defaultPeerAction || pluginApi?.manifest?.metadata?.defaultSettings?.defaultPeerAction || "copy-ip"
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editRefreshInterval: root.editRefreshInterval, editCompactMode: root.editCompactMode, editShowIpAddress: root.editShowIpAddress, editHideDisconnected: root.editHideDisconnected, editShowPing: root.editShowPing, editTerminalCommand: root.editTerminalCommand, editManagementUrl: root.editManagementUrl, editPingCount: root.editPingCount, editDefaultPeerAction: root.editDefaultPeerAction})
 
     function saveSettings() {
         if (!pluginApi) {

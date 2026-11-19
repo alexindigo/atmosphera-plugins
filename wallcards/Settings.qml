@@ -7,25 +7,46 @@ import Quickshell
 ColumnLayout {
   id: root
 
-  property int editAnimationCardsDuration: pluginApi?.pluginSettings?.animation_cards_duration ?? pluginApi?.manifest?.metadata?.defaultSettings?.animation_cards_duration
-  property int editAnimationDuration: pluginApi?.pluginSettings?.animation_duration ?? pluginApi?.manifest?.metadata?.defaultSettings?.animation_window_duration
-  property int editAnimationWindowDuration: pluginApi?.pluginSettings?.animation_window_duration ?? pluginApi?.manifest?.metadata?.defaultSettings?.animation_window_duration
-  property color editBackgroundColor: pluginApi?.pluginSettings?.background_color ?? pluginApi?.manifest?.metadata?.defaultSettings?.background_color
-  property real editBackgroundOpacity: pluginApi?.pluginSettings?.background_opacity ?? pluginApi?.manifest?.metadata?.defaultSettings?.background_opacity
-  property int editCardHeight: pluginApi?.pluginSettings?.card_height ?? pluginApi?.manifest?.metadata?.defaultSettings?.card_height
-  property int editCardSpacing: pluginApi?.pluginSettings?.card_spacing ?? pluginApi?.manifest?.metadata?.defaultSettings?.card_spacing
-  property int editCardStripWidth: pluginApi?.pluginSettings?.card_strip_width ?? pluginApi?.manifest?.metadata?.defaultSettings?.card_strip_width
-  property int editCardsShown: pluginApi?.pluginSettings?.cards_shown ?? pluginApi?.manifest?.metadata?.defaultSettings?.cards_shown
-  property real editCenterWidthRatio: pluginApi?.pluginSettings?.center_width_ratio ?? pluginApi?.manifest?.metadata?.defaultSettings?.center_width_ratio
-  property bool editHideHelp: pluginApi?.pluginSettings?.hide_help ?? pluginApi?.manifest?.metadata?.defaultSettings?.hide_help
-  property bool editHideTopBar: pluginApi?.pluginSettings?.hide_top_bar ?? pluginApi?.manifest?.metadata?.defaultSettings?.hide_top_bar ?? false
-  property bool editAnimateWindow: pluginApi?.pluginSettings?.animate_window ?? pluginApi?.manifest?.metadata?.defaultSettings?.animate_window ?? true
-  property string editIconColor: pluginApi?.pluginSettings?.icon_color ?? "none"
-  property bool editLivePreview: pluginApi?.pluginSettings?.live_preview ?? pluginApi?.manifest?.metadata?.defaultSettings?.live_preview
-  property string editSelectedFilter: pluginApi?.pluginSettings?.selected_filter || pluginApi?.manifest?.metadata?.defaultSettings?.selected_filter
-  property real editShearFactor: pluginApi?.pluginSettings?.shear_factor ?? pluginApi?.manifest?.metadata?.defaultSettings?.shear_factor
-  property int editTopBarHeight: pluginApi?.pluginSettings?.top_bar_height ?? pluginApi?.manifest?.metadata?.defaultSettings?.top_bar_height
+  property int editAnimationCardsDuration: displayBaseline.editAnimationCardsDuration
+  property int editAnimationWindowDuration: displayBaseline.editAnimationWindowDuration
+  property color editBackgroundColor: displayBaseline.editBackgroundColor
+  property real editBackgroundOpacity: displayBaseline.editBackgroundOpacity
+  property int editCardHeight: displayBaseline.editCardHeight
+  property int editCardSpacing: displayBaseline.editCardSpacing
+  property int editCardStripWidth: displayBaseline.editCardStripWidth
+  property int editCardsShown: displayBaseline.editCardsShown
+  property real editCenterWidthRatio: displayBaseline.editCenterWidthRatio
+  property bool editHideHelp: displayBaseline.editHideHelp
+  property bool editHideTopBar: displayBaseline.editHideTopBar
+  property bool editAnimateWindow: displayBaseline.editAnimateWindow
+  property string editIconColor: displayBaseline.editIconColor
+  property bool editLivePreview: displayBaseline.editLivePreview
+  property string editSelectedFilter: displayBaseline.editSelectedFilter
+  property real editShearFactor: displayBaseline.editShearFactor
+  property int editTopBarHeight: displayBaseline.editTopBarHeight
   property var pluginApi: null
+
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property int editAnimationCardsDuration: pluginApi?.pluginSettings?.animation_cards_duration ?? pluginApi?.manifest?.metadata?.defaultSettings?.animation_cards_duration
+    readonly property int editAnimationWindowDuration: pluginApi?.pluginSettings?.animation_window_duration ?? pluginApi?.manifest?.metadata?.defaultSettings?.animation_window_duration
+    readonly property color editBackgroundColor: pluginApi?.pluginSettings?.background_color ?? pluginApi?.manifest?.metadata?.defaultSettings?.background_color
+    readonly property real editBackgroundOpacity: pluginApi?.pluginSettings?.background_opacity ?? pluginApi?.manifest?.metadata?.defaultSettings?.background_opacity
+    readonly property real editCenterWidthRatio: pluginApi?.pluginSettings?.center_width_ratio ?? pluginApi?.manifest?.metadata?.defaultSettings?.center_width_ratio
+    readonly property int editCardHeight: pluginApi?.pluginSettings?.card_height ?? pluginApi?.manifest?.metadata?.defaultSettings?.card_height
+    readonly property int editCardSpacing: pluginApi?.pluginSettings?.card_spacing ?? pluginApi?.manifest?.metadata?.defaultSettings?.card_spacing
+    readonly property int editCardStripWidth: pluginApi?.pluginSettings?.card_strip_width ?? pluginApi?.manifest?.metadata?.defaultSettings?.card_strip_width
+    readonly property int editCardsShown: pluginApi?.pluginSettings?.cards_shown ?? pluginApi?.manifest?.metadata?.defaultSettings?.cards_shown
+    readonly property real editShearFactor: pluginApi?.pluginSettings?.shear_factor ?? pluginApi?.manifest?.metadata?.defaultSettings?.shear_factor
+    readonly property int editTopBarHeight: pluginApi?.pluginSettings?.top_bar_height ?? pluginApi?.manifest?.metadata?.defaultSettings?.top_bar_height
+    readonly property string editIconColor: pluginApi?.pluginSettings?.iconColor ?? pluginApi?.pluginSettings?.icon_color ?? "none"
+    readonly property string editSelectedFilter: pluginApi?.pluginSettings?.selected_filter || pluginApi?.manifest?.metadata?.defaultSettings?.selected_filter
+    readonly property bool editLivePreview: pluginApi?.pluginSettings?.live_preview ?? pluginApi?.manifest?.metadata?.defaultSettings?.live_preview
+    readonly property bool editHideHelp: pluginApi?.pluginSettings?.hide_help ?? pluginApi?.manifest?.metadata?.defaultSettings?.hide_help
+    readonly property bool editHideTopBar: pluginApi?.pluginSettings?.hide_top_bar ?? pluginApi?.manifest?.metadata?.defaultSettings?.hide_top_bar ?? false
+    readonly property bool editAnimateWindow: pluginApi?.pluginSettings?.animate_window ?? pluginApi?.manifest?.metadata?.defaultSettings?.animate_window ?? true
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editAnimationCardsDuration: root.editAnimationCardsDuration, editAnimationWindowDuration: root.editAnimationWindowDuration, editBackgroundColor: root.editBackgroundColor, editBackgroundOpacity: root.editBackgroundOpacity, editCenterWidthRatio: root.editCenterWidthRatio, editCardHeight: root.editCardHeight, editCardSpacing: root.editCardSpacing, editCardStripWidth: root.editCardStripWidth, editCardsShown: root.editCardsShown, editShearFactor: root.editShearFactor, editTopBarHeight: root.editTopBarHeight, editIconColor: root.editIconColor, editSelectedFilter: root.editSelectedFilter, editLivePreview: root.editLivePreview, editHideHelp: root.editHideHelp, editHideTopBar: root.editHideTopBar, editAnimateWindow: root.editAnimateWindow})
 
   function saveSettings() {
     if (!pluginApi || !pluginApi.pluginSettings) {
@@ -55,8 +76,10 @@ ColumnLayout {
     pluginApi.pluginSettings.hide_top_bar = root.editHideTopBar;
     pluginApi.pluginSettings.animate_window = root.editAnimateWindow;
 
-    pluginApi.saveSettings();
-    Logger.i("Wallcards", "Settings saved");
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("Wallcards", "Settings saved");
+    });
   }
 
   Layout.rightMargin: Style.marginL

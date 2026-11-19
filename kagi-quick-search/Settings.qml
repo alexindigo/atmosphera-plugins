@@ -7,8 +7,8 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
-  property string editToken: pluginApi.pluginSettings.kagiSessionToken ?? ""
-  property int editDebounce: pluginApi.pluginSettings.debounceMs ?? 500
+  property string editToken: displayBaseline.editToken
+  property int editDebounce: displayBaseline.editDebounce
 
   spacing: Style.marginM
 
@@ -58,15 +58,24 @@ ColumnLayout {
 
   }
 
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string editToken: pluginApi.pluginSettings.kagiSessionToken ?? ""
+    readonly property int editDebounce: pluginApi.pluginSettings.debounceMs ?? 500
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editToken: root.editToken, editDebounce: root.editDebounce})
+
   function saveSettings() {
     if (!pluginApi) {
       Logger.e("Kagi", "Cannot save settings: pluginApi is null");
       return;
     }
-    pluginApi.pluginSettings.kagiSessionToken = root.editToken.trim();
+    root.editToken = root.editToken.trim();
+    pluginApi.pluginSettings.kagiSessionToken = root.editToken;
     pluginApi.pluginSettings.debounceMs = root.editDebounce;
-    pluginApi.saveSettings();
-
-    Logger.i("Kagi", "Settings saved successfully");
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("Kagi", "Settings saved successfully");
+    });
   }
 }

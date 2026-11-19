@@ -8,6 +8,7 @@ ColumnLayout {
 
   property var pluginApi: null
   property var widgetSettings: null
+  signal settingsChanged(var settings)
   property var screen: null
 
   spacing: Style.marginM
@@ -52,7 +53,7 @@ ColumnLayout {
     currentKey: String(root.valueVisualizationMode)
     onSelected: key => {
       root.valueVisualizationMode = parseInt(key);
-      root.saveSettings();
+      root.saveSettings({visualizationMode: root.valueVisualizationMode});
     }
   }
 
@@ -67,7 +68,7 @@ ColumnLayout {
     stepSize: 0.1
     onMoved: value => {
       root.valueWaveThickness = value;
-      root.saveSettings();
+      root.saveSettings({waveThickness: root.valueWaveThickness});
     }
   }
 
@@ -81,7 +82,7 @@ ColumnLayout {
     stepSize: 0.1
     onMoved: value => {
       root.valueSensitivity = value;
-      root.saveSettings();
+      root.saveSettings({sensitivity: root.valueSensitivity});
     }
   }
 
@@ -95,7 +96,7 @@ ColumnLayout {
     stepSize: 0.1
     onMoved: value => {
       root.valueRotationSpeed = value;
-      root.saveSettings();
+      root.saveSettings({rotationSpeed: root.valueRotationSpeed});
     }
   }
 
@@ -110,7 +111,7 @@ ColumnLayout {
     stepSize: 0.1
     onMoved: value => {
       root.valueBarWidth = value;
-      root.saveSettings();
+      root.saveSettings({barWidth: root.valueBarWidth});
     }
   }
 
@@ -125,7 +126,7 @@ ColumnLayout {
     stepSize: 0.1
     onMoved: value => {
       root.valueRingOpacity = value;
-      root.saveSettings();
+      root.saveSettings({ringOpacity: root.valueRingOpacity});
     }
   }
 
@@ -139,7 +140,7 @@ ColumnLayout {
     stepSize: 0.05
     onMoved: value => {
       root.valueInnerDiameter = value;
-      root.saveSettings();
+      root.saveSettings({innerDiameter: root.valueInnerDiameter});
     }
   }
 
@@ -153,7 +154,7 @@ ColumnLayout {
     stepSize: 0.05
     onMoved: value => {
       root.valueBloomIntensity = value;
-      root.saveSettings();
+      root.saveSettings({bloomIntensity: root.valueBloomIntensity});
     }
   }
 
@@ -164,7 +165,7 @@ ColumnLayout {
     checked: root.valueFadeWhenIdle
     onToggled: checked => {
       root.valueFadeWhenIdle = checked;
-      root.saveSettings();
+      root.saveSettings({fadeWhenIdle: root.valueFadeWhenIdle});
     }
   }
 
@@ -175,7 +176,7 @@ ColumnLayout {
     checked: root.valueUseCustomColors
     onToggled: checked => {
       root.valueUseCustomColors = checked;
-      root.saveSettings();
+      root.saveSettings({useCustomColors: root.valueUseCustomColors});
     }
   }
 
@@ -195,7 +196,7 @@ ColumnLayout {
       selectedColor: root.valueCustomPrimaryColor
       onColorSelected: color => {
         root.valueCustomPrimaryColor = color;
-        root.saveSettings();
+        root.saveSettings({customPrimaryColor: root.valueCustomPrimaryColor.toString()});
       }
     }
   }
@@ -216,29 +217,13 @@ ColumnLayout {
       selectedColor: root.valueCustomSecondaryColor
       onColorSelected: color => {
         root.valueCustomSecondaryColor = color;
-        root.saveSettings();
+        root.saveSettings({customSecondaryColor: root.valueCustomSecondaryColor.toString()});
       }
     }
   }
 
-  // Called when user clicks Apply/Save
-  function saveSettings() {
-    if (!widgetSettings)
-      return;
-
-    widgetSettings.data.sensitivity = root.valueSensitivity;
-    widgetSettings.data.rotationSpeed = root.valueRotationSpeed;
-    widgetSettings.data.barWidth = root.valueBarWidth;
-    widgetSettings.data.ringOpacity = root.valueRingOpacity;
-    widgetSettings.data.bloomIntensity = root.valueBloomIntensity;
-    widgetSettings.data.visualizationMode = root.valueVisualizationMode;
-    widgetSettings.data.waveThickness = root.valueWaveThickness;
-    widgetSettings.data.innerDiameter = root.valueInnerDiameter;
-    widgetSettings.data.fadeWhenIdle = root.valueFadeWhenIdle;
-    widgetSettings.data.useCustomColors = root.valueUseCustomColors;
-    widgetSettings.data.customPrimaryColor = root.valueCustomPrimaryColor.toString();
-    widgetSettings.data.customSecondaryColor = root.valueCustomSecondaryColor.toString();
-
-    widgetSettings.save();
+  function saveSettings(fields) {
+    if (fields)
+      settingsChanged(fields);
   }
 }

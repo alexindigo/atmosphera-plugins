@@ -10,6 +10,7 @@ ColumnLayout {
 
 	property var pluginApi: null
 	property var widgetSettings: null
+    signal settingsChanged(var settings)
 
     // --- Read from widgetSettings.data ---
     property string scrambleSpeed: widgetSettings?.data?.scrambleSpeed ?? "medium"
@@ -25,21 +26,9 @@ ColumnLayout {
     property string quoteColor: widgetSettings?.data?.quoteColor ?? "primary"
     property string textAlign: widgetSettings?.data?.textAlign ?? "left"
 
-    function saveSettings() {
-        if (!widgetSettings || !widgetSettings.data) return;
-        widgetSettings.data.scrambleSpeed = scrambleSpeed;
-        widgetSettings.data.scrambleChars = scrambleChars;
-        widgetSettings.data.showAuthor = showAuthor;
-        widgetSettings.data.autoChangeDaily = autoChangeDaily;
-        widgetSettings.data.userQuotes = userQuotes;
-        widgetSettings.data.quoteFont = quoteFont;
-        widgetSettings.data.authorFont = authorFont;
-        widgetSettings.data.showBackground = showBackground;
-        widgetSettings.data.showGradientOverlay = showGradientOverlay;
-        widgetSettings.data.gradientDirection = gradientDirection;
-        widgetSettings.data.quoteColor = quoteColor;
-        widgetSettings.data.textAlign = textAlign;
-        widgetSettings.save();
+    function saveSettings(fields) {
+        if (fields)
+            settingsChanged(fields);
     }
 
 	// --- Header ---
@@ -113,7 +102,7 @@ ListView {
                     var quotes = root.userQuotes.slice();
                     quotes.splice(index, 1);
                     root.userQuotes = quotes;
-                    root.saveSettings();
+                    root.saveSettings({userQuotes: root.userQuotes});
                 }
             }
         }
@@ -155,7 +144,7 @@ ListView {
 						"author": newAuthorInput.text.trim()
 					});
 					root.userQuotes = quotes;
-					root.saveSettings();
+					root.saveSettings({userQuotes: root.userQuotes});
 					newQuoteInput.text = "";
 					newAuthorInput.text = "";
 				}
@@ -182,7 +171,7 @@ ListView {
         minimumWidth: 260
         onSelected: function(key) {
             root.quoteFont = key;
-            root.saveSettings();
+            root.saveSettings({quoteFont: root.quoteFont});
         }
         defaultValue: ""
     }
@@ -198,7 +187,7 @@ ListView {
         minimumWidth: 260
         onSelected: function(key) {
             root.authorFont = key;
-            root.saveSettings();
+            root.saveSettings({authorFont: root.authorFont});
         }
         defaultValue: ""
     }
@@ -209,7 +198,7 @@ ListView {
         currentKey: root.quoteColor
         onSelected: function(key) {
             root.quoteColor = key;
-            root.saveSettings();
+            root.saveSettings({quoteColor: root.quoteColor});
         }
         defaultValue: "primary"
     }
@@ -225,7 +214,7 @@ ListView {
         currentKey: root.textAlign
         onSelected: function(key) {
             root.textAlign = key;
-            root.saveSettings();
+            root.saveSettings({textAlign: root.textAlign});
         }
     }
 
@@ -248,7 +237,7 @@ ListView {
 		currentKey: root.scrambleSpeed
 		onSelected: function(key) {
 			root.scrambleSpeed = key;
-			root.saveSettings();
+			root.saveSettings({scrambleSpeed: root.scrambleSpeed});
 		}
 	}
 
@@ -263,7 +252,7 @@ ListView {
 		currentKey: root.scrambleChars
 		onSelected: function(key) {
 			root.scrambleChars = key;
-			root.saveSettings();
+			root.saveSettings({scrambleChars: root.scrambleChars});
 		}
 	}
 
@@ -274,7 +263,7 @@ ListView {
         defaultValue: true
         onToggled: function(val) {
             root.showBackground = val;
-            root.saveSettings();
+            root.saveSettings({showBackground: root.showBackground});
         }
     }
 
@@ -287,7 +276,7 @@ ListView {
         defaultValue: true
         onToggled: function(val) {
             root.showGradientOverlay = val;
-            root.saveSettings();
+            root.saveSettings({showGradientOverlay: root.showGradientOverlay});
         }
     }
 
@@ -302,7 +291,7 @@ ListView {
         currentKey: root.gradientDirection
         onSelected: function(key) {
             root.gradientDirection = key;
-            root.saveSettings();
+            root.saveSettings({gradientDirection: root.gradientDirection});
         }
     }
 
@@ -313,7 +302,7 @@ ListView {
 		defaultValue: true
 		onToggled: function(val) {
 			root.showAuthor = val;
-			root.saveSettings();
+			root.saveSettings({showAuthor: root.showAuthor});
 		}
 	}
 
@@ -324,7 +313,7 @@ ListView {
 		defaultValue: true
 		onToggled: function(val) {
 			root.autoChangeDaily = val;
-			root.saveSettings();
+			root.saveSettings({autoChangeDaily: root.autoChangeDaily});
 		}
 	}
 }

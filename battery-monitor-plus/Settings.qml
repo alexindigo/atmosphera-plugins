@@ -12,15 +12,15 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property string valueDisplayMode: cfg.displayMode ?? defaults.displayMode ?? "graphic-clean"
-  property string valueDeviceNativePath: cfg.deviceNativePath ?? defaults.deviceNativePath ?? "__default__"
-  property bool valueShowPowerProfiles: cfg.showPowerProfiles ?? defaults.showPowerProfiles ?? false
-  property bool valueShowNoctaliaPerformance: cfg.showNoctaliaPerformance ?? defaults.showNoctaliaPerformance ?? false
-  property bool valueHideIfNotDetected: cfg.hideIfNotDetected ?? defaults.hideIfNotDetected ?? true
-  property bool valueHideIfIdle: cfg.hideIfIdle ?? defaults.hideIfIdle ?? false
-  property int valueRefreshIntervalSeconds: cfg.refreshIntervalSeconds ?? defaults.refreshIntervalSeconds ?? 5
-  property bool valueShowPowerInBar: cfg.showPowerInBar ?? defaults.showPowerInBar ?? true
-  property bool valueShowTimeInBar: cfg.showTimeInBar ?? defaults.showTimeInBar ?? true
+  property string valueDisplayMode: displayBaseline.valueDisplayMode
+  property string valueDeviceNativePath: displayBaseline.valueDeviceNativePath
+  property bool valueShowPowerProfiles: displayBaseline.valueShowPowerProfiles
+  property bool valueShowNoctaliaPerformance: displayBaseline.valueShowNoctaliaPerformance
+  property bool valueHideIfNotDetected: displayBaseline.valueHideIfNotDetected
+  property bool valueHideIfIdle: displayBaseline.valueHideIfIdle
+  property int valueRefreshIntervalSeconds: displayBaseline.valueRefreshIntervalSeconds
+  property bool valueShowPowerInBar: displayBaseline.valueShowPowerInBar
+  property bool valueShowTimeInBar: displayBaseline.valueShowTimeInBar
 
   spacing: Style.marginM
 
@@ -149,15 +149,19 @@ ColumnLayout {
     onToggled: checked => root.valueShowTimeInBar = checked
   }
 
-  readonly property bool settingsDirty: root.valueDisplayMode !== (cfg.displayMode ?? defaults.displayMode ?? "graphic-clean")
-      || root.valueDeviceNativePath !== (cfg.deviceNativePath ?? defaults.deviceNativePath ?? "__default__")
-      || root.valueShowPowerProfiles !== (cfg.showPowerProfiles ?? defaults.showPowerProfiles ?? false)
-      || root.valueShowNoctaliaPerformance !== (cfg.showNoctaliaPerformance ?? defaults.showNoctaliaPerformance ?? false)
-      || root.valueHideIfNotDetected !== (cfg.hideIfNotDetected ?? defaults.hideIfNotDetected ?? true)
-      || root.valueHideIfIdle !== (cfg.hideIfIdle ?? defaults.hideIfIdle ?? false)
-      || root.valueRefreshIntervalSeconds !== (cfg.refreshIntervalSeconds ?? defaults.refreshIntervalSeconds ?? 5)
-      || root.valueShowPowerInBar !== (cfg.showPowerInBar ?? defaults.showPowerInBar ?? true)
-      || root.valueShowTimeInBar !== (cfg.showTimeInBar ?? defaults.showTimeInBar ?? true)
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string valueDisplayMode: cfg.displayMode ?? defaults.displayMode ?? "graphic-clean"
+    readonly property string valueDeviceNativePath: cfg.deviceNativePath ?? defaults.deviceNativePath ?? "__default__"
+    readonly property bool valueShowPowerProfiles: cfg.showPowerProfiles ?? defaults.showPowerProfiles ?? false
+    readonly property bool valueShowNoctaliaPerformance: cfg.showNoctaliaPerformance ?? defaults.showNoctaliaPerformance ?? false
+    readonly property bool valueHideIfNotDetected: cfg.hideIfNotDetected ?? defaults.hideIfNotDetected ?? true
+    readonly property bool valueHideIfIdle: cfg.hideIfIdle ?? defaults.hideIfIdle ?? false
+    readonly property int valueRefreshIntervalSeconds: cfg.refreshIntervalSeconds ?? defaults.refreshIntervalSeconds ?? 5
+    readonly property bool valueShowPowerInBar: cfg.showPowerInBar ?? defaults.showPowerInBar ?? true
+    readonly property bool valueShowTimeInBar: cfg.showTimeInBar ?? defaults.showTimeInBar ?? true
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({valueDisplayMode: root.valueDisplayMode, valueDeviceNativePath: root.valueDeviceNativePath, valueShowPowerProfiles: root.valueShowPowerProfiles, valueShowNoctaliaPerformance: root.valueShowNoctaliaPerformance, valueHideIfNotDetected: root.valueHideIfNotDetected, valueHideIfIdle: root.valueHideIfIdle, valueRefreshIntervalSeconds: root.valueRefreshIntervalSeconds, valueShowPowerInBar: root.valueShowPowerInBar, valueShowTimeInBar: root.valueShowTimeInBar})
 
   function saveSettings() {
     if (!pluginApi) {

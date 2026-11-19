@@ -1,9 +1,9 @@
 {
   "id": "translator",
   "name": "Translator",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "minNoctaliaVersion": "4.4.1",
-  "minAtmospheraVersion": "0.8.0",
+  "minAtmospheraVersion": "0.10.0",
   "author": "Cleboost",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

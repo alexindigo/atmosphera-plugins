@@ -11,9 +11,9 @@ ColumnLayout {
     property var cfg:      pluginApi?.pluginSettings                      || ({})
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    property string valueAnimationsFolder: cfg.animationsFolder ?? defaults.animationsFolder ?? "~/.config/niri/animations"
-    property string valueTargetFile:       cfg.targetFile       ?? defaults.targetFile       ?? "~/.config/niri/animations.kdl"
-    property string valueIconColor:        cfg.iconColor        ?? defaults.iconColor        ?? "none"
+    property string valueAnimationsFolder: displayBaseline.valueAnimationsFolder
+    property string valueTargetFile: displayBaseline.valueTargetFile
+    property string valueIconColor: displayBaseline.valueIconColor
 
     spacing: Style.marginL
 
@@ -81,9 +81,13 @@ ColumnLayout {
         }
     }
 
-    readonly property bool settingsDirty: root.valueAnimationsFolder !== (cfg.animationsFolder ?? defaults.animationsFolder ?? "~/.config/niri/animations")
-        || root.valueTargetFile !== (cfg.targetFile ?? defaults.targetFile ?? "~/.config/niri/animations.kdl")
-        || root.valueIconColor !== (cfg.iconColor ?? defaults.iconColor ?? "none")
+    NSettingsBaseline {
+      id: displayBaseline
+      readonly property string valueAnimationsFolder: cfg.animationsFolder ?? defaults.animationsFolder ?? "~/.config/niri/animations"
+      readonly property string valueTargetFile: cfg.targetFile ?? defaults.targetFile ?? "~/.config/niri/animations.kdl"
+      readonly property string valueIconColor: cfg.iconColor ?? defaults.iconColor ?? "none"
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({valueAnimationsFolder: root.valueAnimationsFolder, valueTargetFile: root.valueTargetFile, valueIconColor: root.valueIconColor})
 
     function saveSettings() {
         if (!pluginApi) {

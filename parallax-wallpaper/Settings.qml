@@ -21,6 +21,15 @@ ColumnLayout {
   property bool invertDirection: cfg.invertDirection ?? defaults.invertDirection ?? false
   property bool autoZoom: cfg.autoZoom ?? defaults.autoZoom ?? false
   property string parallaxEasing: cfg.parallaxEasing ?? defaults.parallaxEasing ?? "OutCubic"
+  readonly property bool settingsDirty: zoomAmount !== (cfg.zoomAmount ?? defaults.zoomAmount ?? 1.1)
+                                        || parallaxDirection !== (cfg.parallaxDirection ?? defaults.parallaxDirection ?? "horizontal")
+                                        || hParallaxAmount !== (cfg.hParallaxAmount ?? defaults.hParallaxAmount ?? 50)
+                                        || hParallaxDuration !== (cfg.hParallaxDuration ?? defaults.hParallaxDuration ?? 400)
+                                        || vParallaxAmount !== (cfg.vParallaxAmount ?? defaults.vParallaxAmount ?? 50)
+                                        || vParallaxDuration !== (cfg.vParallaxDuration ?? defaults.vParallaxDuration ?? 400)
+                                        || invertDirection !== (cfg.invertDirection ?? defaults.invertDirection ?? false)
+                                        || autoZoom !== (cfg.autoZoom ?? defaults.autoZoom ?? false)
+                                        || parallaxEasing !== (cfg.parallaxEasing ?? defaults.parallaxEasing ?? "OutCubic")
 
   readonly property bool showHorizontal: parallaxDirection === "horizontal" || parallaxDirection === "both"
   readonly property bool showVertical: parallaxDirection === "vertical" || parallaxDirection === "both"

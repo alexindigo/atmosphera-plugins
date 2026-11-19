@@ -12,7 +12,7 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property int delay: cfg.delay ?? defaults.delay 
+  property int delay: displayBaseline.delay
   property string valueIconColor: cfg.iconColor ?? defaults.iconColor
 
   spacing: Style.marginL
@@ -32,12 +32,18 @@ ColumnLayout {
       to: 36
       stepSize: 5
       value: root.delay
-      onValueChanged:{
+      onMoved:{
          root.delay = value
          saveSettings()
        } 
      }
   }
+
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property int delay: cfg.delay ?? defaults.delay
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({delay: root.delay})
 
   function saveSettings() {
     if (!pluginApi) {
@@ -48,10 +54,6 @@ ColumnLayout {
     pluginApi.pluginSettings.delay = root.delay;
     pluginApi.saveSettings();
 
-  }
-
-  Component.onCompleted: {
-    saveSettings() 
   }
 
 }

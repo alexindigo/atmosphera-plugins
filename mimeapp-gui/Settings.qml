@@ -11,7 +11,7 @@ ColumnLayout {
 	property var cfg: pluginApi?.pluginSettings || ({})
 	property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-	property string valueIconColor: cfg.iconColor ?? defaults.iconColor
+	property string valueIconColor: displayBaseline.valueIconColor
 
 	spacing: Style.marginM
 
@@ -59,7 +59,11 @@ ColumnLayout {
 		}
 	}
 
-	readonly property bool settingsDirty: root.valueIconColor !== (cfg.iconColor ?? defaults.iconColor)
+	NSettingsBaseline {
+      id: displayBaseline
+      readonly property string valueIconColor: cfg.iconColor ?? defaults.iconColor
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({valueIconColor: root.valueIconColor})
 
 	function saveSettings() {
 		if (!pluginApi) {

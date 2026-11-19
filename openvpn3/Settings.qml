@@ -12,13 +12,13 @@ ColumnLayout {
     readonly property var cfg: pluginApi?.pluginSettings || ({})
     readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    property string editDisplayMode: cfg.displayMode ?? defaults.displayMode ?? "onhover"
-    property string editConnectedColor: cfg.connectedColor ?? defaults.connectedColor ?? "primary"
-    property string editDisconnectedColor: cfg.disconnectedColor ?? defaults.disconnectedColor ?? "none"
-    property int editPollInterval: cfg.pollInterval ?? defaults.pollInterval ?? 5
-    property bool editShowNotifications: cfg.showNotifications ?? defaults.showNotifications ?? true
-    property bool editDefaultPersistent: cfg.defaultPersistent ?? defaults.defaultPersistent ?? true
-    property bool editHideWhenInactive: cfg.hideWhenInactive ?? defaults.hideWhenInactive ?? false
+    property string editDisplayMode: displayBaseline.editDisplayMode
+    property string editConnectedColor: displayBaseline.editConnectedColor
+    property string editDisconnectedColor: displayBaseline.editDisconnectedColor
+    property int editPollInterval: displayBaseline.editPollInterval
+    property bool editShowNotifications: displayBaseline.editShowNotifications
+    property bool editDefaultPersistent: displayBaseline.editDefaultPersistent
+    property bool editHideWhenInactive: displayBaseline.editHideWhenInactive
 
     readonly property var displayModeModel: [{
         "key": "onhover",
@@ -45,13 +45,17 @@ ColumnLayout {
         "name": pluginApi?.tr("settings.pollInterval.30s")
     }]
 
-    readonly property bool settingsDirty: root.editDisplayMode !== (cfg.displayMode ?? defaults.displayMode ?? "onhover")
-        || root.editConnectedColor !== (cfg.connectedColor ?? defaults.connectedColor ?? "primary")
-        || root.editDisconnectedColor !== (cfg.disconnectedColor ?? defaults.disconnectedColor ?? "none")
-        || root.editPollInterval !== (cfg.pollInterval ?? defaults.pollInterval ?? 5)
-        || root.editShowNotifications !== (cfg.showNotifications ?? defaults.showNotifications ?? true)
-        || root.editDefaultPersistent !== (cfg.defaultPersistent ?? defaults.defaultPersistent ?? true)
-        || root.editHideWhenInactive !== (cfg.hideWhenInactive ?? defaults.hideWhenInactive ?? false)
+    NSettingsBaseline {
+      id: displayBaseline
+      readonly property string editDisplayMode: cfg.displayMode ?? defaults.displayMode ?? "onhover"
+      readonly property string editConnectedColor: cfg.connectedColor ?? defaults.connectedColor ?? "primary"
+      readonly property string editDisconnectedColor: cfg.disconnectedColor ?? defaults.disconnectedColor ?? "none"
+      readonly property int editPollInterval: cfg.pollInterval ?? defaults.pollInterval ?? 5
+      readonly property bool editShowNotifications: cfg.showNotifications ?? defaults.showNotifications ?? true
+      readonly property bool editDefaultPersistent: cfg.defaultPersistent ?? defaults.defaultPersistent ?? true
+      readonly property bool editHideWhenInactive: cfg.hideWhenInactive ?? defaults.hideWhenInactive ?? false
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editDisplayMode: root.editDisplayMode, editConnectedColor: root.editConnectedColor, editDisconnectedColor: root.editDisconnectedColor, editPollInterval: root.editPollInterval, editShowNotifications: root.editShowNotifications, editDefaultPersistent: root.editDefaultPersistent, editHideWhenInactive: root.editHideWhenInactive})
 
     function saveSettings() {
         pluginApi.pluginSettings.displayMode = root.editDisplayMode

@@ -11,16 +11,20 @@ ColumnLayout {
     property var cfg: pluginApi?.pluginSettings || ({})
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    property int valueRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 5000
-    property string iconColor: cfg.iconColor ?? defaults.iconColor ?? "none"
-    property string statusState: cfg.statusState ?? defaults.statusState ?? "all"
-    property string activeColor: cfg.activeColor ?? defaults.activeColor ?? "success"
-    property string inactiveColor: cfg.inactiveColor ?? defaults.inactiveColor ?? "error"
-    readonly property bool settingsDirty: valueRefreshInterval !== (cfg.refreshInterval ?? defaults.refreshInterval ?? 5000)
-                                          || iconColor !== (cfg.iconColor ?? defaults.iconColor ?? "none")
-                                          || statusState !== (cfg.statusState ?? defaults.statusState ?? "all")
-                                          || activeColor !== (cfg.activeColor ?? defaults.activeColor ?? "success")
-                                          || inactiveColor !== (cfg.inactiveColor ?? defaults.inactiveColor ?? "error")
+    property int valueRefreshInterval: displayBaseline.valueRefreshInterval
+    property string iconColor: displayBaseline.iconColor
+    property string statusState: displayBaseline.statusState
+    property string activeColor: displayBaseline.activeColor
+    property string inactiveColor: displayBaseline.inactiveColor
+    NSettingsBaseline {
+      id: displayBaseline
+      readonly property int valueRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 5000
+      readonly property string iconColor: cfg.iconColor ?? defaults.iconColor ?? "none"
+      readonly property string statusState: cfg.statusState ?? defaults.statusState ?? "all"
+      readonly property string activeColor: cfg.activeColor ?? defaults.activeColor ?? "success"
+      readonly property string inactiveColor: cfg.inactiveColor ?? defaults.inactiveColor ?? "error"
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({valueRefreshInterval: root.valueRefreshInterval, iconColor: root.iconColor, statusState: root.statusState, activeColor: root.activeColor, inactiveColor: root.inactiveColor})
 
     function saveSettings() {
         if (!pluginApi) {

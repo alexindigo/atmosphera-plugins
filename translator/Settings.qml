@@ -9,13 +9,11 @@ ColumnLayout {
     property var pluginApi: null
 
     property string editBackend: 
-        pluginApi?.pluginSettings?.backend || 
-        pluginApi?.manifest?.metadata?.defaultSettings?.backend || 
-        "google"
+        displayBaseline.editBackend
 
-    property string editDeeplApiKey: pluginApi?.pluginSettings?.deeplApiKey || ""
-    property bool editRealTime: pluginApi?.pluginSettings?.realTimeTranslation !== undefined ? pluginApi.pluginSettings.realTimeTranslation : true
-    property bool editShowPreview: pluginApi?.pluginSettings?.showPreview !== undefined ? pluginApi.pluginSettings.showPreview : true
+    property string editDeeplApiKey: displayBaseline.editDeeplApiKey
+    property bool editRealTime: displayBaseline.editRealTime
+    property bool editShowPreview: displayBaseline.editShowPreview
     spacing: Style.marginM
 
     NComboBox {
@@ -60,6 +58,15 @@ ColumnLayout {
         onToggled: checked => root.editShowPreview = checked
         defaultValue: true
     }
+
+    NSettingsBaseline {
+      id: displayBaseline
+      readonly property string editBackend: pluginApi?.pluginSettings?.backend || pluginApi?.manifest?.metadata?.defaultSettings?.backend || "google"
+      readonly property string editDeeplApiKey: pluginApi?.pluginSettings?.deeplApiKey || ""
+      readonly property bool editRealTime: pluginApi?.pluginSettings?.realTimeTranslation !== undefined ? pluginApi.pluginSettings.realTimeTranslation : true
+      readonly property bool editShowPreview: pluginApi?.pluginSettings?.showPreview !== undefined ? pluginApi.pluginSettings.showPreview : true
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editBackend: root.editBackend, editDeeplApiKey: root.editDeeplApiKey, editRealTime: root.editRealTime, editShowPreview: root.editShowPreview})
 
     function saveSettings() {
         if (!pluginApi) return;

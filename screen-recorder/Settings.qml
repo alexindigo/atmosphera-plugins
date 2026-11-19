@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import qs.Commons
+import qs.Portals
 import qs.Widgets
 import qs.Services.UI
 import qs.Services.Compositor
@@ -13,13 +14,13 @@ ColumnLayout {
 
     property var pluginApi: null
 
-    property bool editHideInactive: pluginApi?.pluginSettings?.hideInactive ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideInactive ?? false
+    property bool editHideInactive: displayBaseline.editHideInactive
 
-    property string editIconColor: pluginApi?.pluginSettings?.iconColor ?? pluginApi?.manifest?.metadata?.defaultSettings?.iconColor ?? "none"
+    property string editIconColor: displayBaseline.editIconColor
 
-    property string editDirectory: pluginApi?.pluginSettings?.directory || pluginApi?.manifest?.metadata?.defaultSettings?.directory || ""
+    property string editDirectory: displayBaseline.editDirectory
 
-    property string editFilenamePattern: pluginApi?.pluginSettings?.filenamePattern || pluginApi?.manifest?.metadata?.defaultSettings?.filenamePattern || "recording_yyyyMMdd_HHmmss"
+    property string editFilenamePattern: displayBaseline.editFilenamePattern
 
     // Migrate legacy frame rates to "custom"
     readonly property var _validFrameRates: ["30", "60", "120", "custom"]
@@ -29,40 +30,34 @@ ColumnLayout {
         "60"
 
     property string editFrameRate: 
-        _validFrameRates.includes(_rawFrameRate) ? _rawFrameRate : "custom"
+        displayBaseline.editFrameRate
 
     property string editCustomFrameRate: 
-        _validFrameRates.includes(_rawFrameRate)
-            ? (pluginApi?.pluginSettings?.customFrameRate ||
-               pluginApi?.manifest?.metadata?.defaultSettings?.customFrameRate ||
-               "60")
-            : _rawFrameRate
+        displayBaseline.editCustomFrameRate
 
     property string editAudioCodec: 
-        pluginApi?.pluginSettings?.audioCodec || 
-        pluginApi?.manifest?.metadata?.defaultSettings?.audioCodec || 
-        "opus"
+        displayBaseline.editAudioCodec
 
-    property string editVideoCodec: pluginApi?.pluginSettings?.videoCodec || pluginApi?.manifest?.metadata?.defaultSettings?.videoCodec || "h264"
+    property string editVideoCodec: displayBaseline.editVideoCodec
 
-    property string editQuality: pluginApi?.pluginSettings?.quality || pluginApi?.manifest?.metadata?.defaultSettings?.quality || "very_high"
+    property string editQuality: displayBaseline.editQuality
 
-    property string editColorRange: pluginApi?.pluginSettings?.colorRange || pluginApi?.manifest?.metadata?.defaultSettings?.colorRange || "limited"
+    property string editColorRange: displayBaseline.editColorRange
 
-    property bool editShowCursor: pluginApi?.pluginSettings?.showCursor ?? pluginApi?.manifest?.metadata?.defaultSettings?.showCursor ?? true
+    property bool editShowCursor: displayBaseline.editShowCursor
 
-    property bool editCopyToClipboard: pluginApi?.pluginSettings?.copyToClipboard ?? pluginApi?.manifest?.metadata?.defaultSettings?.copyToClipboard ?? false
+    property bool editCopyToClipboard: displayBaseline.editCopyToClipboard
 
-    property string editAudioSource: pluginApi?.pluginSettings?.audioSource || pluginApi?.manifest?.metadata?.defaultSettings?.audioSource || "default_output"
+    property string editAudioSource: displayBaseline.editAudioSource
 
-    property string editVideoSource: pluginApi?.pluginSettings?.videoSource || pluginApi?.manifest?.metadata?.defaultSettings?.videoSource || "portal"
+    property string editVideoSource: displayBaseline.editVideoSource
 
-    property string editResolution: pluginApi?.pluginSettings?.resolution || pluginApi?.manifest?.metadata?.defaultSettings?.resolution || "original"
+    property string editResolution: displayBaseline.editResolution
 
-    property bool editRestorePortalSession: pluginApi?.pluginSettings?.restorePortalSession ?? pluginApi?.manifest?.metadata?.defaultSettings?.restorePortalSession ?? false
+    property bool editRestorePortalSession: displayBaseline.editRestorePortalSession
 
     // Replay settings
-    property bool editReplayEnabled: pluginApi?.pluginSettings?.replayEnabled ?? pluginApi?.manifest?.metadata?.defaultSettings?.replayEnabled ?? false
+    property bool editReplayEnabled: displayBaseline.editReplayEnabled
 
     readonly property var _validReplayDurations: ["15", "30", "60", "120", "300", "custom"]
     readonly property string _rawReplayDuration:
@@ -71,18 +66,39 @@ ColumnLayout {
         "30"
 
     property string editReplayDuration:
-        _validReplayDurations.includes(_rawReplayDuration) ? _rawReplayDuration : "custom"
+        displayBaseline.editReplayDuration
 
     property string editCustomReplayDuration:
-        _validReplayDurations.includes(_rawReplayDuration)
-            ? (pluginApi?.pluginSettings?.customReplayDuration ||
-               pluginApi?.manifest?.metadata?.defaultSettings?.customReplayDuration ||
-               "30")
-            : _rawReplayDuration
+        displayBaseline.editCustomReplayDuration
 
-    property string editReplayStorage: pluginApi?.pluginSettings?.replayStorage || pluginApi?.manifest?.metadata?.defaultSettings?.replayStorage || "ram"
+    property string editReplayStorage: displayBaseline.editReplayStorage
 
 
+
+    NSettingsBaseline {
+      id: displayBaseline
+      readonly property bool editHideInactive: pluginApi?.pluginSettings?.hideInactive ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideInactive ?? false
+      readonly property string editIconColor: pluginApi?.pluginSettings?.iconColor ?? pluginApi?.manifest?.metadata?.defaultSettings?.iconColor ?? "none"
+      readonly property string editDirectory: pluginApi?.pluginSettings?.directory || pluginApi?.manifest?.metadata?.defaultSettings?.directory || ""
+      readonly property string editFilenamePattern: pluginApi?.pluginSettings?.filenamePattern || pluginApi?.manifest?.metadata?.defaultSettings?.filenamePattern || "recording_yyyyMMdd_HHmmss"
+      readonly property string editFrameRate: _validFrameRates.includes(_rawFrameRate) ? _rawFrameRate : "custom"
+      readonly property string editCustomFrameRate: _validFrameRates.includes(_rawFrameRate) ? (pluginApi?.pluginSettings?.customFrameRate || pluginApi?.manifest?.metadata?.defaultSettings?.customFrameRate || "60") : _rawFrameRate
+      readonly property string editAudioCodec: pluginApi?.pluginSettings?.audioCodec || pluginApi?.manifest?.metadata?.defaultSettings?.audioCodec || "opus"
+      readonly property string editVideoCodec: pluginApi?.pluginSettings?.videoCodec || pluginApi?.manifest?.metadata?.defaultSettings?.videoCodec || "h264"
+      readonly property string editQuality: pluginApi?.pluginSettings?.quality || pluginApi?.manifest?.metadata?.defaultSettings?.quality || "very_high"
+      readonly property string editColorRange: pluginApi?.pluginSettings?.colorRange || pluginApi?.manifest?.metadata?.defaultSettings?.colorRange || "limited"
+      readonly property bool editShowCursor: pluginApi?.pluginSettings?.showCursor ?? pluginApi?.manifest?.metadata?.defaultSettings?.showCursor ?? true
+      readonly property bool editCopyToClipboard: pluginApi?.pluginSettings?.copyToClipboard ?? pluginApi?.manifest?.metadata?.defaultSettings?.copyToClipboard ?? false
+      readonly property string editAudioSource: pluginApi?.pluginSettings?.audioSource || pluginApi?.manifest?.metadata?.defaultSettings?.audioSource || "default_output"
+      readonly property string editVideoSource: pluginApi?.pluginSettings?.videoSource || pluginApi?.manifest?.metadata?.defaultSettings?.videoSource || "portal"
+      readonly property string editResolution: pluginApi?.pluginSettings?.resolution || pluginApi?.manifest?.metadata?.defaultSettings?.resolution || "original"
+      readonly property bool editRestorePortalSession: pluginApi?.pluginSettings?.restorePortalSession ?? pluginApi?.manifest?.metadata?.defaultSettings?.restorePortalSession ?? false
+      readonly property bool editReplayEnabled: pluginApi?.pluginSettings?.replayEnabled ?? pluginApi?.manifest?.metadata?.defaultSettings?.replayEnabled ?? false
+      readonly property string editReplayDuration: _validReplayDurations.includes(_rawReplayDuration) ? _rawReplayDuration : "custom"
+      readonly property string editCustomReplayDuration: _validReplayDurations.includes(_rawReplayDuration) ? (pluginApi?.pluginSettings?.customReplayDuration || pluginApi?.manifest?.metadata?.defaultSettings?.customReplayDuration || "30") : _rawReplayDuration
+      readonly property string editReplayStorage: pluginApi?.pluginSettings?.replayStorage || pluginApi?.manifest?.metadata?.defaultSettings?.replayStorage || "ram"
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editHideInactive: root.editHideInactive, editIconColor: root.editIconColor, editDirectory: root.editDirectory, editFilenamePattern: root.editFilenamePattern, editFrameRate: root.editFrameRate, editCustomFrameRate: root.editCustomFrameRate, editAudioCodec: root.editAudioCodec, editVideoCodec: root.editVideoCodec, editQuality: root.editQuality, editColorRange: root.editColorRange, editShowCursor: root.editShowCursor, editCopyToClipboard: root.editCopyToClipboard, editAudioSource: root.editAudioSource, editVideoSource: root.editVideoSource, editResolution: root.editResolution, editRestorePortalSession: root.editRestorePortalSession, editReplayEnabled: root.editReplayEnabled, editReplayDuration: root.editReplayDuration, editCustomReplayDuration: root.editCustomReplayDuration, editReplayStorage: root.editReplayStorage})
 
     function saveSettings() {
         if (!pluginApi || !pluginApi.pluginSettings) {
@@ -115,9 +131,10 @@ ColumnLayout {
         pluginApi.pluginSettings.replayStorage = root.editReplayStorage
 
 
-        pluginApi.saveSettings();
-
-        Logger.i("ScreenRecorder", "Settings saved successfully");
+        pluginApi.saveSettings(function (result) {
+            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+                Logger.i("ScreenRecorder", "Settings saved successfully");
+        });
     }
     // Icon Color
     NComboBox {
@@ -542,7 +559,7 @@ ColumnLayout {
         Layout.fillHeight: true
     }
 
-    AtmoFilePicker {
+    PortalFilePicker {
         id: folderPicker
         selectionMode: "folders"
         title: pluginApi.tr("settings.general.output-folder")

@@ -13,6 +13,8 @@ ColumnLayout {
 
     property bool editHideWhenUnavailable: cfg.hideWhenUnavailable ?? defaults.hideWhenUnavailable ?? false
     property bool editDisableHoverIcon: cfg.disableHoverIcon ?? defaults.disableHoverIcon ?? false
+    readonly property bool settingsDirty: editHideWhenUnavailable !== (cfg.hideWhenUnavailable ?? defaults.hideWhenUnavailable ?? false)
+                                          || editDisableHoverIcon !== (cfg.disableHoverIcon ?? defaults.disableHoverIcon ?? false)
 
     spacing: Style.marginL
 

@@ -11,24 +11,16 @@ ColumnLayout {
 
     property var pluginApi: null
 
-    property bool editCompactMode:
-        pluginApi?.pluginSettings?.compactMode ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ??
-        false
-
-    property string editIconColor:
-        pluginApi?.pluginSettings?.iconColor ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.iconColor ??
-        "none"
-
-    property string editTextColor:
-        pluginApi?.pluginSettings?.textColor ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.textColor ??
-        "none"
-
-    readonly property bool settingsDirty: editCompactMode !== (pluginApi?.pluginSettings?.compactMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ?? false)
-                                          || editIconColor !== (pluginApi?.pluginSettings?.iconColor ?? pluginApi?.manifest?.metadata?.defaultSettings?.iconColor ?? "none")
-                                          || editTextColor !== (pluginApi?.pluginSettings?.textColor ?? pluginApi?.manifest?.metadata?.defaultSettings?.textColor ?? "none")
+    property bool editCompactMode: displayBaseline.editCompactMode
+    property string editIconColor: displayBaseline.editIconColor
+    property string editTextColor: displayBaseline.editTextColor
+    NSettingsBaseline {
+      id: displayBaseline
+      readonly property bool editCompactMode: pluginApi?.pluginSettings?.compactMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ?? false
+      readonly property string editIconColor: pluginApi?.pluginSettings?.iconColor ?? pluginApi?.manifest?.metadata?.defaultSettings?.iconColor ?? "none"
+      readonly property string editTextColor: pluginApi?.pluginSettings?.textColor ?? pluginApi?.manifest?.metadata?.defaultSettings?.textColor ?? "none"
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editCompactMode: root.editCompactMode, editIconColor: root.editIconColor, editTextColor: root.editTextColor})
 
     function saveSettings() {
         if (!pluginApi) {

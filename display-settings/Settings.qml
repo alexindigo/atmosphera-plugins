@@ -12,6 +12,8 @@ ColumnLayout {
 
   property string valueNiriConfigPath: cfg.niriConfigPath ?? defaults.niriConfigPath ?? "~/.config/niri/config.kdl"
   property string valueIconColor: cfg.iconColor ?? defaults.iconColor ?? "none"
+  readonly property bool settingsDirty: valueNiriConfigPath !== (cfg.niriConfigPath ?? defaults.niriConfigPath ?? "~/.config/niri/config.kdl")
+                                        || valueIconColor !== (cfg.iconColor ?? defaults.iconColor ?? "none")
 
   spacing: Style.marginL
 

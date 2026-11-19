@@ -26,17 +26,17 @@ ColumnLayout {
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   // ----- Edit-copy properties -----
-  property bool   editEnabled:        cfg.enabled        ?? defaults.enabled        ?? true
-  property int    editIdleSeconds:    parseInt(cfg.idleSeconds   ?? defaults.idleSeconds   ?? 300)
-  property int    editBatteryMinPercent: parseInt(cfg.batteryMinPercent ?? defaults.batteryMinPercent ?? 0)
-  property string editIncludeEffects: cfg.includeEffects ?? defaults.includeEffects ?? ""
-  property string editExcludeEffects: cfg.excludeEffects ?? defaults.excludeEffects ?? "dev_worm"
-  property string editFadeInEffect:   cfg.fadeInEffect   ?? defaults.fadeInEffect   ?? ""
-  property string editFadeOutEffect:  cfg.fadeOutEffect  ?? defaults.fadeOutEffect  ?? ""
-  property bool   editRandomLogo:     cfg.randomLogo     ?? defaults.randomLogo     ?? false
-  property string editLogoDir:        cfg.logoDir        ?? defaults.logoDir        ?? ""
-  property string editMultiMonitorMode: cfg.multiMonitorMode ?? defaults.multiMonitorMode ?? "independent"
-  property string editLogoPath:       cfg.logoPath       ?? defaults.logoPath       ?? ""
+  property bool editEnabled: displayBaseline.editEnabled
+  property int editIdleSeconds: displayBaseline.editIdleSeconds
+  property int editBatteryMinPercent: displayBaseline.editBatteryMinPercent
+  property string editIncludeEffects: displayBaseline.editIncludeEffects
+  property string editExcludeEffects: displayBaseline.editExcludeEffects
+  property string editFadeInEffect: displayBaseline.editFadeInEffect
+  property string editFadeOutEffect: displayBaseline.editFadeOutEffect
+  property bool editRandomLogo: displayBaseline.editRandomLogo
+  property string editLogoDir: displayBaseline.editLogoDir
+  property string editMultiMonitorMode: displayBaseline.editMultiMonitorMode
+  property string editLogoPath: displayBaseline.editLogoPath
 
   // Effective logo directory for the file dropdown: user override wins, otherwise
   // whichever bash DEFAULT_LOGO_CANDIDATES dir actually exists. Filled by the
@@ -45,31 +45,35 @@ ColumnLayout {
   readonly property string effectiveLogoDir: (editLogoDir && editLogoDir !== "")
     ? editLogoDir
     : detectedSystemLogoDir
-  property bool   editShowClock:      cfg.showClock      ?? defaults.showClock      ?? false
-  property string editClockFormat:    cfg.clockFormat    ?? defaults.clockFormat    ?? "%H:%M"
-  property bool   editShowNowPlaying: cfg.showNowPlaying ?? defaults.showNowPlaying ?? false
-  property int    editNowPlayingDuration: parseInt(cfg.nowPlayingDuration ?? defaults.nowPlayingDuration ?? 3)
+  property bool editShowClock: displayBaseline.editShowClock
+  property string editClockFormat: displayBaseline.editClockFormat
+  property bool editShowNowPlaying: displayBaseline.editShowNowPlaying
+  property int editNowPlayingDuration: displayBaseline.editNowPlayingDuration
 
   // ----- CLI-missing banner (Main.qml runs detection on startup) -----
   readonly property var mainInstance: pluginApi?.mainInstance || null
   readonly property bool cliMissing: mainInstance && mainInstance.cliAvailable === false
 
   // ----- Save handler (called by the shell on Apply) -----
-  readonly property bool settingsDirty: root.editEnabled !== (cfg.enabled ?? defaults.enabled ?? true)
-      || root.editIdleSeconds !== (parseInt(cfg.idleSeconds ?? defaults.idleSeconds ?? 300))
-      || root.editBatteryMinPercent !== (parseInt(cfg.batteryMinPercent ?? defaults.batteryMinPercent ?? 0))
-      || root.editIncludeEffects !== (cfg.includeEffects ?? defaults.includeEffects ?? "")
-      || root.editExcludeEffects !== (cfg.excludeEffects ?? defaults.excludeEffects ?? "dev_worm")
-      || root.editFadeInEffect !== (cfg.fadeInEffect ?? defaults.fadeInEffect ?? "")
-      || root.editFadeOutEffect !== (cfg.fadeOutEffect ?? defaults.fadeOutEffect ?? "")
-      || root.editRandomLogo !== (cfg.randomLogo ?? defaults.randomLogo ?? false)
-      || root.editLogoDir !== (cfg.logoDir ?? defaults.logoDir ?? "")
-      || root.editMultiMonitorMode !== (cfg.multiMonitorMode ?? defaults.multiMonitorMode ?? "independent")
-      || root.editLogoPath !== (cfg.logoPath ?? defaults.logoPath ?? "")
-      || root.editShowClock !== (cfg.showClock ?? defaults.showClock ?? false)
-      || root.editClockFormat !== (cfg.clockFormat ?? defaults.clockFormat ?? "%H:%M")
-      || root.editShowNowPlaying !== (cfg.showNowPlaying ?? defaults.showNowPlaying ?? false)
-      || root.editNowPlayingDuration !== (parseInt(cfg.nowPlayingDuration ?? defaults.nowPlayingDuration ?? 3))
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property bool editEnabled: cfg.enabled ?? defaults.enabled ?? true
+    readonly property int editIdleSeconds: parseInt(cfg.idleSeconds ?? defaults.idleSeconds ?? 300)
+    readonly property int editBatteryMinPercent: parseInt(cfg.batteryMinPercent ?? defaults.batteryMinPercent ?? 0)
+    readonly property string editIncludeEffects: cfg.includeEffects ?? defaults.includeEffects ?? ""
+    readonly property string editExcludeEffects: cfg.excludeEffects ?? defaults.excludeEffects ?? "dev_worm"
+    readonly property string editFadeInEffect: cfg.fadeInEffect ?? defaults.fadeInEffect ?? ""
+    readonly property string editFadeOutEffect: cfg.fadeOutEffect ?? defaults.fadeOutEffect ?? ""
+    readonly property bool editRandomLogo: cfg.randomLogo ?? defaults.randomLogo ?? false
+    readonly property string editLogoDir: cfg.logoDir ?? defaults.logoDir ?? ""
+    readonly property string editMultiMonitorMode: cfg.multiMonitorMode ?? defaults.multiMonitorMode ?? "independent"
+    readonly property string editLogoPath: cfg.logoPath ?? defaults.logoPath ?? ""
+    readonly property bool editShowClock: cfg.showClock ?? defaults.showClock ?? false
+    readonly property string editClockFormat: cfg.clockFormat ?? defaults.clockFormat ?? "%H:%M"
+    readonly property bool editShowNowPlaying: cfg.showNowPlaying ?? defaults.showNowPlaying ?? false
+    readonly property int editNowPlayingDuration: parseInt(cfg.nowPlayingDuration ?? defaults.nowPlayingDuration ?? 3)
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({editEnabled: root.editEnabled, editIdleSeconds: root.editIdleSeconds, editBatteryMinPercent: root.editBatteryMinPercent, editIncludeEffects: root.editIncludeEffects, editExcludeEffects: root.editExcludeEffects, editFadeInEffect: root.editFadeInEffect, editFadeOutEffect: root.editFadeOutEffect, editRandomLogo: root.editRandomLogo, editLogoDir: root.editLogoDir, editMultiMonitorMode: root.editMultiMonitorMode, editLogoPath: root.editLogoPath, editShowClock: root.editShowClock, editClockFormat: root.editClockFormat, editShowNowPlaying: root.editShowNowPlaying, editNowPlayingDuration: root.editNowPlayingDuration})
 
   function saveSettings() {
     if (!pluginApi) {

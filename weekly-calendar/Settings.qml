@@ -8,12 +8,12 @@ ColumnLayout {
     
     property var pluginApi: null
     
-    property string weekStart: "1"
-    property string timeFormat: "24h"
-    property string lineColorType: "mOutline"
-    property string panelMode: "attached"
-    property real hourLineOpacity: 0.5
-    property real dayLineOpacity: 1.0
+    property string weekStart: displayBaseline.weekStart
+    property string timeFormat: displayBaseline.timeFormat
+    property string lineColorType: displayBaseline.lineColorType
+    property string panelMode: displayBaseline.panelMode
+    property real hourLineOpacity: displayBaseline.hourLineOpacity
+    property real dayLineOpacity: displayBaseline.dayLineOpacity
     
     spacing: Style.marginL
     
@@ -158,6 +158,17 @@ ColumnLayout {
         onSelected: key => root.panelMode = key
     }
     
+    NSettingsBaseline {
+      id: displayBaseline
+      readonly property string panelMode: pluginApi?.pluginSettings?.panelMode || "attached"
+      readonly property string weekStart: pluginApi?.pluginSettings?.weekStart || "1"
+      readonly property string timeFormat: pluginApi?.pluginSettings?.timeFormat || "24h"
+      readonly property string lineColorType: pluginApi?.pluginSettings?.lineColorType || "mOutline"
+      readonly property real hourLineOpacity: pluginApi?.pluginSettings?.hourLineOpacity || 0.5
+      readonly property real dayLineOpacity: pluginApi?.pluginSettings?.dayLineOpacity || 0.9
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({panelMode: root.panelMode, weekStart: root.weekStart, timeFormat: root.timeFormat, lineColorType: root.lineColorType, hourLineOpacity: root.hourLineOpacity, dayLineOpacity: root.dayLineOpacity})
+
     function saveSettings() {
         if (!pluginApi) {
             Logger.e("WeeklyCalendar", "Cannot save settings: pluginApi is null")

@@ -12,41 +12,39 @@ ColumnLayout {
     // ===== EDIT STATE =====
 
     property bool editAutoMount:
-        pluginApi?.pluginSettings?.autoMount ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.autoMount ??
-        false
+        displayBaseline.editAutoMount
 
     property string editFileBrowser:
-        pluginApi?.pluginSettings?.fileBrowser ||
-        pluginApi?.manifest?.metadata?.defaultSettings?.fileBrowser ||
-        "yazi"
+        displayBaseline.editFileBrowser
 
     property string editTerminalCommand:
-        pluginApi?.pluginSettings?.terminalCommand ||
-        pluginApi?.manifest?.metadata?.defaultSettings?.terminalCommand ||
-        "kitty"
+        displayBaseline.editTerminalCommand
 
     property bool editShowNotifications:
-        pluginApi?.pluginSettings?.showNotifications ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.showNotifications ??
-        true
+        displayBaseline.editShowNotifications
 
     property bool editHideWhenEmpty:
-        pluginApi?.pluginSettings?.hideWhenEmpty ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.hideWhenEmpty ??
-        false
+        displayBaseline.editHideWhenEmpty
 
     property bool editShowBadge:
-        pluginApi?.pluginSettings?.showBadge ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.showBadge ??
-        true
+        displayBaseline.editShowBadge
 
     property string iconColor:
-        pluginApi?.pluginSettings?.iconColor ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.iconColor ??
-        "none"
+        displayBaseline.iconColor
 
     // ===== SAVE =====
+
+    NSettingsBaseline {
+      id: displayBaseline
+      readonly property bool editAutoMount: pluginApi?.pluginSettings?.autoMount ?? pluginApi?.manifest?.metadata?.defaultSettings?.autoMount ?? false
+      readonly property string editFileBrowser: pluginApi?.pluginSettings?.fileBrowser || pluginApi?.manifest?.metadata?.defaultSettings?.fileBrowser || "yazi"
+      readonly property string editTerminalCommand: pluginApi?.pluginSettings?.terminalCommand || pluginApi?.manifest?.metadata?.defaultSettings?.terminalCommand || "kitty"
+      readonly property bool editShowNotifications: pluginApi?.pluginSettings?.showNotifications ?? pluginApi?.manifest?.metadata?.defaultSettings?.showNotifications ?? true
+      readonly property bool editHideWhenEmpty: pluginApi?.pluginSettings?.hideWhenEmpty ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideWhenEmpty ?? false
+      readonly property bool editShowBadge: pluginApi?.pluginSettings?.showBadge ?? pluginApi?.manifest?.metadata?.defaultSettings?.showBadge ?? true
+      readonly property string iconColor: pluginApi?.pluginSettings?.iconColor ?? pluginApi?.manifest?.metadata?.defaultSettings?.iconColor ?? "none"
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editAutoMount: root.editAutoMount, editFileBrowser: root.editFileBrowser, editTerminalCommand: root.editTerminalCommand, editShowNotifications: root.editShowNotifications, editHideWhenEmpty: root.editHideWhenEmpty, editShowBadge: root.editShowBadge, iconColor: root.iconColor})
 
     function saveSettings() {
         if (!pluginApi) return

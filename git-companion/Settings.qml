@@ -9,14 +9,18 @@ ColumnLayout {
     property var cfg: pluginApi?.pluginSettings
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings
     property var pluginApi: null
-    property string valuePlatform: cfg.platform ?? defaults.platform
-    property string valueRepo: cfg.repo ?? defaults.repo ?? ""
-    property string valueGroup: cfg.group ?? defaults.group ?? ""
-    property int valueRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval
-    readonly property bool settingsDirty: valuePlatform !== (cfg.platform ?? defaults.platform)
-                                          || valueRepo !== (cfg.repo ?? defaults.repo ?? "")
-                                          || valueGroup !== (cfg.group ?? defaults.group ?? "")
-                                          || valueRefreshInterval !== (cfg.refreshInterval ?? defaults.refreshInterval)
+    property string valuePlatform: displayBaseline.valuePlatform
+    property string valueRepo: displayBaseline.valueRepo
+    property string valueGroup: displayBaseline.valueGroup
+    property int valueRefreshInterval: displayBaseline.valueRefreshInterval
+    NSettingsBaseline {
+      id: displayBaseline
+      readonly property string valuePlatform: cfg.platform ?? defaults.platform
+      readonly property string valueRepo: cfg.repo ?? defaults.repo ?? ""
+      readonly property string valueGroup: cfg.group ?? defaults.group ?? ""
+      readonly property int valueRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({valuePlatform: root.valuePlatform, valueRepo: root.valueRepo, valueGroup: root.valueGroup, valueRefreshInterval: root.valueRefreshInterval})
 
     function saveSettings() {
         if (!pluginApi) {

@@ -9,6 +9,7 @@ ColumnLayout {
   // This is the only object reliably injected into the Settings Window
   property var pluginApi: null
   property var widgetSettings: null
+  signal settingsChanged(var settings)
 
   // Local state - initialize from widgetSettings.data with metadata fallback
   property bool valueShowBackground: widgetSettings?.data?.showBackground ?? widgetSettings?.metadata?.showBackground ?? true
@@ -27,9 +28,9 @@ ColumnLayout {
     checked: root.valueShowBackground
     onToggled: checked => {
                  root.valueShowBackground = checked;
-                 saveSettings();
+                 saveSettings({showBackground: root.valueShowBackground});
                }
-    defaultValue: widgetMetadata.showBackground
+    defaultValue: root.widgetSettings?.metadata?.showBackground ?? true
   }
 
   NToggle {
@@ -40,22 +41,13 @@ ColumnLayout {
     checked: valueRoundedCorners
     onToggled: checked => {
                  root.valueRoundedCorners = checked;
-                 saveSettings();
+                 saveSettings({roundedCorners: root.valueRoundedCorners});
                }
-    defaultValue: widgetMetadata.roundedCorners
+    defaultValue: root.widgetSettings?.metadata?.roundedCorners ?? true
   }
 
-  function saveSettings() {
-    if (!widgetSettings || !widgetSettings.data) {
-      Logger.e("Desktop Calendar", "Cannot save: widgetSettings is null");
-      return;
-    }
-
-    widgetSettings.data.showBackground = root.valueShowBackground;
-    widgetSettings.data.roundedCorners = root.valueRoundedCorners;
-
-    widgetSettings.save();
-
-    Logger.i("Desktop Calendar", "Settings saved successfully");
+  function saveSettings(fields) {
+    if (fields)
+      settingsChanged(fields);
   }
 }

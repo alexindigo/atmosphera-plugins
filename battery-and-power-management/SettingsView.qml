@@ -10,30 +10,21 @@ ColumnLayout {
 
     property var pluginApi: null
 
-    property bool editColorizeByProfile:
-        pluginApi?.pluginSettings?.colorizeByProfile ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.colorizeByProfile ??
-        true
+    property bool editColorizeByProfile: displayBaseline.editColorizeByProfile
+    property string editColorPowerSaver: displayBaseline.editColorPowerSaver
+    property string editColorPerformance: displayBaseline.editColorPerformance
+    property bool editShowProfile: displayBaseline.editShowProfile
+    property bool editShowBalancedIcon: displayBaseline.editShowBalancedIcon
 
-    property string editColorPowerSaver:
-        pluginApi?.pluginSettings?.colorPowerSaver ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.colorPowerSaver ??
-        AtmoColor.mSecondary
-
-    property string editColorPerformance:
-        pluginApi?.pluginSettings?.colorPerformance ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.colorPerformance ??
-        AtmoColor.mError
-
-    property bool editShowProfile:
-        pluginApi?.pluginSettings?.showProfile  ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.showProfile ??
-        true
-
-    property bool editShowBalancedIcon:
-        pluginApi?.pluginSettings?.showBalancedIcon  ??
-        pluginApi?.manifest?.metadata?.defaultSettings?.showBalancedIcon ??
-        false
+    NSettingsBaseline {
+      id: displayBaseline
+      readonly property bool editColorizeByProfile: pluginApi?.pluginSettings?.colorizeByProfile ?? pluginApi?.manifest?.metadata?.defaultSettings?.colorizeByProfile ?? true
+      readonly property string editColorPowerSaver: pluginApi?.pluginSettings?.colorPowerSaver ?? pluginApi?.manifest?.metadata?.defaultSettings?.colorPowerSaver ?? AtmoColor.mSecondary
+      readonly property string editColorPerformance: pluginApi?.pluginSettings?.colorPerformance ?? pluginApi?.manifest?.metadata?.defaultSettings?.colorPerformance ?? AtmoColor.mError
+      readonly property bool editShowProfile: pluginApi?.pluginSettings?.showProfile ?? pluginApi?.manifest?.metadata?.defaultSettings?.showProfile ?? true
+      readonly property bool editShowBalancedIcon: pluginApi?.pluginSettings?.showBalancedIcon ?? pluginApi?.manifest?.metadata?.defaultSettings?.showBalancedIcon ?? false
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editColorizeByProfile: root.editColorizeByProfile, editColorPowerSaver: root.editColorPowerSaver, editColorPerformance: root.editColorPerformance, editShowProfile: root.editShowProfile, editShowBalancedIcon: root.editShowBalancedIcon})
 
     function saveSettings() {
         if (!pluginApi) return

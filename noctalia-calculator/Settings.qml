@@ -10,6 +10,8 @@ ColumnLayout {
 
     property bool valueShowBarValue: pluginApi?.pluginSettings?.showBarValue ?? true
     property int valuePrecision: pluginApi?.pluginSettings?.precision ?? 8
+    readonly property bool settingsDirty: valueShowBarValue !== (pluginApi?.pluginSettings?.showBarValue ?? true)
+                                          || valuePrecision !== (pluginApi?.pluginSettings?.precision ?? 8)
 
     spacing: Style.marginM
 

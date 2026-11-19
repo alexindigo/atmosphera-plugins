@@ -8,7 +8,7 @@ ColumnLayout {
   property var pluginApi: null
 
   // Local state
-  property bool showCount: pluginApi?.pluginSettings?.showCountInBar ?? true
+  property bool showCount: displayBaseline.showCount
 
   spacing: Style.marginM
 
@@ -20,6 +20,12 @@ ColumnLayout {
       root.showCount = checked;
     }
   }
+
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property bool showCount: pluginApi?.pluginSettings?.showCountInBar ?? true
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({showCount: root.showCount})
 
   function saveSettings() {
     if (pluginApi) {

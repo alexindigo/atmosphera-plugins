@@ -10,6 +10,8 @@ ColumnLayout {
 
   property string editPanelSize: pluginApi?.pluginSettings?.panelSize || pluginApi?.manifest?.metadata?.defaultSettings?.panelSize || "regular"
   property string editCorner: pluginApi?.pluginSettings?.corner || pluginApi?.manifest?.metadata?.defaultSettings?.corner || "bottomRight"
+  readonly property bool settingsDirty: editPanelSize !== (pluginApi?.pluginSettings?.panelSize || pluginApi?.manifest?.metadata?.defaultSettings?.panelSize || "regular")
+                                        || editCorner !== (pluginApi?.pluginSettings?.corner || pluginApi?.manifest?.metadata?.defaultSettings?.corner || "bottomRight")
 
   NText {
     text: "Panel"

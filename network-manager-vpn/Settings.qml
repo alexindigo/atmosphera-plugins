@@ -14,10 +14,10 @@ ColumnLayout {
     readonly property var main: pluginApi?.mainInstance ?? null
     readonly property var vpnList: main ? main.vpnList : []
     // Local state
-    property string editDisplayMode: root.pluginSettings.displayMode ?? ""
-    property string editConnectedColor: root.pluginSettings.connectedColor ?? ""
-    property string editDisconnectedColor: root.pluginSettings.disconnectedColor ?? ""
-    property bool disableToastNotifications: root.pluginSettings?.disableToastNotifications ?? false
+    property string editDisplayMode: displayBaseline.editDisplayMode
+    property string editConnectedColor: displayBaseline.editConnectedColor
+    property string editDisconnectedColor: displayBaseline.editDisconnectedColor
+    property bool disableToastNotifications: displayBaseline.disableToastNotifications
 
     property string pendingDeleteUuid: ""
     property string pendingDeleteName: ""
@@ -33,14 +33,24 @@ ColumnLayout {
         "name": I18n.tr("display-modes.always-hide")
     }]
 
+    NSettingsBaseline {
+      id: displayBaseline
+      readonly property string editDisplayMode: root.pluginSettings.displayMode ?? ""
+      readonly property string editConnectedColor: root.pluginSettings.connectedColor ?? ""
+      readonly property string editDisconnectedColor: root.pluginSettings.disconnectedColor ?? ""
+      readonly property bool disableToastNotifications: root.pluginSettings?.disableToastNotifications ?? false
+    }
+    readonly property bool settingsDirty: displayBaseline.differs({editDisplayMode: root.editDisplayMode, editConnectedColor: root.editConnectedColor, editDisconnectedColor: root.editDisconnectedColor, disableToastNotifications: root.disableToastNotifications})
+
     function saveSettings() {
         pluginApi.pluginSettings.displayMode = root.editDisplayMode;
         pluginApi.pluginSettings.connectedColor = root.editConnectedColor;
         pluginApi.pluginSettings.disconnectedColor = root.editDisconnectedColor;
         pluginApi.pluginSettings.disableToastNotifications = root.disableToastNotifications;
-        pluginApi.saveSettings();
-
-        Logger.i("NetworkManagerVpn", "Settings saved successfully");
+        pluginApi.saveSettings(function (result) {
+            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+                Logger.i("NetworkManagerVpn", "Settings saved successfully");
+        });
     }
 
     NComboBox {

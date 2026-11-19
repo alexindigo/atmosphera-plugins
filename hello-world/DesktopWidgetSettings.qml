@@ -9,6 +9,7 @@ ColumnLayout {
   id: root
   property var pluginApi: null
   property var widgetSettings: null
+  signal settingsChanged(var settings)
 
   readonly property var cfg: pluginApi?.pluginSettings ?? ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings ?? ({})
@@ -32,22 +33,15 @@ ColumnLayout {
       description: pluginApi?.tr("settings.message.desc")
       placeholderText: pluginApi?.tr("settings.message.placeholder")
       text: root.valueMessage
-      onTextChanged: {
+      onTextEdited: {
         root.valueMessage = text;
-        root.saveSettings();
+        root.saveSettings({message: root.valueMessage});
       }
     }
   }
 
-  function saveSettings() {
-    if (!widgetSettings) {
-      Logger.e("HelloWorld", "Cannot save settings: widgetSettings is null");
-      return;
-    }
-
-    widgetSettings.data.message = root.valueMessage;
-    widgetSettings.save();
-
-    Logger.d("HelloWorld", "Per-instance settings saved successfully");
+  function saveSettings(fields) {
+    if (fields)
+      settingsChanged(fields);
   }
 }

@@ -11,10 +11,14 @@ ColumnLayout {
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property string valueMessage: cfg.message ?? defaults.message
-  property string valueIconColor: cfg.iconColor ?? defaults.iconColor
-  readonly property bool settingsDirty: valueMessage !== (cfg.message ?? defaults.message)
-                                        || valueIconColor !== (cfg.iconColor ?? defaults.iconColor)
+  property string valueMessage: displayBaseline.valueMessage
+  property string valueIconColor: displayBaseline.valueIconColor
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property string valueMessage: cfg.message ?? defaults.message
+    readonly property string valueIconColor: cfg.iconColor ?? defaults.iconColor
+  }
+  readonly property bool settingsDirty: displayBaseline.differs({valueMessage: root.valueMessage, valueIconColor: root.valueIconColor})
 
   spacing: Style.marginL
 
