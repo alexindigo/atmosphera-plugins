@@ -1,7 +1,7 @@
 {
   "id": "kubectl-ctx",
   "name": "Kubectl Context",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.8.0",
   "author": "ultherego",
@@ -20,6 +20,18 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "iconColor": {"type": "String"},
+        "kubeconfigPath": {"type": "String"},
+        "panelHeight": {"type": "Real"},
+        "panelWidth": {"type": "Real"},
+        "pollInterval": {"type": "Real"},
+        "showErrorBadge": {"type": "Boolean"},
+        "terminal": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "kubeconfigPath": "",
       "pollInterval": 60,

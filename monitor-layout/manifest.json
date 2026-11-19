@@ -1,7 +1,7 @@
 {
   "id": "monitor-layout",
   "name": "Monitor Layout",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.8.0",
   "author": "Mathew-D",
@@ -27,6 +27,17 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "backend": {"type": "String"},
+        "gridSize": {"type": "Real"},
+        "hyprctlCommand": {"type": "String"},
+        "iconColor": {"type": "String"},
+        "snapToGrid": {"type": "Boolean"},
+        "swayCommand": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "backend": "auto",
       "swayCommand": "swaymsg",

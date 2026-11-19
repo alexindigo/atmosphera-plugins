@@ -1,7 +1,7 @@
 {
   "id": "2-in-1-tools",
   "name": "2-in-1-tools",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "minNoctaliaVersion": "4.4.3",
   "minAtmospheraVersion": "0.8.0",
   "author": "Codex",
@@ -24,6 +24,26 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "autoRotateInTabletMode": {"type": "Boolean"},
+        "autoRotateOutsideTabletMode": {"type": "Boolean"},
+        "autoTabletBarDensity": {"type": "Boolean"},
+        "buttonBehavior": {"type": "String"},
+        "exclusiveDockInTabletMode": {"type": "Boolean"},
+        "flipVerticalSensorOrientation": {"type": "Boolean"},
+        "iconName": {"type": "String"},
+        "lastNonTabletBarDensity": {"type": "String", "machineLocal": true},
+        "lastNonTabletDockEnabled": {"type": "Boolean", "machineLocal": true},
+        "lastNonTabletDockType": {"type": "String", "machineLocal": true},
+        "showSuccessToast": {"type": "Boolean"},
+        "showTransformInTooltip": {"type": "Boolean"},
+        "syncHyprTouchTransform": {"type": "Boolean"},
+        "tabletBarDensity": {"type": "String"},
+        "tabletModeStateFile": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "iconName": "rotate-cw",
       "showTransformInTooltip": true,

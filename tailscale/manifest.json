@@ -1,7 +1,7 @@
 {
   "id": "tailscale",
   "name": "Tailscale",
-  "version": "1.5.4",
+  "version": "1.5.5",
   "minNoctaliaVersion": "4.0.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "nineluj",
@@ -23,6 +23,26 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "compactMode": {"type": "Boolean"},
+        "defaultPeerAction": {"type": "String"},
+        "hideDisconnected": {"type": "Boolean"},
+        "hideMullvadExitNodes": {"type": "Boolean"},
+        "loginServer": {"type": "String"},
+        "pingCount": {"type": "Real"},
+        "refreshInterval": {"type": "Real"},
+        "showIpAddress": {"type": "Boolean"},
+        "showPeerCount": {"type": "Boolean"},
+        "showSearchBar": {"type": "Boolean"},
+        "sshUsername": {"type": "String"},
+        "taildropDownloadDir": {"type": "String"},
+        "taildropEnabled": {"type": "Boolean"},
+        "taildropReceiveMode": {"type": "String"},
+        "terminalCommand": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "refreshInterval": 5000,
       "compactMode": false,

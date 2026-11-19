@@ -1,7 +1,7 @@
 {
   "id": "daily-wallpaper",
   "name": "Daily Wallpaper",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "minNoctaliaVersion": "4.6.6",
   "author": "DigitallyRefined",
   "license": "MIT",
@@ -20,6 +20,13 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "locale": {"type": "String"},
+        "source": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "source": "bing",
       "locale": ""

@@ -1,7 +1,7 @@
 {
   "id": "nvidia-optimus",
   "name": "NVIDIA Optimus",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "4.0.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "joniler",
@@ -19,6 +19,10 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {}
+    },
     "panel": {
       "defaultPosition": "right"
     },

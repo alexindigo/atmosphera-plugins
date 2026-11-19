@@ -1,7 +1,7 @@
 {
   "id": "ds4-colors",
   "name": "DS4 Colors",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.8.0",
   "author": "Hy4ri",
@@ -19,6 +19,15 @@
     "settings": "Settings.qml"
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "color": {"type": "String"},
+        "colorIcon": {"type": "Boolean"},
+        "hideOnEmpty": {"type": "Boolean"},
+        "recentColors": {"type": "List", "machineLocal": true, "element": {"type": "String"}}
+      }
+    },
     "defaultSettings": {
       "color": "#0064ff",
       "colorIcon": false,

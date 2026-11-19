@@ -1,7 +1,7 @@
 {
   "id": "latency-monitor",
   "name": "Latency Monitor",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "minNoctaliaVersion": "4.1.0",
   "minAtmospheraVersion": "0.8.0",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -23,6 +23,21 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "animations": {"type": "Boolean"},
+        "barHost": {"type": "String"},
+        "colorCritical": {"type": "String"},
+        "colorGood": {"type": "String"},
+        "colorWarning": {"type": "String"},
+        "hosts": {"type": "List","element": {"type": "Record","fields": {"name": {"type": "String","optional": true},"address": {"type": "String","optional": true}}}},
+        "intervalSeconds": {"type": "Real"},
+        "showHostName": {"type": "Boolean"},
+        "thresholdGood": {"type": "Real"},
+        "thresholdWarning": {"type": "Real"}
+      }
+    },
     "defaultSettings": {
       "hosts": [
         {

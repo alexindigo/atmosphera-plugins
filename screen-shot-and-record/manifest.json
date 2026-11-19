@@ -1,7 +1,7 @@
 {
   "id": "screen-shot-and-record",
   "name": "ScreenShot & Record",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "Pulsar",
@@ -25,6 +25,18 @@
     "plugins": []
   },
   "metadata": {
+   "settingsSchema": {
+     "version": 1,
+     "fields": {
+       "enableCross": {"type": "Boolean"},
+       "enableWindowsSelection": {"type": "Boolean"},
+       "keepSourceScreenshot": {"type": "Boolean"},
+       "recordingNotifications": {"type": "Boolean"},
+       "recordingSavePath": {"type": "String"},
+       "savePath": {"type": "String"},
+       "screenshotEditor": {"type": "String"}
+     }
+   },
    "defaultSettings": {
       "enableCross": true,
       "enableWindowsSelection": true,

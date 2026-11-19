@@ -1,7 +1,7 @@
 {
   "id": "screencast-gif",
   "name": "Screencast GIF",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.8.0",
   "author": "mewmewmemw",
@@ -25,6 +25,14 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "fps": {"type": "Real"},
+        "maxRecordingSeconds": {"type": "Real"},
+        "outputDir": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "fps": 20,
       "maxRecordingSeconds": 120,

@@ -1,7 +1,7 @@
 {
   "id": "launcher-pass",
   "name": "Launcher pass",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minNoctaliaVersion": "4.7.7",
   "author": "Marco Melletti",
   "license": "MIT",
@@ -18,6 +18,15 @@
   },
   "metadata": {
     "commandPrefix": "pass",
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "clipTimeout": {"type": "String"},
+        "storePath": {"type": "String"},
+        "typeDelay": {"type": "Real"},
+        "wtypeDelay": {"type": "Real"}
+      }
+    },
     "defaultSettings": {
       "storePath": "",
       "typeDelay": 500,

@@ -1,7 +1,7 @@
 {
   "id": "somnus",
   "name": "somnus",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "4.7.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "yhordi45",
@@ -18,6 +18,24 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "animationsEnabled": {"type": "Boolean"},
+        "buttonHeight": {"type": "Real"},
+        "buttonOpacity": {"type": "Real"},
+        "buttonSpacing": {"type": "Real"},
+        "buttonWidth": {"type": "Real"},
+        "hoverColor": {"type": "String"},
+        "hoverDesaturation": {"type": "Real"},
+        "iconColor": {"type": "String"},
+        "lockOnSuspend": {"type": "Boolean"},
+        "overlayBlur": {"type": "Real"},
+        "overlayTint": {"type": "Real"},
+        "panelTint": {"type": "Real"},
+        "useOverlay": {"type": "Boolean"}
+      }
+    },
     "defaultSettings": {
       "iconColor": "primary",
       "hoverColor": "primary",

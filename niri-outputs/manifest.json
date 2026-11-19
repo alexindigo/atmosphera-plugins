@@ -1,7 +1,7 @@
 {
   "id": "niri-outputs",
   "name": "Niri Outputs",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "minNoctaliaVersion": "4.1.2",
   "minAtmospheraVersion": "0.8.0",
   "author": "adrlau",
@@ -19,6 +19,10 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {}
+    },
     "defaultSettings": {
     }
   }

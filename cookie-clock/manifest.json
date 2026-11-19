@@ -1,7 +1,7 @@
 {
     "id": "cookie-clock",
     "name": "Cookie Clock",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "minNoctaliaVersion": "3.6.0",
     "minAtmospheraVersion": "0.8.0",
     "author": "elrondforwin",
@@ -17,6 +17,20 @@
         "plugins": []
     },
     "metadata": {
+        "settingsSchema": {
+          "version": 1,
+          "fields": {
+            "backgroundOpacity": {"type": "Real"},
+            "dateStyle": {"type": "String"},
+            "dialStyle": {"type": "String"},
+            "hourHandStyle": {"type": "String"},
+            "minuteHandStyle": {"type": "String"},
+            "secondHandStyle": {"type": "String"},
+            "showHourMarks": {"type": "Boolean"},
+            "showSeconds": {"type": "Boolean"},
+            "sides": {"type": "Real"}
+          }
+        },
         "defaultSettings": {
             "sides": 9,
             "dialStyle": "dots",

@@ -1,7 +1,7 @@
 {
   "id": "hermes-ssh-chat",
   "name": "Hermes SSH Terminal",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.8.0",
   "author": "focky",
@@ -25,6 +25,23 @@
   },
   "metadata": {
     "cpuIntensive": false,
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "autoConnectOnStartup": {"type": "Boolean"},
+        "host": {"type": "String", "machineLocal": true},
+        "panelHeight": {"type": "Real"},
+        "panelWidth": {"type": "Real"},
+        "port": {"type": "Real", "machineLocal": true},
+        "rememberLastTarget": {"type": "Boolean"},
+        "showBarText": {"type": "Boolean"},
+        "terminalCols": {"type": "Real"},
+        "terminalFontSize": {"type": "Real"},
+        "terminalRows": {"type": "Real"},
+        "toggleShortcutName": {"type": "String"},
+        "user": {"type": "String", "machineLocal": true}
+      }
+    },
     "defaultSettings": {
       "host": "",
       "port": 22,

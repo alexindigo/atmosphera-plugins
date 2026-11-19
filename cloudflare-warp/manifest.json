@@ -1,7 +1,7 @@
 {
   "id": "cloudflare-warp",
   "name": "Cloudflare WARP",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "minNoctaliaVersion": "4.0.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "ToRvaLDz",
@@ -23,6 +23,14 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "connectedColor": {"type": "String"},
+        "disconnectedColor": {"type": "String"},
+        "refreshInterval": {"type": "Real"}
+      }
+    },
     "defaultSettings": {
       "refreshInterval": 5000,
       "connectedColor": "primary",

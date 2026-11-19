@@ -1,7 +1,7 @@
 {
   "id": "vinyl-launcher",
   "name": "Vinyl Launcher",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "c1ph3r-1337",
@@ -16,6 +16,10 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {}
+    },
     "defaultSettings": {}
   }
 }

@@ -1,7 +1,7 @@
 {
   "id": "auto-cpufreq",
   "name": "auto-cpufreq",
-  "version": "2.6.1",
+  "version": "2.6.2",
   "minNoctaliaVersion": "4.4.1",
   "minAtmospheraVersion": "0.8.0",
   "author": "4rmcyt",
@@ -23,6 +23,15 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "compactMode": {"type": "Boolean"},
+        "refreshInterval": {"type": "Real"},
+        "showGovernor": {"type": "Boolean"},
+        "showTurbo": {"type": "Boolean"}
+      }
+    },
     "defaultSettings": {
       "refreshInterval": 3000,
       "showGovernor": true,

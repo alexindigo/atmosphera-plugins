@@ -1,7 +1,7 @@
 {
   "id": "hyprland-visual-editor",
   "name": "Hyprland Visual Editor",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "minNoctaliaVersion": "4.4.1",
   "minAtmospheraVersion": "0.8.0",
   "author": "XimoCP",
@@ -27,6 +27,20 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "activeAnimFile": {"type": "String"},
+        "activeBorderFile": {"type": "String"},
+        "activeShaderFile": {"type": "String"},
+        "autoApply": {"type": "Boolean"},
+        "borderSize": {"type": "Real"},
+        "icon": {"type": "String","optional": true},
+        "iconColor": {"type": "String","optional": true},
+        "isSystemActive": {"type": "Boolean"},
+        "overlayPath": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "isSystemActive": false,
       "borderSize": 2,

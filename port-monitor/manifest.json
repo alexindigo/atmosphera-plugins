@@ -1,7 +1,7 @@
 {
   "id": "port-monitor",
   "name": "Port Monitor",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "adriamartin91",
@@ -19,6 +19,14 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "hideSystemPorts": {"type": "Boolean"},
+        "hideWhenEmpty": {"type": "Boolean"},
+        "refreshInterval": {"type": "Real"}
+      }
+    },
     "defaultSettings": {
       "refreshInterval": 5,
       "hideSystemPorts": false,

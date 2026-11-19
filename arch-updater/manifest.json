@@ -1,7 +1,7 @@
 {
   "id": "arch-updater",
   "name": "Arch Updater",
-  "version": "2.1.12",
+  "version": "2.1.13",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "Ast",
@@ -22,6 +22,37 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "aurCmd": {"type": "String"},
+        "aurHomepageCmd": {"type": "String"},
+        "boldText": {"type": "Boolean"},
+        "boldVer": {"type": "Boolean"},
+        "boldVerDesktop": {"type": "Boolean"},
+        "boldVerPanel": {"type": "Boolean"},
+        "closeButton": {"type": "Boolean"},
+        "closeOnSettings": {"type": "Boolean"},
+        "customIconPath": {"type": "String"},
+        "desktopTip": {"type": "Boolean"},
+        "enableColorization": {"type": "Boolean"},
+        "flatpak": {"type": "Boolean"},
+        "hideOnEmpty": {"type": "Boolean"},
+        "hoverTip": {"type": "Boolean"},
+        "iconColor": {"type": "String"},
+        "iconName": {"type": "String"},
+        "noctalia": {"type": "Boolean"},
+        "panelContext": {"type": "Boolean"},
+        "panelTooltip": {"type": "Boolean"},
+        "refreshInterval": {"type": "Real"},
+        "refreshTimer": {"type": "Boolean"},
+        "systemCmd": {"type": "String"},
+        "toast": {"type": "Boolean"},
+        "tooltip": {"type": "Boolean"},
+        "updateCmd": {"type": "String"},
+        "useDistroLogo": {"type": "Boolean"}
+      }
+    },
     "defaultSettings": {
       "systemCmd": "checkupdates 2>/dev/null",
       "aurCmd": "paru -Qua 2>/dev/null",

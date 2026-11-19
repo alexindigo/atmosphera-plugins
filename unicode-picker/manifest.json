@@ -1,7 +1,7 @@
 {
   "id": "unicode-picker",
   "name": "Unicode Picker",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Browse and search Unicode characters from the launcher",
   "tags": [
     "Launcher",
@@ -19,6 +19,10 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {}
+    },
     "commandPrefix": "unicode",
     "defaultSettings": {}
   }

@@ -1,7 +1,7 @@
 {
   "id": "ip-monitor",
   "name": "IP Monitor",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "minNoctaliaVersion": "4.4.3",
   "minAtmospheraVersion": "0.8.0",
   "author": "deepalpha",
@@ -21,6 +21,16 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "errorIcon": {"type": "String"},
+        "iconColor": {"type": "String"},
+        "loadingIcon": {"type": "String"},
+        "refreshInterval": {"type": "Real"},
+        "successIcon": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "iconColor": "primary",
       "refreshInterval": 300,

@@ -6,7 +6,7 @@
       "author": "domovoy#arch",
       "description": "Watch model digests in ~/Digest; highlight new finds and browse their titles and summaries.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Digest",
@@ -23,7 +23,7 @@
       "author": "Atmosphera",
       "description": "Spatial overview map of niri windows: workspaces, columns and tiles. Click tiles to focus and rows to switch workspace. Reliable startup focus and drag require the stale-seed shell fix in Atmosphera PR #29.",
       "license": "GPL-3.0",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Panel",
         "Niri",
@@ -40,7 +40,7 @@
       "author": "Codex",
       "description": "A Noctalia utility plugin for screen rotation tools on Niri and Hyprland.",
       "license": "MIT",
-      "version": "1.2.3",
+      "version": "1.2.4",
       "tags": [
         "Bar",
         "Control Center",
@@ -60,7 +60,7 @@
       "author": "Preston Corless (pgattic)",
       "description": "Adds a watermark to the bottom-right of the screen similar to the one found on unactivated Windows 10/11",
       "license": "MIT",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "tags": [
         "Desktop",
         "Fun"
@@ -75,7 +75,7 @@
       "author": "nzlov",
       "description": "Runs a local MCP HTTP service for agents to report session status and shows active sessions in the bar.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Panel",
@@ -95,7 +95,7 @@
       "author": "adriamartin91",
       "description": "Displays real-time air quality data with EPA color coding. Supports Open-Meteo and AQICN data sources. Shows AQI index and pollutant breakdown.",
       "license": "MIT",
-      "version": "1.1.3",
+      "version": "1.1.4",
       "tags": [
         "Bar",
         "Desktop",
@@ -115,7 +115,7 @@
       "author": "Dvaxert",
       "description": "AMD discrete GPU monitoring via rocm-smi with graphs and configurable metrics.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel",
@@ -139,7 +139,7 @@
       "author": "Ast",
       "description": "A plugin to manage updates on Arch",
       "license": "MIT",
-      "version": "2.1.12",
+      "version": "2.1.13",
       "tags": [
         "Bar",
         "Desktop",
@@ -160,7 +160,7 @@
       "author": "j-1in",
       "description": "AI Chat and Translation panel",
       "license": "MIT",
-      "version": "2.1.7",
+      "version": "2.1.8",
       "tags": [
         "Bar",
         "Panel",
@@ -180,7 +180,7 @@
       "author": "ThatOneCalculator",
       "description": "Set the fan state on the ZenBook S 16 UM5606",
       "license": "MIT",
-      "version": "1.1.8",
+      "version": "1.1.9",
       "tags": [
         "Bar",
         "System"
@@ -197,7 +197,7 @@
       "author": "4rmcyt",
       "description": "Monitor and control auto-cpufreq daemon: governor, turbo boost, CPU stats, and force-override.",
       "license": "MIT",
-      "version": "2.6.1",
+      "version": "2.6.2",
       "tags": [
         "Bar",
         "Panel",
@@ -217,7 +217,7 @@
       "author": "itscrystalline",
       "description": "A plugin that allows you to run custom actions when battery state changes.",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "System"
       ],
@@ -232,7 +232,7 @@
       "author": "Piero-93",
       "description": "A lightweight, efficient battery status bar widget and interactive control popup. This plugin displays real-time battery diagnostics (including dynamic power draw in Watts) and provides desktop controls to switch system power profiles or adjust hardware battery charge thresholds safely without needing root privileges.",
       "license": "GPLv3",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "tags": [
         "Bar",
         "System",
@@ -251,7 +251,7 @@
       "author": "krteke",
       "description": "Extended battery monitor with current power draw, remaining time, battery health, and current power profile.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Panel",
@@ -270,7 +270,7 @@
       "author": "Wilfred Mallawa",
       "description": "Set the battery threshold for laptop batteries to extend battery lifespan",
       "license": "MIT",
-      "version": "1.2.6",
+      "version": "1.2.7",
       "tags": [
         "Bar",
         "Panel",
@@ -288,7 +288,7 @@
       "author": "aslauw",
       "description": "Bar widget showing battery levels for wireless peripherals (mouse, keyboard, headset, etc.) via OpenRazer and Solaar.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Indicator",
@@ -307,7 +307,7 @@
       "author": "Jostein Hanssen",
       "description": "Pause idle actions for an arbitrary duration from the Noctalia launcher.",
       "license": "MIT",
-      "version": "1.1.3",
+      "version": "1.1.4",
       "tags": [
         "Bar",
         "Launcher",
@@ -327,7 +327,7 @@
       "author": "Simon",
       "description": "Monthly calendar with today highlighted.",
       "license": "MIT",
-      "version": "1.0.11",
+      "version": "1.0.12",
       "tags": [
         "Desktop",
         "Utility"
@@ -344,7 +344,7 @@
       "author": "Krendil",
       "description": "Search for books in your Calibre library",
       "license": "MIT",
-      "version": "1.3.3",
+      "version": "1.3.4",
       "tags": [
         "Launcher"
       ],
@@ -359,7 +359,7 @@
       "author": "MannuVilasara",
       "description": "A cute animated cat for your bar.",
       "license": "MIT",
-      "version": "1.1.8",
+      "version": "1.1.9",
       "tags": [
         "Bar",
         "Desktop",
@@ -378,7 +378,7 @@
       "author": "Sovego",
       "description": "Auto clamshell on external display, with manual override",
       "license": "MIT",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "tags": [
         "Bar",
         "System",
@@ -398,7 +398,7 @@
       "author": "d7om",
       "description": "Claude Code (Anthropic agentic CLI) with full tool access, permission controls, session management, MCP servers, and device integration",
       "license": "MIT",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "tags": [
         "Bar",
         "Panel",
@@ -417,7 +417,7 @@
       "author": "yanekyuk",
       "description": "Clipboard history panel with search, pinning, and image previews.",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "Utility",
         "Bar",
@@ -435,7 +435,7 @@
       "author": "x0d7x",
       "description": "Privacy-first clipboard manager with masked entries, Vim navigation, and search.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Utility",
         "Bar",
@@ -456,7 +456,7 @@
       "author": "blackbartblues",
       "description": "Advanced clipboard manager with history, search, keyboard navigation, ToDo integration, pinned items, notecards/sticky notes, and selection-to-notecard feature. Fully translated with comprehensive i18n support.",
       "license": "MIT",
-      "version": "2.4.5",
+      "version": "2.4.6",
       "tags": [
         "Utility",
         "Bar",
@@ -474,7 +474,7 @@
       "author": "ToRvaLDz",
       "description": "Toggle Cloudflare WARP from the bar. Shows connection status and mode.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Network",
@@ -492,7 +492,7 @@
       "author": "DanisDeveloper",
       "description": "Simple bar widget with notification about result",
       "license": "MIT",
-      "version": "1.2.3",
+      "version": "1.2.4",
       "minAtmospheraVersion": "0.8.0",
       "tags": [
         "Bar"
@@ -507,7 +507,7 @@
       "author": "Noctalia Team",
       "description": "Create and manage custom predefined color schemes with a visual color editor.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Theming",
         "Utility"
@@ -524,7 +524,7 @@
       "author": "elrondforwin",
       "description": "An analog cookie-shaped clock desktop widget. Features a sine-wave cookie background, hour/minute/second hands, dial marks and date bubbless.",
       "license": "GPLv3",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Desktop",
         "Fun"
@@ -541,7 +541,7 @@
       "author": "balor",
       "description": "Currency conversion utility via launcher and bar widget",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "Launcher",
         "Utility"
@@ -558,7 +558,7 @@
       "author": "ronin ck",
       "description": "A custom battery icon.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "System"
@@ -576,7 +576,7 @@
       "author": "Noctalia Team",
       "description": "Define and run custom shell commands from the launcher",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Launcher"
       ],
@@ -592,7 +592,7 @@
       "author": "spiros132",
       "description": "Custom stickers (images) that you can put on the desktop as desktop widgets.",
       "license": "MIT",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "tags": [
         "Desktop",
         "Fun"
@@ -608,7 +608,7 @@
       "author": "Vikthor",
       "description": "Desktop widget that displays a daily quote with a scramble decode animation",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Desktop",
         "Fun"
@@ -626,7 +626,7 @@
       "author": "DigitallyRefined",
       "description": "Fetches a new daily wallpaper from Bing or NASA",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Desktop",
         "Fun",
@@ -643,7 +643,7 @@
       "author": "HAVEKziad",
       "description": "Audio visualizer desktop widget \u2014 bars, wave, or mirror. Supports all directions. Transparent, follows color scheme.",
       "license": "MIT",
-      "version": "2.0.3",
+      "version": "2.0.4",
       "tags": [
         "Desktop",
         "Audio"
@@ -660,7 +660,7 @@
       "author": "fstanis",
       "description": "View live display settings from wlr-randr and permanent niri KDL output configuration",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Panel",
@@ -679,7 +679,7 @@
       "author": "Ben Hilton",
       "description": "An IPC-driven dmenu replacement that lets external scripts present choices through a Noctalia panel.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Panel",
         "Productivity",
@@ -699,7 +699,7 @@
       "author": "Ronin-CK",
       "description": "DNS Manager with custom server support for Noctalia.",
       "license": "MIT",
-      "version": "1.2.2",
+      "version": "1.2.3",
       "tags": [
         "Bar",
         "Network"
@@ -716,7 +716,7 @@
       "author": "Hy4ri",
       "description": "Change the lightbar color of your DualShock 4 or DualSense controller with a color picker and recent color history.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Hardware",
         "Gaming",
@@ -734,7 +734,7 @@
       "author": "Noctalia Team",
       "description": "Lemmy's fancy circular audio visualizer.",
       "license": "MIT",
-      "version": "1.1.3",
+      "version": "1.1.4",
       "tags": [
         "Desktop",
         "Audio"
@@ -751,7 +751,7 @@
       "author": "ericbreh",
       "description": "File search from the launcher.",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "Launcher",
         "Productivity"
@@ -768,7 +768,7 @@
       "author": "Sergio Mendolia",
       "description": "Search for GIFs on Giphy from the Launcher.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Launcher",
         "Utility",
@@ -785,7 +785,7 @@
       "author": "Thomas Philippo",
       "description": "Monitor your git repositories from the Noctalia bar. See open issues and pull requests at a glance, without leaving your desktop.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Development",
         "Bar",
@@ -804,7 +804,7 @@
       "author": "xevrion",
       "description": "Displays your GitHub contribution graph as a desktop widget. Works without a token via your public profile, or with a personal access token for private contributions.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.3",
       "tags": [
         "Desktop",
         "Development",
@@ -823,7 +823,7 @@
       "author": "linuxmobile",
       "description": "Display GitHub activity from users you follow and activity on your repos",
       "license": "MIT",
-      "version": "1.3.2",
+      "version": "1.3.4",
       "tags": [
         "Bar",
         "Panel",
@@ -842,7 +842,7 @@
       "author": "vasqs",
       "description": "Habitica dashboard and task scorer for Noctalia Shell with official avatar sprite rendering.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel",
@@ -861,7 +861,7 @@
       "author": "Pozzoo",
       "description": "Monitor and control Home Assistant entities from the bar. Requires qt6-websockets.",
       "license": "MIT",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "tags": [
         "Bar",
         "Panel",
@@ -879,11 +879,11 @@
       "author": "Noctalia Team",
       "description": "A simple Hello World plugin demonstrating functionalities. For developers only.",
       "license": "MIT",
-      "version": "1.2.5",
+      "version": "1.2.6",
       "tags": [
         "Development"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-10-31",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
@@ -895,7 +895,7 @@
       "author": "nomadx, FelipeMayerDev",
       "description": "Native Noctalia status and side-panel interface for Hermes Agent. Supports a client-only mode to drive a Hermes bridge running on a remote server over SSH.",
       "license": "MIT",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "tags": [
         "Bar",
         "Panel",
@@ -915,7 +915,7 @@
       "author": "focky",
       "description": "Use Hermes on a remote server through an interactive SSH terminal.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Panel",
@@ -935,7 +935,7 @@
       "author": "sapjax",
       "description": "A macOS-style hot corners plugin for Noctalia Shell.",
       "license": "MIT",
-      "version": "0.0.4",
+      "version": "0.0.5",
       "tags": [
         "Desktop",
         "Productivity"
@@ -952,7 +952,7 @@
       "author": "blacku",
       "description": "[DEPRECATED \u2014 not maintained from Hyprland 0.55+] Steam overlay with automatic window management for Hyprland. Due to Hyprland 0.55 deprecating hyprlang in favour of Lua (changing hyprctl dispatch parsing and popup/xdg handling), this plugin is no longer actively maintained. The 2.2.0 release adds a best-effort dual-mode dispatch fix and an optional custom Lua layout, but no further updates are planned. Automatically moves all Steam windows (except fullscreen games) to an overlay workspace; main 3 windows (Friends, Client, Chat) positioned in a row, fully responsive percentage-based layout. Requires Hyprland window manager.",
       "license": "MIT",
-      "version": "2.2.1",
+      "version": "2.2.2",
       "tags": [],
       "lastUpdated": "2026-10-10",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
@@ -966,7 +966,7 @@
       "author": "XimoCP",
       "description": "Elevate your Hyprland experience. A modular plugin to safely inject custom animations, borders, and visual effects on the fly.",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "Panel",
         "Bar",
@@ -988,7 +988,7 @@
       "author": "Christophe Branchereau",
       "description": "Set the battery charging mode for ideapad laptop batteries, to extend battery lifespan",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel",
@@ -1006,7 +1006,7 @@
       "author": "deepalpha",
       "description": "Plugin showing current external IP",
       "license": "MIT",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "tags": [
         "Development"
       ],
@@ -1022,7 +1022,7 @@
       "author": "Kainoa Kanter",
       "description": "Get AI answers from Kagi in your launcher",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.5",
       "tags": [
         "Launcher",
         "Productivity"
@@ -1039,7 +1039,7 @@
       "author": "Noctalia Team",
       "description": "Browse and search kaomoji emoticons from the launcher",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Launcher",
         "Fun"
@@ -1055,7 +1055,7 @@
       "author": "WerWolv",
       "description": "A Plugin integrating your mobile devices into a panel using KDEConnect",
       "license": "GPLv2",
-      "version": "1.2.3",
+      "version": "1.2.4",
       "tags": [
         "Bar",
         "Panel",
@@ -1074,7 +1074,7 @@
       "author": "Noam Stolero",
       "description": "Duration+scope Keep Awake with persistent last-choice and partial/full inhibit modes.",
       "license": "MIT",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "tags": [
         "Bar",
         "Panel",
@@ -1092,7 +1092,7 @@
       "author": "blacku",
       "description": "Universal keyboard shortcuts keymap that automatically detects and displays keybindings for Hyprland, Niri, or MangoWC compositors.",
       "license": "MIT",
-      "version": "3.7.5",
+      "version": "3.7.6",
       "tags": [
         "Bar",
         "Panel",
@@ -1114,7 +1114,7 @@
       "author": "Simon",
       "description": "Shows khal agenda.",
       "license": "MIT",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "tags": [
         "Desktop",
         "System"
@@ -1131,7 +1131,7 @@
       "author": "ultherego",
       "description": "Kubernetes context and namespace switcher with resource browser powered by kubectl.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Bar",
         "Panel",
@@ -1150,7 +1150,7 @@
       "author": "Borhaneddine GUEMIDI <guemidiborhane@gmail.com>",
       "description": "Network latency monitor \u2014 multi-host, windowed averages, sparkline graphs",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Bar",
         "Panel",
@@ -1168,7 +1168,7 @@
       "author": "Marco Melletti",
       "description": "Noctalia Launcher gnu pass provider",
       "license": "MIT",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "tags": [
         "Launcher"
       ],
@@ -1183,7 +1183,7 @@
       "author": "PaloMiku",
       "description": "Control linux-wallpaperengine from Noctalia with per-screen wallpaper selection.",
       "license": "MIT",
-      "version": "1.3.2",
+      "version": "1.3.3",
       "tags": [
         "Bar",
         "Panel",
@@ -1201,7 +1201,7 @@
       "author": "Pever3ll",
       "description": "Uses MPRIS data to fetch song lyrics from lrclib.net and displays it in the bar.",
       "license": "GPLv3",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "tags": [
         "Bar",
         "Music"
@@ -1218,7 +1218,7 @@
       "author": "atheeq-rhxn",
       "description": "Switch between different mangowc layouts",
       "license": "MIT",
-      "version": "3.1.1",
+      "version": "3.1.2",
       "tags": [
         "Bar",
         "Panel",
@@ -1253,7 +1253,7 @@
       "author": "Mathew-D",
       "description": "GUI for inspecting MIME handlers and updating default applications in mimeapps.list (requires python3).",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "Bar",
         "Panel",
@@ -1272,7 +1272,7 @@
       "author": "MannuVilasara",
       "description": "Manage Docker containers, images, volumes & networks",
       "license": "MIT",
-      "version": "2.2.1",
+      "version": "2.2.2",
       "tags": [
         "Bar",
         "Panel",
@@ -1290,7 +1290,7 @@
       "author": "Mathew-D",
       "description": "Mirror one monitor to another using wl-mirror.",
       "license": "MIT",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "tags": [
         "Bar",
         "Panel",
@@ -1309,7 +1309,7 @@
       "author": "cmptr",
       "description": "Shows AI coding assistant usage stats in the bar with detail panel (Claude Code, Codex, Copilot, Gemini, OpenRouter, Zen)",
       "license": "MIT",
-      "version": "0.3.2",
+      "version": "0.3.3",
       "tags": [
         "Bar",
         "Productivity",
@@ -1345,7 +1345,7 @@
       "author": "ToRvaLDz",
       "description": "Switch monitor profiles from the bar. Shows the active profile and lets you switch between saved configurations.",
       "license": "MIT",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "tags": [
         "Bar",
         "System",
@@ -1363,7 +1363,7 @@
       "author": "Mathew-D",
       "description": "Arrange multiple displays visually and change their resolutions from a Noctalia panel.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Panel",
@@ -1384,7 +1384,7 @@
       "author": "Ido Perlmuter",
       "description": "MPD plugin for Noctalia",
       "license": "MIT",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "tags": [
         "Bar",
         "Audio",
@@ -1402,7 +1402,7 @@
       "author": "DBeidachazi",
       "description": "Display synchronized lyrics from MPRIS-compatible music players (e.g., go-musicfox) in the bar.",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "Bar",
         "Music"
@@ -1476,7 +1476,7 @@
       "author": "Cleboost",
       "description": "Show NetBird VPN status in the menu bar.",
       "license": "MIT",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "tags": [
         "Bar",
         "Network",
@@ -1512,7 +1512,7 @@
       "author": "nZO",
       "description": "Connect to VPN via NetworkManager",
       "license": "MIT",
-      "version": "1.3.1",
+      "version": "1.3.2",
       "tags": [
         "Bar",
         "Panel",
@@ -1530,7 +1530,7 @@
       "author": "LazarH",
       "description": "Display scrolling news headlines from various sources using NewsAPI.org",
       "license": "MIT",
-      "version": "1.2.7",
+      "version": "1.2.8",
       "tags": [
         "Bar",
         "Panel",
@@ -1549,7 +1549,7 @@
       "author": "Duncan-Rose",
       "description": "Pick a KDL animation preset and write it as an include into your niri config",
       "license": "MIT",
-      "version": "1.1.5",
+      "version": "1.1.6",
       "tags": [
         "Fun",
         "Niri",
@@ -1587,7 +1587,7 @@
       "author": "adrlau",
       "description": "Manage niri outputs: scale, mode, and more.",
       "license": "MIT",
-      "version": "1.1.4",
+      "version": "1.1.5",
       "tags": [
         "Utility",
         "Bar",
@@ -1606,7 +1606,7 @@
       "author": "eliahreeves",
       "description": "Opens the launcher when typing in niri's overview mode",
       "license": "MIT",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "tags": [
         "System"
       ],
@@ -1621,7 +1621,7 @@
       "author": "J Pablo Puerta <ews@folksonomy.com>",
       "description": "Tracks off-screen windows in niri ribbon",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Utility",
         "Bar",
@@ -1640,7 +1640,7 @@
       "author": "jfreed-dev",
       "description": "Idle-aware terminal screensaver for niri, driven by TerminalTextEffects.",
       "license": "GPL-3.0-only",
-      "version": "0.8.2",
+      "version": "0.8.3",
       "tags": [
         "Bar",
         "Utility",
@@ -1658,7 +1658,7 @@
       "author": "matt-hb",
       "description": "Sets windows to urgent when they receive a notification and sets them back to normal when their notifications are cleared (Niri only!)",
       "license": "MIT",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "tags": [
         "System",
         "Utility",
@@ -1675,7 +1675,7 @@
       "author": "Koh\u00e1nyi R\u00f3bert",
       "description": "Filter, jump to, rename or reset Niri workspaces from the launcher.",
       "license": "MIT",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "tags": [
         "Launcher",
         "Utility",
@@ -1692,7 +1692,7 @@
       "author": "pir0c0pter0",
       "description": "Theme-aware calculator plugin for Noctalia on Niri with bar widget, floating panel and keyboard support",
       "license": "MIT",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "tags": [
         "Bar",
         "Panel",
@@ -1728,7 +1728,7 @@
       "author": "Sourajyoti Basak",
       "description": "Lenovo Vantage for Noctalia Shell",
       "license": "GPL-3.0-or-later",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "tags": [
         "Community"
       ],
@@ -1745,7 +1745,7 @@
       "author": "\u0423\u043c\u0435\u0434\u0436\u043e\u043d \u0411\u0430\u0437\u0430\u0440\u043e\u0432",
       "description": "VPN/proxy manager for SSH, VLESS, VMess, SOCKS5 and Shadowsocks with routing rules and kill switch.",
       "license": "MIT",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "tags": [
         "Bar",
         "Panel",
@@ -1768,7 +1768,7 @@
       "author": "blackteaextract",
       "description": "Displays custom text, fortune quotes, or a random entry from a user-provided text file in the bar.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Fun"
@@ -1822,7 +1822,7 @@
       "author": "NoFilterA1",
       "description": "Toggle NVIDIA digital vibrance (color saturation) via nvibrant.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "System",
@@ -1840,7 +1840,7 @@
       "author": "joniler",
       "description": "Monitor and control an NVIDIA Optimus dGPU on Hyprland \u2014 toggle Battery (dGPU sleeps) vs HDMI-Ready, see live power/VRAM, and list what is holding the GPU awake.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Panel",
@@ -1862,7 +1862,7 @@
       "author": "Krendil",
       "description": "Open Neovim Sessions",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Launcher",
         "Development"
@@ -1897,7 +1897,7 @@
       "author": "0b10headedcalf",
       "description": "Switch between Obsidian vaults from the launcher.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Launcher",
         "Productivity"
@@ -1913,7 +1913,7 @@
       "author": "alxndrv",
       "description": "Plugin for controlling Philips Hue lights from the taskbar",
       "license": "MIT",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "tags": [
         "Bar",
         "Panel"
@@ -1930,7 +1930,7 @@
       "author": "minh",
       "description": "Manage OpenVPN3 VPN connections from the bar and control center",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel",
@@ -1950,7 +1950,7 @@
       "author": "blackteaextract",
       "description": "Toggle an on-screen keyboard (Squeekboard or wvkbd) with live availability detection, hover icons, and configurable settings. Supersedes squeekboard-toggle.",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "System",
         "Bar",
@@ -1968,7 +1968,7 @@
       "author": "Qholin",
       "description": "A customizable parallax effect for the wallpaper based on the active workspace.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Desktop"
       ],
@@ -1983,7 +1983,7 @@
       "author": "Bojan Jovanovic",
       "description": "Search pass (password-store) from the launcher. Type 'pass <name>' to copy a password or 'po <name>' to copy a TOTP code to clipboard.",
       "license": "MIT",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "tags": [
         "Launcher",
         "Utility"
@@ -2000,7 +2000,7 @@
       "author": "blacku",
       "description": "A full-featured plugin manager with browsing, installation, and README viewer for Noctalia plugins.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel",
@@ -2018,7 +2018,7 @@
       "author": "Noctalia Team <team@noctalia.dev>",
       "description": "Provides a Polkit authentication agent.",
       "license": "MIT",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "tags": [
         "System",
         "Security"
@@ -2052,7 +2052,7 @@
       "author": "adriamartin91",
       "description": "Monitor listening ports and their processes. Shows TCP/UDP ports with process info and kill functionality.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel",
@@ -2072,7 +2072,7 @@
       "author": "Noctalia Team",
       "description": "A privacy indicator widget that shows when microphone, camera or screen sharing is active.",
       "license": "MIT",
-      "version": "1.2.14",
+      "version": "1.2.15",
       "tags": [
         "Bar",
         "Privacy",
@@ -2090,7 +2090,7 @@
       "author": "blessonmathewsam",
       "description": "Shows ProtonVPN connection status in the bar with a panel for connect/disconnect, kill switch toggle, and quick connect options. Requires the ProtonVPN CLI (protonvpn-cli) installed and authenticated.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Network",
@@ -2127,7 +2127,7 @@
       "author": "User",
       "description": "Shows prayer times and a countdown to Iftar during Ramadan.",
       "license": "MIT",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "tags": [
         "Bar",
         "Panel"
@@ -2158,7 +2158,7 @@
       "author": "Kermut572",
       "description": "A simple plugin that fetches the current, past, and future weeks menu for UCLouvain's Restaurants Universitaires",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Panel"
@@ -2209,7 +2209,7 @@
       "author": "Pulsar",
       "description": "A screenshot plugin with OCR, Google Lens integration, and screen recording. Supports Sway, Hyprland and MangoWM.",
       "license": "GPL-3.0-or-later",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "tags": [
         "Bar",
         "Panel",
@@ -2248,7 +2248,7 @@
       "author": "mewmewmemw",
       "description": "Hotkey-driven region screencast that produces an animated GIF and copies it to the clipboard. Bar pill turns red while recording. Backed by wf-recorder + gifski.",
       "license": "MIT",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "tags": [
         "Bar",
         "Recording",
@@ -2270,7 +2270,7 @@
       "author": "Cleboost",
       "description": "Quick screenshot button in bar for Hyprland, Sway, and Niri",
       "license": "MIT",
-      "version": "1.2.2",
+      "version": "1.2.3",
       "tags": [
         "Bar",
         "Utility"
@@ -2359,7 +2359,7 @@
       "author": "yhordi45",
       "description": "A full-screen power menu for Noctalia Shell, inspired by the wlogout design.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Panel",
@@ -2416,7 +2416,7 @@
       "author": "blackteaextract",
       "description": "Toggle the Squeekboard on-screen keyboard with live availability detection, hover icons, and configurable settings. Note: This plugin is deprecated and got consolidated in osk-toggle.",
       "license": "MIT",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "tags": [
         "System",
         "Bar",
@@ -2434,7 +2434,7 @@
       "author": "adriamartin91",
       "description": "Manage SSH connections from ~/.ssh/config with active session detection and launcher integration.",
       "license": "MIT",
-      "version": "1.1.3",
+      "version": "1.1.4",
       "tags": [
         "Bar",
         "Panel",
@@ -2454,7 +2454,7 @@
       "author": "sapjax",
       "description": "A local quick notes plugin with Markdown support.",
       "license": "MIT",
-      "version": "0.0.7",
+      "version": "0.0.9",
       "tags": [
         "Bar",
         "Panel",
@@ -2491,7 +2491,7 @@
       "author": "Simon",
       "description": "Shows Distribution, Kernel, Uptime and IP addresses.",
       "license": "MIT",
-      "version": "1.0.9",
+      "version": "1.0.10",
       "tags": [
         "Desktop",
         "System"
@@ -2508,7 +2508,7 @@
       "author": "nineluj",
       "description": "Show Tailscale status in the menu bar and send/receive files via Taildrop.",
       "license": "MIT",
-      "version": "1.5.4",
+      "version": "1.5.5",
       "tags": [
         "Bar",
         "Network",
@@ -2563,7 +2563,7 @@
       "author": "Noctalia Team",
       "description": "A timer and stopwatch plugin for the bar & control center.",
       "license": "MIT",
-      "version": "1.1.5",
+      "version": "1.1.6",
       "tags": [
         "Bar",
         "Utility"
@@ -2599,7 +2599,7 @@
       "author": "Domovoy",
       "description": "Mark a touchpad jump or phantom click from the bar and preserve evidence through the local touchpad-incident helper.",
       "license": "GPL-3.0",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Input",
@@ -2632,7 +2632,7 @@
       "author": "Daddeffe",
       "description": "Browse and search Unicode characters from the launcher",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Launcher",
         "Utility"
@@ -2665,7 +2665,7 @@
       "author": "hennifant",
       "description": "Manage USB drives: detect, mount, unmount, safely eject, and browse files",
       "license": "MIT",
-      "version": "1.4.2",
+      "version": "1.4.3",
       "tags": [
         "Bar",
         "Panel",
@@ -2683,7 +2683,7 @@
       "author": "Suyash",
       "description": "A plugin integrating your mobile devices into a panel using Valent",
       "license": "GPLv2",
-      "version": "1.2.4",
+      "version": "1.2.5",
       "tags": [
         "Bar",
         "Panel",
@@ -2721,7 +2721,7 @@
       "author": "c1ph3r-1337",
       "description": "A rotational disc app launcher plugin",
       "license": "unknown",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Launcher"
       ],
@@ -2738,7 +2738,7 @@
       "author": "Krendil",
       "description": "Open VS Code Folders and Workspaces",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Launcher",
         "Development"
@@ -2771,7 +2771,7 @@
       "author": "yngwe",
       "description": "Browse and pick wallpapers with a fullscreen skewed carousel overlay",
       "license": "MIT",
-      "version": "0.8.1",
+      "version": "0.8.2",
       "tags": [
         "Theming",
         "Wallpaper"
@@ -2789,7 +2789,7 @@
       "author": "Sovereign",
       "description": "Shows the current weather condition and temperature.",
       "license": "MIT",
-      "version": "1.1.8",
+      "version": "1.1.9",
       "tags": [
         "Bar"
       ],
@@ -2805,7 +2805,7 @@
       "author": "Rigelyon",
       "description": "Search the Internet from the Launcher.",
       "license": "MIT",
-      "version": "1.1.4",
+      "version": "1.1.5",
       "tags": [
         "Launcher",
         "Utility"
@@ -2822,7 +2822,7 @@
       "author": "dodaars",
       "description": "A weekly calendar plugin complementing Noctalia's inbuilt calendar service.",
       "license": "MIT",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "tags": [
         "Bar",
         "Panel",
@@ -2840,7 +2840,7 @@
       "author": "MorphoRust",
       "description": "Show a QR code to join the current Wi-Fi network",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Panel",
@@ -2859,7 +2859,7 @@
       "author": "doughbran",
       "description": "Workspace overview with live window previews and wallpaper backgrounds for Hyprland.",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "Hyprland",
         "Bar",

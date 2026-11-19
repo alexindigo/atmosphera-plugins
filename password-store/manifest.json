@@ -1,7 +1,7 @@
 {
   "id": "password-store",
   "name": "Password Store",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minNoctaliaVersion": "3.6.0",
   "author": "Bojan Jovanovic",
   "license": "MIT",
@@ -15,6 +15,10 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {}
+    },
     "defaultSettings": {}
   }
 }

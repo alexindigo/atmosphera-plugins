@@ -1,7 +1,7 @@
 {
   "id": "battery-threshold",
   "name": "Battery Threshold Control",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "Wilfred Mallawa",
@@ -23,6 +23,13 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "batteryDevice": {"type": "String"},
+        "chargeThreshold": {"type": "Real"}
+      }
+    },
     "defaultSettings": {
       "chargeThreshold": 80,
       "batteryDevice": "/sys/class/power_supply/BAT0"

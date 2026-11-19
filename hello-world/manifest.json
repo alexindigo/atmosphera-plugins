@@ -1,7 +1,7 @@
 {
   "id": "hello-world",
   "name": "Hello World",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.8.0",
   "author": "Noctalia Team",
@@ -25,6 +25,13 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "iconColor": {"type": "String"},
+        "message": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "message": "Hello World",
       "iconColor": "primary"

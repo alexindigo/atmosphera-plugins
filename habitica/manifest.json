@@ -1,7 +1,7 @@
 {
   "id": "habitica",
   "name": "Habitica for Noctalia",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "minNoctaliaVersion": "3.7.1",
   "minAtmospheraVersion": "0.8.0",
   "author": "vasqs",
@@ -24,6 +24,27 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "_habiticaCache": {"type": "String"},
+        "colorizationBadge": {"type": "String"},
+        "colorizationBadgeText": {"type": "String"},
+        "colorizationEnabled": {"type": "Boolean"},
+        "colorizationIcon": {"type": "String"},
+        "enableTagFilter": {"type": "Boolean"},
+        "habiticaApiToken": {"type": "String", "sensitive": true, "machineLocal": true},
+        "habiticaUserId": {"type": "String"},
+        "maxDailies": {"type": "Real"},
+        "maxHabits": {"type": "Real"},
+        "maxTodos": {"type": "Real"},
+        "refreshInterval": {"type": "Real"},
+        "selectedTagId": {"type": "String"},
+        "showChecklistItems": {"type": "Boolean"},
+        "showHabits": {"type": "Boolean"},
+        "showNotificationBadge": {"type": "Boolean"}
+      }
+    },
     "defaultSettings": {
       "habiticaUserId": "",
       "habiticaApiToken": "",

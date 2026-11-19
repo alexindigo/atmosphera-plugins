@@ -1,7 +1,7 @@
 {
   "id": "mpris-lyric",
   "name": "MPRIS Lyric",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "minNoctaliaVersion": "3.8.0",
   "minAtmospheraVersion": "0.8.0",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -21,6 +21,15 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "hideWhenInactive": {"type": "Boolean"},
+        "playerName": {"type": "String"},
+        "updateInterval": {"type": "Real"},
+        "width": {"type": "Real"}
+      }
+    },
     "defaultSettings": {
       "playerName": "musicfox",
       "hideWhenInactive": false,

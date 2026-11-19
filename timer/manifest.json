@@ -1,7 +1,7 @@
 {
   "id": "timer",
   "name": "Timer",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "minNoctaliaVersion": "4.4.4",
   "minAtmospheraVersion": "0.8.0",
   "author": "Noctalia Team",
@@ -24,6 +24,15 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "compactMode": {"type": "Boolean"},
+        "defaultDuration": {"type": "Real"},
+        "iconColor": {"type": "String"},
+        "textColor": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "defaultDuration": 0,
       "compactMode": false,

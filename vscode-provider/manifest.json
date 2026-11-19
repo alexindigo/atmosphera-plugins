@@ -1,7 +1,7 @@
 {
     "id": "vscode-provider",
     "name": "VS Code Provider",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Open VS Code Folders and Workspaces",
     "tags": ["Launcher", "Development"],
     "minNoctaliaVersion": "4.5.0",
@@ -18,6 +18,14 @@
     },
     "metadata": {
         "commandPrefix": "vsc",
+        "settingsSchema": {
+          "version": 1,
+          "fields": {
+            "command": {"type": "String"},
+            "configName": {"type": "String"},
+            "includeInSearch": {"type": "Boolean"}
+          }
+        },
         "defaultSettings": {
             "command": "code",
             "configName": "Code",

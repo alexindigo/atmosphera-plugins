@@ -1,7 +1,7 @@
 {
     "id": "web-search",
     "name": "Web Search",
-    "version": "1.1.4",
+    "version": "1.1.5",
     "author": "Rigelyon",
     "license": "MIT",
     "description": "Search the Internet from the Launcher.",
@@ -22,6 +22,15 @@
     },
     "metadata": {
         "commandPrefix": "web",
+        "settingsSchema": {
+          "version": 1,
+          "fields": {
+            "direct_url": {"type": "Boolean"},
+            "max_results": {"type": "Real"},
+            "search_engine": {"type": "String"},
+            "show_suggestions": {"type": "Boolean"}
+          }
+        },
         "defaultSettings": {
             "search_engine": "Google",
             "direct_url": true,

@@ -1,7 +1,7 @@
 {
   "id": "niri-ribbon",
   "name": "Niri Ribbon",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "4.7.0",
   "minAtmospheraVersion": "0.8.0",
   "license": "MIT",
@@ -16,5 +16,11 @@
   "entryPoints": {
     "main": "Main.qml",
     "barWidget": "BarWidget.qml"
+  },
+  "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {}
+    }
   }
 }

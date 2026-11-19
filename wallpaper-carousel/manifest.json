@@ -1,7 +1,7 @@
 {
   "id": "wallpaper-carousel",
   "name": "Wallpaper Carousel",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "minAtmospheraVersion": "0.8.0",
   "minNoctaliaVersion": "3.6.0",
   "author": "yngwe",
@@ -20,6 +20,24 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "borderWidth": {"type": "Real"},
+        "carouselMode": {"type": "String"},
+        "cornerRadius": {"type": "Real"},
+        "enableHoldExpand": {"type": "String"},
+        "expandMultiplier": {"type": "Real"},
+        "expandSelected": {"type": "String"},
+        "holdDelay": {"type": "Real"},
+        "holdExpandRatio": {"type": "Real"},
+        "itemHeight": {"type": "Real"},
+        "itemWidth": {"type": "Real"},
+        "overlayOpacity": {"type": "Real"},
+        "selectedScale": {"type": "Real"},
+        "wallpaperDirectory": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "wallpaperDirectory": "",
       "carouselMode": "wrap",

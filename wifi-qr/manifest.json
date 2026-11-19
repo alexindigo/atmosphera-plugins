@@ -1,7 +1,7 @@
 {
   "id": "wifi-qr",
   "name": "Wi-Fi QR",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "4.1.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "MorphoRust",
@@ -18,6 +18,10 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {}
+    },
     "defaultSettings": {}
   }
 }

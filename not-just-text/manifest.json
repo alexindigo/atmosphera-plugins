@@ -1,7 +1,7 @@
 {
   "id": "not-just-text",
   "name": "Not Just Text",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "minNoctaliaVersion": "4.4.1",
   "minAtmospheraVersion": "0.8.0",
   "author": "blackteaextract",
@@ -21,6 +21,20 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "fortuneCategory": {"type": "String"},
+        "fortuneEnabled": {"type": "Boolean"},
+        "fortuneEqual": {"type": "Boolean"},
+        "fortuneMaxLength": {"type": "Real"},
+        "fortuneOffensive": {"type": "Boolean"},
+        "listEnabled": {"type": "Boolean"},
+        "refreshOnWallpaper": {"type": "Boolean"},
+        "text": {"type": "String"},
+        "textFile": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "text": "Hello",
       "fortuneEnabled": false,

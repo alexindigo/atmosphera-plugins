@@ -1,7 +1,7 @@
 {
   "id": "dns-switcher",
   "name": "DNS Switcher",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "DNS Manager with custom server support for Noctalia.",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
   "tags": [
@@ -17,5 +17,13 @@
     "panel": "Panel.qml",
     "barWidget": "BarWidget.qml",
     "controlCenterWidget": "ControlCenterWidget.qml"
+  },
+  "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "savedServers": {"type": "String", "optional": true}
+      }
+    }
   }
 }

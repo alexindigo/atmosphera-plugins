@@ -1,7 +1,7 @@
 {
   "id": "battery-monitor-plus",
   "name": "Battery Monitor Plus",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.8.0",
   "author": "krteke",
@@ -19,6 +19,20 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "deviceNativePath": {"type": "String"},
+        "displayMode": {"type": "String"},
+        "hideIfIdle": {"type": "Boolean"},
+        "hideIfNotDetected": {"type": "Boolean"},
+        "refreshIntervalSeconds": {"type": "Real"},
+        "showNoctaliaPerformance": {"type": "Boolean"},
+        "showPowerInBar": {"type": "Boolean"},
+        "showPowerProfiles": {"type": "Boolean"},
+        "showTimeInBar": {"type": "Boolean"}
+      }
+    },
     "defaultSettings": {
       "displayMode": "graphic-clean",
       "deviceNativePath": "__default__",
