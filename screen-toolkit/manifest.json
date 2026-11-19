@@ -1,7 +1,7 @@
 {
   "id": "screen-toolkit",
   "name": "Screen Toolkit",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "minNoctaliaVersion": "4.5.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "ycf-anon",
@@ -25,23 +25,56 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSourceProjection": {
+      "version": 1,
+      "projectionId": "screen-toolkit-palette-list",
+      "transform": "function(input) { var values = input.values; if (Object.prototype.hasOwnProperty.call(input.raw, 'paletteColors') && input.raw.paletteColors === '') values.paletteColors = []; return {values: values, compatibilityRaw: input.compatibilityRaw, effects: [], diagnostics: []}; }"
+    },
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "colorHistory": {"type": "List", "machineLocal": true, "element": {"type": "String"}},
+        "paletteColors": {"type": "List", "machineLocal": true, "element": {"type": "String"}},
+        "installedLangs": {"type": "List", "machineLocal": true, "element": {"type": "String"}},
+        "transAvailable": {"type": "Boolean", "machineLocal": true},
+        "detectedRecorder": {"type": "String", "machineLocal": true},
+        "resultHex": {"type": "String", "optional": true, "machineLocal": true},
+        "resultRgb": {"type": "String", "optional": true, "machineLocal": true},
+        "resultHsv": {"type": "String", "optional": true, "machineLocal": true},
+        "resultHsl": {"type": "String", "optional": true, "machineLocal": true},
+        "colorCapturePath": {"type": "String", "optional": true, "machineLocal": true},
+        "colorCacheBust": {"type": "Real", "optional": true, "machineLocal": true},
+        "ocrResult": {"type": "String", "optional": true, "machineLocal": true},
+        "ocrCapturePath": {"type": "String", "optional": true, "machineLocal": true},
+        "qrResult": {"type": "String", "optional": true, "machineLocal": true},
+        "qrCapturePath": {"type": "String", "optional": true, "machineLocal": true},
+        "translateResult": {"type": "String", "optional": true, "machineLocal": true},
+        "filenameFormat": {"type": "String"},
+        "gifMaxSeconds": {"type": "Real"},
+        "recordCopyToClipboard": {"type": "Boolean"},
+        "recordSkipConfirmation": {"type": "Boolean"},
+        "screenshotPath": {"type": "String"},
+        "searchEngineUrl": {"type": "String", "optional": true},
+        "selectedOcrLang": {"type": "String"},
+        "shareSkipPopover": {"type": "Boolean", "optional": true},
+        "videoPath": {"type": "String"},
+        "x02ApiKey": {"type": "String", "optional": true, "sensitive": true, "machineLocal": true},
+        "x02Expiry": {"type": "String", "optional": true}
+      }
+    },
     "defaultSettings": {
       "colorHistory": [],
       "paletteColors": [],
-      "installedLangs": [
-        "eng"
-      ],
+      "installedLangs": ["eng"],
       "transAvailable": false,
+      "detectedRecorder": "",
       "selectedOcrLang": "eng",
       "screenshotPath": "",
       "videoPath": "",
       "filenameFormat": "",
-      "detectedRecorder": "",
       "recordSkipConfirmation": false,
       "recordCopyToClipboard": false,
       "gifMaxSeconds": 30
     }
   }
 }
-
-

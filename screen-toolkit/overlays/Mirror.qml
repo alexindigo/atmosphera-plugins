@@ -7,6 +7,7 @@ import qs.Commons
 import qs.Widgets
 import qs.Services.UI
 import "../utils/utils.js" as U
+import "../utils"
 Item {
     id: root
     property var  pluginApi: null
@@ -91,7 +92,7 @@ Item {
     }
     function _doScreenshot() {
         if (!root._imgCapture) return
-        root._imgCapture.captureToFile("/tmp/mirror-shot-" + Date.now() + ".png")
+        root._imgCapture.captureToFile(TempPaths.path("mirror-shot-" + Date.now() + ".png"))
     }
     function _onImageCaptured(tmpPath) {
         var home    = Quickshell.env("HOME")
@@ -106,7 +107,7 @@ Item {
             tmpPath, dir, file, filters.join(",")
         ]})
     }
-    Process {
+    ToolProcess {
         id: screenshotProc
         property string destPath: ""
         onExited: (code) => {
@@ -126,7 +127,7 @@ Item {
     }
     function _doStartRecord() {
         if (!root._recorder) return
-        var tmpPath = "/tmp/mirror-record-" + Date.now() + ".mp4"
+        var tmpPath = TempPaths.path("mirror-record-" + Date.now() + ".mp4")
         root._recTmpPath  = tmpPath
         root._recorder.outputLocation = "file://" + tmpPath
         root._isRecording = true
@@ -156,7 +157,7 @@ Item {
             root._audioEnabled ? "1" : "0"
         ]})
     }
-    Process {
+    ToolProcess {
         id: recSaveProc
         property string savedPath: ""
         onExited: (code) => {

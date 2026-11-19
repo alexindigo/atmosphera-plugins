@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/temp-paths.sh"
 # Args: $1=gx $2=gy $3=gw $4=gh $5=lang $6=upscale_flag $7=psm
 
 GX="$1"; GY="$2"; GW="$3"; GH="$4"
 RAW_LANG="${5:-eng}"
 UPSCALE="$6"
 USER_PSM="${7:-3}"
-FILE="/tmp/screen-toolkit-ocr.png"
-TMP_BASE="/tmp/screen-toolkit-ocr-work-$$"
+FILE="${SCREEN_TOOLKIT_TMPDIR}/screen-toolkit-ocr.png"
+TMP_BASE="${SCREEN_TOOLKIT_TMPDIR}/screen-toolkit-ocr-work-$$"
 TMP="${TMP_BASE}.pnm"
 TMP_NOISE="${TMP_BASE}-nr.pnm"
 

@@ -149,6 +149,16 @@ ColumnLayout {
     onToggled: checked => root.valueShowTimeInBar = checked
   }
 
+  readonly property bool settingsDirty: root.valueDisplayMode !== (cfg.displayMode ?? defaults.displayMode ?? "graphic-clean")
+      || root.valueDeviceNativePath !== (cfg.deviceNativePath ?? defaults.deviceNativePath ?? "__default__")
+      || root.valueShowPowerProfiles !== (cfg.showPowerProfiles ?? defaults.showPowerProfiles ?? false)
+      || root.valueShowNoctaliaPerformance !== (cfg.showNoctaliaPerformance ?? defaults.showNoctaliaPerformance ?? false)
+      || root.valueHideIfNotDetected !== (cfg.hideIfNotDetected ?? defaults.hideIfNotDetected ?? true)
+      || root.valueHideIfIdle !== (cfg.hideIfIdle ?? defaults.hideIfIdle ?? false)
+      || root.valueRefreshIntervalSeconds !== (cfg.refreshIntervalSeconds ?? defaults.refreshIntervalSeconds ?? 5)
+      || root.valueShowPowerInBar !== (cfg.showPowerInBar ?? defaults.showPowerInBar ?? true)
+      || root.valueShowTimeInBar !== (cfg.showTimeInBar ?? defaults.showTimeInBar ?? true)
+
   function saveSettings() {
     if (!pluginApi) {
       Logger.e("BatteryMonitorPlus", "Cannot save settings: pluginApi is null");
@@ -164,8 +174,9 @@ ColumnLayout {
     pluginApi.pluginSettings.refreshIntervalSeconds = root.valueRefreshIntervalSeconds;
     pluginApi.pluginSettings.showPowerInBar = root.valueShowPowerInBar;
     pluginApi.pluginSettings.showTimeInBar = root.valueShowTimeInBar;
-    pluginApi.saveSettings();
-
-    Logger.d("BatteryMonitorPlus", "Settings saved successfully");
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.d("BatteryMonitorPlus", "Settings saved successfully");
+    });
   }
 }

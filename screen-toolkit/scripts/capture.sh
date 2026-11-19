@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/temp-paths.sh"
 # capture.sh <action> [args...]
 #
 # Actions:
 #   annotate-window          — capture the focused Hyprland window with grim
-#                              output: /tmp/screen-toolkit-annotate.png
+#                              output: $SCREEN_TOOLKIT_TMPDIR/screen-toolkit-annotate.png
 #                              stdout: "X,Y WxH" geometry string
 #   pin       <geometry>     — capture a region at 2× scale with grim
 #                              stdout: "/path/to/file.png|WxH"
@@ -40,7 +41,7 @@ case "$ACTION" in
     | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"' 2>/dev/null)
     [ -n "$GEOM" ] \
     || { echo "ERROR: could not parse window geometry" >&2; exit 2; }
-    grim -g "$GEOM" /tmp/screen-toolkit-annotate.png 2>/dev/null \
+    grim -g "$GEOM" "${SCREEN_TOOLKIT_TMPDIR}/screen-toolkit-annotate.png" 2>/dev/null \
     || { echo "ERROR: grim capture failed" >&2; exit 2; }
     printf '%s\n' "$GEOM"
     ;;
@@ -50,7 +51,7 @@ case "$ACTION" in
     [ -n "$GEOMETRY" ] || { echo "ERROR: pin: missing <geometry>" >&2; exit 1; }
     _require grim
 
-    FILE="/tmp/screen-toolkit-pin-$(date +%s%3N).png"
+    FILE="${SCREEN_TOOLKIT_TMPDIR}/screen-toolkit-pin-$(date +%s%3N).png"
     WH="${GEOMETRY##* }"   # "WxH" portion of "X,Y WxH"
 
     grim -s 2 -g "$GEOMETRY" "$FILE" 2>/dev/null \
@@ -65,7 +66,7 @@ case "$ACTION" in
     _require grim
     _require magick
 
-    FILE="/tmp/screen-toolkit-palette.png"
+    FILE="${SCREEN_TOOLKIT_TMPDIR}/screen-toolkit-palette.png"
 
     grim -g "$GEOMETRY" "$FILE" 2>/dev/null \
         || { echo "ERROR: palette: grim capture failed" >&2; exit 2; }
@@ -82,10 +83,10 @@ case "$ACTION" in
     _require grim
     _require zbarimg
 
-    grim -g "$GEOMETRY" /tmp/screen-toolkit-qr.png 2>/dev/null \
+    grim -g "$GEOMETRY" "${SCREEN_TOOLKIT_TMPDIR}/screen-toolkit-qr.png" 2>/dev/null \
         || { echo "ERROR: qr: grim capture failed" >&2; exit 2; }
 
-    zbarimg -q --raw /tmp/screen-toolkit-qr.png 2>/dev/null
+    zbarimg -q --raw "${SCREEN_TOOLKIT_TMPDIR}/screen-toolkit-qr.png" 2>/dev/null
     ;;
 
   *)

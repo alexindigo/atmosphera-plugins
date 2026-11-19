@@ -6,6 +6,7 @@ import qs.Services.UI
 import "overlays"
 import "widgets"
 import "utils/utils.js" as U
+import "utils"
 Item {
     id: root
     property var pluginApi: null
@@ -321,7 +322,7 @@ Item {
                     Image {
                         anchors.fill: parent; visible: root.recordFormat === "mp4"
                         source: root.recordFormat === "mp4" && root._thumbBust !== ""
-                            ? "file:///tmp/screen-toolkit-record-thumb.png?" + root._thumbBust : ""
+                            ? "file://" + TempPaths.path("screen-toolkit-record-thumb.png") + "?" + root._thumbBust : ""
                         fillMode: Image.PreserveAspectFit; smooth: true; cache: false
                     }
                 }

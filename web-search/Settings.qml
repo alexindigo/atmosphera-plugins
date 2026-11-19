@@ -93,6 +93,11 @@ ColumnLayout {
         }
     }
 
+    readonly property bool settingsDirty: root.valueSearchEngine !== (cfg.search_engine ?? defaults.search_engine ?? "Google")
+        || root.valueDirectUrl !== (cfg.direct_url ?? defaults.direct_url ?? true)
+        || root.valueShowSuggestions !== (cfg.show_suggestions ?? defaults.show_suggestions ?? true)
+        || root.valueMaxResults !== (cfg.max_results ?? defaults.max_results ?? 5)
+
     function saveSettings() {
         if (!pluginApi) {
             Logger.e("WebSearch", "Cannot save settings: pluginApi is null");
@@ -103,8 +108,9 @@ ColumnLayout {
         pluginApi.pluginSettings.direct_url = root.valueDirectUrl;
         pluginApi.pluginSettings.show_suggestions = root.valueShowSuggestions;
         pluginApi.pluginSettings.max_results = root.valueMaxResults;
-        pluginApi.saveSettings();
-
-        Logger.d("WebSearch", "Settings saved successfully");
+        pluginApi.saveSettings(function (result) {
+            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+                Logger.d("WebSearch", "Settings saved successfully");
+        });
     }
 }

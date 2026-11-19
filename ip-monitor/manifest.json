@@ -1,9 +1,9 @@
 {
   "id": "ip-monitor",
   "name": "IP Monitor",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "minNoctaliaVersion": "4.4.3",
-  "minAtmospheraVersion": "0.8.0",
+  "minAtmospheraVersion": "0.10.0",
   "author": "deepalpha",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

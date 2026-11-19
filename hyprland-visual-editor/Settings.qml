@@ -86,6 +86,11 @@ ColumnLayout {
   }
 
   // ── Save Function (Required by the Shell) ──────────────────────────
+  readonly property bool settingsDirty: root.editOverlayPath !== (cfg.overlayPath ?? defaults.overlayPath ?? "~/.cache/noctalia/HVE/overlay.conf")
+      || root.editAutoApply !== (cfg.autoApply ?? defaults.autoApply ?? true)
+      || root.editIcon !== (cfg.icon ?? defaults.icon ?? "adjustments-horizontal")
+      || root.editIconColor !== (cfg.iconColor ?? defaults.iconColor ?? "primary")
+
   function saveSettings() {
     if (!pluginApi) return
     
@@ -94,7 +99,9 @@ ColumnLayout {
     pluginApi.pluginSettings.icon = root.editIcon
     pluginApi.pluginSettings.iconColor = root.editIconColor
     
-    pluginApi.saveSettings()
-    Logger.i("HVE", "Settings saved")
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("HVE", "Settings saved")
+    });
   }
 }

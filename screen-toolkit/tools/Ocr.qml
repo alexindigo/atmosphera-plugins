@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.Services.UI
+import "../utils"
 
 Item {
     id: root
@@ -54,7 +55,7 @@ Item {
         root.ocrCapturePath = s.ocrCapturePath ?? ""
     }
 
-    Process {
+    ToolProcess {
         id: ocrProc
 
         stdout: SplitParser {
@@ -70,11 +71,11 @@ Item {
                         return
                     }
                     root.ocrResult       = text
-                    root.ocrCapturePath  = "/tmp/screen-toolkit-ocr.png"
+                    root.ocrCapturePath  = TempPaths.path("screen-toolkit-ocr.png")
                     root.translateResult = ""
                     if (root.pluginApi) {
                         root.pluginApi.pluginSettings.ocrResult       = text
-                        root.pluginApi.pluginSettings.ocrCapturePath  = "/tmp/screen-toolkit-ocr.png"
+                        root.pluginApi.pluginSettings.ocrCapturePath  = TempPaths.path("screen-toolkit-ocr.png")
                         root.pluginApi.pluginSettings.translateResult = ""
                         root.pluginApi.saveSettings()
                     }
@@ -99,7 +100,7 @@ Item {
         }
     }
 
-    Process {
+    ToolProcess {
         id: translateProc
         stdout: StdioCollector {}
         onExited: {

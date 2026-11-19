@@ -1,7 +1,7 @@
 {
   "id": "todo",
   "name": "Todo List",
-  "version": "1.10.2",
+  "version": "1.10.3",
   "minNoctaliaVersion": "3.7.1",
   "minAtmospheraVersion": "0.8.0",
   "author": "lonerOrz <lonerOrz@qq.com>",
@@ -21,14 +21,27 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "todos": {"type": "List", "machineLocal": true, "element": {"type": "Record", "fields": {"id": {"type": "Real", "optional": true}, "text": {"type": "String", "optional": true}, "completed": {"type": "Boolean", "optional": true}, "createdAt": {"type": "String", "optional": true}, "pageId": {"type": "Real", "optional": true}, "priority": {"type": "String", "optional": true}, "details": {"type": "String", "optional": true}}}},
+        "pages": {"type": "List", "machineLocal": true, "element": {"type": "Record", "fields": {"id": {"type": "Real"}, "name": {"type": "String"}}}},
+        "current_page_id": {"type": "Real", "machineLocal": true},
+        "count": {"type": "Real", "machineLocal": true},
+        "completedCount": {"type": "Real", "machineLocal": true},
+        "exportEmptySections": {"type": "Boolean"},
+        "exportFormat": {"type": "String"},
+        "exportPath": {"type": "String"},
+        "isExpanded": {"type": "Boolean"},
+        "priorityColors": {"type": "Record", "fields": {"high": {"type": "String", "optional": true}, "medium": {"type": "String", "optional": true}, "low": {"type": "String", "optional": true}}},
+        "showBackground": {"type": "Boolean"},
+        "showCompleted": {"type": "Boolean"},
+        "useCustomColors": {"type": "Boolean"}
+      }
+    },
     "defaultSettings": {
       "todos": [],
-      "pages": [
-        {
-          "id": 0,
-          "name": "General"
-        }
-      ],
+      "pages": [{"id": 0, "name": "General"}],
       "current_page_id": 0,
       "count": 0,
       "completedCount": 0,

@@ -98,6 +98,14 @@ ColumnLayout {
     }
   }
 
+  readonly property bool settingsDirty: root.valueKubeconfigPath !== (cfg.kubeconfigPath ?? defaults.kubeconfigPath ?? "")
+      || root.valueTerminal !== (cfg.terminal ?? defaults.terminal ?? "")
+      || root.valuePollInterval !== (cfg.pollInterval ?? defaults.pollInterval ?? 60)
+      || root.valueShowErrorBadge !== (cfg.showErrorBadge ?? defaults.showErrorBadge ?? true)
+      || root.valueIconColor !== (cfg.iconColor ?? defaults.iconColor ?? "none")
+      || root.valuePanelWidth !== (cfg.panelWidth ?? defaults.panelWidth ?? 620)
+      || root.valuePanelHeight !== (cfg.panelHeight ?? defaults.panelHeight ?? 680)
+
   function saveSettings() {
     if (!pluginApi) {
       Logger.e("KubectlCtx", "Cannot save settings: pluginApi is null");
@@ -110,7 +118,9 @@ ColumnLayout {
     pluginApi.pluginSettings.iconColor = root.valueIconColor;
     pluginApi.pluginSettings.panelWidth = root.valuePanelWidth;
     pluginApi.pluginSettings.panelHeight = root.valuePanelHeight;
-    pluginApi.saveSettings();
-    Logger.i("KubectlCtx", "Settings saved");
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("KubectlCtx", "Settings saved");
+    });
   }
 }

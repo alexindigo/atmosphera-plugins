@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.Services.UI
+import "../utils"
 
 Item {
     id: root
@@ -22,7 +23,7 @@ Item {
     function run() {
         colorPickerProc.exec({ command: [
             root.scriptsDir + "color-picker.sh",
-            "/tmp/screen-toolkit-colorpicker.png"
+            TempPaths.path("screen-toolkit-colorpicker.png")
         ]})
     }
 
@@ -45,7 +46,7 @@ Item {
         root.colorCacheBust   = s.colorCacheBust   ?? 0
     }
 
-    Process {
+    ToolProcess {
         id: colorPickerProc
         stdout: StdioCollector {}
         onExited: (code) => {
@@ -84,7 +85,7 @@ Item {
             root.resultRgb        = rgb
             root.resultHsv        = hsv
             root.resultHsl        = hsl
-            root.colorCapturePath = "/tmp/screen-toolkit-colorpicker.png"
+            root.colorCapturePath = TempPaths.path("screen-toolkit-colorpicker.png")
             root.colorCacheBust   = Date.now()
 
             if (root.pluginApi) {
@@ -93,7 +94,7 @@ Item {
                 settings.resultRgb        = rgb
                 settings.resultHsv        = hsv
                 settings.resultHsl        = hsl
-                settings.colorCapturePath = "/tmp/screen-toolkit-colorpicker.png"
+                settings.colorCapturePath = TempPaths.path("screen-toolkit-colorpicker.png")
                 settings.colorCacheBust   = Date.now()
                 var history = (settings.colorHistory || [])
                 history = [hex].concat(history.filter(c => c !== hex)).slice(0, 8)

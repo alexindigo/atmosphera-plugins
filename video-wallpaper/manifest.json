@@ -1,7 +1,7 @@
 {
   "id": "video-wallpaper",
   "name": "Video Wallpaper",
-  "version": "2.0.11",
+  "version": "2.0.12",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "spiros132",
@@ -33,6 +33,55 @@
       "profile": "default",
       "volume": 1.0,
       "wallpapersFolder": "~/Pictures/Wallpapers"
+    },
+    "settingsSchema": {
+      "version": 1,
+      "definitions": {
+        "monitor": {
+          "type": "Record",
+          "fields": {
+            "automation": {"type": "Boolean", "optional": true},
+            "automationMode": {"type": "String", "optional": true},
+            "automationTime": {"type": "Real", "optional": true},
+            "currentWallpaper": {"type": "String", "optional": true},
+            "hardwareAcceleration": {"type": "Boolean", "optional": true},
+            "fillMode": {"type": "String", "optional": true},
+            "isMuted": {"type": "Boolean", "optional": true},
+            "isPlaying": {"type": "Boolean", "optional": true, "machineLocal": true},
+            "noctaliaWallpaper": {"type": "String", "optional": true, "machineLocal": true},
+            "orientation": {"type": "Real", "optional": true},
+            "profile": {"type": "String", "optional": true},
+            "thumbCacheReady": {"type": "Boolean", "optional": true, "machineLocal": true},
+            "volume": {"type": "Real", "optional": true}
+          }
+        }
+      },
+      "fields": {
+        "activeBackend": {"type": "String"},
+        "automation": {"type": "Boolean", "optional": true},
+        "automationCustomTime": {"type": "List", "optional": true, "element": {"type": "Real"}},
+        "automationMode": {"type": "String"},
+        "automationTime": {"type": "Real"},
+        "currentWallpaper": {"type": "String", "optional": true},
+        "enabled": {"type": "Boolean", "optional": true},
+        "fillMode": {"type": "String"},
+        "hardwareAcceleration": {"type": "Boolean", "optional": true},
+        "isMuted": {"type": "Boolean", "optional": true},
+        "isPlaying": {"type": "Boolean", "optional": true, "machineLocal": true},
+        "monitorSpecific": {"type": "Boolean", "optional": true},
+        "monitors": {"type": "Map", "optional": true, "element": {"ref": "monitor"}},
+        "mpvSocket": {"type": "String"},
+        "orientation": {"type": "Real", "optional": true},
+        "profile": {"type": "String"},
+        "thumbCacheReady": {"type": "Boolean", "optional": true, "machineLocal": true},
+        "volume": {"type": "Real"},
+        "wallpapersFolder": {"type": "String"}
+      }
+    },
+    "settingsSourceProjection": {
+      "version": 1,
+      "projectionId": "video-wallpaper-monitors",
+      "transform": "function(input) { var has = Object.prototype.hasOwnProperty; if (!has.call(input.raw, 'monitors')) { var globals = ['activeBackend','automation','automationCustomTime','automationMode','automationTime','currentWallpaper','enabled','fillMode','hardwareAcceleration','isMuted','isPlaying','monitorSpecific','mpvSocket','orientation','profile','thumbCacheReady','volume','wallpapersFolder']; var monitors = Object.create(null); var found = false; Object.keys(input.raw).forEach(function(key) { var record = input.raw[key]; if (globals.indexOf(key) === -1 && record !== null && typeof record === 'object' && !Array.isArray(record) && !Object.isFrozen(record)) { monitors[key] = record; found = true; } }); if (found) input.values.monitors = monitors; } return {values: input.values, compatibilityRaw: input.compatibilityRaw, effects: [], diagnostics: []}; }"
     }
   }
 }

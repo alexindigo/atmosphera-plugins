@@ -1,7 +1,7 @@
 {
   "id": "wallcards",
   "name": "Wallcards",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "minNoctaliaVersion": "4.7.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "tonigineer",
@@ -18,6 +18,32 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "animate_window": {"type": "Boolean"},
+        "animation_cards_duration": {"type": "Real"},
+        "animation_duration": {"type": "Real", "optional": true},
+        "animation_window_duration": {"type": "Real"},
+        "background_color": {"type": "String", "nullable": true},
+        "background_opacity": {"type": "Real", "nullable": true},
+        "card_height": {"type": "Real"},
+        "card_spacing": {"type": "Real"},
+        "card_strip_width": {"type": "Real"},
+        "cards_shown": {"type": "Real"},
+        "center_width_ratio": {"type": "Real"},
+        "hide_help": {"type": "Boolean"},
+        "hide_top_bar": {"type": "Boolean"},
+        "iconColor": {"type": "String", "optional": true},
+        "icon_color": {"type": "String", "optional": true},
+        "image_filter": {"type": "List", "element": {"type": "String"}},
+        "live_preview": {"type": "Boolean"},
+        "selected_filter": {"type": "String"},
+        "shear_factor": {"type": "Real"},
+        "top_bar_height": {"type": "Real"},
+        "video_filter": {"type": "List", "element": {"type": "String"}}
+      }
+    },
     "defaultSettings": {
       "animation_cards_duration": 750,
       "animation_window_duration": 500,

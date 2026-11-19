@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/temp-paths.sh"
 # share-upload.sh <file> [api_key] [expiry]
 # api_key: X02 API key — if empty, falls back to uguu.se (anonymous, 3h, 128MB max)
 # expiry:  1h | 1d | 7d | 30d | permanent (X02 only, default: 7d)
@@ -79,4 +80,3 @@ fi
 
 echo "ERROR: uguu.se: no valid URL in response" >&2
 exit 5
-

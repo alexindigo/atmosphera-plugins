@@ -4,6 +4,7 @@ import qs.Commons
 import qs.Widgets
 import qs.Services.UI
 import "../utils/utils.js" as U
+import "../utils"
 Item {
     id: root
     property var pluginApi: null
@@ -29,7 +30,7 @@ Item {
     readonly property string colorCapturePath: mainInstance?.colorCapturePath ?? ""
     readonly property int    colorCacheBust:   mainInstance?.colorCacheBust ?? 0
     readonly property var    colorHistory:     mainInstance?.colorHistory ?? []
-    Process { id: clipProc }
+    ToolProcess { id: clipProc }
     function _copy(text) {
         if (!text || text === "") return
         clipProc.exec({
@@ -369,4 +370,3 @@ Item {
         }
     }
 }
-

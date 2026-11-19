@@ -26,6 +26,10 @@ ColumnLayout {
         pluginApi?.manifest?.metadata?.defaultSettings?.textColor ??
         "none"
 
+    readonly property bool settingsDirty: editCompactMode !== (pluginApi?.pluginSettings?.compactMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ?? false)
+                                          || editIconColor !== (pluginApi?.pluginSettings?.iconColor ?? pluginApi?.manifest?.metadata?.defaultSettings?.iconColor ?? "none")
+                                          || editTextColor !== (pluginApi?.pluginSettings?.textColor ?? pluginApi?.manifest?.metadata?.defaultSettings?.textColor ?? "none")
+
     function saveSettings() {
         if (!pluginApi) {
             Logger.e("Timer", "Cannot save: pluginApi is null")
@@ -36,8 +40,10 @@ ColumnLayout {
         pluginApi.pluginSettings.iconColor = root.editIconColor
         pluginApi.pluginSettings.textColor = root.editTextColor
 
-        pluginApi.saveSettings()
-        Logger.i("Timer", "Settings saved successfully")
+        pluginApi.saveSettings(function (result) {
+            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+                Logger.i("Timer", "Settings saved successfully")
+        })
     }
 
     // Icon Color

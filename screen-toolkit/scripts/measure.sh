@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/temp-paths.sh"
 # measure.sh — capture a measurement overlay
 # Args: sx sy rx ry rw rh lx1 ly1 lx2 ly2 lw lh color scale dest_dir full_path
 set -euo pipefail
@@ -9,9 +10,9 @@ LX1=$7; LY1=$8; LX2=$9; LY2=${10}
 LW=${11}; LH=${12}
 COL=${13}; SCALE=${14}
 DEST_DIR=${15}; FULL_PATH=${16}
-TMP_CROP="/tmp/measure-crop-$$.png"
-TMP_OUT="/tmp/measure-out-$$.png"
-TMP_VLABEL="/tmp/measure-vlabel-$$.png"
+TMP_CROP="${SCREEN_TOOLKIT_TMPDIR}/measure-crop-$$.png"
+TMP_OUT="${SCREEN_TOOLKIT_TMPDIR}/measure-out-$$.png"
+TMP_VLABEL="${SCREEN_TOOLKIT_TMPDIR}/measure-vlabel-$$.png"
 cleanup() { rm -f "$TMP_CROP" "$TMP_OUT" "$TMP_VLABEL"; }
 trap cleanup EXIT
 # Float-safe scale helpers

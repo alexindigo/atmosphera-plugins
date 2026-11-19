@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.Services.UI
+import "../utils"
 
 Item {
     id: root
@@ -31,7 +32,7 @@ Item {
         if (pal.length > 0) root.paletteColors = pal
     }
 
-    Process {
+    ToolProcess {
         id: paletteProc
         stdout: StdioCollector {}
         onExited: (code) => {

@@ -1,7 +1,7 @@
 {
   "id": "shell-profiles",
   "name": "Profiles",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.8.0",
   "author": "Archlexx",
@@ -32,6 +32,18 @@
       "lastAppliedProfile": "",
       "backupEnabled": true,
       "backupCount": 5
+    },
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "profilesDir": {"type": "String", "machineLocal": true},
+        "icon": {"type": "String"},
+        "iconColor": {"type": "String"},
+        "includeWallpapers": {"type": "Boolean"},
+        "lastAppliedProfile": {"type": "String", "machineLocal": true},
+        "backupEnabled": {"type": "Boolean"},
+        "backupCount": {"type": "Real"}
+      }
     }
   }
 }

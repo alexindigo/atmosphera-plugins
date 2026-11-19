@@ -1,7 +1,7 @@
 {
   "id": "update-count",
   "name": "Update Count",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "BukoMoon",
@@ -21,6 +21,17 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "currentIconName": {"type": "String"},
+        "customCmdDoSystemUpdate": {"type": "String", "optional": true},
+        "customCmdGetNumUpdates": {"type": "String", "optional": true},
+        "hideOnZero": {"type": "Boolean"},
+        "updateIntervalMinutes": {"type": "Real"},
+        "updateTerminalCommand": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "updateIntervalMinutes": 30,
       "updateTerminalCommand": "foot -e",

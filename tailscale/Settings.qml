@@ -85,6 +85,22 @@ ColumnLayout {
     pluginApi?.manifest?.metadata?.defaultSettings?.loginServer ||
     ""
 
+  readonly property bool settingsDirty: editRefreshInterval !== (pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 5000)
+                                        || editCompactMode !== (pluginApi?.pluginSettings?.compactMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ?? false)
+                                        || editShowIpAddress !== (pluginApi?.pluginSettings?.showIpAddress ?? pluginApi?.manifest?.metadata?.defaultSettings?.showIpAddress ?? true)
+                                        || editShowPeerCount !== (pluginApi?.pluginSettings?.showPeerCount ?? pluginApi?.manifest?.metadata?.defaultSettings?.showPeerCount ?? true)
+                                        || editHideDisconnected !== (pluginApi?.pluginSettings?.hideDisconnected ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideDisconnected ?? false)
+                                        || editHideMullvadExitNodes !== (pluginApi?.pluginSettings?.hideMullvadExitNodes ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideMullvadExitNodes ?? true)
+                                        || editShowSearchBar !== (pluginApi?.pluginSettings?.showSearchBar ?? pluginApi?.manifest?.metadata?.defaultSettings?.showSearchBar ?? false)
+                                        || editTerminalCommand !== (pluginApi?.pluginSettings?.terminalCommand || pluginApi?.manifest?.metadata?.defaultSettings?.terminalCommand || "")
+                                        || editSshUsername !== (pluginApi?.pluginSettings?.sshUsername || pluginApi?.manifest?.metadata?.defaultSettings?.sshUsername || "")
+                                        || editPingCount !== (pluginApi?.pluginSettings?.pingCount || pluginApi?.manifest?.metadata?.defaultSettings?.pingCount || 5)
+                                        || editDefaultPeerAction !== (pluginApi?.pluginSettings?.defaultPeerAction || pluginApi?.manifest?.metadata?.defaultSettings?.defaultPeerAction || "copy-ip")
+                                        || editTaildropEnabled !== (pluginApi?.pluginSettings?.taildropEnabled ?? pluginApi?.manifest?.metadata?.defaultSettings?.taildropEnabled ?? true)
+                                        || editTaildropDownloadDir !== (pluginApi?.pluginSettings?.taildropDownloadDir || pluginApi?.manifest?.metadata?.defaultSettings?.taildropDownloadDir || "~/Downloads")
+                                        || editTaildropReceiveMode !== (pluginApi?.pluginSettings?.taildropReceiveMode || pluginApi?.manifest?.metadata?.defaultSettings?.taildropReceiveMode || "operator")
+                                        || editLoginServer !== (pluginApi?.pluginSettings?.loginServer || pluginApi?.manifest?.metadata?.defaultSettings?.loginServer || "")
+
   spacing: Style.marginM
 
   // Title section
@@ -358,8 +374,9 @@ ColumnLayout {
     pluginApi.pluginSettings.taildropReceiveMode = root.editTaildropReceiveMode
     pluginApi.pluginSettings.loginServer = root.editLoginServer
 
-    pluginApi.saveSettings()
-
-    Logger.i("Tailscale", "Settings saved successfully")
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("Tailscale", "Settings saved successfully")
+    })
   }
 }

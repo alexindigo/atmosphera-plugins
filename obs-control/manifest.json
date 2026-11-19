@@ -1,7 +1,7 @@
 {
   "id": "obs-control",
   "name": "OBS Control",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "author": "ayagmar",
   "description": "OBS recording, replay, and stream status widget for Noctalia.",
   "tags": [
@@ -25,6 +25,28 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "autoCloseManagedObs": {"type": "Boolean"},
+        "barLabelMode": {"type": "String"},
+        "launchBehavior": {"type": "String"},
+        "leftClickAction": {"type": "String"},
+        "openVideosAfterStop": {"type": "Boolean"},
+        "pollIntervalMs": {"type": "Real"},
+        "showBarWhenReady": {"type": "Boolean"},
+        "showBarWhenRecording": {"type": "Boolean"},
+        "showBarWhenReplay": {"type": "Boolean"},
+        "showBarWhenStreaming": {"type": "Boolean"},
+        "showControlCenterWhenReady": {"type": "Boolean"},
+        "showControlCenterWhenRecording": {"type": "Boolean"},
+        "showControlCenterWhenReplay": {"type": "Boolean"},
+        "showControlCenterWhenStreaming": {"type": "Boolean"},
+        "showElapsedInBar": {"type": "Boolean"},
+        "videosOpener": {"type": "String"},
+        "videosPath": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "pollIntervalMs": 2500,
       "leftClickAction": "panel",

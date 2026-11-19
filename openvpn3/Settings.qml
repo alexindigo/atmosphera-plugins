@@ -45,6 +45,14 @@ ColumnLayout {
         "name": pluginApi?.tr("settings.pollInterval.30s")
     }]
 
+    readonly property bool settingsDirty: root.editDisplayMode !== (cfg.displayMode ?? defaults.displayMode ?? "onhover")
+        || root.editConnectedColor !== (cfg.connectedColor ?? defaults.connectedColor ?? "primary")
+        || root.editDisconnectedColor !== (cfg.disconnectedColor ?? defaults.disconnectedColor ?? "none")
+        || root.editPollInterval !== (cfg.pollInterval ?? defaults.pollInterval ?? 5)
+        || root.editShowNotifications !== (cfg.showNotifications ?? defaults.showNotifications ?? true)
+        || root.editDefaultPersistent !== (cfg.defaultPersistent ?? defaults.defaultPersistent ?? true)
+        || root.editHideWhenInactive !== (cfg.hideWhenInactive ?? defaults.hideWhenInactive ?? false)
+
     function saveSettings() {
         pluginApi.pluginSettings.displayMode = root.editDisplayMode
         pluginApi.pluginSettings.connectedColor = root.editConnectedColor
@@ -53,8 +61,10 @@ ColumnLayout {
         pluginApi.pluginSettings.showNotifications = root.editShowNotifications
         pluginApi.pluginSettings.defaultPersistent = root.editDefaultPersistent
         pluginApi.pluginSettings.hideWhenInactive = root.editHideWhenInactive
-        pluginApi.saveSettings()
-        Logger.i("OpenVPN3", "Settings saved")
+        pluginApi.saveSettings(function (result) {
+            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+                Logger.i("OpenVPN3", "Settings saved")
+        });
     }
 
     NLabel {

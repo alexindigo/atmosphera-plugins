@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/temp-paths.sh"
 # annotate.sh
 # Usage:
 #   annotate.sh save-overlay-auto <base> <overlay> <filename> <ss_dir> <pic_dir>
@@ -39,7 +40,7 @@ save)
     ;;
 copy)
     BASE="$2"; OVERLAY="$3"
-    OUT="/tmp/screen-toolkit-annotated.png"
+    OUT="${SCREEN_TOOLKIT_TMPDIR}/screen-toolkit-annotated.png"
     magick "$BASE" "$OVERLAY" -composite "$OUT" 2>/dev/null && \
     wl-copy < "$OUT" && rm -f "$OVERLAY" "$OUT"
     ;;
@@ -48,7 +49,7 @@ copy-zoom)
     ;;
 share-flatten)
     BASE="$2"; OVERLAY="$3"
-    magick "$BASE" "$OVERLAY" -composite /tmp/screen-toolkit-share.png 2>/dev/null && \
+    magick "$BASE" "$OVERLAY" -composite "${SCREEN_TOOLKIT_TMPDIR}/screen-toolkit-share.png" 2>/dev/null && \
     rm -f "$OVERLAY"
     ;;
 *)

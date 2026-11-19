@@ -1,7 +1,7 @@
 {
 	"id": "mullvad",
 	"name": "Mullvad VPN",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"minNoctaliaVersion": "4.0.0",
 	"minAtmospheraVersion": "0.8.0",
 	"author": "OCSPG",
@@ -23,6 +23,21 @@
 		"plugins": []
 	},
 	"metadata": {
+		"settingsSchema": {
+			"version": 1,
+			"fields": {
+				"clickAction": {"type": "String"},
+				"compactMode": {"type": "Boolean"},
+				"confirmDisconnectInLockdown": {"type": "Boolean"},
+				"expiryWarningDays": {"type": "Real"},
+				"favoriteCountries": {"type": "List", "element": {"type": "String"}},
+				"refreshInterval": {"type": "Real"},
+				"relayClickConnects": {"type": "Boolean"},
+				"showCityName": {"type": "Boolean"},
+				"showCountryFlag": {"type": "Boolean"},
+				"showIp": {"type": "Boolean"}
+			}
+		},
 		"defaultSettings": {
 			"refreshInterval": 3000,
 			"showCountryFlag": true,

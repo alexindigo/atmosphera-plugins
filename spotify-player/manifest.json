@@ -1,7 +1,7 @@
 {
     "id": "spotify-player",
     "name": "Spotify Player",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "minNoctaliaVersion": "4.7.6",
     "minAtmospheraVersion": "0.8.0",
     "author": "suvi",
@@ -19,14 +19,27 @@
         "plugins": []
     },
     "metadata": {
+        "settingsSchema": {
+            "version": 1,
+            "fields": {
+                "accessToken": {"type": "String", "machineLocal": true, "sensitive": true},
+                "callbackPort": {"type": "Real"},
+                "clientId": {"type": "String"},
+                "clientSecret": {"type": "String", "machineLocal": true, "sensitive": true},
+                "message": {"type": "String", "optional": true},
+                "playerId": {"type": "String"},
+                "refreshToken": {"type": "String", "machineLocal": true, "sensitive": true},
+                "tokenExpiresAt": {"type": "Real", "machineLocal": true}
+            }
+        },
         "defaultSettings": {
             "clientId": "",
             "clientSecret": "",
-            "playerId": "",
-            "callbackPort": 8888,
             "accessToken": "",
             "refreshToken": "",
-            "tokenExpiresAt": 0
+            "tokenExpiresAt": 0,
+            "playerId": "",
+            "callbackPort": 8888
         }
     }
 }

@@ -6,9 +6,10 @@ import qs.Commons
 import qs.Widgets
 import qs.Services.UI
 import "../utils/utils.js" as U
+import "../utils"
 Variants {
     id: root
-    property string imagePath: "/tmp/screen-toolkit-annotate.png"
+    property string imagePath: TempPaths.path("screen-toolkit-annotate.png")
     property var    mainInstance: null
     property bool   isVisible: false
     property int    regionX: 0
@@ -121,7 +122,7 @@ Variants {
             if (overlayWin._cacheRebuilding) return
             overlayWin._cacheRebuilding = true
             var ctx    = cacheCanvas.getContext("2d")
-            var pixUrl = "file:///tmp/screen-toolkit-annotate-pixel.png?" + overlayWin._pixelCacheBust
+            var pixUrl = "file://" + TempPaths.path("screen-toolkit-annotate-pixel.png") + "?" + overlayWin._pixelCacheBust
             ctx.clearRect(0, 0, cacheCanvas.width, cacheCanvas.height)
             if (overlayWin.pixelImgReady && !cacheCanvas.isImageLoaded(pixUrl)) {
                 cacheCanvas.loadImage(pixUrl)
@@ -147,7 +148,7 @@ Variants {
                 var bw = Math.abs(stroke.x2 - stroke.x1)
                 var bh = Math.abs(stroke.y2 - stroke.y1)
                 if (bw > 0 && bh > 0) {
-                    var pixUrl = "file:///tmp/screen-toolkit-annotate-pixel.png?" + overlayWin._pixelCacheBust
+                    var pixUrl = "file://" + TempPaths.path("screen-toolkit-annotate-pixel.png") + "?" + overlayWin._pixelCacheBust
                     if (cacheCanvas.isImageLoaded(pixUrl)) {
                         ctx.beginPath()
                         ctx.rect(bx, by, bw, bh)
@@ -311,7 +312,7 @@ Variants {
                 for (var ri = 0; ri < overlayWin.strokes.length; ri++)
                     if (overlayWin.strokes[ri].type === "step") restoredCount++
                 overlayWin.stepCounter = restoredCount
-                root.parseAndShow(region, "/tmp/screen-toolkit-annotate.png", root._primaryScreen)
+                root.parseAndShow(region, TempPaths.path("screen-toolkit-annotate.png"), root._primaryScreen)
                 _invalidateCache()
                 drawCanvas.requestPaint()
                 return
@@ -329,11 +330,11 @@ Variants {
             var newH = Math.round(root.regionH * scale)
             zoomProc.exec({ command: [
                 "bash", "-c",
-                "magick /tmp/screen-toolkit-annotate.png -resize "
-                    + newW + "x" + newH + "! /tmp/screen-toolkit-annotate-zoom.png 2>/dev/null"
+                "magick " + TempPaths.shellPath("screen-toolkit-annotate.png") + " -resize "
+                    + newW + "x" + newH + "! " + TempPaths.shellPath("screen-toolkit-annotate-zoom.png") + " 2>/dev/null"
             ]})
         }
-        Process {
+        ToolProcess {
             id: pixelateProc
             onExited: (code) => {
                 if (!root.isVisible) return
@@ -346,7 +347,7 @@ Variants {
         }
         property string _lastPreparedPath: ""
         function preparePixelImage() {
-            var basePath = "/tmp/screen-toolkit-annotate.png"
+            var basePath = TempPaths.path("screen-toolkit-annotate.png")
             if (basePath === overlayWin._lastPreparedPath && overlayWin.pixelImgReady) {
                 drawCanvas.requestPaint()
                 return
@@ -355,13 +356,13 @@ Variants {
             pixelImgReady = false
             pixelateProc.exec({ command: [
                 "bash", "-c",
-                "magick /tmp/screen-toolkit-annotate.png -scale 5% -scale 2000% "
-                    + "/tmp/screen-toolkit-annotate-pixel.png 2>/dev/null"
+                "magick " + TempPaths.shellPath("screen-toolkit-annotate.png") + " -scale 5% -scale 2000% "
+                    + TempPaths.shellPath("screen-toolkit-annotate-pixel.png") + " 2>/dev/null"
             ]})
         }
         onPixelImgReadyChanged: {
             if (pixelImgReady) {
-                var stale = "file:///tmp/screen-toolkit-annotate-pixel.png?"
+                var stale = "file://" + TempPaths.path("screen-toolkit-annotate-pixel.png") + "?"
                     + (overlayWin._pixelCacheBust - 1)
                 cacheCanvas.unloadImage(stale)
                 drawCanvas.unloadImage(stale)
@@ -369,18 +370,18 @@ Variants {
                 drawCanvas.requestPaint()
             }
         }
-        Process {
+        ToolProcess {
             id: zoomProc
             onExited: (code) => {
                 if (code === 0) {
                     root.parseAndShowZoomed(
                         root.lastRegion,
-                        "/tmp/screen-toolkit-annotate-zoom.png",
+                        TempPaths.path("screen-toolkit-annotate-zoom.png"),
                         overlayWin._pendingZoomScale)
                 }
             }
         }
-        Process {
+        ToolProcess {
             id: copyProc
             onExited: (code) => {
                 overlayWin.isSaving = false
@@ -392,7 +393,7 @@ Variants {
                 }
             }
         }
-        Process {
+        ToolProcess {
             id: clipFlattenProc
             onExited: (code) => {
                 overlayWin.isSaving = false
@@ -404,7 +405,7 @@ Variants {
                 }
             }
         }
-        Process {
+        ToolProcess {
             id: saveFileProc
             stdout: StdioCollector {}
             onExited: (code) => {
@@ -420,7 +421,7 @@ Variants {
                 }
             }
         }
-        Process { id: cleanupProc }
+        ToolProcess { id: cleanupProc }
         Shortcut {
             sequence: "Escape"
             onActivated: {
@@ -437,7 +438,7 @@ Variants {
                 overlayWin.flattenAndCopy()
             }
         }
-        Process {
+        ToolProcess {
             id: flattenForShareProc
             onExited: (code) => {
                 if (code !== 0) {
@@ -445,10 +446,10 @@ Variants {
                     overlayWin.uploadFailed = true
                     return
                 }
-                overlayWin._doUpload("/tmp/screen-toolkit-share.png")
+                overlayWin._doUpload(TempPaths.path("screen-toolkit-share.png"))
             }
         }
-        Process {
+        ToolProcess {
 			id: uploadProc
 			stdout: StdioCollector {}
 			onExited: (code) => {
@@ -495,7 +496,7 @@ Variants {
 				}
 			}
 		}
-        Process { id: wlCopyUrlProc }
+        ToolProcess { id: wlCopyUrlProc }
         Connections {
             target: root
             function onIsVisibleChanged() {
@@ -521,12 +522,12 @@ Variants {
                     overlayWin.shareUrl          = ""
                     overlayWin.showSharePopover  = false
                     overlayWin.uploadFailed      = false
-                    var pixUrl = "file:///tmp/screen-toolkit-annotate-pixel.png?"
+                    var pixUrl = "file://" + TempPaths.path("screen-toolkit-annotate-pixel.png") + "?"
                         + overlayWin._pixelCacheBust
                     cacheCanvas.unloadImage(pixUrl)
                     drawCanvas.unloadImage(pixUrl)
                     drawCanvas.requestPaint()
-                    cleanupProc.exec({ command: ["bash", "-c", "rm -f /tmp/screen-toolkit-annotate-zoom.png"] })
+                    cleanupProc.exec({ command: ["rm", "-f", "--", TempPaths.path("screen-toolkit-annotate-zoom.png")] })
                 } else {
                     overlayWin.preparePixelImage()
                 }
@@ -700,7 +701,7 @@ Variants {
                         width:  root.regionW
                         height: root.regionH
                         source: overlayWin.pixelImgReady
-                            ? "file:///tmp/screen-toolkit-annotate-pixel.png?" + overlayWin._pixelCacheBust
+                            ? "file://" + TempPaths.path("screen-toolkit-annotate-pixel.png") + "?" + overlayWin._pixelCacheBust
                             : ""
                         fillMode: Image.Stretch
                         cache:    false
@@ -1663,15 +1664,15 @@ Variants {
                 _doUpload(root.imagePath)
             } else {
                 drawCanvas.grabToImage(function(result) {
-                    if (!result || !result.saveToFile("/tmp/screen-toolkit-overlay.png")) {
+                    if (!result || !result.saveToFile(TempPaths.path("screen-toolkit-overlay.png"))) {
                         overlayWin.isUploading  = false
                         overlayWin.uploadFailed = true
                         return
                     }
                     flattenForShareProc.exec({ command: [
                         "bash", overlayWin._annotateScript, "share-flatten",
-                        "/tmp/screen-toolkit-annotate.png",
-                        "/tmp/screen-toolkit-overlay.png"
+                        TempPaths.path("screen-toolkit-annotate.png"),
+                        TempPaths.path("screen-toolkit-overlay.png")
                     ]})
                 })
             }
@@ -1699,7 +1700,7 @@ Variants {
                 }
             } else {
                 drawCanvas.grabToImage(function(result) {
-                    if (!result || !result.saveToFile("/tmp/screen-toolkit-overlay.png")) {
+                    if (!result || !result.saveToFile(TempPaths.path("screen-toolkit-overlay.png"))) {
                         overlayWin.isSaving = false
                         ToastService.showError(root.mainInstance?.pluginApi?.tr("annotate.saveFileFailed"))
                         return
@@ -1707,8 +1708,8 @@ Variants {
                     if (custom === "__auto__") {
                         saveFileProc.exec({ command: [
                             "bash", overlayWin._annotateScript, "save-overlay-auto",
-                            "/tmp/screen-toolkit-annotate.png",
-                            "/tmp/screen-toolkit-overlay.png",
+                            TempPaths.path("screen-toolkit-annotate.png"),
+                            TempPaths.path("screen-toolkit-overlay.png"),
                             filename,
                             home + "/Pictures/Screenshots",
                             home + "/Pictures"
@@ -1716,8 +1717,8 @@ Variants {
                     } else {
                         saveFileProc.exec({ command: [
                             "bash", overlayWin._annotateScript, "save-overlay",
-                            "/tmp/screen-toolkit-annotate.png",
-                            "/tmp/screen-toolkit-overlay.png",
+                            TempPaths.path("screen-toolkit-annotate.png"),
+                            TempPaths.path("screen-toolkit-overlay.png"),
                             custom + "/" + filename
                         ]})
                     }
@@ -1733,20 +1734,19 @@ Variants {
                 ]})
             } else {
                 drawCanvas.grabToImage(function(result) {
-                    if (!result || !result.saveToFile("/tmp/screen-toolkit-overlay.png")) {
+                    if (!result || !result.saveToFile(TempPaths.path("screen-toolkit-overlay.png"))) {
                         overlayWin.isSaving = false
                         ToastService.showError(root.mainInstance?.pluginApi?.tr("annotate.copyFailed"))
                         return
                     }
                     clipFlattenProc.exec({ command: [
                         "bash", overlayWin._annotateScript, "copy",
-                        "/tmp/screen-toolkit-annotate.png",
-                        "/tmp/screen-toolkit-overlay.png"
+                        TempPaths.path("screen-toolkit-annotate.png"),
+                        TempPaths.path("screen-toolkit-overlay.png")
                     ]})
                 })
             }
         }
     }
 }
-
 

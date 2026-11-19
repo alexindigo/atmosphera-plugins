@@ -1,7 +1,7 @@
 {
   "id": "modern-clock",
   "name": "Modern Clock",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "minNoctaliaVersion": "4.1.2",
   "minAtmospheraVersion": "0.8.0",
   "author": "Screamified",
@@ -17,6 +17,25 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "colourChoice": {"type": "Boolean"},
+        "customDateFont": {"type": "String"},
+        "customDayFont": {"type": "String"},
+        "customTimeFont": {"type": "String"},
+        "dateColourChoice": {"type": "String"},
+        "dateColourPicker": {"type": "String"},
+        "dateFontSize": {"type": "Real", "optional": true},
+        "dayColourChoice": {"type": "String"},
+        "dayColourPicker": {"type": "String"},
+        "dayFontSize": {"type": "Real", "optional": true},
+        "textOpacity": {"type": "Real"},
+        "timeColourChoice": {"type": "String"},
+        "timeColourPicker": {"type": "String"},
+        "timeFontSize": {"type": "Real", "optional": true}
+      }
+    },
     "defaultSettings": {
       "dayColourPicker": "black",
       "dateColourPicker": "black",

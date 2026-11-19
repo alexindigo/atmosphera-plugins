@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/temp-paths.sh"
 # XDG-portal-aware file picker with GUI fallbacks.
 # Portal logic lives in pick-file-portal.py (same directory).
 
@@ -19,4 +20,3 @@ elif command -v kdialog >/dev/null 2>&1; then
 else
     exit 2
 fi
-

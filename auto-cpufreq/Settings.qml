@@ -15,6 +15,10 @@ ColumnLayout {
     property bool   editShowGovernor:    cfg.showGovernor    ?? defaults.showGovernor    ?? true
     property bool   editShowTurbo:       cfg.showTurbo       ?? defaults.showTurbo       ?? true
     property bool   editCompactMode:     cfg.compactMode     ?? defaults.compactMode     ?? false
+    readonly property bool settingsDirty: editRefreshInterval !== (cfg.refreshInterval ?? defaults.refreshInterval ?? 3000)
+                                          || editShowGovernor !== (cfg.showGovernor ?? defaults.showGovernor ?? true)
+                                          || editShowTurbo !== (cfg.showTurbo ?? defaults.showTurbo ?? true)
+                                          || editCompactMode !== (cfg.compactMode ?? defaults.compactMode ?? false)
 
     spacing: Style.marginL
 

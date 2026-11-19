@@ -1,7 +1,7 @@
 {
   "id": "ntfy-notifications",
   "name": "ntfy Notifications",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "minNoctaliaVersion": "4.4.1",
   "minAtmospheraVersion": "0.8.0",
   "author": "maxe",
@@ -24,6 +24,21 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "authMethod": {"type": "String"},
+        "authPassword": {"type": "String", "machineLocal": true, "sensitive": true},
+        "authToken": {"type": "String", "machineLocal": true, "sensitive": true},
+        "authUsername": {"type": "String", "machineLocal": true, "sensitive": true},
+        "enableToasts": {"type": "Boolean"},
+        "maxMessages": {"type": "Real"},
+        "pollInterval": {"type": "Real"},
+        "readMessageIds": {"type": "List", "machineLocal": true, "element": {"type": "String"}},
+        "serverUrl": {"type": "String"},
+        "topics": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "serverUrl": "https://ntfy.sh",
       "topics": "",
@@ -31,10 +46,10 @@
       "authToken": "",
       "authUsername": "",
       "authPassword": "",
+      "readMessageIds": [],
       "pollInterval": 30,
       "enableToasts": true,
-      "maxMessages": 100,
-      "readMessageIds": []
+      "maxMessages": 100
     }
   }
 }

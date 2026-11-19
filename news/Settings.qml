@@ -21,6 +21,14 @@ ColumnLayout {
   property int maxHeadlinesValue: cfg.maxHeadlines ?? defaults.maxHeadlines ?? 10
   property int widgetWidthValue: cfg.widgetWidth ?? defaults.widgetWidth ?? 300
   property int rollingSpeedValue: cfg.rollingSpeed ?? defaults.rollingSpeed ?? 50
+  readonly property bool settingsDirty: apiKeyValue !== (cfg.apiKey ?? defaults.apiKey ?? "YOUR_API_KEY_HERE")
+                                        || countryValue !== (cfg.country ?? defaults.country ?? "us")
+                                        || languageValue !== (cfg.language ?? defaults.language ?? "en")
+                                        || categoryValue !== (cfg.category ?? defaults.category ?? "general")
+                                        || refreshIntervalValue !== (cfg.refreshInterval ?? defaults.refreshInterval ?? 30)
+                                        || maxHeadlinesValue !== (cfg.maxHeadlines ?? defaults.maxHeadlines ?? 10)
+                                        || widgetWidthValue !== (cfg.widgetWidth ?? defaults.widgetWidth ?? 300)
+                                        || rollingSpeedValue !== (cfg.rollingSpeed ?? defaults.rollingSpeed ?? 50)
 
   function saveSettings() {
     if (!pluginApi) return;
@@ -43,8 +51,8 @@ ColumnLayout {
     text: apiKeyValue
     onTextChanged: {
       apiKeyValue = text
-      saveSettings()
     }
+    onTextEdited: saveSettings()
   }
 
   NButton {
@@ -136,7 +144,7 @@ ColumnLayout {
     to: 1440
     stepSize: 5
     value: refreshIntervalValue
-    onValueChanged: {
+    onValueModified: {
       refreshIntervalValue = value;
       saveSettings();
     }
@@ -148,7 +156,7 @@ ColumnLayout {
     from: 1
     to: 100
     value: maxHeadlinesValue
-    onValueChanged: {
+    onValueModified: {
       maxHeadlinesValue = value;
       saveSettings();
     }
@@ -161,7 +169,7 @@ ColumnLayout {
     to: 1000
     stepSize: 10
     value: widgetWidthValue
-    onValueChanged: {
+    onValueModified: {
       widgetWidthValue = value;
       saveSettings();
     }
@@ -174,7 +182,7 @@ ColumnLayout {
     to: 200
     stepSize: 10
     value: rollingSpeedValue
-    onValueChanged: {
+    onValueModified: {
       rollingSpeedValue = value;
       saveSettings();
     }

@@ -46,6 +46,9 @@ ColumnLayout {
         }
     }
 
+    readonly property bool settingsDirty: root.valueApiKey !== (cfg.api_key ?? defaults.api_key ?? "")
+        || root.valueRating !== (cfg.rating ?? defaults.rating ?? "g")
+
     function saveSettings() {
         if (!pluginApi) {
             Logger.e("GiphySearch", "Cannot save settings: pluginApi is null");
@@ -54,8 +57,9 @@ ColumnLayout {
 
         pluginApi.pluginSettings.api_key = root.valueApiKey;
         pluginApi.pluginSettings.rating = root.valueRating;
-        pluginApi.saveSettings();
-
-        Logger.d("GiphySearch", "Settings saved successfully");
+        pluginApi.saveSettings(function (result) {
+            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+                Logger.d("GiphySearch", "Settings saved successfully");
+        });
     }
 }

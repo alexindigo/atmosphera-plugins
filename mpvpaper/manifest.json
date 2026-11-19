@@ -1,7 +1,7 @@
 {
   "id": "mpvpaper",
   "name": "Mpvpaper",
-  "version": "1.6.6",
+  "version": "1.6.7",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "spiros132",
@@ -24,6 +24,26 @@
     "plugins": []
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "active": {"type": "Boolean", "optional": true},
+        "automation": {"type": "Boolean", "optional": true},
+        "automationMode": {"type": "String", "optional": true},
+        "automationTime": {"type": "Real", "optional": true},
+        "currentWallpaper": {"type": "String", "optional": true},
+        "fillMode": {"type": "String"},
+        "hardwareAcceleration": {"type": "Boolean", "optional": true},
+        "isMuted": {"type": "Boolean", "optional": true},
+        "isPlaying": {"type": "Boolean", "optional": true},
+        "mpvSocket": {"type": "String"},
+        "oldWallpapers": {"type": "Map", "optional": true, "machineLocal": true, "element": {"type": "String"}},
+        "profile": {"type": "String"},
+        "thumbCacheReady": {"type": "Boolean", "optional": true, "machineLocal": true},
+        "volume": {"type": "Real", "optional": true},
+        "wallpapersFolder": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "mpvSocket": "/tmp/mpv-socket",
       "wallpapersFolder": "~/Pictures/Wallpapers",

@@ -18,6 +18,10 @@ ColumnLayout {
   property int editUpdateInterval: cfg.updateInterval || defaults.updateInterval || 200
   property int editWidth: cfg.width || defaults.width || 300
   property bool editHideWhenInactive: cfg.hideWhenInactive ?? defaults.hideWhenInactive ?? true
+  readonly property bool settingsDirty: editPlayerName !== (cfg.playerName || defaults.playerName || "musicfox")
+                                        || editUpdateInterval !== (cfg.updateInterval || defaults.updateInterval || 200)
+                                        || editWidth !== (cfg.width || defaults.width || 300)
+                                        || editHideWhenInactive !== (cfg.hideWhenInactive ?? defaults.hideWhenInactive ?? true)
 
   Component.onCompleted: {
     Logger.i("MprisLyric", "Settings UI loaded")
@@ -34,8 +38,10 @@ ColumnLayout {
     pluginApi.pluginSettings.width = root.editWidth
     pluginApi.pluginSettings.hideWhenInactive = root.editHideWhenInactive
 
-    pluginApi.saveSettings()
-    Logger.i("MprisLyric", "Settings saved successfully")
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("MprisLyric", "Settings saved successfully")
+    })
   }
 
   // Player name

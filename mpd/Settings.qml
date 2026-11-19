@@ -15,6 +15,10 @@ ColumnLayout {
   property string editRightButton:          cfg.rightButton          ?? defaults.rightButton          ?? "toggle"
   property string editMiddleButton:         cfg.middleButton         ?? defaults.middleButton         ?? "shuffle"
   property bool   editShuffleStopsPlayback: cfg.shuffleStopsPlayback ?? defaults.shuffleStopsPlayback ?? true
+  readonly property bool settingsDirty: editLeftButton !== (cfg.leftButton ?? defaults.leftButton ?? "next")
+                                        || editRightButton !== (cfg.rightButton ?? defaults.rightButton ?? "toggle")
+                                        || editMiddleButton !== (cfg.middleButton ?? defaults.middleButton ?? "shuffle")
+                                        || editShuffleStopsPlayback !== (cfg.shuffleStopsPlayback ?? defaults.shuffleStopsPlayback ?? true)
 
   spacing: Style.marginL
 

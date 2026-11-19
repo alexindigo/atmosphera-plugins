@@ -4,6 +4,7 @@ import qs.Commons
 import qs.Widgets
 import qs.Services.UI
 import "../utils/utils.js" as U
+import "../utils"
 Item {
     id: root
     property var    pluginApi:    null
@@ -55,7 +56,7 @@ Item {
         var custom = pluginApi?.pluginSettings?.searchEngineUrl ?? ""
         return custom.trim() !== "" ? custom : "https://www.google.com/search?q="
     }
-    Process { id: clipProc }
+    ToolProcess { id: clipProc }
     function _copy(text) {
         if (!text || text === "") return
         clipProc.exec({ command: ["bash", "-c",
@@ -262,4 +263,3 @@ Item {
         }
     }
 }
-

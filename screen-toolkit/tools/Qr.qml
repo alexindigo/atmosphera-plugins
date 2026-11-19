@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.Services.UI
+import "../utils"
 
 Item {
     id: root
@@ -29,7 +30,7 @@ Item {
         root.qrCapturePath = s.qrCapturePath ?? ""
     }
 
-    Process {
+    ToolProcess {
         id: qrProc
         stdout: StdioCollector {}
         onExited: (code) => {
@@ -37,11 +38,11 @@ Item {
             if (code !== 0 || result === "") { root.failed(); return }
 
             root.qrResult      = result
-            root.qrCapturePath = "/tmp/screen-toolkit-qr.png"
+            root.qrCapturePath = TempPaths.path("screen-toolkit-qr.png")
 
             if (root.pluginApi) {
                 root.pluginApi.pluginSettings.qrResult      = result
-                root.pluginApi.pluginSettings.qrCapturePath = "/tmp/screen-toolkit-qr.png"
+                root.pluginApi.pluginSettings.qrCapturePath = TempPaths.path("screen-toolkit-qr.png")
                 root.pluginApi.saveSettings()
             }
 

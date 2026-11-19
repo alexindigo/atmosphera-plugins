@@ -1,7 +1,7 @@
 {
   "id": "quickemu",
   "name": "Quickemu",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "minNoctaliaVersion": "4.0.0",
   "minAtmospheraVersion": "0.8.0",
   "author": "GughNess",
@@ -15,6 +15,12 @@
     "panel": "Panel.qml"
   },
   "metadata": {
+    "settingsSchema": {
+      "version": 1,
+      "fields": {
+        "vmDirectory": {"type": "String"}
+      }
+    },
     "defaultSettings": {
       "vmDirectory": "~/quickemu/"
     }

@@ -60,12 +60,13 @@
       "author": "Preston Corless (pgattic)",
       "description": "Adds a watermark to the bottom-right of the screen similar to the one found on unactivated Windows 10/11",
       "license": "MIT",
-      "version": "1.1.1",
+      "version": "1.1.3",
+      "minAtmospheraVersion": "0.10.0",
       "tags": [
         "Desktop",
         "Fun"
       ],
-      "lastUpdated": "2026-02-04T23:08:01-07:00",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true
     },
@@ -197,7 +198,7 @@
       "author": "4rmcyt",
       "description": "Monitor and control auto-cpufreq daemon: governor, turbo boost, CPU stats, and force-override.",
       "license": "MIT",
-      "version": "2.6.2",
+      "version": "2.6.3",
       "tags": [
         "Bar",
         "Panel",
@@ -207,7 +208,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": false,
       "upstreamPR": 914,
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "minNoctaliaVersion": "4.4.1",
       "minAtmospheraVersion": "0.8.0"
     },
@@ -217,11 +218,11 @@
       "author": "itscrystalline",
       "description": "A plugin that allows you to run custom actions when battery state changes.",
       "license": "MIT",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "tags": [
         "System"
       ],
-      "lastUpdated": "2026-04-25T13:10:34+02:00",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.0"
@@ -251,18 +252,18 @@
       "author": "krteke",
       "description": "Extended battery monitor with current power draw, remaining time, battery health, and current power profile.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel",
         "Indicator",
         "System"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "battery-threshold",
@@ -359,18 +360,18 @@
       "author": "MannuVilasara",
       "description": "A cute animated cat for your bar.",
       "license": "MIT",
-      "version": "1.1.9",
+      "version": "1.1.10",
       "tags": [
         "Bar",
         "Desktop",
         "Panel",
         "Fun"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "clamshell",
@@ -474,17 +475,17 @@
       "author": "ToRvaLDz",
       "description": "Toggle Cloudflare WARP from the bar. Shows connection status and mode.",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Bar",
         "Network",
         "Panel"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.0.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "coin-flip",
@@ -679,7 +680,7 @@
       "author": "Ben Hilton",
       "description": "An IPC-driven dmenu replacement that lets external scripts present choices through a Noctalia panel.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.4",
       "tags": [
         "Panel",
         "Productivity",
@@ -687,11 +688,11 @@
         "System",
         "Utility"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.9.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "dns-switcher",
@@ -751,16 +752,16 @@
       "author": "ericbreh",
       "description": "File search from the launcher.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Launcher",
         "Productivity"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.1.2",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "giphy-search",
@@ -768,13 +769,14 @@
       "author": "Sergio Mendolia",
       "description": "Search for GIFs on Giphy from the Launcher.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
+      "minAtmospheraVersion": "0.10.0",
       "tags": [
         "Launcher",
         "Utility",
         "Fun"
       ],
-      "lastUpdated": "2026-06-12T23:11:05+02:00",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.9.0"
@@ -785,18 +787,18 @@
       "author": "Thomas Philippo",
       "description": "Monitor your git repositories from the Noctalia bar. See open issues and pull requests at a glance, without leaving your desktop.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Development",
         "Bar",
         "Panel",
         "Productivity"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "github-contributions",
@@ -879,15 +881,15 @@
       "author": "Noctalia Team",
       "description": "A simple Hello World plugin demonstrating functionalities. For developers only.",
       "license": "MIT",
-      "version": "1.2.6",
+      "version": "1.2.7",
       "tags": [
         "Development"
       ],
-      "lastUpdated": "2026-10-31",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "hermes-agent",
@@ -952,13 +954,13 @@
       "author": "blacku",
       "description": "[DEPRECATED \u2014 not maintained from Hyprland 0.55+] Steam overlay with automatic window management for Hyprland. Due to Hyprland 0.55 deprecating hyprlang in favour of Lua (changing hyprctl dispatch parsing and popup/xdg handling), this plugin is no longer actively maintained. The 2.2.0 release adds a best-effort dual-mode dispatch fix and an optional custom Lua layout, but no further updates are planned. Automatically moves all Steam windows (except fullscreen games) to an overlay workspace; main 3 windows (Friends, Client, Chat) positioned in a row, fully responsive percentage-based layout. Requires Hyprland window manager.",
       "license": "MIT",
-      "version": "2.2.2",
+      "version": "2.2.3",
       "tags": [],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.1.2",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "hyprland-visual-editor",
@@ -966,7 +968,7 @@
       "author": "XimoCP",
       "description": "Elevate your Hyprland experience. A modular plugin to safely inject custom animations, borders, and visual effects on the fly.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Panel",
         "Bar",
@@ -976,11 +978,11 @@
         "Utility",
         "Hyprland"
       ],
-      "lastUpdated": "2026-10-11",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.1",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "ideapad-battery-health",
@@ -1006,15 +1008,15 @@
       "author": "deepalpha",
       "description": "Plugin showing current external IP",
       "license": "MIT",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "tags": [
         "Development"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.3",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "kagi-quick-search",
@@ -1055,18 +1057,18 @@
       "author": "WerWolv",
       "description": "A Plugin integrating your mobile devices into a panel using KDEConnect",
       "license": "GPLv2",
-      "version": "1.2.4",
+      "version": "1.2.5",
       "tags": [
         "Bar",
         "Panel",
         "Utility",
         "System"
       ],
-      "lastUpdated": "2026-10-11",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "keep-awake-plus",
@@ -1131,18 +1133,18 @@
       "author": "ultherego",
       "description": "Kubernetes context and namespace switcher with resource browser powered by kubectl.",
       "license": "MIT",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "tags": [
         "Bar",
         "Panel",
         "Utility",
         "Development"
       ],
-      "lastUpdated": "2026-10-11",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "latency-monitor",
@@ -1168,11 +1170,11 @@
       "author": "Marco Melletti",
       "description": "Noctalia Launcher gnu pass provider",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Launcher"
       ],
-      "lastUpdated": "2026-05-22T12:20:30+02:00",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.7.7"
@@ -1201,12 +1203,12 @@
       "author": "Pever3ll",
       "description": "Uses MPRIS data to fetch song lyrics from lrclib.net and displays it in the bar.",
       "license": "GPLv3",
-      "version": "1.1.3",
+      "version": "1.1.4",
       "tags": [
         "Bar",
         "Music"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
@@ -1236,7 +1238,7 @@
       "author": "User",
       "description": "Shows prayer times with a live countdown and a Hijri calendar with Islamic events.",
       "license": "MIT",
-      "version": "1.3.8",
+      "version": "1.3.10",
       "tags": [
         "Bar",
         "Panel"
@@ -1253,18 +1255,18 @@
       "author": "Mathew-D",
       "description": "GUI for inspecting MIME handlers and updating default applications in mimeapps.list (requires python3).",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Bar",
         "Panel",
         "Utility",
         "System"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.1.2",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "mini-docker",
@@ -1272,17 +1274,17 @@
       "author": "MannuVilasara",
       "description": "Manage Docker containers, images, volumes & networks",
       "license": "MIT",
-      "version": "2.2.2",
+      "version": "2.2.3",
       "tags": [
         "Bar",
         "Panel",
         "Development"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "mirror-mirror",
@@ -1327,7 +1329,7 @@
       "author": "Screamified",
       "description": "A Modern looking clock desktop widget that will tell you the time. (duh)",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Desktop",
         "Fun"
@@ -1345,17 +1347,17 @@
       "author": "ToRvaLDz",
       "description": "Switch monitor profiles from the bar. Shows the active profile and lets you switch between saved configurations.",
       "license": "MIT",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "tags": [
         "Bar",
         "System",
         "Panel"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.0.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "monitor-layout",
@@ -1363,7 +1365,7 @@
       "author": "Mathew-D",
       "description": "Arrange multiple displays visually and change their resolutions from a Noctalia panel.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel",
@@ -1372,7 +1374,7 @@
         "Sway",
         "Hyprland"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
@@ -1384,13 +1386,13 @@
       "author": "Ido Perlmuter",
       "description": "MPD plugin for Noctalia",
       "license": "MIT",
-      "version": "1.1.3",
+      "version": "1.1.4",
       "tags": [
         "Bar",
         "Audio",
         "Music"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
@@ -1402,16 +1404,16 @@
       "author": "DBeidachazi",
       "description": "Display synchronized lyrics from MPRIS-compatible music players (e.g., go-musicfox) in the bar.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Bar",
         "Music"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.8.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "mpvpaper",
@@ -1419,7 +1421,7 @@
       "author": "spiros132",
       "description": "A plugin that allows having video wallpapers using mpvpaper.",
       "license": "MIT",
-      "version": "1.6.6",
+      "version": "1.6.7",
       "tags": [
         "Bar",
         "Panel",
@@ -1438,7 +1440,7 @@
       "author": "OCSPG",
       "description": "Control Mullvad VPN from the bar: connect/disconnect, pick relays, toggle lockdown mode, multihop and more.",
       "license": "MIT",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "tags": [
         "Bar",
         "Network",
@@ -1456,7 +1458,7 @@
       "author": "kevichi7",
       "description": "Search YouTube, play audio in the background with mpv, and save favorites into a persistent library.",
       "license": "MIT",
-      "version": "1.2.4",
+      "version": "1.2.5",
       "tags": [
         "Bar",
         "Panel",
@@ -1476,17 +1478,17 @@
       "author": "Cleboost",
       "description": "Show NetBird VPN status in the menu bar.",
       "license": "MIT",
-      "version": "1.1.3",
+      "version": "1.1.4",
       "tags": [
         "Bar",
         "Network",
         "Panel"
       ],
-      "lastUpdated": "2026-10-11",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.0.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "network-indicator",
@@ -1494,7 +1496,7 @@
       "author": "tonigineer",
       "description": "A `lively` network traffic indicator.",
       "license": "MIT",
-      "version": "2.0.1",
+      "version": "2.0.2",
       "tags": [
         "Bar",
         "Network",
@@ -1530,18 +1532,18 @@
       "author": "LazarH",
       "description": "Display scrolling news headlines from various sources using NewsAPI.org",
       "license": "MIT",
-      "version": "1.2.8",
+      "version": "1.2.9",
       "tags": [
         "Bar",
         "Panel",
         "Network",
         "Fun"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "niri-animation-picker",
@@ -1549,18 +1551,18 @@
       "author": "Duncan-Rose",
       "description": "Pick a KDL animation preset and write it as an include into your niri config",
       "license": "MIT",
-      "version": "1.1.6",
+      "version": "1.1.7",
       "tags": [
         "Fun",
         "Niri",
         "Theming",
         "Utility"
       ],
-      "lastUpdated": "2026-10-11",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "niri-auto-tile",
@@ -1568,7 +1570,7 @@
       "author": "pir0c0pter0",
       "description": "Automatically redistributes niri column widths evenly when windows open or close",
       "license": "MIT",
-      "version": "1.4.3",
+      "version": "1.4.4",
       "tags": [
         "Bar",
         "Utility",
@@ -1640,17 +1642,17 @@
       "author": "jfreed-dev",
       "description": "Idle-aware terminal screensaver for niri, driven by TerminalTextEffects.",
       "license": "GPL-3.0-only",
-      "version": "0.8.3",
+      "version": "0.8.5",
       "tags": [
         "Bar",
         "Utility",
         "Niri"
       ],
-      "lastUpdated": "2026-10-11",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.7.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "niri-urgent-on-notification",
@@ -1710,7 +1712,7 @@
       "author": "cod3d <cod3ddot@proton.me>",
       "description": "GPU control with supergfxctl for noctalia.",
       "license": "MIT",
-      "version": "0.0.4",
+      "version": "0.0.5",
       "tags": [
         "Bar",
         "Panel",
@@ -1785,7 +1787,7 @@
       "author": "apt-get",
       "description": "A simple scratchpad for quick notes.",
       "license": "MIT",
-      "version": "1.1.8",
+      "version": "1.1.9",
       "tags": [
         "Bar",
         "Panel",
@@ -1803,7 +1805,7 @@
       "author": "maxe",
       "description": "Subscribe to ntfy topics and receive push notifications directly in your bar, with full theming support",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel",
@@ -1878,7 +1880,7 @@
       "author": "ayagmar",
       "description": "OBS recording, replay, and stream status widget for Noctalia.",
       "license": "MIT",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "tags": [
         "Bar",
         "Panel",
@@ -1930,7 +1932,7 @@
       "author": "minh",
       "description": "Manage OpenVPN3 VPN connections from the bar and control center",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Bar",
         "Panel",
@@ -1940,9 +1942,9 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": false,
       "upstreamPR": 947,
-      "lastUpdated": "2026-10-11",
+      "lastUpdated": "2026-11-02",
       "minNoctaliaVersion": "4.4.1",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "osk-toggle",
@@ -2000,17 +2002,17 @@
       "author": "blacku",
       "description": "A full-featured plugin manager with browsing, installation, and README viewer for Noctalia plugins.",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Bar",
         "Panel",
         "Development"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "polkit-agent",
@@ -2035,7 +2037,7 @@
       "author": "notprayasmitra",
       "description": "A pomodoro timer plugin to help boost productivity.",
       "license": "MIT",
-      "version": "1.2.1",
+      "version": "1.2.2",
       "tags": [
         "Bar",
         "Productivity"
@@ -2072,17 +2074,17 @@
       "author": "Noctalia Team",
       "description": "A privacy indicator widget that shows when microphone, camera or screen sharing is active.",
       "license": "MIT",
-      "version": "1.2.15",
+      "version": "1.2.16",
       "tags": [
         "Bar",
         "Privacy",
         "Indicator"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "protonvpn",
@@ -2108,7 +2110,7 @@
       "author": "GughNess",
       "description": "Manage and create Quickemu virtual machines from the bar.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Virtualization",
@@ -2144,7 +2146,7 @@
       "author": "Lokize",
       "description": "Monitor and read RSS/Atom feeds directly from your desktop",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [],
       "lastUpdated": "2026-10-11",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
@@ -2175,7 +2177,7 @@
       "author": "spiros132",
       "description": "A plugin that allows you to have multiple setups for your desktop widgets based on the wallpaper.",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Fun",
         "System"
@@ -2192,7 +2194,7 @@
       "author": "Noctalia Team",
       "description": "Hardware-accelerated screen recording using gpu-screen-recorder with customizable video and audio settings",
       "license": "MIT",
-      "version": "1.3.9",
+      "version": "1.3.10",
       "tags": [
         "Bar",
         "Utility"
@@ -2229,7 +2231,7 @@
       "author": "ycf-anon",
       "description": "A set of screen tools: color picker, annotate, record, pin, OCR, QR scanner, palette, measure, and webcam mirror (deps: README).",
       "license": "MIT",
-      "version": "1.3.5",
+      "version": "1.3.6",
       "tags": [
         "Panel",
         "Bar",
@@ -2287,7 +2289,7 @@
       "author": "Archlexx",
       "description": "Save, load, and manage Noctalia configuration profiles.",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Bar",
         "Theming",
@@ -2306,7 +2308,7 @@
       "author": "onez3r0",
       "description": "Floating OSD that displays keyboard input in real-time via evtest.",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Indicator",
         "System"
@@ -2323,7 +2325,7 @@
       "author": "fusuyfusuy",
       "description": "A simple note taking plugin for Noctalia Shell.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Bar",
         "Panel",
@@ -2341,7 +2343,7 @@
       "author": "tui",
       "description": "A bongo cat that sits in your bar and slaps when you type.",
       "license": "MIT",
-      "version": "0.8.1",
+      "version": "0.8.2",
       "tags": [
         "Bar",
         "Audio",
@@ -2379,7 +2381,7 @@
       "author": "Qholin",
       "description": "Configurable Hyprland special workspaces indicator for the bar.",
       "license": "MIT",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "tags": [
         "Bar",
         "Productivity",
@@ -2397,7 +2399,7 @@
       "author": "suvi",
       "description": "Control spotify_player from a bar widget.",
       "license": "GPL 3.0",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Bar",
         "Panel",
@@ -2434,7 +2436,7 @@
       "author": "adriamartin91",
       "description": "Manage SSH connections from ~/.ssh/config with active session detection and launcher integration.",
       "license": "MIT",
-      "version": "1.1.4",
+      "version": "1.1.5",
       "tags": [
         "Bar",
         "Panel",
@@ -2442,11 +2444,11 @@
         "Utility",
         "Development"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "sticky-notes",
@@ -2472,7 +2474,7 @@
       "author": "Pir0c0pter0",
       "description": "Theme-aware Syncthing status plugin with bar and panel integration",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel",
@@ -2508,17 +2510,17 @@
       "author": "nineluj",
       "description": "Show Tailscale status in the menu bar and send/receive files via Taildrop.",
       "license": "MIT",
-      "version": "1.5.5",
+      "version": "1.5.6",
       "tags": [
         "Bar",
         "Network",
         "Panel"
       ],
-      "lastUpdated": "2026-10-11",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.0.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "tamagotchi",
@@ -2526,7 +2528,7 @@
       "author": "Joaquin Righetti, Lucia Bollati",
       "description": "A lightweight taskbar Tamagotchi that lives and evolves while you use your computer.",
       "license": "MIT",
-      "version": "1.1.4",
+      "version": "1.1.5",
       "tags": [
         "Bar",
         "Fun",
@@ -2544,7 +2546,7 @@
       "author": "Piero-93",
       "description": "Monitors system temperatures and provides manual overrides for fan speed profiles via sysfs.",
       "license": "GPLv3",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "tags": [
         "Bar",
         "Indicator",
@@ -2563,16 +2565,16 @@
       "author": "Noctalia Team",
       "description": "A timer and stopwatch plugin for the bar & control center.",
       "license": "MIT",
-      "version": "1.1.6",
+      "version": "1.1.7",
       "tags": [
         "Bar",
         "Utility"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.4",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "todo",
@@ -2580,7 +2582,7 @@
       "author": "lonerOrz <lonerOrz@qq.com>",
       "description": "A simple todo list manager plugin for Noctalia Shell.",
       "license": "MIT",
-      "version": "1.10.2",
+      "version": "1.10.3",
       "tags": [
         "Bar",
         "Desktop",
@@ -2616,7 +2618,7 @@
       "author": "Cleboost",
       "description": "Quick translate in launcher",
       "license": "MIT",
-      "version": "1.2.7",
+      "version": "1.2.8",
       "tags": [
         "Launcher"
       ],
@@ -2648,7 +2650,7 @@
       "author": "BukoMoon",
       "description": "Checks for system updates and shows the update count. Click to run update command in a terminal.",
       "license": "GPLv3",
-      "version": "1.0.15",
+      "version": "1.0.16",
       "tags": [
         "Bar",
         "System"
@@ -2702,7 +2704,7 @@
       "author": "spiros132",
       "description": "A plugin that uses a backend renderer to play videos as your wallpaper.",
       "license": "MIT",
-      "version": "2.0.11",
+      "version": "2.0.12",
       "tags": [
         "Bar",
         "Panel",
@@ -2754,7 +2756,7 @@
       "author": "tonigineer",
       "description": "A `lively` wallpaper selector.",
       "license": "MIT",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "tags": [
         "Desktop",
         "Theming"
@@ -2805,16 +2807,16 @@
       "author": "Rigelyon",
       "description": "Search the Internet from the Launcher.",
       "license": "MIT",
-      "version": "1.1.5",
+      "version": "1.1.6",
       "tags": [
         "Launcher",
         "Utility"
       ],
-      "lastUpdated": "2026-10-10",
+      "lastUpdated": "2026-11-02",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.9.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.10.0"
     },
     {
       "id": "weekly-calendar",
@@ -2878,7 +2880,7 @@
       "author": "Lokize",
       "description": "Display time from multiple timezones around the world with automatic rotation.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [],
       "lastUpdated": "2026-10-10",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
@@ -2892,7 +2894,7 @@
       "author": "justKevv",
       "description": "A zed provider for opening project easier using zed code editor",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "Launcher",
         "Developer"
