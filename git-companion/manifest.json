@@ -1,7 +1,7 @@
 {
   "id": "git-companion",
   "name": "Git Companion",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.10.0",
   "author": "Thomas Philippo",
@@ -28,11 +28,11 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "group": {"type": "String"},
-        "platform": {"type": "String"},
-        "refreshInterval": {"type": "Real"},
-        "repo": {"type": "String"},
-        "selectedRepo": {"type": "String", "optional": true, "machineLocal": true}
+        "group": {"type": "String", "editorUsage": "configuration"},
+        "platform": {"type": "String", "editorUsage": "configuration"},
+        "refreshInterval": {"type": "Real", "editorUsage": "configuration"},
+        "repo": {"type": "String", "editorUsage": "configuration"},
+        "selectedRepo": {"type": "String", "editorUsage": "configuration", "optional": true, "machineLocal": true}
       }
     },
     "defaultSettings": {

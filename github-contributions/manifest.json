@@ -1,7 +1,7 @@
 {
   "id": "github-contributions",
   "name": "GitHub Contributions",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "minNoctaliaVersion": "4.4.1",
   "minAtmospheraVersion": "0.10.0",
   "author": "xevrion",
@@ -21,13 +21,13 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "layout": {"type": "String"},
-        "refreshInterval": {"type": "Real"},
-        "showLabels": {"type": "Boolean"},
-        "showTotal": {"type": "Boolean"},
-        "token": {"type": "String", "sensitive": true, "machineLocal": true},
-        "username": {"type": "String"},
-        "weeksShown": {"type": "Real"}
+        "layout": {"type": "String", "editorUsage": "configuration"},
+        "refreshInterval": {"type": "Real", "editorUsage": "configuration"},
+        "showLabels": {"type": "Boolean", "editorUsage": "configuration"},
+        "showTotal": {"type": "Boolean", "editorUsage": "configuration"},
+        "token": {"type": "String", "editorUsage": "configuration", "sensitive": true, "machineLocal": true},
+        "username": {"type": "String", "editorUsage": "configuration"},
+        "weeksShown": {"type": "Real", "editorUsage": "configuration"}
       }
     },
     "defaultSettings": {

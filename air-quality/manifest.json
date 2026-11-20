@@ -1,7 +1,7 @@
 {
   "id": "air-quality",
   "name": "Air Quality",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "adriamartin91",
@@ -23,14 +23,14 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "aqiScale": {"type": "String"},
-        "aqicnToken": {"type": "String"},
-        "boldText": {"type": "Boolean"},
-        "customLatitude": {"type": "String"},
-        "customLongitude": {"type": "String"},
-        "dataSource": {"type": "String"},
-        "refreshInterval": {"type": "Real"},
-        "useNoctaliaLocation": {"type": "Boolean"}
+        "aqiScale": {"type": "String", "editorUsage": "configuration"},
+        "aqicnToken": {"type": "String", "editorUsage": "configuration"},
+        "boldText": {"type": "Boolean", "editorUsage": "configuration"},
+        "customLatitude": {"type": "String", "editorUsage": "configuration"},
+        "customLongitude": {"type": "String", "editorUsage": "configuration"},
+        "dataSource": {"type": "String", "editorUsage": "configuration"},
+        "refreshInterval": {"type": "Real", "editorUsage": "configuration"},
+        "useNoctaliaLocation": {"type": "Boolean", "editorUsage": "configuration"}
       }
     },
     "defaultSettings": {

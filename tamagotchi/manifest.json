@@ -1,7 +1,7 @@
 {
   "id": "tamagotchi",
   "name": "Tamagochi",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.10.0",
   "author": "Joaquin Righetti, Lucia Bollati",
@@ -22,14 +22,14 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "hunger": {"type": "Real", "machineLocal": true},
-        "happiness": {"type": "Real", "machineLocal": true},
-        "cleanliness": {"type": "Real", "machineLocal": true},
-        "energy": {"type": "Real", "machineLocal": true},
-        "difficulty": {"type": "Real"},
-        "showDebug": {"type": "Boolean"},
-        "showPercentage": {"type": "Boolean"},
-        "volume": {"type": "Real"}
+        "hunger": {"type": "Real", "editorUsage": "operational", "machineLocal": true},
+        "happiness": {"type": "Real", "editorUsage": "operational", "machineLocal": true},
+        "cleanliness": {"type": "Real", "editorUsage": "operational", "machineLocal": true},
+        "energy": {"type": "Real", "editorUsage": "operational", "machineLocal": true},
+        "difficulty": {"type": "Real", "editorUsage": "configuration"},
+        "showDebug": {"type": "Boolean", "editorUsage": "configuration"},
+        "showPercentage": {"type": "Boolean", "editorUsage": "configuration"},
+        "volume": {"type": "Real", "editorUsage": "configuration"}
       }
     },
     "defaultSettings": {
