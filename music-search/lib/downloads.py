@@ -5,7 +5,6 @@ import fcntl
 import json
 import os
 from pathlib import Path
-import shutil
 import stat
 import subprocess
 import sys
@@ -76,6 +75,16 @@ def produce(stage, title, url, extractor):
     return outputs[0]
 
 
+def copy_complete(incoming, target):
+    while chunk := incoming.read(64 * 1024):
+        remaining = memoryview(chunk)
+        while remaining:
+            written = target.write(remaining)
+            if written is None or written <= 0:
+                raise OSError("MP3 output write made no progress.")
+            remaining = remaining[written:]
+
+
 def download(cache, destination, limit, title, url, extractor):
     ledger = cache / "downloads.json"
     with (cache / "downloads.lock").open("a") as lock:
@@ -115,7 +124,7 @@ def download(cache, destination, limit, title, url, extractor):
             with target:
                 try:
                     with source.open("rb") as incoming:
-                        shutil.copyfileobj(incoming, target)
+                        copy_complete(incoming, target)
                         os.fsync(target.fileno())
                 finally:
                     # The pathname may already refer to an unrelated replacement.

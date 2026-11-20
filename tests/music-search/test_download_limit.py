@@ -1,10 +1,12 @@
 """Offline public-helper regression tests. Run only inside the project VM."""
 
 import concurrent.futures
+import contextlib
 import fcntl
 import functools
 import http.server
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
@@ -164,7 +166,7 @@ if os.environ.get("STUB_FAIL"):
         module = self.download_module()
         source = self.root / "Publication.mp3"
         source.write_bytes(b"new")
-        copy = module.shutil.copyfileobj
+        copy = module.copy_complete
         for failure in (False, True):
             with self.subTest(failure=failure):
                 created = []
@@ -178,7 +180,7 @@ if os.environ.get("STUB_FAIL"):
                     if failure:
                         raise OSError("fixture copy failed")
                 with mock.patch.object(module, "produce", return_value=source), \
-                     mock.patch.object(module.shutil, "copyfileobj", side_effect=replace_during_copy):
+                     mock.patch.object(module, "copy_complete", side_effect=replace_during_copy):
                     if failure:
                         with self.assertRaises(OSError):
                             module.download(self.state, self.music, 0, "", "", "")
@@ -191,6 +193,57 @@ if os.environ.get("STUB_FAIL"):
                 self.assertNotEqual(output.stat().st_ino, record["inode"])
                 self.assertEqual(output.read_bytes(), b"foreign replacement")
                 self.assertNotIn(str(output), [r["path"] for r in module.live_records(self.state / "downloads.json")])
+
+    def test_publication_completes_short_writes_and_accounts_for_write_failures(self):
+        module = self.download_module()
+        open_file = Path.open
+        payload = b"complete audio bytes"
+        for outcome in ("short", "zero", "error"):
+            with self.subTest(outcome=outcome):
+                source = self.root / (outcome + ".mp3")
+                source.write_bytes(payload)
+
+                class PartialWriter:
+                    def __init__(self, target):
+                        self.target = target
+                        self.calls = 0
+
+                    def __getattr__(self, name):
+                        return getattr(self.target, name)
+
+                    def __enter__(self):
+                        return self
+
+                    def __exit__(self, *args):
+                        return self.target.__exit__(*args)
+
+                    def write(self, data):
+                        self.calls += 1
+                        if self.calls > 1 and outcome == "zero":
+                            return 0
+                        if self.calls > 1 and outcome == "error":
+                            raise OSError("fixture volume full")
+                        return self.target.write(data[:2])
+
+                def open_partial(path, mode="r", *args, **kwargs):
+                    target = open_file(path, mode, *args, **kwargs)
+                    return PartialWriter(target) if mode == "xb" else target
+
+                reported = io.StringIO()
+                with mock.patch.object(module, "produce", return_value=source), \
+                     mock.patch.object(Path, "open", open_partial), \
+                     contextlib.redirect_stdout(reported):
+                    if outcome == "short":
+                        self.assertEqual(module.download(self.state, self.music, 0, "", "", ""), 0)
+                    else:
+                        with self.assertRaises(OSError):
+                            module.download(self.state, self.music, 0, "", "", "")
+                output = self.music / source.name
+                self.assertEqual(output.read_bytes(), payload if outcome == "short" else payload[:2])
+                record = self.records()[-1]
+                self.assertEqual(record["size"], output.stat().st_size)
+                self.assertEqual(record["inode"], output.stat().st_ino)
+                self.assertEqual(reported.getvalue().strip(), str(output) if outcome == "short" else "")
 
     def test_stop_defers_busy_cleanup_and_retries_without_blocking(self):
         source = self.prepare_playback()
