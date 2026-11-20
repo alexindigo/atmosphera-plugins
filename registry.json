@@ -2573,14 +2573,14 @@
       "author": "lonerOrz <lonerOrz@qq.com>",
       "description": "A simple todo list manager plugin for Noctalia Shell.",
       "license": "MIT",
-      "version": "1.10.8",
+      "version": "1.10.9",
       "tags": [
         "Bar",
         "Desktop",
         "Panel",
         "Productivity"
       ],
-      "lastUpdated": "2026-10-11",
+      "lastUpdated": "2026-11-19",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.7.1",
