@@ -11,6 +11,25 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
+  readonly property bool sharedContent: pluginApi?.scopeKind === "plugin"
+  // Explicit shared-content commands only. Configuration Apply never gathers
+  // a rendered task/page snapshot into the native selected namespace.
+  property var contentIntents: ({})
+  property bool namesPending: false
+  function markContent(key) {
+    var next = Object.assign({}, contentIntents);
+    next[key] = true;
+    contentIntents = next;
+  }
+  function stageConfiguration(key, value) {
+    // Existing selected-page namespace only; no live runtime API or new writer.
+    pluginApi.pluginSettings[key] = value;
+  }
+  function stagePriorityColor(key, value) {
+    var next = Object.assign({}, pluginApi.pluginSettings.priorityColors);
+    next[key] = value.toString();
+    stageConfiguration("priorityColors", next);
+  }
   readonly property var initial: pluginApi?.initialSettings || ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
   NSettingsBaseline {
@@ -38,13 +57,16 @@ ColumnLayout {
   readonly property bool settingsDirty: displayBaseline.differs({valueShowCompleted: valueShowCompleted, valueShowBackground: valueShowBackground, valueUseCustomColors: valueUseCustomColors, valueHighPriorityColor: valueHighPriorityColor, valueMediumPriorityColor: valueMediumPriorityColor, valueLowPriorityColor: valueLowPriorityColor, valueExportPath: valueExportPath, valueExportFormat: valueExportFormat, valueExportEmptySections: valueExportEmptySections, editPages: editPages, editTodos: editTodos, editCurrentPage: editCurrentPage, pendingNames: pendingNames, newPageName: newPageName})
 
   function setPendingName(id, value) {
+    if (!sharedContent) return;
+    namesPending = true;
     var next = Object.assign({}, pendingNames); next[String(id)] = value; pendingNames = next;
   }
   function renamePage(id, name) {
     name = name.trim();
     var index = editPages.findIndex(page => page.id === id);
-    if (!name || !isPageNameUnique(name, index)) return false;
+    if (!sharedContent || !name || !isPageNameUnique(name, index)) return false;
     editPages = Pages.rename(editPages, id, name);
+    markContent("pages");
     setPendingName(id, name);
     return true;
   }
@@ -79,6 +101,7 @@ ColumnLayout {
     checked: root.valueShowCompleted
     onToggled: function (checked) {
       root.valueShowCompleted = checked;
+      root.stageConfiguration("showCompleted", checked);
     }
   }
 
@@ -89,6 +112,7 @@ ColumnLayout {
     checked: root.valueShowBackground
     onToggled: function (checked) {
       root.valueShowBackground = checked;
+      root.stageConfiguration("showBackground", checked);
     }
   }
 
@@ -100,6 +124,7 @@ ColumnLayout {
     checked: root.valueUseCustomColors
     onToggled: function (checked) {
       root.valueUseCustomColors = checked;
+      root.stageConfiguration("useCustomColors", checked);
     }
   }
 
@@ -135,6 +160,7 @@ ColumnLayout {
         selectedColor: root.valueHighPriorityColor
         onColorSelected: function (color) {
           root.valueHighPriorityColor = color;
+          root.stagePriorityColor("high", color);
         }
       }
 
@@ -151,6 +177,7 @@ ColumnLayout {
         selectedColor: root.valueMediumPriorityColor
         onColorSelected: function (color) {
           root.valueMediumPriorityColor = color;
+          root.stagePriorityColor("medium", color);
         }
       }
 
@@ -167,6 +194,7 @@ ColumnLayout {
         selectedColor: root.valueLowPriorityColor
         onColorSelected: function (color) {
           root.valueLowPriorityColor = color;
+          root.stagePriorityColor("low", color);
         }
       }
     }
@@ -181,7 +209,10 @@ ColumnLayout {
     text: root.valueExportPath
     buttonIcon: "folder-open"
     buttonTooltip: pluginApi.tr("settings.export_path.select_folder")
-    onInputEditingFinished: root.valueExportPath = text
+    onInputEditCommitted: {
+      root.valueExportPath = text;
+      root.stageConfiguration("exportPath", text);
+    }
     onButtonClicked: folderPicker.openFilePicker()
   }
 
@@ -203,6 +234,7 @@ ColumnLayout {
     currentKey: root.valueExportFormat
     onSelected: function (key) {
       root.valueExportFormat = key;
+      root.stageConfiguration("exportFormat", key);
     }
   }
 
@@ -214,6 +246,7 @@ ColumnLayout {
     checked: root.valueExportEmptySections
     onToggled: function (checked) {
       root.valueExportEmptySections = checked;
+      root.stageConfiguration("exportEmptySections", checked);
     }
   }
 
@@ -226,14 +259,22 @@ ColumnLayout {
     onAccepted: function (paths) {
       if (paths.length > 0) {
         root.valueExportPath = paths[0];
+        root.stageConfiguration("exportPath", paths[0]);
       }
     }
   }
 
   // Section for managing pages
+  NText {
+    visible: !root.sharedContent
+    Layout.fillWidth: true
+    wrapMode: Text.WordWrap
+    text: pluginApi?.tr("settings.pages.shared_scope")
+  }
   ColumnLayout {
     Layout.fillWidth: true
     spacing: Style.marginS
+    enabled: root.sharedContent
 
     NText {
       text: pluginApi?.tr("settings.pages.label")
@@ -446,6 +487,7 @@ ColumnLayout {
   }
 
   function addPage() {
+    if (!sharedContent) return;
     var name = newPageName.trim();
 
     if (name === "") {
@@ -460,6 +502,7 @@ ColumnLayout {
 
     // Use mainInstance to create page
     editPages = Pages.create(editPages, name);
+    markContent("pages");
     pendingNames = Pages.names(editPages, pendingNames);
 
     newPageName = "";
@@ -533,7 +576,7 @@ ColumnLayout {
 
   // Function to perform the actual page deletion
   function performPageDeletion(pageIdx) {
-    if (pageIdx < 0)
+    if (!sharedContent || pageIdx < 0)
       return;
 
     var pages = editPages;
@@ -556,6 +599,9 @@ ColumnLayout {
     editPages = next.pages;
     editTodos = next.todos;
     editCurrentPage = next.current;
+    markContent("pages");
+    markContent("todos");
+    markContent("current_page_id");
     pendingNames = Pages.names(editPages, pendingNames);
   }
 
@@ -565,26 +611,19 @@ ColumnLayout {
       return;
     }
 
-    editPages = Pages.withNames(editPages, pendingNames, newPageName);
-    pendingNames = Pages.names(editPages);
-    newPageName = "";
-
-    pluginApi.pluginSettings.showCompleted = root.valueShowCompleted;
-    pluginApi.pluginSettings.showBackground = root.valueShowBackground;
-    pluginApi.pluginSettings.useCustomColors = root.valueUseCustomColors;
-
-    if (!valueUseCustomColors) {
-      valueHighPriorityColor = AtmoColor.mError;
-      valueMediumPriorityColor = AtmoColor.mPrimary;
-      valueLowPriorityColor = AtmoColor.mOnSurfaceVariant;
+    if (sharedContent && (namesPending || newPageName.length > 0)) {
+      editPages = Pages.withNames(editPages, pendingNames, newPageName);
+      pendingNames = Pages.names(editPages);
+      newPageName = "";
+      namesPending = false;
+      markContent("pages");
     }
-    pluginApi.pluginSettings.priorityColors = Object.assign({}, pluginApi.pluginSettings.priorityColors, {high: valueHighPriorityColor.toString(), medium: valueMediumPriorityColor.toString(), low: valueLowPriorityColor.toString()});
-    pluginApi.pluginSettings.exportPath = valueExportPath;
-    pluginApi.pluginSettings.exportFormat = valueExportFormat;
-    pluginApi.pluginSettings.exportEmptySections = valueExportEmptySections;
-    pluginApi.pluginSettings.pages = Pages.clone(editPages);
-    pluginApi.pluginSettings.todos = Pages.clone(editTodos);
-    pluginApi.pluginSettings.current_page_id = editCurrentPage;
+
+    if (sharedContent) {
+      if (contentIntents.pages) pluginApi.pluginSettings.pages = Pages.clone(editPages);
+      if (contentIntents.todos) pluginApi.pluginSettings.todos = Pages.clone(editTodos);
+      if (contentIntents.current_page_id) pluginApi.pluginSettings.current_page_id = editCurrentPage;
+    }
 
     pluginApi.saveSettings();
 
@@ -593,7 +632,10 @@ ColumnLayout {
   Connections {
     target: root.pluginApi
     function onSettingsCompleted(result) {
-      if ((result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current") Logger.i("Todo", "Settings saved successfully");
+      if ((result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current") {
+        root.contentIntents = ({});
+        Logger.i("Todo", "Settings saved successfully");
+      }
     }
   }
 }

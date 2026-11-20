@@ -120,6 +120,7 @@
       "low_label": "Low Priority:"
     },
     "pages": {
+      "shared_scope": "Pages and tasks are shared content. Manage them in Settings -> Plugins -> Todo.",
       "label": "Manage Pages",
       "placeholder": "Enter new page name",
       "add_button": "Add Page",
