@@ -7,29 +7,26 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
+  readonly property var iconColorField: pluginApi?.field("iconColor") ?? null
 
-  property var cfg: pluginApi?.pluginSettings || ({})
-  property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-  property string iconColor: displayBaseline.iconColor
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property string iconColor: cfg.iconColor ?? defaults.iconColor ?? "none"
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({iconColor: root.iconColor})
+  readonly property string iconColor: root.iconColorField?.value ?? "none"
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   spacing: Style.marginL
-
 
   ColumnLayout {
     spacing: Style.marginM
     Layout.fillWidth: true
 
-
-    NColorChoice {
-      label: pluginApi?.tr("settings.iconColor.label")
-      description: pluginApi?.tr("settings.iconColor.desc")
-      currentKey: root.iconColor
-      onSelected: key => root.iconColor = key
+    NPluginSettingsField {
+      field: root.iconColorField
+      NColorChoice {
+        label: pluginApi?.tr("settings.iconColor.label")
+        description: pluginApi?.tr("settings.iconColor.desc")
+        currentKey: root.iconColor
+        onSelected: key => root.iconColorField.set(key)
+      }
     }
   }
 
@@ -37,7 +34,6 @@ ColumnLayout {
     if (!pluginApi) {
       return;
     }
-    pluginApi.pluginSettings.iconColor = root.iconColor;
     pluginApi.saveSettings();
   }
 }

@@ -1,7 +1,7 @@
 {
   "id": "model-usage",
   "name": "Model Usage",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "cmptr",

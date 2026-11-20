@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Io
 
 import qs.Commons
+import qs.Portals
 import qs.Widgets
 import qs.Services.UI
 
@@ -194,12 +195,20 @@ Item {
 
             ToolRow {
                 pluginApi: root.pluginApi
+                playingWriter: value => {
+                    root.pluginApi.pluginSettings.isPlaying = value;
+                    root.pluginApi.saveSettings();
+                }
+                muteWriter: value => {
+                    root.pluginApi.pluginSettings.isMuted = value;
+                    root.pluginApi.saveSettings();
+                }
             }
         }
     }
 
 
-    AtmoFilePicker {
+    PortalFilePicker {
         id: wallpapersFolderPicker
         title: pluginApi?.tr("settings.wallpapers_folder.file_picker_title") || "Choose wallpapers folder"
         initialPath: root.wallpapersFolder

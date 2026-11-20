@@ -4,68 +4,71 @@ import qs.Commons
 import qs.Widgets
 
 ColumnLayout {
-    id: root
+  id: root
 
-    property var pluginApi: null
+  property var pluginApi: null
+  readonly property var showBarValueField: pluginApi?.field("showBarValue") ?? null
+  readonly property var precisionField: pluginApi?.field("precision") ?? null
 
-    property bool valueShowBarValue: displayBaseline.valueShowBarValue
-    property int valuePrecision: displayBaseline.project("valuePrecision")
-    NSettingsBaseline {
-        ranges: [NSettingsRange { field: "valuePrecision"; from: rangeValuePrecision.from; to: rangeValuePrecision.to }]
-        id: displayBaseline
-        readonly property bool valueShowBarValue: pluginApi?.pluginSettings?.showBarValue ?? true
-        readonly property int valuePrecision: pluginApi?.pluginSettings?.precision ?? 8
-    }
-    readonly property bool settingsDirty: displayBaseline.differs({valueShowBarValue: root.valueShowBarValue, valuePrecision: root.valuePrecision})
+  readonly property bool valueShowBarValue: root.showBarValueField?.value ?? true
+  readonly property int valuePrecision: root.precisionField?.value ?? 8
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
-    spacing: Style.marginM
+  spacing: Style.marginM
 
-    function saveSettings() {
-        if (!pluginApi?.pluginSettings) return;
-        pluginApi.pluginSettings.showBarValue = valueShowBarValue;
-        pluginApi.pluginSettings.precision = valuePrecision;
-        pluginApi.saveSettings();
-    }
+  function saveSettings() {
+    if (!pluginApi?.pluginSettings)
+      return;
+    pluginApi.saveSettings();
+  }
 
+  NPluginSettingsField {
+    field: root.showBarValueField
     NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.show-bar")
-        description: pluginApi?.tr("settings.show-bar-desc")
-        checked: root.valueShowBarValue
-        onToggled: checked => {
-            root.valueShowBarValue = checked;
-            root.saveSettings();
-        }
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.show-bar")
+      description: pluginApi?.tr("settings.show-bar-desc")
+      checked: root.valueShowBarValue
+      onToggled: checked => {
+        root.showBarValueField.set(checked);
+      }
     }
+  }
 
-    ColumnLayout {
-        Layout.fillWidth: true
-        spacing: Style.marginS
-
-        NLabel {
-            label: pluginApi?.tr("settings.precision", { "value": root.valuePrecision })
-            description: pluginApi?.tr("settings.precision-desc")
-        }
-
-        NSlider {
-            id: rangeValuePrecision
-            objectName: "settings-range-valuePrecision"
-            onValueChanged: root.valuePrecision = value
-            Layout.fillWidth: true
-            from: 0
-            to: 10
-            stepSize: 1
-            value: root.valuePrecision
-            onMoved: {
-                root.valuePrecision = Math.round(value);
-                root.saveSettings();
-            }
-        }
-    }
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginS
 
     NLabel {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.about")
-        description: pluginApi?.tr("settings.developed-by", { "version": pluginApi?.manifest?.version ?? "1.0.0" })
+      label: pluginApi?.tr("settings.precision", {
+                             "value": root.valuePrecision
+                           })
+      description: pluginApi?.tr("settings.precision-desc")
     }
+
+    NPluginSettingsField {
+      field: root.precisionField
+      NSlider {
+        id: rangeValuePrecision
+        objectName: "settings-range-valuePrecision"
+        Layout.fillWidth: true
+        from: 0
+        to: 10
+        stepSize: 1
+        value: root.valuePrecision
+        onMoved: {
+          root.precisionField.set(Math.round(value));
+        }
+      }
+    }
+  }
+
+  NLabel {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.about")
+    description: pluginApi?.tr("settings.developed-by", {
+                                 "version": pluginApi?.manifest?.version ?? "1.0.0"
+                               })
+  }
 }

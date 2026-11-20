@@ -6,13 +6,13 @@ import qs.Widgets
 ColumnLayout {
   id: root
   property var pluginApi: null
+  readonly property var terminalCommandField: pluginApi?.field("terminalCommand") ?? null
+  readonly property var pollIntervalField: pluginApi?.field("pollInterval") ?? null
+  readonly property var showInactiveHostsField: pluginApi?.field("showInactiveHosts") ?? null
 
-  property var cfg: pluginApi?.pluginSettings || ({})
-  property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-
-  property string editTerminalCommand: displayBaseline.editTerminalCommand
-  property int editPollInterval: displayBaseline.project("editPollInterval")
-  property bool editShowInactiveHosts: displayBaseline.editShowInactiveHosts
+  readonly property string editTerminalCommand: root.terminalCommandField?.value ?? ""
+  readonly property int editPollInterval: root.pollIntervalField?.value ?? 10
+  readonly property bool editShowInactiveHosts: root.showInactiveHostsField?.value ?? true
 
   spacing: Style.marginM
 
@@ -25,19 +25,24 @@ ColumnLayout {
 
   NText {
     Layout.fillWidth: true
-    text: root.detectedTerminal !== "" ? pluginApi?.tr("settings.terminalDetected", { terminal: root.detectedTerminal }) : pluginApi?.tr("settings.terminalNone")
+    text: root.detectedTerminal !== "" ? pluginApi?.tr("settings.terminalDetected", {
+                                                         terminal: root.detectedTerminal
+                                                       }) : pluginApi?.tr("settings.terminalNone")
     color: root.detectedTerminal !== "" ? AtmoColor.mPrimary : AtmoColor.mError
     pointSize: Style.fontSizeS
     wrapMode: Text.Wrap
   }
 
-  NTextInput {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.terminalOverride")
-    description: pluginApi?.tr("settings.terminalOverrideDesc")
-    placeholderText: root.detectedTerminal
-    text: root.editTerminalCommand
-    onTextChanged: root.editTerminalCommand = text
+  NPluginSettingsField {
+    field: root.terminalCommandField
+    NTextInput {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.terminalOverride")
+      description: pluginApi?.tr("settings.terminalOverrideDesc")
+      placeholderText: root.detectedTerminal
+      text: root.editTerminalCommand
+      onEditCommitted: root.terminalCommandField.set(text)
+    }
   }
 
   // --- Poll Interval ---
@@ -50,15 +55,18 @@ ColumnLayout {
       description: pluginApi?.tr("settings.pollIntervalDesc") + root.editPollInterval
     }
 
-    NSlider {
-      id: rangeEditPollInterval
-      objectName: "settings-range-editPollInterval"
-      Layout.fillWidth: true
-      from: 5
-      to: 30
-      stepSize: 1
-      value: root.editPollInterval
-      onValueChanged: root.editPollInterval = value
+    NPluginSettingsField {
+      field: root.pollIntervalField
+      NSlider {
+        id: rangeEditPollInterval
+        objectName: "settings-range-editPollInterval"
+        Layout.fillWidth: true
+        from: 5
+        to: 30
+        stepSize: 1
+        value: root.editPollInterval
+        onMoved: root.pollIntervalField.set(value)
+      }
     }
   }
 
@@ -66,38 +74,31 @@ ColumnLayout {
   Item {
     Layout.fillWidth: true
     Layout.preferredHeight: inactiveToggle.implicitHeight
-    NToggle {
-      id: inactiveToggle
-      anchors.fill: parent
-      label: pluginApi?.tr("settings.showInactiveHosts")
-      description: pluginApi?.tr("settings.showInactiveHostsDesc")
-      checked: root.editShowInactiveHosts
-      onToggled: checked => root.editShowInactiveHosts = checked
+    NPluginSettingsField {
+      field: root.showInactiveHostsField
+      NToggle {
+        id: inactiveToggle
+        anchors.fill: parent
+        label: pluginApi?.tr("settings.showInactiveHosts")
+        description: pluginApi?.tr("settings.showInactiveHostsDesc")
+        checked: root.editShowInactiveHosts
+        onToggled: checked => root.showInactiveHostsField.set(checked)
+      }
     }
   }
 
-  NSettingsBaseline {
-    ranges: [NSettingsRange { field: "editPollInterval"; from: rangeEditPollInterval.from; to: rangeEditPollInterval.to }]
-    id: displayBaseline
-    readonly property string editTerminalCommand: cfg.terminalCommand ?? defaults.terminalCommand ?? ""
-    readonly property int editPollInterval: cfg.pollInterval ?? defaults.pollInterval ?? 10
-    readonly property bool editShowInactiveHosts: cfg.showInactiveHosts ?? defaults.showInactiveHosts ?? true
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({editTerminalCommand: root.editTerminalCommand, editPollInterval: root.editPollInterval, editShowInactiveHosts: root.editShowInactiveHosts})
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   function saveSettings() {
     if (!pluginApi) {
-      Logger.e("SSH Sessions", "Cannot save: pluginApi is null")
-      return
+      Logger.e("SSH Sessions", "Cannot save: pluginApi is null");
+      return;
     }
-
-    pluginApi.pluginSettings.terminalCommand = root.editTerminalCommand
-    pluginApi.pluginSettings.pollInterval = root.editPollInterval
-    pluginApi.pluginSettings.showInactiveHosts = root.editShowInactiveHosts
 
     pluginApi.saveSettings(function (result) {
       if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
-        Logger.i("SSH Sessions", "Settings saved")
+        Logger.i("SSH Sessions", "Settings saved");
     });
   }
 }

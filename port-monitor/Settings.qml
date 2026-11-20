@@ -6,26 +6,21 @@ import qs.Widgets
 ColumnLayout {
   id: root
   property var pluginApi: null
+  readonly property var refreshIntervalField: pluginApi?.field("refreshInterval") ?? null
+  readonly property var hideSystemPortsField: pluginApi?.field("hideSystemPorts") ?? null
+  readonly property var hideWhenEmptyField: pluginApi?.field("hideWhenEmpty") ?? null
 
-  property var cfg: pluginApi?.pluginSettings || ({})
-  property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-
-  property int editRefreshInterval: displayBaseline.project("editRefreshInterval")
-  property bool editHideSystemPorts: displayBaseline.editHideSystemPorts
-  property bool editHideWhenEmpty: displayBaseline.editHideWhenEmpty
+  readonly property int editRefreshInterval: root.refreshIntervalField?.value ?? 5
+  readonly property bool editHideSystemPorts: root.hideSystemPortsField?.value ?? false
+  readonly property bool editHideWhenEmpty: root.hideWhenEmptyField?.value ?? false
   property bool _applyEffectPending: false
-  NSettingsBaseline {
-    ranges: [NSettingsRange { field: "editRefreshInterval"; from: rangeEditRefreshInterval.from; to: rangeEditRefreshInterval.to }]
-    id: displayBaseline
-    readonly property int editRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 5
-    readonly property bool editHideSystemPorts: cfg.hideSystemPorts ?? defaults.hideSystemPorts ?? false
-    readonly property bool editHideWhenEmpty: cfg.hideWhenEmpty ?? defaults.hideWhenEmpty ?? false
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({editRefreshInterval: root.editRefreshInterval, editHideSystemPorts: root.editHideSystemPorts, editHideWhenEmpty: root.editHideWhenEmpty})
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
   Connections {
     target: root.pluginApi
     function onSettingsCompleted(result) {
-      if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current")
+        return;
       root._applyEffectPending = false;
       root.pluginApi.mainInstance?.refresh();
       Logger.i("Port Monitor", "Settings saved");
@@ -41,18 +36,23 @@ ColumnLayout {
 
     NLabel {
       label: pluginApi?.tr("settings.refreshInterval")
-      description: pluginApi?.tr("settings.refreshIntervalDesc", { value: root.editRefreshInterval })
+      description: pluginApi?.tr("settings.refreshIntervalDesc", {
+                                   value: root.editRefreshInterval
+                                 })
     }
 
-    NSlider {
-      id: rangeEditRefreshInterval
-      objectName: "settings-range-editRefreshInterval"
-      Layout.fillWidth: true
-      from: 1
-      to: 30
-      stepSize: 1
-      value: root.editRefreshInterval
-      onValueChanged: root.editRefreshInterval = value
+    NPluginSettingsField {
+      field: root.refreshIntervalField
+      NSlider {
+        id: rangeEditRefreshInterval
+        objectName: "settings-range-editRefreshInterval"
+        Layout.fillWidth: true
+        from: 1
+        to: 30
+        stepSize: 1
+        value: root.editRefreshInterval
+        onMoved: root.refreshIntervalField.set(value)
+      }
     }
   }
 
@@ -60,13 +60,16 @@ ColumnLayout {
   Item {
     Layout.fillWidth: true
     Layout.preferredHeight: systemToggle.implicitHeight
-    NToggle {
-      id: systemToggle
-      anchors.fill: parent
-      label: pluginApi?.tr("settings.hideSystemPorts")
-      description: pluginApi?.tr("settings.hideSystemPortsDesc")
-      checked: root.editHideSystemPorts
-      onToggled: checked => root.editHideSystemPorts = checked
+    NPluginSettingsField {
+      field: root.hideSystemPortsField
+      NToggle {
+        id: systemToggle
+        anchors.fill: parent
+        label: pluginApi?.tr("settings.hideSystemPorts")
+        description: pluginApi?.tr("settings.hideSystemPortsDesc")
+        checked: root.editHideSystemPorts
+        onToggled: checked => root.hideSystemPortsField.set(checked)
+      }
     }
   }
 
@@ -74,27 +77,26 @@ ColumnLayout {
   Item {
     Layout.fillWidth: true
     Layout.preferredHeight: emptyToggle.implicitHeight
-    NToggle {
-      id: emptyToggle
-      anchors.fill: parent
-      label: pluginApi?.tr("settings.hideWhenEmpty")
-      description: pluginApi?.tr("settings.hideWhenEmptyDesc")
-      checked: root.editHideWhenEmpty
-      onToggled: checked => root.editHideWhenEmpty = checked
+    NPluginSettingsField {
+      field: root.hideWhenEmptyField
+      NToggle {
+        id: emptyToggle
+        anchors.fill: parent
+        label: pluginApi?.tr("settings.hideWhenEmpty")
+        description: pluginApi?.tr("settings.hideWhenEmptyDesc")
+        checked: root.editHideWhenEmpty
+        onToggled: checked => root.hideWhenEmptyField.set(checked)
+      }
     }
   }
 
   function saveSettings() {
     if (!pluginApi) {
-      Logger.e("Port Monitor", "Cannot save: pluginApi is null")
-      return
+      Logger.e("Port Monitor", "Cannot save: pluginApi is null");
+      return;
     }
 
-    pluginApi.pluginSettings.refreshInterval = root.editRefreshInterval
-    pluginApi.pluginSettings.hideSystemPorts = root.editHideSystemPorts
-    pluginApi.pluginSettings.hideWhenEmpty = root.editHideWhenEmpty
-
     if (pluginApi.saveSettings() !== false)
-      root._applyEffectPending = true
+      root._applyEffectPending = true;
   }
 }

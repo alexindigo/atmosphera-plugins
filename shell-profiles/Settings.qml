@@ -8,34 +8,43 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
+  readonly property var profilesDirField: pluginApi?.field("profilesDir") ?? null
+  readonly property var iconField: pluginApi?.field("icon") ?? null
+  readonly property var iconColorField: pluginApi?.field("iconColor") ?? null
+  readonly property var includeWallpapersField: pluginApi?.field("includeWallpapers") ?? null
+  readonly property var backupEnabledField: pluginApi?.field("backupEnabled") ?? null
+  readonly property var backupCountField: pluginApi?.field("backupCount") ?? null
 
   // Local state
-  property string editProfilesDir: displayBaseline.editProfilesDir
+  readonly property string editProfilesDir: root.profilesDirField?.value || ""
 
-  property string editIcon: displayBaseline.editIcon
+  readonly property string editIcon: root.iconField?.value || "bookmark"
 
-  property bool editIncludeWallpapers: displayBaseline.editIncludeWallpapers
+  readonly property bool editIncludeWallpapers: root.includeWallpapersField?.value ?? true
 
-  property string editIconColor: displayBaseline.editIconColor
+  readonly property string editIconColor: root.iconColorField?.value || "primary"
 
-  property bool editBackupEnabled: displayBaseline.editBackupEnabled
+  readonly property bool editBackupEnabled: root.backupEnabledField?.value ?? true
 
-  property int editBackupCount: displayBaseline.project("editBackupCount")
+  readonly property int editBackupCount: root.backupCountField?.value ?? 5
 
   spacing: Style.marginM
 
   // ── Profiles directory ──────────────────────────────────────────────────
 
-  NTextInputButton {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.dir-label")
-    description: pluginApi?.tr("settings.dir-description")
-    placeholderText: Settings.configDir + "profiles/"
-    text: root.editProfilesDir
-    buttonIcon: "folder"
-    buttonTooltip: pluginApi?.tr("settings.dir-select")
-    onInputEditingFinished: root.editProfilesDir = text
-    onButtonClicked: dirPicker.openFilePicker()
+  NPluginSettingsField {
+    field: root.profilesDirField
+    NTextInputButton {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.dir-label")
+      description: pluginApi?.tr("settings.dir-description")
+      placeholderText: Settings.configDir + "profiles/"
+      text: root.editProfilesDir
+      buttonIcon: "folder"
+      buttonTooltip: pluginApi?.tr("settings.dir-select")
+      onInputEditCommitted: root.profilesDirField.set(text.trim())
+      onButtonClicked: dirPicker.openFilePicker()
+    }
   }
 
   PortalFilePicker {
@@ -44,9 +53,9 @@ ColumnLayout {
     title: pluginApi?.tr("settings.dir-select")
     initialPath: root.editProfilesDir || (Settings.configDir + "profiles/")
     onAccepted: paths => {
-                  if (paths.length > 0)
-                  root.editProfilesDir = paths[0];
-                }
+      if (paths.length > 0)
+        root.profilesDirField.set(paths[0]);
+    }
   }
 
   NDivider {
@@ -73,26 +82,32 @@ ColumnLayout {
     }
   }
 
-  NButton {
-    text: I18n.tr("bar.control-center.browse-library")
-    onClicked: iconPicker.open()
+  NPluginSettingsField {
+    field: root.iconField
+    NButton {
+      text: I18n.tr("bar.control-center.browse-library")
+      onClicked: iconPicker.open()
+    }
   }
 
   AtmoIconPicker {
     id: iconPicker
     initialIcon: root.editIcon
     onIconSelected: iconName => {
-                      root.editIcon = iconName;
-                    }
+      root.iconField.set(iconName.trim() || "bookmark");
+    }
   }
 
-  NColorChoice {
-    label: pluginApi?.tr("settings.icon-color-label")
-    currentKey: root.editIconColor
-    onSelected: key => {
-                  root.editIconColor = key;
-                }
-    defaultValue: pluginApi?.manifest?.metadata?.defaultSettings?.iconColor || "primary"
+  NPluginSettingsField {
+    field: root.iconColorField
+    NColorChoice {
+      label: pluginApi?.tr("settings.icon-color-label")
+      currentKey: root.editIconColor
+      onSelected: key => {
+        root.iconColorField.set(key);
+      }
+      defaultValue: pluginApi?.manifest?.metadata?.defaultSettings?.iconColor || "primary"
+    }
   }
 
   NDivider {
@@ -103,15 +118,18 @@ ColumnLayout {
 
   // ── Include wallpapers toggle ────────────────────────────────────────────
 
-  NToggle {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.wallpapers-label")
-    description: pluginApi?.tr("settings.wallpapers-description")
-    checked: root.editIncludeWallpapers
-    onToggled: checked => {
-                 root.editIncludeWallpapers = checked;
-               }
-    defaultValue: pluginApi?.manifest?.metadata?.defaultSettings?.includeWallpapers ?? true
+  NPluginSettingsField {
+    field: root.includeWallpapersField
+    NToggle {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.wallpapers-label")
+      description: pluginApi?.tr("settings.wallpapers-description")
+      checked: root.editIncludeWallpapers
+      onToggled: checked => {
+        root.includeWallpapersField.set(checked);
+      }
+      defaultValue: pluginApi?.manifest?.metadata?.defaultSettings?.includeWallpapers ?? true
+    }
   }
 
   NDivider {
@@ -122,64 +140,51 @@ ColumnLayout {
 
   // ── Auto-backup ──────────────────────────────────────────────────────────
 
-  NToggle {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.backup-label")
-    description: pluginApi?.tr("settings.backup-description")
-    checked: root.editBackupEnabled
-    onToggled: checked => {
-                 root.editBackupEnabled = checked;
-               }
-    defaultValue: pluginApi?.manifest?.metadata?.defaultSettings?.backupEnabled ?? true
+  NPluginSettingsField {
+    field: root.backupEnabledField
+    NToggle {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.backup-label")
+      description: pluginApi?.tr("settings.backup-description")
+      checked: root.editBackupEnabled
+      onToggled: checked => {
+        root.backupEnabledField.set(checked);
+      }
+      defaultValue: pluginApi?.manifest?.metadata?.defaultSettings?.backupEnabled ?? true
+    }
   }
 
-  NValueSlider {
-    id: rangeEditBackupCount
-    objectName: "settings-range-editBackupCount"
-    onValueChanged: root.editBackupCount = value
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.backup-count-label")
-    description: pluginApi?.tr("settings.backup-count-description")
-    from: 1
-    to: 20
-    stepSize: 1
-    snapAlways: true
-    value: root.editBackupCount
-    text: String(Math.round(root.editBackupCount))
-    defaultValue: pluginApi?.manifest?.metadata?.defaultSettings?.backupCount ?? 5
-    showReset: true
-    enabled: root.editBackupEnabled
-    onMoved: function (v) {
-      root.editBackupCount = Math.round(v);
+  NPluginSettingsField {
+    field: root.backupCountField
+    NValueSlider {
+      id: rangeEditBackupCount
+      objectName: "settings-range-editBackupCount"
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.backup-count-label")
+      description: pluginApi?.tr("settings.backup-count-description")
+      from: 1
+      to: 20
+      stepSize: 1
+      snapAlways: true
+      value: root.editBackupCount
+      text: String(Math.round(root.editBackupCount))
+      defaultValue: pluginApi?.manifest?.metadata?.defaultSettings?.backupCount ?? 5
+      showReset: true
+      enabled: root.editBackupEnabled
+      onMoved: function (v) {
+        root.backupCountField.set(Math.round(v));
+      }
     }
   }
 
   // ── Save ────────────────────────────────
 
-  NSettingsBaseline {
-    ranges: [NSettingsRange { field: "editBackupCount"; from: rangeEditBackupCount.from; to: rangeEditBackupCount.to }]
-    id: displayBaseline
-    readonly property string editProfilesDir: pluginApi?.pluginSettings?.profilesDir || pluginApi?.manifest?.metadata?.defaultSettings?.profilesDir || ""
-    readonly property string editIcon: pluginApi?.pluginSettings?.icon || pluginApi?.manifest?.metadata?.defaultSettings?.icon || "bookmark"
-    readonly property string editIconColor: pluginApi?.pluginSettings?.iconColor || pluginApi?.manifest?.metadata?.defaultSettings?.iconColor || "primary"
-    readonly property bool editIncludeWallpapers: pluginApi?.pluginSettings?.includeWallpapers ?? pluginApi?.manifest?.metadata?.defaultSettings?.includeWallpapers ?? true
-    readonly property bool editBackupEnabled: pluginApi?.pluginSettings?.backupEnabled ?? pluginApi?.manifest?.metadata?.defaultSettings?.backupEnabled ?? true
-    readonly property int editBackupCount: pluginApi?.pluginSettings?.backupCount ?? pluginApi?.manifest?.metadata?.defaultSettings?.backupCount ?? 5
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({editProfilesDir: root.editProfilesDir, editIcon: root.editIcon, editIconColor: root.editIconColor, editIncludeWallpapers: root.editIncludeWallpapers, editBackupEnabled: root.editBackupEnabled, editBackupCount: root.editBackupCount})
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   function saveSettings() {
     if (!pluginApi)
       return;
-    root.editProfilesDir = root.editProfilesDir.trim();
-    root.editIcon = root.editIcon.trim() || "bookmark";
-    root.editIconColor = root.editIconColor || "primary";
-    pluginApi.pluginSettings.profilesDir = root.editProfilesDir;
-    pluginApi.pluginSettings.icon = root.editIcon;
-    pluginApi.pluginSettings.iconColor = root.editIconColor;
-    pluginApi.pluginSettings.includeWallpapers = root.editIncludeWallpapers;
-    pluginApi.pluginSettings.backupEnabled = root.editBackupEnabled;
-    pluginApi.pluginSettings.backupCount = root.editBackupCount;
     pluginApi.saveSettings(function (result) {
       if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
         Logger.i("ShellProfiles", "Settings saved");

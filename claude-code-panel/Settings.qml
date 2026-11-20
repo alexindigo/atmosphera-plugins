@@ -3,8 +3,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import qs.Commons
-import qs.Widgets
 import qs.Services.UI
+import qs.Widgets
 
 // Settings.qml — overhauled layout.
 //
@@ -18,33 +18,25 @@ Item {
   implicitHeight: 560
   property var pluginApi: null
 
-  readonly property var initialClaude: Object.assign({}, pluginApi?.manifest?.metadata?.defaultSettings?.claude || ({}), pluginApi?.initialSettings?.claude || ({}))
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property var editClaude: root.initialClaude
-    readonly property string editAdditionalDirsText: (root.initialClaude.additionalDirs || []).join("\n")
-    readonly property string editAllowedToolsText: (root.initialClaude.allowedTools || []).join(",")
-    readonly property string editDisallowedToolsText: (root.initialClaude.disallowedTools || []).join(",")
-    readonly property string editAppendSystemPrompt: root.initialClaude.appendSystemPrompt || ""
-    readonly property int editMaxTurns: root.initialClaude.maxTurns || 0
-    readonly property string editPanelPosition: root.pluginApi?.initialSettings?.panelPosition || "right"
-    readonly property bool editPanelDetached: root.pluginApi?.initialSettings?.panelDetached ?? true
-    readonly property int editPanelWidth: root.pluginApi?.initialSettings?.panelWidth ?? 620
-    readonly property int editPanelHeightPercent: Math.round((root.pluginApi?.initialSettings?.panelHeightRatio ?? 0.9) * 100)
-    ranges: [NSettingsRange { field: "editMaxTurns"; from: maxTurnsInput.from; to: maxTurnsInput.to }, NSettingsRange { field: "editPanelWidth"; from: panelWidthInput.from; to: panelWidthInput.to }, NSettingsRange { field: "editPanelHeightPercent"; from: panelHeightInput.from; to: panelHeightInput.to }]
-  }
-  property var editClaude: JSON.parse(JSON.stringify(displayBaseline.editClaude))
+  readonly property var claudeField: pluginApi?.field("claude") ?? null
+  readonly property var panelPositionField: pluginApi?.field("panelPosition") ?? null
+  readonly property var panelDetachedField: pluginApi?.field("panelDetached") ?? null
+  readonly property var panelWidthField: pluginApi?.field("panelWidth") ?? null
+  readonly property var panelHeightRatioField: pluginApi?.field("panelHeightRatio") ?? null
+  // claude is one atomic record: a member control's intent is the whole record.
+  readonly property var editClaude: claudeField?.value ?? ({})
   readonly property var cs: editClaude
-  property string editAdditionalDirsText: displayBaseline.editAdditionalDirsText
-  property string editAllowedToolsText: displayBaseline.editAllowedToolsText
-  property string editDisallowedToolsText: displayBaseline.editDisallowedToolsText
-  property string editAppendSystemPrompt: displayBaseline.editAppendSystemPrompt
-  property int editMaxTurns: displayBaseline.project("editMaxTurns")
-  property string editPanelPosition: displayBaseline.editPanelPosition
-  property bool editPanelDetached: displayBaseline.editPanelDetached
-  property int editPanelWidth: displayBaseline.project("editPanelWidth")
-  property int editPanelHeightPercent: displayBaseline.project("editPanelHeightPercent")
-  readonly property bool settingsDirty: displayBaseline.differs({editClaude: editClaude, editAdditionalDirsText: editAdditionalDirsText, editAllowedToolsText: editAllowedToolsText, editDisallowedToolsText: editDisallowedToolsText, editAppendSystemPrompt: editAppendSystemPrompt, editMaxTurns: editMaxTurns, editPanelPosition: editPanelPosition, editPanelDetached: editPanelDetached, editPanelWidth: editPanelWidth, editPanelHeightPercent: editPanelHeightPercent})
+  readonly property string editAdditionalDirsText: (editClaude.additionalDirs || []).join("\n")
+  readonly property string editAllowedToolsText: (editClaude.allowedTools || []).join(",")
+  readonly property string editDisallowedToolsText: (editClaude.disallowedTools || []).join(",")
+  readonly property string editAppendSystemPrompt: editClaude.appendSystemPrompt || ""
+  readonly property int editMaxTurns: editClaude.maxTurns || 0
+  readonly property string editPanelPosition: panelPositionField?.value || "right"
+  readonly property bool editPanelDetached: panelDetachedField?.value ?? true
+  readonly property int editPanelWidth: panelWidthField?.value ?? 620
+  readonly property int editPanelHeightPercent: Math.round((panelHeightRatioField?.value ?? 0.9) * 100)
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
   property bool _bypassPending: false
 
   // ---- Save indicator state -------------------------------------------------
@@ -69,22 +61,16 @@ Item {
   }
 
   function set(key, value) {
-    if (!pluginApi) { return; }
+    if (!pluginApi) {
+      return;
+    }
     var next = Object.assign({}, editClaude);
     next[key] = value;
-    editClaude = next;
+    return claudeField.set(next);
   }
 
+  // Completion observer only; native publication belongs to the session.
   function saveSettings() {
-    editAdditionalDirsText = parseList(editAdditionalDirsText).join("\n");
-    editAllowedToolsText = parseList(editAllowedToolsText).join(",");
-    editDisallowedToolsText = parseList(editDisallowedToolsText).join(",");
-    editClaude = Object.assign({}, editClaude, {additionalDirs: parseList(editAdditionalDirsText), allowedTools: parseList(editAllowedToolsText), disallowedTools: parseList(editDisallowedToolsText), appendSystemPrompt: editAppendSystemPrompt, maxTurns: editMaxTurns});
-    pluginApi.pluginSettings.claude = JSON.parse(JSON.stringify(editClaude));
-    pluginApi.pluginSettings.panelPosition = editPanelPosition;
-    pluginApi.pluginSettings.panelDetached = editPanelDetached;
-    pluginApi.pluginSettings.panelWidth = editPanelWidth;
-    pluginApi.pluginSettings.panelHeightRatio = editPanelHeightPercent / 100;
     pluginApi.saveSettings();
   }
 
@@ -93,43 +79,79 @@ Item {
     function onSettingsCompleted(result) {
       if ((result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current") {
         root._flashSaved();
-        if (root._bypassPending && (root.cs.dangerouslySkipPermissions === true || root.cs.permissionMode === "bypassPermissions")) ToastService.showError(root.pluginApi.tr("toast.bypassEnabled"));
+        if (root._bypassPending && (root.cs.dangerouslySkipPermissions === true || root.cs.permissionMode === "bypassPermissions"))
+          ToastService.showError(root.pluginApi.tr("toast.bypassEnabled"));
         root._bypassPending = false;
       }
     }
   }
 
   function parseList(raw) {
-    if (!raw) { return []; }
-    return String(raw).split(/[,\n]/).map(function (s) { return s.trim(); }).filter(function (s) { return s !== ""; });
+    if (!raw) {
+      return [];
+    }
+    return String(raw).split(/[,\n]/).map(function (s) {
+      return s.trim();
+    }).filter(function (s) {
+      return s !== "";
+    });
   }
 
   // ---- Permission-mode visual state -----------------------------------------
   // Color + label for the small status pill next to the dropdown. Reading the
   // pill color is faster than parsing the dropdown text.
   function _modeColor(m) {
-    if (cs.dangerouslySkipPermissions === true || m === "bypassPermissions") return AtmoColor.mError;
-    if (m === "acceptEdits") return AtmoColor.mSecondary;
-    if (m === "plan")        return AtmoColor.mTertiary;
+    if (cs.dangerouslySkipPermissions === true || m === "bypassPermissions")
+      return AtmoColor.mError;
+    if (m === "acceptEdits")
+      return AtmoColor.mSecondary;
+    if (m === "plan")
+      return AtmoColor.mTertiary;
     return AtmoColor.mPrimary;
   }
   function _modeBadge(m) {
     if (cs.dangerouslySkipPermissions === true || m === "bypassPermissions") {
-      return pluginApi?.tr("settings.modeBadgeBypass") ;
+      return pluginApi?.tr("settings.modeBadgeBypass");
     }
-    if (m === "acceptEdits") return pluginApi?.tr("settings.modeBadgeAccept") ;
-    if (m === "plan")        return pluginApi?.tr("settings.modeBadgePlan")   ;
-    return pluginApi?.tr("settings.modeBadgeDefault") ;
+    if (m === "acceptEdits")
+      return pluginApi?.tr("settings.modeBadgeAccept");
+    if (m === "plan")
+      return pluginApi?.tr("settings.modeBadgePlan");
+    return pluginApi?.tr("settings.modeBadgeDefault");
   }
 
   // Tab catalog. Add a tab here and a corresponding StackLayout entry below.
   readonly property var _tabs: [
-    { key: "general",     icon: "settings",     label: pluginApi?.tr("settings.tabGeneral")             },
-    { key: "permissions", icon: "shield",       label: pluginApi?.tr("settings.tabPermissions")     },
-    { key: "session",     icon: "cpu",          label: pluginApi?.tr("settings.tabSession")     },
-    { key: "mcp",         icon: "plug",         label: pluginApi?.tr("settings.tabMcp")                     },
-    { key: "panel",       icon: "layout",       label: pluginApi?.tr("settings.tabPanel")                 },
-    { key: "danger",      icon: "alert-circle", label: pluginApi?.tr("settings.tabDanger")          }
+    {
+      key: "general",
+      icon: "settings",
+      label: pluginApi?.tr("settings.tabGeneral")
+    },
+    {
+      key: "permissions",
+      icon: "shield",
+      label: pluginApi?.tr("settings.tabPermissions")
+    },
+    {
+      key: "session",
+      icon: "cpu",
+      label: pluginApi?.tr("settings.tabSession")
+    },
+    {
+      key: "mcp",
+      icon: "plug",
+      label: pluginApi?.tr("settings.tabMcp")
+    },
+    {
+      key: "panel",
+      icon: "layout",
+      label: pluginApi?.tr("settings.tabPanel")
+    },
+    {
+      key: "danger",
+      icon: "alert-circle",
+      label: pluginApi?.tr("settings.tabDanger")
+    }
   ]
   property int currentTab: 0
 
@@ -201,12 +223,14 @@ Item {
             radius: Style.radiusM
             readonly property bool active: index === root.currentTab
             readonly property bool danger: modelData.key === "danger"
-            color: active
-                     ? (danger ? Qt.alpha(AtmoColor.mError, 0.18) : Qt.alpha(AtmoColor.mPrimary, 0.16))
-                     : (tabHover.containsMouse ? AtmoColor.mHover : "transparent")
+            color: active ? (danger ? Qt.alpha(AtmoColor.mError, 0.18) : Qt.alpha(AtmoColor.mPrimary, 0.16)) : (tabHover.containsMouse ? AtmoColor.mHover : "transparent")
             border.color: active ? (danger ? AtmoColor.mError : AtmoColor.mPrimary) : "transparent"
             border.width: active ? Style.borderS : 0
-            Behavior on color { ColorAnimation { duration: Style.animationFast } }
+            Behavior on color {
+              ColorAnimation {
+                duration: Style.animationFast
+              }
+            }
 
             RowLayout {
               anchors.fill: parent
@@ -217,17 +241,13 @@ Item {
               AtmoIcon {
                 icon: modelData.icon
                 pointSize: Style.fontSizeS
-                color: tabItem.active
-                         ? (tabItem.danger ? AtmoColor.mError : AtmoColor.mPrimary)
-                         : AtmoColor.mOnSurfaceVariant
+                color: tabItem.active ? (tabItem.danger ? AtmoColor.mError : AtmoColor.mPrimary) : AtmoColor.mOnSurfaceVariant
               }
               NText {
                 text: modelData.label
                 pointSize: Style.fontSizeS
                 font.weight: tabItem.active ? Font.DemiBold : Font.Normal
-                color: tabItem.danger && !tabItem.active
-                         ? AtmoColor.mError
-                         : AtmoColor.mOnSurface
+                color: tabItem.danger && !tabItem.active ? AtmoColor.mError : AtmoColor.mOnSurface
                 Layout.fillWidth: true
                 elide: Text.ElideRight
               }
@@ -243,7 +263,9 @@ Item {
           }
         }
 
-        Item { Layout.fillHeight: true }
+        Item {
+          Layout.fillHeight: true
+        }
 
         // Reset button at the bottom of the rail.
         Rectangle {
@@ -258,9 +280,13 @@ Item {
             anchors.fill: parent
             anchors.leftMargin: Style.marginM
             spacing: Style.marginS
-            AtmoIcon { icon: "rotate-ccw"; pointSize: Style.fontSizeXS; color: AtmoColor.mError }
+            AtmoIcon {
+              icon: "rotate-ccw"
+              pointSize: Style.fontSizeXS
+              color: AtmoColor.mError
+            }
             NText {
-              text: pluginApi?.tr("settings.resetDefaults") 
+              text: pluginApi?.tr("settings.resetDefaults")
               pointSize: Style.fontSizeXS
               color: AtmoColor.mError
               Layout.fillWidth: true
@@ -289,355 +315,410 @@ Item {
         contentWidth: availableWidth
         clip: true
 
-      StackLayout {
-        width: scroller.availableWidth
-        currentIndex: root.currentTab
-
-        // ============== GENERAL ==============
-        ColumnLayout {
-          spacing: Style.marginM
-          Layout.margins: Style.marginM
-
-          Section {
-            title: pluginApi?.tr("settings.groupBinary") 
-            NTextInput {
-              Layout.fillWidth: true
-              label: pluginApi?.tr("settings.binary")
-              text: cs.binary || "claude"
-              onTextEdited: root.set("binary", text)
-            }
-          }
-
-          Section {
-            title: pluginApi?.tr("settings.groupWorkspace") 
-            NTextInput {
-              Layout.fillWidth: true
-              label: pluginApi?.tr("settings.workingDir")
-              description: pluginApi?.tr("settings.workingDirHelp")
-              text: cs.workingDir 
-              placeholderText: "/home/you/project"
-              onTextEdited: root.set("workingDir", text)
-            }
-            ColumnLayout {
-              Layout.fillWidth: true
-              spacing: Style.marginXS
-              NLabel {
-                label: pluginApi?.tr("settings.additionalDirs")
-                description: pluginApi?.tr("settings.additionalDirsHelp")
-              }
-              TextArea {
-                id: addlDirsArea
-                Layout.fillWidth: true
-                Layout.preferredHeight: Math.round(72 * Style.uiScaleRatio)
-                text: root.editAdditionalDirsText
-                placeholderText: "/home/you/notes\n/tmp/scratch"
-                // QtQuick.Controls.TextArea has no editingFinished — commit on
-                // focus loss instead. Without this, multi-line edits silently
-                // never save.
-                onTextChanged: root.editAdditionalDirsText = text
-              }
-            }
-          }
-
-          NText {
-            text: pluginApi?.tr("settings.restartHint") 
-            color: AtmoColor.mOnSurfaceVariant
-            pointSize: Style.fontSizeXS
-            wrapMode: Text.Wrap
+        NPluginSettingsField {
+          field: root.claudeField
+          width: scroller.availableWidth
+          StackLayout {
             Layout.fillWidth: true
-            Layout.leftMargin: Style.marginXS
-            opacity: 0.8
-          }
-        }
+            currentIndex: root.currentTab
 
-        // ============== PERMISSIONS ==============
-        ColumnLayout {
-          spacing: Style.marginM
-          Layout.margins: Style.marginM
+            // ============== GENERAL ==============
+            ColumnLayout {
+              spacing: Style.marginM
+              Layout.margins: Style.marginM
 
-          Section {
-            title: pluginApi?.tr("settings.permissionMode")
+              Section {
+                title: pluginApi?.tr("settings.groupBinary")
+                NTextInput {
+                  Layout.fillWidth: true
+                  label: pluginApi?.tr("settings.binary")
+                  text: cs.binary || "claude"
+                  onEditCommitted: root.set("binary", text)
+                }
+              }
 
-            // Mode picker + live status pill on the same row.
-            RowLayout {
-              Layout.fillWidth: true
-              spacing: Style.marginS
-
-              NComboBox {
-                Layout.fillWidth: true
-                model: [
-                  { key: "default",           name: pluginApi?.tr("settings.permModeDefault") },
-                  { key: "acceptEdits",       name: pluginApi?.tr("settings.permModeAccept") },
-                  { key: "plan",              name: pluginApi?.tr("settings.permModePlan") },
-                  { key: "bypassPermissions", name: pluginApi?.tr("settings.permModeBypass") }
-                ]
-                currentKey: cs.permissionMode || "default"
-                onSelected: key => {
-                  if (key === "bypassPermissions" && (cs.requireConfirmBypass !== false)) {
-                    bypassConfirm.forSkip = false;
-                    bypassConfirm.open();
-                  } else {
-                    set("permissionMode", key);
+              Section {
+                title: pluginApi?.tr("settings.groupWorkspace")
+                NTextInput {
+                  Layout.fillWidth: true
+                  label: pluginApi?.tr("settings.workingDir")
+                  description: pluginApi?.tr("settings.workingDirHelp")
+                  text: cs.workingDir
+                  placeholderText: "/home/you/project"
+                  onEditCommitted: root.set("workingDir", text)
+                }
+                ColumnLayout {
+                  Layout.fillWidth: true
+                  spacing: Style.marginXS
+                  NLabel {
+                    label: pluginApi?.tr("settings.additionalDirs")
+                    description: pluginApi?.tr("settings.additionalDirsHelp")
+                  }
+                  TextArea {
+                    id: addlDirsArea
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Math.round(72 * Style.uiScaleRatio)
+                    text: root.editAdditionalDirsText
+                    placeholderText: "/home/you/notes\n/tmp/scratch"
+                    // QtQuick.Controls.TextArea has no editingFinished — commit on
+                    // focus loss instead. Without this, multi-line edits silently
+                    // never save.
+                    onTextChanged: if (activeFocus && root.parseList(text).join("\n") !== root.editAdditionalDirsText)
+                                     root.set("additionalDirs", root.parseList(text))
                   }
                 }
               }
 
-              Rectangle {
-                Layout.preferredHeight: Math.round(28 * Style.uiScaleRatio)
-                Layout.preferredWidth: badgeText.implicitWidth + Style.marginM * 2
-                radius: height / 2
-                color: Qt.alpha(root._modeColor(cs.permissionMode || "default"), 0.18)
-                border.color: root._modeColor(cs.permissionMode || "default")
-                border.width: Style.borderS
-
-                NText {
-                  id: badgeText
-                  anchors.centerIn: parent
-                  text: root._modeBadge(cs.permissionMode || "default")
-                  pointSize: Style.fontSizeXS
-                  font.weight: Font.DemiBold
-                  color: root._modeColor(cs.permissionMode || "default")
-                }
-              }
-            }
-          }
-
-          Section {
-            title: pluginApi?.tr("settings.groupTools") 
-            NTextInput {
-              Layout.fillWidth: true
-              label: pluginApi?.tr("settings.allowedTools")
-              description: pluginApi?.tr("settings.allowedToolsHelp")
-              text: root.editAllowedToolsText
-              placeholderText: "Read,Edit,Bash(git:*),WebFetch"
-              onTextEdited: root.editAllowedToolsText = text
-            }
-            NTextInput {
-              Layout.fillWidth: true
-              label: pluginApi?.tr("settings.disallowedTools")
-              text: root.editDisallowedToolsText
-              placeholderText: "Bash(rm:*),WebFetch"
-              onTextEdited: root.editDisallowedToolsText = text
-            }
-          }
-        }
-
-        // ============== SESSION & MODEL ==============
-        ColumnLayout {
-          spacing: Style.marginM
-          Layout.margins: Style.marginM
-
-          Section {
-            title: pluginApi?.tr("settings.groupModel") 
-
-            // Side-by-side primary + fallback to keep the relationship obvious.
-            RowLayout {
-              Layout.fillWidth: true
-              spacing: Style.marginM
-              NTextInput {
-                Layout.fillWidth: true
-                label: pluginApi?.tr("settings.model")
-                description: pluginApi?.tr("settings.modelHelp")
-                text: cs.model 
-                placeholderText: "claude-opus-4-7"
-                onTextEdited: root.set("model", text)
-              }
-              NTextInput {
-                Layout.fillWidth: true
-                label: pluginApi?.tr("settings.fallbackModel")
-                text: cs.fallbackModel 
-                placeholderText: "claude-sonnet-4-6"
-                onTextEdited: root.set("fallbackModel", text)
-              }
-            }
-          }
-
-          Section {
-            title: pluginApi?.tr("settings.groupSession") 
-            NCheckbox {
-              Layout.fillWidth: true
-              label: pluginApi?.tr("settings.autoResume")
-              checked: cs.autoResume !== false
-              onToggled: checked => set("autoResume", checked)
-            }
-            NSpinBox {
-              id: maxTurnsInput
-              objectName: "settings-range-editMaxTurns"
-              Layout.fillWidth: true
-              label: pluginApi?.tr("settings.maxTurns")
-              from: 0
-              to: 9999
-              stepSize: 1
-              value: root.editMaxTurns
-              onValueModified: value => root.editMaxTurns = value
-            }
-            NCheckbox {
-              Layout.fillWidth: true
-              label: pluginApi?.tr("settings.includePartialMessages")
-              checked: cs.includePartialMessages === true
-              onToggled: checked => set("includePartialMessages", checked)
-            }
-          }
-
-          Section {
-            title: pluginApi?.tr("settings.groupSystemPrompt") 
-            NCheckbox {
-              Layout.fillWidth: true
-              label: pluginApi?.tr("settings.injectNoctaliaContext")
-              description: pluginApi?.tr("settings.injectNoctaliaContextHelp")
-              checked: cs.injectNoctaliaContext !== false
-              onToggled: checked => set("injectNoctaliaContext", checked)
-            }
-            ColumnLayout {
-              Layout.fillWidth: true
-              spacing: Style.marginXS
-              NLabel { label: pluginApi?.tr("settings.appendSystemPrompt") }
-              TextArea {
-                Layout.fillWidth: true
-                Layout.preferredHeight: Math.round(80 * Style.uiScaleRatio)
-                text: root.editAppendSystemPrompt
-                onTextChanged: root.editAppendSystemPrompt = text
-              }
-            }
-          }
-        }
-
-        // ============== MCP ==============
-        ColumnLayout {
-          spacing: Style.marginM
-          Layout.margins: Style.marginM
-
-          Section {
-            title: pluginApi?.tr("settings.sectionMcp") 
-            NTextInput {
-              Layout.fillWidth: true
-              label: pluginApi?.tr("settings.mcpConfigPath")
-              text: cs.mcpConfigPath 
-              placeholderText: "/home/you/.config/claude/mcp.json"
-              onTextEdited: root.set("mcpConfigPath", text)
-            }
-            NCheckbox {
-              Layout.fillWidth: true
-              label: pluginApi?.tr("settings.mcpStrict")
-              checked: cs.strictMcpConfig === true
-              onToggled: checked => set("strictMcpConfig", checked)
-            }
-          }
-        }
-
-        // ============== PANEL ==============
-        ColumnLayout {
-          spacing: Style.marginM
-          Layout.margins: Style.marginM
-
-          Section {
-            title: pluginApi?.tr("settings.groupLayout") 
-            NComboBox {
-              Layout.fillWidth: true
-              label: pluginApi?.tr("settings.panelPosition")
-              model: [
-                { key: "right",  name: "right" },
-                { key: "left",   name: "left" },
-                { key: "center", name: "center" },
-                { key: "top",    name: "top" },
-                { key: "bottom", name: "bottom" }
-              ]
-              currentKey: root.editPanelPosition
-              onSelected: key => root.editPanelPosition = key
-            }
-            NCheckbox {
-              Layout.fillWidth: true
-              label: pluginApi?.tr("settings.panelDetached")
-              checked: root.editPanelDetached
-              onToggled: checked => root.editPanelDetached = checked
-            }
-          }
-
-          Section {
-            title: pluginApi?.tr("settings.groupSize") 
-            NSpinBox {
-              id: panelWidthInput
-              objectName: "settings-range-editPanelWidth"
-              Layout.fillWidth: true
-              label: pluginApi?.tr("settings.panelWidth")
-              from: 320
-              to: 1600
-              stepSize: 10
-              value: root.editPanelWidth
-              onValueModified: value => root.editPanelWidth = value
-            }
-            NSpinBox {
-              id: panelHeightInput
-              objectName: "settings-range-editPanelHeightPercent"
-              Layout.fillWidth: true
-              label: pluginApi?.tr("settings.panelHeightRatio")
-              from: 30
-              to: 100
-              stepSize: 1
-              value: root.editPanelHeightPercent
-              onValueModified: value => root.editPanelHeightPercent = value
-            }
-          }
-        }
-
-        // ============== DANGER ZONE ==============
-        ColumnLayout {
-          spacing: Style.marginM
-          Layout.margins: Style.marginM
-
-          Rectangle {
-            Layout.fillWidth: true
-            radius: Style.radiusM
-            color: Qt.alpha(AtmoColor.mError, 0.10)
-            border.color: AtmoColor.mError
-            border.width: Style.borderS
-            implicitHeight: dangerCol.implicitHeight + Style.marginM * 2
-
-            ColumnLayout {
-              id: dangerCol
-              anchors.fill: parent
-              anchors.margins: Style.marginM
-              spacing: Style.marginS
-
-              RowLayout {
-                Layout.fillWidth: true
-                spacing: Style.marginS
-                AtmoIcon { icon: "alert-triangle"; color: AtmoColor.mError; pointSize: Style.fontSizeM }
-                NText {
-                  text: pluginApi?.tr("settings.dangerHeading") 
-                  font.weight: Font.Bold
-                  pointSize: Style.fontSizeM
-                  color: AtmoColor.mError
-                }
-              }
               NText {
-                text: pluginApi?.tr("settings.dangerSubheading") 
+                text: pluginApi?.tr("settings.restartHint")
+                color: AtmoColor.mOnSurfaceVariant
+                pointSize: Style.fontSizeXS
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
-                pointSize: Style.fontSizeXS
-                color: AtmoColor.mOnSurfaceVariant
+                Layout.leftMargin: Style.marginXS
+                opacity: 0.8
               }
+            }
 
-              NCheckbox {
-                Layout.fillWidth: true
-                label: pluginApi?.tr("settings.dangerouslySkip")
-                description: pluginApi?.tr("settings.dangerouslySkipHelp")
-                checked: cs.dangerouslySkipPermissions === true
-                onToggled: checked => {
-                  if (checked) { bypassConfirm.forSkip = true; bypassConfirm.open(); }
-                  else         { set("dangerouslySkipPermissions", false); }
+            // ============== PERMISSIONS ==============
+            ColumnLayout {
+              spacing: Style.marginM
+              Layout.margins: Style.marginM
+
+              Section {
+                title: pluginApi?.tr("settings.permissionMode")
+
+                // Mode picker + live status pill on the same row.
+                RowLayout {
+                  Layout.fillWidth: true
+                  spacing: Style.marginS
+
+                  NComboBox {
+                    Layout.fillWidth: true
+                    model: [
+                      {
+                        key: "default",
+                        name: pluginApi?.tr("settings.permModeDefault")
+                      },
+                      {
+                        key: "acceptEdits",
+                        name: pluginApi?.tr("settings.permModeAccept")
+                      },
+                      {
+                        key: "plan",
+                        name: pluginApi?.tr("settings.permModePlan")
+                      },
+                      {
+                        key: "bypassPermissions",
+                        name: pluginApi?.tr("settings.permModeBypass")
+                      }
+                    ]
+                    currentKey: cs.permissionMode || "default"
+                    onSelected: key => {
+                      if (key === "bypassPermissions" && (cs.requireConfirmBypass !== false)) {
+                        bypassConfirm.forSkip = false;
+                        bypassConfirm.open();
+                      } else {
+                        set("permissionMode", key);
+                      }
+                    }
+                  }
+
+                  Rectangle {
+                    Layout.preferredHeight: Math.round(28 * Style.uiScaleRatio)
+                    Layout.preferredWidth: badgeText.implicitWidth + Style.marginM * 2
+                    radius: height / 2
+                    color: Qt.alpha(root._modeColor(cs.permissionMode || "default"), 0.18)
+                    border.color: root._modeColor(cs.permissionMode || "default")
+                    border.width: Style.borderS
+
+                    NText {
+                      id: badgeText
+                      anchors.centerIn: parent
+                      text: root._modeBadge(cs.permissionMode || "default")
+                      pointSize: Style.fontSizeXS
+                      font.weight: Font.DemiBold
+                      color: root._modeColor(cs.permissionMode || "default")
+                    }
+                  }
                 }
               }
-              NCheckbox {
+
+              Section {
+                title: pluginApi?.tr("settings.groupTools")
+                NTextInput {
+                  Layout.fillWidth: true
+                  label: pluginApi?.tr("settings.allowedTools")
+                  description: pluginApi?.tr("settings.allowedToolsHelp")
+                  text: root.editAllowedToolsText
+                  placeholderText: "Read,Edit,Bash(git:*),WebFetch"
+                  onEditCommitted: root.set("allowedTools", root.parseList(text))
+                }
+                NTextInput {
+                  Layout.fillWidth: true
+                  label: pluginApi?.tr("settings.disallowedTools")
+                  text: root.editDisallowedToolsText
+                  placeholderText: "Bash(rm:*),WebFetch"
+                  onEditCommitted: root.set("disallowedTools", root.parseList(text))
+                }
+              }
+            }
+
+            // ============== SESSION & MODEL ==============
+            ColumnLayout {
+              spacing: Style.marginM
+              Layout.margins: Style.marginM
+
+              Section {
+                title: pluginApi?.tr("settings.groupModel")
+
+                // Side-by-side primary + fallback to keep the relationship obvious.
+                RowLayout {
+                  Layout.fillWidth: true
+                  spacing: Style.marginM
+                  NTextInput {
+                    Layout.fillWidth: true
+                    label: pluginApi?.tr("settings.model")
+                    description: pluginApi?.tr("settings.modelHelp")
+                    text: cs.model
+                    placeholderText: "claude-opus-4-7"
+                    onEditCommitted: root.set("model", text)
+                  }
+                  NTextInput {
+                    Layout.fillWidth: true
+                    label: pluginApi?.tr("settings.fallbackModel")
+                    text: cs.fallbackModel
+                    placeholderText: "claude-sonnet-4-6"
+                    onEditCommitted: root.set("fallbackModel", text)
+                  }
+                }
+              }
+
+              Section {
+                title: pluginApi?.tr("settings.groupSession")
+                NCheckbox {
+                  Layout.fillWidth: true
+                  label: pluginApi?.tr("settings.autoResume")
+                  checked: cs.autoResume !== false
+                  onToggled: checked => set("autoResume", checked)
+                }
+                NSpinBox {
+                  id: maxTurnsInput
+                  objectName: "settings-range-editMaxTurns"
+                  Layout.fillWidth: true
+                  label: pluginApi?.tr("settings.maxTurns")
+                  from: 0
+                  to: 9999
+                  stepSize: 1
+                  value: root.editMaxTurns
+                  onValueModified: value => root.set("maxTurns", value)
+                }
+                NCheckbox {
+                  Layout.fillWidth: true
+                  label: pluginApi?.tr("settings.includePartialMessages")
+                  checked: cs.includePartialMessages === true
+                  onToggled: checked => set("includePartialMessages", checked)
+                }
+              }
+
+              Section {
+                title: pluginApi?.tr("settings.groupSystemPrompt")
+                NCheckbox {
+                  Layout.fillWidth: true
+                  label: pluginApi?.tr("settings.injectNoctaliaContext")
+                  description: pluginApi?.tr("settings.injectNoctaliaContextHelp")
+                  checked: cs.injectNoctaliaContext !== false
+                  onToggled: checked => set("injectNoctaliaContext", checked)
+                }
+                ColumnLayout {
+                  Layout.fillWidth: true
+                  spacing: Style.marginXS
+                  NLabel {
+                    label: pluginApi?.tr("settings.appendSystemPrompt")
+                  }
+                  TextArea {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Math.round(80 * Style.uiScaleRatio)
+                    text: root.editAppendSystemPrompt
+                    onTextChanged: if (activeFocus)
+                                     root.set("appendSystemPrompt", text)
+                  }
+                }
+              }
+            }
+
+            // ============== MCP ==============
+            ColumnLayout {
+              spacing: Style.marginM
+              Layout.margins: Style.marginM
+
+              Section {
+                title: pluginApi?.tr("settings.sectionMcp")
+                NTextInput {
+                  Layout.fillWidth: true
+                  label: pluginApi?.tr("settings.mcpConfigPath")
+                  text: cs.mcpConfigPath
+                  placeholderText: "/home/you/.config/claude/mcp.json"
+                  onEditCommitted: root.set("mcpConfigPath", text)
+                }
+                NCheckbox {
+                  Layout.fillWidth: true
+                  label: pluginApi?.tr("settings.mcpStrict")
+                  checked: cs.strictMcpConfig === true
+                  onToggled: checked => set("strictMcpConfig", checked)
+                }
+              }
+            }
+
+            // ============== PANEL ==============
+            ColumnLayout {
+              spacing: Style.marginM
+              Layout.margins: Style.marginM
+
+              Section {
+                title: pluginApi?.tr("settings.groupLayout")
+                NPluginSettingsField {
+                  field: root.panelPositionField
+                  NComboBox {
+                    Layout.fillWidth: true
+                    label: pluginApi?.tr("settings.panelPosition")
+                    model: [
+                      {
+                        key: "right",
+                        name: "right"
+                      },
+                      {
+                        key: "left",
+                        name: "left"
+                      },
+                      {
+                        key: "center",
+                        name: "center"
+                      },
+                      {
+                        key: "top",
+                        name: "top"
+                      },
+                      {
+                        key: "bottom",
+                        name: "bottom"
+                      }
+                    ]
+                    currentKey: root.editPanelPosition
+                    onSelected: key => root.panelPositionField.set(key)
+                  }
+                }
+                NPluginSettingsField {
+                  field: root.panelDetachedField
+                  NCheckbox {
+                    Layout.fillWidth: true
+                    label: pluginApi?.tr("settings.panelDetached")
+                    checked: root.editPanelDetached
+                    onToggled: checked => root.panelDetachedField.set(checked)
+                  }
+                }
+              }
+
+              Section {
+                title: pluginApi?.tr("settings.groupSize")
+                NPluginSettingsField {
+                  field: root.panelWidthField
+                  NSpinBox {
+                    id: panelWidthInput
+                    objectName: "settings-range-editPanelWidth"
+                    Layout.fillWidth: true
+                    label: pluginApi?.tr("settings.panelWidth")
+                    from: 320
+                    to: 1600
+                    stepSize: 10
+                    value: root.editPanelWidth
+                    onValueModified: value => root.panelWidthField.set(value)
+                  }
+                }
+                NPluginSettingsField {
+                  field: root.panelHeightRatioField
+                  NSpinBox {
+                    id: panelHeightInput
+                    objectName: "settings-range-editPanelHeightPercent"
+                    Layout.fillWidth: true
+                    label: pluginApi?.tr("settings.panelHeightRatio")
+                    from: 30
+                    to: 100
+                    stepSize: 1
+                    value: root.editPanelHeightPercent
+                    onValueModified: value => root.panelHeightRatioField.set(value / 100)
+                  }
+                }
+              }
+            }
+
+            // ============== DANGER ZONE ==============
+            ColumnLayout {
+              spacing: Style.marginM
+              Layout.margins: Style.marginM
+
+              Rectangle {
                 Layout.fillWidth: true
-                label: pluginApi?.tr("settings.confirmBypass")
-                checked: cs.requireConfirmBypass !== false
-                onToggled: checked => set("requireConfirmBypass", checked)
+                radius: Style.radiusM
+                color: Qt.alpha(AtmoColor.mError, 0.10)
+                border.color: AtmoColor.mError
+                border.width: Style.borderS
+                implicitHeight: dangerCol.implicitHeight + Style.marginM * 2
+
+                ColumnLayout {
+                  id: dangerCol
+                  anchors.fill: parent
+                  anchors.margins: Style.marginM
+                  spacing: Style.marginS
+
+                  RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Style.marginS
+                    AtmoIcon {
+                      icon: "alert-triangle"
+                      color: AtmoColor.mError
+                      pointSize: Style.fontSizeM
+                    }
+                    NText {
+                      text: pluginApi?.tr("settings.dangerHeading")
+                      font.weight: Font.Bold
+                      pointSize: Style.fontSizeM
+                      color: AtmoColor.mError
+                    }
+                  }
+                  NText {
+                    text: pluginApi?.tr("settings.dangerSubheading")
+                    wrapMode: Text.Wrap
+                    Layout.fillWidth: true
+                    pointSize: Style.fontSizeXS
+                    color: AtmoColor.mOnSurfaceVariant
+                  }
+
+                  NCheckbox {
+                    Layout.fillWidth: true
+                    label: pluginApi?.tr("settings.dangerouslySkip")
+                    description: pluginApi?.tr("settings.dangerouslySkipHelp")
+                    checked: cs.dangerouslySkipPermissions === true
+                    onToggled: checked => {
+                      if (checked) {
+                        bypassConfirm.forSkip = true;
+                        bypassConfirm.open();
+                      } else {
+                        set("dangerouslySkipPermissions", false);
+                      }
+                    }
+                  }
+                  NCheckbox {
+                    Layout.fillWidth: true
+                    label: pluginApi?.tr("settings.confirmBypass")
+                    checked: cs.requireConfirmBypass !== false
+                    onToggled: checked => set("requireConfirmBypass", checked)
+                  }
+                }
               }
             }
           }
         }
-      }
       } // /NScrollView
 
       // Floating "Saved ✓" pill — appears near the bottom-right of the settings
@@ -652,13 +733,24 @@ Item {
         anchors.bottomMargin: Style.marginM
         z: 100
         opacity: root._saveBlinking ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: 200 } }
+        Behavior on opacity {
+          NumberAnimation {
+            duration: 200
+          }
+        }
         // Subtle slide-up while appearing. Behavior must live on a regular
         // property — not inside the Translate — so we drive Translate via
         // a bound property and animate that.
         property real _slideY: root._saveBlinking ? 0 : 6
-        Behavior on _slideY { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-        transform: Translate { y: savedIndicator._slideY }
+        Behavior on _slideY {
+          NumberAnimation {
+            duration: 200
+            easing.type: Easing.OutCubic
+          }
+        }
+        transform: Translate {
+          y: savedIndicator._slideY
+        }
 
         implicitWidth: savedRow.implicitWidth + Style.marginM * 2
         implicitHeight: savedRow.implicitHeight + Style.marginS * 2
@@ -677,7 +769,7 @@ Item {
             color: AtmoColor.mOnSecondary
           }
           NText {
-            text: pluginApi?.tr("settings.savedFlash") 
+            text: pluginApi?.tr("settings.savedFlash")
             pointSize: Style.fontSizeXS
             font.weight: Font.DemiBold
             color: AtmoColor.mOnSecondary
@@ -701,9 +793,7 @@ Item {
     contentItem: ColumnLayout {
       spacing: Style.marginS
       NText {
-        text: bypassConfirm.forSkip
-              ? pluginApi?.tr("dialog.bypassSkipWarning")
-              : pluginApi?.tr("dialog.bypassModeWarning")
+        text: bypassConfirm.forSkip ? pluginApi?.tr("dialog.bypassSkipWarning") : pluginApi?.tr("dialog.bypassModeWarning")
         wrapMode: Text.Wrap
         Layout.fillWidth: true
         color: AtmoColor.mError
@@ -734,22 +824,16 @@ Item {
   Dialog {
     id: resetConfirm
     modal: true
-    title: pluginApi?.tr("settings.resetDefaults") 
+    title: pluginApi?.tr("settings.resetDefaults")
     width: 420
     contentItem: NText {
-      text: pluginApi?.tr("settings.resetConfirm") 
+      text: pluginApi?.tr("settings.resetConfirm")
       wrapMode: Text.Wrap
     }
     standardButtons: Dialog.Ok | Dialog.Cancel
     onAccepted: {
-      // Wipe the claude block and known top-level overrides; saveSettings()
-      // re-emits defaults from the manifest schema.
-      root.editClaude = Object.assign({}, root.editClaude, pluginApi.manifest.metadata.defaultSettings.claude);
-      root.editAdditionalDirsText = (root.editClaude.additionalDirs || []).join("\n");
-      root.editAllowedToolsText = (root.editClaude.allowedTools || []).join(",");
-      root.editDisallowedToolsText = (root.editClaude.disallowedTools || []).join(",");
-      root.editAppendSystemPrompt = root.editClaude.appendSystemPrompt || "";
-      root.editMaxTurns = root.editClaude.maxTurns || 0;
+      // One multi-field Reset: the claude block reveals its inherited value.
+      pluginApi.resetFields(["claude"]);
     }
   }
 }

@@ -5,245 +5,258 @@ import qs.Commons
 import qs.Widgets
 
 ColumnLayout {
-    id: root
+  id: root
 
-    
-    property var pluginApi: null
+  property var pluginApi: null
+  readonly property var refreshIntervalField: pluginApi?.field("refreshInterval") ?? null
+  readonly property var compactModeField: pluginApi?.field("compactMode") ?? null
+  readonly property var showIpAddressField: pluginApi?.field("showIpAddress") ?? null
+  readonly property var hideDisconnectedField: pluginApi?.field("hideDisconnected") ?? null
+  readonly property var showPingField: pluginApi?.field("showPing") ?? null
+  readonly property var terminalCommandField: pluginApi?.field("terminalCommand") ?? null
+  readonly property var managementUrlField: pluginApi?.field("managementUrl") ?? null
+  readonly property var pingCountField: pluginApi?.field("pingCount") ?? null
+  readonly property var defaultPeerActionField: pluginApi?.field("defaultPeerAction") ?? null
 
-    property int editRefreshInterval: displayBaseline.project("editRefreshInterval")
+  readonly property int editRefreshInterval: root.refreshIntervalField?.value || 5000
 
-    property bool editCompactMode: displayBaseline.editCompactMode
+  readonly property bool editCompactMode: root.compactModeField?.value ?? false
 
-    property bool editShowIpAddress: displayBaseline.editShowIpAddress
+  readonly property bool editShowIpAddress: root.showIpAddressField?.value ?? true
 
-    property bool editHideDisconnected: displayBaseline.editHideDisconnected
+  readonly property bool editHideDisconnected: root.hideDisconnectedField?.value ?? false
 
-    property bool editShowPing: displayBaseline.editShowPing
+  readonly property bool editShowPing: root.showPingField?.value ?? false
 
-    property int editPingCount: displayBaseline.project("editPingCount")
+  readonly property int editPingCount: root.pingCountField?.value || 5
 
-    property string editTerminalCommand: displayBaseline.editTerminalCommand
+  readonly property string editTerminalCommand: root.terminalCommandField?.value || ""
 
-    property string editManagementUrl: displayBaseline.editManagementUrl
+  readonly property string editManagementUrl: root.managementUrlField?.value ?? ""
 
-    property string editDefaultPeerAction: displayBaseline.editDefaultPeerAction
+  readonly property string editDefaultPeerAction: root.defaultPeerActionField?.value || "copy-ip"
 
-    spacing: Style.marginM
+  spacing: Style.marginM
 
-    NText {
-        text: pluginApi?.tr("settings.title") || "NetBird Settings"
-        font.pointSize: Style.fontSizeXL
-        font.bold: true
-    }
+  NText {
+    text: pluginApi?.tr("settings.title") || "NetBird Settings"
+    font.pointSize: Style.fontSizeXL
+    font.bold: true
+  }
 
-    NText {
-        text: pluginApi?.tr("settings.description") || "Configure NetBird VPN status display and behavior"
-        color: AtmoColor.mSecondary
-        Layout.fillWidth: true
-        wrapMode: Text.Wrap
-    }
+  NText {
+    text: pluginApi?.tr("settings.description") || "Configure NetBird VPN status display and behavior"
+    color: AtmoColor.mSecondary
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+  }
 
-    NDivider {
-        Layout.fillWidth: true
-        Layout.topMargin: Style.marginM
-        Layout.bottomMargin: Style.marginM
-    }
+  NDivider {
+    Layout.fillWidth: true
+    Layout.topMargin: Style.marginM
+    Layout.bottomMargin: Style.marginM
+  }
 
-    NLabel {
-        label: pluginApi?.tr("settings.refresh-interval") || "Refresh Interval"
-        description: (pluginApi?.tr("settings.refresh-interval-desc") || "How often to check NetBird status") + " (" + root.editRefreshInterval + " ms)"
-    }
+  NLabel {
+    label: pluginApi?.tr("settings.refresh-interval") || "Refresh Interval"
+    description: (pluginApi?.tr("settings.refresh-interval-desc") || "How often to check NetBird status") + " (" + root.editRefreshInterval + " ms)"
+  }
 
+  NPluginSettingsField {
+    field: root.refreshIntervalField
     NSlider {
-        id: rangeEditRefreshInterval
-        objectName: "settings-range-editRefreshInterval"
-        Layout.fillWidth: true
-        from: 1000
-        to: 60000
-        stepSize: 1000
-        value: root.editRefreshInterval
-        onValueChanged: root.editRefreshInterval = value
+      id: rangeEditRefreshInterval
+      objectName: "settings-range-editRefreshInterval"
+      Layout.fillWidth: true
+      from: 1000
+      to: 60000
+      stepSize: 1000
+      value: root.editRefreshInterval
+      onMoved: root.refreshIntervalField.set(value)
     }
+  }
 
-    NDivider {
-        Layout.fillWidth: true
-        Layout.topMargin: Style.marginM
-        Layout.bottomMargin: Style.marginM
-    }
+  NDivider {
+    Layout.fillWidth: true
+    Layout.topMargin: Style.marginM
+    Layout.bottomMargin: Style.marginM
+  }
 
-    NLabel {
-        label: pluginApi?.tr("settings.display-options") || "Display Options"
-    }
+  NLabel {
+    label: pluginApi?.tr("settings.display-options") || "Display Options"
+  }
 
+  NPluginSettingsField {
+    field: root.compactModeField
     NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.compact-mode") || "Compact Mode"
-        description: pluginApi?.tr("settings.compact-mode-desc") || "Show only icon in the bar"
-        checked: root.editCompactMode
-        onToggled: checked => {
-            root.editCompactMode = checked;
-            if (checked) {
-                root.editShowIpAddress = false;
-            }
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.compact-mode") || "Compact Mode"
+      description: pluginApi?.tr("settings.compact-mode-desc") || "Show only icon in the bar"
+      checked: root.editCompactMode
+      onToggled: checked => {
+        root.compactModeField.set(checked);
+        if (checked) {
+          root.showIpAddressField.set(false);
         }
+      }
     }
+  }
 
+  NPluginSettingsField {
+    field: root.showIpAddressField
     NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.show-ip") || "Show IP Address"
-        description: pluginApi?.tr("settings.show-ip-desc") || "Display NetBird IP in the bar widget"
-        checked: root.editShowIpAddress
-        enabled: !root.editCompactMode
-        onToggled: checked => {
-            root.editShowIpAddress = checked;
-            if (checked) {
-                root.editCompactMode = false;
-            } else {
-                root.editCompactMode = true;
-            }
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.show-ip") || "Show IP Address"
+      description: pluginApi?.tr("settings.show-ip-desc") || "Display NetBird IP in the bar widget"
+      checked: root.editShowIpAddress
+      enabled: !root.editCompactMode
+      onToggled: checked => {
+        root.showIpAddressField.set(checked);
+        if (checked) {
+          root.compactModeField.set(false);
+        } else {
+          root.compactModeField.set(true);
         }
+      }
     }
+  }
 
+  NPluginSettingsField {
+    field: root.hideDisconnectedField
     NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.hide-disconnected") || "Hide Disconnected Peers"
-        description: pluginApi?.tr("settings.hide-disconnected-desc") || "Only show online peers in the panel"
-        checked: root.editHideDisconnected
-        onToggled: checked => root.editHideDisconnected = checked
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.hide-disconnected") || "Hide Disconnected Peers"
+      description: pluginApi?.tr("settings.hide-disconnected-desc") || "Only show online peers in the panel"
+      checked: root.editHideDisconnected
+      onToggled: checked => root.hideDisconnectedField.set(checked)
     }
+  }
 
+  NPluginSettingsField {
+    field: root.showPingField
     NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.show-ping") || "Show Ping Latency"
-        description: pluginApi?.tr("settings.show-ping-desc") || "Ping all connected peers and display latency (ms). Refreshes at the same interval as status."
-        checked: root.editShowPing
-        onToggled: checked => root.editShowPing = checked
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.show-ping") || "Show Ping Latency"
+      description: pluginApi?.tr("settings.show-ping-desc") || "Ping all connected peers and display latency (ms). Refreshes at the same interval as status."
+      checked: root.editShowPing
+      onToggled: checked => root.showPingField.set(checked)
     }
+  }
 
-    NText {
-        visible: root.editShowPing
-        Layout.fillWidth: true
-        text: "⚠ " + (pluginApi?.tr("settings.show-ping-warning") || "This feature sends ICMP packets to each connected peer at every refresh interval. It may increase network usage and CPU load.")
-        pointSize: Style.fontSizeXS
-        color: AtmoColor.mError
-        wrapMode: Text.Wrap
-    }
+  NText {
+    visible: root.editShowPing
+    Layout.fillWidth: true
+    text: "⚠ " + (pluginApi?.tr("settings.show-ping-warning") || "This feature sends ICMP packets to each connected peer at every refresh interval. It may increase network usage and CPU load.")
+    pointSize: Style.fontSizeXS
+    color: AtmoColor.mError
+    wrapMode: Text.Wrap
+  }
 
-    NDivider {
-        Layout.fillWidth: true
-        Layout.topMargin: Style.marginM
-        Layout.bottomMargin: Style.marginM
-    }
+  NDivider {
+    Layout.fillWidth: true
+    Layout.topMargin: Style.marginM
+    Layout.bottomMargin: Style.marginM
+  }
 
+  NPluginSettingsField {
+    field: root.terminalCommandField
     NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.terminal")
-        description: pluginApi?.tr("settings.terminal-desc")
-        placeholderText: {
-            var detected = pluginApi?.mainInstance?.detectedTerminal || "";
-            if (detected !== "") {
-                return pluginApi?.tr("settings.terminal-detected") + ": " + detected;
-            } else {
-                return pluginApi?.tr("settings.terminal-none");
-            }
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.terminal")
+      description: pluginApi?.tr("settings.terminal-desc")
+      placeholderText: {
+        var detected = pluginApi?.mainInstance?.detectedTerminal || "";
+        if (detected !== "") {
+          return pluginApi?.tr("settings.terminal-detected") + ": " + detected;
+        } else {
+          return pluginApi?.tr("settings.terminal-none");
         }
-        text: root.editTerminalCommand
-        onTextChanged: root.editTerminalCommand = text
+      }
+      text: root.editTerminalCommand
+      onEditCommitted: root.terminalCommandField.set(text)
     }
+  }
 
+  NPluginSettingsField {
+    field: root.managementUrlField
     NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.management-url")
-        description: pluginApi?.tr("settings.management-url-desc")
-        placeholderText: pluginApi?.manifest?.metadata?.defaultSettings?.managementUrl
-        text: root.editManagementUrl
-        onTextChanged: root.editManagementUrl = text
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.management-url")
+      description: pluginApi?.tr("settings.management-url-desc")
+      placeholderText: pluginApi?.manifest?.metadata?.defaultSettings?.managementUrl
+      text: root.editManagementUrl
+      onEditCommitted: root.managementUrlField.set(text)
     }
+  }
 
-    NLabel {
-        label: pluginApi?.tr("settings.ping-count") || "Ping Count"
-        description: (pluginApi?.tr("settings.ping-count-desc") || "Number of ping packets to send when testing connectivity") + " (" + root.editPingCount + ")"
-    }
+  NLabel {
+    label: pluginApi?.tr("settings.ping-count") || "Ping Count"
+    description: (pluginApi?.tr("settings.ping-count-desc") || "Number of ping packets to send when testing connectivity") + " (" + root.editPingCount + ")"
+  }
 
+  NPluginSettingsField {
+    field: root.pingCountField
     NSlider {
-        id: rangeEditPingCount
-        objectName: "settings-range-editPingCount"
-        Layout.fillWidth: true
-        from: 1
-        to: 20
-        stepSize: 1
-        value: root.editPingCount
-        onValueChanged: root.editPingCount = value
+      id: rangeEditPingCount
+      objectName: "settings-range-editPingCount"
+      Layout.fillWidth: true
+      from: 1
+      to: 20
+      stepSize: 1
+      value: root.editPingCount
+      onMoved: root.pingCountField.set(value)
     }
+  }
 
-    NDivider {
-        Layout.fillWidth: true
-        Layout.topMargin: Style.marginM
-        Layout.bottomMargin: Style.marginM
-    }
+  NDivider {
+    Layout.fillWidth: true
+    Layout.topMargin: Style.marginM
+    Layout.bottomMargin: Style.marginM
+  }
 
-    NLabel {
-        label: pluginApi?.tr("settings.peer-action") || "Peer Click Action"
-    }
+  NLabel {
+    label: pluginApi?.tr("settings.peer-action") || "Peer Click Action"
+  }
 
+  NPluginSettingsField {
+    field: root.defaultPeerActionField
     NComboBox {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.default-peer-action") || "Default Action"
-        description: pluginApi?.tr("settings.default-peer-action-desc") || "Action when clicking on a peer in the panel"
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.default-peer-action") || "Default Action"
+      description: pluginApi?.tr("settings.default-peer-action-desc") || "Action when clicking on a peer in the panel"
 
-        model: [
-            {
-                key: "copy-ip",
-                name: pluginApi?.tr("context.copy-ip") || "Copy IP"
-            },
-            {
-                key: "ssh",
-                name: pluginApi?.tr("context.ssh") || "SSH to host"
-            },
-            {
-                key: "ping",
-                name: pluginApi?.tr("context.ping") || "Ping host"
-            }
-        ]
-
-        currentKey: root.editDefaultPeerAction
-        onSelected: key => root.editDefaultPeerAction = key
-    }
-
-    NSettingsBaseline {
-      ranges: [NSettingsRange { field: "editRefreshInterval"; from: rangeEditRefreshInterval.from; to: rangeEditRefreshInterval.to }, NSettingsRange { field: "editPingCount"; from: rangeEditPingCount.from; to: rangeEditPingCount.to }]
-      id: displayBaseline
-      readonly property int editRefreshInterval: pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 5000
-      readonly property bool editCompactMode: pluginApi?.pluginSettings?.compactMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ?? false
-      readonly property bool editShowIpAddress: pluginApi?.pluginSettings?.showIpAddress ?? pluginApi?.manifest?.metadata?.defaultSettings?.showIpAddress ?? true
-      readonly property bool editHideDisconnected: pluginApi?.pluginSettings?.hideDisconnected ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideDisconnected ?? false
-      readonly property bool editShowPing: pluginApi?.pluginSettings?.showPing ?? pluginApi?.manifest?.metadata?.defaultSettings?.showPing ?? false
-      readonly property string editTerminalCommand: pluginApi?.pluginSettings?.terminalCommand || pluginApi?.manifest?.metadata?.defaultSettings?.terminalCommand || ""
-      readonly property string editManagementUrl: pluginApi?.pluginSettings?.managementUrl ?? pluginApi?.manifest?.metadata?.defaultSettings?.managementUrl ?? ""
-      readonly property int editPingCount: pluginApi?.pluginSettings?.pingCount || pluginApi?.manifest?.metadata?.defaultSettings?.pingCount || 5
-      readonly property string editDefaultPeerAction: pluginApi?.pluginSettings?.defaultPeerAction || pluginApi?.manifest?.metadata?.defaultSettings?.defaultPeerAction || "copy-ip"
-    }
-    readonly property bool settingsDirty: displayBaseline.differs({editRefreshInterval: root.editRefreshInterval, editCompactMode: root.editCompactMode, editShowIpAddress: root.editShowIpAddress, editHideDisconnected: root.editHideDisconnected, editShowPing: root.editShowPing, editTerminalCommand: root.editTerminalCommand, editManagementUrl: root.editManagementUrl, editPingCount: root.editPingCount, editDefaultPeerAction: root.editDefaultPeerAction})
-
-    function saveSettings() {
-        if (!pluginApi) {
-            Logger.e("NetBird", "Cannot save: pluginApi is null");
-            return;
+      model: [
+        {
+          key: "copy-ip",
+          name: pluginApi?.tr("context.copy-ip") || "Copy IP"
+        },
+        {
+          key: "ssh",
+          name: pluginApi?.tr("context.ssh") || "SSH to host"
+        },
+        {
+          key: "ping",
+          name: pluginApi?.tr("context.ping") || "Ping host"
         }
+      ]
 
-        pluginApi.pluginSettings.refreshInterval = root.editRefreshInterval;
-        pluginApi.pluginSettings.compactMode = root.editCompactMode;
-        pluginApi.pluginSettings.showIpAddress = root.editShowIpAddress;
-        pluginApi.pluginSettings.hideDisconnected = root.editHideDisconnected;
-        pluginApi.pluginSettings.showPing = root.editShowPing;
-        pluginApi.pluginSettings.terminalCommand = root.editTerminalCommand;
-        pluginApi.pluginSettings.managementUrl = root.editManagementUrl;
-        pluginApi.pluginSettings.pingCount = root.editPingCount;
-        pluginApi.pluginSettings.defaultPeerAction = root.editDefaultPeerAction;
-
-        pluginApi.saveSettings(function (result) {
-            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
-                Logger.i("NetBird", "Settings saved successfully");
-        });
+      currentKey: root.editDefaultPeerAction
+      onSelected: key => root.defaultPeerActionField.set(key)
     }
+  }
+
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
+
+  function saveSettings() {
+    if (!pluginApi) {
+      Logger.e("NetBird", "Cannot save: pluginApi is null");
+      return;
+    }
+
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("NetBird", "Settings saved successfully");
+    });
+  }
 }

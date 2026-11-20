@@ -10,76 +10,52 @@ ColumnLayout {
   width: 560
 
   required property var pluginApi
+  readonly property var pollIntervalMsField: pluginApi?.field("pollIntervalMs") ?? null
+  readonly property var leftClickActionField: pluginApi?.field("leftClickAction") ?? null
+  readonly property var launchBehaviorField: pluginApi?.field("launchBehavior") ?? null
+  readonly property var barLabelModeField: pluginApi?.field("barLabelMode") ?? null
+  readonly property var videosPathField: pluginApi?.field("videosPath") ?? null
+  readonly property var videosOpenerField: pluginApi?.field("videosOpener") ?? null
+  readonly property var autoCloseManagedObsField: pluginApi?.field("autoCloseManagedObs") ?? null
+  readonly property var openVideosAfterStopField: pluginApi?.field("openVideosAfterStop") ?? null
+  readonly property var showBarWhenRecordingField: pluginApi?.field("showBarWhenRecording") ?? null
+  readonly property var showBarWhenReplayField: pluginApi?.field("showBarWhenReplay") ?? null
+  readonly property var showBarWhenStreamingField: pluginApi?.field("showBarWhenStreaming") ?? null
+  readonly property var showBarWhenReadyField: pluginApi?.field("showBarWhenReady") ?? null
+  readonly property var showControlCenterWhenRecordingField: pluginApi?.field("showControlCenterWhenRecording") ?? null
+  readonly property var showControlCenterWhenReplayField: pluginApi?.field("showControlCenterWhenReplay") ?? null
+  readonly property var showControlCenterWhenStreamingField: pluginApi?.field("showControlCenterWhenStreaming") ?? null
+  readonly property var showControlCenterWhenReadyField: pluginApi?.field("showControlCenterWhenReady") ?? null
+  readonly property var showElapsedInBarField: pluginApi?.field("showElapsedInBar") ?? null
 
-  readonly property var defaults: root.pluginApi.manifest?.metadata?.defaultSettings ?? ({})
   readonly property var settings: root.pluginApi.pluginSettings ?? ({})
   readonly property var service: root.pluginApi.mainInstance
   readonly property bool durationLabelsSelected: root.valueBarLabelMode === "duration"
 
-  property int valuePollIntervalMs: displayBaseline.valuePollIntervalMs
-  property string valueLeftClickAction: displayBaseline.valueLeftClickAction
-  property string valueLaunchBehavior: displayBaseline.valueLaunchBehavior
-  property string valueBarLabelMode: displayBaseline.valueBarLabelMode
-  property string valueVideosPath: displayBaseline.valueVideosPath
-  property string valueVideosOpener: displayBaseline.valueVideosOpener
-  property bool valueAutoCloseManagedObs: displayBaseline.valueAutoCloseManagedObs
-  property bool valueOpenVideosAfterStop: displayBaseline.valueOpenVideosAfterStop
-  property bool valueShowBarWhenRecording: displayBaseline.valueShowBarWhenRecording
-  property bool valueShowBarWhenReplay: displayBaseline.valueShowBarWhenReplay
-  property bool valueShowBarWhenStreaming: displayBaseline.valueShowBarWhenStreaming
+  readonly property int valuePollIntervalMs: root.pollIntervalMsField?.value ?? 2500
+  readonly property string valueLeftClickAction: root.leftClickActionField?.value ?? "panel"
+  readonly property string valueLaunchBehavior: root.launchBehaviorField?.value ?? "minimized-to-tray"
+  readonly property string valueBarLabelMode: root.barLabelModeField?.value ?? "short-label"
+  readonly property string valueVideosPath: root.videosPathField?.value ?? ""
+  readonly property string valueVideosOpener: root.videosOpenerField?.value ?? "xdg-open"
+  readonly property bool valueAutoCloseManagedObs: root.autoCloseManagedObsField?.value ?? true
+  readonly property bool valueOpenVideosAfterStop: root.openVideosAfterStopField?.value ?? true
+  readonly property bool valueShowBarWhenRecording: root.showBarWhenRecordingField?.value ?? true
+  readonly property bool valueShowBarWhenReplay: root.showBarWhenReplayField?.value ?? false
+  readonly property bool valueShowBarWhenStreaming: root.showBarWhenStreamingField?.value ?? true
   // Stored under the legacy showBarWhenReady key for settings compatibility.
-  property bool valueAlwaysShowInBar: displayBaseline.valueAlwaysShowInBar
-  property bool valueShowControlCenterWhenRecording: displayBaseline.valueShowControlCenterWhenRecording
-  property bool valueShowControlCenterWhenReplay: displayBaseline.valueShowControlCenterWhenReplay
-  property bool valueShowControlCenterWhenStreaming: displayBaseline.valueShowControlCenterWhenStreaming
-  property bool valueShowControlCenterWhenReady: displayBaseline.valueShowControlCenterWhenReady
-  property bool valueShowElapsedInBar: displayBaseline.valueShowElapsedInBar
+  readonly property bool valueAlwaysShowInBar: root.showBarWhenReadyField?.value ?? true
+  readonly property bool valueShowControlCenterWhenRecording: root.showControlCenterWhenRecordingField?.value ?? true
+  readonly property bool valueShowControlCenterWhenReplay: root.showControlCenterWhenReplayField?.value ?? true
+  readonly property bool valueShowControlCenterWhenStreaming: root.showControlCenterWhenStreamingField?.value ?? true
+  readonly property bool valueShowControlCenterWhenReady: root.showControlCenterWhenReadyField?.value ?? false
+  readonly property bool valueShowElapsedInBar: root.showElapsedInBarField?.value ?? false
 
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property int valuePollIntervalMs: root.settings.pollIntervalMs ?? root.defaults.pollIntervalMs ?? 2500
-    readonly property string valueLeftClickAction: root.settings.leftClickAction ?? root.defaults.leftClickAction ?? "panel"
-    readonly property string valueLaunchBehavior: root.settings.launchBehavior ?? root.defaults.launchBehavior ?? "minimized-to-tray"
-    readonly property string valueBarLabelMode: root.settings.barLabelMode ?? root.defaults.barLabelMode ?? "short-label"
-    readonly property string valueVideosPath: root.settings.videosPath ?? root.defaults.videosPath ?? ""
-    readonly property string valueVideosOpener: root.settings.videosOpener ?? root.defaults.videosOpener ?? "xdg-open"
-    readonly property bool valueAutoCloseManagedObs: root.settings.autoCloseManagedObs ?? root.defaults.autoCloseManagedObs ?? true
-    readonly property bool valueOpenVideosAfterStop: root.settings.openVideosAfterStop ?? root.defaults.openVideosAfterStop ?? true
-    readonly property bool valueShowBarWhenRecording: root.settings.showBarWhenRecording ?? root.defaults.showBarWhenRecording ?? true
-    readonly property bool valueShowBarWhenReplay: root.settings.showBarWhenReplay ?? root.defaults.showBarWhenReplay ?? false
-    readonly property bool valueShowBarWhenStreaming: root.settings.showBarWhenStreaming ?? root.defaults.showBarWhenStreaming ?? true
-    readonly property bool valueAlwaysShowInBar: root.settings.showBarWhenReady ?? root.defaults.showBarWhenReady ?? true
-    readonly property bool valueShowControlCenterWhenRecording: root.settings.showControlCenterWhenRecording ?? root.defaults.showControlCenterWhenRecording ?? true
-    readonly property bool valueShowControlCenterWhenReplay: root.settings.showControlCenterWhenReplay ?? root.defaults.showControlCenterWhenReplay ?? true
-    readonly property bool valueShowControlCenterWhenStreaming: root.settings.showControlCenterWhenStreaming ?? root.defaults.showControlCenterWhenStreaming ?? true
-    readonly property bool valueShowControlCenterWhenReady: root.settings.showControlCenterWhenReady ?? root.defaults.showControlCenterWhenReady ?? false
-    readonly property bool valueShowElapsedInBar: root.settings.showElapsedInBar ?? root.defaults.showElapsedInBar ?? false
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({valuePollIntervalMs: root.valuePollIntervalMs, valueLeftClickAction: root.valueLeftClickAction, valueLaunchBehavior: root.valueLaunchBehavior, valueBarLabelMode: root.valueBarLabelMode, valueVideosPath: root.valueVideosPath, valueVideosOpener: root.valueVideosOpener, valueAutoCloseManagedObs: root.valueAutoCloseManagedObs, valueOpenVideosAfterStop: root.valueOpenVideosAfterStop, valueShowBarWhenRecording: root.valueShowBarWhenRecording, valueShowBarWhenReplay: root.valueShowBarWhenReplay, valueShowBarWhenStreaming: root.valueShowBarWhenStreaming, valueAlwaysShowInBar: root.valueAlwaysShowInBar, valueShowControlCenterWhenRecording: root.valueShowControlCenterWhenRecording, valueShowControlCenterWhenReplay: root.valueShowControlCenterWhenReplay, valueShowControlCenterWhenStreaming: root.valueShowControlCenterWhenStreaming, valueShowControlCenterWhenReady: root.valueShowControlCenterWhenReady, valueShowElapsedInBar: root.valueShowElapsedInBar})
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   function saveSettings() {
-    const settings = root.pluginApi.pluginSettings
-
-    settings.pollIntervalMs = root.valuePollIntervalMs
-    settings.leftClickAction = root.valueLeftClickAction
-    settings.launchBehavior = root.valueLaunchBehavior
-    settings.barLabelMode = root.valueBarLabelMode
-    root.valueVideosPath = root.valueVideosPath.trim()
-    root.valueVideosOpener = root.valueVideosOpener.trim()
-    settings.videosPath = root.valueVideosPath
-    settings.videosOpener = root.valueVideosOpener
-    settings.autoCloseManagedObs = root.valueAutoCloseManagedObs
-    settings.openVideosAfterStop = root.valueOpenVideosAfterStop
-    settings.showBarWhenRecording = root.valueShowBarWhenRecording
-    settings.showBarWhenReplay = root.valueShowBarWhenReplay
-    settings.showBarWhenStreaming = root.valueShowBarWhenStreaming
-    settings.showBarWhenReady = root.valueAlwaysShowInBar
-    settings.showControlCenterWhenRecording = root.valueShowControlCenterWhenRecording
-    settings.showControlCenterWhenReplay = root.valueShowControlCenterWhenReplay
-    settings.showControlCenterWhenStreaming = root.valueShowControlCenterWhenStreaming
-    settings.showControlCenterWhenReady = root.valueShowControlCenterWhenReady
-    settings.showElapsedInBar = root.valueShowElapsedInBar
-    root.pluginApi.saveSettings()
+    root.pluginApi.saveSettings();
   }
 
   NHeader {
@@ -102,9 +78,7 @@ ColumnLayout {
       spacing: Style.marginXS
 
       NText {
-        text: root.service?.websocketSupportMissing
-              ? root.pluginApi.tr("settings.runtime.qt_websockets_missing_title")
-              : root.pluginApi.tr("settings.runtime.websocket_config_missing_title")
+        text: root.service?.websocketSupportMissing ? root.pluginApi.tr("settings.runtime.qt_websockets_missing_title") : root.pluginApi.tr("settings.runtime.websocket_config_missing_title")
         font.weight: Style.fontWeightSemiBold
         color: AtmoColor.mPrimary
       }
@@ -113,9 +87,7 @@ ColumnLayout {
         Layout.fillWidth: true
         wrapMode: Text.WordWrap
         color: AtmoColor.mOnSurfaceVariant
-        text: root.service?.websocketSupportMissing
-              ? root.pluginApi.tr("settings.runtime.qt_websockets_missing")
-              : root.pluginApi.tr("settings.runtime.websocket_config_missing")
+        text: root.service?.websocketSupportMissing ? root.pluginApi.tr("settings.runtime.qt_websockets_missing") : root.pluginApi.tr("settings.runtime.websocket_config_missing")
       }
     }
   }
@@ -147,42 +119,66 @@ ColumnLayout {
         text: root.pluginApi.tr("settings.sections.behavior.description")
       }
 
-      NComboBox {
-        Layout.fillWidth: true
-        label: root.pluginApi.tr("settings.left_click_action.label")
-        description: root.pluginApi.tr("settings.left_click_action.description")
-        model: [
-          { key: "panel", name: root.pluginApi.tr("settings.left_click_action.options.open_controls") },
-          { key: "toggle-record", name: root.pluginApi.tr("settings.left_click_action.options.toggle_recording") },
-          { key: "toggle-stream", name: root.pluginApi.tr("settings.left_click_action.options.toggle_streaming") },
-        ]
-        currentKey: root.valueLeftClickAction
-        minimumWidth: 220
-        onSelected: key => root.valueLeftClickAction = key
+      NPluginSettingsField {
+        field: root.leftClickActionField
+        NComboBox {
+          Layout.fillWidth: true
+          label: root.pluginApi.tr("settings.left_click_action.label")
+          description: root.pluginApi.tr("settings.left_click_action.description")
+          model: [
+            {
+              key: "panel",
+              name: root.pluginApi.tr("settings.left_click_action.options.open_controls")
+            },
+            {
+              key: "toggle-record",
+              name: root.pluginApi.tr("settings.left_click_action.options.toggle_recording")
+            },
+            {
+              key: "toggle-stream",
+              name: root.pluginApi.tr("settings.left_click_action.options.toggle_streaming")
+            },
+          ]
+          currentKey: root.valueLeftClickAction
+          minimumWidth: 220
+          onSelected: key => root.leftClickActionField.set(key)
+        }
       }
 
-      NComboBox {
-        Layout.fillWidth: true
-        label: root.pluginApi.tr("settings.launch_behavior.label")
-        description: root.pluginApi.tr("settings.launch_behavior.description")
-        model: [
-          { key: "normal", name: root.pluginApi.tr("settings.launch_behavior.options.normal") },
-          { key: "minimized-to-tray", name: root.pluginApi.tr("settings.launch_behavior.options.minimized_to_tray") },
-        ]
-        currentKey: root.valueLaunchBehavior
-        minimumWidth: 220
-        onSelected: key => root.valueLaunchBehavior = key
+      NPluginSettingsField {
+        field: root.launchBehaviorField
+        NComboBox {
+          Layout.fillWidth: true
+          label: root.pluginApi.tr("settings.launch_behavior.label")
+          description: root.pluginApi.tr("settings.launch_behavior.description")
+          model: [
+            {
+              key: "normal",
+              name: root.pluginApi.tr("settings.launch_behavior.options.normal")
+            },
+            {
+              key: "minimized-to-tray",
+              name: root.pluginApi.tr("settings.launch_behavior.options.minimized_to_tray")
+            },
+          ]
+          currentKey: root.valueLaunchBehavior
+          minimumWidth: 220
+          onSelected: key => root.launchBehaviorField.set(key)
+        }
       }
 
-      NSpinBox {
-        Layout.fillWidth: true
-        label: root.pluginApi.tr("settings.poll_interval.label")
-        description: root.pluginApi.tr("settings.poll_interval.description")
-        from: 750
-        to: 10000
-        stepSize: 250
-        value: root.valuePollIntervalMs
-        onValueChanged: root.valuePollIntervalMs = value
+      NPluginSettingsField {
+        field: root.pollIntervalMsField
+        NSpinBox {
+          Layout.fillWidth: true
+          label: root.pluginApi.tr("settings.poll_interval.label")
+          description: root.pluginApi.tr("settings.poll_interval.description")
+          from: 750
+          to: 10000
+          stepSize: 250
+          value: root.valuePollIntervalMs
+          onValueModified: value => root.pollIntervalMsField.set(value)
+        }
       }
     }
   }
@@ -214,59 +210,86 @@ ColumnLayout {
         text: root.pluginApi.tr("settings.sections.bar.description")
       }
 
-      NComboBox {
-        Layout.fillWidth: true
-        label: root.pluginApi.tr("settings.bar_label_mode.label")
-        description: root.pluginApi.tr("settings.bar_label_mode.description")
-        model: [
-          { key: "icon-only", name: root.pluginApi.tr("settings.bar_label_mode.options.icon_only") },
-          { key: "short-label", name: root.pluginApi.tr("settings.bar_label_mode.options.short_label") },
-          { key: "duration", name: root.pluginApi.tr("settings.bar_label_mode.options.duration") },
-        ]
-        currentKey: root.valueBarLabelMode
-        minimumWidth: 220
-        onSelected: key => root.valueBarLabelMode = key
+      NPluginSettingsField {
+        field: root.barLabelModeField
+        NComboBox {
+          Layout.fillWidth: true
+          label: root.pluginApi.tr("settings.bar_label_mode.label")
+          description: root.pluginApi.tr("settings.bar_label_mode.description")
+          model: [
+            {
+              key: "icon-only",
+              name: root.pluginApi.tr("settings.bar_label_mode.options.icon_only")
+            },
+            {
+              key: "short-label",
+              name: root.pluginApi.tr("settings.bar_label_mode.options.short_label")
+            },
+            {
+              key: "duration",
+              name: root.pluginApi.tr("settings.bar_label_mode.options.duration")
+            },
+          ]
+          currentKey: root.valueBarLabelMode
+          minimumWidth: 220
+          onSelected: key => root.barLabelModeField.set(key)
+        }
       }
 
-      NToggle {
-        Layout.fillWidth: true
+      NPluginSettingsField {
+        field: root.showElapsedInBarField
         visible: root.durationLabelsSelected
-        label: root.pluginApi.tr("settings.show_elapsed_in_bar.label")
-        description: root.pluginApi.tr("settings.show_elapsed_in_bar.description")
-        checked: root.valueShowElapsedInBar
-        onToggled: checked => root.valueShowElapsedInBar = checked
+        NToggle {
+          Layout.fillWidth: true
+          label: root.pluginApi.tr("settings.show_elapsed_in_bar.label")
+          description: root.pluginApi.tr("settings.show_elapsed_in_bar.description")
+          checked: root.valueShowElapsedInBar
+          onToggled: checked => root.showElapsedInBarField.set(checked)
+        }
       }
 
-      NToggle {
-        Layout.fillWidth: true
-        label: root.pluginApi.tr("settings.always_show_in_bar.label")
-        description: root.pluginApi.tr("settings.always_show_in_bar.description")
-        checked: root.valueAlwaysShowInBar
-        onToggled: checked => root.valueAlwaysShowInBar = checked
+      NPluginSettingsField {
+        field: root.showBarWhenReadyField
+        NToggle {
+          Layout.fillWidth: true
+          label: root.pluginApi.tr("settings.always_show_in_bar.label")
+          description: root.pluginApi.tr("settings.always_show_in_bar.description")
+          checked: root.valueAlwaysShowInBar
+          onToggled: checked => root.showBarWhenReadyField.set(checked)
+        }
       }
 
-      NToggle {
-        Layout.fillWidth: true
-        label: root.pluginApi.tr("settings.show_bar_recording.label")
-        description: root.pluginApi.tr("settings.show_bar_recording.description")
-        checked: root.valueShowBarWhenRecording
-        onToggled: checked => root.valueShowBarWhenRecording = checked
+      NPluginSettingsField {
+        field: root.showBarWhenRecordingField
+        NToggle {
+          Layout.fillWidth: true
+          label: root.pluginApi.tr("settings.show_bar_recording.label")
+          description: root.pluginApi.tr("settings.show_bar_recording.description")
+          checked: root.valueShowBarWhenRecording
+          onToggled: checked => root.showBarWhenRecordingField.set(checked)
+        }
       }
 
-      NToggle {
-        Layout.fillWidth: true
-        label: root.pluginApi.tr("settings.show_bar_streaming.label")
-        description: root.pluginApi.tr("settings.show_bar_streaming.description")
-        checked: root.valueShowBarWhenStreaming
-        onToggled: checked => root.valueShowBarWhenStreaming = checked
+      NPluginSettingsField {
+        field: root.showBarWhenStreamingField
+        NToggle {
+          Layout.fillWidth: true
+          label: root.pluginApi.tr("settings.show_bar_streaming.label")
+          description: root.pluginApi.tr("settings.show_bar_streaming.description")
+          checked: root.valueShowBarWhenStreaming
+          onToggled: checked => root.showBarWhenStreamingField.set(checked)
+        }
       }
 
-      NToggle {
-        Layout.fillWidth: true
-        label: root.pluginApi.tr("settings.show_bar_replay.label")
-        description: root.pluginApi.tr("settings.show_bar_replay.description")
-        checked: root.valueShowBarWhenReplay
-        onToggled: checked => root.valueShowBarWhenReplay = checked
+      NPluginSettingsField {
+        field: root.showBarWhenReplayField
+        NToggle {
+          Layout.fillWidth: true
+          label: root.pluginApi.tr("settings.show_bar_replay.label")
+          description: root.pluginApi.tr("settings.show_bar_replay.description")
+          checked: root.valueShowBarWhenReplay
+          onToggled: checked => root.showBarWhenReplayField.set(checked)
+        }
       }
     }
   }
@@ -298,36 +321,48 @@ ColumnLayout {
         text: root.pluginApi.tr("settings.sections.control_center.description")
       }
 
-      NToggle {
-        Layout.fillWidth: true
-        label: root.pluginApi.tr("settings.show_control_center_ready.label")
-        description: root.pluginApi.tr("settings.show_control_center_ready.description")
-        checked: root.valueShowControlCenterWhenReady
-        onToggled: checked => root.valueShowControlCenterWhenReady = checked
+      NPluginSettingsField {
+        field: root.showControlCenterWhenReadyField
+        NToggle {
+          Layout.fillWidth: true
+          label: root.pluginApi.tr("settings.show_control_center_ready.label")
+          description: root.pluginApi.tr("settings.show_control_center_ready.description")
+          checked: root.valueShowControlCenterWhenReady
+          onToggled: checked => root.showControlCenterWhenReadyField.set(checked)
+        }
       }
 
-      NToggle {
-        Layout.fillWidth: true
-        label: root.pluginApi.tr("settings.show_control_center_recording.label")
-        description: root.pluginApi.tr("settings.show_control_center_recording.description")
-        checked: root.valueShowControlCenterWhenRecording
-        onToggled: checked => root.valueShowControlCenterWhenRecording = checked
+      NPluginSettingsField {
+        field: root.showControlCenterWhenRecordingField
+        NToggle {
+          Layout.fillWidth: true
+          label: root.pluginApi.tr("settings.show_control_center_recording.label")
+          description: root.pluginApi.tr("settings.show_control_center_recording.description")
+          checked: root.valueShowControlCenterWhenRecording
+          onToggled: checked => root.showControlCenterWhenRecordingField.set(checked)
+        }
       }
 
-      NToggle {
-        Layout.fillWidth: true
-        label: root.pluginApi.tr("settings.show_control_center_streaming.label")
-        description: root.pluginApi.tr("settings.show_control_center_streaming.description")
-        checked: root.valueShowControlCenterWhenStreaming
-        onToggled: checked => root.valueShowControlCenterWhenStreaming = checked
+      NPluginSettingsField {
+        field: root.showControlCenterWhenStreamingField
+        NToggle {
+          Layout.fillWidth: true
+          label: root.pluginApi.tr("settings.show_control_center_streaming.label")
+          description: root.pluginApi.tr("settings.show_control_center_streaming.description")
+          checked: root.valueShowControlCenterWhenStreaming
+          onToggled: checked => root.showControlCenterWhenStreamingField.set(checked)
+        }
       }
 
-      NToggle {
-        Layout.fillWidth: true
-        label: root.pluginApi.tr("settings.show_control_center_replay.label")
-        description: root.pluginApi.tr("settings.show_control_center_replay.description")
-        checked: root.valueShowControlCenterWhenReplay
-        onToggled: checked => root.valueShowControlCenterWhenReplay = checked
+      NPluginSettingsField {
+        field: root.showControlCenterWhenReplayField
+        NToggle {
+          Layout.fillWidth: true
+          label: root.pluginApi.tr("settings.show_control_center_replay.label")
+          description: root.pluginApi.tr("settings.show_control_center_replay.description")
+          checked: root.valueShowControlCenterWhenReplay
+          onToggled: checked => root.showControlCenterWhenReplayField.set(checked)
+        }
       }
     }
   }
@@ -359,38 +394,50 @@ ColumnLayout {
         text: root.pluginApi.tr("settings.sections.videos.description")
       }
 
-      NTextInput {
-        Layout.fillWidth: true
-        label: root.pluginApi.tr("settings.videos_path.label")
-        description: root.pluginApi.tr("settings.videos_path.description")
-        placeholderText: "~/Videos"
-        text: root.valueVideosPath
-        onTextChanged: root.valueVideosPath = text
+      NPluginSettingsField {
+        field: root.videosPathField
+        NTextInput {
+          Layout.fillWidth: true
+          label: root.pluginApi.tr("settings.videos_path.label")
+          description: root.pluginApi.tr("settings.videos_path.description")
+          placeholderText: "~/Videos"
+          text: root.valueVideosPath
+          onEditCommitted: root.videosPathField.set(text.trim())
+        }
       }
 
-      NTextInput {
-        Layout.fillWidth: true
-        label: root.pluginApi.tr("settings.videos_opener.label")
-        description: root.pluginApi.tr("settings.videos_opener.description")
-        placeholderText: "xdg-open"
-        text: root.valueVideosOpener
-        onTextChanged: root.valueVideosOpener = text
+      NPluginSettingsField {
+        field: root.videosOpenerField
+        NTextInput {
+          Layout.fillWidth: true
+          label: root.pluginApi.tr("settings.videos_opener.label")
+          description: root.pluginApi.tr("settings.videos_opener.description")
+          placeholderText: "xdg-open"
+          text: root.valueVideosOpener
+          onEditCommitted: root.videosOpenerField.set(text.trim())
+        }
       }
 
-      NToggle {
-        Layout.fillWidth: true
-        label: root.pluginApi.tr("settings.open_videos_after_stop.label")
-        description: root.pluginApi.tr("settings.open_videos_after_stop.description")
-        checked: root.valueOpenVideosAfterStop
-        onToggled: checked => root.valueOpenVideosAfterStop = checked
+      NPluginSettingsField {
+        field: root.openVideosAfterStopField
+        NToggle {
+          Layout.fillWidth: true
+          label: root.pluginApi.tr("settings.open_videos_after_stop.label")
+          description: root.pluginApi.tr("settings.open_videos_after_stop.description")
+          checked: root.valueOpenVideosAfterStop
+          onToggled: checked => root.openVideosAfterStopField.set(checked)
+        }
       }
 
-      NToggle {
-        Layout.fillWidth: true
-        label: root.pluginApi.tr("settings.auto_close_managed.label")
-        description: root.pluginApi.tr("settings.auto_close_managed.description")
-        checked: root.valueAutoCloseManagedObs
-        onToggled: checked => root.valueAutoCloseManagedObs = checked
+      NPluginSettingsField {
+        field: root.autoCloseManagedObsField
+        NToggle {
+          Layout.fillWidth: true
+          label: root.pluginApi.tr("settings.auto_close_managed.label")
+          description: root.pluginApi.tr("settings.auto_close_managed.description")
+          checked: root.valueAutoCloseManagedObs
+          onToggled: checked => root.autoCloseManagedObsField.set(checked)
+        }
       }
     }
   }

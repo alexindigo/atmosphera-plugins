@@ -1,14 +1,14 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.Commons
-import qs.Widgets
 import qs.Modules.DesktopWidgets
+import qs.Widgets
 
 DraggableDesktopWidget {
   id: root
   property var pluginApi: null
 
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
@@ -23,27 +23,32 @@ DraggableDesktopWidget {
   readonly property int effectiveWeeks: compact ? Math.min(weeksShown, 13) : weeksShown
 
   readonly property var slicedDays: {
-    if (!allDays.length) return []
-    var lastWd = weekdayOf(allDays[allDays.length - 1].date)
-    var keep = (effectiveWeeks - 1) * 7 + lastWd + 1
-    return allDays.length > keep ? allDays.slice(allDays.length - keep) : allDays
+    if (!allDays.length)
+      return [];
+    var lastWd = weekdayOf(allDays[allDays.length - 1].date);
+    var keep = (effectiveWeeks - 1) * 7 + lastWd + 1;
+    return allDays.length > keep ? allDays.slice(allDays.length - keep) : allDays;
   }
   readonly property int padOffset: slicedDays.length ? weekdayOf(slicedDays[0].date) : 0
   readonly property int columns: Math.ceil((padOffset + slicedDays.length) / 7)
   property int hoveredIndex: -1
 
   readonly property var monthLabels: {
-    var labels = []
-    var prevMonth = -1
+    var labels = [];
+    var prevMonth = -1;
     for (var i = 0; i < slicedDays.length; i++) {
-      var idx = padOffset + i
-      if (idx % 7 !== 0) continue
-      var month = parseInt(slicedDays[i].date.substring(5, 7))
+      var idx = padOffset + i;
+      if (idx % 7 !== 0)
+        continue;
+      var month = parseInt(slicedDays[i].date.substring(5, 7));
       if (month !== prevMonth && prevMonth !== -1 && idx / 7 <= columns - 3)
-        labels.push({ "col": idx / 7, "name": Qt.locale().standaloneMonthName(month - 1, Locale.ShortFormat) })
-      prevMonth = month
+        labels.push({
+                      "col": idx / 7,
+                      "name": Qt.locale().standaloneMonthName(month - 1, Locale.ShortFormat)
+                    });
+      prevMonth = month;
     }
-    return labels
+    return labels;
   }
 
   readonly property real cellStep: 13 * widgetScale
@@ -58,31 +63,45 @@ DraggableDesktopWidget {
   height: implicitHeight
 
   function weekdayOf(dateStr) {
-    var p = dateStr.split("-")
-    return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2])).getDay()
+    var p = dateStr.split("-");
+    return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2])).getDay();
   }
 
   function cellColor(level) {
-    if (level <= 0) return Qt.alpha(AtmoColor.mOnSurface, 0.08)
-    return Qt.alpha(AtmoColor.mPrimary, [0.25, 0.45, 0.7, 1.0][Math.min(level, 4) - 1])
+    if (level <= 0)
+      return Qt.alpha(AtmoColor.mOnSurface, 0.08);
+    return Qt.alpha(AtmoColor.mPrimary, [0.25, 0.45, 0.7, 1.0][Math.min(level, 4) - 1]);
   }
 
   function footerText() {
     // Hover needs Noctalia >= 4.7.2; older shells keep desktop widgets click-through
     if (hoveredIndex >= 0 && hoveredIndex < slicedDays.length) {
-      var day = slicedDays[hoveredIndex]
-      var date = new Date(day.date + "T12:00:00").toLocaleDateString(Qt.locale(), Locale.ShortFormat)
-      if (day.count === 0 || day.level === 0) return pluginApi?.tr("desktop.cellNone", { "date": date })
-      if (day.count < 0) return pluginApi?.tr("desktop.cellSomeUnknown", { "date": date })
-      return pluginApi?.tr("desktop.cellSome", { "count": day.count, "date": date })
+      var day = slicedDays[hoveredIndex];
+      var date = new Date(day.date + "T12:00:00").toLocaleDateString(Qt.locale(), Locale.ShortFormat);
+      if (day.count === 0 || day.level === 0)
+        return pluginApi?.tr("desktop.cellNone", {
+                               "date": date
+                             });
+      if (day.count < 0)
+        return pluginApi?.tr("desktop.cellSomeUnknown", {
+                               "date": date
+                             });
+      return pluginApi?.tr("desktop.cellSome", {
+                             "count": day.count,
+                             "date": date
+                           });
     }
-    var name = "@" + (mainInstance?.username ?? "")
-    if (!allDays.length) return name
+    var name = "@" + (mainInstance?.username ?? "");
+    if (!allDays.length)
+      return name;
     // The calendar rolls over at UTC, so the last cell isn't always today locally
-    var last = allDays[allDays.length - 1]
-    var today = Qt.formatDate(new Date(), "yyyy-MM-dd")
-    if (last.date !== today || last.count < 0) return name
-    return name + " · " + pluginApi?.tr("desktop.todayCount", { "count": last.count })
+    var last = allDays[allDays.length - 1];
+    var today = Qt.formatDate(new Date(), "yyyy-MM-dd");
+    if (last.date !== today || last.count < 0)
+      return name;
+    return name + " · " + pluginApi?.tr("desktop.todayCount", {
+                                          "count": last.count
+                                        });
   }
 
   ColumnLayout {
@@ -98,17 +117,23 @@ DraggableDesktopWidget {
       spacing: Style.marginM * root.widgetScale
 
       NText {
-        text: pluginApi?.tr("desktop.total", { "total": root.mainInstance?.totalContributions ?? 0 })
+        text: pluginApi?.tr("desktop.total", {
+                              "total": root.mainInstance?.totalContributions ?? 0
+                            })
         pointSize: Style.fontSizeS * root.widgetScale
         font.weight: Font.Bold
         color: AtmoColor.mOnSurface
       }
 
-      Item { Layout.fillWidth: true }
+      Item {
+        Layout.fillWidth: true
+      }
 
       NText {
         visible: (root.mainInstance?.currentStreak ?? 0) > 0
-        text: pluginApi?.tr("desktop.streak", { "count": root.mainInstance?.currentStreak ?? 0 })
+        text: pluginApi?.tr("desktop.streak", {
+                              "count": root.mainInstance?.currentStreak ?? 0
+                            })
         pointSize: Style.fontSizeXS * root.widgetScale
         color: AtmoColor.mOnSurfaceVariant
       }
@@ -153,7 +178,9 @@ DraggableDesktopWidget {
           pointSize: Style.fontSizeXS * root.widgetScale
           color: AtmoColor.mOnSurfaceVariant
         }
-        Item { implicitHeight: Style.marginM * root.widgetScale }
+        Item {
+          implicitHeight: Style.marginM * root.widgetScale
+        }
         NText {
           text: Number(root.mainInstance?.totalContributions ?? 0).toLocaleString(Qt.locale(), 'f', 0)
           pointSize: Style.fontSizeXXL * 1.4 * root.widgetScale
@@ -208,10 +235,10 @@ DraggableDesktopWidget {
           hoverEnabled: true
           acceptedButtons: Qt.NoButton
           onPositionChanged: mouse => {
-            var col = Math.floor(mouse.x / root.cellStep)
-            var row = Math.floor(mouse.y / root.cellStep)
-            var i = col * 7 + row - root.padOffset
-            root.hoveredIndex = (row >= 0 && row < 7 && i >= 0 && i < root.slicedDays.length) ? i : -1
+            var col = Math.floor(mouse.x / root.cellStep);
+            var row = Math.floor(mouse.y / root.cellStep);
+            var i = col * 7 + row - root.padOffset;
+            root.hoveredIndex = (row >= 0 && row < 7 && i >= 0 && i < root.slicedDays.length) ? i : -1;
           }
           onExited: root.hoveredIndex = -1
         }
@@ -234,9 +261,11 @@ DraggableDesktopWidget {
       Layout.margins: Style.marginL * root.widgetScale
       visible: !root.hasData
       text: {
-        if (root.mainInstance?.errorMessage) return root.mainInstance.errorMessage
-        if (root.mainInstance?.loading) return pluginApi?.tr("desktop.loading")
-        return pluginApi?.tr("errors.noUsername")
+        if (root.mainInstance?.errorMessage)
+          return root.mainInstance.errorMessage;
+        if (root.mainInstance?.loading)
+          return pluginApi?.tr("desktop.loading");
+        return pluginApi?.tr("errors.noUsername");
       }
       pointSize: Style.fontSizeS * root.widgetScale
       color: AtmoColor.mOnSurfaceVariant

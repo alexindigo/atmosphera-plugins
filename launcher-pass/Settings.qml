@@ -7,22 +7,17 @@ import qs.Widgets
 ColumnLayout {
   id: root
   property var pluginApi: null
+  readonly property var storePathField: pluginApi?.field("storePath") ?? null
+  readonly property var typeDelayField: pluginApi?.field("typeDelay") ?? null
+  readonly property var wtypeDelayField: pluginApi?.field("wtypeDelay") ?? null
+  readonly property var clipTimeoutField: pluginApi?.field("clipTimeout") ?? null
 
-  property var cfg: pluginApi?.pluginSettings || ({})
-  property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-
-  property string editStorePath: displayBaseline.editStorePath
-  property string editTypeDelay: displayBaseline.editTypeDelay
-  property string editWtypeDelay: displayBaseline.editWtypeDelay
-  property string editClipTimeout: displayBaseline.editClipTimeout
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property string editStorePath: cfg.storePath ?? defaults.storePath ?? ""
-    readonly property string editTypeDelay: String(cfg.typeDelay ?? defaults.typeDelay ?? 500)
-    readonly property string editWtypeDelay: String(cfg.wtypeDelay ?? defaults.wtypeDelay ?? 12)
-    readonly property string editClipTimeout: cfg.clipTimeout ?? defaults.clipTimeout ?? ""
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({editStorePath: root.editStorePath, editTypeDelay: root.editTypeDelay, editWtypeDelay: root.editWtypeDelay, editClipTimeout: root.editClipTimeout})
+  readonly property string editStorePath: root.storePathField?.value ?? ""
+  readonly property string editTypeDelay: String(root.typeDelayField?.value ?? 500)
+  readonly property string editWtypeDelay: String(root.wtypeDelayField?.value ?? 12)
+  readonly property string editClipTimeout: root.clipTimeoutField?.value ?? ""
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   readonly property string envClipTimeout: Quickshell.env("PASSWORD_STORE_CLIP_TIME") || ""
 
@@ -57,20 +52,28 @@ ColumnLayout {
       Layout.fillWidth: true
       spacing: Style.marginL
 
-      NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.storePath.label")
-        description: pluginApi?.tr("settings.storePath.desc")
-        text: root.editStorePath
-        onTextChanged: root.editStorePath = text
+      NPluginSettingsField {
+        field: root.storePathField
+        NTextInput {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.storePath.label")
+          description: pluginApi?.tr("settings.storePath.desc")
+          text: root.editStorePath
+          onEditCommitted: root.storePathField.set(text)
+        }
       }
 
-      NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.clipTimeout.label")
-        description: pluginApi?.tr("settings.clipTimeout.desc", { value: root.envClipTimeout })
-        text: root.editClipTimeout
-        onTextChanged: root.editClipTimeout = text
+      NPluginSettingsField {
+        field: root.clipTimeoutField
+        NTextInput {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.clipTimeout.label")
+          description: pluginApi?.tr("settings.clipTimeout.desc", {
+                                       value: root.envClipTimeout
+                                     })
+          text: root.editClipTimeout
+          onEditCommitted: root.clipTimeoutField.set(text)
+        }
       }
     }
 
@@ -78,39 +81,39 @@ ColumnLayout {
       Layout.fillWidth: true
       spacing: Style.marginL
 
-      NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.typeDelay.label")
-        description: pluginApi?.tr("settings.typeDelay.desc")
-        text: root.editTypeDelay
-        onTextChanged: root.editTypeDelay = text
+      NPluginSettingsField {
+        field: root.typeDelayField
+        NTextInput {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.typeDelay.label")
+          description: pluginApi?.tr("settings.typeDelay.desc")
+          text: root.editTypeDelay
+          onEditCommitted: {
+            var value = parseFloat(text);
+            root.typeDelayField.set(isNaN(value) || value < 0 ? 500 : value);
+          }
+        }
       }
 
-      NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.wtypeDelay.label")
-        description: pluginApi?.tr("settings.wtypeDelay.desc")
-        text: root.editWtypeDelay
-        onTextChanged: root.editWtypeDelay = text
+      NPluginSettingsField {
+        field: root.wtypeDelayField
+        NTextInput {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.wtypeDelay.label")
+          description: pluginApi?.tr("settings.wtypeDelay.desc")
+          text: root.editWtypeDelay
+          onEditCommitted: {
+            var value = parseInt(text);
+            root.wtypeDelayField.set(isNaN(value) || value < 0 ? 12 : value);
+          }
+        }
       }
     }
   }
 
   function saveSettings() {
-    if (!pluginApi) return;
-    pluginApi.pluginSettings.storePath = root.editStorePath;
-
-    var typeDelayVal = parseFloat(root.editTypeDelay)
-    typeDelayVal = isNaN(typeDelayVal) || typeDelayVal < 0 ? 500 : typeDelayVal;
-    root.editTypeDelay = String(typeDelayVal);
-    pluginApi.pluginSettings.typeDelay = typeDelayVal;
-
-    var wtypeDelayVal = parseInt(root.editWtypeDelay)
-    wtypeDelayVal = isNaN(wtypeDelayVal) || wtypeDelayVal < 0 ? 12 : wtypeDelayVal;
-    root.editWtypeDelay = String(wtypeDelayVal);
-    pluginApi.pluginSettings.wtypeDelay = wtypeDelayVal;
-
-    pluginApi.pluginSettings.clipTimeout = root.editClipTimeout;
+    if (!pluginApi)
+      return;
 
     pluginApi.saveSettings();
   }

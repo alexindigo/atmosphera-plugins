@@ -1,7 +1,7 @@
 {
   "id": "daily-wallpaper",
   "name": "Daily Wallpaper",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "minAtmospheraVersion": "0.10.0",
   "minNoctaliaVersion": "4.6.6",
   "author": "DigitallyRefined",

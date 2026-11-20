@@ -7,51 +7,56 @@ import qs.Widgets
 ColumnLayout {
   id: root
 
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property bool valueSyncEnabled: cfg.syncEnabled ?? defaults.syncEnabled ?? false
-    readonly property string valueGithubToken: cfg.githubToken ?? defaults.githubToken ?? ""
-  }
-  readonly property bool settingsDirty: { return displayBaseline.differs({valueSyncEnabled: root.valueSyncEnabled, valueGithubToken: root.valueGithubToken}); }
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
   property bool _savePending: false
   property bool _syncPending: false
   Connections {
     target: root.pluginApi
     function onSettingsCompleted(result) {
-      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current")
+        return;
       root._savePending = false;
-      var sync = root._syncPending; root._syncPending = false;
+      var sync = root._syncPending;
+      root._syncPending = false;
       ToastService.showNotice(root.pluginApi?.tr("settings.saved"));
-      if (sync) root.mainInstance?.manualSync();
+      if (sync)
+        root.mainInstance?.manualSync();
     }
   }
 
   property var pluginApi: null
+  readonly property var syncEnabledField: pluginApi?.field("syncEnabled") ?? null
+  readonly property var githubTokenField: pluginApi?.field("githubToken") ?? null
 
-  property var cfg: pluginApi?.pluginSettings || ({})
-  property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
   property var mainInstance: pluginApi?.mainInstance || null
 
-  property bool valueSyncEnabled: displayBaseline.valueSyncEnabled
-  property string valueGithubToken: displayBaseline.valueGithubToken
+  readonly property bool valueSyncEnabled: root.syncEnabledField?.value ?? false
+  readonly property string valueGithubToken: root.githubTokenField?.value ?? ""
 
   spacing: Style.marginL
 
-  NToggle {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.syncEnabled.label")
-    description: pluginApi?.tr("settings.syncEnabled.desc")
-    checked: root.valueSyncEnabled
-    onToggled: checked => root.valueSyncEnabled = checked
+  NPluginSettingsField {
+    field: root.syncEnabledField
+    NToggle {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.syncEnabled.label")
+      description: pluginApi?.tr("settings.syncEnabled.desc")
+      checked: root.valueSyncEnabled
+      onToggled: checked => root.syncEnabledField.set(checked)
+    }
   }
 
-  NTextInput {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.githubToken.label")
-    description: pluginApi?.tr("settings.githubToken.desc")
-    placeholderText: pluginApi?.tr("settings.githubToken.placeholder")
-    text: root.valueGithubToken
-    onTextChanged: root.valueGithubToken = text
+  NPluginSettingsField {
+    field: root.githubTokenField
+    NTextInput {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.githubToken.label")
+      description: pluginApi?.tr("settings.githubToken.desc")
+      placeholderText: pluginApi?.tr("settings.githubToken.placeholder")
+      text: root.valueGithubToken
+      onEditCommitted: root.githubTokenField.set(text.trim())
+    }
   }
 
   NText {
@@ -74,7 +79,9 @@ ColumnLayout {
       onClicked: root.requestSync()
     }
 
-    Item { Layout.fillWidth: true }
+    Item {
+      Layout.fillWidth: true
+    }
 
     NText {
       text: {
@@ -93,7 +100,6 @@ ColumnLayout {
 
   function requestSync() {
     root._syncPending = true;
-    root.saveSettings();
   }
 
   function saveSettings() {
@@ -101,9 +107,7 @@ ColumnLayout {
       return;
     }
 
-    pluginApi.pluginSettings.syncEnabled = root.valueSyncEnabled;
-    root.valueGithubToken = root.valueGithubToken.trim();
-    pluginApi.pluginSettings.githubToken = root.valueGithubToken;
-    if (pluginApi.saveSettings() !== false) root._savePending = true;
+    if (pluginApi.saveSettings() !== false)
+      root._savePending = true;
   }
 }

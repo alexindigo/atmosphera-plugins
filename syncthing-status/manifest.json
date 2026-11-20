@@ -1,7 +1,7 @@
 {
   "id": "syncthing-status",
   "name": "Syncthing Status",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "minNoctaliaVersion": "4.4.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "Pir0c0pter0",

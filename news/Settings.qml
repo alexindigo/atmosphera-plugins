@@ -8,55 +8,44 @@ ColumnLayout {
   spacing: Style.marginM
 
   property var pluginApi: null
-  
-  property var cfg: pluginApi?.pluginSettings || ({})
-  property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
+  readonly property var apiKeyField: pluginApi?.field("apiKey") ?? null
+  readonly property var countryField: pluginApi?.field("country") ?? null
+  readonly property var languageField: pluginApi?.field("language") ?? null
+  readonly property var categoryField: pluginApi?.field("category") ?? null
+  readonly property var refreshIntervalField: pluginApi?.field("refreshInterval") ?? null
+  readonly property var maxHeadlinesField: pluginApi?.field("maxHeadlines") ?? null
+  readonly property var widgetWidthField: pluginApi?.field("widgetWidth") ?? null
+  readonly property var rollingSpeedField: pluginApi?.field("rollingSpeed") ?? null
 
   // Local state
-  property string apiKeyValue: displayBaseline.apiKeyValue
-  property string countryValue: displayBaseline.countryValue
-  property string languageValue: displayBaseline.languageValue
-  property string categoryValue: displayBaseline.categoryValue
-  property int refreshIntervalValue: displayBaseline.refreshIntervalValue
-  property int maxHeadlinesValue: displayBaseline.maxHeadlinesValue
-  property int widgetWidthValue: displayBaseline.widgetWidthValue
-  property int rollingSpeedValue: displayBaseline.rollingSpeedValue
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property string apiKeyValue: cfg.apiKey ?? defaults.apiKey ?? "YOUR_API_KEY_HERE"
-    readonly property string countryValue: cfg.country ?? defaults.country ?? "us"
-    readonly property string languageValue: cfg.language ?? defaults.language ?? "en"
-    readonly property string categoryValue: cfg.category ?? defaults.category ?? "general"
-    readonly property int refreshIntervalValue: cfg.refreshInterval ?? defaults.refreshInterval ?? 30
-    readonly property int maxHeadlinesValue: cfg.maxHeadlines ?? defaults.maxHeadlines ?? 10
-    readonly property int widgetWidthValue: cfg.widgetWidth ?? defaults.widgetWidth ?? 300
-    readonly property int rollingSpeedValue: cfg.rollingSpeed ?? defaults.rollingSpeed ?? 50
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({apiKeyValue: root.apiKeyValue, countryValue: root.countryValue, languageValue: root.languageValue, categoryValue: root.categoryValue, refreshIntervalValue: root.refreshIntervalValue, maxHeadlinesValue: root.maxHeadlinesValue, widgetWidthValue: root.widgetWidthValue, rollingSpeedValue: root.rollingSpeedValue})
+  readonly property string apiKeyValue: root.apiKeyField?.value ?? "YOUR_API_KEY_HERE"
+  readonly property string countryValue: root.countryField?.value ?? "us"
+  readonly property string languageValue: root.languageField?.value ?? "en"
+  readonly property string categoryValue: root.categoryField?.value ?? "general"
+  readonly property int refreshIntervalValue: root.refreshIntervalField?.value ?? 30
+  readonly property int maxHeadlinesValue: root.maxHeadlinesField?.value ?? 10
+  readonly property int widgetWidthValue: root.widgetWidthField?.value ?? 300
+  readonly property int rollingSpeedValue: root.rollingSpeedField?.value ?? 50
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   function saveSettings() {
-    if (!pluginApi) return;
-    
-    pluginApi.pluginSettings.apiKey = apiKeyValue;
-    pluginApi.pluginSettings.country = countryValue;
-    pluginApi.pluginSettings.language = languageValue;
-    pluginApi.pluginSettings.category = categoryValue;
-    pluginApi.pluginSettings.refreshInterval = refreshIntervalValue;
-    pluginApi.pluginSettings.maxHeadlines = maxHeadlinesValue;
-    pluginApi.pluginSettings.widgetWidth = widgetWidthValue;
-    pluginApi.pluginSettings.rollingSpeed = rollingSpeedValue;
-    
+    if (!pluginApi)
+      return;
+
     pluginApi.saveSettings();
   }
 
-  NTextInput {
-    label: "API Key"
-    description: "Get your free API key from newsapi.org/register"
-    text: apiKeyValue
-    onTextChanged: {
-      apiKeyValue = text
+  NPluginSettingsField {
+    field: root.apiKeyField
+    NTextInput {
+      label: "API Key"
+      description: "Get your free API key from newsapi.org/register"
+      text: apiKeyValue
+      onEditCommitted: {
+        root.apiKeyField.set(text);
+      }
     }
-    onTextEdited: saveSettings()
   }
 
   NButton {
@@ -65,130 +54,255 @@ ColumnLayout {
     onClicked: Qt.openUrlExternally("https://newsapi.org/register")
   }
 
-  NComboBox {
-    label: "Country/Region"
-    description: "Note: NewsAPI free tier only supports US for country-specific top headlines. Other regions use language-based filtering instead."
-    minimumWidth: 200
-    model: [
-      { "key": "us", "name": "United States (English)" },
-      { "key": "gb", "name": "United Kingdom (English)" },
-      { "key": "ca", "name": "Canada (English)" },
-      { "key": "au", "name": "Australia (English)" },
-      { "key": "de", "name": "Germany (German)" },
-      { "key": "fr", "name": "France (French)" },
-      { "key": "it", "name": "Italy (Italian)" },
-      { "key": "es", "name": "Spain (Spanish)" },
-      { "key": "mx", "name": "Mexico (Spanish)" },
-      { "key": "br", "name": "Brazil (Portuguese)" },
-      { "key": "jp", "name": "Japan (Japanese)" },
-      { "key": "kr", "name": "South Korea (Korean)" },
-      { "key": "nl", "name": "Netherlands (Dutch)" },
-      { "key": "se", "name": "Sweden (Swedish)" },
-      { "key": "no", "name": "Norway (Norwegian)" },
-      { "key": "in", "name": "India (English)" }
-    ]
-    currentKey: countryValue
-    onSelected: key => {
-      countryValue = key;
-      saveSettings();
+  NPluginSettingsField {
+    field: root.countryField
+    NComboBox {
+      label: "Country/Region"
+      description: "Note: NewsAPI free tier only supports US for country-specific top headlines. Other regions use language-based filtering instead."
+      minimumWidth: 200
+      model: [
+        {
+          "key": "us",
+          "name": "United States (English)"
+        },
+        {
+          "key": "gb",
+          "name": "United Kingdom (English)"
+        },
+        {
+          "key": "ca",
+          "name": "Canada (English)"
+        },
+        {
+          "key": "au",
+          "name": "Australia (English)"
+        },
+        {
+          "key": "de",
+          "name": "Germany (German)"
+        },
+        {
+          "key": "fr",
+          "name": "France (French)"
+        },
+        {
+          "key": "it",
+          "name": "Italy (Italian)"
+        },
+        {
+          "key": "es",
+          "name": "Spain (Spanish)"
+        },
+        {
+          "key": "mx",
+          "name": "Mexico (Spanish)"
+        },
+        {
+          "key": "br",
+          "name": "Brazil (Portuguese)"
+        },
+        {
+          "key": "jp",
+          "name": "Japan (Japanese)"
+        },
+        {
+          "key": "kr",
+          "name": "South Korea (Korean)"
+        },
+        {
+          "key": "nl",
+          "name": "Netherlands (Dutch)"
+        },
+        {
+          "key": "se",
+          "name": "Sweden (Swedish)"
+        },
+        {
+          "key": "no",
+          "name": "Norway (Norwegian)"
+        },
+        {
+          "key": "in",
+          "name": "India (English)"
+        }
+      ]
+      currentKey: countryValue
+      onSelected: key => {
+        root.countryField.set(key);
+      }
     }
   }
 
-  NComboBox {
-    label: "Language Override"
-    description: "Manually override language (auto-detected from country by default)"
-    minimumWidth: 200
-    model: [
-      { "key": "en", "name": "English" },
-      { "key": "de", "name": "German" },
-      { "key": "fr", "name": "French" },
-      { "key": "it", "name": "Italian" },
-      { "key": "es", "name": "Spanish" },
-      { "key": "pt", "name": "Portuguese" },
-      { "key": "nl", "name": "Dutch" },
-      { "key": "no", "name": "Norwegian" },
-      { "key": "sv", "name": "Swedish" },
-      { "key": "ja", "name": "Japanese" },
-      { "key": "ko", "name": "Korean" },
-      { "key": "ar", "name": "Arabic" },
-      { "key": "ru", "name": "Russian" },
-      { "key": "zh", "name": "Chinese" }
-    ]
-    currentKey: languageValue
-    onSelected: key => {
-      languageValue = key;
-      saveSettings();
+  NPluginSettingsField {
+    field: root.languageField
+    NComboBox {
+      label: "Language Override"
+      description: "Manually override language (auto-detected from country by default)"
+      minimumWidth: 200
+      model: [
+        {
+          "key": "en",
+          "name": "English"
+        },
+        {
+          "key": "de",
+          "name": "German"
+        },
+        {
+          "key": "fr",
+          "name": "French"
+        },
+        {
+          "key": "it",
+          "name": "Italian"
+        },
+        {
+          "key": "es",
+          "name": "Spanish"
+        },
+        {
+          "key": "pt",
+          "name": "Portuguese"
+        },
+        {
+          "key": "nl",
+          "name": "Dutch"
+        },
+        {
+          "key": "no",
+          "name": "Norwegian"
+        },
+        {
+          "key": "sv",
+          "name": "Swedish"
+        },
+        {
+          "key": "ja",
+          "name": "Japanese"
+        },
+        {
+          "key": "ko",
+          "name": "Korean"
+        },
+        {
+          "key": "ar",
+          "name": "Arabic"
+        },
+        {
+          "key": "ru",
+          "name": "Russian"
+        },
+        {
+          "key": "zh",
+          "name": "Chinese"
+        }
+      ]
+      currentKey: languageValue
+      onSelected: key => {
+        root.languageField.set(key);
+      }
     }
   }
 
-  NComboBox {
-    label: "Category"
-    description: "Filter news by category"
-    minimumWidth: 200
-    model: [
-      { "key": "general", "name": "General" },
-      { "key": "business", "name": "Business" },
-      { "key": "entertainment", "name": "Entertainment" },
-      { "key": "health", "name": "Health" },
-      { "key": "science", "name": "Science" },
-      { "key": "sports", "name": "Sports" },
-      { "key": "technology", "name": "Technology" }
-    ]
-    currentKey: categoryValue
-    onSelected: key => {
-      categoryValue = key;
-      saveSettings();
+  NPluginSettingsField {
+    field: root.categoryField
+    NComboBox {
+      label: "Category"
+      description: "Filter news by category"
+      minimumWidth: 200
+      model: [
+        {
+          "key": "general",
+          "name": "General"
+        },
+        {
+          "key": "business",
+          "name": "Business"
+        },
+        {
+          "key": "entertainment",
+          "name": "Entertainment"
+        },
+        {
+          "key": "health",
+          "name": "Health"
+        },
+        {
+          "key": "science",
+          "name": "Science"
+        },
+        {
+          "key": "sports",
+          "name": "Sports"
+        },
+        {
+          "key": "technology",
+          "name": "Technology"
+        }
+      ]
+      currentKey: categoryValue
+      onSelected: key => {
+        root.categoryField.set(key);
+      }
     }
   }
 
-  NSpinBox {
-    label: "Refresh Interval"
-    description: "Check for new headlines every " + refreshIntervalValue + " minutes"
-    from: 5
-    to: 1440
-    stepSize: 5
-    value: refreshIntervalValue
-    onValueModified: {
-      refreshIntervalValue = value;
-      saveSettings();
+  NPluginSettingsField {
+    field: root.refreshIntervalField
+    NSpinBox {
+      label: "Refresh Interval"
+      description: "Check for new headlines every " + refreshIntervalValue + " minutes"
+      from: 5
+      to: 1440
+      stepSize: 5
+      value: refreshIntervalValue
+      onValueModified: value => {
+        root.refreshIntervalField.set(value);
+      }
     }
   }
 
-  NSpinBox {
-    label: "Max Headlines"
-    description: "Maximum number of headlines to display"
-    from: 1
-    to: 100
-    value: maxHeadlinesValue
-    onValueModified: {
-      maxHeadlinesValue = value;
-      saveSettings();
+  NPluginSettingsField {
+    field: root.maxHeadlinesField
+    NSpinBox {
+      label: "Max Headlines"
+      description: "Maximum number of headlines to display"
+      from: 1
+      to: 100
+      value: maxHeadlinesValue
+      onValueModified: value => {
+        root.maxHeadlinesField.set(value);
+      }
     }
   }
 
-  NSpinBox {
-    label: "Widget Width"
-    description: "Widget width in pixels: " + widgetWidthValue + "px"
-    from: 100
-    to: 1000
-    stepSize: 10
-    value: widgetWidthValue
-    onValueModified: {
-      widgetWidthValue = value;
-      saveSettings();
+  NPluginSettingsField {
+    field: root.widgetWidthField
+    NSpinBox {
+      label: "Widget Width"
+      description: "Widget width in pixels: " + widgetWidthValue + "px"
+      from: 100
+      to: 1000
+      stepSize: 10
+      value: widgetWidthValue
+      onValueModified: value => {
+        root.widgetWidthField.set(value);
+      }
     }
   }
 
-  NSpinBox {
-    label: "Scroll Speed"
-    description: "Time in ms per pixel (lower = faster): " + rollingSpeedValue + "ms"
-    from: 10
-    to: 200
-    stepSize: 10
-    value: rollingSpeedValue
-    onValueModified: {
-      rollingSpeedValue = value;
-      saveSettings();
+  NPluginSettingsField {
+    field: root.rollingSpeedField
+    NSpinBox {
+      label: "Scroll Speed"
+      description: "Time in ms per pixel (lower = faster): " + rollingSpeedValue + "ms"
+      from: 10
+      to: 200
+      stepSize: 10
+      value: rollingSpeedValue
+      onValueModified: value => {
+        root.rollingSpeedField.set(value);
+      }
     }
   }
 }

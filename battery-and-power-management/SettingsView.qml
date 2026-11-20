@@ -1,187 +1,192 @@
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Dialogs
+import QtQuick.Layouts
 import qs.Commons
 import qs.Widgets
 
 ColumnLayout {
-    id: root
-    spacing: Style.marginL
+  id: root
+  spacing: Style.marginL
 
-    property var pluginApi: null
+  property var pluginApi: null
+  readonly property var colorizeByProfileField: pluginApi?.field("colorizeByProfile") ?? null
+  readonly property var colorPowerSaverField: pluginApi?.field("colorPowerSaver") ?? null
+  readonly property var colorPerformanceField: pluginApi?.field("colorPerformance") ?? null
+  readonly property var showProfileField: pluginApi?.field("showProfile") ?? null
+  readonly property var showBalancedIconField: pluginApi?.field("showBalancedIcon") ?? null
 
-    property bool editColorizeByProfile: displayBaseline.editColorizeByProfile
-    property string editColorPowerSaver: displayBaseline.editColorPowerSaver
-    property string editColorPerformance: displayBaseline.editColorPerformance
-    property bool editShowProfile: displayBaseline.editShowProfile
-    property bool editShowBalancedIcon: displayBaseline.editShowBalancedIcon
+  readonly property bool editColorizeByProfile: root.colorizeByProfileField?.value ?? true
+  readonly property string editColorPowerSaver: root.colorPowerSaverField?.value ?? AtmoColor.mSecondary
+  readonly property string editColorPerformance: root.colorPerformanceField?.value ?? AtmoColor.mError
+  readonly property bool editShowProfile: root.showProfileField?.value ?? true
+  readonly property bool editShowBalancedIcon: root.showBalancedIconField?.value ?? false
 
-    NSettingsBaseline {
-      id: displayBaseline
-      readonly property bool editColorizeByProfile: pluginApi?.pluginSettings?.colorizeByProfile ?? pluginApi?.manifest?.metadata?.defaultSettings?.colorizeByProfile ?? true
-      readonly property string editColorPowerSaver: pluginApi?.pluginSettings?.colorPowerSaver ?? pluginApi?.manifest?.metadata?.defaultSettings?.colorPowerSaver ?? AtmoColor.mSecondary
-      readonly property string editColorPerformance: pluginApi?.pluginSettings?.colorPerformance ?? pluginApi?.manifest?.metadata?.defaultSettings?.colorPerformance ?? AtmoColor.mError
-      readonly property bool editShowProfile: pluginApi?.pluginSettings?.showProfile ?? pluginApi?.manifest?.metadata?.defaultSettings?.showProfile ?? true
-      readonly property bool editShowBalancedIcon: pluginApi?.pluginSettings?.showBalancedIcon ?? pluginApi?.manifest?.metadata?.defaultSettings?.showBalancedIcon ?? false
-    }
-    readonly property bool settingsDirty: displayBaseline.differs({editColorizeByProfile: root.editColorizeByProfile, editColorPowerSaver: root.editColorPowerSaver, editColorPerformance: root.editColorPerformance, editShowProfile: root.editShowProfile, editShowBalancedIcon: root.editShowBalancedIcon})
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
-    function saveSettings() {
-        if (!pluginApi) return
-        pluginApi.pluginSettings.colorizeByProfile = root.editColorizeByProfile
-        pluginApi.pluginSettings.colorPowerSaver = root.editColorPowerSaver
-        pluginApi.pluginSettings.colorPerformance = root.editColorPerformance
-        pluginApi.pluginSettings.showProfile = root.editShowProfile
-        pluginApi.pluginSettings.showBalancedIcon = root.editShowBalancedIcon
-        pluginApi.saveSettings()
-    }
+  function saveSettings() {
+    if (!pluginApi)
+      return;
+    pluginApi.saveSettings();
+  }
 
-    // All palette colors
-    readonly property var noctaliaPalette: [
-        AtmoColor.mPrimary, AtmoColor.mSecondary, AtmoColor.mTertiary, AtmoColor.mError,
-        AtmoColor.mSurface, AtmoColor.mSurfaceVariant, AtmoColor.mOutline
-    ]
+  // All palette colors
+  readonly property var noctaliaPalette: [AtmoColor.mPrimary, AtmoColor.mSecondary, AtmoColor.mTertiary, AtmoColor.mError, AtmoColor.mSurface, AtmoColor.mSurfaceVariant, AtmoColor.mOutline]
 
-    Component.onCompleted: {
-        Logger.d("BatterySettings", "editColorPowerSaver: " + editColorPowerSaver)
-        Logger.d("BatterySettings", "editColorPerformance: " + editColorPerformance)
-    }
+  Component.onCompleted: {
+    Logger.d("BatterySettings", "editColorPowerSaver: " + editColorPowerSaver);
+    Logger.d("BatterySettings", "editColorPerformance: " + editColorPerformance);
+  }
 
-    //Dynamic coloring based on selected profile
+  //Dynamic coloring based on selected profile
+  NPluginSettingsField {
+    field: root.colorizeByProfileField
     NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.dynamic-coloring")
-        description: pluginApi?.tr("settings.dynamic-coloring-desc")
-        checked: root.editColorizeByProfile
-        onToggled: checked => {
-            root.editColorizeByProfile = checked
-            root.saveSettings()
-        }
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.dynamic-coloring")
+      description: pluginApi?.tr("settings.dynamic-coloring-desc")
+      checked: root.editColorizeByProfile
+      onToggled: checked => {
+        root.colorizeByProfileField.set(checked);
+      }
     }
+  }
 
-    ColumnLayout {
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginM
+    enabled: root.editColorizeByProfile
+    opacity: enabled ? 1.0 : 0.5
+
+    // Power saver color
+    NPluginSettingsField {
+      field: root.colorPowerSaverField
+      ColumnLayout {
         Layout.fillWidth: true
-        spacing: Style.marginM
-        enabled: root.editColorizeByProfile
-        opacity: enabled ? 1.0 : 0.5
+        spacing: Style.marginS
 
-        // Power saver color
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: Style.marginS
+        NText {
+          text: pluginApi?.tr("settings.color-powersaver")
+          font.weight: Font.Bold
+        }
+        NText {
+          text: pluginApi?.tr("settings.color-powersaver-desc")
+          font.pointSize: Style.fontSizeS
+          color: AtmoColor.mOnSurfaceVariant
+        }
 
-            NText {
-                text: pluginApi?.tr("settings.color-powersaver")
-                font.weight: Font.Bold
-            }
-            NText {
-                text: pluginApi?.tr("settings.color-powersaver-desc")
-                font.pointSize: Style.fontSizeS
-                color: AtmoColor.mOnSurfaceVariant
-            }
+        RowLayout {
+          spacing: Style.marginS
 
-            RowLayout {
-                spacing: Style.marginS
+          Repeater {
+            id: powerSaverColor
+            model: root.noctaliaPalette
 
-                Repeater {
-                    id: powerSaverColor
-                    model: root.noctaliaPalette
+            Rectangle {
+              //width: 28
+              //height: 28
+              radius: Style.radiusL
+              color: modelData
+              border.color: Qt.colorEqual(root.editColorPowerSaver, modelData) ? AtmoColor.mOnSurface : AtmoColor.mOutline
+              border.width: Qt.colorEqual(root.editColorPowerSaver, modelData) ? 3 : 1
 
-                    Rectangle {
-                        //width: 28
-                        //height: 28
-                        radius: Style.radiusL
-                        color: modelData
-                        border.color: Qt.colorEqual(root.editColorPowerSaver, modelData) ? AtmoColor.mOnSurface : AtmoColor.mOutline
-                        border.width: Qt.colorEqual(root.editColorPowerSaver, modelData) ? 3 : 1
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                Logger.d("BatterySettings", "Power Saver selected: " + modelData)
-                                root.editColorPowerSaver = modelData
-                                root.saveSettings()
-                            }
-                        }
-                    }
+              MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                  Logger.d("BatterySettings", "Power Saver selected: " + modelData);
+                  root.colorPowerSaverField.set(modelData);
                 }
+              }
             }
+          }
+        }
+      }
+    }
+
+    // Space separator
+    Item {
+      Layout.preferredHeight: Style.marginS
+    }
+
+    // Performance color
+    NPluginSettingsField {
+      field: root.colorPerformanceField
+      ColumnLayout {
+        Layout.fillWidth: true
+        spacing: Style.marginS
+
+        NText {
+          text: pluginApi?.tr("settings.color-performance")
+          font.weight: Font.Bold
+        }
+        NText {
+          text: pluginApi?.tr("settings.color-performance-desc")
+          font.pointSize: Style.fontSizeS
+          color: AtmoColor.mOnSurfaceVariant
         }
 
-        // Space separator
-        Item { Layout.preferredHeight: Style.marginS }
+        RowLayout {
+          spacing: Style.marginS
 
-        // Performance color
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: Style.marginS
+          Repeater {
+            id: performanceColor
+            model: root.noctaliaPalette
 
-            NText {
-                text: pluginApi?.tr("settings.color-performance")
-                font.weight: Font.Bold
-            }
-            NText {
-                text: pluginApi?.tr("settings.color-performance-desc")
-                font.pointSize: Style.fontSizeS
-                color: AtmoColor.mOnSurfaceVariant
-            }
+            Rectangle {
+              //width: 28
+              //height: 28
+              radius: Style.radiusL
+              color: modelData
+              border.color: Qt.colorEqual(root.editColorPerformance, modelData) ? AtmoColor.mOnSurface : AtmoColor.mOutline
+              border.width: Qt.colorEqual(root.editColorPerformance, modelData) ? 3 : 1
 
-            RowLayout {
-                spacing: Style.marginS
-
-                Repeater {
-                    id: performanceColor
-                    model: root.noctaliaPalette
-
-                    Rectangle {
-                        //width: 28
-                        //height: 28
-                        radius: Style.radiusL
-                        color: modelData
-                        border.color: Qt.colorEqual(root.editColorPerformance, modelData) ? AtmoColor.mOnSurface : AtmoColor.mOutline
-                        border.width: Qt.colorEqual(root.editColorPerformance, modelData) ? 3 : 1
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                Logger.d("BatterySettings", "Performance selected: " + modelData)
-                                root.editColorPerformance = modelData
-                                root.saveSettings()
-                            }
-                        }
-                    }
+              MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                  Logger.d("BatterySettings", "Performance selected: " + modelData);
+                  root.colorPerformanceField.set(modelData);
                 }
+              }
             }
+          }
         }
+      }
     }
+  }
 
-    //Show profile in widget
+  //Show profile in widget
+  NPluginSettingsField {
+    field: root.showProfileField
     NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.show-profile")
-        description: pluginApi?.tr("settings.show-profile-desc")
-        checked: root.editShowProfile
-        onToggled: checked => {
-            root.editShowProfile = checked
-            root.saveSettings()
-        }
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.show-profile")
+      description: pluginApi?.tr("settings.show-profile-desc")
+      checked: root.editShowProfile
+      onToggled: checked => {
+        root.showProfileField.set(checked);
+      }
     }
+  }
 
-    //Show balanced icon
+  //Show balanced icon
+  NPluginSettingsField {
+    field: root.showBalancedIconField
     NToggle {
-        enabled: root.editShowProfile
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.show-balanced")
-        description: pluginApi?.tr("settings.show-balanced-desc")
-        checked: root.editShowBalancedIcon
-        onToggled: checked => {
-            Logger.d("BatterySettings", "showBalancedIcon checked: " + checked)
-            root.editShowBalancedIcon = checked
-            root.saveSettings()
-        }
+      enabled: root.editShowProfile
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.show-balanced")
+      description: pluginApi?.tr("settings.show-balanced-desc")
+      checked: root.editShowBalancedIcon
+      onToggled: checked => {
+        Logger.d("BatterySettings", "showBalancedIcon checked: " + checked);
+        root.showBalancedIconField.set(checked);
+      }
     }
+  }
 
-    Item { Layout.fillHeight: true }
+  Item {
+    Layout.fillHeight: true
+  }
 }

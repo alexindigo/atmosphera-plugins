@@ -4,114 +4,73 @@ import qs.Commons
 import qs.Widgets
 
 ColumnLayout {
-    id: root
-
-    property var cfg: pluginApi?.pluginSettings
-    property var defaults: pluginApi?.manifest?.metadata?.defaultSettings
-    property var pluginApi: null
-    property string valuePlatform: displayBaseline.valuePlatform
-    property string valueRepo: displayBaseline.valueRepo
-    property string valueGroup: displayBaseline.valueGroup
-    property int valueRefreshInterval: displayBaseline.valueRefreshInterval
-    NSettingsBaseline {
-      id: displayBaseline
-      readonly property string valuePlatform: cfg.platform ?? defaults.platform
-      readonly property string valueRepo: cfg.repo ?? defaults.repo ?? ""
-      readonly property string valueGroup: cfg.group ?? defaults.group ?? ""
-      readonly property int valueRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval
+  id: root
+  property var pluginApi: null
+  readonly property var platform: pluginApi?.field("platform")
+  readonly property var repo: pluginApi?.field("repo")
+  readonly property var group: pluginApi?.field("group")
+  readonly property var interval: pluginApi?.field("refreshInterval")
+  readonly property bool settingsDirty: false
+  spacing: Style.marginL
+  NPluginSettingsField {
+    field: root.platform
+    NComboBox {
+      Layout.fillWidth: true
+      currentKey: root.platform?.value ?? ""
+      description: root.pluginApi?.tr("settings.platform.desc")
+      label: root.pluginApi?.tr("settings.platform.label")
+      model: [
+        {
+          key: "github",
+          name: "GitHub"
+        },
+        {
+          key: "gitlab",
+          name: "GitLab"
+        }
+      ]
+      onSelected: key => root.platform.set(key)
     }
-    readonly property bool settingsDirty: displayBaseline.differs({valuePlatform: root.valuePlatform, valueRepo: root.valueRepo, valueGroup: root.valueGroup, valueRefreshInterval: root.valueRefreshInterval})
-
-    function saveSettings() {
-        if (!pluginApi) {
-            Logger.e("Git Companion", "Cannot save settings: pluginApi is null");
-            return;
-        }
-
-        pluginApi.pluginSettings.platform = root.valuePlatform;
-        pluginApi.pluginSettings.repo = root.valueRepo;
-        pluginApi.pluginSettings.group = root.valueGroup;
-        pluginApi.pluginSettings.refreshInterval = root.valueRefreshInterval;
-        pluginApi.saveSettings(function (result) {
-            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
-                Logger.d("Git Companion", "Settings saved successfully");
-        });
+  }
+  NPluginSettingsField {
+    field: root.repo
+    NTextInput {
+      Layout.fillWidth: true
+      label: root.pluginApi?.tr("settings.repo.label")
+      description: root.pluginApi?.tr("settings.repo.desc")
+      placeholderText: "owner/repo"
+      text: root.repo?.value ?? ""
+      onEditCommitted: root.repo.set(text)
     }
-
-    spacing: Style.marginL
-
-    Component.onCompleted: {
-        Logger.d("Git Companion", "Settings UI loaded");
+  }
+  NPluginSettingsField {
+    field: root.group
+    NTextInput {
+      Layout.fillWidth: true
+      label: root.pluginApi?.tr(root.platform?.value === "gitlab" ? "settings.group.label" : "settings.org.label")
+      description: root.pluginApi?.tr(root.platform?.value === "gitlab" ? "settings.group.desc" : "settings.org.desc")
+      placeholderText: root.platform?.value === "gitlab" ? "my-group" : "my-org"
+      text: root.group?.value ?? ""
+      onEditCommitted: root.group.set(text)
     }
-
-    ColumnLayout {
-        Layout.fillWidth: true
-        spacing: Style.marginM
-
-        NComboBox {
-            currentKey: root.valuePlatform
-            description: pluginApi?.tr("settings.platform.desc")
-            label: pluginApi?.tr("settings.platform.label")
-            model: [
-                {
-                    "key": "github",
-                    "name": "GitHub"
-                },
-                {
-                    "key": "gitlab",
-                    "name": "GitLab"
-                }
-            ]
-
-            onSelected: key => {
-                root.valuePlatform = key;
-                pluginApi.pluginSettings.platform = key;
-                pluginApi.saveSettings();
-            }
-        }
-        NTextInput {
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.repo.label")
-            description: pluginApi?.tr("settings.repo.desc")
-            placeholderText: "owner/repo"
-            text: root.valueRepo
-
-            onTextChanged: {
-                root.valueRepo = text;
-            }
-            onTextEdited: {
-                pluginApi.pluginSettings.repo = text;
-                pluginApi.saveSettings();
-            }
-        }
-        NTextInput {
-            Layout.fillWidth: true
-            label: pluginApi?.tr(root.valuePlatform === 'gitlab' ? "settings.group.label" : "settings.org.label")
-            description: pluginApi?.tr(root.valuePlatform === 'gitlab' ? "settings.group.desc" : "settings.org.desc")
-            placeholderText: root.valuePlatform === 'gitlab' ? "my-group" : "my-org"
-            text: root.valueGroup
-
-            onTextChanged: {
-                root.valueGroup = text;
-            }
-            onTextEdited: {
-                pluginApi.pluginSettings.group = text;
-                pluginApi.saveSettings();
-            }
-        }
-        NSpinBox {
-            description: pluginApi?.tr("settings.refreshInterval.desc")
-            label: pluginApi?.tr("settings.refreshInterval.label")
-            stepSize: 1
-            from: 30
-            to: 90
-            value: root.valueRefreshInterval
-
-            onValueModified: {
-                root.valueRefreshInterval = value;
-                pluginApi.pluginSettings.refreshInterval = value;
-                pluginApi.saveSettings();
-            }
-        }
+  }
+  NPluginSettingsField {
+    field: root.interval
+    NSpinBox {
+      Layout.fillWidth: true
+      description: root.pluginApi?.tr("settings.refreshInterval.desc")
+      label: root.pluginApi?.tr("settings.refreshInterval.label")
+      stepSize: 1
+      from: 30
+      to: 90
+      value: root.interval?.value ?? 60
+      onValueModified: root.interval.set(value)
     }
+  }
+  function saveSettings() {
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.d("Git Companion", "Settings saved successfully");
+    });
+  }
 }

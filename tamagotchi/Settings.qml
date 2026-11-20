@@ -4,97 +4,102 @@ import qs.Commons
 import qs.Widgets
 
 ColumnLayout {
-    id: root
-    spacing: Style.marginM
+  id: root
+  spacing: Style.marginM
 
-    property var pluginApi: null
-    property real editVolume: displayBaseline.project("editVolume")
-    property real editDifficulty: displayBaseline.project("editDifficulty")
-    property bool editShowDebug: displayBaseline.editShowDebug
-    property bool showPercentage: displayBaseline.showPercentage
-    NSettingsBaseline {
-        ranges: [NSettingsRange { field: "editVolume"; from: rangeEditVolume.from; to: rangeEditVolume.to }, NSettingsRange { field: "editDifficulty"; from: rangeEditDifficulty.from; to: rangeEditDifficulty.to }]
-        id: displayBaseline
-        readonly property real editVolume: pluginApi?.pluginSettings?.volume ?? 0.5
-        readonly property real editDifficulty: pluginApi?.pluginSettings?.difficulty ?? 50
-        readonly property bool editShowDebug: pluginApi?.pluginSettings?.showDebug ?? false
-        readonly property bool showPercentage: pluginApi?.pluginSettings?.showPercentage ?? false
-    }
-    readonly property bool settingsDirty: displayBaseline.differs({editVolume: root.editVolume, editDifficulty: root.editDifficulty, editShowDebug: root.editShowDebug, showPercentage: root.showPercentage})
+  property var pluginApi: null
+  readonly property var volumeField: pluginApi?.field("volume") ?? null
+  readonly property var difficultyField: pluginApi?.field("difficulty") ?? null
+  readonly property var showDebugField: pluginApi?.field("showDebug") ?? null
+  readonly property var showPercentageField: pluginApi?.field("showPercentage") ?? null
+  readonly property real editVolume: root.volumeField?.value ?? 0.5
+  readonly property real editDifficulty: root.difficultyField?.value ?? 50
+  readonly property bool editShowDebug: root.showDebugField?.value ?? false
+  readonly property bool showPercentage: root.showPercentageField?.value ?? false
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
-    function saveSettings() {
-        pluginApi.pluginSettings.volume = root.editVolume;
-        pluginApi.pluginSettings.difficulty = root.editDifficulty;
-        pluginApi.pluginSettings.showDebug = root.editShowDebug;
-        pluginApi.pluginSettings.showPercentage = root.showPercentage;
-        pluginApi.saveSettings();
-    }
+  function saveSettings() {
+    pluginApi.saveSettings();
+  }
 
-    NLabel {
-        label: pluginApi?.tr("settings.volume")
-        description: pluginApi?.tr("settings.volume-desc")
-    }
+  NLabel {
+    label: pluginApi?.tr("settings.volume")
+    description: pluginApi?.tr("settings.volume-desc")
+  }
 
+  NPluginSettingsField {
+    field: root.volumeField
     NSlider {
-        id: rangeEditVolume
-        objectName: "settings-range-editVolume"
-        Layout.fillWidth: true
-        from: 0
-        to: 1
-        value: root.editVolume
-        onValueChanged: root.editVolume = value
+      id: rangeEditVolume
+      objectName: "settings-range-editVolume"
+      Layout.fillWidth: true
+      from: 0
+      to: 1
+      value: root.editVolume
+      onMoved: root.volumeField.set(value)
     }
+  }
 
-    NDivider {
-        Layout.fillWidth: true
-        Layout.topMargin: Style.marginS
-        Layout.bottomMargin: Style.marginS
-    }
+  NDivider {
+    Layout.fillWidth: true
+    Layout.topMargin: Style.marginS
+    Layout.bottomMargin: Style.marginS
+  }
 
-    NLabel {
-        label: pluginApi?.tr("settings.difficulty")
-        description: pluginApi?.tr("settings.difficulty-desc")
-    }
+  NLabel {
+    label: pluginApi?.tr("settings.difficulty")
+    description: pluginApi?.tr("settings.difficulty-desc")
+  }
 
+  NPluginSettingsField {
+    field: root.difficultyField
     NSlider {
-        id: rangeEditDifficulty
-        objectName: "settings-range-editDifficulty"
-        Layout.fillWidth: true
-        from: 0
-        to: 100
-        value: root.editDifficulty
-        onValueChanged: root.editDifficulty = value
+      id: rangeEditDifficulty
+      objectName: "settings-range-editDifficulty"
+      Layout.fillWidth: true
+      from: 0
+      to: 100
+      value: root.editDifficulty
+      onMoved: root.difficultyField.set(value)
     }
+  }
 
-    NDivider {
-        Layout.fillWidth: true
-        Layout.topMargin: Style.marginS
-        Layout.bottomMargin: Style.marginS
-    }
+  NDivider {
+    Layout.fillWidth: true
+    Layout.topMargin: Style.marginS
+    Layout.bottomMargin: Style.marginS
+  }
 
+  NPluginSettingsField {
+    field: root.showDebugField
     NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.debug")
-        description: pluginApi?.tr("settings.debug-desc")
-        checked: root.editShowDebug
-        onToggled: checked => root.editShowDebug = checked
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.debug")
+      description: pluginApi?.tr("settings.debug-desc")
+      checked: root.editShowDebug
+      onToggled: checked => root.showDebugField.set(checked)
     }
+  }
 
-    NDivider {
-        Layout.fillWidth: true
-        Layout.topMargin: Style.marginS
-        Layout.bottomMargin: Style.marginS
-    }
+  NDivider {
+    Layout.fillWidth: true
+    Layout.topMargin: Style.marginS
+    Layout.bottomMargin: Style.marginS
+  }
 
+  NPluginSettingsField {
+    field: root.showPercentageField
     NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.percentage")
-        description: pluginApi?.tr("settings.percentage-desc")
-        checked: root.showPercentage ?? false
-        onToggled: checked => root.showPercentage = checked
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.percentage")
+      description: pluginApi?.tr("settings.percentage-desc")
+      checked: root.showPercentage ?? false
+      onToggled: checked => root.showPercentageField.set(checked)
     }
+  }
 
-    Item {
-        Layout.fillHeight: true
-    }
+  Item {
+    Layout.fillHeight: true
+  }
 }

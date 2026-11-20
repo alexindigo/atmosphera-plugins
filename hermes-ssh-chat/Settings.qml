@@ -8,156 +8,178 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
-  property var cfg: pluginApi?.pluginSettings || ({})
-  property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-  property string valueHost: displayBaseline.valueHost
-  property int valuePort: displayBaseline.valuePort
-  property string valueUser: displayBaseline.valueUser
-  property bool valueRememberLastTarget: displayBaseline.valueRememberLastTarget
-  property bool valueAutoConnectOnStartup: displayBaseline.valueAutoConnectOnStartup
-  property int valuePanelWidth: displayBaseline.valuePanelWidth
-  property int valuePanelHeight: displayBaseline.valuePanelHeight
-  property int valueTerminalCols: displayBaseline.valueTerminalCols
-  property int valueTerminalRows: displayBaseline.valueTerminalRows
-  property int valueTerminalFontSize: displayBaseline.valueTerminalFontSize
-  property bool valueShowBarText: displayBaseline.valueShowBarText
-  property string valueToggleShortcutName: displayBaseline.valueToggleShortcutName
+  readonly property var hostField: pluginApi?.field("host") ?? null
+  readonly property var portField: pluginApi?.field("port") ?? null
+  readonly property var userField: pluginApi?.field("user") ?? null
+  readonly property var rememberLastTargetField: pluginApi?.field("rememberLastTarget") ?? null
+  readonly property var autoConnectOnStartupField: pluginApi?.field("autoConnectOnStartup") ?? null
+  readonly property var panelWidthField: pluginApi?.field("panelWidth") ?? null
+  readonly property var panelHeightField: pluginApi?.field("panelHeight") ?? null
+  readonly property var terminalColsField: pluginApi?.field("terminalCols") ?? null
+  readonly property var terminalRowsField: pluginApi?.field("terminalRows") ?? null
+  readonly property var terminalFontSizeField: pluginApi?.field("terminalFontSize") ?? null
+  readonly property var showBarTextField: pluginApi?.field("showBarText") ?? null
+  readonly property var toggleShortcutNameField: pluginApi?.field("toggleShortcutName") ?? null
+  readonly property string valueHost: root.hostField?.value ?? ""
+  readonly property int valuePort: root.portField?.value ?? 22
+  readonly property string valueUser: root.userField?.value ?? ""
+  readonly property bool valueRememberLastTarget: root.rememberLastTargetField?.value ?? true
+  readonly property bool valueAutoConnectOnStartup: root.autoConnectOnStartupField?.value ?? false
+  readonly property int valuePanelWidth: root.panelWidthField?.value ?? 1200
+  readonly property int valuePanelHeight: root.panelHeightField?.value ?? 760
+  readonly property int valueTerminalCols: root.terminalColsField?.value ?? 180
+  readonly property int valueTerminalRows: root.terminalRowsField?.value ?? 32
+  readonly property int valueTerminalFontSize: root.terminalFontSizeField?.value ?? 11
+  readonly property bool valueShowBarText: root.showBarTextField?.value ?? true
+  readonly property string valueToggleShortcutName: root.toggleShortcutNameField?.value ?? "hermes-toggle"
 
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property string valueHost: cfg.host ?? defaults.host ?? ""
-    readonly property int valuePort: cfg.port ?? defaults.port ?? 22
-    readonly property string valueUser: cfg.user ?? defaults.user ?? ""
-    readonly property bool valueRememberLastTarget: cfg.rememberLastTarget ?? defaults.rememberLastTarget ?? true
-    readonly property bool valueAutoConnectOnStartup: cfg.autoConnectOnStartup ?? defaults.autoConnectOnStartup ?? false
-    readonly property int valuePanelWidth: cfg.panelWidth ?? defaults.panelWidth ?? 1200
-    readonly property int valuePanelHeight: cfg.panelHeight ?? defaults.panelHeight ?? 760
-    readonly property int valueTerminalCols: cfg.terminalCols ?? defaults.terminalCols ?? 180
-    readonly property int valueTerminalRows: cfg.terminalRows ?? defaults.terminalRows ?? 32
-    readonly property int valueTerminalFontSize: cfg.terminalFontSize ?? defaults.terminalFontSize ?? 11
-    readonly property bool valueShowBarText: cfg.showBarText ?? defaults.showBarText ?? true
-    readonly property string valueToggleShortcutName: cfg.toggleShortcutName ?? defaults.toggleShortcutName ?? "hermes-toggle"
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({valueHost: root.valueHost, valuePort: root.valuePort, valueUser: root.valueUser, valueRememberLastTarget: root.valueRememberLastTarget, valueAutoConnectOnStartup: root.valueAutoConnectOnStartup, valuePanelWidth: root.valuePanelWidth, valuePanelHeight: root.valuePanelHeight, valueTerminalCols: root.valueTerminalCols, valueTerminalRows: root.valueTerminalRows, valueTerminalFontSize: root.valueTerminalFontSize, valueShowBarText: root.valueShowBarText, valueToggleShortcutName: root.valueToggleShortcutName})
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   function saveSettings() {
     if (!pluginApi)
       return;
 
-    pluginApi.pluginSettings.host = root.valueHost;
-    pluginApi.pluginSettings.port = root.valuePort;
-    pluginApi.pluginSettings.user = root.valueUser;
-    pluginApi.pluginSettings.rememberLastTarget = root.valueRememberLastTarget;
-    pluginApi.pluginSettings.autoConnectOnStartup = root.valueAutoConnectOnStartup;
-    pluginApi.pluginSettings.panelWidth = root.valuePanelWidth;
-    pluginApi.pluginSettings.panelHeight = root.valuePanelHeight;
-    pluginApi.pluginSettings.terminalCols = root.valueTerminalCols;
-    pluginApi.pluginSettings.terminalRows = root.valueTerminalRows;
-    pluginApi.pluginSettings.terminalFontSize = root.valueTerminalFontSize;
-    pluginApi.pluginSettings.showBarText = root.valueShowBarText;
-    pluginApi.pluginSettings.toggleShortcutName = root.valueToggleShortcutName;
     pluginApi.saveSettings();
   }
 
   spacing: Style.marginL
 
-  NTextInput {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.host.label")
-    description: pluginApi?.tr("settings.host.desc")
-    placeholderText: pluginApi?.tr("settings.host.placeholder")
-    text: root.valueHost
-    onTextChanged: root.valueHost = text
+  NPluginSettingsField {
+    field: root.hostField
+    NTextInput {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.host.label")
+      description: pluginApi?.tr("settings.host.desc")
+      placeholderText: pluginApi?.tr("settings.host.placeholder")
+      text: root.valueHost
+      onEditCommitted: root.hostField.set(text)
+    }
   }
 
-  NTextInput {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.user.label")
-    placeholderText: pluginApi?.tr("settings.user.placeholder")
-    text: root.valueUser
-    onTextChanged: root.valueUser = text
+  NPluginSettingsField {
+    field: root.userField
+    NTextInput {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.user.label")
+      placeholderText: pluginApi?.tr("settings.user.placeholder")
+      text: root.valueUser
+      onEditCommitted: root.userField.set(text)
+    }
   }
 
-  NSpinBox {
-    label: pluginApi?.tr("settings.port.label")
-    from: 1
-    to: 65535
-    stepSize: 1
-    value: root.valuePort
-    onValueChanged: root.valuePort = value
+  NPluginSettingsField {
+    field: root.portField
+    NSpinBox {
+      label: pluginApi?.tr("settings.port.label")
+      from: 1
+      to: 65535
+      stepSize: 1
+      value: root.valuePort
+      onValueModified: value => root.portField.set(value)
+    }
   }
 
-  NSpinBox {
-    label: pluginApi?.tr("settings.panelWidth.label")
-    description: pluginApi?.tr("settings.panelWidth.desc")
-    from: 720
-    to: 1800
-    stepSize: 20
-    value: root.valuePanelWidth
-    onValueChanged: root.valuePanelWidth = value
+  NPluginSettingsField {
+    field: root.panelWidthField
+    NSpinBox {
+      label: pluginApi?.tr("settings.panelWidth.label")
+      description: pluginApi?.tr("settings.panelWidth.desc")
+      from: 720
+      to: 1800
+      stepSize: 20
+      value: root.valuePanelWidth
+      onValueModified: value => root.panelWidthField.set(value)
+    }
   }
 
-  NSpinBox {
-    label: pluginApi?.tr("settings.panelHeight.label")
-    description: pluginApi?.tr("settings.panelHeight.desc")
-    from: 560
-    to: 1200
-    stepSize: 20
-    value: root.valuePanelHeight
-    onValueChanged: root.valuePanelHeight = value
+  NPluginSettingsField {
+    field: root.panelHeightField
+    NSpinBox {
+      label: pluginApi?.tr("settings.panelHeight.label")
+      description: pluginApi?.tr("settings.panelHeight.desc")
+      from: 560
+      to: 1200
+      stepSize: 20
+      value: root.valuePanelHeight
+      onValueModified: value => root.panelHeightField.set(value)
+    }
   }
 
-  NSpinBox {
-    label: pluginApi?.tr("settings.terminalCols.label")
-    from: 80
-    to: 240
-    stepSize: 5
-    value: root.valueTerminalCols
-    onValueChanged: root.valueTerminalCols = value
+  NPluginSettingsField {
+    field: root.terminalColsField
+    NSpinBox {
+      label: pluginApi?.tr("settings.terminalCols.label")
+      from: 80
+      to: 240
+      stepSize: 5
+      value: root.valueTerminalCols
+      onValueModified: value => root.terminalColsField.set(value)
+    }
   }
 
-  NSpinBox {
-    label: pluginApi?.tr("settings.terminalRows.label")
-    from: 20
-    to: 80
-    stepSize: 1
-    value: root.valueTerminalRows
-    onValueChanged: root.valueTerminalRows = value
+  NPluginSettingsField {
+    field: root.terminalRowsField
+    NSpinBox {
+      label: pluginApi?.tr("settings.terminalRows.label")
+      from: 20
+      to: 80
+      stepSize: 1
+      value: root.valueTerminalRows
+      onValueModified: value => root.terminalRowsField.set(value)
+    }
   }
 
-  NSpinBox {
-    label: pluginApi?.tr("settings.terminalFontSize.label")
-    from: 8
-    to: 20
-    stepSize: 1
-    value: root.valueTerminalFontSize
-    onValueChanged: root.valueTerminalFontSize = value
+  NPluginSettingsField {
+    field: root.terminalFontSizeField
+    NSpinBox {
+      label: pluginApi?.tr("settings.terminalFontSize.label")
+      from: 8
+      to: 20
+      stepSize: 1
+      value: root.valueTerminalFontSize
+      onValueModified: value => root.terminalFontSizeField.set(value)
+    }
   }
 
-  NToggle {
-    label: pluginApi?.tr("settings.autoConnectOnStartup.label")
-    checked: root.valueAutoConnectOnStartup
-    onToggled: checked => root.valueAutoConnectOnStartup = checked
+  NPluginSettingsField {
+    field: root.autoConnectOnStartupField
+    NToggle {
+      label: pluginApi?.tr("settings.autoConnectOnStartup.label")
+      checked: root.valueAutoConnectOnStartup
+      onToggled: checked => root.autoConnectOnStartupField.set(checked)
+    }
   }
 
-  NToggle {
-    label: pluginApi?.tr("settings.rememberLastTarget.label")
-    checked: root.valueRememberLastTarget
-    onToggled: checked => root.valueRememberLastTarget = checked
+  NPluginSettingsField {
+    field: root.rememberLastTargetField
+    NToggle {
+      label: pluginApi?.tr("settings.rememberLastTarget.label")
+      checked: root.valueRememberLastTarget
+      onToggled: checked => root.rememberLastTargetField.set(checked)
+    }
   }
 
-  NToggle {
-    label: pluginApi?.tr("settings.showBarText.label")
-    checked: root.valueShowBarText
-    onToggled: checked => root.valueShowBarText = checked
+  NPluginSettingsField {
+    field: root.showBarTextField
+    NToggle {
+      label: pluginApi?.tr("settings.showBarText.label")
+      checked: root.valueShowBarText
+      onToggled: checked => root.showBarTextField.set(checked)
+    }
   }
 
-  NTextInput {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.toggleShortcut.label")
-    description: pluginApi?.tr("settings.toggleShortcut.desc", { name: root.valueToggleShortcutName })
-    placeholderText: "hermes-toggle"
-    text: root.valueToggleShortcutName
-    onTextChanged: root.valueToggleShortcutName = text
+  NPluginSettingsField {
+    field: root.toggleShortcutNameField
+    NTextInput {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.toggleShortcut.label")
+      description: pluginApi?.tr("settings.toggleShortcut.desc", {
+                                   name: root.valueToggleShortcutName
+                                 })
+      placeholderText: "hermes-toggle"
+      text: root.valueToggleShortcutName
+      onEditCommitted: root.toggleShortcutNameField.set(text)
+    }
   }
 }

@@ -1,7 +1,7 @@
 {
   "id": "saved-desktop-widgets",
   "name": "Saved Desktop Widgets",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "spiros132",

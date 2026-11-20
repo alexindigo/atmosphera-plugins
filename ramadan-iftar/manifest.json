@@ -1,7 +1,7 @@
 {
   "id": "ramadan-iftar",
   "name": "Ramadan Iftar",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "minNoctaliaVersion": "4.1.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "User",

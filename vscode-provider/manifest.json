@@ -1,7 +1,7 @@
 {
     "id": "vscode-provider",
     "name": "VS Code Provider",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "minAtmospheraVersion": "0.10.0",
     "description": "Open VS Code Folders and Workspaces",
     "tags": ["Launcher", "Development"],

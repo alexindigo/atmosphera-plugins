@@ -24,10 +24,8 @@ RowLayout {
     // Use the inherited Item.enabled control input, not a shadow property.
     property var monitorSpecific: undefined
     property var settings: pluginApi?.pluginSettings || ({})
-    property var settingWriter: null
-    readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
-        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
-        function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
+    // The caller owns field staging or runtime publication, never this row.
+    required property var settingWriter
 
     // Monitor specific properties
     readonly property bool isPlaying: Commands.value(settings.monitors, screenName, "isPlaying", pluginApi?.manifest?.metadata?.defaultSettings)
@@ -74,12 +72,7 @@ RowLayout {
     }
 
     function saveSetting(key: string, value: var) {
-        if (typeof settingWriter === "function") { settingWriter(key, value); return; }
-        var names = _monitorSpecific ? [screenName] : Array.from(Quickshell.screens).map(screen => screen.name);
-        if (!names.length) return;
-        monitorCommand.submit(names.map(name => ({op: "set", screen: name, field: key, value: value})));
-
-        pluginApi.saveSettings();
+        settingWriter(key, value);
     }
 
 

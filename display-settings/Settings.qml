@@ -7,17 +7,13 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
-  property var cfg: pluginApi?.pluginSettings || ({})
-  property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
+  readonly property var niriConfigPathField: pluginApi?.field("niriConfigPath") ?? null
+  readonly property var iconColorField: pluginApi?.field("iconColor") ?? null
 
-  property string valueNiriConfigPath: displayBaseline.valueNiriConfigPath
-  property string valueIconColor: displayBaseline.valueIconColor
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property string valueNiriConfigPath: cfg.niriConfigPath ?? defaults.niriConfigPath ?? "~/.config/niri/config.kdl"
-    readonly property string valueIconColor: cfg.iconColor ?? defaults.iconColor ?? "none"
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({valueNiriConfigPath: root.valueNiriConfigPath, valueIconColor: root.valueIconColor})
+  readonly property string valueNiriConfigPath: root.niriConfigPathField?.value ?? "~/.config/niri/config.kdl"
+  readonly property string valueIconColor: root.iconColorField?.value ?? "none"
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   spacing: Style.marginL
 
@@ -25,27 +21,32 @@ ColumnLayout {
     spacing: Style.marginM
     Layout.fillWidth: true
 
-    NTextInput {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.niriConfigPath.label")
-      description: pluginApi?.tr("settings.niriConfigPath.description")
-      placeholderText: "~/.config/niri/config.kdl"
-      text: root.valueNiriConfigPath
-      onTextChanged: root.valueNiriConfigPath = text
+    NPluginSettingsField {
+      field: root.niriConfigPathField
+      NTextInput {
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.niriConfigPath.label")
+        description: pluginApi?.tr("settings.niriConfigPath.description")
+        placeholderText: "~/.config/niri/config.kdl"
+        text: root.valueNiriConfigPath
+        onEditCommitted: root.niriConfigPathField.set(text)
+      }
     }
 
-    NColorChoice {
-      label: pluginApi?.tr("settings.iconColor.label")
-      description: pluginApi?.tr("settings.iconColor.description")
-      currentKey: root.valueIconColor
-      onSelected: key => root.valueIconColor = key
+    NPluginSettingsField {
+      field: root.iconColorField
+      NColorChoice {
+        label: pluginApi?.tr("settings.iconColor.label")
+        description: pluginApi?.tr("settings.iconColor.description")
+        currentKey: root.valueIconColor
+        onSelected: key => root.iconColorField.set(key)
+      }
     }
   }
 
   function saveSettings() {
-    if (!pluginApi) return
-    pluginApi.pluginSettings.niriConfigPath = root.valueNiriConfigPath
-    pluginApi.pluginSettings.iconColor = root.valueIconColor
-    pluginApi.saveSettings()
+    if (!pluginApi)
+      return;
+    pluginApi.saveSettings();
   }
 }

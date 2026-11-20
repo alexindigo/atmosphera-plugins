@@ -6,30 +6,30 @@ import qs.Widgets
 ColumnLayout {
   id: root
   property var pluginApi: null
+  readonly property var showCountInBarField: pluginApi?.field("showCountInBar") ?? null
 
   // Local state
-  property bool showCount: displayBaseline.showCount
+  readonly property bool showCount: root.showCountInBarField?.value ?? true
 
   spacing: Style.marginM
 
-  NToggle {
-    label: pluginApi?.tr("settings.show_count.label") || "Show Note Count"
-    description: pluginApi?.tr("settings.show_count.description") || "Show the number of notes in the bar widget"
-    checked: root.showCount
-    onToggled: (checked) => {
-      root.showCount = checked;
+  NPluginSettingsField {
+    field: root.showCountInBarField
+    NToggle {
+      label: pluginApi?.tr("settings.show_count.label") || "Show Note Count"
+      description: pluginApi?.tr("settings.show_count.description") || "Show the number of notes in the bar widget"
+      checked: root.showCount
+      onToggled: checked => {
+        root.showCountInBarField.set(checked);
+      }
     }
   }
 
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property bool showCount: pluginApi?.pluginSettings?.showCountInBar ?? true
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({showCount: root.showCount})
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   function saveSettings() {
     if (pluginApi) {
-      pluginApi.pluginSettings.showCountInBar = root.showCount;
       pluginApi.saveSettings();
     }
   }

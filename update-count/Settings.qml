@@ -8,30 +8,28 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
+  readonly property var updateIntervalMinutesField: pluginApi?.field("updateIntervalMinutes") ?? null
+  readonly property var updateTerminalCommandField: pluginApi?.field("updateTerminalCommand") ?? null
+  readonly property var currentIconNameField: pluginApi?.field("currentIconName") ?? null
+  readonly property var hideOnZeroField: pluginApi?.field("hideOnZero") ?? null
+  readonly property var customCmdGetNumUpdatesField: pluginApi?.field("customCmdGetNumUpdates") ?? null
+  readonly property var customCmdDoSystemUpdateField: pluginApi?.field("customCmdDoSystemUpdate") ?? null
 
-  property int updateIntervalMinutes: displayBaseline.project("updateIntervalMinutes")
-  property string updateTerminalCommand: displayBaseline.updateTerminalCommand
-  property string currentIconName: displayBaseline.currentIconName
-  property bool hideOnZero: displayBaseline.hideOnZero
+  readonly property int updateIntervalMinutes: root.updateIntervalMinutesField?.value
+  readonly property string updateTerminalCommand: root.updateTerminalCommandField?.value
+  readonly property string currentIconName: root.currentIconNameField?.value
+  readonly property bool hideOnZero: root.hideOnZeroField?.value
 
-  property string customCmdGetNumUpdates: displayBaseline.customCmdGetNumUpdates
-  property string customCmdDoSystemUpdate: displayBaseline.customCmdDoSystemUpdate
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property int updateIntervalMinutes: pluginApi?.pluginSettings?.updateIntervalMinutes || pluginApi?.manifest?.metadata?.defaultSettings?.updateIntervalMinutes
-    readonly property string updateTerminalCommand: pluginApi?.pluginSettings?.updateTerminalCommand || pluginApi?.manifest?.metadata?.defaultSettings?.updateTerminalCommand
-    readonly property string currentIconName: pluginApi?.pluginSettings?.currentIconName || pluginApi?.manifest?.metadata?.defaultSettings?.currentIconName
-    readonly property bool hideOnZero: pluginApi?.pluginSettings?.hideOnZero || pluginApi?.manifest?.metadata?.defaultSettings?.hideOnZero
-    readonly property string customCmdGetNumUpdates: pluginApi?.pluginSettings?.customCmdGetNumUpdates || ""
-    readonly property string customCmdDoSystemUpdate: pluginApi?.pluginSettings?.customCmdDoSystemUpdate || ""
-    ranges: [NSettingsRange { field: "updateIntervalMinutes"; from: rangeUpdateIntervalMinutes.from; to: rangeUpdateIntervalMinutes.to }]
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({updateIntervalMinutes: root.updateIntervalMinutes, updateTerminalCommand: root.updateTerminalCommand, currentIconName: root.currentIconName, hideOnZero: root.hideOnZero, customCmdGetNumUpdates: root.customCmdGetNumUpdates, customCmdDoSystemUpdate: root.customCmdDoSystemUpdate})
+  readonly property string customCmdGetNumUpdates: root.customCmdGetNumUpdatesField?.value || ""
+  readonly property string customCmdDoSystemUpdate: root.customCmdDoSystemUpdateField?.value || ""
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
   property bool _applyEffectPending: false
   Connections {
     target: root.pluginApi
     function onSettingsCompleted(result) {
-      if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current")
+        return;
       root._applyEffectPending = false;
       root.pluginApi.mainInstance?.startGetNumUpdates();
       Logger.i("UpdateCount", "Settings saved successfully");
@@ -48,13 +46,16 @@ ColumnLayout {
   //
   // ------ General ------
   //
-  NToggle {
-    id: widgetSwitch
-    label: pluginApi?.tr("settings.hideWidget.label")
-    description: pluginApi?.tr("settings.hideWidget.desc")
-    checked: root.hideOnZero
-    onToggled: function (checked) {
-      root.hideOnZero = checked;
+  NPluginSettingsField {
+    field: root.hideOnZeroField
+    NToggle {
+      id: widgetSwitch
+      label: pluginApi?.tr("settings.hideWidget.label")
+      description: pluginApi?.tr("settings.hideWidget.desc")
+      checked: root.hideOnZero
+      onToggled: function (checked) {
+        root.hideOnZeroField.set(checked);
+      }
     }
   }
 
@@ -76,18 +77,21 @@ ColumnLayout {
       color: Settings.data.colorSchemes.darkMode ? AtmoColor.mPrimary : AtmoColor.mOnPrimary
     }
 
-    NButton {
-      text: pluginApi?.tr("settings.changeIcon.label")
-      onClicked: {
-        Logger.i("UpdateCount", "Icon selector button clicked.");
-        changeIcon.open();
+    NPluginSettingsField {
+      field: root.currentIconNameField
+      NButton {
+        text: pluginApi?.tr("settings.changeIcon.label")
+        onClicked: {
+          Logger.i("UpdateCount", "Icon selector button clicked.");
+          changeIcon.open();
+        }
       }
     }
 
     AtmoIconPicker {
       id: changeIcon
       onIconSelected: function (icon) {
-        root.currentIconName = icon;
+        root.currentIconNameField.set(icon);
       }
     }
   }
@@ -110,16 +114,19 @@ ColumnLayout {
       }
     }
 
-    NSlider {
-      id: rangeUpdateIntervalMinutes
-      objectName: "settings-range-updateIntervalMinutes"
-      Layout.fillWidth: true
-      from: 5
-      to: 300
-      value: root.updateIntervalMinutes
-      stepSize: 5
-      onMoved: {
-        root.updateIntervalMinutes = value;
+    NPluginSettingsField {
+      field: root.updateIntervalMinutesField
+      NSlider {
+        id: rangeUpdateIntervalMinutes
+        objectName: "settings-range-updateIntervalMinutes"
+        Layout.fillWidth: true
+        from: 5
+        to: 300
+        value: root.updateIntervalMinutes
+        stepSize: 5
+        onMoved: {
+          root.updateIntervalMinutesField.set(value);
+        }
       }
     }
   }
@@ -134,29 +141,38 @@ ColumnLayout {
   //
   // ------ Custom commands ------
   //
-  NTextInput {
-    label: pluginApi?.tr("settings.customCmdGetNumUpdates.label")
-    description: pluginApi?.tr("settings.customCmdGetNumUpdates.desc")
-    placeholderText: pluginApi?.tr("settings.customCmdGetNumUpdates.placeholder")
-    text: root.customCmdGetNumUpdates
-    onTextChanged: root.customCmdGetNumUpdates = text
+  NPluginSettingsField {
+    field: root.customCmdGetNumUpdatesField
+    NTextInput {
+      label: pluginApi?.tr("settings.customCmdGetNumUpdates.label")
+      description: pluginApi?.tr("settings.customCmdGetNumUpdates.desc")
+      placeholderText: pluginApi?.tr("settings.customCmdGetNumUpdates.placeholder")
+      text: root.customCmdGetNumUpdates
+      onEditCommitted: root.customCmdGetNumUpdatesField.set(text)
+    }
   }
 
-  NTextInput {
-    label: pluginApi?.tr("settings.customCmdDoSystemUpdate.label")
-    description: pluginApi?.tr("settings.customCmdDoSystemUpdate.desc")
-    placeholderText: pluginApi?.tr("settings.customCmdDoSystemUpdate.placeholder")
-    text: root.customCmdDoSystemUpdate
-    onTextChanged: root.customCmdDoSystemUpdate = text
+  NPluginSettingsField {
+    field: root.customCmdDoSystemUpdateField
+    NTextInput {
+      label: pluginApi?.tr("settings.customCmdDoSystemUpdate.label")
+      description: pluginApi?.tr("settings.customCmdDoSystemUpdate.desc")
+      placeholderText: pluginApi?.tr("settings.customCmdDoSystemUpdate.placeholder")
+      text: root.customCmdDoSystemUpdate
+      onEditCommitted: root.customCmdDoSystemUpdateField.set(text)
+    }
   }
 
-  NTextInput {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.terminal.label")
-    description: pluginApi?.tr("settings.terminal.desc")
-    placeholderText: pluginApi?.tr("settings.terminal.placeholder")
-    text: root.updateTerminalCommand
-    onTextChanged: root.updateTerminalCommand = text
+  NPluginSettingsField {
+    field: root.updateTerminalCommandField
+    NTextInput {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.terminal.label")
+      description: pluginApi?.tr("settings.terminal.desc")
+      placeholderText: pluginApi?.tr("settings.terminal.placeholder")
+      text: root.updateTerminalCommand
+      onEditCommitted: root.updateTerminalCommandField.set(text || pluginApi?.manifest?.metadata?.defaultSettings?.updateTerminalCommand || "")
+    }
   }
 
   NDivider {
@@ -199,15 +215,6 @@ ColumnLayout {
       Logger.e("UpdateCount", "Cannot save settings: pluginApi is null");
       return;
     }
-
-    pluginApi.pluginSettings.updateIntervalMinutes = root.updateIntervalMinutes;
-    root.updateTerminalCommand = root.updateTerminalCommand || pluginApi?.manifest?.metadata.defaultSettings?.updateTerminalCommand;
-    pluginApi.pluginSettings.updateTerminalCommand = root.updateTerminalCommand;
-    pluginApi.pluginSettings.currentIconName = root.currentIconName;
-    pluginApi.pluginSettings.hideOnZero = root.hideOnZero;
-
-    pluginApi.pluginSettings.customCmdGetNumUpdates = root.customCmdGetNumUpdates;
-    pluginApi.pluginSettings.customCmdDoSystemUpdate = root.customCmdDoSystemUpdate;
 
     if (pluginApi.saveSettings() !== false)
       root._applyEffectPending = true;

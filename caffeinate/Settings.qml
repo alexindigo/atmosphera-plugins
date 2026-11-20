@@ -3,46 +3,50 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import qs.Commons
-import qs.Widgets
 import "DurationLanguage.js" as DurationLanguage
 import "LauncherModel.js" as LauncherModel
 import "SettingsModel.js" as SettingsModel
+import qs.Commons
+import qs.Widgets
 
 ColumnLayout {
   id: root
 
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property string editAlias: cfg.alias ?? defaults.alias ?? "c"
-    readonly property bool editIncludeIndefinite: cfg.includeIndefinitePreset ?? defaults.includeIndefinitePreset ?? true
-    readonly property bool editHideInactive: cfg.hideInactiveWidget ?? defaults.hideInactiveWidget ?? false
-    readonly property var presetValues: SettingsModel.copyPresets(cfg.presets ?? defaults.presets ?? [])
-  }
-  readonly property bool settingsDirty: { root._presetsRevision; presetsModel.count; return displayBaseline.differs({editAlias: root.editAlias, editIncludeIndefinite: root.editIncludeIndefinite, editHideInactive: root.editHideInactive, presetValues: root.presetExpressions()}); }
+  property var pluginApi: null
+  readonly property var aliasField: pluginApi?.field("alias") ?? null
+  readonly property var presetsField: pluginApi?.field("presets") ?? null
+  readonly property var includeIndefinitePresetField: pluginApi?.field("includeIndefinitePreset") ?? null
+  readonly property var hideInactiveWidgetField: pluginApi?.field("hideInactiveWidget") ?? null
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
   property bool _savePending: false
   Connections {
     target: root.pluginApi
     function onSettingsCompleted(result) {
-      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current")
+        return;
       root._savePending = false;
       Logger.i("Caffeinate", pluginApi?.tr("settings.saved"));
     }
   }
 
-  property var pluginApi: null
-
-  readonly property var cfg: pluginApi?.pluginSettings || ({})
+  // Presentation-only default markers on controls.
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-
-  property string editAlias: displayBaseline.editAlias
-  property bool editIncludeIndefinite: displayBaseline.editIncludeIndefinite
-  property bool editHideInactive: displayBaseline.editHideInactive
+  readonly property string editAlias: aliasField?.value ?? "c"
+  readonly property bool editIncludeIndefinite: includeIndefinitePresetField?.value ?? true
+  readonly property bool editHideInactive: hideInactiveWidgetField?.value ?? false
+  // The list editor buffers rows; it follows the field value (Reset, Apply)
+  // and every explicit row operation submits the whole atomic list.
+  readonly property var presetsValue: presetsField?.value ?? []
+  onPresetsValueChanged: {
+    if (JSON.stringify(presetExpressions()) !== JSON.stringify(SettingsModel.copyPresets(presetsValue)))
+      replacePresets(presetsValue);
+  }
   property real preferredWidth: 720 * Style.uiScaleRatio
 
   spacing: Style.marginL
 
-  Component.onCompleted: loadSettings()
+  Component.onCompleted: replacePresets(presetsValue)
 
   ListModel {
     id: presetsModel
@@ -51,14 +55,35 @@ ColumnLayout {
   property int _presetsRevision: 0
   Connections {
     target: presetsModel
-    function onDataChanged() { root._presetsRevision++; }
-    function onRowsMoved() { root._presetsRevision++; }
+    function onDataChanged() {
+      root._presetsRevision++;
+    }
+    function onRowsMoved() {
+      root._presetsRevision++;
+    }
   }
 
-  function setPreset(index, expression) { presetsModel.setProperty(index, "expression", expression); }
-  function movePreset(from, to) { presetsModel.move(from, to, 1); }
-  function removePreset(index) { presetsModel.remove(index); }
-  function addPreset(expression) { presetsModel.append({expression: expression}); }
+  function submitPresets() {
+    return root.presetsField.set(root.presetExpressions());
+  }
+  function setPreset(index, expression) {
+    presetsModel.setProperty(index, "expression", expression);
+    submitPresets();
+  }
+  function movePreset(from, to) {
+    presetsModel.move(from, to, 1);
+    submitPresets();
+  }
+  function removePreset(index) {
+    presetsModel.remove(index);
+    submitPresets();
+  }
+  function addPreset(expression) {
+    presetsModel.append({
+                          expression: expression
+                        });
+    submitPresets();
+  }
 
   function replacePresets(source) {
     const presets = SettingsModel.copyPresets(source);
@@ -77,18 +102,9 @@ ColumnLayout {
     return presets;
   }
 
-  function loadSettings() {
-    editAlias = displayBaseline.editAlias;
-    replacePresets(cfg.presets ?? defaults.presets ?? []);
-    editIncludeIndefinite = displayBaseline.editIncludeIndefinite;
-    editHideInactive = displayBaseline.editHideInactive;
-  }
-
+  // The page's own Reset control is one multi-field Reset of these leaves.
   function resetDefaults() {
-    editAlias = defaults.alias ?? "c";
-    replacePresets(defaults.presets ?? []);
-    editIncludeIndefinite = defaults.includeIndefinitePreset ?? true;
-    editHideInactive = defaults.hideInactiveWidget ?? false;
+    return pluginApi.resetFields(["alias", "presets", "includeIndefinitePreset", "hideInactiveWidget"]);
   }
 
   function aliasValidation() {
@@ -98,8 +114,7 @@ ColumnLayout {
   function aliasFeedback() {
     const validation = aliasValidation();
     if (validation.state === "invalid") {
-      return pluginApi?.tr(validation.code === "alias-duplicates-canonical"
-                           ? "settings.alias.duplicateError" : "settings.alias.formatError");
+      return pluginApi?.tr(validation.code === "alias-duplicates-canonical" ? "settings.alias.duplicateError" : "settings.alias.formatError");
     }
     if (validation.normalized === "")
       return pluginApi?.tr("settings.alias.disabled");
@@ -124,8 +139,7 @@ ColumnLayout {
   }
 
   function validatedSettings() {
-    return SettingsModel.validate(editAlias, presetExpressions(), "caffeinate",
-                                  LauncherModel.validateAlias, DurationLanguage.parse);
+    return SettingsModel.validate(editAlias, presetExpressions(), "caffeinate", LauncherModel.validateAlias, DurationLanguage.parse);
   }
 
   function saveSettings() {
@@ -140,13 +154,13 @@ ColumnLayout {
       throw new Error("invalid-settings");
     }
 
-    root.editAlias = validated.alias;
-    root.replacePresets(validated.presets);
-    pluginApi.pluginSettings.alias = validated.alias;
-    pluginApi.pluginSettings.presets = validated.presets;
-    pluginApi.pluginSettings.includeIndefinitePreset = editIncludeIndefinite;
-    pluginApi.pluginSettings.hideInactiveWidget = editHideInactive;
-    if (pluginApi.saveSettings() !== false) root._savePending = true;
+    // Normalize only the user's own pending intents; untouched leaves inherit.
+    if (root.aliasField.pendingIntent === "set" && validated.alias !== root.aliasField.value)
+      root.aliasField.set(validated.alias);
+    if (root.presetsField.pendingIntent === "set" && JSON.stringify(validated.presets) !== JSON.stringify(root.presetsField.value))
+      root.presetsField.set(validated.presets);
+    if (pluginApi.saveSettings() !== false)
+      root._savePending = true;
   }
 
   NText {
@@ -166,14 +180,17 @@ ColumnLayout {
     Layout.fillWidth: true
   }
 
-  NTextInput {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.alias.label")
-    description: pluginApi?.tr("settings.alias.description")
-    placeholderText: pluginApi?.tr("settings.alias.placeholder")
-    defaultValue: defaults.alias ?? "c"
-    text: root.editAlias
-    onTextChanged: root.editAlias = text
+  NPluginSettingsField {
+    field: root.aliasField
+    NTextInput {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.alias.label")
+      description: pluginApi?.tr("settings.alias.description")
+      placeholderText: pluginApi?.tr("settings.alias.placeholder")
+      defaultValue: defaults.alias ?? "c"
+      text: root.editAlias
+      onEditCommitted: root.aliasField.set(text)
+    }
   }
 
   NText {
@@ -193,12 +210,15 @@ ColumnLayout {
     description: pluginApi?.tr("settings.bar.description")
   }
 
-  NToggle {
-    label: pluginApi?.tr("settings.bar.hideInactive.label")
-    description: pluginApi?.tr("settings.bar.hideInactive.description")
-    checked: root.editHideInactive
-    defaultValue: defaults.hideInactiveWidget ?? false
-    onToggled: checked => root.editHideInactive = checked
+  NPluginSettingsField {
+    field: root.hideInactiveWidgetField
+    NToggle {
+      label: pluginApi?.tr("settings.bar.hideInactive.label")
+      description: pluginApi?.tr("settings.bar.hideInactive.description")
+      checked: root.editHideInactive
+      defaultValue: defaults.hideInactiveWidget ?? false
+      onToggled: checked => root.hideInactiveWidgetField.set(checked)
+    }
   }
 
   NDivider {
@@ -211,113 +231,116 @@ ColumnLayout {
     description: pluginApi?.tr("settings.presets.description")
   }
 
-  NScrollView {
-    id: presetsScroll
+  NPluginSettingsField {
+    field: root.presetsField
+    NScrollView {
+      id: presetsScroll
 
-    Layout.fillWidth: true
-    Layout.preferredHeight: Math.min(presetsColumn.implicitHeight, 360 * Style.uiScaleRatio)
-    horizontalPolicy: ScrollBar.AlwaysOff
-    showScrollbarWhenScrollable: true
-    gradientColor: AtmoColor.mSurfaceVariant
+      Layout.fillWidth: true
+      Layout.preferredHeight: Math.min(presetsColumn.implicitHeight, 360 * Style.uiScaleRatio)
+      horizontalPolicy: ScrollBar.AlwaysOff
+      showScrollbarWhenScrollable: true
+      gradientColor: AtmoColor.mSurfaceVariant
 
-    ColumnLayout {
-      id: presetsColumn
+      ColumnLayout {
+        id: presetsColumn
 
-      width: presetsScroll.availableWidth
-      spacing: Style.marginM
+        width: presetsScroll.availableWidth
+        spacing: Style.marginM
 
-      Repeater {
-        model: presetsModel
+        Repeater {
+          model: presetsModel
 
-        delegate: ColumnLayout {
-          id: presetDelegate
+          delegate: ColumnLayout {
+            id: presetDelegate
 
-          required property int index
-          required property string expression
+            required property int index
+            required property string expression
 
-          Layout.fillWidth: true
-          spacing: Style.marginXS
-
-          RowLayout {
             Layout.fillWidth: true
-            spacing: Style.marginS
+            spacing: Style.marginXS
 
-            NTextInput {
-              id: presetInput
-
+            RowLayout {
               Layout.fillWidth: true
-              placeholderText: pluginApi?.tr("settings.presets.placeholder")
-              text: presetDelegate.expression
-              onTextChanged: {
-                if (presetDelegate.expression !== text) {
-                  presetsModel.setProperty(presetDelegate.index, "expression", text);
+              spacing: Style.marginS
+
+              NTextInput {
+                id: presetInput
+
+                Layout.fillWidth: true
+                placeholderText: pluginApi?.tr("settings.presets.placeholder")
+                text: presetDelegate.expression
+                onEditCommitted: {
+                  if (presetDelegate.expression !== text)
+                    root.setPreset(presetDelegate.index, text);
                 }
+              }
+
+              AtmoIconButton {
+                icon: "arrow-up"
+                tooltipText: pluginApi?.tr("settings.presets.moveUp")
+                enabled: presetDelegate.index > 0
+                onClicked: root.movePreset(presetDelegate.index, presetDelegate.index - 1)
+              }
+
+              AtmoIconButton {
+                icon: "arrow-down"
+                tooltipText: pluginApi?.tr("settings.presets.moveDown")
+                enabled: presetDelegate.index < presetsModel.count - 1
+                onClicked: root.movePreset(presetDelegate.index, presetDelegate.index + 1)
+              }
+
+              AtmoIconButton {
+                icon: "trash"
+                tooltipText: pluginApi?.tr("settings.presets.remove")
+                onClicked: root.removePreset(presetDelegate.index)
               }
             }
 
-            AtmoIconButton {
-              icon: "arrow-up"
-              tooltipText: pluginApi?.tr("settings.presets.moveUp")
-              enabled: presetDelegate.index > 0
-              onClicked: presetsModel.move(presetDelegate.index, presetDelegate.index - 1, 1)
+            readonly property var parsed: DurationLanguage.parse(presetInput.text)
+
+            NText {
+              Layout.fillWidth: true
+              text: root.durationFeedback(presetInput.text)
+              color: presetDelegate.parsed.state === "valid" ? AtmoColor.mOnSurfaceVariant : AtmoColor.mError
+              wrapMode: Text.Wrap
             }
-
-            AtmoIconButton {
-              icon: "arrow-down"
-              tooltipText: pluginApi?.tr("settings.presets.moveDown")
-              enabled: presetDelegate.index < presetsModel.count - 1
-              onClicked: presetsModel.move(presetDelegate.index, presetDelegate.index + 1, 1)
-            }
-
-            AtmoIconButton {
-              icon: "trash"
-              tooltipText: pluginApi?.tr("settings.presets.remove")
-              onClicked: presetsModel.remove(presetDelegate.index)
-            }
-          }
-
-          readonly property var parsed: DurationLanguage.parse(presetInput.text)
-
-          NText {
-            Layout.fillWidth: true
-            text: root.durationFeedback(presetInput.text)
-            color: presetDelegate.parsed.state === "valid" ? AtmoColor.mOnSurfaceVariant : AtmoColor.mError
-            wrapMode: Text.Wrap
           }
         }
       }
     }
-  }
 
-  RowLayout {
-    Layout.fillWidth: true
-    spacing: Style.marginM
-
-    NButton {
-      text: pluginApi?.tr("settings.presets.add")
-      icon: "plus"
-      onClicked: presetsModel.append({
-                                       "expression": ""
-                                     })
-    }
-
-    Item {
+    RowLayout {
       Layout.fillWidth: true
-    }
+      spacing: Style.marginM
 
-    NButton {
-      text: pluginApi?.tr("settings.reset")
-      icon: "restore"
-      outlined: true
-      onClicked: root.resetDefaults()
+      NButton {
+        text: pluginApi?.tr("settings.presets.add")
+        icon: "plus"
+        onClicked: root.addPreset("")
+      }
+
+      Item {
+        Layout.fillWidth: true
+      }
+
+      NButton {
+        text: pluginApi?.tr("settings.reset")
+        icon: "restore"
+        outlined: true
+        onClicked: root.resetDefaults()
+      }
     }
   }
 
-  NToggle {
-    label: pluginApi?.tr("settings.indefinite.label")
-    description: pluginApi?.tr("settings.indefinite.description")
-    checked: root.editIncludeIndefinite
-    defaultValue: defaults.includeIndefinitePreset ?? true
-    onToggled: checked => root.editIncludeIndefinite = checked
+  NPluginSettingsField {
+    field: root.includeIndefinitePresetField
+    NToggle {
+      label: pluginApi?.tr("settings.indefinite.label")
+      description: pluginApi?.tr("settings.indefinite.description")
+      checked: root.editIncludeIndefinite
+      defaultValue: defaults.includeIndefinitePreset ?? true
+      onToggled: checked => root.includeIndefinitePresetField.set(checked)
+    }
   }
 }

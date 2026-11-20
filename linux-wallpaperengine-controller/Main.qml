@@ -105,6 +105,15 @@ Item {
     }
   }
 
+  // Explicit cache-clear action from Settings: the runtime owner records which
+  // color screenshots survived. Operational state, never a preference draft.
+  function retainWallpaperColorScreenshots(entries) {
+    if (!pluginApi)
+      return false;
+    pluginApi.pluginSettings.wallpaperColorScreenshots = cloneValue(entries || ({}));
+    return pluginApi.saveSettings() !== false;
+  }
+
   function cloneValue(value) {
     return JSON.parse(JSON.stringify(value || ({})));
   }
@@ -240,7 +249,7 @@ Item {
   readonly property bool defaultNoFullscreenPause: cfg.defaultNoFullscreenPause ?? defaults.defaultNoFullscreenPause ?? false
   readonly property bool defaultFullscreenPauseOnlyActive: cfg.defaultFullscreenPauseOnlyActive ?? defaults.defaultFullscreenPauseOnlyActive ?? false
   readonly property bool defaultAutoApply: cfg.autoApplyOnStartup ?? defaults.autoApplyOnStartup ?? true
-  
+
   readonly property int wallpaperScanCacheMinutes: {
     const value = Number(cfg.wallpaperScanCacheMinutes ?? defaults.wallpaperScanCacheMinutes ?? 10);
     if (isNaN(value)) {
@@ -249,17 +258,13 @@ Item {
     return Math.max(0, Math.floor(value));
   }
 
-
   // Screen topology, path normalization, and persisted wallpaper accessors.
   function normalizedPath(path) {
     return Settings.preprocessPath(String(path || ""));
   }
 
   function currentScreenSetSignature() {
-    return Quickshell.screens
-      .map(screen => String(screen.name || ""))
-      .sort()
-      .join("|");
+    return Quickshell.screens.map(screen => String(screen.name || "")).sort().join("|");
   }
 
   function wallpaperScanCacheValid() {
@@ -573,10 +578,10 @@ Item {
   // Runtime error capture and recovery hints.
   function extractRuntimeError(stderrText) {
     return EngineHelpers.extractRuntimeError(stderrText, {
-      assetsMissing: pluginApi?.tr("main.error.assetsMissing"),
-      noBackground: pluginApi?.tr("main.error.noBackground"),
-      opengl: pluginApi?.tr("main.error.opengl")
-    });
+                                               assetsMissing: pluginApi?.tr("main.error.assetsMissing"),
+                                               noBackground: pluginApi?.tr("main.error.noBackground"),
+                                               opengl: pluginApi?.tr("main.error.opengl")
+                                             });
   }
 
   function setRuntimeErrorFromStderr(stderrText) {
@@ -614,14 +619,7 @@ Item {
     }
 
     lastRuntimeErrorKey = logKey;
-    Logger.e(
-      "LWEController",
-      "runtime-error",
-      "stage=", stage,
-      "exitCode=", exitCode === null ? "-" : exitCode,
-      "exitStatus=", exitStatus === null ? "-" : exitStatus,
-      "summary=", summary
-    );
+    Logger.e("LWEController", "runtime-error", "stage=", stage, "exitCode=", exitCode === null ? "-" : exitCode, "exitStatus=", exitStatus === null ? "-" : exitStatus, "summary=", summary);
     return true;
   }
 
@@ -648,23 +646,23 @@ Item {
   function buildCommand(runtimeOverrides = null) {
     const overrides = runtimeOverrides || ({});
     return EngineHelpers.buildEngineCommand({
-      defaultFps: defaultFps,
-      defaultClamp: overrides.defaultClamp ?? defaultClamp,
-      defaultVolume: overrides.defaultVolume ?? defaultVolume,
-      defaultMuted: overrides.defaultMuted ?? defaultMuted,
-      defaultAudioReactiveEffects: overrides.defaultAudioReactiveEffects ?? defaultAudioReactiveEffects,
-      defaultNoAutomute: overrides.defaultNoAutomute ?? defaultNoAutomute,
-      defaultDisableMouse: overrides.defaultDisableMouse ?? defaultDisableMouse,
-      defaultDisableParallax: overrides.defaultDisableParallax ?? defaultDisableParallax,
-      defaultNoFullscreenPause: defaultNoFullscreenPause,
-      defaultFullscreenPauseOnlyActive: defaultFullscreenPauseOnlyActive,
-      defaultScaling: defaultScaling,
-      screens: Quickshell.screens,
-      getScreenConfig: getScreenConfig,
-      normalizePath: normalizedPath,
-      wallpaperIdFromPath: wallpaperIdFromPath,
-      getWallpaperProperties: getWallpaperProperties
-    });
+                                              defaultFps: defaultFps,
+                                              defaultClamp: overrides.defaultClamp ?? defaultClamp,
+                                              defaultVolume: overrides.defaultVolume ?? defaultVolume,
+                                              defaultMuted: overrides.defaultMuted ?? defaultMuted,
+                                              defaultAudioReactiveEffects: overrides.defaultAudioReactiveEffects ?? defaultAudioReactiveEffects,
+                                              defaultNoAutomute: overrides.defaultNoAutomute ?? defaultNoAutomute,
+                                              defaultDisableMouse: overrides.defaultDisableMouse ?? defaultDisableMouse,
+                                              defaultDisableParallax: overrides.defaultDisableParallax ?? defaultDisableParallax,
+                                              defaultNoFullscreenPause: defaultNoFullscreenPause,
+                                              defaultFullscreenPauseOnlyActive: defaultFullscreenPauseOnlyActive,
+                                              defaultScaling: defaultScaling,
+                                              screens: Quickshell.screens,
+                                              getScreenConfig: getScreenConfig,
+                                              normalizePath: normalizedPath,
+                                              wallpaperIdFromPath: wallpaperIdFromPath,
+                                              getWallpaperProperties: getWallpaperProperties
+                                            });
   }
 
   function resolveRuntimeOverrides(options = null) {
@@ -815,21 +813,21 @@ Item {
 
         if (path.length > 0) {
           parsed.push({
-            path: path,
-            name: name,
-            thumb: thumb,
-            motionPreview: motionPreview,
-            dynamic: dynamic,
-            hasEmbeddedAudio: hasEmbeddedAudio,
-            hasAudioReactive: hasAudioReactive,
-            id: id,
-            type: type,
-            resolution: resolution,
-            bytes: bytes,
-            mtime: mtime,
-            approved: approved,
-            description: description
-          });
+                        path: path,
+                        name: name,
+                        thumb: thumb,
+                        motionPreview: motionPreview,
+                        dynamic: dynamic,
+                        hasEmbeddedAudio: hasEmbeddedAudio,
+                        hasAudioReactive: hasAudioReactive,
+                        id: id,
+                        type: type,
+                        resolution: resolution,
+                        bytes: bytes,
+                        mtime: mtime,
+                        approved: approved,
+                        description: description
+                      });
         }
       }
 
@@ -838,11 +836,9 @@ Item {
       root.lastWallpaperScanAt = exitCode === 0 ? Date.now() : 0;
 
       if (root.wallpaperScanShowToast && exitCode === 0) {
-        ToastService.showNotice(
-          pluginApi?.tr("panel.title"),
-          pluginApi?.tr("toast.refreshedWallpapers", { count: parsed.length }),
-          "refresh"
-        );
+        ToastService.showNotice(pluginApi?.tr("panel.title"), pluginApi?.tr("toast.refreshedWallpapers", {
+                                                                              count: parsed.length
+                                                                            }), "refresh");
       }
       root.wallpaperScanShowToast = false;
 

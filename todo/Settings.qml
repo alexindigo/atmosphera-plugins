@@ -1,89 +1,70 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import "Pages.js" as Pages
 import qs.Commons
+import qs.Portals
 import qs.Services.UI
 import qs.Widgets
-import qs.Portals
-import "Pages.js" as Pages
 
 ColumnLayout {
   id: root
 
   property var pluginApi: null
-  readonly property bool sharedContent: pluginApi?.scopeKind === "plugin"
-  // Explicit shared-content commands only. Configuration Apply never gathers
-  // a rendered task/page snapshot into the native selected namespace.
-  property var contentIntents: ({})
-  property bool namesPending: false
-  function markContent(key) {
-    var next = Object.assign({}, contentIntents);
-    next[key] = true;
-    contentIntents = next;
-  }
-  function stageConfiguration(key, value) {
-    // Existing selected-page namespace only; no live runtime API or new writer.
-    pluginApi.pluginSettings[key] = value;
-  }
-  function stagePriorityColor(key, value) {
-    var next = Object.assign({}, pluginApi.pluginSettings.priorityColors);
-    next[key] = value.toString();
-    stageConfiguration("priorityColors", next);
-  }
   readonly property var initial: pluginApi?.initialSettings || ({})
-  readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property bool valueShowCompleted: root.initial.showCompleted ?? root.defaults.showCompleted ?? true
-    readonly property bool valueShowBackground: root.initial.showBackground ?? root.defaults.showBackground ?? true
-    readonly property bool valueUseCustomColors: root.initial.useCustomColors ?? root.defaults.useCustomColors ?? false
-    readonly property color valueHighPriorityColor: root.initial.priorityColors?.high || root.defaults.priorityColors?.high || AtmoColor.mError.toString()
-    readonly property color valueMediumPriorityColor: root.initial.priorityColors?.medium || root.defaults.priorityColors?.medium || AtmoColor.mPrimary.toString()
-    readonly property color valueLowPriorityColor: root.initial.priorityColors?.low || root.defaults.priorityColors?.low || AtmoColor.mOnSurfaceVariant.toString()
-    readonly property string valueExportPath: root.initial.exportPath ?? root.defaults.exportPath ?? "~/Documents"
-    readonly property string valueExportFormat: root.initial.exportFormat ?? root.defaults.exportFormat ?? "markdown"
-    readonly property bool valueExportEmptySections: root.initial.exportEmptySections ?? root.defaults.exportEmptySections ?? false
-    readonly property var editPages: root.initial.pages || [{id: 0, name: "General"}]
-    readonly property var editTodos: root.initial.todos || []
-    readonly property int editCurrentPage: root.initial.current_page_id ?? 0
-    readonly property var pendingNames: Pages.names(editPages)
-    readonly property string newPageName: ""
-  }
-  property var editPages: Pages.clone(displayBaseline.editPages)
-  property var editTodos: Pages.clone(displayBaseline.editTodos)
-  property int editCurrentPage: displayBaseline.editCurrentPage
-  property var pendingNames: Pages.clone(displayBaseline.pendingNames)
+  readonly property bool sharedContent: pluginApi?.scopeKind === "plugin"
+  readonly property var showCompletedField: pluginApi?.field("showCompleted")
+  readonly property var showBackgroundField: pluginApi?.field("showBackground")
+  readonly property var useCustomColorsField: pluginApi?.field("useCustomColors")
+  readonly property var priorityColorsField: pluginApi?.field("priorityColors")
+  readonly property var exportPathField: pluginApi?.field("exportPath")
+  readonly property var exportFormatField: pluginApi?.field("exportFormat")
+  readonly property var exportEmptySectionsField: pluginApi?.field("exportEmptySections")
+  readonly property var editPages: pluginApi?.pluginSettings.pages || []
+  readonly property var editTodos: pluginApi?.pluginSettings.todos || []
+  readonly property int editCurrentPage: pluginApi?.pluginSettings.current_page_id ?? 0
+  property var pendingNames: Pages.names(editPages)
+  property bool namesPending: false
   property string newPageName: ""
-  readonly property bool settingsDirty: displayBaseline.differs({valueShowCompleted: valueShowCompleted, valueShowBackground: valueShowBackground, valueUseCustomColors: valueUseCustomColors, valueHighPriorityColor: valueHighPriorityColor, valueMediumPriorityColor: valueMediumPriorityColor, valueLowPriorityColor: valueLowPriorityColor, valueExportPath: valueExportPath, valueExportFormat: valueExportFormat, valueExportEmptySections: valueExportEmptySections, editPages: editPages, editTodos: editTodos, editCurrentPage: editCurrentPage, pendingNames: pendingNames, newPageName: newPageName})
+  readonly property bool settingsDirty: namesPending || newPageName.length > 0
 
   function setPendingName(id, value) {
-    if (!sharedContent) return;
+    if (!sharedContent)
+      return;
+    var next = Object.assign({}, pendingNames);
+    next[String(id)] = value;
+    pendingNames = next;
     namesPending = true;
-    var next = Object.assign({}, pendingNames); next[String(id)] = value; pendingNames = next;
   }
   function renamePage(id, name) {
     name = name.trim();
     var index = editPages.findIndex(page => page.id === id);
-    if (!sharedContent || !name || !isPageNameUnique(name, index)) return false;
-    editPages = Pages.rename(editPages, id, name);
-    markContent("pages");
+    if (!sharedContent || !name || !isPageNameUnique(name, index))
+      return false;
+    if (!pluginApi.contentField("pages").set(Pages.rename(editPages, id, name)))
+      return false;
     setPendingName(id, name);
     return true;
   }
 
-  property bool valueShowCompleted: displayBaseline.valueShowCompleted
-  property bool valueShowBackground: displayBaseline.valueShowBackground
+  readonly property bool valueShowCompleted: showCompletedField?.value ?? false
+  readonly property bool valueShowBackground: showBackgroundField?.value ?? false
 
   // Priority color properties
-  property bool valueUseCustomColors: displayBaseline.valueUseCustomColors
-  property color valueHighPriorityColor: displayBaseline.valueHighPriorityColor
-  property color valueMediumPriorityColor: displayBaseline.valueMediumPriorityColor
-  property color valueLowPriorityColor: displayBaseline.valueLowPriorityColor
+  readonly property bool valueUseCustomColors: useCustomColorsField?.value ?? false
+  readonly property color valueHighPriorityColor: priorityColorsField?.value?.high || AtmoColor.mError
+  readonly property color valueMediumPriorityColor: priorityColorsField?.value?.medium || AtmoColor.mPrimary
+  readonly property color valueLowPriorityColor: priorityColorsField?.value?.low || AtmoColor.mOnSurfaceVariant
+  function setPriorityColor(key, color) {
+    var next = Object.assign({}, priorityColorsField.value);
+    next[key] = color.toString();
+    return priorityColorsField.set(next);
+  }
 
   // Export path property
-  property string valueExportPath: displayBaseline.valueExportPath
-  property string valueExportFormat: displayBaseline.valueExportFormat
-  property bool valueExportEmptySections: displayBaseline.valueExportEmptySections
+  readonly property string valueExportPath: exportPathField?.value ?? ""
+  readonly property string valueExportFormat: exportFormatField?.value ?? ""
+  readonly property bool valueExportEmptySections: exportEmptySectionsField?.value ?? false
 
   // Reference to Main.qml instance for centralized data management
   readonly property var mainInstance: pluginApi?.mainInstance
@@ -94,42 +75,49 @@ ColumnLayout {
     Logger.i("Todo", "Settings UI loaded");
   }
 
-  NToggle {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.show_completed.label")
-    description: pluginApi?.tr("settings.show_completed.description")
-    checked: root.valueShowCompleted
-    onToggled: function (checked) {
-      root.valueShowCompleted = checked;
-      root.stageConfiguration("showCompleted", checked);
+  NPluginSettingsField {
+    field: root.showCompletedField
+    NToggle {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.show_completed.label")
+      description: pluginApi?.tr("settings.show_completed.description")
+      checked: root.valueShowCompleted
+      onToggled: function (checked) {
+        root.showCompletedField.set(checked);
+      }
     }
   }
 
-  NToggle {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.background_color.label")
-    description: pluginApi?.tr("settings.background_color.description")
-    checked: root.valueShowBackground
-    onToggled: function (checked) {
-      root.valueShowBackground = checked;
-      root.stageConfiguration("showBackground", checked);
+  NPluginSettingsField {
+    field: root.showBackgroundField
+    NToggle {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.background_color.label")
+      description: pluginApi?.tr("settings.background_color.description")
+      checked: root.valueShowBackground
+      onToggled: function (checked) {
+        root.showBackgroundField.set(checked);
+      }
     }
   }
 
   // Toggle for custom priority colors
-  NToggle {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.custom_priority_colors.label")
-    description: pluginApi?.tr("settings.custom_priority_colors.description")
-    checked: root.valueUseCustomColors
-    onToggled: function (checked) {
-      root.valueUseCustomColors = checked;
-      root.stageConfiguration("useCustomColors", checked);
+  NPluginSettingsField {
+    field: root.useCustomColorsField
+    NToggle {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.custom_priority_colors.label")
+      description: pluginApi?.tr("settings.custom_priority_colors.description")
+      checked: root.valueUseCustomColors
+      onToggled: function (checked) {
+        root.useCustomColorsField.set(checked);
+      }
     }
   }
 
   // Section for priority color settings (only visible when custom colors are enabled)
-  ColumnLayout {
+  NPluginSettingsField {
+    field: root.priorityColorsField
     Layout.fillWidth: true
     spacing: Style.marginS
     visible: root.valueUseCustomColors
@@ -159,8 +147,7 @@ ColumnLayout {
         Layout.preferredHeight: Style.baseWidgetSize
         selectedColor: root.valueHighPriorityColor
         onColorSelected: function (color) {
-          root.valueHighPriorityColor = color;
-          root.stagePriorityColor("high", color);
+          root.setPriorityColor("high", color);
         }
       }
 
@@ -176,8 +163,7 @@ ColumnLayout {
         Layout.preferredHeight: Style.baseWidgetSize
         selectedColor: root.valueMediumPriorityColor
         onColorSelected: function (color) {
-          root.valueMediumPriorityColor = color;
-          root.stagePriorityColor("medium", color);
+          root.setPriorityColor("medium", color);
         }
       }
 
@@ -193,60 +179,63 @@ ColumnLayout {
         Layout.preferredHeight: Style.baseWidgetSize
         selectedColor: root.valueLowPriorityColor
         onColorSelected: function (color) {
-          root.valueLowPriorityColor = color;
-          root.stagePriorityColor("low", color);
+          root.setPriorityColor("low", color);
         }
       }
     }
   }
 
   // Export path setting
-  NTextInputButton {
-    Layout.fillWidth: true
-    label: pluginApi.tr("settings.export_path.label")
-    description: pluginApi.tr("settings.export_path.description")
-    placeholderText: pluginApi.tr("settings.export_path.placeholder")
-    text: root.valueExportPath
-    buttonIcon: "folder-open"
-    buttonTooltip: pluginApi.tr("settings.export_path.select_folder")
-    onInputEditCommitted: {
-      root.valueExportPath = text;
-      root.stageConfiguration("exportPath", text);
+  NPluginSettingsField {
+    field: root.exportPathField
+    NTextInputButton {
+      Layout.fillWidth: true
+      label: pluginApi.tr("settings.export_path.label")
+      description: pluginApi.tr("settings.export_path.description")
+      placeholderText: pluginApi.tr("settings.export_path.placeholder")
+      text: root.valueExportPath
+      buttonIcon: "folder-open"
+      buttonTooltip: pluginApi.tr("settings.export_path.select_folder")
+      onInputEditCommitted: root.exportPathField.set(text)
+      onButtonClicked: folderPicker.openFilePicker()
     }
-    onButtonClicked: folderPicker.openFilePicker()
   }
 
   // Export format setting
-  NComboBox {
-    Layout.fillWidth: true
-    label: pluginApi.tr("settings.export_format.label")
-    description: pluginApi.tr("settings.export_format.description")
-    model: [
-      {
-        key: "markdown",
-        name: pluginApi.tr("settings.export_format.markdown")
-      },
-      {
-        key: "json",
-        name: pluginApi.tr("settings.export_format.json")
+  NPluginSettingsField {
+    field: root.exportFormatField
+    NComboBox {
+      Layout.fillWidth: true
+      label: pluginApi.tr("settings.export_format.label")
+      description: pluginApi.tr("settings.export_format.description")
+      model: [
+        {
+          key: "markdown",
+          name: pluginApi.tr("settings.export_format.markdown")
+        },
+        {
+          key: "json",
+          name: pluginApi.tr("settings.export_format.json")
+        }
+      ]
+      currentKey: root.valueExportFormat
+      onSelected: function (key) {
+        root.exportFormatField.set(key);
       }
-    ]
-    currentKey: root.valueExportFormat
-    onSelected: function (key) {
-      root.valueExportFormat = key;
-      root.stageConfiguration("exportFormat", key);
     }
   }
 
   // Export empty sections setting
-  NToggle {
-    Layout.fillWidth: true
-    label: pluginApi.tr("settings.export_empty_sections.label")
-    description: pluginApi.tr("settings.export_empty_sections.description")
-    checked: root.valueExportEmptySections
-    onToggled: function (checked) {
-      root.valueExportEmptySections = checked;
-      root.stageConfiguration("exportEmptySections", checked);
+  NPluginSettingsField {
+    field: root.exportEmptySectionsField
+    NToggle {
+      Layout.fillWidth: true
+      label: pluginApi.tr("settings.export_empty_sections.label")
+      description: pluginApi.tr("settings.export_empty_sections.description")
+      checked: root.valueExportEmptySections
+      onToggled: function (checked) {
+        root.exportEmptySectionsField.set(checked);
+      }
     }
   }
 
@@ -258,8 +247,7 @@ ColumnLayout {
     initialPath: root.valueExportPath
     onAccepted: function (paths) {
       if (paths.length > 0) {
-        root.valueExportPath = paths[0];
-        root.stageConfiguration("exportPath", paths[0]);
+        root.exportPathField.set(paths[0]);
       }
     }
   }
@@ -269,11 +257,12 @@ ColumnLayout {
     visible: !root.sharedContent
     Layout.fillWidth: true
     wrapMode: Text.WordWrap
-    text: pluginApi?.tr("settings.pages.shared_scope")
+    text: pluginApi.tr("settings.pages.shared_scope")
   }
   ColumnLayout {
     Layout.fillWidth: true
     spacing: Style.marginS
+
     enabled: root.sharedContent
 
     NText {
@@ -487,7 +476,8 @@ ColumnLayout {
   }
 
   function addPage() {
-    if (!sharedContent) return;
+    if (!sharedContent)
+      return;
     var name = newPageName.trim();
 
     if (name === "") {
@@ -501,8 +491,8 @@ ColumnLayout {
     }
 
     // Use mainInstance to create page
-    editPages = Pages.create(editPages, name);
-    markContent("pages");
+    if (!pluginApi.contentField("pages").set(Pages.create(editPages, name)))
+      return;
     pendingNames = Pages.names(editPages, pendingNames);
 
     newPageName = "";
@@ -596,12 +586,9 @@ ColumnLayout {
 
     // Use mainInstance to delete page (handles todos migration and current_page_id update)
     var next = Pages.remove(editPages, editTodos, editCurrentPage, pageToDeleteId);
-    editPages = next.pages;
-    editTodos = next.todos;
-    editCurrentPage = next.current;
-    markContent("pages");
-    markContent("todos");
-    markContent("current_page_id");
+    pluginApi.contentField("pages").set(next.pages);
+    pluginApi.contentField("todos").set(next.todos);
+    pluginApi.contentField("current_page_id").set(next.current);
     pendingNames = Pages.names(editPages, pendingNames);
   }
 
@@ -612,17 +599,11 @@ ColumnLayout {
     }
 
     if (sharedContent && (namesPending || newPageName.length > 0)) {
-      editPages = Pages.withNames(editPages, pendingNames, newPageName);
+      if (!pluginApi.contentField("pages").set(Pages.withNames(editPages, pendingNames, newPageName)))
+        return false;
       pendingNames = Pages.names(editPages);
-      newPageName = "";
       namesPending = false;
-      markContent("pages");
-    }
-
-    if (sharedContent) {
-      if (contentIntents.pages) pluginApi.pluginSettings.pages = Pages.clone(editPages);
-      if (contentIntents.todos) pluginApi.pluginSettings.todos = Pages.clone(editTodos);
-      if (contentIntents.current_page_id) pluginApi.pluginSettings.current_page_id = editCurrentPage;
+      newPageName = "";
     }
 
     pluginApi.saveSettings();
@@ -632,10 +613,8 @@ ColumnLayout {
   Connections {
     target: root.pluginApi
     function onSettingsCompleted(result) {
-      if ((result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current") {
-        root.contentIntents = ({});
+      if ((result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
         Logger.i("Todo", "Settings saved successfully");
-      }
     }
   }
 }

@@ -6,65 +6,63 @@ import qs.Widgets
 ColumnLayout {
   id: root
 
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property string valueBridgeHost: cfg.bridgeHost ?? defaults.bridgeHost ?? "127.0.0.1"
-    readonly property int valueBridgePort: cfg.bridgePort ?? defaults.bridgePort ?? 19777
-    readonly property string valueStateFile: cfg.stateFile ?? defaults.stateFile ?? "~/.cache/noctalia-hermes/state.json"
-    readonly property string valueHermesHome: cfg.hermesHome ?? defaults.hermesHome ?? "~/.hermes"
-    readonly property string valueHermesCommand: cfg.hermesCommand ?? defaults.hermesCommand ?? "hermes"
-    readonly property bool valueAutoStartBridge: cfg.autoStartBridge ?? defaults.autoStartBridge ?? true
-    readonly property bool valueAutoStartGateway: cfg.autoStartGateway ?? defaults.autoStartGateway ?? true
-    readonly property bool valueClientOnlyMode: cfg.clientOnlyMode ?? defaults.clientOnlyMode ?? false
-    readonly property string valueBridgeTokenManual: cfg.bridgeTokenManual ?? defaults.bridgeTokenManual ?? ""
-    readonly property int valueStatusPollIntervalSec: cfg.statusPollIntervalSec ?? defaults.statusPollIntervalSec ?? 30
-    readonly property bool valueHideWhenIdle: cfg.hideWhenIdle ?? defaults.hideWhenIdle ?? false
-    readonly property string valueLauncherPrefix: cfg.launcherPrefix ?? defaults.launcherPrefix ?? ">hermes"
-    readonly property bool valuePanelPinned: cfg.panelPinned ?? defaults.panelPinned ?? false
-    readonly property bool valueShowToolActivity: cfg.showToolActivity ?? defaults.showToolActivity ?? false
-    readonly property string valueDefaultProvider: (detectedModel.provider || cfg.defaultProvider || defaults.defaultProvider || "")
-    readonly property string valueDefaultModel: (detectedModel.name || cfg.defaultModel || defaults.defaultModel || "")
-    ranges: [NSettingsRange { field: "valueBridgePort"; from: rangeValueBridgePort.from; to: rangeValueBridgePort.to }, NSettingsRange { field: "valueStatusPollIntervalSec"; from: rangeValueStatusPollIntervalSec.from; to: rangeValueStatusPollIntervalSec.to }]
-  }
-  readonly property bool settingsDirty: { return displayBaseline.differs({valueBridgeHost: root.valueBridgeHost, valueBridgePort: root.valueBridgePort, valueStateFile: root.valueStateFile, valueHermesHome: root.valueHermesHome, valueHermesCommand: root.valueHermesCommand, valueAutoStartBridge: root.valueAutoStartBridge, valueAutoStartGateway: root.valueAutoStartGateway, valueClientOnlyMode: root.valueClientOnlyMode, valueBridgeTokenManual: root.valueBridgeTokenManual, valueStatusPollIntervalSec: root.valueStatusPollIntervalSec, valueHideWhenIdle: root.valueHideWhenIdle, valueLauncherPrefix: root.valueLauncherPrefix, valuePanelPinned: root.valuePanelPinned, valueShowToolActivity: root.valueShowToolActivity, valueDefaultProvider: root.valueDefaultProvider, valueDefaultModel: root.valueDefaultModel}); }
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
   property bool _savePending: false
   property bool _trimModelPending: false
   Connections {
     target: root.pluginApi
     function onSettingsCompleted(result) {
-      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current")
+        return;
       root._savePending = false;
       var cfg = root.pluginApi.pluginSettings;
-      var trim = root._trimModelPending; root._trimModelPending = false;
+      var trim = root._trimModelPending;
+      root._trimModelPending = false;
       root.mainInstance?.setPinnedPanelRequested(cfg.panelPinned);
       root.mainInstance?.setModel(trim ? cfg.defaultProvider.trim() : cfg.defaultProvider, trim ? cfg.defaultModel.trim() : cfg.defaultModel, false);
     }
   }
 
   property var pluginApi: null
+  readonly property var bridgeHostField: pluginApi?.field("bridgeHost") ?? null
+  readonly property var bridgePortField: pluginApi?.field("bridgePort") ?? null
+  readonly property var stateFileField: pluginApi?.field("stateFile") ?? null
+  readonly property var hermesHomeField: pluginApi?.field("hermesHome") ?? null
+  readonly property var hermesCommandField: pluginApi?.field("hermesCommand") ?? null
+  readonly property var autoStartBridgeField: pluginApi?.field("autoStartBridge") ?? null
+  readonly property var autoStartGatewayField: pluginApi?.field("autoStartGateway") ?? null
+  readonly property var clientOnlyModeField: pluginApi?.field("clientOnlyMode") ?? null
+  readonly property var bridgeTokenManualField: pluginApi?.field("bridgeTokenManual") ?? null
+  readonly property var statusPollIntervalSecField: pluginApi?.field("statusPollIntervalSec") ?? null
+  readonly property var hideWhenIdleField: pluginApi?.field("hideWhenIdle") ?? null
+  readonly property var launcherPrefixField: pluginApi?.field("launcherPrefix") ?? null
+  readonly property var panelPinnedField: pluginApi?.field("panelPinned") ?? null
+  readonly property var showToolActivityField: pluginApi?.field("showToolActivity") ?? null
+  readonly property var defaultProviderField: pluginApi?.field("defaultProvider") ?? null
+  readonly property var defaultModelField: pluginApi?.field("defaultModel") ?? null
   property var cfg: pluginApi?.pluginSettings || ({})
-  property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
   readonly property var mainInstance: pluginApi?.mainInstance
   readonly property var summary: mainInstance?.state?.summary || ({})
   readonly property var detectedModel: summary.model || ({})
   readonly property var availableModels: summary.models || []
 
-  property string valueBridgeHost: displayBaseline.valueBridgeHost
-  property int valueBridgePort: displayBaseline.project("valueBridgePort")
-  property string valueStateFile: displayBaseline.valueStateFile
-  property string valueHermesHome: displayBaseline.valueHermesHome
-  property string valueHermesCommand: displayBaseline.valueHermesCommand
-  property bool valueAutoStartBridge: displayBaseline.valueAutoStartBridge
-  property bool valueAutoStartGateway: displayBaseline.valueAutoStartGateway
-  property bool valueClientOnlyMode: displayBaseline.valueClientOnlyMode
-  property string valueBridgeTokenManual: displayBaseline.valueBridgeTokenManual
-  property int valueStatusPollIntervalSec: displayBaseline.project("valueStatusPollIntervalSec")
-  property bool valueHideWhenIdle: displayBaseline.valueHideWhenIdle
-  property string valueLauncherPrefix: displayBaseline.valueLauncherPrefix
-  property bool valuePanelPinned: displayBaseline.valuePanelPinned
-  property bool valueShowToolActivity: displayBaseline.valueShowToolActivity
-  property string valueDefaultProvider: displayBaseline.valueDefaultProvider
-  property string valueDefaultModel: displayBaseline.valueDefaultModel
+  readonly property string valueBridgeHost: root.bridgeHostField?.value ?? "127.0.0.1"
+  readonly property int valueBridgePort: root.bridgePortField?.value ?? 19777
+  readonly property string valueStateFile: root.stateFileField?.value ?? "~/.cache/noctalia-hermes/state.json"
+  readonly property string valueHermesHome: root.hermesHomeField?.value ?? "~/.hermes"
+  readonly property string valueHermesCommand: root.hermesCommandField?.value ?? "hermes"
+  readonly property bool valueAutoStartBridge: root.autoStartBridgeField?.value ?? true
+  readonly property bool valueAutoStartGateway: root.autoStartGatewayField?.value ?? true
+  readonly property bool valueClientOnlyMode: root.clientOnlyModeField?.value ?? false
+  readonly property string valueBridgeTokenManual: root.bridgeTokenManualField?.value ?? ""
+  readonly property int valueStatusPollIntervalSec: root.statusPollIntervalSecField?.value ?? 30
+  readonly property bool valueHideWhenIdle: root.hideWhenIdleField?.value ?? false
+  readonly property string valueLauncherPrefix: root.launcherPrefixField?.value ?? ">hermes"
+  readonly property bool valuePanelPinned: root.panelPinnedField?.value ?? false
+  readonly property bool valueShowToolActivity: root.showToolActivityField?.value ?? false
+  readonly property string valueDefaultProvider: (detectedModel.provider || root.defaultProviderField?.value || "")
+  readonly property string valueDefaultModel: (detectedModel.name || root.defaultModelField?.value || "")
   readonly property string selectedModelKey: modelKey(valueDefaultProvider, valueDefaultModel)
   property bool showAdvanced: false
   property string testResult: ""
@@ -84,36 +82,44 @@ ColumnLayout {
     Layout.fillWidth: true
     spacing: Style.marginM
 
-    ColumnLayout {
-      Layout.fillWidth: true
-      spacing: Style.marginM
+    NPluginSettingsField {
+      field: root.defaultProviderField
+      NPluginSettingsField {
+        field: root.defaultModelField
+        ColumnLayout {
+          Layout.fillWidth: true
+          spacing: Style.marginM
 
-      NComboBox {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.providerSelect")
-        model: root.providerOptions()
-        currentKey: root.valueDefaultProvider
-        minimumWidth: 180
-        onSelected: function(key) {
-          root.valueDefaultProvider = key;
-          if (root.valueDefaultModel !== "" && root.findModel(root.valueDefaultProvider, root.valueDefaultModel) === null) {
-            var first = root.firstModelForProvider(key);
-            if (first) root.valueDefaultModel = first.model;
+          NComboBox {
+            Layout.fillWidth: true
+            label: pluginApi?.tr("settings.providerSelect")
+            model: root.providerOptions()
+            currentKey: root.valueDefaultProvider
+            minimumWidth: 180
+            onSelected: function (key) {
+              root.defaultProviderField.set(key);
+              if (root.valueDefaultModel !== "" && root.findModel(root.valueDefaultProvider, root.valueDefaultModel) === null) {
+                var first = root.firstModelForProvider(key);
+                if (first)
+                  root.defaultModelField.set(first.model);
+              }
+            }
           }
-        }
-      }
 
-      NComboBox {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.modelSelect")
-        model: root.modelOptions(root.valueDefaultProvider)
-        currentKey: root.selectedModelKey
-        minimumWidth: 320
-        onSelected: function(key) {
-          var item = root.findModelByKey(key);
-          if (!item) return;
-          root.valueDefaultProvider = item.provider || "";
-          root.valueDefaultModel = item.model || "";
+          NComboBox {
+            Layout.fillWidth: true
+            label: pluginApi?.tr("settings.modelSelect")
+            model: root.modelOptions(root.valueDefaultProvider)
+            currentKey: root.selectedModelKey
+            minimumWidth: 320
+            onSelected: function (key) {
+              var item = root.findModelByKey(key);
+              if (!item)
+                return;
+              root.defaultProviderField.set(item.provider || "");
+              root.defaultModelField.set(item.model || "");
+            }
+          }
         }
       }
     }
@@ -125,25 +131,34 @@ ColumnLayout {
       onClicked: root.applyModel()
     }
 
-    NToggle {
-      label: pluginApi?.tr("settings.hideWhenIdle")
-      description: pluginApi?.tr("settings.hideWhenIdleDescription")
-      checked: root.valueHideWhenIdle
-      onToggled: root.valueHideWhenIdle = checked
+    NPluginSettingsField {
+      field: root.hideWhenIdleField
+      NToggle {
+        label: pluginApi?.tr("settings.hideWhenIdle")
+        description: pluginApi?.tr("settings.hideWhenIdleDescription")
+        checked: root.valueHideWhenIdle
+        onToggled: checked => root.hideWhenIdleField.set(checked)
+      }
     }
 
-    NToggle {
-      label: pluginApi?.tr("settings.panelPinned")
-      description: pluginApi?.tr("settings.panelPinnedDescription")
-      checked: root.valuePanelPinned
-      onToggled: root.valuePanelPinned = checked
+    NPluginSettingsField {
+      field: root.panelPinnedField
+      NToggle {
+        label: pluginApi?.tr("settings.panelPinned")
+        description: pluginApi?.tr("settings.panelPinnedDescription")
+        checked: root.valuePanelPinned
+        onToggled: checked => root.panelPinnedField.set(checked)
+      }
     }
 
-    NToggle {
-      label: pluginApi?.tr("settings.showToolActivity")
-      description: pluginApi?.tr("settings.showToolActivityDescription")
-      checked: root.valueShowToolActivity
-      onToggled: root.valueShowToolActivity = checked
+    NPluginSettingsField {
+      field: root.showToolActivityField
+      NToggle {
+        label: pluginApi?.tr("settings.showToolActivity")
+        description: pluginApi?.tr("settings.showToolActivityDescription")
+        checked: root.valueShowToolActivity
+        onToggled: checked => root.showToolActivityField.set(checked)
+      }
     }
 
     NButton {
@@ -158,23 +173,30 @@ ColumnLayout {
       spacing: Style.marginM
       visible: root.showAdvanced
 
-      NToggle {
-        label: pluginApi?.tr("settings.clientOnlyMode")
-        description: pluginApi?.tr("settings.clientOnlyModeDescription")
-        checked: root.valueClientOnlyMode
-        onToggled: root.valueClientOnlyMode = checked
+      NPluginSettingsField {
+        field: root.clientOnlyModeField
+        NToggle {
+          label: pluginApi?.tr("settings.clientOnlyMode")
+          description: pluginApi?.tr("settings.clientOnlyModeDescription")
+          checked: root.valueClientOnlyMode
+          onToggled: checked => root.clientOnlyModeField.set(checked)
+        }
       }
 
-      NTextInput {
-        Layout.fillWidth: true
+      NPluginSettingsField {
+        field: root.bridgeTokenManualField
         visible: root.valueClientOnlyMode
-        label: pluginApi?.tr("settings.bridgeToken")
-        description: pluginApi?.tr("settings.bridgeTokenDescription")
-        text: root.valueBridgeTokenManual
-        onTextChanged: {
-          // Guard: only update when visible. Some QML components clear text
-          // when hidden, which would wipe the saved token on toggle OFF.
-          if (root.valueClientOnlyMode) root.valueBridgeTokenManual = text;
+        NTextInput {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.bridgeToken")
+          description: pluginApi?.tr("settings.bridgeTokenDescription")
+          text: root.valueBridgeTokenManual
+          onEditCommitted: {
+            // Guard: only update when visible. Some QML components clear text
+            // when hidden, which would wipe the saved token on toggle OFF.
+            if (root.valueClientOnlyMode)
+              root.bridgeTokenManualField.set(text);
+          }
         }
       }
 
@@ -194,11 +216,14 @@ ColumnLayout {
         }
       }
 
-      NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.bridgeHost")
-        text: root.valueBridgeHost
-        onTextChanged: root.valueBridgeHost = text
+      NPluginSettingsField {
+        field: root.bridgeHostField
+        NTextInput {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.bridgeHost")
+          text: root.valueBridgeHost
+          onEditCommitted: root.bridgeHostField.set(text)
+        }
       }
 
       RowLayout {
@@ -216,14 +241,17 @@ ColumnLayout {
             color: AtmoColor.mOnSurface
           }
 
-          NSpinBox {
-            id: rangeValueBridgePort
-            objectName: "settings-range-valueBridgePort"
-            from: 1024
-            to: 65535
-            value: root.valueBridgePort
-            stepSize: 1
-            onValueModified: value => root.valueBridgePort = value
+          NPluginSettingsField {
+            field: root.bridgePortField
+            NSpinBox {
+              id: rangeValueBridgePort
+              objectName: "settings-range-valueBridgePort"
+              from: 1024
+              to: 65535
+              value: root.valueBridgePort
+              stepSize: 1
+              onValueModified: value => root.bridgePortField.set(value)
+            }
           }
         }
 
@@ -238,44 +266,59 @@ ColumnLayout {
             color: AtmoColor.mOnSurface
           }
 
-          NSpinBox {
-            id: rangeValueStatusPollIntervalSec
-            objectName: "settings-range-valueStatusPollIntervalSec"
-            from: 5
-            to: 300
-            value: root.valueStatusPollIntervalSec
-            stepSize: 5
-            onValueModified: value => root.valueStatusPollIntervalSec = value
+          NPluginSettingsField {
+            field: root.statusPollIntervalSecField
+            NSpinBox {
+              id: rangeValueStatusPollIntervalSec
+              objectName: "settings-range-valueStatusPollIntervalSec"
+              from: 5
+              to: 300
+              value: root.valueStatusPollIntervalSec
+              stepSize: 5
+              onValueModified: value => root.statusPollIntervalSecField.set(value)
+            }
           }
         }
       }
 
-      NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.stateFile")
-        text: root.valueStateFile
-        onTextChanged: root.valueStateFile = text
+      NPluginSettingsField {
+        field: root.stateFileField
+        NTextInput {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.stateFile")
+          text: root.valueStateFile
+          onEditCommitted: root.stateFileField.set(text)
+        }
       }
 
-      NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.hermesHome")
-        text: root.valueHermesHome
-        onTextChanged: root.valueHermesHome = text
+      NPluginSettingsField {
+        field: root.hermesHomeField
+        NTextInput {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.hermesHome")
+          text: root.valueHermesHome
+          onEditCommitted: root.hermesHomeField.set(text)
+        }
       }
 
-      NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.hermesCommand")
-        text: root.valueHermesCommand
-        onTextChanged: root.valueHermesCommand = text
+      NPluginSettingsField {
+        field: root.hermesCommandField
+        NTextInput {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.hermesCommand")
+          text: root.valueHermesCommand
+          onEditCommitted: root.hermesCommandField.set(text)
+        }
       }
 
-      NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.launcherPrefix")
-        text: root.valueLauncherPrefix
-        onTextChanged: root.valueLauncherPrefix = text
+      NPluginSettingsField {
+        field: root.launcherPrefixField
+        NTextInput {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.launcherPrefix")
+          text: root.valueLauncherPrefix
+          onEditCommitted: root.launcherPrefixField.set(text)
+        }
       }
 
       RowLayout {
@@ -286,60 +329,51 @@ ColumnLayout {
           Layout.fillWidth: true
           label: pluginApi?.tr("settings.defaultProvider")
           text: root.valueDefaultProvider
-          onTextChanged: root.valueDefaultProvider = text
+          onEditCommitted: root.defaultProviderField.set(text)
         }
 
         NTextInput {
           Layout.fillWidth: true
           label: pluginApi?.tr("settings.defaultModel")
           text: root.valueDefaultModel
-          onTextChanged: root.valueDefaultModel = text
+          onEditCommitted: root.defaultModelField.set(text)
         }
       }
 
-      NToggle {
-        label: pluginApi?.tr("settings.autoStartBridge")
-        description: pluginApi?.tr("settings.autoStartBridgeDescription")
+      NPluginSettingsField {
+        field: root.autoStartBridgeField
         visible: !root.valueClientOnlyMode
-        checked: root.valueAutoStartBridge
-        onToggled: root.valueAutoStartBridge = checked
+        NToggle {
+          label: pluginApi?.tr("settings.autoStartBridge")
+          description: pluginApi?.tr("settings.autoStartBridgeDescription")
+          checked: root.valueAutoStartBridge
+          onToggled: checked => root.autoStartBridgeField.set(checked)
+        }
       }
 
-      NToggle {
-        label: pluginApi?.tr("settings.autoStartGateway")
-        description: pluginApi?.tr("settings.autoStartGatewayDescription")
+      NPluginSettingsField {
+        field: root.autoStartGatewayField
         visible: !root.valueClientOnlyMode
-        checked: root.valueAutoStartGateway
-        onToggled: root.valueAutoStartGateway = checked
+        NToggle {
+          label: pluginApi?.tr("settings.autoStartGateway")
+          description: pluginApi?.tr("settings.autoStartGatewayDescription")
+          checked: root.valueAutoStartGateway
+          onToggled: checked => root.autoStartGatewayField.set(checked)
+        }
       }
     }
   }
 
   function applyModel() {
     root._trimModelPending = true;
-    root.saveSettings();
   }
 
   function saveSettings() {
-    if (!pluginApi) return;
+    if (!pluginApi)
+      return;
     Logger.i("hermes-agent", "saveSettings: tokenManual len:", root.valueBridgeTokenManual.length, "clientOnlyMode:", root.valueClientOnlyMode);
-    pluginApi.pluginSettings.bridgeHost = root.valueBridgeHost;
-    pluginApi.pluginSettings.bridgePort = root.valueBridgePort;
-    pluginApi.pluginSettings.stateFile = root.valueStateFile;
-    pluginApi.pluginSettings.hermesHome = root.valueHermesHome;
-    pluginApi.pluginSettings.hermesCommand = root.valueHermesCommand;
-    pluginApi.pluginSettings.autoStartBridge = root.valueAutoStartBridge;
-    pluginApi.pluginSettings.autoStartGateway = root.valueAutoStartGateway;
-    pluginApi.pluginSettings.clientOnlyMode = root.valueClientOnlyMode;
-    pluginApi.pluginSettings.bridgeTokenManual = root.valueBridgeTokenManual;
-    pluginApi.pluginSettings.statusPollIntervalSec = root.valueStatusPollIntervalSec;
-    pluginApi.pluginSettings.hideWhenIdle = root.valueHideWhenIdle;
-    pluginApi.pluginSettings.launcherPrefix = root.valueLauncherPrefix;
-    pluginApi.pluginSettings.panelPinned = root.valuePanelPinned;
-    pluginApi.pluginSettings.showToolActivity = root.valueShowToolActivity;
-    pluginApi.pluginSettings.defaultProvider = root.valueDefaultProvider;
-    pluginApi.pluginSettings.defaultModel = root.valueDefaultModel;
-    if (pluginApi.saveSettings() !== false) root._savePending = true;
+    if (pluginApi.saveSettings() !== false)
+      root._savePending = true;
   }
 
   function testConnection() {
@@ -350,8 +384,9 @@ ColumnLayout {
     var token = root.valueBridgeTokenManual;
     var url = "http://" + host + ":" + port + "/health";
     var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState !== XMLHttpRequest.DONE) return;
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== XMLHttpRequest.DONE)
+        return;
       if (xhr.status === 0) {
         root.testResult = pluginApi?.tr("settings.testFailedUnreachable");
         root.testResultColor = AtmoColor.mError;
@@ -367,7 +402,8 @@ ColumnLayout {
       }
     };
     xhr.open("GET", url);
-    if (token) xhr.setRequestHeader("X-Bridge-Token", token);
+    if (token)
+      xhr.setRequestHeader("X-Bridge-Token", token);
     xhr.send();
   }
 
@@ -377,15 +413,27 @@ ColumnLayout {
 
   function providerOptions() {
     var seen = {};
-    var items = [{ "key": "", "name": pluginApi?.tr("settings.providerCurrent") }];
+    var items = [
+          {
+            "key": "",
+            "name": pluginApi?.tr("settings.providerCurrent")
+          }
+        ];
     for (var i = 0; i < root.availableModels.length; i++) {
       var provider = root.availableModels[i].provider || "";
-      if (provider === "" || seen[provider]) continue;
+      if (provider === "" || seen[provider])
+        continue;
       seen[provider] = true;
-      items.push({ "key": provider, "name": provider });
+      items.push({
+                   "key": provider,
+                   "name": provider
+                 });
     }
     if (root.valueDefaultProvider !== "" && !seen[root.valueDefaultProvider]) {
-      items.push({ "key": root.valueDefaultProvider, "name": root.valueDefaultProvider });
+      items.push({
+                   "key": root.valueDefaultProvider,
+                   "name": root.valueDefaultProvider
+                 });
     }
     return items;
   }
@@ -394,17 +442,18 @@ ColumnLayout {
     var items = [];
     for (var i = 0; i < root.availableModels.length; i++) {
       var item = root.availableModels[i];
-      if (provider !== "" && item.provider !== provider) continue;
+      if (provider !== "" && item.provider !== provider)
+        continue;
       items.push({
-        "key": root.modelKey(item.provider || "", item.model || ""),
-        "name": item.name || item.model || ""
-      });
+                   "key": root.modelKey(item.provider || "", item.model || ""),
+                   "name": item.name || item.model || ""
+                 });
     }
     if (root.valueDefaultModel !== "" && root.findModel(root.valueDefaultProvider, root.valueDefaultModel) === null) {
       items.unshift({
-        "key": root.selectedModelKey,
-        "name": root.valueDefaultModel + (root.valueDefaultProvider ? " (" + root.valueDefaultProvider + ")" : "")
-      });
+                      "key": root.selectedModelKey,
+                      "name": root.valueDefaultModel + (root.valueDefaultProvider ? " (" + root.valueDefaultProvider + ")" : "")
+                    });
     }
     return items;
   }
@@ -412,7 +461,8 @@ ColumnLayout {
   function findModel(provider, model) {
     for (var i = 0; i < root.availableModels.length; i++) {
       var item = root.availableModels[i];
-      if ((item.provider || "") === (provider || "") && (item.model || "") === (model || "")) return item;
+      if ((item.provider || "") === (provider || "") && (item.model || "") === (model || ""))
+        return item;
     }
     return null;
   }
@@ -420,7 +470,8 @@ ColumnLayout {
   function findModelByKey(key) {
     for (var i = 0; i < root.availableModels.length; i++) {
       var item = root.availableModels[i];
-      if (root.modelKey(item.provider || "", item.model || "") === key) return item;
+      if (root.modelKey(item.provider || "", item.model || "") === key)
+        return item;
     }
     return null;
   }
@@ -428,7 +479,8 @@ ColumnLayout {
   function firstModelForProvider(provider) {
     for (var i = 0; i < root.availableModels.length; i++) {
       var item = root.availableModels[i];
-      if (provider === "" || item.provider === provider) return item;
+      if (provider === "" || item.provider === provider)
+        return item;
     }
     return null;
   }

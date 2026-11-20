@@ -1,7 +1,7 @@
 {
   "id": "arch-updater",
   "name": "Arch Updater",
-  "version": "2.1.15",
+  "version": "2.1.16",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "Ast",

@@ -4,40 +4,40 @@ import qs.Commons
 import qs.Widgets
 
 ColumnLayout {
-    id: root
+  id: root
 
-    property var pluginApi: null
+  property var pluginApi: null
+  readonly property var modeField: pluginApi?.field("mode") ?? null
 
-    property string editMode: displayBaseline.editMode
-    NSettingsBaseline {
-        id: displayBaseline
-        readonly property string editMode: pluginApi?.pluginSettings?.mode || pluginApi?.manifest?.metadata?.defaultSettings?.mode || "region"
-    }
-    readonly property bool settingsDirty: displayBaseline.differs({editMode: root.editMode})
-    spacing: Style.marginM
+  readonly property string editMode: root.modeField?.value || "region"
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
+  NPluginSettingsField {
+    field: root.modeField
     NComboBox {
-        label: pluginApi?.tr("settings.mode.label")
-        description: pluginApi?.tr("settings.mode.description")
-        model: [
-            {
-                "key": "region",
-                "name": pluginApi?.tr("settings.mode.region")
-            },
-            {
-                "key": "screen",
-                "name": pluginApi?.tr("settings.mode.screen")
-            }
-        ]
-        currentKey: root.editMode
-        onSelected: key => root.editMode = key
-        defaultValue: pluginApi?.manifest?.metadata?.defaultSettings?.mode || "region"
+      label: pluginApi?.tr("settings.mode.label")
+      description: pluginApi?.tr("settings.mode.description")
+      model: [
+        {
+          "key": "region",
+          "name": pluginApi?.tr("settings.mode.region")
+        },
+        {
+          "key": "screen",
+          "name": pluginApi?.tr("settings.mode.screen")
+        }
+      ]
+      currentKey: root.editMode
+      onSelected: key => root.modeField.set(key)
+      defaultValue: pluginApi?.manifest?.metadata?.defaultSettings?.mode || "region"
     }
+  }
 
-    function saveSettings() {
-        if (!pluginApi) return;
+  function saveSettings() {
+    if (!pluginApi)
+      return;
 
-        pluginApi.pluginSettings.mode = root.editMode;
-        pluginApi.saveSettings();
-    }
+    pluginApi.saveSettings();
+  }
 }

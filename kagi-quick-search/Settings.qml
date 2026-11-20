@@ -7,8 +7,10 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
-  property string editToken: displayBaseline.editToken
-  property int editDebounce: displayBaseline.project("editDebounce")
+  readonly property var kagiSessionTokenField: pluginApi?.field("kagiSessionToken") ?? null
+  readonly property var debounceMsField: pluginApi?.field("debounceMs") ?? null
+  readonly property string editToken: root.kagiSessionTokenField?.value ?? ""
+  readonly property int editDebounce: root.debounceMsField?.value ?? 500
 
   spacing: Style.marginM
 
@@ -20,11 +22,14 @@ ColumnLayout {
     Layout.fillWidth: true
     spacing: Style.marginS
 
-    NTextInput {
-      Layout.fillWidth: true
-      label: "Kagi Session Token (Required)"
-      text: root.editToken
-      onTextChanged: root.editToken = text
+    NPluginSettingsField {
+      field: root.kagiSessionTokenField
+      NTextInput {
+        Layout.fillWidth: true
+        label: "Kagi Session Token (Required)"
+        text: root.editToken
+        onEditCommitted: root.kagiSessionTokenField.set(text.trim())
+      }
     }
 
     Text {
@@ -33,48 +38,42 @@ ColumnLayout {
       font.pointSize: Style.fontSizeS
       textFormat: Text.MarkdownText
     }
-    
+
     NLabel {
-        label: "Debounce"
-        description: "How long it'll take to search your query in milliseconds"
+      label: "Debounce"
+      description: "How long it'll take to search your query in milliseconds"
     }
 
-    NSlider {
-      objectName: "settings-range-editDebounce"
+    NPluginSettingsField {
+      field: root.debounceMsField
+      NSlider {
         id: debounceSlider
+        objectName: "settings-range-editDebounce"
         from: 300
         to: 1500
         value: root.editDebounce
         stepSize: 100
-        onValueChanged: {
-            root.editDebounce = value
+        onMoved: {
+          root.debounceMsField.set(value);
         }
+      }
     }
-    
+
     Text {
-        text: `${root.editDebounce}ms`
-        color: AtmoColor.mOnSurfaceVariant
-        font.pointSize: Style.fontSizeS
+      text: `${root.editDebounce}ms`
+      color: AtmoColor.mOnSurfaceVariant
+      font.pointSize: Style.fontSizeS
     }
-
   }
 
-  NSettingsBaseline {
-    ranges: [NSettingsRange { field: "editDebounce"; from: debounceSlider.from; to: debounceSlider.to }]
-    id: displayBaseline
-    readonly property string editToken: pluginApi.pluginSettings.kagiSessionToken ?? ""
-    readonly property int editDebounce: pluginApi.pluginSettings.debounceMs ?? 500
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({editToken: root.editToken, editDebounce: root.editDebounce})
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   function saveSettings() {
     if (!pluginApi) {
       Logger.e("Kagi", "Cannot save settings: pluginApi is null");
       return;
     }
-    root.editToken = root.editToken.trim();
-    pluginApi.pluginSettings.kagiSessionToken = root.editToken;
-    pluginApi.pluginSettings.debounceMs = root.editDebounce;
     pluginApi.saveSettings(function (result) {
       if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
         Logger.i("Kagi", "Settings saved successfully");

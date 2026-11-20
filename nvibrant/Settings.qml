@@ -6,23 +6,15 @@ import qs.Widgets
 ColumnLayout {
   id: root
   property var pluginApi: null
-
-  readonly property var cfg: pluginApi?.pluginSettings ?? ({})
-  readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings ?? ({})
-
-  property alias editVibranceValue: vibranceSpinBox.value
-  property alias editDisplayIndex: displayIndexSpinBox.value
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property int editVibranceValue: root.cfg.vibranceValue ?? root.defaults.vibranceValue ?? 512
-    readonly property int editDisplayIndex: root.cfg.displayIndex ?? root.defaults.displayIndex ?? 1
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({editVibranceValue: root.editVibranceValue, editDisplayIndex: root.editDisplayIndex})
+  readonly property var vibranceValueField: pluginApi?.field("vibranceValue") ?? null
+  readonly property var displayIndexField: pluginApi?.field("displayIndex") ?? null
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   spacing: Style.marginM
 
-  ColumnLayout {
-    Layout.fillWidth: true
+  NPluginSettingsField {
+    field: root.vibranceValueField
     spacing: Style.marginS
 
     NLabel {
@@ -35,7 +27,8 @@ ColumnLayout {
       from: 0
       to: 1023
       stepSize: 64
-      value: displayBaseline.editVibranceValue
+      value: root.vibranceValueField?.value ?? 512
+      onValueModified: value => root.vibranceValueField.set(value)
     }
   }
 
@@ -45,8 +38,8 @@ ColumnLayout {
     Layout.bottomMargin: Style.marginM
   }
 
-  ColumnLayout {
-    Layout.fillWidth: true
+  NPluginSettingsField {
+    field: root.displayIndexField
     spacing: Style.marginS
 
     NLabel {
@@ -59,14 +52,15 @@ ColumnLayout {
       from: 1
       to: 8
       stepSize: 1
-      value: displayBaseline.editDisplayIndex
+      value: root.displayIndexField?.value ?? 1
+      onValueModified: value => root.displayIndexField.set(value)
     }
   }
 
+  // Completion observer only; native publication belongs to the session.
   function saveSettings() {
-    if (!pluginApi) return
-    pluginApi.pluginSettings.vibranceValue = vibranceSpinBox.value
-    pluginApi.pluginSettings.displayIndex  = displayIndexSpinBox.value
-    pluginApi.saveSettings()
+    if (!pluginApi)
+      return;
+    pluginApi.saveSettings();
   }
 }

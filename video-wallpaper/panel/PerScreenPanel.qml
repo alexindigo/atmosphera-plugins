@@ -34,14 +34,14 @@ ColumnLayout {
     /***************************
     * FUNCTIONS
     ***************************/
-    function saveMonitorProperty(key: string, value: var): void {
+    function saveMonitorProperty(key: string, value: var): bool {
         if(pluginApi == null) {
             Logger.e("video-wallpaper", "PluginAPI is null.");
-            return;
+            return false;
         }
 
         var names = monitorSpecific ? [screenName] : Array.from(Quickshell.screens).map(screen => screen.name);
-        if (names.length) monitorCommand.submit(names.map(name => ({op: "set", screen: name, field: key, value: value})));
+        return names.length > 0 && monitorCommand.submit(names.map(name => ({op: "set", screen: name, field: key, value: value})));
     }
 
 
@@ -148,5 +148,8 @@ ColumnLayout {
     ToolRow {
         pluginApi:       root.pluginApi
         screenName:      root.screenName
+        settingWriter: (key, value) => {
+            if (root.saveMonitorProperty(key, value)) root.pluginApi.saveSettings();
+        }
     }
 }

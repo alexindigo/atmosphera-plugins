@@ -23,94 +23,111 @@ import qs.Widgets
 // properties until the user clicks Apply; saveSettings() flushes them into
 // pluginApi.pluginSettings and calls pluginApi.saveSettings().
 ColumnLayout {
-    id: root
-    spacing: Style.marginM
+  id: root
+  spacing: Style.marginM
 
-    // Injected by the shell after instantiation. Always null-guard every
-    // access with optional chaining (?.) — per docs/specs/plugin-qml-idioms.md.
-    property var pluginApi: null
+  // Injected by the shell after instantiation. Always null-guard every
+  // access with optional chaining (?.) — per docs/specs/plugin-qml-idioms.md.
+  property var pluginApi: null
+  readonly property var maxHistorySizeField: pluginApi?.field("maxHistorySize") ?? null
+  readonly property var showImagePreviewsField: pluginApi?.field("showImagePreviews") ?? null
+  readonly property var densityField: pluginApi?.field("density") ?? null
 
-    // --- Pending state ------------------------------------------------------
-    //
-    // Local buffer. UI controls bind to and mutate these properties; they
-    // are flushed into pluginApi.pluginSettings only when the user clicks
-    // Apply. The ?? fallbacks MUST match manifest.json metadata.defaultSettings
-    // exactly — drift between the two is a real bug (a plugin instance that
-    // predates a defaults change falls back to the QML literal here, not
-    // the manifest value).
-    property int valueMaxHistorySize: displayBaseline.valueMaxHistorySize
-    property bool valueShowImagePreviews: displayBaseline.valueShowImagePreviews
-    property string valueDensity: displayBaseline.valueDensity
+  // --- Pending state ------------------------------------------------------
+  //
+  // Local buffer. UI controls bind to and mutate these properties; they
+  // are flushed into pluginApi.pluginSettings only when the user clicks
+  // Apply. The ?? fallbacks MUST match manifest.json metadata.defaultSettings
+  // exactly — drift between the two is a real bug (a plugin instance that
+  // predates a defaults change falls back to the QML literal here, not
+  // the manifest value).
+  readonly property int valueMaxHistorySize: root.maxHistorySizeField?.value ?? 100
+  readonly property bool valueShowImagePreviews: root.showImagePreviewsField?.value ?? true
+  readonly property string valueDensity: root.densityField?.value ?? "comfortable"
 
-    // --- Controls -----------------------------------------------------------
+  // --- Controls -----------------------------------------------------------
 
-    // maxHistorySize — number of cliphist entries kept in the list.
-    // Takes effect on the next refresh (Main.qml's refresh() reads
-    // pluginSettings.maxHistorySize on every call, so no explicit signal
-    // is needed — see docs/specs/settings-panel.md §Constraints).
+  // maxHistorySize — number of cliphist entries kept in the list.
+  // Takes effect on the next refresh (Main.qml's refresh() reads
+  // pluginSettings.maxHistorySize on every call, so no explicit signal
+  // is needed — see docs/specs/settings-panel.md §Constraints).
+  NPluginSettingsField {
+    field: root.maxHistorySizeField
     NSpinBox {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.max-history-size")
-        description: pluginApi?.tr("settings.max-history-size-description")
-        from: 20
-        to: 500
-        stepSize: 10
-        value: root.valueMaxHistorySize
-        onValueChanged: root.valueMaxHistorySize = value
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.max-history-size")
+      description: pluginApi?.tr("settings.max-history-size-description")
+      from: 20
+      to: 500
+      stepSize: 10
+      value: root.valueMaxHistorySize
+      onValueModified: value => root.maxHistorySizeField.set(value)
     }
+  }
 
-    // showImagePreviews — guards the whole image-decode path in Main.qml
-    // (getImage() short-circuits when this is false — see Main.qml).
+  // showImagePreviews — guards the whole image-decode path in Main.qml
+  // (getImage() short-circuits when this is false — see Main.qml).
+  NPluginSettingsField {
+    field: root.showImagePreviewsField
     NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.show-image-previews")
-        description: pluginApi?.tr("settings.show-image-previews-description")
-        checked: root.valueShowImagePreviews
-        onToggled: checked => { root.valueShowImagePreviews = checked; }
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.show-image-previews")
+      description: pluginApi?.tr("settings.show-image-previews-description")
+      checked: root.valueShowImagePreviews
+      onToggled: checked => {
+        root.showImagePreviewsField.set(checked);
+      }
     }
+  }
 
-    // density — enum of "compact" / "comfortable" / "spacious". The
-    // NComboBox model uses { key, name } entries; we bind selection through
-    // currentKey so the stored value is the enum string itself (matching
-    // manifest.json's "comfortable" default) rather than a numeric index.
+  // density — enum of "compact" / "comfortable" / "spacious". The
+  // NComboBox model uses { key, name } entries; we bind selection through
+  // currentKey so the stored value is the enum string itself (matching
+  // manifest.json's "comfortable" default) rather than a numeric index.
+  NPluginSettingsField {
+    field: root.densityField
     NComboBox {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.density")
-        description: pluginApi?.tr("settings.density-description")
-        model: [
-            { "key": "compact",     "name": pluginApi?.tr("settings.density-compact") },
-            { "key": "comfortable", "name": pluginApi?.tr("settings.density-comfortable") },
-            { "key": "spacious",    "name": pluginApi?.tr("settings.density-spacious") }
-        ]
-        currentKey: root.valueDensity
-        onSelected: key => { root.valueDensity = key; }
-    }
-
-    // --- Save contract ------------------------------------------------------
-    //
-    // Called by the shell when the user clicks the global "Apply" button in
-    // the Noctalia Settings dialog. Flushes pending values into
-    // pluginApi.pluginSettings, then calls pluginApi.saveSettings() which
-    // persists settings.json to ~/.config/noctalia/plugins/clipboard/.
-    //
-    // Null-guard matches the idiom used in every other entry point — if the
-    // shell calls saveSettings() before injecting pluginApi (edge case on
-    // rapid open/close), silently return rather than throwing.
-    NSettingsBaseline {
-      id: displayBaseline
-      readonly property int valueMaxHistorySize: pluginApi?.pluginSettings?.maxHistorySize ?? 100
-      readonly property bool valueShowImagePreviews: pluginApi?.pluginSettings?.showImagePreviews ?? true
-      readonly property string valueDensity: pluginApi?.pluginSettings?.density ?? "comfortable"
-    }
-    readonly property bool settingsDirty: displayBaseline.differs({valueMaxHistorySize: root.valueMaxHistorySize, valueShowImagePreviews: root.valueShowImagePreviews, valueDensity: root.valueDensity})
-
-    function saveSettings() {
-        if (!pluginApi) {
-            return;
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.density")
+      description: pluginApi?.tr("settings.density-description")
+      model: [
+        {
+          "key": "compact",
+          "name": pluginApi?.tr("settings.density-compact")
+        },
+        {
+          "key": "comfortable",
+          "name": pluginApi?.tr("settings.density-comfortable")
+        },
+        {
+          "key": "spacious",
+          "name": pluginApi?.tr("settings.density-spacious")
         }
-        pluginApi.pluginSettings.maxHistorySize = root.valueMaxHistorySize;
-        pluginApi.pluginSettings.showImagePreviews = root.valueShowImagePreviews;
-        pluginApi.pluginSettings.density = root.valueDensity;
-        pluginApi.saveSettings();
+      ]
+      currentKey: root.valueDensity
+      onSelected: key => {
+        root.densityField.set(key);
+      }
     }
+  }
+
+  // --- Save contract ------------------------------------------------------
+  //
+  // Called by the shell when the user clicks the global "Apply" button in
+  // the Noctalia Settings dialog. Flushes pending values into
+  // pluginApi.pluginSettings, then calls pluginApi.saveSettings() which
+  // persists settings.json to ~/.config/noctalia/plugins/clipboard/.
+  //
+  // Null-guard matches the idiom used in every other entry point — if the
+  // shell calls saveSettings() before injecting pluginApi (edge case on
+  // rapid open/close), silently return rather than throwing.
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
+
+  function saveSettings() {
+    if (!pluginApi) {
+      return;
+    }
+    pluginApi.saveSettings();
+  }
 }

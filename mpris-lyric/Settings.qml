@@ -8,55 +8,49 @@ ColumnLayout {
   spacing: Style.marginL
 
   property var pluginApi: null
+  readonly property var playerNameField: pluginApi?.field("playerName") ?? null
+  readonly property var updateIntervalField: pluginApi?.field("updateInterval") ?? null
+  readonly property var widthField: pluginApi?.field("width") ?? null
+  readonly property var hideWhenInactiveField: pluginApi?.field("hideWhenInactive") ?? null
 
   // Shortcut to settings and defaults
-  property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   // Editable settings
-  property string editPlayerName: displayBaseline.editPlayerName
-  property int editUpdateInterval: displayBaseline.project("editUpdateInterval")
-  property int editWidth: displayBaseline.project("editWidth")
-  property bool editHideWhenInactive: displayBaseline.editHideWhenInactive
-  NSettingsBaseline {
-    ranges: [NSettingsRange { field: "editUpdateInterval"; from: rangeEditUpdateInterval.from; to: rangeEditUpdateInterval.to }, NSettingsRange { field: "editWidth"; from: rangeEditWidth.from; to: rangeEditWidth.to }]
-    id: displayBaseline
-    readonly property string editPlayerName: cfg.playerName || defaults.playerName || "musicfox"
-    readonly property int editUpdateInterval: cfg.updateInterval || defaults.updateInterval || 200
-    readonly property int editWidth: cfg.width || defaults.width || 300
-    readonly property bool editHideWhenInactive: cfg.hideWhenInactive ?? defaults.hideWhenInactive ?? true
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({editPlayerName: root.editPlayerName, editUpdateInterval: root.editUpdateInterval, editWidth: root.editWidth, editHideWhenInactive: root.editHideWhenInactive})
+  readonly property string editPlayerName: root.playerNameField?.value || "musicfox"
+  readonly property int editUpdateInterval: root.updateIntervalField?.value || 200
+  readonly property int editWidth: root.widthField?.value || 300
+  readonly property bool editHideWhenInactive: root.hideWhenInactiveField?.value ?? true
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   Component.onCompleted: {
-    Logger.i("MprisLyric", "Settings UI loaded")
+    Logger.i("MprisLyric", "Settings UI loaded");
   }
 
   function saveSettings() {
     if (!pluginApi) {
-      Logger.e("MprisLyric", "Cannot save: pluginApi is null")
-      return
+      Logger.e("MprisLyric", "Cannot save: pluginApi is null");
+      return;
     }
-
-    pluginApi.pluginSettings.playerName = root.editPlayerName
-    pluginApi.pluginSettings.updateInterval = root.editUpdateInterval
-    pluginApi.pluginSettings.width = root.editWidth
-    pluginApi.pluginSettings.hideWhenInactive = root.editHideWhenInactive
 
     pluginApi.saveSettings(function (result) {
       if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
-        Logger.i("MprisLyric", "Settings saved successfully")
-    })
+        Logger.i("MprisLyric", "Settings saved successfully");
+    });
   }
 
   // Player name
-  NTextInput {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.player-name")
-    description: pluginApi?.tr("settings.player-name-desc")
-    text: root.editPlayerName
-    placeholderText: "musicfox"
-    onTextChanged: root.editPlayerName = text
+  NPluginSettingsField {
+    field: root.playerNameField
+    NTextInput {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.player-name")
+      description: pluginApi?.tr("settings.player-name-desc")
+      text: root.editPlayerName
+      placeholderText: "musicfox"
+      onEditCommitted: root.playerNameField.set(text)
+    }
   }
 
   NDivider {
@@ -65,11 +59,14 @@ ColumnLayout {
     Layout.bottomMargin: Style.marginS
   }
 
-  NToggle {
-    label: pluginApi?.tr("settings.hide-when-inactive")
-    description: pluginApi?.tr("settings.hide-when-inactive-desc")
-    checked: root.editHideWhenInactive
-    onToggled: checked => root.editHideWhenInactive = checked
+  NPluginSettingsField {
+    field: root.hideWhenInactiveField
+    NToggle {
+      label: pluginApi?.tr("settings.hide-when-inactive")
+      description: pluginApi?.tr("settings.hide-when-inactive-desc")
+      checked: root.editHideWhenInactive
+      onToggled: checked => root.hideWhenInactiveField.set(checked)
+    }
   }
 
   // Update interval
@@ -79,20 +76,23 @@ ColumnLayout {
 
     NLabel {
       label: pluginApi?.tr("settings.update-interval", {
-        value: root.editUpdateInterval
-      })
+                             value: root.editUpdateInterval
+                           })
       description: pluginApi?.tr("settings.update-interval-desc")
     }
 
-    NSlider {
-      id: rangeEditUpdateInterval
-      objectName: "settings-range-editUpdateInterval"
-      Layout.fillWidth: true
-      from: 50
-      to: 500
-      stepSize: 50
-      value: root.editUpdateInterval
-      onValueChanged: root.editUpdateInterval = value
+    NPluginSettingsField {
+      field: root.updateIntervalField
+      NSlider {
+        id: rangeEditUpdateInterval
+        objectName: "settings-range-editUpdateInterval"
+        Layout.fillWidth: true
+        from: 50
+        to: 500
+        stepSize: 50
+        value: root.editUpdateInterval
+        onMoved: root.updateIntervalField.set(value)
+      }
     }
   }
 
@@ -103,20 +103,23 @@ ColumnLayout {
 
     NLabel {
       label: pluginApi?.tr("settings.width", {
-        value: root.editWidth
-      })
+                             value: root.editWidth
+                           })
       description: pluginApi?.tr("settings.width-desc")
     }
 
-    NSlider {
-      id: rangeEditWidth
-      objectName: "settings-range-editWidth"
-      Layout.fillWidth: true
-      from: 100
-      to: 600
-      stepSize: 50
-      value: root.editWidth
-      onValueChanged: root.editWidth = value
+    NPluginSettingsField {
+      field: root.widthField
+      NSlider {
+        id: rangeEditWidth
+        objectName: "settings-range-editWidth"
+        Layout.fillWidth: true
+        from: 100
+        to: 600
+        stepSize: 50
+        value: root.editWidth
+        onMoved: root.widthField.set(value)
+      }
     }
   }
 

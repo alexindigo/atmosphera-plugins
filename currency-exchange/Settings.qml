@@ -1,13 +1,11 @@
 import QtQuick
 import QtQuick.Layouts
+import "CurrencyData.js" as CurrencyData
 import qs.Commons
 import qs.Widgets
-import "CurrencyData.js" as CurrencyData
 
 ColumnLayout {
   id: root
-
-  property var cfg: pluginApi?.pluginSettings || ({})
 
   // Currency model with translated names
   property var currencyModel: pluginApi ? buildTranslatedCurrencyModel() : CurrencyData.buildComboModel(false)
@@ -29,6 +27,7 @@ ColumnLayout {
     }
   ]
   property var pluginApi: null
+  readonly property var refreshIntervalField: pluginApi?.field("refreshInterval") ?? null
 
   // Refresh interval options (in minutes)
   property var refreshIntervalModel: [
@@ -57,22 +56,19 @@ ColumnLayout {
       "name": pluginApi?.tr("settings.intervals.720") || "12 hours"
     }
   ]
-  property string valueRefreshInterval: displayBaseline.valueRefreshInterval
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
+  readonly property var sourceCurrencyField: pluginApi?.field("sourceCurrency") ?? null
+  readonly property var targetCurrencyField: pluginApi?.field("targetCurrency") ?? null
+  readonly property string valueRefreshInterval: String(root.refreshIntervalField?.value ?? 60)
 
   // Global currency settings (used by launcher, widget, and panel)
-  property string valueSourceCurrency: displayBaseline.valueSourceCurrency
-  property string valueTargetCurrency: displayBaseline.valueTargetCurrency
+  readonly property string valueSourceCurrency: root.sourceCurrencyField?.value || "USD"
+  readonly property string valueTargetCurrency: root.targetCurrencyField?.value || "EUR"
 
   // Widget settings
-  property string valueWidgetDisplayMode: displayBaseline.valueWidgetDisplayMode
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property string valueRefreshInterval: String(cfg.refreshInterval ?? defaults.refreshInterval ?? 60)
-    readonly property string valueSourceCurrency: cfg.sourceCurrency || defaults.sourceCurrency || "USD"
-    readonly property string valueTargetCurrency: cfg.targetCurrency || defaults.targetCurrency || "EUR"
-    readonly property string valueWidgetDisplayMode: cfg.widgetDisplayMode || defaults.widgetDisplayMode || "icon"
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({valueRefreshInterval: root.valueRefreshInterval, valueSourceCurrency: root.valueSourceCurrency, valueTargetCurrency: root.valueTargetCurrency, valueWidgetDisplayMode: root.valueWidgetDisplayMode})
+  readonly property string valueWidgetDisplayMode: root.widgetDisplayModeField?.value || "icon"
+  readonly property var widgetDisplayModeField: pluginApi?.field("widgetDisplayMode") ?? null
 
   function buildTranslatedCurrencyModel() {
     var model = [];
@@ -80,19 +76,15 @@ ColumnLayout {
       var code = CurrencyData.currencies[i];
       var translatedName = pluginApi?.tr("currencies." + code) || CurrencyData.currencyNames[code];
       model.push({
-        "key": code,
-        "name": translatedName + " (" + code + ")"
-      });
+                   "key": code,
+                   "name": translatedName + " (" + code + ")"
+                 });
     }
     return model;
   }
   function saveSettings() {
     if (!pluginApi)
       return;
-    pluginApi.pluginSettings.sourceCurrency = valueSourceCurrency;
-    pluginApi.pluginSettings.targetCurrency = valueTargetCurrency;
-    pluginApi.pluginSettings.widgetDisplayMode = valueWidgetDisplayMode;
-    pluginApi.pluginSettings.refreshInterval = parseInt(valueRefreshInterval);
     pluginApi.saveSettings();
   }
 
@@ -107,28 +99,36 @@ ColumnLayout {
       Layout.fillWidth: true
       label: pluginApi?.tr("settings.general") || "General Settings"
     }
-    NComboBox {
-      Layout.fillWidth: true
-      currentKey: valueSourceCurrency
-      description: pluginApi?.tr("settings.source_currency_description") || "Default currency to convert from"
-      label: pluginApi?.tr("settings.source_currency") || "Source Currency"
-      minimumWidth: 280
-      model: currencyModel
+    NPluginSettingsField {
+      field: root.sourceCurrencyField
 
-      onSelected: key => {
-        valueSourceCurrency = key;
+      NComboBox {
+        Layout.fillWidth: true
+        currentKey: valueSourceCurrency
+        description: pluginApi?.tr("settings.source_currency_description") || "Default currency to convert from"
+        label: pluginApi?.tr("settings.source_currency") || "Source Currency"
+        minimumWidth: 280
+        model: currencyModel
+
+        onSelected: key => {
+          root.sourceCurrencyField.set(key);
+        }
       }
     }
-    NComboBox {
-      Layout.fillWidth: true
-      currentKey: valueTargetCurrency
-      description: pluginApi?.tr("settings.target_currency_description") || "Default currency to convert to"
-      label: pluginApi?.tr("settings.target_currency") || "Target Currency"
-      minimumWidth: 280
-      model: currencyModel
+    NPluginSettingsField {
+      field: root.targetCurrencyField
 
-      onSelected: key => {
-        valueTargetCurrency = key;
+      NComboBox {
+        Layout.fillWidth: true
+        currentKey: valueTargetCurrency
+        description: pluginApi?.tr("settings.target_currency_description") || "Default currency to convert to"
+        label: pluginApi?.tr("settings.target_currency") || "Target Currency"
+        minimumWidth: 280
+        model: currencyModel
+
+        onSelected: key => {
+          root.targetCurrencyField.set(key);
+        }
       }
     }
   }
@@ -147,28 +147,36 @@ ColumnLayout {
       Layout.fillWidth: true
       label: pluginApi?.tr("settings.widget") || "Widget Settings"
     }
-    NComboBox {
-      Layout.fillWidth: true
-      currentKey: valueWidgetDisplayMode
-      description: pluginApi?.tr("settings.display_mode_description") || "How much information to show in the bar widget"
-      label: pluginApi?.tr("settings.display_mode") || "Display Mode"
-      minimumWidth: 240
-      model: displayModeModel
+    NPluginSettingsField {
+      field: root.widgetDisplayModeField
 
-      onSelected: key => {
-        valueWidgetDisplayMode = key;
+      NComboBox {
+        Layout.fillWidth: true
+        currentKey: valueWidgetDisplayMode
+        description: pluginApi?.tr("settings.display_mode_description") || "How much information to show in the bar widget"
+        label: pluginApi?.tr("settings.display_mode") || "Display Mode"
+        minimumWidth: 240
+        model: displayModeModel
+
+        onSelected: key => {
+          root.widgetDisplayModeField.set(key);
+        }
       }
     }
-    NComboBox {
-      Layout.fillWidth: true
-      currentKey: valueRefreshInterval
-      defaultValue: defaults.refreshInterval
-      description: pluginApi?.tr("settings.refresh_interval_description") || "How often to refresh exchange rates automatically"
-      label: pluginApi?.tr("settings.refresh_interval") || "Auto-refresh Interval"
-      minimumWidth: 240
-      model: refreshIntervalModel
+    NPluginSettingsField {
+      field: root.refreshIntervalField
 
-      onSelected: key => valueRefreshInterval = key
+      NComboBox {
+        Layout.fillWidth: true
+        currentKey: valueRefreshInterval
+        defaultValue: defaults.refreshInterval
+        description: pluginApi?.tr("settings.refresh_interval_description") || "How often to refresh exchange rates automatically"
+        label: pluginApi?.tr("settings.refresh_interval") || "Auto-refresh Interval"
+        minimumWidth: 240
+        model: refreshIntervalModel
+
+        onSelected: key => root.refreshIntervalField.set(parseInt(key))
+      }
     }
   }
   Item {

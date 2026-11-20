@@ -8,19 +8,27 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
+  readonly property var displayModeField: pluginApi?.field("displayMode") ?? null
+  readonly property var deviceNativePathField: pluginApi?.field("deviceNativePath") ?? null
+  readonly property var showPowerProfilesField: pluginApi?.field("showPowerProfiles") ?? null
+  readonly property var showNoctaliaPerformanceField: pluginApi?.field("showNoctaliaPerformance") ?? null
+  readonly property var hideIfNotDetectedField: pluginApi?.field("hideIfNotDetected") ?? null
+  readonly property var hideIfIdleField: pluginApi?.field("hideIfIdle") ?? null
+  readonly property var refreshIntervalSecondsField: pluginApi?.field("refreshIntervalSeconds") ?? null
+  readonly property var showPowerInBarField: pluginApi?.field("showPowerInBar") ?? null
+  readonly property var showTimeInBarField: pluginApi?.field("showTimeInBar") ?? null
 
-  property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property string valueDisplayMode: displayBaseline.valueDisplayMode
-  property string valueDeviceNativePath: displayBaseline.valueDeviceNativePath
-  property bool valueShowPowerProfiles: displayBaseline.valueShowPowerProfiles
-  property bool valueShowNoctaliaPerformance: displayBaseline.valueShowNoctaliaPerformance
-  property bool valueHideIfNotDetected: displayBaseline.valueHideIfNotDetected
-  property bool valueHideIfIdle: displayBaseline.valueHideIfIdle
-  property int valueRefreshIntervalSeconds: displayBaseline.project("valueRefreshIntervalSeconds")
-  property bool valueShowPowerInBar: displayBaseline.valueShowPowerInBar
-  property bool valueShowTimeInBar: displayBaseline.valueShowTimeInBar
+  readonly property string valueDisplayMode: root.displayModeField?.value ?? "graphic-clean"
+  readonly property string valueDeviceNativePath: root.deviceNativePathField?.value ?? "__default__"
+  readonly property bool valueShowPowerProfiles: root.showPowerProfilesField?.value ?? false
+  readonly property bool valueShowNoctaliaPerformance: root.showNoctaliaPerformanceField?.value ?? false
+  readonly property bool valueHideIfNotDetected: root.hideIfNotDetectedField?.value ?? true
+  readonly property bool valueHideIfIdle: root.hideIfIdleField?.value ?? false
+  readonly property int valueRefreshIntervalSeconds: root.refreshIntervalSecondsField?.value ?? 5
+  readonly property bool valueShowPowerInBar: root.showPowerInBarField?.value ?? true
+  readonly property bool valueShowTimeInBar: root.showTimeInBarField?.value ?? true
 
   spacing: Style.marginM
 
@@ -28,84 +36,102 @@ ColumnLayout {
     Logger.d("BatteryMonitorPlus", "Settings UI loaded");
   }
 
-  NComboBox {
-    id: deviceComboBox
-    Layout.fillWidth: true
-    label: I18n.tr("bar.battery.device-label")
-    description: I18n.tr("bar.battery.device-description")
-    minimumWidth: 240
-    model: BatteryService.deviceModel
-    currentKey: root.valueDeviceNativePath
-    defaultValue: defaults.deviceNativePath ?? "__default__"
-    onSelected: key => root.valueDeviceNativePath = key
+  NPluginSettingsField {
+    field: root.deviceNativePathField
+    NComboBox {
+      id: deviceComboBox
+      Layout.fillWidth: true
+      label: I18n.tr("bar.battery.device-label")
+      description: I18n.tr("bar.battery.device-description")
+      minimumWidth: 240
+      model: BatteryService.deviceModel
+      currentKey: root.valueDeviceNativePath
+      defaultValue: defaults.deviceNativePath ?? "__default__"
+      onSelected: key => root.deviceNativePathField.set(key)
+    }
   }
 
-  NComboBox {
-    Layout.fillWidth: true
-    label: I18n.tr("common.display-mode")
-    description: I18n.tr("bar.battery.display-mode-description")
-    minimumWidth: 240
-    model: [
-      {
-        "key": "graphic",
-        "name": I18n.tr("bar.battery.display-mode-graphic")
-      },
-      {
-        "key": "graphic-clean",
-        "name": I18n.tr("bar.battery.display-mode-graphic-clean")
-      },
-      {
-        "key": "icon-hover",
-        "name": I18n.tr("bar.battery.display-mode-icon-hover")
-      },
-      {
-        "key": "icon-always",
-        "name": I18n.tr("bar.battery.display-mode-icon-always")
-      },
-      {
-        "key": "icon-only",
-        "name": I18n.tr("bar.battery.display-mode-icon-only")
-      }
-    ]
-    currentKey: root.valueDisplayMode
-    defaultValue: defaults.displayMode ?? "graphic-clean"
-    onSelected: key => root.valueDisplayMode = key
+  NPluginSettingsField {
+    field: root.displayModeField
+    NComboBox {
+      Layout.fillWidth: true
+      label: I18n.tr("common.display-mode")
+      description: I18n.tr("bar.battery.display-mode-description")
+      minimumWidth: 240
+      model: [
+        {
+          "key": "graphic",
+          "name": I18n.tr("bar.battery.display-mode-graphic")
+        },
+        {
+          "key": "graphic-clean",
+          "name": I18n.tr("bar.battery.display-mode-graphic-clean")
+        },
+        {
+          "key": "icon-hover",
+          "name": I18n.tr("bar.battery.display-mode-icon-hover")
+        },
+        {
+          "key": "icon-always",
+          "name": I18n.tr("bar.battery.display-mode-icon-always")
+        },
+        {
+          "key": "icon-only",
+          "name": I18n.tr("bar.battery.display-mode-icon-only")
+        }
+      ]
+      currentKey: root.valueDisplayMode
+      defaultValue: defaults.displayMode ?? "graphic-clean"
+      onSelected: key => root.displayModeField.set(key)
+    }
   }
 
-  NToggle {
-    label: I18n.tr("bar.battery.hide-if-not-detected-label")
-    description: I18n.tr("bar.battery.hide-if-not-detected-description")
-    checked: root.valueHideIfNotDetected
-    defaultValue: defaults.hideIfNotDetected ?? true
-    onToggled: checked => root.valueHideIfNotDetected = checked
+  NPluginSettingsField {
+    field: root.hideIfNotDetectedField
+    NToggle {
+      label: I18n.tr("bar.battery.hide-if-not-detected-label")
+      description: I18n.tr("bar.battery.hide-if-not-detected-description")
+      checked: root.valueHideIfNotDetected
+      defaultValue: defaults.hideIfNotDetected ?? true
+      onToggled: checked => root.hideIfNotDetectedField.set(checked)
+    }
   }
 
-  NToggle {
-    label: I18n.tr("bar.battery.hide-if-idle-label")
-    description: I18n.tr("bar.battery.hide-if-idle-description")
-    checked: root.valueHideIfIdle
-    defaultValue: defaults.hideIfIdle ?? false
-    onToggled: checked => root.valueHideIfIdle = checked
+  NPluginSettingsField {
+    field: root.hideIfIdleField
+    NToggle {
+      label: I18n.tr("bar.battery.hide-if-idle-label")
+      description: I18n.tr("bar.battery.hide-if-idle-description")
+      checked: root.valueHideIfIdle
+      defaultValue: defaults.hideIfIdle ?? false
+      onToggled: checked => root.hideIfIdleField.set(checked)
+    }
   }
 
   NDivider {
     Layout.fillWidth: true
   }
 
-  NToggle {
-    label: I18n.tr("bar.battery.show-power-profile-label")
-    description: I18n.tr("bar.battery.show-power-profile-description")
-    checked: root.valueShowPowerProfiles
-    defaultValue: defaults.showPowerProfiles ?? false
-    onToggled: checked => root.valueShowPowerProfiles = checked
+  NPluginSettingsField {
+    field: root.showPowerProfilesField
+    NToggle {
+      label: I18n.tr("bar.battery.show-power-profile-label")
+      description: I18n.tr("bar.battery.show-power-profile-description")
+      checked: root.valueShowPowerProfiles
+      defaultValue: defaults.showPowerProfiles ?? false
+      onToggled: checked => root.showPowerProfilesField.set(checked)
+    }
   }
 
-  NToggle {
-    label: I18n.tr("bar.battery.show-noctalia-performance-label")
-    description: I18n.tr("bar.battery.show-noctalia-performance-description")
-    checked: root.valueShowNoctaliaPerformance
-    defaultValue: defaults.showNoctaliaPerformance ?? false
-    onToggled: checked => root.valueShowNoctaliaPerformance = checked
+  NPluginSettingsField {
+    field: root.showNoctaliaPerformanceField
+    NToggle {
+      label: I18n.tr("bar.battery.show-noctalia-performance-label")
+      description: I18n.tr("bar.battery.show-noctalia-performance-description")
+      checked: root.valueShowNoctaliaPerformance
+      defaultValue: defaults.showNoctaliaPerformance ?? false
+      onToggled: checked => root.showNoctaliaPerformanceField.set(checked)
+    }
   }
 
   NDivider {
@@ -121,51 +147,47 @@ ColumnLayout {
       description: pluginApi?.tr("settings.refreshInterval.desc")
     }
 
-    NValueSlider {
-      id: rangeValueRefreshIntervalSeconds
-      objectName: "settings-range-valueRefreshIntervalSeconds"
-      onValueChanged: root.valueRefreshIntervalSeconds = value
-      Layout.fillWidth: true
-      from: 1
-      to: 60
-      stepSize: 1
-      snapAlways: true
-      value: root.valueRefreshIntervalSeconds
-      text: `${root.valueRefreshIntervalSeconds}s`
-      onMoved: value => root.valueRefreshIntervalSeconds = Math.round(value)
+    NPluginSettingsField {
+      field: root.refreshIntervalSecondsField
+      NValueSlider {
+        id: rangeValueRefreshIntervalSeconds
+        objectName: "settings-range-valueRefreshIntervalSeconds"
+        Layout.fillWidth: true
+        from: 1
+        to: 60
+        stepSize: 1
+        snapAlways: true
+        value: root.valueRefreshIntervalSeconds
+        text: `${root.valueRefreshIntervalSeconds}s`
+        onMoved: value => root.refreshIntervalSecondsField.set(Math.round(value))
+      }
     }
   }
 
-  NToggle {
-    label: pluginApi?.tr("settings.showPowerInBar.label")
-    description: pluginApi?.tr("settings.showPowerInBar.desc")
-    checked: root.valueShowPowerInBar
-    defaultValue: defaults.showPowerInBar ?? true
-    onToggled: checked => root.valueShowPowerInBar = checked
+  NPluginSettingsField {
+    field: root.showPowerInBarField
+    NToggle {
+      label: pluginApi?.tr("settings.showPowerInBar.label")
+      description: pluginApi?.tr("settings.showPowerInBar.desc")
+      checked: root.valueShowPowerInBar
+      defaultValue: defaults.showPowerInBar ?? true
+      onToggled: checked => root.showPowerInBarField.set(checked)
+    }
   }
 
-  NToggle {
-    label: pluginApi?.tr("settings.showTimeInBar.label")
-    description: pluginApi?.tr("settings.showTimeInBar.desc")
-    checked: root.valueShowTimeInBar
-    defaultValue: defaults.showTimeInBar ?? true
-    onToggled: checked => root.valueShowTimeInBar = checked
+  NPluginSettingsField {
+    field: root.showTimeInBarField
+    NToggle {
+      label: pluginApi?.tr("settings.showTimeInBar.label")
+      description: pluginApi?.tr("settings.showTimeInBar.desc")
+      checked: root.valueShowTimeInBar
+      defaultValue: defaults.showTimeInBar ?? true
+      onToggled: checked => root.showTimeInBarField.set(checked)
+    }
   }
 
-  NSettingsBaseline {
-    ranges: [NSettingsRange { field: "valueRefreshIntervalSeconds"; from: rangeValueRefreshIntervalSeconds.from; to: rangeValueRefreshIntervalSeconds.to }]
-    id: displayBaseline
-    readonly property string valueDisplayMode: cfg.displayMode ?? defaults.displayMode ?? "graphic-clean"
-    readonly property string valueDeviceNativePath: cfg.deviceNativePath ?? defaults.deviceNativePath ?? "__default__"
-    readonly property bool valueShowPowerProfiles: cfg.showPowerProfiles ?? defaults.showPowerProfiles ?? false
-    readonly property bool valueShowNoctaliaPerformance: cfg.showNoctaliaPerformance ?? defaults.showNoctaliaPerformance ?? false
-    readonly property bool valueHideIfNotDetected: cfg.hideIfNotDetected ?? defaults.hideIfNotDetected ?? true
-    readonly property bool valueHideIfIdle: cfg.hideIfIdle ?? defaults.hideIfIdle ?? false
-    readonly property int valueRefreshIntervalSeconds: cfg.refreshIntervalSeconds ?? defaults.refreshIntervalSeconds ?? 5
-    readonly property bool valueShowPowerInBar: cfg.showPowerInBar ?? defaults.showPowerInBar ?? true
-    readonly property bool valueShowTimeInBar: cfg.showTimeInBar ?? defaults.showTimeInBar ?? true
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({valueDisplayMode: root.valueDisplayMode, valueDeviceNativePath: root.valueDeviceNativePath, valueShowPowerProfiles: root.valueShowPowerProfiles, valueShowNoctaliaPerformance: root.valueShowNoctaliaPerformance, valueHideIfNotDetected: root.valueHideIfNotDetected, valueHideIfIdle: root.valueHideIfIdle, valueRefreshIntervalSeconds: root.valueRefreshIntervalSeconds, valueShowPowerInBar: root.valueShowPowerInBar, valueShowTimeInBar: root.valueShowTimeInBar})
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   function saveSettings() {
     if (!pluginApi) {
@@ -173,15 +195,6 @@ ColumnLayout {
       return;
     }
 
-    pluginApi.pluginSettings.displayMode = root.valueDisplayMode;
-    pluginApi.pluginSettings.deviceNativePath = root.valueDeviceNativePath;
-    pluginApi.pluginSettings.showPowerProfiles = root.valueShowPowerProfiles;
-    pluginApi.pluginSettings.showNoctaliaPerformance = root.valueShowNoctaliaPerformance;
-    pluginApi.pluginSettings.hideIfNotDetected = root.valueHideIfNotDetected;
-    pluginApi.pluginSettings.hideIfIdle = root.valueHideIfIdle;
-    pluginApi.pluginSettings.refreshIntervalSeconds = root.valueRefreshIntervalSeconds;
-    pluginApi.pluginSettings.showPowerInBar = root.valueShowPowerInBar;
-    pluginApi.pluginSettings.showTimeInBar = root.valueShowTimeInBar;
     pluginApi.saveSettings(function (result) {
       if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
         Logger.d("BatteryMonitorPlus", "Settings saved successfully");

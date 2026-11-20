@@ -1,7 +1,7 @@
 {
   "id": "translator",
   "name": "Translator",
-  "version": "1.2.10",
+  "version": "1.2.11",
   "minNoctaliaVersion": "4.4.1",
   "minAtmospheraVersion": "0.10.0",
   "author": "Cleboost",

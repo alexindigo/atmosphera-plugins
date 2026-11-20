@@ -1,206 +1,221 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.Commons
-import qs.Widgets
 import qs.Services.System
+import qs.Widgets
 
 ColumnLayout {
-    id: root
-    property var pluginApi: null
+  id: root
+  property var pluginApi: null
+  readonly property var widgetWidthField: pluginApi?.field("widgetWidth") ?? null
+  readonly property var scrollSpeedField: pluginApi?.field("scrollSpeed") ?? null
+  readonly property var scrollModeField: pluginApi?.field("scrollMode") ?? null
+  readonly property var adaptScrollSpeedField: pluginApi?.field("adaptScrollSpeed") ?? null
+  readonly property var hideWhenPausedField: pluginApi?.field("hideWhenPaused") ?? null
+  readonly property var verticalRotationDirectionField: pluginApi?.field("verticalRotationDirection") ?? null
+  readonly property var fontSizeField: pluginApi?.field("fontSize") ?? null
+  readonly property var hideWhenEmptyField: pluginApi?.field("hideWhenEmpty") ?? null
+  readonly property var fontFamilyField: pluginApi?.field("fontFamily") ?? null
 
-    property int draftWidth: displayBaseline.project("draftWidth")
-    property int draftSpeed: displayBaseline.project("draftSpeed")
-    property string draftMode: displayBaseline.draftMode
-    property int draftFontSize: displayBaseline.project("draftFontSize")
-    property bool draftHideWhenEmpty: displayBaseline.draftHideWhenEmpty
-    property string draftFontFamily: displayBaseline.draftFontFamily
-    property bool draftAdaptScrollSpeed: displayBaseline.draftAdaptScrollSpeed
-    property bool draftHideWhenPaused: displayBaseline.draftHideWhenPaused
-    property string draftVerticalRotationDirection: displayBaseline.draftVerticalRotationDirection
+  readonly property int draftWidth: root.widgetWidthField?.value ?? 215
+  readonly property int draftSpeed: root.scrollSpeedField?.value ?? 70
+  readonly property string draftMode: root.scrollModeField?.value ?? "always"
+  readonly property int draftFontSize: root.fontSizeField?.value ?? 10
+  readonly property bool draftHideWhenEmpty: root.hideWhenEmptyField?.value ?? true
+  readonly property string draftFontFamily: root.fontFamilyField?.value ?? "Inter"
+  readonly property bool draftAdaptScrollSpeed: root.adaptScrollSpeedField?.value ?? true
+  readonly property bool draftHideWhenPaused: root.hideWhenPausedField?.value ?? true
+  readonly property string draftVerticalRotationDirection: root.displayedRotation()
 
-    readonly property bool isBarVertical: Settings.data.bar.position === "left" || Settings.data.bar.position === "right"
-    NSettingsBaseline {
-        ranges: [NSettingsRange { field: "draftFontSize"; from: rangeDraftFontSize.from; to: rangeDraftFontSize.to }, NSettingsRange { field: "draftWidth"; from: rangeDraftWidth.from; to: rangeDraftWidth.to }, NSettingsRange { field: "draftSpeed"; from: rangeDraftSpeed.from; to: rangeDraftSpeed.to }]
-        id: displayBaseline
-        readonly property int draftWidth: pluginApi?.pluginSettings?.widgetWidth ?? 215
-        readonly property int draftSpeed: pluginApi?.pluginSettings?.scrollSpeed ?? 70
-        readonly property string draftMode: pluginApi?.pluginSettings?.scrollMode ?? "always"
-        readonly property int draftFontSize: pluginApi?.pluginSettings?.fontSize ?? 10
-        readonly property bool draftHideWhenEmpty: pluginApi?.pluginSettings?.hideWhenEmpty ?? true
-        readonly property string draftFontFamily: pluginApi?.pluginSettings?.fontFamily ?? "Inter"
-        readonly property bool draftAdaptScrollSpeed: pluginApi?.pluginSettings?.adaptScrollSpeed ?? true
-        readonly property bool draftHideWhenPaused: pluginApi?.pluginSettings?.hideWhenPaused ?? true
-        readonly property string draftVerticalRotationDirection: root.displayedRotation()
+  readonly property bool isBarVertical: Settings.data.bar.position === "left" || Settings.data.bar.position === "right"
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
+
+  function displayedRotation() {
+    const value = pluginApi?.pluginSettings?.verticalRotationDirection;
+    return value === "auto" || value === "cw" || value === "ccw" ? value : "auto";
+  }
+
+  spacing: Style.marginM
+
+  function saveSettings() {
+    if (pluginApi) {
+      // Save the selected font
+      pluginApi.saveSettings();
     }
-    readonly property bool settingsDirty: displayBaseline.differs({draftWidth: root.draftWidth, draftSpeed: root.draftSpeed, draftMode: root.draftMode, draftFontSize: root.draftFontSize, draftHideWhenEmpty: root.draftHideWhenEmpty, draftFontFamily: root.draftFontFamily, draftAdaptScrollSpeed: root.draftAdaptScrollSpeed, draftHideWhenPaused: root.draftHideWhenPaused, draftVerticalRotationDirection: root.draftVerticalRotationDirection})
+  }
 
-    function displayedRotation() {
-        const value = pluginApi?.pluginSettings?.verticalRotationDirection;
-        return value === "auto" || value === "cw" || value === "ccw" ? value : "auto";
-    }
-
-    spacing: Style.marginM
-
-    function saveSettings() {
-        if (pluginApi) {
-            pluginApi.pluginSettings.widgetWidth = draftWidth;
-            pluginApi.pluginSettings.scrollSpeed = draftSpeed;
-            pluginApi.pluginSettings.scrollMode = draftMode;
-            pluginApi.pluginSettings.adaptScrollSpeed = draftAdaptScrollSpeed;
-            pluginApi.pluginSettings.hideWhenPaused = draftHideWhenPaused;
-            pluginApi.pluginSettings.verticalRotationDirection = draftVerticalRotationDirection;
-            pluginApi.pluginSettings.fontSize = draftFontSize;
-            pluginApi.pluginSettings.hideWhenEmpty = draftHideWhenEmpty;
-            // Save the selected font
-            pluginApi.pluginSettings.fontFamily = draftFontFamily;
-            pluginApi.saveSettings();
-        }
-    }
-
+  NPluginSettingsField {
+    field: root.fontFamilyField
     NSearchableComboBox {
-        label: pluginApi?.tr("settings.font.title")
-        description: pluginApi?.tr("settings.font.desc")
+      label: pluginApi?.tr("settings.font.title")
+      description: pluginApi?.tr("settings.font.desc")
+      Layout.fillWidth: true
+
+      model: FontService.availableFonts
+
+      currentKey: draftFontFamily
+      placeholder: pluginApi?.tr("settings.font.placeholder")
+      searchPlaceholder: pluginApi?.tr("settings.font.search-placeholder")
+      popupHeight: 300
+
+      onSelected: key => root.fontFamilyField.set(key)
+    }
+  }
+
+  NLabel {
+    label: pluginApi?.tr("settings.font.size")
+    description: pluginApi?.tr("settings.font.size-desc")
+  }
+
+  RowLayout {
+    Layout.fillWidth: true
+    NPluginSettingsField {
+      field: root.fontSizeField
+      NSlider {
+        id: rangeDraftFontSize
+        objectName: "settings-range-draftFontSize"
         Layout.fillWidth: true
-
-        model: FontService.availableFonts
-
-        currentKey: draftFontFamily
-        placeholder: pluginApi?.tr("settings.font.placeholder")
-        searchPlaceholder: pluginApi?.tr("settings.font.search-placeholder")
-        popupHeight: 300
-
-        onSelected: key => draftFontFamily = key
+        from: 8
+        to: 32
+        value: draftFontSize
+        onMoved: root.fontSizeField.set(value)
+      }
     }
-
-    NLabel {
-        label: pluginApi?.tr("settings.font.size")
-        description: pluginApi?.tr("settings.font.size-desc")
+    NText {
+      text: Math.round(draftFontSize) + "pt"
     }
+  }
 
-    RowLayout {
+  NDivider {
+    Layout.fillWidth: true
+  }
+
+  NLabel {
+    label: pluginApi?.tr("settings.width")
+  }
+  RowLayout {
+    Layout.fillWidth: true
+    NPluginSettingsField {
+      field: root.widgetWidthField
+      NSlider {
+        id: rangeDraftWidth
+        objectName: "settings-range-draftWidth"
         Layout.fillWidth: true
-        NSlider {
-            id: rangeDraftFontSize
-            objectName: "settings-range-draftFontSize"
-            Layout.fillWidth: true
-            from: 8
-            to: 32
-            value: draftFontSize
-            onValueChanged: draftFontSize = value
-        }
-        NText {
-            text: Math.round(draftFontSize) + "pt"
-        }
+        from: 100
+        to: 500
+        value: draftWidth
+        onMoved: root.widgetWidthField.set(value)
+      }
     }
+    NText {
+      text: Math.round(draftWidth) + "px"
+    }
+  }
 
-    NDivider {
+  NLabel {
+    label: pluginApi?.tr("settings.scroll.speed")
+  }
+  RowLayout {
+    Layout.fillWidth: true
+    NPluginSettingsField {
+      field: root.scrollSpeedField
+      NSlider {
+        id: rangeDraftSpeed
+        objectName: "settings-range-draftSpeed"
         Layout.fillWidth: true
+        from: 10
+        to: 200
+        value: draftSpeed
+        onMoved: root.scrollSpeedField.set(value)
+      }
     }
+    NText {
+      text: Math.round(draftSpeed) + " px/s"
+    }
+  }
 
-    NLabel {
-        label: pluginApi?.tr("settings.width")
-    }
-    RowLayout {
-        Layout.fillWidth: true
-        NSlider {
-            id: rangeDraftWidth
-            objectName: "settings-range-draftWidth"
-            Layout.fillWidth: true
-            from: 100
-            to: 500
-            value: draftWidth
-            onValueChanged: draftWidth = value
-        }
-        NText {
-            text: Math.round(draftWidth) + "px"
-        }
-    }
-
-    NLabel {
-        label: pluginApi?.tr("settings.scroll.speed")
-    }
-    RowLayout {
-        Layout.fillWidth: true
-        NSlider {
-            id: rangeDraftSpeed
-            objectName: "settings-range-draftSpeed"
-            Layout.fillWidth: true
-            from: 10
-            to: 200
-            value: draftSpeed
-            onValueChanged: draftSpeed = value
-        }
-        NText {
-            text: Math.round(draftSpeed) + " px/s"
-        }
-    }
-
+  NPluginSettingsField {
+    field: root.scrollModeField
     NComboBox {
-        label: pluginApi?.tr("settings.scroll.mode.title")
-        Layout.fillWidth: true
-        model: [
-            {
-                name: pluginApi?.tr("settings.scroll.mode.always"),
-                key: "always"
-            },
-            {
-                name: pluginApi?.tr("settings.scroll.mode.hover"),
-                key: "hover"
-            },
-            {
-                name: pluginApi?.tr("settings.scroll.mode.never"),
-                key: "none"
-            }
-        ]
-        currentKey: draftMode
-        onSelected: key => draftMode = key
-    }
-
-    NToggle {
-        label: pluginApi?.tr("settings.scroll.adapt")
-        description: pluginApi?.tr("settings.scroll.adapt-desc")
-        checked: draftAdaptScrollSpeed
-        onToggled: newState => {
-            draftAdaptScrollSpeed = newState;
+      label: pluginApi?.tr("settings.scroll.mode.title")
+      Layout.fillWidth: true
+      model: [
+        {
+          name: pluginApi?.tr("settings.scroll.mode.always"),
+          key: "always"
+        },
+        {
+          name: pluginApi?.tr("settings.scroll.mode.hover"),
+          key: "hover"
+        },
+        {
+          name: pluginApi?.tr("settings.scroll.mode.never"),
+          key: "none"
         }
+      ]
+      currentKey: draftMode
+      onSelected: key => root.scrollModeField.set(key)
     }
+  }
 
+  NPluginSettingsField {
+    field: root.adaptScrollSpeedField
     NToggle {
-        label: pluginApi?.tr("settings.hide-when-empty")
-        checked: draftHideWhenEmpty
-        onToggled: newState => {
-            draftHideWhenEmpty = newState;
-        }
+      label: pluginApi?.tr("settings.scroll.adapt")
+      description: pluginApi?.tr("settings.scroll.adapt-desc")
+      checked: draftAdaptScrollSpeed
+      onToggled: newState => {
+        root.adaptScrollSpeedField.set(newState);
+      }
     }
+  }
 
+  NPluginSettingsField {
+    field: root.hideWhenEmptyField
+    NToggle {
+      label: pluginApi?.tr("settings.hide-when-empty")
+      checked: draftHideWhenEmpty
+      onToggled: newState => {
+        root.hideWhenEmptyField.set(newState);
+      }
+    }
+  }
+
+  NPluginSettingsField {
+    field: root.verticalRotationDirectionField
+    visible: root.isBarVertical
     NComboBox {
-        visible: root.isBarVertical
-        label: pluginApi?.tr("settings.vertical-rotation.title")
-        description: pluginApi?.tr("settings.vertical-rotation.description")
-        Layout.fillWidth: true
-        model: [
-            {
-                name: pluginApi?.tr("settings.vertical-rotation.auto"),
-                key: "auto"
-            },
-            {
-                name: pluginApi?.tr("settings.vertical-rotation.ccw"),
-                key: "ccw"
-            },
-            {
-                name: pluginApi?.tr("settings.vertical-rotation.cw"),
-                key: "cw"
-            }
-        ]
-        currentKey: draftVerticalRotationDirection
-        onSelected: key => draftVerticalRotationDirection = key
-    }
-
-    NToggle {
-        label: pluginApi?.tr("settings.hide-when-paused")
-        checked: draftHideWhenPaused
-        onToggled: newState => {
-            draftHideWhenPaused = newState;
+      label: pluginApi?.tr("settings.vertical-rotation.title")
+      description: pluginApi?.tr("settings.vertical-rotation.description")
+      Layout.fillWidth: true
+      model: [
+        {
+          name: pluginApi?.tr("settings.vertical-rotation.auto"),
+          key: "auto"
+        },
+        {
+          name: pluginApi?.tr("settings.vertical-rotation.ccw"),
+          key: "ccw"
+        },
+        {
+          name: pluginApi?.tr("settings.vertical-rotation.cw"),
+          key: "cw"
         }
+      ]
+      currentKey: draftVerticalRotationDirection
+      onSelected: key => root.verticalRotationDirectionField.set(key)
     }
+  }
+
+  NPluginSettingsField {
+    field: root.hideWhenPausedField
+    NToggle {
+      label: pluginApi?.tr("settings.hide-when-paused")
+      checked: draftHideWhenPaused
+      onToggled: newState => {
+        root.hideWhenPausedField.set(newState);
+      }
+    }
+  }
 }

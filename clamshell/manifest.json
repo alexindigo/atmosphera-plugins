@@ -2,7 +2,7 @@
   "id": "clamshell",
   "name": "Clamshell Mode",
   "description": "Auto clamshell on external display, with manual override",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "author": "Sovego",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
