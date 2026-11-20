@@ -93,27 +93,36 @@ def download(cache, destination, limit, title, url, extractor):
         # Only disposable producer intermediates live here, never saved music.
         with tempfile.TemporaryDirectory(prefix="download-", dir=cache) as scratch:
             source = produce(Path(scratch), title, url, extractor)
+            capacity = os.pathconf(destination, "PC_NAME_MAX")
             suffix = 0
             while True:
-                name = source.name if suffix == 0 else f"{source.stem} ({suffix}).mp3"
+                ending = ".mp3" if suffix == 0 else f" ({suffix}).mp3"
+                stem = source.stem
+                if capacity > 0:
+                    while stem and len(os.fsencode(stem + ending)) > capacity:
+                        stem = stem[:-1]
+                    if not stem:
+                        raise ValueError("Destination filename capacity is too small.")
+                name = stem + ending
                 output = destination / name
                 try:
-                    target = output.open("xb")
+                    target = output.open("xb", buffering=0)
                     break
                 except FileExistsError:
                     suffix += 1
             # Exclusive creation also protects existing symlinks and local inputs.
             # Even on an I/O failure, keep and account for the partial output.
-            try:
-                with target, source.open("rb") as incoming:
-                    shutil.copyfileobj(incoming, target)
-                    target.flush()
-                    os.fsync(target.fileno())
-            finally:
-                info = output.stat()
-                records.append({"path": str(output), "size": info.st_size,
-                                "device": info.st_dev, "inode": info.st_ino})
-                write_records(ledger, records)
+            with target:
+                try:
+                    with source.open("rb") as incoming:
+                        shutil.copyfileobj(incoming, target)
+                        os.fsync(target.fileno())
+                finally:
+                    # The pathname may already refer to an unrelated replacement.
+                    info = os.fstat(target.fileno())
+                    records.append({"path": str(output), "size": info.st_size,
+                                    "device": info.st_dev, "inode": info.st_ino})
+                    write_records(ledger, records)
             print(output)
     return 0
 

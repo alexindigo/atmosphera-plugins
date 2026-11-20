@@ -1,6 +1,7 @@
 """Offline public-helper regression tests. Run only inside the project VM."""
 
 import concurrent.futures
+import fcntl
 import functools
 import http.server
 import importlib.util
@@ -8,6 +9,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -134,6 +136,98 @@ if os.environ.get("STUB_FAIL"):
         self.assertTrue(old.exists())
         self.command("set-download-dir", str(self.music))
         self.download(expected=3)
+
+    def download_module(self):
+        spec = importlib.util.spec_from_file_location("download_review", ROOT / "music-search/lib/downloads.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def test_full_length_names_reserve_collision_suffix_bytes(self):
+        module = self.download_module()
+        capacity = os.pathconf(self.music, "PC_NAME_MAX")
+        for stem in ("x" * (capacity - 4), "é" * ((capacity - 4) // 2)):
+            with self.subTest(stem=stem[:1]):
+                source = self.root / (stem + ".mp3")
+                source.write_bytes(b"new")
+                existing = self.music / source.name
+                existing.write_bytes(b"user music")
+                with mock.patch.object(module, "produce", return_value=source):
+                    self.assertEqual(module.download(self.state, self.music, 0, "", "", ""), 0)
+                output = Path(self.records()[-1]["path"])
+                self.assertLessEqual(len(os.fsencode(output.name)), capacity)
+                self.assertTrue(output.name.endswith(" (1).mp3"))
+                self.assertEqual(output.read_bytes(), b"new")
+                self.assertEqual(existing.read_bytes(), b"user music")
+
+    def test_publication_records_descriptor_identity_even_after_replacement_or_failure(self):
+        module = self.download_module()
+        source = self.root / "Publication.mp3"
+        source.write_bytes(b"new")
+        copy = module.shutil.copyfileobj
+        for failure in (False, True):
+            with self.subTest(failure=failure):
+                created = []
+                def replace_during_copy(incoming, target):
+                    copy(incoming, target)
+                    target.flush()
+                    created.append(os.fstat(target.fileno()))
+                    output = Path(target.name)
+                    output.rename(output.with_suffix(".original"))
+                    output.write_bytes(b"foreign replacement")
+                    if failure:
+                        raise OSError("fixture copy failed")
+                with mock.patch.object(module, "produce", return_value=source), \
+                     mock.patch.object(module.shutil, "copyfileobj", side_effect=replace_during_copy):
+                    if failure:
+                        with self.assertRaises(OSError):
+                            module.download(self.state, self.music, 0, "", "", "")
+                    else:
+                        module.download(self.state, self.music, 0, "", "", "")
+                record = self.records()[-1]
+                output = Path(record["path"])
+                self.assertEqual((record["device"], record["inode"]),
+                                 (created[0].st_dev, created[0].st_ino))
+                self.assertNotEqual(output.stat().st_ino, record["inode"])
+                self.assertEqual(output.read_bytes(), b"foreign replacement")
+                self.assertNotIn(str(output), [r["path"] for r in module.live_records(self.state / "downloads.json")])
+
+    def test_stop_defers_busy_cleanup_and_retries_without_blocking(self):
+        source = self.prepare_playback()
+        before = (self.state / "playback.json").read_bytes()
+        with (self.state / "downloads.lock").open("a") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            process = subprocess.Popen(["bash", str(ROOT / "music-search/musicctl.sh"), "stop"],
+                        env=self.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                        text=True, start_new_session=True)
+            try:
+                stdout, stderr = process.communicate(timeout=1)
+            except subprocess.TimeoutExpired:
+                os.killpg(process.pid, signal.SIGTERM)
+                process.communicate(timeout=2)
+                self.fail("stop waited on the download production lock")
+            self.assertEqual(process.returncode, 0, stderr)
+            self.assertEqual(json.loads(stdout)["endReason"], "stopped")
+            self.assertTrue(source.exists())
+            self.assertEqual((self.state / "playback.json").read_bytes(), before)
+        self.command("stop")
+        self.assertFalse(source.exists())
+        self.assertEqual(self.playback_records(), [])
+
+    def test_stop_finalizes_endpoints_and_state_when_cleanup_fails(self):
+        source = self.prepare_playback()
+        before = (self.state / "playback.json").read_bytes()
+        (self.state / "downloads.json").write_text("corrupt")
+        for name in ("mpv.pid", "mpv.sock", "mpv.log"):
+            (self.state / name).write_text("")
+        result = self.command("stop")
+        self.assertIn("cleanup", result.stderr.lower())
+        self.assertEqual(json.loads(result.stdout)["endReason"], "stopped")
+        self.assertFalse(json.loads((self.state / "state.json").read_text())["isPlaying"])
+        self.assertTrue(source.exists())
+        self.assertEqual((self.state / "playback.json").read_bytes(), before)
+        self.assertEqual((self.state / "downloads.json").read_text(), "corrupt")
+        self.assertTrue(all(not (self.state / name).exists() for name in ("mpv.pid", "mpv.sock", "mpv.log")))
 
     def test_concurrent_admission_is_serialized(self):
         self.command("set-cache-size", "1")

@@ -57,6 +57,11 @@ remove a downloaded file to free space; missing files stop counting on the next
 attempt. A download admitted below the limit can exceed it; the next is refused.
 Set 0 for unlimited. Name collisions create a numbered copy instead of replacing
 an existing file. Removing a saved library entry only removes its library record.
+If an MP3 download holds the ownership lock, stopping playback leaves private
+media cleanup pending instead of blocking the controls. The next stop or cached
+play retries it. Cleanup errors preserve media and ownership records and are
+reported separately; player endpoints and stopped state are still finalized.
+
 Private playback fallback sources are recorded separately and removed by exact
 created identity on replacement or cleanup. Recorded downloads always take
 precedence and are never deleted, even when their folder overlaps the runtime

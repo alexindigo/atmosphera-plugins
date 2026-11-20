@@ -113,8 +113,14 @@ def cleanup_locked(cache):
 
 def cleanup(cache):
     with (cache / "downloads.lock").open("a") as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX)
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            # Stopping a player must not wait for an unrelated MP3 producer.
+            # Leave the ledger intact for the next stop or prepare transaction.
+            return False
         cleanup_locked(cache)
+        return True
 
 
 def prepare(cache, url, extractor):
@@ -147,7 +153,9 @@ if __name__ == "__main__":
     try:
         action, cache = sys.argv[1], Path(sys.argv[2]).resolve()
         if action == "cleanup":
-            cleanup(cache)
+            if not cleanup(cache):
+                print("Playback cleanup deferred until the next stop or cached play; download is busy.", file=sys.stderr)
+                sys.exit(4)
         elif action == "prepare":
             print(prepare(cache, sys.argv[3], sys.argv[4]))
         elif action == "play":
