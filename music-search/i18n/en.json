@@ -49,7 +49,7 @@
     "syncingFolder": "Syncing folder playlist...",
     "savingMp3": "Saving current track as mp3...",
     "downloadFolderUpdated": "Download folder updated.",
-    "cacheLimitUpdated": "MP3 cache limit updated.",
+    "cacheLimitUpdated": "MP3 download limit updated. Existing files are kept.",
     "playlistEmpty": "Playlist is empty.",
     "switchedTo": "Switched to {provider}.",
     "ytClientSet": "YouTube player client set to {client}.",
@@ -63,6 +63,7 @@
     "playbackFailed": "music-search playback command failed.",
     "libraryFailed": "music-search library command failed.",
     "mp3SaveFailed": "Could not save mp3 locally.",
+    "downloadLimitReached": "Download limit reached. Music Search keeps your files. Increase the limit or remove a downloaded file yourself to download more.",
     "queueFailed": "Could not add track to queue.",
     "queuePlaylistTrackFailed": "Could not add playlist track to queue.",
     "queueActionFailed": "Could not {action} queue.",
@@ -393,9 +394,9 @@
       "folderPickerTitle": "Choose MP3 download folder"
     },
     "cache": {
-      "label": "Max MP3 cache size",
-      "desc": "Limit the download folder size in MB. Older files are pruned after downloads. Set 0 for unlimited.",
-      "apply": "Apply cache limit"
+      "label": "MP3 download limit (MB)",
+      "desc": "Count only files Music Search downloaded into this folder. At the limit, stop new downloads; never delete files. The last download may exceed the limit. Set 0 for unlimited.",
+      "apply": "Apply download limit"
     },
     "autoSave": {
       "label": "Save remote tracks as mp3 after playback starts",

@@ -13,7 +13,6 @@ SOCKET_FILE="${CACHE_DIR}/mpv.sock"
 SETTINGS_FILE="${CACHE_DIR}/settings.json"
 PLAYLISTS_FILE="${CACHE_DIR}/playlists.json"
 QUEUE_FILE="${CACHE_DIR}/queue.json"
-DOWNLOAD_BASENAME="${CACHE_DIR}/current-media"
 DOWNLOADS_DIR_DEFAULT="${HOME}/Music/Noctalia"
 LOCAL_MUSIC_DIR="${HOME}/Music"
 
@@ -146,28 +145,6 @@ download_cache_max_mb() {
   else
     printf '0\n'
   fi
-}
-
-prune_download_cache() {
-  local target_dir max_mb limit_bytes total_bytes oldest_path
-  target_dir="$(downloads_dir)"
-  max_mb="$(download_cache_max_mb)"
-
-  if [[ ! "$max_mb" =~ ^[0-9]+$ ]] || (( max_mb <= 0 )) || [[ ! -d "$target_dir" ]]; then
-    return 0
-  fi
-
-  limit_bytes=$((max_mb * 1024 * 1024))
-  total_bytes="$(find "$target_dir" -maxdepth 1 -type f -printf '%s\n' 2>/dev/null | awk '{sum+=$1} END {print sum+0}')"
-
-  while [[ "$total_bytes" =~ ^[0-9]+$ ]] && (( total_bytes > limit_bytes )); do
-    oldest_path="$(find "$target_dir" -maxdepth 1 -type f -printf '%T@ %p\n' 2>/dev/null | sort -n | head -n 1 | cut -d' ' -f2-)"
-    if [[ -z "$oldest_path" ]]; then
-      break
-    fi
-    rm -f -- "$oldest_path" || break
-    total_bytes="$(find "$target_dir" -maxdepth 1 -type f -printf '%s\n' 2>/dev/null | awk '{sum+=$1} END {print sum+0}')"
-  done
 }
 
 ensure_files() {

@@ -1446,7 +1446,7 @@
       "author": "kevichi7",
       "description": "Search YouTube, play audio in the background with mpv, and save favorites into a persistent library.",
       "license": "MIT",
-      "version": "1.2.7",
+      "version": "1.2.10",
       "tags": [
         "Bar",
         "Panel",
@@ -1454,7 +1454,7 @@
         "Audio",
         "Music"
       ],
-      "lastUpdated": "2026-10-11",
+      "lastUpdated": "2026-11-19",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
