@@ -1,7 +1,7 @@
 {
   "id": "niri-windows-map",
   "name": "Niri Windows Map",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "author": "Atmosphera",
   "license": "GPL-3.0",
   "description": "Spatial overview map of niri windows: workspaces, columns and tiles. Click tiles to focus and rows to switch workspace. Reliable startup focus and drag require the stale-seed shell fix in Atmosphera PR #29.",
@@ -22,14 +22,14 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "audioIndicators": {"type": "Boolean"},
-        "browserIcons": {"type": "Boolean"},
-        "corner": {"type": "String"},
-        "hideIcons": {"type": "Boolean"},
-        "hideOnClick": {"type": "Boolean"},
-        "hoverInfo": {"type": "Boolean"},
-        "panelSize": {"type": "String"},
-        "terminalIcons": {"type": "Boolean"}
+        "audioIndicators": {"editorUsage": "configuration", "type": "Boolean"},
+        "browserIcons": {"editorUsage": "configuration", "type": "Boolean"},
+        "corner": {"editorUsage": "configuration", "type": "String"},
+        "hideIcons": {"editorUsage": "configuration", "type": "Boolean"},
+        "hideOnClick": {"editorUsage": "configuration", "type": "Boolean"},
+        "hoverInfo": {"editorUsage": "configuration", "type": "Boolean"},
+        "panelSize": {"editorUsage": "configuration", "type": "String"},
+        "terminalIcons": {"editorUsage": "configuration", "type": "Boolean"}
       }
     },
     "defaultSettings": {

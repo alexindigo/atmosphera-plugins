@@ -1,7 +1,7 @@
 {
     "id": "giphy-search",
     "name": "Giphy Search",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "minAtmospheraVersion": "0.10.0",
     "author": "Sergio Mendolia",
     "license": "MIT",
@@ -26,8 +26,8 @@
         "settingsSchema": {
           "version": 1,
           "fields": {
-            "api_key": {"type": "String"},
-            "rating": {"type": "String"}
+            "api_key": {"editorUsage": "configuration", "type": "String"},
+            "rating": {"editorUsage": "configuration", "type": "String"}
           }
         },
         "defaultSettings": {

@@ -1,7 +1,7 @@
 {
   "id": "plugin-manager",
   "name": "Plugin Manager",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.10.0",
   "author": "blacku",
@@ -27,7 +27,7 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "iconColor": {"type": "String"}
+        "iconColor": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

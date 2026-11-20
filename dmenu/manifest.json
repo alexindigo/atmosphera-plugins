@@ -1,7 +1,7 @@
 {
   "id": "dmenu",
   "name": "Dmenu Provider",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "minNoctaliaVersion": "3.9.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "Ben Hilton",
@@ -21,13 +21,13 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "customInputPrefix": {"type": "String","optional": true},
-        "maxResults": {"type": "Real"},
-        "panelPosition": {"type": "String"},
-        "resultFile": {"type": "String"},
-        "showFooter": {"type": "Boolean"},
-        "showMatchCount": {"type": "Boolean"},
-        "showToastOnSelect": {"type": "Boolean"}
+        "customInputPrefix": {"editorUsage": "configuration", "type": "String","optional": true},
+        "maxResults": {"editorUsage": "configuration", "type": "Real"},
+        "panelPosition": {"editorUsage": "configuration", "type": "String"},
+        "resultFile": {"editorUsage": "configuration", "type": "String"},
+        "showFooter": {"editorUsage": "configuration", "type": "Boolean"},
+        "showMatchCount": {"editorUsage": "configuration", "type": "Boolean"},
+        "showToastOnSelect": {"editorUsage": "configuration", "type": "Boolean"}
       }
     },
     "defaultSettings": {

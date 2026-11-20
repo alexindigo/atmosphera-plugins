@@ -1,7 +1,7 @@
 {
   "id": "display-settings",
   "name": "Display Settings",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "fstanis",
@@ -22,8 +22,8 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "iconColor": {"type": "String"},
-        "niriConfigPath": {"type": "String"}
+        "iconColor": {"editorUsage": "configuration", "type": "String"},
+        "niriConfigPath": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

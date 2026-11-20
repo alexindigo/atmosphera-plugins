@@ -1,7 +1,7 @@
 {
   "id": "custom-commands",
   "name": "Custom Commands",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Define and run custom shell commands from the launcher",
   "tags": [
     "Launcher"
@@ -25,7 +25,7 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "commands": {"type": "List","element": {"type": "Record","fields": {"name": {"type": "String","optional": true},"command": {"type": "String","optional": true},"icon": {"type": "String","optional": true}}}}
+        "commands": {"editorUsage": "configuration", "type": "List","element": {"type": "Record","fields": {"name": {"type": "String","optional": true},"command": {"type": "String","optional": true},"icon": {"type": "String","optional": true}}}}
       }
     },
     "defaultSettings": {

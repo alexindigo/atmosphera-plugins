@@ -1,7 +1,7 @@
 {
   "id": "monique",
   "name": "Monique",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "minNoctaliaVersion": "4.0.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "ToRvaLDz",
@@ -26,9 +26,9 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "activeColor": {"type": "String"},
-        "refreshInterval": {"type": "Real"},
-        "showProfileLabel": {"type": "Boolean"}
+        "activeColor": {"editorUsage": "configuration", "type": "String"},
+        "refreshInterval": {"editorUsage": "configuration", "type": "Real"},
+        "showProfileLabel": {"editorUsage": "configuration", "type": "Boolean"}
       }
     },
     "defaultSettings": {

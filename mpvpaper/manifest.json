@@ -1,7 +1,7 @@
 {
   "id": "mpvpaper",
   "name": "Mpvpaper",
-  "version": "1.6.9",
+  "version": "1.6.10",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "spiros132",
@@ -27,21 +27,21 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "active": {"type": "Boolean", "optional": true},
-        "automation": {"type": "Boolean", "optional": true},
-        "automationMode": {"type": "String", "optional": true},
-        "automationTime": {"type": "Real", "optional": true},
-        "currentWallpaper": {"type": "String", "optional": true},
-        "fillMode": {"type": "String"},
-        "hardwareAcceleration": {"type": "Boolean", "optional": true},
-        "isMuted": {"type": "Boolean", "optional": true},
-        "isPlaying": {"type": "Boolean", "optional": true},
-        "mpvSocket": {"type": "String"},
-        "oldWallpapers": {"type": "Map", "optional": true, "machineLocal": true, "element": {"type": "String"}},
-        "profile": {"type": "String"},
-        "thumbCacheReady": {"type": "Boolean", "optional": true, "machineLocal": true},
-        "volume": {"type": "Real", "optional": true},
-        "wallpapersFolder": {"type": "String"}
+        "active": {"editorUsage": "configuration", "type": "Boolean", "optional": true},
+        "automation": {"editorUsage": "configuration", "type": "Boolean", "optional": true},
+        "automationMode": {"editorUsage": "configuration", "type": "String", "optional": true},
+        "automationTime": {"editorUsage": "configuration", "type": "Real", "optional": true},
+        "currentWallpaper": {"editorUsage": "configuration", "type": "String", "optional": true},
+        "fillMode": {"editorUsage": "configuration", "type": "String"},
+        "hardwareAcceleration": {"editorUsage": "configuration", "type": "Boolean", "optional": true},
+        "isMuted": {"editorUsage": "configuration", "type": "Boolean", "optional": true},
+        "isPlaying": {"editorUsage": "configuration", "type": "Boolean", "optional": true},
+        "mpvSocket": {"editorUsage": "configuration", "type": "String"},
+        "oldWallpapers": {"editorUsage": "operational", "type": "Map", "optional": true, "machineLocal": true, "element": {"type": "String"}},
+        "profile": {"editorUsage": "configuration", "type": "String"},
+        "thumbCacheReady": {"editorUsage": "operational", "type": "Boolean", "optional": true, "machineLocal": true},
+        "volume": {"editorUsage": "configuration", "type": "Real", "optional": true},
+        "wallpapersFolder": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

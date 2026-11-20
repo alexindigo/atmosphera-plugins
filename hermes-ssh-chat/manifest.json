@@ -1,7 +1,7 @@
 {
   "id": "hermes-ssh-chat",
   "name": "Hermes SSH Terminal",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.10.0",
   "author": "focky",
@@ -28,18 +28,18 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "autoConnectOnStartup": {"type": "Boolean"},
-        "host": {"type": "String", "machineLocal": true},
-        "panelHeight": {"type": "Real"},
-        "panelWidth": {"type": "Real"},
-        "port": {"type": "Real", "machineLocal": true},
-        "rememberLastTarget": {"type": "Boolean"},
-        "showBarText": {"type": "Boolean"},
-        "terminalCols": {"type": "Real"},
-        "terminalFontSize": {"type": "Real"},
-        "terminalRows": {"type": "Real"},
-        "toggleShortcutName": {"type": "String"},
-        "user": {"type": "String", "machineLocal": true}
+        "autoConnectOnStartup": {"editorUsage": "configuration", "type": "Boolean"},
+        "host": {"editorUsage": "configuration", "type": "String", "machineLocal": true},
+        "panelHeight": {"editorUsage": "configuration", "type": "Real"},
+        "panelWidth": {"editorUsage": "configuration", "type": "Real"},
+        "port": {"editorUsage": "configuration", "type": "Real", "machineLocal": true},
+        "rememberLastTarget": {"editorUsage": "configuration", "type": "Boolean"},
+        "showBarText": {"editorUsage": "configuration", "type": "Boolean"},
+        "terminalCols": {"editorUsage": "configuration", "type": "Real"},
+        "terminalFontSize": {"editorUsage": "configuration", "type": "Real"},
+        "terminalRows": {"editorUsage": "configuration", "type": "Real"},
+        "toggleShortcutName": {"editorUsage": "configuration", "type": "String"},
+        "user": {"editorUsage": "configuration", "type": "String", "machineLocal": true}
       }
     },
     "defaultSettings": {

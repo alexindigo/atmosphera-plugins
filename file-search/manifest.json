@@ -1,7 +1,7 @@
 {
     "id": "file-search",
     "name": "File Search",
-  "version": "1.0.9",
+  "version": "1.0.10",
     "minNoctaliaVersion": "4.1.2",
   "minAtmospheraVersion": "0.10.0",
     "author": "ericbreh",
@@ -24,11 +24,11 @@
         "settingsSchema": {
           "version": 1,
           "fields": {
-            "fdCommand": {"type": "String"},
-            "fileOpener": {"type": "String"},
-            "maxResults": {"type": "Real"},
-            "searchDirectory": {"type": "String"},
-            "showHidden": {"type": "Boolean"}
+            "fdCommand": {"editorUsage": "configuration", "type": "String"},
+            "fileOpener": {"editorUsage": "configuration", "type": "String"},
+            "maxResults": {"editorUsage": "configuration", "type": "Real"},
+            "searchDirectory": {"editorUsage": "configuration", "type": "String"},
+            "showHidden": {"editorUsage": "configuration", "type": "Boolean"}
           }
         },
         "defaultSettings": {

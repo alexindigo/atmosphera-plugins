@@ -1,7 +1,7 @@
 {
   "id": "not-just-text",
   "name": "Not Just Text",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "minNoctaliaVersion": "4.4.1",
   "minAtmospheraVersion": "0.10.0",
   "author": "blackteaextract",
@@ -24,15 +24,15 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "fortuneCategory": {"type": "String"},
-        "fortuneEnabled": {"type": "Boolean"},
-        "fortuneEqual": {"type": "Boolean"},
-        "fortuneMaxLength": {"type": "Real"},
-        "fortuneOffensive": {"type": "Boolean"},
-        "listEnabled": {"type": "Boolean"},
-        "refreshOnWallpaper": {"type": "Boolean"},
-        "text": {"type": "String"},
-        "textFile": {"type": "String"}
+        "fortuneCategory": {"editorUsage": "configuration", "type": "String"},
+        "fortuneEnabled": {"editorUsage": "configuration", "type": "Boolean"},
+        "fortuneEqual": {"editorUsage": "configuration", "type": "Boolean"},
+        "fortuneMaxLength": {"editorUsage": "configuration", "type": "Real"},
+        "fortuneOffensive": {"editorUsage": "configuration", "type": "Boolean"},
+        "listEnabled": {"editorUsage": "configuration", "type": "Boolean"},
+        "refreshOnWallpaper": {"editorUsage": "configuration", "type": "Boolean"},
+        "text": {"editorUsage": "configuration", "type": "String"},
+        "textFile": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

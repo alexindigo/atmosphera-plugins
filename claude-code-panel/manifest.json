@@ -1,7 +1,7 @@
 {
   "id": "claude-code-panel",
   "name": "Claude Code Panel",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "minNoctaliaVersion": "4.1.2",
   "minAtmospheraVersion": "0.10.0",
   "author": "d7om",
@@ -32,14 +32,14 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "attachmentStyle": {"type": "String"},
-        "claude": {"type": "Record","fields": {"binary": {"type": "String","optional": true},"workingDir": {"type": "String","optional": true},"model": {"type": "String","optional": true},"fallbackModel": {"type": "String","optional": true},"permissionMode": {"type": "String","optional": true},"mcpConfigPath": {"type": "String","optional": true},"appendSystemPrompt": {"type": "String","optional": true},"sessionId": {"type": "String","optional": true},"injectNoctaliaContext": {"type": "Boolean","optional": true},"includePartialMessages": {"type": "Boolean","optional": true},"dangerouslySkipPermissions": {"type": "Boolean","optional": true},"autoResume": {"type": "Boolean","optional": true},"strictMcpConfig": {"type": "Boolean","optional": true},"requireConfirmBypass": {"type": "Boolean","optional": true},"allowedTools": {"type": "List","element": {"type": "String"},"optional": true},"disallowedTools": {"type": "List","element": {"type": "String"},"optional": true},"additionalDirs": {"type": "List","element": {"type": "String"},"optional": true},"maxTurns": {"type": "Real","optional": true}}},
-        "maxHistoryLength": {"type": "Real"},
-        "panelDetached": {"type": "Boolean"},
-        "panelHeightRatio": {"type": "Real"},
-        "panelPosition": {"type": "String"},
-        "panelWidth": {"type": "Real"},
-        "scale": {"type": "Real"}
+        "attachmentStyle": {"editorUsage": "configuration", "type": "String"},
+        "claude": {"editorUsage": "configuration", "type": "Record","fields": {"binary": {"type": "String","optional": true},"workingDir": {"type": "String","optional": true},"model": {"type": "String","optional": true},"fallbackModel": {"type": "String","optional": true},"permissionMode": {"type": "String","optional": true},"mcpConfigPath": {"type": "String","optional": true},"appendSystemPrompt": {"type": "String","optional": true},"sessionId": {"type": "String","optional": true},"injectNoctaliaContext": {"type": "Boolean","optional": true},"includePartialMessages": {"type": "Boolean","optional": true},"dangerouslySkipPermissions": {"type": "Boolean","optional": true},"autoResume": {"type": "Boolean","optional": true},"strictMcpConfig": {"type": "Boolean","optional": true},"requireConfirmBypass": {"type": "Boolean","optional": true},"allowedTools": {"type": "List","element": {"type": "String"},"optional": true},"disallowedTools": {"type": "List","element": {"type": "String"},"optional": true},"additionalDirs": {"type": "List","element": {"type": "String"},"optional": true},"maxTurns": {"type": "Real","optional": true}}},
+        "maxHistoryLength": {"editorUsage": "configuration", "type": "Real"},
+        "panelDetached": {"editorUsage": "configuration", "type": "Boolean"},
+        "panelHeightRatio": {"editorUsage": "configuration", "type": "Real"},
+        "panelPosition": {"editorUsage": "configuration", "type": "String"},
+        "panelWidth": {"editorUsage": "configuration", "type": "Real"},
+        "scale": {"editorUsage": "configuration", "type": "Real"}
       }
     },
     "defaultSettings": {

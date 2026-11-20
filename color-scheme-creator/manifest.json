@@ -1,7 +1,7 @@
 {
   "id": "color-scheme-creator",
   "name": "Color Scheme Creator",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "minNoctaliaVersion": "4.5.1",
   "minAtmospheraVersion": "0.10.0",
   "author": "Noctalia Team",
@@ -28,8 +28,8 @@
       "version": 1,
       "definitions": {"colorVariant": {"type": "Record","fields": {"mPrimary": {"type": "String","optional": true},"mOnPrimary": {"type": "String","optional": true},"mSecondary": {"type": "String","optional": true},"mOnSecondary": {"type": "String","optional": true},"mTertiary": {"type": "String","optional": true},"mOnTertiary": {"type": "String","optional": true},"mError": {"type": "String","optional": true},"mOnError": {"type": "String","optional": true},"mSurface": {"type": "String","optional": true},"mOnSurface": {"type": "String","optional": true},"mSurfaceVariant": {"type": "String","optional": true},"mOnSurfaceVariant": {"type": "String","optional": true},"mOutline": {"type": "String","optional": true},"mShadow": {"type": "String","optional": true},"mHover": {"type": "String","optional": true},"mOnHover": {"type": "String","optional": true},"terminal": {"type": "Record","fields": {"normal": {"type": "Map","element": {"type": "String"},"optional": true},"bright": {"type": "Map","element": {"type": "String"},"optional": true},"foreground": {"type": "String","optional": true},"background": {"type": "String","optional": true},"selectionFg": {"type": "String","optional": true},"selectionBg": {"type": "String","optional": true},"cursor": {"type": "String","optional": true},"cursorText": {"type": "String","optional": true}},"optional": true}}}},
       "fields": {
-        "iconColor": {"type": "String"},
-        "wip": {"type": "Record", "machineLocal": true, "fields": {"name": {"type": "String","optional": true},"dark": {"ref": "colorVariant","optional": true},"light": {"ref": "colorVariant","optional": true}},"optional": true,"nullable": true}
+        "iconColor": {"editorUsage": "configuration", "type": "String"},
+        "wip": {"editorUsage": "content", "type": "Record", "machineLocal": true, "fields": {"name": {"type": "String","optional": true},"dark": {"ref": "colorVariant","optional": true},"light": {"ref": "colorVariant","optional": true}},"optional": true,"nullable": true}
       }
     },
     "defaultSettings": {

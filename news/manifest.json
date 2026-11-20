@@ -1,7 +1,7 @@
 {
   "id": "news",
   "name": "News Bar",
-  "version": "1.2.10",
+  "version": "1.2.11",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "LazarH",
@@ -27,14 +27,14 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "apiKey": {"type": "String"},
-        "category": {"type": "String"},
-        "country": {"type": "String"},
-        "language": {"type": "String"},
-        "maxHeadlines": {"type": "Real"},
-        "refreshInterval": {"type": "Real"},
-        "rollingSpeed": {"type": "Real"},
-        "widgetWidth": {"type": "Real"}
+        "apiKey": {"editorUsage": "configuration", "type": "String"},
+        "category": {"editorUsage": "configuration", "type": "String"},
+        "country": {"editorUsage": "configuration", "type": "String"},
+        "language": {"editorUsage": "configuration", "type": "String"},
+        "maxHeadlines": {"editorUsage": "configuration", "type": "Real"},
+        "refreshInterval": {"editorUsage": "configuration", "type": "Real"},
+        "rollingSpeed": {"editorUsage": "configuration", "type": "Real"},
+        "widgetWidth": {"editorUsage": "configuration", "type": "Real"}
       }
     },
     "defaultSettings": {

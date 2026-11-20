@@ -1,7 +1,7 @@
 {
   "id": "ntfy-notifications",
   "name": "ntfy Notifications",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "minNoctaliaVersion": "4.4.1",
   "minAtmospheraVersion": "0.10.0",
   "author": "maxe",
@@ -27,16 +27,16 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "authMethod": {"type": "String"},
-        "authPassword": {"type": "String", "machineLocal": true, "sensitive": true},
-        "authToken": {"type": "String", "machineLocal": true, "sensitive": true},
-        "authUsername": {"type": "String", "machineLocal": true, "sensitive": true},
-        "enableToasts": {"type": "Boolean"},
-        "maxMessages": {"type": "Real"},
-        "pollInterval": {"type": "Real"},
-        "readMessageIds": {"type": "List", "machineLocal": true, "element": {"type": "String"}},
-        "serverUrl": {"type": "String"},
-        "topics": {"type": "String"}
+        "authMethod": {"editorUsage": "configuration", "type": "String"},
+        "authPassword": {"editorUsage": "configuration", "type": "String", "machineLocal": true, "sensitive": true},
+        "authToken": {"editorUsage": "configuration", "type": "String", "machineLocal": true, "sensitive": true},
+        "authUsername": {"editorUsage": "configuration", "type": "String", "machineLocal": true, "sensitive": true},
+        "enableToasts": {"editorUsage": "configuration", "type": "Boolean"},
+        "maxMessages": {"editorUsage": "configuration", "type": "Real"},
+        "pollInterval": {"editorUsage": "configuration", "type": "Real"},
+        "readMessageIds": {"editorUsage": "operational", "type": "List", "machineLocal": true, "element": {"type": "String"}},
+        "serverUrl": {"editorUsage": "configuration", "type": "String"},
+        "topics": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

@@ -1,7 +1,7 @@
 {
   "id": "2-in-1-tools",
   "name": "2-in-1-tools",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "minNoctaliaVersion": "4.4.3",
   "minAtmospheraVersion": "0.10.0",
   "author": "Codex",
@@ -27,21 +27,21 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "autoRotateInTabletMode": {"type": "Boolean"},
-        "autoRotateOutsideTabletMode": {"type": "Boolean"},
-        "autoTabletBarDensity": {"type": "Boolean"},
-        "buttonBehavior": {"type": "String"},
-        "exclusiveDockInTabletMode": {"type": "Boolean"},
-        "flipVerticalSensorOrientation": {"type": "Boolean"},
-        "iconName": {"type": "String"},
-        "lastNonTabletBarDensity": {"type": "String", "machineLocal": true},
-        "lastNonTabletDockEnabled": {"type": "Boolean", "machineLocal": true},
-        "lastNonTabletDockType": {"type": "String", "machineLocal": true},
-        "showSuccessToast": {"type": "Boolean"},
-        "showTransformInTooltip": {"type": "Boolean"},
-        "syncHyprTouchTransform": {"type": "Boolean"},
-        "tabletBarDensity": {"type": "String"},
-        "tabletModeStateFile": {"type": "String"}
+        "autoRotateInTabletMode": {"editorUsage": "configuration", "type": "Boolean"},
+        "autoRotateOutsideTabletMode": {"editorUsage": "configuration", "type": "Boolean"},
+        "autoTabletBarDensity": {"editorUsage": "configuration", "type": "Boolean"},
+        "buttonBehavior": {"editorUsage": "configuration", "type": "String"},
+        "exclusiveDockInTabletMode": {"editorUsage": "configuration", "type": "Boolean"},
+        "flipVerticalSensorOrientation": {"editorUsage": "configuration", "type": "Boolean"},
+        "iconName": {"editorUsage": "configuration", "type": "String"},
+        "lastNonTabletBarDensity": {"editorUsage": "operational", "type": "String", "machineLocal": true},
+        "lastNonTabletDockEnabled": {"editorUsage": "operational", "type": "Boolean", "machineLocal": true},
+        "lastNonTabletDockType": {"editorUsage": "operational", "type": "String", "machineLocal": true},
+        "showSuccessToast": {"editorUsage": "configuration", "type": "Boolean"},
+        "showTransformInTooltip": {"editorUsage": "configuration", "type": "Boolean"},
+        "syncHyprTouchTransform": {"editorUsage": "configuration", "type": "Boolean"},
+        "tabletBarDensity": {"editorUsage": "configuration", "type": "String"},
+        "tabletModeStateFile": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

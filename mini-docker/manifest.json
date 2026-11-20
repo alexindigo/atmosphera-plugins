@@ -1,7 +1,7 @@
 {
   "id": "mini-docker",
   "name": "Mini Docker",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "MannuVilasara",
@@ -25,11 +25,11 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "activeColor": {"type": "String"},
-        "iconColor": {"type": "String"},
-        "inactiveColor": {"type": "String"},
-        "refreshInterval": {"type": "Real"},
-        "statusState": {"type": "String"}
+        "activeColor": {"editorUsage": "configuration", "type": "String"},
+        "iconColor": {"editorUsage": "configuration", "type": "String"},
+        "inactiveColor": {"editorUsage": "configuration", "type": "String"},
+        "refreshInterval": {"editorUsage": "configuration", "type": "Real"},
+        "statusState": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

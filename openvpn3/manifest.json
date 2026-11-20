@@ -1,7 +1,7 @@
 {
   "id": "openvpn3",
   "name": "OpenVPN3",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "minNoctaliaVersion": "4.4.1",
   "minAtmospheraVersion": "0.10.0",
   "author": "minh",
@@ -23,13 +23,13 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "connectedColor": {"type": "String"},
-        "defaultPersistent": {"type": "Boolean"},
-        "disconnectedColor": {"type": "String"},
-        "displayMode": {"type": "String"},
-        "hideWhenInactive": {"type": "Boolean"},
-        "pollInterval": {"type": "Real"},
-        "showNotifications": {"type": "Boolean"}
+        "connectedColor": {"editorUsage": "configuration", "type": "String"},
+        "defaultPersistent": {"editorUsage": "configuration", "type": "Boolean"},
+        "disconnectedColor": {"editorUsage": "configuration", "type": "String"},
+        "displayMode": {"editorUsage": "configuration", "type": "String"},
+        "hideWhenInactive": {"editorUsage": "configuration", "type": "Boolean"},
+        "pollInterval": {"editorUsage": "configuration", "type": "Real"},
+        "showNotifications": {"editorUsage": "configuration", "type": "Boolean"}
       }
     },
     "defaultSettings": {

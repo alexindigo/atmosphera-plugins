@@ -1,7 +1,7 @@
 {
   "id": "keep-awake-plus",
   "name": "Keep Awake+",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "Noam Stolero",
@@ -21,12 +21,12 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "activateOnLeftClick": {"type": "Boolean"},
-        "defaultScope": {"type": "String"},
-        "durations": {"type": "List","element": {"type": "Real"}},
-        "includeUnlimited": {"type": "Boolean"},
-        "quickExtendMinutes": {"type": "Real"},
-        "showRemainingText": {"type": "Boolean"}
+        "activateOnLeftClick": {"editorUsage": "configuration", "type": "Boolean"},
+        "defaultScope": {"editorUsage": "configuration", "type": "String"},
+        "durations": {"editorUsage": "configuration", "type": "List","element": {"type": "Real"}},
+        "includeUnlimited": {"editorUsage": "configuration", "type": "Boolean"},
+        "quickExtendMinutes": {"editorUsage": "configuration", "type": "Real"},
+        "showRemainingText": {"editorUsage": "configuration", "type": "Boolean"}
       }
     },
     "defaultSettings": {

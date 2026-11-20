@@ -1,7 +1,7 @@
 {
     "id": "nvim-session-provider",
     "name": "Neovim Session Provider",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "minAtmospheraVersion": "0.10.0",
     "description": "Open Neovim Sessions",
     "tags": ["Launcher", "Development"],
@@ -23,10 +23,10 @@
         "settingsSchema": {
           "version": 1,
           "fields": {
-            "includeInSearch": {"type": "Boolean"},
-            "nvim": {"type": "String"},
-            "runInTerminal": {"type": "Boolean"},
-            "sessionDir": {"type": "String"}
+            "includeInSearch": {"editorUsage": "configuration", "type": "Boolean"},
+            "nvim": {"editorUsage": "configuration", "type": "String"},
+            "runInTerminal": {"editorUsage": "configuration", "type": "Boolean"},
+            "sessionDir": {"editorUsage": "configuration", "type": "String"}
           }
         },
         "defaultSettings": {

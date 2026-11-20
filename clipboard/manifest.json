@@ -1,7 +1,7 @@
 {
   "id": "clipboard",
   "name": "Clipboard",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "minNoctaliaVersion": "4.1.2",
   "minAtmospheraVersion": "0.10.0",
   "author": "yanekyuk",
@@ -30,9 +30,9 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "density": {"type": "String"},
-        "maxHistorySize": {"type": "Real"},
-        "showImagePreviews": {"type": "Boolean"}
+        "density": {"editorUsage": "configuration", "type": "String"},
+        "maxHistorySize": {"editorUsage": "configuration", "type": "Real"},
+        "showImagePreviews": {"editorUsage": "configuration", "type": "Boolean"}
       }
     },
     "defaultSettings": {

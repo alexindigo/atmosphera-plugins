@@ -1,7 +1,7 @@
 {
   "id": "niri-animation-picker",
   "name": "Niri Animation Picker",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "Duncan-Rose",
@@ -27,9 +27,9 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "animationsFolder": {"type": "String"},
-        "iconColor": {"type": "String"},
-        "targetFile": {"type": "String"}
+        "animationsFolder": {"editorUsage": "configuration", "type": "String"},
+        "iconColor": {"editorUsage": "configuration", "type": "String"},
+        "targetFile": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

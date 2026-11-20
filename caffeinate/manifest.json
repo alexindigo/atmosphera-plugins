@@ -1,7 +1,7 @@
 {
   "id": "caffeinate",
   "name": "Caffeinate",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "minNoctaliaVersion": "4.7.7",
   "minAtmospheraVersion": "0.10.0",
   "author": "Jostein Hanssen",
@@ -29,10 +29,10 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "alias": {"type": "String"},
-        "hideInactiveWidget": {"type": "Boolean"},
-        "includeIndefinitePreset": {"type": "Boolean"},
-        "presets": {"type": "List","element": {"type": "String"}}
+        "alias": {"editorUsage": "configuration", "type": "String"},
+        "hideInactiveWidget": {"editorUsage": "configuration", "type": "Boolean"},
+        "includeIndefinitePreset": {"editorUsage": "configuration", "type": "Boolean"},
+        "presets": {"editorUsage": "configuration", "type": "List","element": {"type": "String"}}
       }
     },
     "defaultSettings": {

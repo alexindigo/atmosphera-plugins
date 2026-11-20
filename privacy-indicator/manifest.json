@@ -1,7 +1,7 @@
 {
   "id": "privacy-indicator",
   "name": "Privacy Indicator",
-  "version": "1.2.17",
+  "version": "1.2.18",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "Noctalia Team",
@@ -27,14 +27,14 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "activeColor": {"type": "String"},
-        "camFilterRegex": {"type": "String"},
-        "enableToast": {"type": "Boolean"},
-        "hideInactive": {"type": "Boolean"},
-        "iconSpacing": {"type": "Real"},
-        "inactiveColor": {"type": "String"},
-        "micFilterRegex": {"type": "String"},
-        "removeMargins": {"type": "Boolean"}
+        "activeColor": {"editorUsage": "configuration", "type": "String"},
+        "camFilterRegex": {"editorUsage": "configuration", "type": "String"},
+        "enableToast": {"editorUsage": "configuration", "type": "Boolean"},
+        "hideInactive": {"editorUsage": "configuration", "type": "Boolean"},
+        "iconSpacing": {"editorUsage": "configuration", "type": "Real"},
+        "inactiveColor": {"editorUsage": "configuration", "type": "String"},
+        "micFilterRegex": {"editorUsage": "configuration", "type": "String"},
+        "removeMargins": {"editorUsage": "configuration", "type": "Boolean"}
       }
     },
     "defaultSettings": {

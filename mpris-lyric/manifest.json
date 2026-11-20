@@ -1,7 +1,7 @@
 {
   "id": "mpris-lyric",
   "name": "MPRIS Lyric",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "minNoctaliaVersion": "3.8.0",
   "minAtmospheraVersion": "0.10.0",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -24,10 +24,10 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "hideWhenInactive": {"type": "Boolean"},
-        "playerName": {"type": "String"},
-        "updateInterval": {"type": "Real"},
-        "width": {"type": "Real"}
+        "hideWhenInactive": {"editorUsage": "configuration", "type": "Boolean"},
+        "playerName": {"editorUsage": "configuration", "type": "String"},
+        "updateInterval": {"editorUsage": "configuration", "type": "Real"},
+        "width": {"editorUsage": "configuration", "type": "Real"}
       }
     },
     "defaultSettings": {

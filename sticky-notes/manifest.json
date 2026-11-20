@@ -1,7 +1,7 @@
 {
   "id": "sticky-notes",
   "name": "Sticky Notes",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "sapjax",
@@ -26,10 +26,10 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "githubGistId": {"type": "String"},
-        "githubToken": {"type": "String", "sensitive": true, "machineLocal": true},
-        "notes": {"type": "String"},
-        "syncEnabled": {"type": "Boolean"}
+        "githubGistId": {"editorUsage": "operational", "type": "String"},
+        "githubToken": {"editorUsage": "configuration", "type": "String", "sensitive": true, "machineLocal": true},
+        "notes": {"editorUsage": "content", "type": "String"},
+        "syncEnabled": {"editorUsage": "configuration", "type": "Boolean"}
       }
     },
     "defaultSettings": {

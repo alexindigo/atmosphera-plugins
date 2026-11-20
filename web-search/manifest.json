@@ -1,7 +1,7 @@
 {
     "id": "web-search",
     "name": "Web Search",
-  "version": "1.1.8",
+  "version": "1.1.9",
     "author": "Rigelyon",
     "license": "MIT",
     "description": "Search the Internet from the Launcher.",
@@ -25,10 +25,10 @@
         "settingsSchema": {
           "version": 1,
           "fields": {
-            "direct_url": {"type": "Boolean"},
-            "max_results": {"type": "Real"},
-            "search_engine": {"type": "String"},
-            "show_suggestions": {"type": "Boolean"}
+            "direct_url": {"editorUsage": "configuration", "type": "Boolean"},
+            "max_results": {"editorUsage": "configuration", "type": "Real"},
+            "search_engine": {"editorUsage": "configuration", "type": "String"},
+            "show_suggestions": {"editorUsage": "configuration", "type": "Boolean"}
           }
         },
         "defaultSettings": {

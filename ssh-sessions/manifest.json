@@ -1,7 +1,7 @@
 {
   "id": "ssh-sessions",
   "name": "SSH Sessions",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "adriamartin91",
@@ -24,9 +24,9 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "pollInterval": {"type": "Real"},
-        "showInactiveHosts": {"type": "Boolean"},
-        "terminalCommand": {"type": "String"}
+        "pollInterval": {"editorUsage": "configuration", "type": "Real"},
+        "showInactiveHosts": {"editorUsage": "configuration", "type": "Boolean"},
+        "terminalCommand": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

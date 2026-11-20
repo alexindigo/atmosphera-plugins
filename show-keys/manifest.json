@@ -1,7 +1,7 @@
 {
     "id": "show-keys",
     "name": "Show Keys",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "minNoctaliaVersion": "3.6.0",
     "minAtmospheraVersion": "0.10.0",
     "author": "onez3r0",
@@ -23,15 +23,15 @@
         "settingsSchema": {
             "version": 1,
             "fields": {
-                "captureEnabled": {"type": "Boolean"},
-                "disabledScreens": {"type": "List", "element": {"type": "String"}},
-                "evtestDevice": {"type": "String"},
-                "hideDelaySec": {"type": "Real"},
-                "marginPx": {"type": "Real"},
-                "pillBg": {"type": "String", "optional": true},
-                "pillColor": {"type": "String", "optional": true},
-                "position": {"type": "String"},
-                "useCustomColors": {"type": "Boolean", "optional": true}
+                "captureEnabled": {"editorUsage": "configuration", "type": "Boolean"},
+                "disabledScreens": {"editorUsage": "configuration", "type": "List", "element": {"type": "String"}},
+                "evtestDevice": {"editorUsage": "configuration", "type": "String"},
+                "hideDelaySec": {"editorUsage": "configuration", "type": "Real"},
+                "marginPx": {"editorUsage": "configuration", "type": "Real"},
+                "pillBg": {"editorUsage": "configuration", "type": "String", "optional": true},
+                "pillColor": {"editorUsage": "configuration", "type": "String", "optional": true},
+                "position": {"editorUsage": "configuration", "type": "String"},
+                "useCustomColors": {"editorUsage": "configuration", "type": "Boolean", "optional": true}
             }
         },
         "defaultSettings": {

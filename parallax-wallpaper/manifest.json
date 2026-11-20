@@ -1,7 +1,7 @@
 {
   "id": "parallax-wallpaper",
   "name": "Parallax Wallpaper",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "minAtmospheraVersion": "0.10.0",
   "minNoctaliaVersion": "4.4.0",
   "author": "Qholin",
@@ -20,15 +20,15 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "autoZoom": {"type": "Boolean"},
-        "hParallaxAmount": {"type": "Real"},
-        "hParallaxDuration": {"type": "Real"},
-        "invertDirection": {"type": "Boolean"},
-        "parallaxDirection": {"type": "String"},
-        "parallaxEasing": {"type": "String"},
-        "vParallaxAmount": {"type": "Real"},
-        "vParallaxDuration": {"type": "Real"},
-        "zoomAmount": {"type": "Real"}
+        "autoZoom": {"editorUsage": "configuration", "type": "Boolean"},
+        "hParallaxAmount": {"editorUsage": "configuration", "type": "Real"},
+        "hParallaxDuration": {"editorUsage": "configuration", "type": "Real"},
+        "invertDirection": {"editorUsage": "configuration", "type": "Boolean"},
+        "parallaxDirection": {"editorUsage": "configuration", "type": "String"},
+        "parallaxEasing": {"editorUsage": "configuration", "type": "String"},
+        "vParallaxAmount": {"editorUsage": "configuration", "type": "Real"},
+        "vParallaxDuration": {"editorUsage": "configuration", "type": "Real"},
+        "zoomAmount": {"editorUsage": "configuration", "type": "Real"}
       }
     },
     "defaultSettings": {

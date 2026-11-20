@@ -1,7 +1,7 @@
 {
   "id": "mimeapp-gui",
   "name": "MimeApp GUI",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "minNoctaliaVersion": "4.1.2",
   "minAtmospheraVersion": "0.10.0",
   "author": "Mathew-D",
@@ -28,8 +28,8 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "iconColor": {"type": "String"},
-        "showOnlyConflicts": {"type": "Boolean","optional": true}
+        "iconColor": {"editorUsage": "configuration", "type": "String"},
+        "showOnlyConflicts": {"editorUsage": "configuration", "type": "Boolean","optional": true}
       }
     },
     "defaultSettings": {

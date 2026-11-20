@@ -1,7 +1,7 @@
 {
   "id": "agent-session-status",
   "name": "Agent Session Status",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.10.0",
   "author": "nzlov",
@@ -22,11 +22,11 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "bindAddress": {"type": "String"},
-        "hideWhenEmpty": {"type": "Boolean"},
-        "pollIntervalSec": {"type": "Real"},
-        "port": {"type": "Real"},
-        "token": {"type": "String"}
+        "bindAddress": {"editorUsage": "configuration", "type": "String"},
+        "hideWhenEmpty": {"editorUsage": "configuration", "type": "Boolean"},
+        "pollIntervalSec": {"editorUsage": "configuration", "type": "Real"},
+        "port": {"editorUsage": "configuration", "type": "Real"},
+        "token": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

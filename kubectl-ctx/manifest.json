@@ -1,7 +1,7 @@
 {
   "id": "kubectl-ctx",
   "name": "Kubectl Context",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.10.0",
   "author": "ultherego",
@@ -23,13 +23,13 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "iconColor": {"type": "String"},
-        "kubeconfigPath": {"type": "String"},
-        "panelHeight": {"type": "Real"},
-        "panelWidth": {"type": "Real"},
-        "pollInterval": {"type": "Real"},
-        "showErrorBadge": {"type": "Boolean"},
-        "terminal": {"type": "String"}
+        "iconColor": {"editorUsage": "configuration", "type": "String"},
+        "kubeconfigPath": {"editorUsage": "configuration", "type": "String"},
+        "panelHeight": {"editorUsage": "configuration", "type": "Real"},
+        "panelWidth": {"editorUsage": "configuration", "type": "Real"},
+        "pollInterval": {"editorUsage": "configuration", "type": "Real"},
+        "showErrorBadge": {"editorUsage": "configuration", "type": "Boolean"},
+        "terminal": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

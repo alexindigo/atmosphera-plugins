@@ -1,7 +1,7 @@
 {
   "id": "obs-control",
   "name": "OBS Control",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "author": "ayagmar",
   "description": "OBS recording, replay, and stream status widget for Noctalia.",
   "tags": [
@@ -28,23 +28,23 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "autoCloseManagedObs": {"type": "Boolean"},
-        "barLabelMode": {"type": "String"},
-        "launchBehavior": {"type": "String"},
-        "leftClickAction": {"type": "String"},
-        "openVideosAfterStop": {"type": "Boolean"},
-        "pollIntervalMs": {"type": "Real"},
-        "showBarWhenReady": {"type": "Boolean"},
-        "showBarWhenRecording": {"type": "Boolean"},
-        "showBarWhenReplay": {"type": "Boolean"},
-        "showBarWhenStreaming": {"type": "Boolean"},
-        "showControlCenterWhenReady": {"type": "Boolean"},
-        "showControlCenterWhenRecording": {"type": "Boolean"},
-        "showControlCenterWhenReplay": {"type": "Boolean"},
-        "showControlCenterWhenStreaming": {"type": "Boolean"},
-        "showElapsedInBar": {"type": "Boolean"},
-        "videosOpener": {"type": "String"},
-        "videosPath": {"type": "String"}
+        "autoCloseManagedObs": {"editorUsage": "configuration", "type": "Boolean"},
+        "barLabelMode": {"editorUsage": "configuration", "type": "String"},
+        "launchBehavior": {"editorUsage": "configuration", "type": "String"},
+        "leftClickAction": {"editorUsage": "configuration", "type": "String"},
+        "openVideosAfterStop": {"editorUsage": "configuration", "type": "Boolean"},
+        "pollIntervalMs": {"editorUsage": "configuration", "type": "Real"},
+        "showBarWhenReady": {"editorUsage": "configuration", "type": "Boolean"},
+        "showBarWhenRecording": {"editorUsage": "configuration", "type": "Boolean"},
+        "showBarWhenReplay": {"editorUsage": "configuration", "type": "Boolean"},
+        "showBarWhenStreaming": {"editorUsage": "configuration", "type": "Boolean"},
+        "showControlCenterWhenReady": {"editorUsage": "configuration", "type": "Boolean"},
+        "showControlCenterWhenRecording": {"editorUsage": "configuration", "type": "Boolean"},
+        "showControlCenterWhenReplay": {"editorUsage": "configuration", "type": "Boolean"},
+        "showControlCenterWhenStreaming": {"editorUsage": "configuration", "type": "Boolean"},
+        "showElapsedInBar": {"editorUsage": "configuration", "type": "Boolean"},
+        "videosOpener": {"editorUsage": "configuration", "type": "String"},
+        "videosPath": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

@@ -1,7 +1,7 @@
 {
   "id": "lyrics-fetch",
   "name": "Lyrics Fetch/Bar Display",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "Pever3ll",
@@ -23,15 +23,15 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "adaptScrollSpeed": {"type": "Boolean"},
-        "fontFamily": {"type": "String","optional": true},
-        "fontSize": {"type": "Real"},
-        "hideWhenEmpty": {"type": "Boolean"},
-        "hideWhenPaused": {"type": "Boolean","optional": true},
-        "scrollMode": {"type": "String"},
-        "scrollSpeed": {"type": "Real"},
-        "verticalRotationDirection": {"type": "String"},
-        "widgetWidth": {"type": "Real"}
+        "adaptScrollSpeed": {"editorUsage": "configuration", "type": "Boolean"},
+        "fontFamily": {"editorUsage": "configuration", "type": "String","optional": true},
+        "fontSize": {"editorUsage": "configuration", "type": "Real"},
+        "hideWhenEmpty": {"editorUsage": "configuration", "type": "Boolean"},
+        "hideWhenPaused": {"editorUsage": "configuration", "type": "Boolean","optional": true},
+        "scrollMode": {"editorUsage": "configuration", "type": "String"},
+        "scrollSpeed": {"editorUsage": "configuration", "type": "Real"},
+        "verticalRotationDirection": {"editorUsage": "configuration", "type": "String"},
+        "widgetWidth": {"editorUsage": "configuration", "type": "Real"}
       }
     },
     "defaultSettings": {

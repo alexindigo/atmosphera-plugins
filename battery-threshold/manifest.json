@@ -1,7 +1,7 @@
 {
   "id": "battery-threshold",
   "name": "Battery Threshold Control",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "Wilfred Mallawa",
@@ -26,8 +26,8 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "batteryDevice": {"type": "String"},
-        "chargeThreshold": {"type": "Real"}
+        "batteryDevice": {"editorUsage": "configuration", "type": "String"},
+        "chargeThreshold": {"editorUsage": "configuration", "type": "Real"}
       }
     },
     "defaultSettings": {

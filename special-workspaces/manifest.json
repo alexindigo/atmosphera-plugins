@@ -1,7 +1,7 @@
 {
   "id": "special-workspaces",
   "name": "Special Workspaces (Hyprland)",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "minNoctaliaVersion": "4.4.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "Qholin",
@@ -22,19 +22,19 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "drawer": {"type": "Boolean"},
-        "expandDirection": {"type": "String"},
-        "hideEmptyWorkspaces": {"type": "Boolean"},
-        "mainIcon": {"type": "String"},
-        "panelBackgroundColor": {"type": "String"},
-        "panelBackgroundEnabled": {"type": "Boolean"},
-        "primaryBorderRadius": {"type": "Real"},
-        "primaryFocusColor": {"type": "String"},
-        "primaryPillColor": {"type": "String"},
-        "primaryShowPill": {"type": "Boolean"},
-        "primarySize": {"type": "Real"},
-        "primarySymbolColor": {"type": "String"},
-        "workspaces": {"type": "List", "element": {"type": "Record", "fields": {"name": {"type": "String"}, "icon": {"type": "String", "optional": true}, "symbolColor": {"type": "String", "optional": true}, "showPill": {"type": "Boolean", "optional": true}, "pillColor": {"type": "String", "optional": true}, "size": {"type": "Real", "optional": true}, "borderRadius": {"type": "Real", "optional": true}, "focusColor": {"type": "String", "optional": true}}}}
+        "drawer": {"editorUsage": "configuration", "type": "Boolean"},
+        "expandDirection": {"editorUsage": "configuration", "type": "String"},
+        "hideEmptyWorkspaces": {"editorUsage": "configuration", "type": "Boolean"},
+        "mainIcon": {"editorUsage": "configuration", "type": "String"},
+        "panelBackgroundColor": {"editorUsage": "configuration", "type": "String"},
+        "panelBackgroundEnabled": {"editorUsage": "configuration", "type": "Boolean"},
+        "primaryBorderRadius": {"editorUsage": "configuration", "type": "Real"},
+        "primaryFocusColor": {"editorUsage": "configuration", "type": "String"},
+        "primaryPillColor": {"editorUsage": "configuration", "type": "String"},
+        "primaryShowPill": {"editorUsage": "configuration", "type": "Boolean"},
+        "primarySize": {"editorUsage": "configuration", "type": "Real"},
+        "primarySymbolColor": {"editorUsage": "configuration", "type": "String"},
+        "workspaces": {"editorUsage": "configuration", "type": "List", "element": {"type": "Record", "fields": {"name": {"type": "String"}, "icon": {"type": "String", "optional": true}, "symbolColor": {"type": "String", "optional": true}, "showPill": {"type": "Boolean", "optional": true}, "pillColor": {"type": "String", "optional": true}, "size": {"type": "Real", "optional": true}, "borderRadius": {"type": "Real", "optional": true}, "focusColor": {"type": "String", "optional": true}}}}
       }
     },
     "defaultSettings": {

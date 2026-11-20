@@ -1,7 +1,7 @@
 {
   "id": "hyprland-steam-overlay",
   "name": "Steam Overlay (Hyprland)",
-  "version": "2.2.5",
+  "version": "2.2.6",
   "minNoctaliaVersion": "4.1.2",
   "minAtmospheraVersion": "0.10.0",
   "author": "blacku",
@@ -21,18 +21,18 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "autoLaunchSteam": {"type": "Boolean"},
-        "chatWidth": {"type": "Real","optional": true},
-        "chatWidthPercent": {"type": "Real"},
-        "enableChatNotifications": {"type": "Boolean","optional": true},
-        "friendsWidth": {"type": "Real","optional": true},
-        "friendsWidthPercent": {"type": "Real"},
-        "gapSize": {"type": "Real"},
-        "mainWidth": {"type": "Real","optional": true},
-        "mainWidthPercent": {"type": "Real"},
-        "topMarginPercent": {"type": "Real"},
-        "useCustomLayout": {"type": "Boolean"},
-        "windowHeightPercent": {"type": "Real"}
+        "autoLaunchSteam": {"editorUsage": "configuration", "type": "Boolean"},
+        "chatWidth": {"editorUsage": "configuration", "type": "Real","optional": true},
+        "chatWidthPercent": {"editorUsage": "configuration", "type": "Real"},
+        "enableChatNotifications": {"editorUsage": "configuration", "type": "Boolean","optional": true},
+        "friendsWidth": {"editorUsage": "configuration", "type": "Real","optional": true},
+        "friendsWidthPercent": {"editorUsage": "configuration", "type": "Real"},
+        "gapSize": {"editorUsage": "configuration", "type": "Real"},
+        "mainWidth": {"editorUsage": "configuration", "type": "Real","optional": true},
+        "mainWidthPercent": {"editorUsage": "configuration", "type": "Real"},
+        "topMarginPercent": {"editorUsage": "configuration", "type": "Real"},
+        "useCustomLayout": {"editorUsage": "configuration", "type": "Boolean"},
+        "windowHeightPercent": {"editorUsage": "configuration", "type": "Real"}
       }
     },
     "defaultSettings": {

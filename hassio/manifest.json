@@ -1,7 +1,7 @@
 {
   "id": "hassio",
   "name": "Home Assistant",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "Pozzoo",
@@ -23,9 +23,9 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "entities": {"type": "List","element": {"type": "String"}},
-        "haToken": {"type": "String", "sensitive": true, "machineLocal": true},
-        "haUrl": {"type": "String"}
+        "entities": {"editorUsage": "configuration", "type": "List","element": {"type": "String"}},
+        "haToken": {"editorUsage": "configuration", "type": "String", "sensitive": true, "machineLocal": true},
+        "haUrl": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

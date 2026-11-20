@@ -1,7 +1,7 @@
 {
   "id": "obsidian-provider",
   "name": "Obsidian Provider",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "minAtmospheraVersion": "0.10.0",
   "description": "Switch between Obsidian vaults from the launcher.",
   "tags": ["Launcher", "Productivity"],
@@ -22,8 +22,8 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "includeInSearch": {"type": "Boolean"},
-        "obsidianConfigPath": {"type": "String"}
+        "includeInSearch": {"editorUsage": "configuration", "type": "Boolean"},
+        "obsidianConfigPath": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

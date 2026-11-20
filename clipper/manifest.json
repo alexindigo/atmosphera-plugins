@@ -1,7 +1,7 @@
 {
   "id": "clipper",
   "name": "Clipper",
-  "version": "2.4.8",
+  "version": "2.4.9",
   "minNoctaliaVersion": "4.1.2",
   "minAtmospheraVersion": "0.10.0",
   "author": "blackbartblues",
@@ -31,19 +31,19 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "autoPaste": {"type": "Boolean"},
-        "autoPasteDelay": {"type": "Real"},
-        "autoPasteOnRightClick": {"type": "Boolean"},
-        "cardColors": {"type": "Map","element": {"type": "Record","fields": {"bg": {"type": "String","optional": true},"separator": {"type": "String","optional": true},"fg": {"type": "String","optional": true}}}},
-        "customColors": {"type": "Map","element": {"type": "Record","fields": {"bg": {"type": "String","optional": true},"separator": {"type": "String","optional": true},"fg": {"type": "String","optional": true}}}},
-        "enableTodoIntegration": {"type": "Boolean"},
-        "fullscreenMode": {"type": "Boolean"},
-        "hidePanelBackground": {"type": "Boolean"},
-        "notecardsEnabled": {"type": "Boolean"},
-        "panelHeight": {"type": "Real"},
-        "panelWidth": {"type": "Real"},
-        "pincardsEnabled": {"type": "Boolean"},
-        "showCloseButton": {"type": "Boolean"}
+        "autoPaste": {"editorUsage": "configuration", "type": "Boolean"},
+        "autoPasteDelay": {"editorUsage": "configuration", "type": "Real"},
+        "autoPasteOnRightClick": {"editorUsage": "configuration", "type": "Boolean"},
+        "cardColors": {"editorUsage": "configuration", "type": "Map","element": {"type": "Record","fields": {"bg": {"type": "String","optional": true},"separator": {"type": "String","optional": true},"fg": {"type": "String","optional": true}}}},
+        "customColors": {"editorUsage": "configuration", "type": "Map","element": {"type": "Record","fields": {"bg": {"type": "String","optional": true},"separator": {"type": "String","optional": true},"fg": {"type": "String","optional": true}}}},
+        "enableTodoIntegration": {"editorUsage": "configuration", "type": "Boolean"},
+        "fullscreenMode": {"editorUsage": "configuration", "type": "Boolean"},
+        "hidePanelBackground": {"editorUsage": "configuration", "type": "Boolean"},
+        "notecardsEnabled": {"editorUsage": "configuration", "type": "Boolean"},
+        "panelHeight": {"editorUsage": "configuration", "type": "Real"},
+        "panelWidth": {"editorUsage": "configuration", "type": "Real"},
+        "pincardsEnabled": {"editorUsage": "configuration", "type": "Boolean"},
+        "showCloseButton": {"editorUsage": "configuration", "type": "Boolean"}
       }
     },
     "defaultSettings": {

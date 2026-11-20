@@ -1,7 +1,7 @@
 {
   "id": "activate-linux",
   "name": "Activate Linux Watermark",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "minAtmospheraVersion": "0.10.0",
   "author": "Preston Corless (pgattic)",
   "contributors": ["outfoxxed"],
@@ -20,9 +20,9 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "customizeText": {"type": "Boolean"},
-        "firstLine": {"type": "String"},
-        "secondLine": {"type": "String"}
+        "customizeText": {"editorUsage": "configuration", "type": "Boolean"},
+        "firstLine": {"editorUsage": "configuration", "type": "String"},
+        "secondLine": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

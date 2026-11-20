@@ -1,7 +1,7 @@
 {
   "id": "auto-cpufreq",
   "name": "auto-cpufreq",
-  "version": "2.6.5",
+  "version": "2.6.6",
   "minNoctaliaVersion": "4.4.1",
   "minAtmospheraVersion": "0.10.0",
   "author": "4rmcyt",
@@ -26,10 +26,10 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "compactMode": {"type": "Boolean"},
-        "refreshInterval": {"type": "Real"},
-        "showGovernor": {"type": "Boolean"},
-        "showTurbo": {"type": "Boolean"}
+        "compactMode": {"editorUsage": "configuration", "type": "Boolean"},
+        "refreshInterval": {"editorUsage": "configuration", "type": "Real"},
+        "showGovernor": {"editorUsage": "configuration", "type": "Boolean"},
+        "showTurbo": {"editorUsage": "configuration", "type": "Boolean"}
       }
     },
     "defaultSettings": {

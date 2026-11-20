@@ -1,7 +1,7 @@
 {
   "id": "world-clock",
   "name": "World Clock",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "Lokize",
@@ -20,10 +20,10 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "rotationInterval": {"type": "Real"},
-        "showDate": {"type": "Boolean"},
-        "timeFormat": {"type": "String"},
-        "timezones": {"type": "List", "element": {"type": "Record", "fields": {"name": {"type": "String"}, "timezone": {"type": "String"}, "enabled": {"type": "Boolean"}}}}
+        "rotationInterval": {"editorUsage": "configuration", "type": "Real"},
+        "showDate": {"editorUsage": "configuration", "type": "Boolean"},
+        "timeFormat": {"editorUsage": "configuration", "type": "String"},
+        "timezones": {"editorUsage": "configuration", "type": "List", "element": {"type": "Record", "fields": {"name": {"type": "String"}, "timezone": {"type": "String"}, "enabled": {"type": "Boolean"}}}}
       }
     },
     "defaultSettings": {

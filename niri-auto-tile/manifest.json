@@ -1,7 +1,7 @@
 {
   "id": "niri-auto-tile",
   "name": "Auto-Tile",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "minNoctaliaVersion": "4.4.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "pir0c0pter0",
@@ -25,14 +25,14 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "debounceMs": {"type": "Real"},
-        "enabled": {"type": "Boolean"},
-        "language": {"type": "String"},
-        "maxEventsPerSecond": {"type": "Real"},
-        "maxVisible": {"type": "Real"},
-        "onlyAtMax": {"type": "Boolean", "optional": true},
-        "perWorkspace": {"type": "Boolean"},
-        "workspaceMaxVisible": {"type": "Map", "element": {"type": "Real"}}
+        "debounceMs": {"editorUsage": "configuration", "type": "Real"},
+        "enabled": {"editorUsage": "configuration", "type": "Boolean"},
+        "language": {"editorUsage": "configuration", "type": "String"},
+        "maxEventsPerSecond": {"editorUsage": "configuration", "type": "Real"},
+        "maxVisible": {"editorUsage": "configuration", "type": "Real"},
+        "onlyAtMax": {"editorUsage": "configuration", "type": "Boolean", "optional": true},
+        "perWorkspace": {"editorUsage": "configuration", "type": "Boolean"},
+        "workspaceMaxVisible": {"editorUsage": "configuration", "type": "Map", "element": {"type": "Real"}}
       }
     },
     "defaultSettings": {

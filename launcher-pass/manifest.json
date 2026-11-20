@@ -1,7 +1,7 @@
 {
   "id": "launcher-pass",
   "name": "Launcher pass",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "minAtmospheraVersion": "0.10.0",
   "minNoctaliaVersion": "4.7.7",
   "author": "Marco Melletti",
@@ -22,10 +22,10 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "clipTimeout": {"type": "String"},
-        "storePath": {"type": "String"},
-        "typeDelay": {"type": "Real"},
-        "wtypeDelay": {"type": "Real"}
+        "clipTimeout": {"editorUsage": "configuration", "type": "String"},
+        "storePath": {"editorUsage": "configuration", "type": "String"},
+        "typeDelay": {"editorUsage": "configuration", "type": "Real"},
+        "wtypeDelay": {"editorUsage": "configuration", "type": "Real"}
       }
     },
     "defaultSettings": {

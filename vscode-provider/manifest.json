@@ -1,7 +1,7 @@
 {
     "id": "vscode-provider",
     "name": "VS Code Provider",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "minAtmospheraVersion": "0.10.0",
     "description": "Open VS Code Folders and Workspaces",
     "tags": ["Launcher", "Development"],
@@ -22,9 +22,9 @@
         "settingsSchema": {
           "version": 1,
           "fields": {
-            "command": {"type": "String"},
-            "configName": {"type": "String"},
-            "includeInSearch": {"type": "Boolean"}
+            "command": {"editorUsage": "configuration", "type": "String"},
+            "configName": {"editorUsage": "configuration", "type": "String"},
+            "includeInSearch": {"editorUsage": "configuration", "type": "Boolean"}
           }
         },
         "defaultSettings": {

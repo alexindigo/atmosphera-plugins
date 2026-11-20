@@ -1,7 +1,7 @@
 {
   "id": "weekly-calendar",
   "name": "Weekly Calendar",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "minNoctaliaVersion": "4.2.3",
   "minAtmospheraVersion": "0.10.0",
   "author": "dodaars",
@@ -22,12 +22,12 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "dayLineOpacity": {"type": "Real", "optional": true},
-        "hourLineOpacity": {"type": "Real", "optional": true},
-        "lineColorType": {"type": "String", "optional": true},
-        "panelMode": {"type": "String", "optional": true},
-        "timeFormat": {"type": "String", "optional": true},
-        "weekStart": {"type": "String", "optional": true}
+        "dayLineOpacity": {"editorUsage": "configuration", "type": "Real", "optional": true},
+        "hourLineOpacity": {"editorUsage": "configuration", "type": "Real", "optional": true},
+        "lineColorType": {"editorUsage": "configuration", "type": "String", "optional": true},
+        "panelMode": {"editorUsage": "configuration", "type": "String", "optional": true},
+        "timeFormat": {"editorUsage": "configuration", "type": "String", "optional": true},
+        "weekStart": {"editorUsage": "configuration", "type": "String", "optional": true}
       }
     }
   }

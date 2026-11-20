@@ -1,7 +1,7 @@
 {
   "id": "model-usage",
   "name": "Model Usage",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "cmptr",
@@ -26,11 +26,11 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "barCycleIntervalSec": {"type": "Real"},
-        "barDisplayMode": {"type": "String"},
-        "barMetric": {"type": "String"},
-        "providers": {"type": "Record", "machineLocal": true, "fields": {"claude": {"type": "Record","fields": {"enabled": {"type": "Boolean","optional": true},"statsPath": {"type": "String","optional": true},"credentialsPath": {"type": "String","optional": true}},"optional": true},"codex": {"type": "Record","fields": {"enabled": {"type": "Boolean","optional": true}},"optional": true},"copilot": {"type": "Record","fields": {"enabled": {"type": "Boolean","optional": true}},"optional": true},"gemini": {"type": "Record","fields": {"enabled": {"type": "Boolean","optional": true}},"optional": true},"openrouter": {"type": "Record","fields": {"enabled": {"type": "Boolean","optional": true},"apiKey": {"type": "String","sensitive": true,"machineLocal": true,"optional": true}},"optional": true},"zen": {"type": "Record","fields": {"enabled": {"type": "Boolean","optional": true},"apiKey": {"type": "String","sensitive": true,"machineLocal": true,"optional": true},"apiBaseUrl": {"type": "String","optional": true}},"optional": true}}},
-        "refreshIntervalSec": {"type": "Real"}
+        "barCycleIntervalSec": {"editorUsage": "configuration", "type": "Real"},
+        "barDisplayMode": {"editorUsage": "configuration", "type": "String"},
+        "barMetric": {"editorUsage": "configuration", "type": "String"},
+        "providers": {"editorUsage": "configuration", "type": "Record", "machineLocal": true, "fields": {"claude": {"type": "Record","fields": {"enabled": {"type": "Boolean","optional": true},"statsPath": {"type": "String","optional": true},"credentialsPath": {"type": "String","optional": true}},"optional": true},"codex": {"type": "Record","fields": {"enabled": {"type": "Boolean","optional": true}},"optional": true},"copilot": {"type": "Record","fields": {"enabled": {"type": "Boolean","optional": true}},"optional": true},"gemini": {"type": "Record","fields": {"enabled": {"type": "Boolean","optional": true}},"optional": true},"openrouter": {"type": "Record","fields": {"enabled": {"type": "Boolean","optional": true},"apiKey": {"type": "String","sensitive": true,"machineLocal": true,"optional": true}},"optional": true},"zen": {"type": "Record","fields": {"enabled": {"type": "Boolean","optional": true},"apiKey": {"type": "String","sensitive": true,"machineLocal": true,"optional": true},"apiBaseUrl": {"type": "String","optional": true}},"optional": true}}},
+        "refreshIntervalSec": {"editorUsage": "configuration", "type": "Real"}
       }
     },
     "defaultSettings": {

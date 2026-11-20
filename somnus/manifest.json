@@ -1,7 +1,7 @@
 {
   "id": "somnus",
   "name": "somnus",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "minNoctaliaVersion": "4.7.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "yhordi45",
@@ -21,19 +21,19 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "animationsEnabled": {"type": "Boolean"},
-        "buttonHeight": {"type": "Real"},
-        "buttonOpacity": {"type": "Real"},
-        "buttonSpacing": {"type": "Real"},
-        "buttonWidth": {"type": "Real"},
-        "hoverColor": {"type": "String"},
-        "hoverDesaturation": {"type": "Real"},
-        "iconColor": {"type": "String"},
-        "lockOnSuspend": {"type": "Boolean"},
-        "overlayBlur": {"type": "Real"},
-        "overlayTint": {"type": "Real"},
-        "panelTint": {"type": "Real"},
-        "useOverlay": {"type": "Boolean"}
+        "animationsEnabled": {"editorUsage": "configuration", "type": "Boolean"},
+        "buttonHeight": {"editorUsage": "configuration", "type": "Real"},
+        "buttonOpacity": {"editorUsage": "configuration", "type": "Real"},
+        "buttonSpacing": {"editorUsage": "configuration", "type": "Real"},
+        "buttonWidth": {"editorUsage": "configuration", "type": "Real"},
+        "hoverColor": {"editorUsage": "configuration", "type": "String"},
+        "hoverDesaturation": {"editorUsage": "configuration", "type": "Real"},
+        "iconColor": {"editorUsage": "configuration", "type": "String"},
+        "lockOnSuspend": {"editorUsage": "configuration", "type": "Boolean"},
+        "overlayBlur": {"editorUsage": "configuration", "type": "Real"},
+        "overlayTint": {"editorUsage": "configuration", "type": "Real"},
+        "panelTint": {"editorUsage": "configuration", "type": "Real"},
+        "useOverlay": {"editorUsage": "configuration", "type": "Boolean"}
       }
     },
     "defaultSettings": {
