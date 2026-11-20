@@ -13,6 +13,7 @@ Search YouTube, SoundCloud, or local files, play audio in the background with `m
 - `mpv` for playback
 - `yt-dlp` for YouTube and SoundCloud search/details/downloads
 - `jq` for local persistence helpers
+- `python3` and `ffmpeg` for safe MP3 downloads and local conversions
 - `ffprobe` is optional but improves local metadata detection
 
 ## Launcher usage
@@ -45,6 +46,22 @@ qs -c noctalia-shell ipc call plugin:music seek 90
 qs -c noctalia-shell ipc call plugin:music stop
 ```
 
+## Download limit
+
+Music Search never deletes or overwrites saved music. The MP3 download limit
+counts only files it downloaded into the currently selected folder. Other music
+and files already there before download tracking was introduced are not counted.
+Applying a limit keeps every existing file. At or above the limit, manual and
+automatic downloads stop with an explanation. Increase the limit or manually
+remove a downloaded file to free space; missing files stop counting on the next
+attempt. A download admitted below the limit can exceed it; the next is refused.
+Set 0 for unlimited. Name collisions create a numbered copy instead of replacing
+an existing file. Removing a saved library entry only removes its library record.
+Private playback fallback sources are recorded separately and removed by exact
+created identity on replacement or cleanup. Recorded downloads always take
+precedence and are never deleted, even when their folder overlaps the runtime
+directory. The download-folder limit does not count playback intermediates.
+
 ## Data files
 
 - By default, runtime data lives under `~/.cache/noctalia/plugins/music-search/`
@@ -53,4 +70,6 @@ qs -c noctalia-shell ipc call plugin:music stop
 - `~/.cache/noctalia/plugins/music-search/queue.json` stores the built-in persistent queue
 - `~/.cache/noctalia/plugins/music-search/state.json` stores current playback state
 - `~/.cache/noctalia/plugins/music-search/settings.json` stores local user state
+- `~/.cache/noctalia/plugins/music-search/downloads.json` records created MP3 paths, sizes and identities; losing this state makes existing downloads untracked, not deleted
+- `~/.cache/noctalia/plugins/music-search/playback.json` records exact private playback sources eligible for cleanup; unrecorded files are never adopted or swept
 - Set `MUSIC_CACHE_DIR` to override the default cache directory

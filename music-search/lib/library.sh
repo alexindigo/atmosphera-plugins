@@ -288,43 +288,15 @@ details_for_url() {
 download_mp3() {
   local title="${1-}"
   local url="${2-}"
-  local target_dir
 
   if [[ -z "$url" ]]; then
     die "Missing URL."
   fi
 
-  target_dir="$(downloads_dir)"
-  mkdir -p "$target_dir"
-
-  if [[ -f "$url" ]]; then
-    require_cmd ffmpeg
-
-    local base_name output_path
-    base_name="$(sanitize_filename "${title:-$(basename "$url")}")"
-    base_name="${base_name%.*}"
-    output_path="${target_dir}/${base_name}.mp3"
-
-    ffmpeg -y -i "$url" -vn -codec:a libmp3lame -q:a 2 "$output_path" >/dev/null 2>&1
-    prune_download_cache
-    printf '%s\n' "$output_path"
-    exit 0
-  fi
-
-  require_cmd yt-dlp
+  require_cmd python3
   require_cmd ffmpeg
-
-  local -a dl_args=(yt-dlp --ignore-config --no-warnings --no-part --no-playlist -x --audio-format mp3 --audio-quality 0)
-  if [[ "$url" =~ youtube\.com|youtu\.be ]]; then
-    local extractor_arg
-    extractor_arg="$(yt_extractor_args)"
-    [[ -n "$extractor_arg" ]] && dl_args+=("$extractor_arg")
-    dl_args+=(-o "${target_dir}/%(title)s [yt-%(id)s].%(ext)s")
-  else
-    dl_args+=(-o "${target_dir}/%(title)s [%(id)s].%(ext)s")
-  fi
-  "${dl_args[@]}" --print after_move:filepath -- "$url"
-  prune_download_cache
+  python3 "${SCRIPT_DIR}/lib/downloads.py" "$CACHE_DIR" "$(downloads_dir)" \
+    "$(download_cache_max_mb)" "$title" "$url" "$(yt_extractor_args)"
 }
 
 _save_entry_unlocked() {

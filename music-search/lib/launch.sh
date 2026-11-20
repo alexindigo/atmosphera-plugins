@@ -30,19 +30,8 @@ launch_youtube_cached() {
   local extractor_arg
   extractor_arg="$(yt_extractor_args)"
 
-  nohup setsid bash -lc '
-    set -euo pipefail
-    shopt -s nullglob
-    rm -f "$2".*
-    ytdlp_args=(yt-dlp --ignore-config --no-warnings -f bestaudio/best --no-part -o "$2.%(ext)s")
-    [[ -n "$5" ]] && ytdlp_args+=("$5")
-    "${ytdlp_args[@]}" -- "$1" >>"$4" 2>&1
-    files=("$2".*)
-    if [[ ${#files[@]} -eq 0 ]]; then
-      exit 1
-    fi
-    exec mpv --no-video --force-window=no --audio-display=no --demuxer-max-bytes=256K --speed="$6" --log-file="$4" --input-ipc-server="$3" --title="Noctalia music-search" "${files[0]}"
-  ' _ "$source_url" "$DOWNLOAD_BASENAME" "$SOCKET_FILE" "$LOG_FILE" "$extractor_arg" "$speed" >/dev/null 2>&1 &
+  nohup setsid python3 "${SCRIPT_DIR}/lib/playback-cache.py" play "$CACHE_DIR" \
+    "$source_url" "$extractor_arg" "$speed" >>"$LOG_FILE" 2>&1 &
 }
 
 wait_for_audio_start() {

@@ -98,7 +98,8 @@ force_terminate_pid() {
 }
 
 cleanup_runtime_cache() {
-  rm -f "${DOWNLOAD_BASENAME}".* "$LOG_FILE" "$SOCKET_FILE"
+  python3 "${SCRIPT_DIR}/lib/playback-cache.py" cleanup "$CACHE_DIR"
+  rm -f "$LOG_FILE" "$SOCKET_FILE"
 }
 
 hash_value() {
