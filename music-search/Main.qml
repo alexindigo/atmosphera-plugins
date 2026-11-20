@@ -298,7 +298,7 @@ Item {
         root.lastNotice = output.length > 0 ? (root.pluginApi?.tr("notices.savedMp3To", {"path": output})) : (root.pluginApi?.tr("notices.savedMp3"));
       } else {
         root.lastNotice = "";
-        root.lastError = stderrText.length > 0 ? stderrText : (root.pluginApi?.tr("errors.mp3SaveFailed"));
+        root.lastError = exitCode === 3 ? root.pluginApi?.tr("errors.downloadLimitReached") : (stderrText.length > 0 ? stderrText : (root.pluginApi?.tr("errors.mp3SaveFailed")));
       }
     }
   }

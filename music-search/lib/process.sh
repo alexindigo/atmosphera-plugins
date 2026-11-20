@@ -98,7 +98,14 @@ force_terminate_pid() {
 }
 
 cleanup_runtime_cache() {
-  rm -f "${DOWNLOAD_BASENAME}".* "$LOG_FILE" "$SOCKET_FILE"
+  local cleanup_status=0
+  python3 "${SCRIPT_DIR}/lib/playback-cache.py" cleanup "$CACHE_DIR" || cleanup_status=$?
+  if (( cleanup_status != 0 && cleanup_status != 4 )); then
+    printf 'Playback cache cleanup failed (%s); media and ownership records retained.\n' "$cleanup_status" >&2
+  fi
+  # Player termination and endpoint/state finalization do not depend on best-effort
+  # media cleanup. Busy cleanup keeps its ledger for the next stop or cached play.
+  rm -f "$LOG_FILE" "$SOCKET_FILE"
 }
 
 hash_value() {

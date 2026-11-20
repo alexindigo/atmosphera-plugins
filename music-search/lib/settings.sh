@@ -275,7 +275,7 @@ _set_cache_size_unlocked() {
   local max_mb="${1-0}"
 
   if [[ ! "$max_mb" =~ ^[0-9]+$ ]]; then
-    die "Cache size must be a non-negative number."
+    die "Download limit must be a non-negative number."
   fi
 
   safe_read_json "$SETTINGS_FILE"
@@ -288,7 +288,6 @@ _set_cache_size_unlocked() {
       | json_write_raw "$SETTINGS_FILE"
   fi
 
-  prune_download_cache
   cat "$SETTINGS_FILE"
 }
 
