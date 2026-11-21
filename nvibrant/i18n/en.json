@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "This instance selects its display port and vibrance. Toggling changes that physical display for all instances; its saved enabled choice remains instance-local. Main/IPC actions use plugin-level settings.",
     "vibrance-value": "Vibrance Level",
     "vibrance-value-desc": "Digital vibrance intensity (0 = default, 1023 = maximum saturation)",
     "display-index": "Display Port Index",

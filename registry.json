@@ -721,13 +721,13 @@
       "author": "Hy4ri",
       "description": "Change the lightbar color of your DualShock 4 or DualSense controller with a color picker and recent color history.",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "Hardware",
         "Gaming",
         "Bar"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
@@ -1812,13 +1812,13 @@
       "author": "NoFilterA1",
       "description": "Toggle NVIDIA digital vibrance (color saturation) via nvibrant.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Bar",
         "System",
         "Gaming"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.0.0",
