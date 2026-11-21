@@ -1,7 +1,7 @@
 {
   "id": "network-manager-vpn",
   "name": "Network Manager VPN",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.10.0",
   "author": "nZO",

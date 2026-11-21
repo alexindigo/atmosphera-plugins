@@ -1502,13 +1502,13 @@
       "author": "nZO",
       "description": "Connect to VPN via NetworkManager",
       "license": "MIT",
-      "version": "1.3.5",
+      "version": "1.3.6",
       "tags": [
         "Bar",
         "Panel",
         "Network"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
@@ -2241,7 +2241,7 @@
       "author": "mewmewmemw",
       "description": "Hotkey-driven region screencast that produces an animated GIF and copies it to the clipboard. Bar pill turns red while recording. Backed by wf-recorder + gifski.",
       "license": "MIT",
-      "version": "0.1.6",
+      "version": "0.1.7",
       "tags": [
         "Bar",
         "Recording",
@@ -2253,7 +2253,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": false,
       "upstreamPR": 766,
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "minNoctaliaVersion": "4.6.6",
       "minAtmospheraVersion": "0.10.0"
     },

@@ -4,228 +4,268 @@ import qs.Commons
 import qs.Services.UI
 
 QtObject {
-    id: root
+  id: root
 
-    readonly property var pluginSettings: pluginApi?.pluginSettings ?? ({})
+  property var pluginApi: null
 
-    readonly property var toast: root.pluginSettings?.disableToastNotifications ? null : ToastService
+  // One NetworkManager owner; only the originating action's notification
+  // policy is selected. Completion never borrows a newer caller's settings.
+  function capturePolicy(context) {
+    context = context || pluginApi?.settingsContext;
+    if (!context?.current())
+      return null;
+    return {
+      toast: context.settingsView.disableToastNotifications ? null : ToastService
+    };
+  }
 
-    property var pluginApi: null
+  property var vpnList: []
+  property real connectedCount: 0
+  readonly property bool isLoading: Object.keys(root._pending).length > 0
 
-    property var vpnList: []
-    property real connectedCount: 0
-    readonly property bool isLoading: Object.keys(root._pending).length > 0
+  property var _pending: ({})
 
-    property var _pending: ({})
+  // Needed only to detect disconnection not initiated by the user
+  property var _pollTimer: Timer {
+    interval: 5000
+    running: true
+    repeat: true
+    onTriggered: root.refresh()
+  }
 
-    // Needed only to detect disconnection not initiated by the user
-    property var _pollTimer: Timer {
-        interval: 5000
-        running: true
-        repeat: true
-        onTriggered: root.refresh()
+  property var _lines: []
+
+  property var _listProc: Process {
+    command: ["nmcli", "-t", "-f", "NAME,TYPE,STATE,UUID", "connection", "show"]
+    running: true
+
+    stdout: SplitParser {
+      onRead: line => {
+        if (line.trim() !== "")
+          root._lines.push(line);
+      }
     }
 
-    property var _lines: []
-
-    property var _listProc: Process {
-        command: ["nmcli", "-t", "-f", "NAME,TYPE,STATE,UUID", "connection", "show"]
-        running: true
-
-        stdout: SplitParser {
-            onRead: (line) => {
-                if (line.trim() !== "")
-                    root._lines.push(line)
+    onExited: exitCode => {
+      if (exitCode === 0) {
+        const parsed = [];
+        const newPending = Object.assign({}, root._pending);
+        for (const line of root._lines) {
+          const parts = line.split(":");
+          if (parts.length >= 4) {
+            const name = parts[0];
+            const type = parts[1];
+            const state = parts[2];
+            const uuid = parts[3];
+            if (type === "vpn" || type === "wireguard") {
+              if (newPending[uuid]) {
+                const wasConnecting = newPending[uuid] === "connect";
+                if (wasConnecting && state === "activated")
+                  delete newPending[uuid];
+                else if (!wasConnecting && state !== "activated")
+                  delete newPending[uuid];
+              }
+              parsed.push({
+                            name,
+                            type,
+                            connected: state === "activated",
+                            isLoading: !!newPending[uuid],
+                            uuid
+                          });
             }
+          }
         }
+        root._pending = newPending;
+        root.vpnList = parsed;
+        root.connectedCount = parsed.filter(v => v.connected).length;
+      }
+      root._lines = [];
+    }
+  }
 
-        onExited: (exitCode) => {
-            if (exitCode === 0) {
-                const parsed = []
-                const newPending = Object.assign({}, root._pending)
-                for (const line of root._lines) {
-                    const parts = line.split(":")
-                    if (parts.length >= 4) {
-                        const name  = parts[0]
-                        const type  = parts[1]
-                        const state = parts[2]
-                        const uuid = parts[3]
-                        if (type === "vpn" || type === "wireguard") {
-                            if (newPending[uuid]) {
-                                const wasConnecting = newPending[uuid] === "connect"
-                                if (wasConnecting && state === "activated")
-                                    delete newPending[uuid]
-                                else if (!wasConnecting && state !== "activated")
-                                    delete newPending[uuid]
-                            }
-                            parsed.push({
-                                name,
-                                type,
-                                connected: state === "activated",
-                                isLoading: !!newPending[uuid],
-                                uuid
-                            })
-                        }
-                    }
-                }
-                root._pending = newPending
-                root.vpnList = parsed
-                root.connectedCount = parsed.filter(v => v.connected).length
-            }
-            root._lines = []
-        }
+  property var _connectProc: Process {
+    property var actionPolicy: null
+    property string targetName: ""
+    property string targetUuid: ""
+    command: ["nmcli", "connection", "up", "uuid", targetUuid]
+    onExited: exitCode => {
+      if (exitCode === 0)
+        actionPolicy?.toast?.showNotice(t("toast.connectedTo", {
+                                            name: targetName
+                                          }));
+      else {
+        root.stopLoading(targetUuid);
+        actionPolicy?.toast?.showError(t("toast.connectionError", {
+                                           name: targetName
+                                         }));
+      }
+      root.refresh();
+    }
+  }
+
+  property var _disconnectProc: Process {
+    property var actionPolicy: null
+    property string targetName: ""
+    property string targetUuid: ""
+    command: ["nmcli", "connection", "down", "uuid", targetUuid]
+    onExited: exitCode => {
+      if (exitCode === 0)
+        actionPolicy?.toast?.showNotice(t("toast.disconnectedFrom", {
+                                            name: targetName
+                                          }));
+      else {
+        root.stopLoading(targetUuid);
+        actionPolicy?.toast?.showError(t("toast.disconnectionError", {
+                                           name: targetName
+                                         }));
+      }
+      root.refresh();
+    }
+  }
+
+  property var _addProc: Process {
+    property string targetType: ""
+
+    command: ["nm-connection-editor", "--create", "--type", targetType]
+    onExited: exitCode => {
+      root.refresh();
+    }
+  }
+
+  property var _editProc: Process {
+    property string targetName: ""
+    property string targetUuid: ""
+
+    command: ["nm-connection-editor", "--edit", targetUuid]
+    onExited: exitCode => {
+      root.refresh();
+    }
+  }
+
+  property var _removeProc: Process {
+    property var actionPolicy: null
+    property string targetName: ""
+    property string targetUuid: ""
+
+    command: ["nmcli", "connection", "delete", "uuid", targetUuid]
+    onExited: exitCode => {
+      if (exitCode === 0)
+        actionPolicy?.toast?.showNotice(t("toast.vpnRemoved", {
+                                            "name": targetName
+                                          }));
+      else
+        actionPolicy?.toast?.showError(t("toast.vpnRemoveError", {
+                                           "name": targetName
+                                         }));
+      root.refresh();
+    }
+  }
+
+  function t(key: string, data) {
+    if (!pluginApi)
+      return null;
+
+    return pluginApi.tr(key, data);
+  }
+
+  function refresh() {
+    _listProc.running = true;
+  }
+
+  function stopLoading(uuid) {
+    if (uuid && _pending[uuid]) {
+      const p = Object.assign({}, _pending);
+      delete p[uuid];
+      _pending = p;
     }
 
-    property var _connectProc: Process {
-        property string targetName: ""
-        property string targetUuid: ""
-        command: ["nmcli", "connection", "up", "uuid", targetUuid]
-        onExited: (exitCode) => {
-            if (exitCode === 0)
-                toast?.showNotice(t("toast.connectedTo", { name: targetName }))
-            else {
-                root.stopLoading(targetUuid)
-                toast?.showError(t("toast.connectionError", { name: targetName }))
-            }
-            root.refresh()
-        }
-    }
+    vpnList = vpnList.map(v => {
+      if (v.uuid !== uuid) {
+        return v;
+      }
 
-    property var _disconnectProc: Process {
-        property string targetName: ""
-        property string targetUuid: ""
-        command: ["nmcli", "connection", "down", "uuid", targetUuid]
-        onExited: (exitCode) => {
-            if (exitCode === 0)
-                toast?.showNotice(t("toast.disconnectedFrom", { name: targetName }))
-            else {
-                root.stopLoading(targetUuid)
-                toast?.showError(t("toast.disconnectionError", { name: targetName }))
-            }
-            root.refresh()
-        }
-    }
+      return Object.assign({}, v, {
+                             isLoading: false
+                           });
+    });
+  }
 
-    property var _addProc: Process {
-        property string targetType: ""
+  function connectTo(uuid, context) {
+    const policy = capturePolicy(context);
+    if (!policy || _connectProc.running)
+      return false;
+    _connectProc.actionPolicy = policy;
+    const p = Object.assign({}, _pending);
+    p[uuid] = "connect";
+    _pending = p;
+    let name = "";
+    vpnList = vpnList.map(v => {
+      if (v.uuid !== uuid) {
+        return v;
+      }
 
-        command: ["nm-connection-editor", "--create", "--type", targetType]
-        onExited: (exitCode) => {
-            root.refresh();
-        }
-    }
+      name = v.name;
+      return Object.assign({}, v, {
+                             isLoading: true
+                           });
+    });
+    _connectProc.targetName = name;
+    _connectProc.targetUuid = uuid;
+    _connectProc.running = true;
+  }
 
-    property var _editProc: Process {
-        property string targetName: ""
-        property string targetUuid: ""
+  function disconnectFrom(uuid, context) {
+    const policy = capturePolicy(context);
+    if (!policy || _disconnectProc.running)
+      return false;
+    _disconnectProc.actionPolicy = policy;
+    const p = Object.assign({}, _pending);
+    p[uuid] = "disconnect";
+    _pending = p;
+    let name = "";
+    vpnList = vpnList.map(v => {
+      if (v.uuid !== uuid) {
+        return v;
+      }
 
-        command: ["nm-connection-editor", "--edit", targetUuid]
-        onExited: (exitCode) => {
-            root.refresh();
-        }
-    }
+      name = v.name;
+      return Object.assign({}, v, {
+                             isLoading: true
+                           });
+    });
+    _disconnectProc.targetName = name;
+    _disconnectProc.targetUuid = uuid;
+    _disconnectProc.running = true;
+  }
 
-    property var _removeProc: Process {
-        property string targetName: ""
-        property string targetUuid: ""
+  function addConnection(type) {
+    _addProc.targetType = type || "vpn";
+    _addProc.running = true;
+  }
 
-        command: ["nmcli", "connection", "delete", "uuid", targetUuid]
-        onExited: (exitCode) => {
-            if (exitCode === 0)
-                toast?.showNotice(t("toast.vpnRemoved", { "name": targetName }));
-            else
-                toast?.showError(t("toast.vpnRemoveError", { "name": targetName }));
-            root.refresh();
-        }
-    }
+  function editConnection(uuid) {
+    const vpn = vpnList.find(v => {
+      return v.uuid === uuid;
+    });
+    _editProc.targetName = vpn ? vpn.name : uuid;
+    _editProc.targetUuid = uuid;
+    _editProc.running = true;
+  }
 
-    function t(key: string, data) {
-        if (!pluginApi)
-            return null;
+  function removeConnection(uuid, context) {
+    const policy = capturePolicy(context);
+    if (!policy || _removeProc.running)
+      return false;
+    _removeProc.actionPolicy = policy;
+    const vpn = vpnList.find(v => {
+      return v.uuid === uuid;
+    });
+    _removeProc.targetName = vpn ? vpn.name : uuid;
+    _removeProc.targetUuid = uuid;
+    _removeProc.running = true;
+  }
 
-        return pluginApi.tr(key, data);
-    }
-
-    function refresh() {
-        _listProc.running = true
-    }
-
-    function stopLoading(uuid) {
-        if (uuid && _pending[uuid]) {
-            const p = Object.assign({}, _pending)
-            delete p[uuid]
-            _pending = p
-        }
-
-        vpnList = vpnList.map(v => {
-            if (v.uuid !== uuid) {
-                return v
-            }
-
-            return Object.assign({}, v, { isLoading: false })
-        })
-    }
-
-    function connectTo(uuid) {
-        const p = Object.assign({}, _pending)
-        p[uuid] = "connect"
-        _pending = p
-        let name = ""
-        vpnList = vpnList.map(v => {
-            if (v.uuid !== uuid) {
-                return v
-            }
-            
-            name = v.name
-            return Object.assign({}, v, { isLoading: true })
-        })
-        _connectProc.targetName = name
-        _connectProc.targetUuid = uuid
-        _connectProc.running = true
-    }
-
-    function disconnectFrom(uuid) {
-        const p = Object.assign({}, _pending)
-        p[uuid] = "disconnect"
-        _pending = p
-        let name = ""
-        vpnList = vpnList.map(v => {
-            if (v.uuid !== uuid) {
-                return v
-            }
-            
-            name = v.name
-            return Object.assign({}, v, { isLoading: true })
-        })
-        _disconnectProc.targetName = name
-        _disconnectProc.targetUuid = uuid
-        _disconnectProc.running = true
-    }
-
-    function addConnection(type) {
-        _addProc.targetType = type || "vpn";
-        _addProc.running = true;
-    }
-
-    function editConnection(uuid) {
-        const vpn = vpnList.find((v) => {
-            return v.uuid === uuid;
-        });
-        _editProc.targetName = vpn ? vpn.name : uuid;
-        _editProc.targetUuid = uuid;
-        _editProc.running = true;
-    }
-
-    function removeConnection(uuid) {
-        const vpn = vpnList.find((v) => {
-            return v.uuid === uuid;
-        });
-        _removeProc.targetName = vpn ? vpn.name : uuid;
-        _removeProc.targetUuid = uuid;
-        _removeProc.running = true;
-    }
-
-    Component.onCompleted: {
-        Logger.i("NetworkManagerVPN", "Started")
-    }
+  Component.onCompleted: {
+    Logger.i("NetworkManagerVPN", "Started");
+  }
 }
