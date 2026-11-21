@@ -2352,7 +2352,7 @@
       "author": "yhordi45",
       "description": "A full-screen power menu for Noctalia Shell, inspired by the wlogout design.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Bar",
         "Panel",
@@ -2748,7 +2748,7 @@
       "author": "tonigineer",
       "description": "A `lively` wallpaper selector.",
       "license": "MIT",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "tags": [
         "Desktop",
         "Theming"

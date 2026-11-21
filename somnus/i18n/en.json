@@ -1,4 +1,5 @@
 {
+  "shared-window-effect": "Appearance and lock-on-suspend policy belong to the instance that opens this window. Power and session actions affect the whole system.",
   "header": {
     "title": "Somnus Power Menu",
     "desc": "Customize the appearance of the power menu"

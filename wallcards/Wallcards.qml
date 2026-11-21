@@ -1,15 +1,15 @@
-import "src"
-import "src/Utils.js" as Utils
-import qs.Commons
-import qs.Widgets
-import qs.Services.UI
-import QtQuick
+import Qt.labs.folderlistmodel
+import Qt5Compat.GraphicalEffects
 import QtMultimedia
+import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
-import Qt5Compat.GraphicalEffects
-import Qt.labs.folderlistmodel
+import "src/Utils.js" as Utils
+import "src"
+import qs.Commons
+import qs.Services.UI
+import qs.Widgets
 
 PanelWindow {
   id: root
@@ -37,6 +37,7 @@ PanelWindow {
   property bool loading: thumbnailService.loading
   property int pendingProcesses: 0
   property var pluginApi: null
+  property ShellScreen screenRef: null
   property string selectedFilter: pluginApi?.pluginSettings?.selected_filter || pluginApi?.manifest?.metadata?.defaultSettings?.selected_filter
   property string selectedColorFilter: ""
   property real shearFactor: pluginApi?.pluginSettings?.shear_factor ?? pluginApi?.manifest?.metadata?.defaultSettings?.shear_factor
@@ -45,6 +46,23 @@ PanelWindow {
   property int topBarRadius: Style.radiusM
 
   signal quitRequested
+
+  function saveLayout(callback) {
+    const api = root.pluginApi;
+    if (!api?.settingsContext.current())
+      return false;
+    api.pluginSettings.card_height = root.cardHeight;
+    api.pluginSettings.center_width_ratio = cardDeck.centerWidthRatio;
+    api.pluginSettings.cards_shown = root.cardsShown;
+    api.pluginSettings.card_spacing = root.cardSpacing;
+    api.pluginSettings.card_strip_width = root.cardStripWidth;
+    api.pluginSettings.hide_top_bar = root.hideTopBar;
+    api.pluginSettings.live_preview = root.livePreview;
+    api.pluginSettings.selected_filter = root.selectedFilter;
+    api.pluginSettings.hide_help = root.hideHelp;
+    api.pluginSettings.animate_window = root.animateWindow;
+    return api.saveSettings(callback);
+  }
 
   function applyCurrentCard() {
     var f = filteredFiles[cardDeck.currentIndex];
@@ -110,7 +128,7 @@ PanelWindow {
   exclusiveZone: 0
   implicitHeight: screen.height
   implicitWidth: screen.width
-  screen: pluginApi.panelOpenScreen
+  screen: screenRef || pluginApi?.panelOpenScreen
 
   onCurrentIndexChanged: {
     if (root.livePreview)
@@ -283,17 +301,7 @@ PanelWindow {
           event.accepted = true;
           return;
         } else if (event.key === Qt.Key_S) {
-          root.pluginApi.pluginSettings.card_height = root.cardHeight;
-          root.pluginApi.pluginSettings.center_width_ratio = cardDeck.centerWidthRatio;
-          root.pluginApi.pluginSettings.cards_shown = root.cardsShown;
-          root.pluginApi.pluginSettings.card_spacing = root.cardSpacing;
-          root.pluginApi.pluginSettings.card_strip_width = root.cardStripWidth;
-          root.pluginApi.pluginSettings.hide_top_bar = root.hideTopBar;
-          root.pluginApi.pluginSettings.live_preview = root.livePreview;
-          root.pluginApi.pluginSettings.selected_filter = root.selectedFilter;
-          root.pluginApi.pluginSettings.hide_help = root.hideHelp;
-          root.pluginApi.pluginSettings.animate_window = root.animateWindow;
-          root.pluginApi.saveSettings();
+          root.saveLayout();
           event.accepted = true;
           return;
         }

@@ -5,60 +5,59 @@ import qs.Services.UI
 import qs.Widgets
 
 AtmoIconButton {
-    id: root
+  id: root
 
-    property var pluginApi: null
-    property ShellScreen screen
-    property string widgetId: ""
-    property string section: ""
-    property int sectionWidgetIndex: -1
-    property int sectionWidgetsCount: 0
+  property var pluginApi: null
+  property ShellScreen screen
+  property string widgetId: ""
+  property string section: ""
+  property int sectionWidgetIndex: -1
+  property int sectionWidgetsCount: 0
 
-    readonly property string iconColorKey: pluginApi?.pluginSettings?.iconColor
-        || pluginApi?.manifest?.metadata?.defaultSettings?.iconColor || "primary"
+  readonly property string iconColorKey: pluginApi?.pluginSettings?.iconColor || pluginApi?.manifest?.metadata?.defaultSettings?.iconColor || "primary"
 
-    icon: "power"
-    tooltipText: pluginApi?.tr("widget.tooltip")
-    tooltipDirection: BarService.getTooltipDirection(screen?.name)
-    baseSize: Style.getCapsuleHeightForScreen(screen?.name)
-    applyUiScale: false
-    customRadius: Style.radiusL
+  icon: "power"
+  tooltipText: pluginApi?.tr("widget.tooltip")
+  tooltipDirection: BarService.getTooltipDirection(screen?.name)
+  baseSize: Style.getCapsuleHeightForScreen(screen?.name)
+  applyUiScale: false
+  customRadius: Style.radiusL
 
-    colorBg: Style.capsuleColor
-    colorFg: AtmoColor.resolveColorKey(iconColorKey)
-    colorBgHover: AtmoColor.mHover
-    colorFgHover: AtmoColor.mOnHover
-    colorBorder: "transparent"
-    colorBorderHover: "transparent"
-    border.color: Style.capsuleBorderColor
-    border.width: Style.capsuleBorderWidth
+  colorBg: Style.capsuleColor
+  colorFg: AtmoColor.resolveColorKey(iconColorKey)
+  colorBgHover: AtmoColor.mHover
+  colorFgHover: AtmoColor.mOnHover
+  colorBorder: "transparent"
+  colorBorderHover: "transparent"
+  border.color: Style.capsuleBorderColor
+  border.width: Style.capsuleBorderWidth
 
-    onClicked: {
-        Logger.i("Somnus", "Bar button pressed")
-        pluginApi?.mainInstance?.togglePanel?.(screen)
+  onClicked: {
+    Logger.i("Somnus", "Bar button pressed");
+    pluginApi?.mainInstance?.togglePanel?.(screen, pluginApi);
+  }
+
+  NPopupContextMenu {
+    id: contextMenu
+
+    model: [
+      {
+        "label": pluginApi?.tr("menu.settings"),
+        "action": "settings",
+        "icon": "settings"
+      }
+    ]
+
+    onTriggered: action => {
+      contextMenu.close();
+      PanelService.closeContextMenu(screen);
+      if (action === "settings") {
+        BarService.openPluginSettings(screen, pluginApi?.manifest);
+      }
     }
+  }
 
-    NPopupContextMenu {
-        id: contextMenu
-
-        model: [
-            {
-                "label": pluginApi?.tr("menu.settings"),
-                "action": "settings",
-                "icon": "settings"
-            }
-        ]
-
-        onTriggered: action => {
-            contextMenu.close()
-            PanelService.closeContextMenu(screen)
-            if (action === "settings") {
-                BarService.openPluginSettings(screen, pluginApi?.manifest)
-            }
-        }
-    }
-
-    onRightClicked: {
-        PanelService.showContextMenu(contextMenu, root, screen)
-    }
+  onRightClicked: {
+    PanelService.showContextMenu(contextMenu, root, screen);
+  }
 }

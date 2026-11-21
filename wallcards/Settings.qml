@@ -61,6 +61,13 @@ ColumnLayout {
   Layout.rightMargin: Style.marginL
   spacing: Style.marginL
 
+  NText {
+    Layout.fillWidth: true
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("shared-window-effect") ?? ""
+    wrapMode: Text.WordWrap
+  }
+
   // ── Icon ──
   NPluginSettingsField {
     field: root.iconColorField

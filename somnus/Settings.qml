@@ -43,6 +43,13 @@ ColumnLayout {
   spacing: Style.marginM
 
   NText {
+    Layout.fillWidth: true
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("shared-window-effect") ?? ""
+    wrapMode: Text.WordWrap
+  }
+
+  NText {
     text: pluginApi?.tr("header.title")
     pointSize: Style.fontSizeXL
     font.weight: Style.fontWeightBold
