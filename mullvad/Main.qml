@@ -9,6 +9,24 @@ Item {
 
 	property var pluginApi: null
 
+	property var _settingsConsumers: new Map()
+	Component { id: clientFactory; MullvadSettingsClient {} }
+	function settingsConsumerFor(context) {
+		if (!context || !context.current()) return null;
+		if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+		var client = clientFactory.createObject(root, {
+			settingsContext: context,
+			observation: root,
+			retire: function(retired) {
+				root._settingsConsumers.delete(context);
+				retired.destroy();
+			}
+		});
+		_settingsConsumers.set(context, client);
+		return client;
+	}
+	readonly property var settingsConsumer: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
+
 	readonly property var cfg: pluginApi?.pluginSettings || ({})
 	readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
@@ -60,11 +78,11 @@ Item {
 	// ─── Status polling ───
 	Process {
 		id: statusProcess
-		stdout: StdioCollector {}
+		stdout: StdioCollector { id: statusOutput }
 		stderr: StdioCollector {}
 		onExited: function (code) {
 			root.isRefreshing = false
-			var raw = String(statusProcess.stdout.text || "").trim()
+			var raw = String(statusOutput.text || "").trim()
 			if (code !== 0 || !raw) {
 				root.state = "error"
 				root.locked = false
@@ -112,18 +130,6 @@ Item {
 		root.isRefreshing = true
 		statusProcess.command = ["mullvad", "status", "--json"]
 		statusProcess.running = true
-	}
-
-	Timer {
-		id: updateTimer
-		interval: refreshInterval
-		repeat: true
-		running: true
-		triggeredOnStart: true
-		onTriggered: {
-			if (!root.installed) checkInstalled()
-			else updateStatus()
-		}
 	}
 
 	// ─── Connect / disconnect / reconnect ───
@@ -199,10 +205,10 @@ Item {
 
 	Process {
 		id: relayGetProcess
-		stdout: StdioCollector {}
+		stdout: StdioCollector { id: relayGetOutput }
 		stderr: StdioCollector {}
 		onExited: function (code) {
-			var raw = String(relayGetProcess.stdout.text || "")
+			var raw = String(relayGetOutput.text || "")
 			_applyRelayGet(_parseRelayGet(raw))
 		}
 	}
@@ -268,11 +274,11 @@ Item {
 
 	Process {
 		id: relayListProcess
-		stdout: StdioCollector {}
+		stdout: StdioCollector { id: relayListOutput }
 		stderr: StdioCollector {}
 		onExited: function (code) {
 			if (code !== 0) return
-			root.relayList = root._parseRelayList(String(relayListProcess.stdout.text || ""))
+			root.relayList = root._parseRelayList(String(relayListOutput.text || ""))
 			root.relayListReady = true
 		}
 	}
@@ -343,30 +349,30 @@ Item {
 
 	Process {
 		id: lockdownGet
-		stdout: StdioCollector {}
+		stdout: StdioCollector { id: lockdownOutput }
 		stderr: StdioCollector {}
 		onExited: function (code) {
-			var raw = String(lockdownGet.stdout.text || "").trim()
+			var raw = String(lockdownOutput.text || "").trim()
 			root.lockdownMode = /:\s*on/i.test(raw)
 		}
 	}
 
 	Process {
 		id: autoConnectGet
-		stdout: StdioCollector {}
+		stdout: StdioCollector { id: autoConnectOutput }
 		stderr: StdioCollector {}
 		onExited: function (code) {
-			var raw = String(autoConnectGet.stdout.text || "").trim()
+			var raw = String(autoConnectOutput.text || "").trim()
 			root.autoConnect = /:\s*on/i.test(raw)
 		}
 	}
 
 	Process {
 		id: lanGet
-		stdout: StdioCollector {}
+		stdout: StdioCollector { id: lanOutput }
 		stderr: StdioCollector {}
 		onExited: function (code) {
-			var raw = String(lanGet.stdout.text || "").trim()
+			var raw = String(lanOutput.text || "").trim()
 			root.lanSharing = /block/i.test(raw) ? "block" : "allow"
 		}
 	}
@@ -458,11 +464,11 @@ Item {
 
 	Process {
 		id: accountProc
-		stdout: StdioCollector {}
+		stdout: StdioCollector { id: accountOutput }
 		stderr: StdioCollector {}
 		onExited: function (code) {
 			if (code !== 0) return
-			var raw = String(accountProc.stdout.text || "")
+			var raw = String(accountOutput.text || "")
 			var m = raw.match(/Expires at:\s+(\S+)/)
 			if (!m) return
 			root.accountExpiry = m[1]

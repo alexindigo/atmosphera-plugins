@@ -1428,13 +1428,13 @@
       "author": "OCSPG",
       "description": "Control Mullvad VPN from the bar: connect/disconnect, pick relays, toggle lockdown mode, multihop and more.",
       "license": "MIT",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "tags": [
         "Bar",
         "Network",
         "Panel"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.0.0",
@@ -2045,7 +2045,7 @@
       "author": "adriamartin91",
       "description": "Monitor listening ports and their processes. Shows TCP/UDP ports with process info and kill functionality.",
       "license": "MIT",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "tags": [
         "Bar",
         "Panel",
@@ -2053,7 +2053,7 @@
         "System",
         "Utility"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",

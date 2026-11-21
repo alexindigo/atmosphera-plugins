@@ -19,6 +19,7 @@
     "cancel": "Cancel"
   },
   "settings": {
+    "shared-effect": "Polling and display choices apply to this instance. Port observations are shared; ending a process affects the whole system.",
     "refreshInterval": "Refresh interval",
     "refreshIntervalDesc": "Seconds between port scans: {value}",
     "hideSystemPorts": "Hide system ports",

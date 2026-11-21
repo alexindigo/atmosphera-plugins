@@ -46,6 +46,13 @@ ColumnLayout {
     });
   }
 
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+  }
+
   NPluginSettingsField {
     field: root.refreshIntervalField
     NSpinBox {

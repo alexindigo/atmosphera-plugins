@@ -19,6 +19,7 @@
     "cancel": "Annuler"
   },
   "settings": {
+    "shared-effect": "Les choix de sondage et d'affichage s'appliquent a cette instance. Les observations des ports sont partagees ; arreter un processus affecte tout le systeme.",
     "refreshInterval": "Intervalle de rafraîchissement",
     "refreshIntervalDesc": "Secondes entre les scans de ports : {value}",
     "hideSystemPorts": "Masquer les ports système",

@@ -21,7 +21,7 @@ Item {
   readonly property real capsuleHeight: Style.getCapsuleHeightForScreen(screenName)
   readonly property real barFontSize: Style.getBarFontSizeForScreen(screenName)
 
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext)
   readonly property int portCount: mainInstance?.portCount ?? 0
   readonly property bool hideWhenEmpty: pluginApi?.pluginSettings?.hideWhenEmpty ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideWhenEmpty ?? false
 

@@ -78,6 +78,7 @@
 		"start-hint": "Starten mit: systemctl start mullvad-daemon"
 	},
 	"settings": {
+        "shared-effect": "Abfrage-, Anzeige- und Aktionsoptionen gelten fuer diese Instanz. VPN-, Relay- und Daemon-Aenderungen betreffen alle Instanzen und das gesamte System.",
 		"title": "Mullvad VPN Einstellungen",
 		"refresh-interval": "Aktualisierungsintervall (ms)",
 		"show-flag": "Länderflagge in der Bar anzeigen",
