@@ -459,7 +459,7 @@
       "author": "blackbartblues",
       "description": "Advanced clipboard manager with history, search, keyboard navigation, ToDo integration, pinned items, notecards/sticky notes, and selection-to-notecard feature. Fully translated with comprehensive i18n support.",
       "license": "MIT",
-      "version": "2.4.10",
+      "version": "2.4.11",
       "tags": [
         "Utility",
         "Bar",
@@ -1446,7 +1446,7 @@
       "author": "kevichi7",
       "description": "Search YouTube, play audio in the background with mpv, and save favorites into a persistent library.",
       "license": "MIT",
-      "version": "1.2.13",
+      "version": "1.2.14",
       "tags": [
         "Bar",
         "Panel",

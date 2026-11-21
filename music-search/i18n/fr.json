@@ -372,6 +372,7 @@
     "viewCountK": "{count} k de vues"
   },
   "settings": {
+    "shared-effect": "Playback, queue, library and helper provider/folder/limit/YouTube-client settings are shared. This instance selects presentation and playback follow-up policy. Helper actions are immediate and are not undone by Discard; the legacy preference named ytPlayerClient is not the helper setting.",
     "provider": {
       "label": "Fournisseur global",
       "desc": "Choisissez le fournisseur par défaut utilisé pour les recherches musicales normales lorsque vous n'utilisez pas de préfixe comme `yt:` ou `sc:`."

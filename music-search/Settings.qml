@@ -149,6 +149,13 @@ ColumnLayout {
     _lastCacheLimit = currentDownloadCacheMaxMb;
   }
 
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+  }
+
   NComboBox {
     Layout.fillWidth: true
     label: pluginApi?.tr("settings.provider.label")

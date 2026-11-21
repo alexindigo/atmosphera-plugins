@@ -291,6 +291,13 @@ ColumnLayout {
     return getColorValue(cardColors[selectedCardType]?.fg || "mOnSurface", selectedCardType, "fg");
   }
 
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+  }
+
   // Tab bar
   NTabBar {
     id: tabBar

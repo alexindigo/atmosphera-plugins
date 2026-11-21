@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Io
 import qs.Commons
 import qs.Services.UI
+import qs.Services.Plugins as Plugins
 
 Item {
   id: root
@@ -38,6 +39,17 @@ Item {
 
   // Pending pageId for async operations (ToDo integration)
   property int pendingPageId: 0
+  property var selectionPolicy: null
+  property var selectorRequestPolicy: null
+  property var todoSelectorPolicy: null
+  property var pastePolicy: null
+
+  function capturePolicy(context) {
+    context = context || pluginApi?.settingsContext;
+    if (!context?.current()) return null;
+    const settings = context.settingsView;
+    return {context: context, enableTodoIntegration: settings.enableTodoIntegration ?? false, autoPasteDelay: settings.autoPasteDelay ?? 300};
+  }
 
   // Constants for limits
   readonly property int maxPinnedItems: 20          // Maximum number of pinned items
@@ -840,7 +852,7 @@ Item {
                 if (exitCode === 0) {
                   const selectedText = selectionStdout.text.trim();
                   if (selectedText && selectedText.length > 0) {
-                    root.addTodoWithText(selectedText, root.pendingPageId);
+                    root.addTodoWithText(selectedText, root.pendingPageId, undefined, root.selectionPolicy);
                   } else {
                     ToastService.showError(pluginApi?.tr("toast.no-text-selected"));
                   }
@@ -851,13 +863,15 @@ Item {
   }
 
   // Add todo with text to specified page via direct PluginService API
-  function addTodoWithText(text, pageId) {
+  function addTodoWithText(text, pageId, context, retainedPolicy) {
+    const policy = retainedPolicy || capturePolicy(context);
+    if (!policy?.context?.current() || !policy.enableTodoIntegration) return;
     if (!text || text.length === 0) {
       ToastService.showError(pluginApi?.tr("toast.no-text-to-add"));
       return;
     }
 
-    const todoApi = PluginService.getPluginAPI("todo");
+    const todoApi = Plugins.Service.getPluginAPI("todo");
     if (!todoApi) {
       ToastService.showError(pluginApi?.tr("toast.todo-not-available"));
       return;
@@ -968,13 +982,16 @@ Item {
   }
 
   // Add selected text to specific page
-  function addSelectedToPage(pageId) {
-    if (!pluginApi?.settingsView?.enableTodoIntegration) {
+  function addSelectedToPage(pageId, context) {
+    if (getSelectionProcess.running) return;
+    const policy = capturePolicy(context);
+    if (!policy || !policy.enableTodoIntegration) {
       ToastService.showError(pluginApi?.tr("toast.todo-disabled"));
       return;
     }
 
     root.pendingPageId = pageId;
+    root.selectionPolicy = policy;
     getSelectionProcess.running = true;
   }
 
@@ -1065,7 +1082,7 @@ Item {
                 if (exitCode === 0) {
                   const selectedText = selectorSelectionStdout.text.trim();
                   if (selectedText && selectedText.length > 0) {
-                    root.showTodoPageSelector(selectedText);
+                    root.showTodoPageSelector(selectedText, undefined, root.selectorRequestPolicy);
                   } else {
                     ToastService.showError(pluginApi?.tr("toast.no-text-selected"));
                   }
@@ -1076,7 +1093,11 @@ Item {
   }
 
   // Get selection and show page selector
-  function getSelectionAndShowSelector() {
+  function getSelectionAndShowSelector(context) {
+    if (getSelectionForSelectorProcess.running) return;
+    const policy = capturePolicy(context);
+    if (!policy || !policy.enableTodoIntegration) return;
+    root.selectorRequestPolicy = policy;
     getSelectionForSelectorProcess.running = true;
   }
 
@@ -1086,13 +1107,16 @@ Item {
   }
 
   // Show ToDo page selector at cursor position
-  function showTodoPageSelector(text) {
+  function showTodoPageSelector(text, context, retainedPolicy) {
+    const policy = retainedPolicy || capturePolicy(context);
+    if (!policy?.context?.current() || !policy.enableTodoIntegration) return;
+    root.todoSelectorPolicy = policy;
     root.activeSelector = "todo";
     root.activeSelector = "todo";
     root.pendingSelectedText = text;
 
     // Get pages from ToDo plugin
-    const todoApi = PluginService.getPluginAPI("todo");
+    const todoApi = Plugins.Service.getPluginAPI("todo");
     let todoPages = [];
     if (todoApi) {
       if (todoApi.mainInstance) {
@@ -1111,7 +1135,7 @@ Item {
   // Handle page selection from selector
   function handleTodoPageSelected(pageId, pageName) {
     if (root.pendingSelectedText) {
-      root.addTodoWithText(root.pendingSelectedText, pageId);
+      root.addTodoWithText(root.pendingSelectedText, pageId, undefined, root.todoSelectorPolicy);
       root.pendingSelectedText = "";
     }
   }
@@ -1146,8 +1170,8 @@ Item {
   // Handle creating new note from selection
   // Handle creating new ToDo page from selection
   function handleCreateNewTodoPage() {
-    if (root.pendingSelectedText) {
-      const todoApi = PluginService.getPluginAPI("todo");
+    if (root.pendingSelectedText && root.todoSelectorPolicy?.context?.current() && root.todoSelectorPolicy.enableTodoIntegration) {
+      const todoApi = Plugins.Service.getPluginAPI("todo");
       if (todoApi && todoApi.mainInstance) {
         todoApi.mainInstance.addTextToNewPage(root.pendingSelectedText);
         ToastService.showNotice(pluginApi?.tr("toast.todo-page-created"));
@@ -1284,7 +1308,7 @@ Item {
     interval: pluginApi?.settingsView?.autoPasteDelay ?? 300
     repeat: false
     onTriggered: {
-      if (root.wtypeAvailable) {
+      if (root.pastePolicy?.context?.current() && root.wtypeAvailable) {
         autoPasteProc.running = true;
       } else {
         Logger.w("Clipper", "Auto-paste failed: wtype not found. Install with: sudo pacman -S wtype");
@@ -1305,9 +1329,11 @@ Item {
   }
 
   // Public function called from Panel.qml
-  function triggerAutoPaste(delay) {
-    // Main is shared. Capture the invoking placement's delay with this action.
-    autoPasteTimer.interval = delay === undefined ? (pluginApi?.settingsView?.autoPasteDelay ?? 300) : delay;
+  function triggerAutoPaste(delay, context) {
+    const policy = capturePolicy(context);
+    if (!policy) return;
+    root.pastePolicy = policy;
+    autoPasteTimer.interval = delay === undefined ? policy.autoPasteDelay : delay;
     autoPasteTimer.restart();
   }
 
