@@ -1758,7 +1758,7 @@
       "author": "blackteaextract",
       "description": "Displays custom text, fortune quotes, or a random entry from a user-provided text file in the bar.",
       "license": "MIT",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "tags": [
         "Bar",
         "Fun"

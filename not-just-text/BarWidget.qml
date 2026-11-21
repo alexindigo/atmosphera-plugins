@@ -18,10 +18,12 @@ Item {
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
     readonly property bool fortuneEnabled: cfg.fortuneEnabled ?? defaults.fortuneEnabled ?? false
     readonly property bool listEnabled: cfg.listEnabled ?? defaults.listEnabled ?? false
+    readonly property var main: pluginApi?.settingsContext?.current() && pluginApi?.mainInstance
+        ? pluginApi.mainInstance.settingsConsumerFor(pluginApi.settingsContext) : null
     property string displayText: fortuneEnabled
-        ? (pluginApi?.mainInstance?.fortuneText ?? "")
+        ? (main?.fortuneText ?? "")
         : listEnabled
-            ? (pluginApi?.mainInstance?.listText ?? "")
+            ? (main?.listText ?? "")
             : (cfg.text ?? defaults.text ?? "")
 
     readonly property string screenName: screen?.name ?? ""

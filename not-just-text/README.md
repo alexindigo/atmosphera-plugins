@@ -26,6 +26,13 @@ Quotes are filtered to single-line entries up to a configurable character limit 
 
 ## Settings
 
+Settings from a placed widget select that instance. File and fortune results
+follow its effective configuration; views of the same instance share one
+worker. Settings -> Plugins changes the plugin-level values inherited by
+instances without overrides. Apply publishes explicit field edits, Discard
+leaves them unpublished, and Reset restores inheritance. Replaced sources and
+retired instances cannot display a delayed result from the previous worker.
+
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `text` | string | `"Hello"` | Static text shown in the bar (just text mode) |
