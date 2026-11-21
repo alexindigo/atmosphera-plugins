@@ -32,31 +32,12 @@ Item {
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   // Get settings from configuration
-  readonly property string apiKey: cfg.apiKey || defaults.apiKey || "YOUR_API_KEY_HERE"
-  readonly property string country: cfg.country || defaults.country || "us"
-  readonly property string language: cfg.language || defaults.language || "en"
-  readonly property string category: cfg.category || defaults.category || "general"
-  readonly property int refreshInterval: cfg.refreshInterval || defaults.refreshInterval || 30
-  readonly property int maxHeadlines: cfg.maxHeadlines || defaults.maxHeadlines || 10
   readonly property int rollingSpeed: cfg.rollingSpeed || defaults.rollingSpeed || 50
   readonly property int widgetWidth: cfg.widgetWidth || defaults.widgetWidth || 300
 
-  // News data (stored in Main singleton for sharing with Panel)
-  property string allNewsText: ""
-  
-  // Shorthand for accessing Main singleton
-  readonly property var main: pluginApi?.mainInstance
-
-  // API configuration
-  readonly property string baseUrl: "https://newsapi.org/v2"
-  
-  // Country to language mapping for better international support
-  readonly property var countryLanguageMap: ({
-    "us": "en", "gb": "en", "ca": "en", "au": "en",
-    "de": "de", "fr": "fr", "it": "it", "es": "es",
-    "jp": "ja", "kr": "ko", "in": "en", "br": "pt",
-    "nl": "nl", "se": "sv", "no": "no", "mx": "es"
-  })
+  readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+  readonly property var main: settingsConsumer
+  readonly property string allNewsText: (main?.newsData ?? []).map((article, index) => "[" + (index + 1) + "] " + (article?.title || "No headline")).join("  \u2022  ")
 
   readonly property real visualContentWidth: {
     if (isVertical) return root.capsuleHeight;
@@ -74,135 +55,7 @@ Item {
   implicitWidth: contentWidth
   implicitHeight: contentHeight
 
-  // Auto-refresh timer
-  Timer {
-    id: refreshTimer
-    interval: refreshInterval * 60 * 1000
-    running: apiKey !== "YOUR_API_KEY_HERE" && apiKey !== ""
-    repeat: true
-    onTriggered: fetchNews()
-  }
-
-  // Watch for when pluginApi becomes available
-  onPluginApiChanged: {
-    if (pluginApi && apiKey && apiKey !== "YOUR_API_KEY_HERE") {
-      Logger.i("[News Plugin] PluginApi loaded, API key:", apiKey ? "configured" : "not configured");
-      Qt.callLater(fetchNews);
-    }
-  }
-
-  // Update combined news text when main.newsData changes
-  Connections {
-    target: main
-    function onNewsDataChanged() {
-      updateAllNewsText();
-    }
-    function onRefreshRequested() {
-      fetchNews();
-    }
-  }
-
-  // Fetch news when API key becomes available
-  onApiKeyChanged: {
-    Logger.i("[News Plugin] API key changed:", apiKey ? "configured" : "not configured");
-    if (apiKey && apiKey !== "YOUR_API_KEY_HERE") {
-      Qt.callLater(fetchNews);
-    }
-  }
-
-  // Update combined news text
-  function updateAllNewsText() {
-    if (!main || !main.newsData || main.newsData.length === 0) {
-      allNewsText = ""
-      return
-    }
-    
-    var combined = ""
-    for (var i = 0; i < main.newsData.length; i++) {
-      if (i > 0) combined += "  •  "
-      combined += "[" + (i + 1) + "] " + (main.newsData[i]?.title || "No headline")
-    }
-    allNewsText = combined
-  }
-
-
-  // Fetch news
-  function fetchNews() {
-    if (!main) return;
-    
-    main.isLoading = true
-    main.errorMessage = ""
-
-    if (!apiKey || apiKey === "YOUR_API_KEY_HERE") {
-      main.errorMessage = "API key not configured"
-      main.isLoading = false
-      Logger.i("[News Plugin] Error: API key not configured")
-      return
-    }
-
-    var xhr = new XMLHttpRequest()
-    
-    // Determine language from country
-    var lang = countryLanguageMap[country] || language || "en"
-    
-    // Build category-specific search query for better results
-    var searchQuery = category !== "general" ? category : "news OR headlines"
-    
-    // Use /everything endpoint with language filter for better international support
-    // This works better with free tier than country-specific top-headlines
-    var url = baseUrl + "/everything?q=" + encodeURIComponent(searchQuery) + 
-              "&language=" + lang + 
-              "&sortBy=publishedAt" +
-              "&pageSize=" + maxHeadlines +
-              "&apiKey=" + apiKey
-
-    Logger.i("[News Plugin] Fetching headlines - Language:", lang, "Category:", category)
-
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === XMLHttpRequest.DONE) {
-        Logger.i("[News Plugin] Response received - Status:", xhr.status)
-
-        if (xhr.status === 200) {
-          try {
-            var response = JSON.parse(xhr.responseText)
-            if (response.status === "ok" && response.articles) {
-              Logger.i("[News Plugin] Success: Fetched", response.articles.length, "articles")
-              main.newsData = response.articles.slice(0, maxHeadlines)
-              main.isLoading = false
-              main.errorMessage = ""
-            } else {
-              main.errorMessage = response.message || "API error"
-              main.isLoading = false
-              Logger.i("[News Plugin] API Error:", response.message || "Unknown error")
-            }
-          } catch (e) {
-            main.errorMessage = "Failed to parse response"
-            main.isLoading = false
-            Logger.i("[News Plugin] Parse Error:", e.toString())
-          }
-        } else if (xhr.status === 401) {
-          main.errorMessage = "Invalid API key"
-          main.isLoading = false
-          Logger.i("[News Plugin] Error: Invalid API key (401)")
-        } else if (xhr.status === 429) {
-          main.errorMessage = "Rate limit exceeded"
-          main.isLoading = false
-          Logger.i("[News Plugin] Error: Rate limit exceeded (429)")
-        } else if (xhr.status === 0) {
-          main.errorMessage = "Network error"
-          main.isLoading = false
-          Logger.i("[News Plugin] Error: Network error or CORS issue (0)")
-        } else {
-          main.errorMessage = "HTTP error " + xhr.status
-          main.isLoading = false
-          Logger.i("[News Plugin] Error: HTTP", xhr.status)
-        }
-      }
-    }
-
-    xhr.open("GET", url)
-    xhr.send()
-  }
+  function fetchNews() { settingsConsumer?.fetchNews(); }
 
   Rectangle {
     id: visualCapsule
@@ -344,10 +197,4 @@ Item {
     }
   }
 
-  Component.onCompleted: {
-    // Only fetch if API key is already available
-    if (apiKey && apiKey !== "YOUR_API_KEY_HERE") {
-      fetchNews();
-    }
-  }
 }

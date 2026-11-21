@@ -31,6 +31,12 @@ ColumnLayout {
   // Explicit field intents only; the selected session owns Apply/Reset.
   readonly property bool settingsDirty: false
 
+  NLabel {
+    visible: root.pluginApi?.scopeKind === "instance"
+    label: root.pluginApi?.tr("settings.shared-effect-label")
+    description: root.pluginApi?.tr("settings.shared-effect")
+  }
+
   function saveSettings() {
     if (!pluginApi)
       return;

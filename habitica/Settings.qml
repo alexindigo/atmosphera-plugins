@@ -46,6 +46,12 @@ ColumnLayout {
   spacing: Style.marginM
 
   NLabel {
+    visible: root.pluginApi?.scopeKind === "instance"
+    label: root.pluginApi?.tr("settings.shared-effect-label")
+    description: root.pluginApi?.tr("settings.shared-effect")
+  }
+
+  NLabel {
     label: pluginApi?.tr("settings.account.label")
     description: pluginApi?.tr("settings.account.description")
   }

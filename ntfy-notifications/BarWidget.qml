@@ -21,7 +21,8 @@ Item {
     readonly property real capsuleHeight: Style.getCapsuleHeightForScreen(screenName)
     readonly property real barFontSize: Style.getBarFontSizeForScreen(screenName)
 
-    readonly property var main: pluginApi?.mainInstance
+    readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+    readonly property var main: settingsConsumer
     readonly property int unreadCount: main ? main.unreadCount : 0
 
     // Track previous count for pulse animation

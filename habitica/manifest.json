@@ -1,7 +1,7 @@
 {
   "id": "habitica",
   "name": "Habitica for Noctalia",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "minNoctaliaVersion": "3.7.1",
   "minAtmospheraVersion": "0.10.0",
   "author": "vasqs",
