@@ -31,6 +31,7 @@
     "activity": "Activité"
   },
   "settings": {
+    "shared-effect": "Le p\u00e9riph\u00e9rique et l'affichage sont propres \u00e0 cette instance. Les vues du m\u00eame GPU partagent les mesures et l'historique.",
     "bar_section": "Widget de barre",
     "compact_mode_label": "Mode compact",
     "compact_mode_description": "Mini jauges verticales au lieu du texte en pourcentage.",

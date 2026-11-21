@@ -17,9 +17,10 @@ Item {
 
   readonly property var cfg: pluginApi?.pluginSettings || ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-  readonly property var monitor: pluginApi?.mainInstance
+  readonly property var settingsClient: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext)
+  readonly property var monitor: settingsClient?.observation
   readonly property string deviceNativePath: cfg.deviceNativePath ?? defaults.deviceNativePath ?? "__default__"
-  readonly property var selectedDevice: BatteryService.isDevicePresent(BatteryService.findDevice(deviceNativePath)) ? BatteryService.findDevice(deviceNativePath) : BatteryService.primaryDevice
+  readonly property var selectedDevice: monitor?.selectedDevice ?? null
   readonly property var primaryDevice: selectedDevice
   readonly property bool showPowerProfiles: cfg.showPowerProfiles ?? defaults.showPowerProfiles ?? false
   readonly property bool showNoctaliaPerformance: cfg.showNoctaliaPerformance ?? defaults.showNoctaliaPerformance ?? false
@@ -453,161 +454,19 @@ Item {
   }
 
   function statusText(device) {
-    if (root.monitor && root.monitor.sysfsOk) {
-      return root.monitor.statusText();
-    }
-
-    if (!BatteryService.isDeviceReady(device)) {
-      return pluginApi?.tr("status.noBattery");
-    }
-
-    if (BatteryService.isCharging(device)) {
-      return pluginApi?.tr("status.charging");
-    }
-
-    if (device.state !== undefined && device.state === UPowerDeviceState.FullyCharged) {
-      return pluginApi?.tr("status.fullyCharged");
-    }
-
-    if (BatteryService.isPluggedIn(device)) {
-      return pluginApi?.tr("status.pluggedIn");
-    }
-
-    return pluginApi?.tr("status.discharging");
+    return root.monitor?.statusText() ?? pluginApi?.tr("status.noBattery");
   }
 
   function formatPower(device, compact, showUnavailable) {
-    if (root.monitor && root.monitor.sysfsOk) {
-      return root.monitor.formatPower(compact, showUnavailable);
-    }
-
-    const rate = resolvePowerRate(device);
-    if (rate <= 0) {
-      return showUnavailable ? pluginApi?.tr("common.unavailable") : "";
-    }
-
-    return `${rate.toFixed(1)}${compact ? "W" : " W"}`;
-  }
-
-  function resolvePowerRate(device) {
-    const directRate = readDeviceRate(device);
-    if (directRate > 0) {
-      return directRate;
-    }
-
-    // UPower's DisplayDevice can report a zero rate even when BAT* devices have data.
-    let totalRate = 0;
-    let foundPhysicalRate = false;
-    const batteries = BatteryService.laptopBatteries || [];
-    for (let i = 0; i < batteries.length; i++) {
-      const battery = batteries[i];
-      if (!battery || (battery.nativePath && battery.nativePath.includes("DisplayDevice"))) {
-        continue;
-      }
-
-      const rate = readDeviceRate(battery);
-      if (rate > 0) {
-        totalRate += rate;
-        foundPhysicalRate = true;
-      }
-    }
-
-    if (foundPhysicalRate) {
-      return totalRate;
-    }
-
-    return directRate;
-  }
-
-  function readDeviceRate(device) {
-    if (!device || device.changeRate === undefined || device.changeRate === null) {
-      return -1;
-    }
-
-    const rate = Math.abs(Number(device.changeRate));
-    return isNaN(rate) ? -1 : rate;
+    return root.monitor?.formatPower(compact, showUnavailable) ?? (showUnavailable ? pluginApi?.tr("common.unavailable") : "");
   }
 
   function formatRemainingTime(device, showUnavailable) {
-    if (root.monitor && root.monitor.sysfsOk) {
-      return root.monitor.formatRelevantTime(showUnavailable);
-    }
-
-    if (!BatteryService.isDeviceReady(device)) {
-      return showUnavailable ? pluginApi?.tr("common.unavailable") : "";
-    }
-
-    const seconds = resolveRemainingSeconds(device);
-    const text = formatDurationCompact(seconds);
-    return text || (showUnavailable ? pluginApi?.tr("common.unavailable") : "");
-  }
-
-  function resolveRemainingSeconds(device) {
-    const directSeconds = readRemainingSeconds(device);
-    if (directSeconds > 0) {
-      return directSeconds;
-    }
-
-    const batteries = BatteryService.laptopBatteries || [];
-    for (let i = 0; i < batteries.length; i++) {
-      const battery = batteries[i];
-      if (!battery || (battery.nativePath && battery.nativePath.includes("DisplayDevice"))) {
-        continue;
-      }
-
-      const seconds = readRemainingSeconds(battery);
-      if (seconds > 0) {
-        return seconds;
-      }
-    }
-
-    return 0;
-  }
-
-  function readRemainingSeconds(device) {
-    if (!BatteryService.isDeviceReady(device)) {
-      return 0;
-    }
-
-    if (BatteryService.isCharging(device) && device.timeToFull > 0) {
-      return device.timeToFull;
-    }
-    if (!BatteryService.isCharging(device) && !BatteryService.isPluggedIn(device) && device.timeToEmpty > 0) {
-      return device.timeToEmpty;
-    }
-    if (device.timeToFull > 0) {
-      return device.timeToFull;
-    }
-    if (device.timeToEmpty > 0) {
-      return device.timeToEmpty;
-    }
-
-    return 0;
-  }
-
-  function formatDurationCompact(seconds) {
-    if (seconds <= 0) {
-      return "";
-    }
-
-    const totalMinutes = Math.max(1, Math.round(seconds / 60));
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-
-    if (hours > 0) {
-      return minutes > 0 ? `${hours}h${minutes}m` : `${hours}h`;
-    }
-
-    return `${minutes}m`;
+    return root.monitor?.formatRelevantTime(showUnavailable) ?? (showUnavailable ? pluginApi?.tr("common.unavailable") : "");
   }
 
   function healthText(device) {
-    let healthDevice = device && device.healthSupported ? device : (BatteryService.laptopBatteries.length > 0 ? BatteryService.laptopBatteries[0] : null);
-    if (healthDevice && healthDevice.healthSupported) {
-      return `${Math.round(healthDevice.healthPercentage)}%`;
-    }
-
-    return pluginApi?.tr("common.unavailable");
+    return root.monitor?.healthText() ?? pluginApi?.tr("common.unavailable");
   }
 
   function powerLabel(device) {

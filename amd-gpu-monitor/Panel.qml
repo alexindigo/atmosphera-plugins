@@ -14,7 +14,9 @@ Item {
   property real contentPreferredWidth: 440 * Style.uiScaleRatio
   property real contentPreferredHeight: panelContainer.implicitHeight
 
-  readonly property var mon: pluginApi?.mainInstance
+  readonly property var settingsClient: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext)
+  readonly property var mon: settingsClient?.observation ?? emptyReadings
+  GpuReadings { id: emptyReadings }
   readonly property var cfg: pluginApi?.pluginSettings ?? pluginApi?.manifest?.metadata?.defaultSettings ?? ({})
 
   readonly property bool dataReady: mon?.available ?? false
@@ -142,15 +144,17 @@ Item {
     return "—";
   }
 
-  Component.onCompleted: {
-    if (mon)
-      mon.registerPoller("panel:" + (pluginApi?.instanceId ?? "unknown"));
+  property var _registeredClient: null
+  property bool _constructed: false
+  function syncPoller() {
+    if (!_constructed || _registeredClient === settingsClient) return;
+    _registeredClient?.unregisterPoller(root);
+    _registeredClient = settingsClient;
+    _registeredClient?.registerPoller(root);
   }
-
-  Component.onDestruction: {
-    if (mon)
-      mon.unregisterPoller("panel:" + (pluginApi?.instanceId ?? "unknown"));
-  }
+  onSettingsClientChanged: syncPoller()
+  Component.onCompleted: { _constructed = true; syncPoller(); }
+  Component.onDestruction: _registeredClient?.unregisterPoller(root)
 
   NBox {
     id: panelContainer

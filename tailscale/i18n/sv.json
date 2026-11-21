@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "Polling, visning, inloggningsserver och \u00f6verf\u00f6ring g\u00e4ller denna instans. VPN, kontobyten och Taildrop p\u00e5verkar den gemensamma systemtj\u00e4nsten och filer.",
     "title": "Tailscale-inställningar",
     "description": "Konfigurera Tailscale-statusvisning och beteende",
     "refresh-interval": "Uppdateringsintervall",

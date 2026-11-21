@@ -31,6 +31,7 @@
     "activity": "Actividad"
   },
   "settings": {
+    "shared-effect": "El dispositivo y la vista se eligen por instancia. Las vistas de la misma GPU comparten datos e historial.",
     "bar_section": "Widget de barra",
     "compact_mode_label": "Modo compacto",
     "compact_mode_description": "Mini indicadores verticales en lugar de texto con porcentajes.",

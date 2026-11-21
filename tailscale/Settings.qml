@@ -8,6 +8,13 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    text: root.pluginApi?.tr("settings.shared-effect") || ""
+    wrapMode: Text.WordWrap
+    color: AtmoColor.mOnSurfaceVariant
+  }
   readonly property var refreshIntervalField: pluginApi?.field("refreshInterval") ?? null
   readonly property var compactModeField: pluginApi?.field("compactMode") ?? null
   readonly property var showIpAddressField: pluginApi?.field("showIpAddress") ?? null

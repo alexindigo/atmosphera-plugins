@@ -31,6 +31,7 @@
     "activity": "Activiteit"
   },
   "settings": {
+    "shared-effect": "Apparaat en weergave gelden voor deze instantie. Weergaven van dezelfde GPU delen metingen en geschiedenis.",
     "bar_section": "Balkwidget",
     "compact_mode_label": "Compacte modus",
     "compact_mode_description": "Verticale mini-meters in plaats van procenttekst.",

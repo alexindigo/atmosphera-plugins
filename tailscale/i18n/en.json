@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "Polling, display, login-server and transfer choices apply to this instance. VPN connections, account changes and Taildrop transfers affect the shared system daemon and files.",
     "title": "Tailscale Settings",
     "description": "Configure Tailscale status display and behavior",
     "refresh-interval": "Refresh Interval",

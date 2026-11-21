@@ -10,6 +10,43 @@ Item {
     
     property var pluginApi: null
 
+    property var _settingsConsumers: new Map()
+    Component { id: clientFactory; NetbirdSettingsClient {} }
+    function settingsConsumerFor(context) {
+        if (!context || !context.current()) return null;
+        if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+        var client = clientFactory.createObject(root, {
+            settingsContext: context,
+            observation: root,
+            retire: function(retired) {
+                root._settingsConsumers.delete(context);
+                root.updatePingDemand();
+                retired.destroy();
+            }
+        });
+        _settingsConsumers.set(context, client);
+        updatePingDemand();
+        return client;
+    }
+    readonly property var settingsConsumer: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
+    property bool pingRequested: false
+    function updatePingDemand() {
+        var requested = root.showPing;
+        _settingsConsumers.forEach(function(client) {
+            requested = requested || (client.current && client.showPing);
+        });
+        var wasRequested = pingRequested;
+        pingRequested = requested;
+        if (!requested) {
+            pingQueue = [];
+            currentPingIp = "";
+            pingProcess.running = false;
+        } else if (!wasRequested && netbirdRunning) {
+            startPingQueue();
+        }
+    }
+    onShowPingChanged: updatePingDemand()
+
     onPluginApiChanged: {
         if (pluginApi) {
             settingsVersion++;
@@ -95,7 +132,6 @@ Item {
         showIpAddress = _computeShowIpAddress();
         showPing = _computeShowPing();
         configuredManagementUrl = _computeConfiguredManagementUrl();
-        updateTimer.interval = refreshInterval;
     }
 
     property bool netbirdInstalled: false
@@ -164,13 +200,6 @@ Item {
     }
 
     function detectTerminal() {
-        var manualTerm = pluginApi?.pluginSettings?.terminalCommand || "";
-        if (manualTerm !== "") {
-            root.detectedTerminal = manualTerm;
-            Logger.i("NetBird", "Using user-defined terminal: " + root.detectedTerminal);
-            return;
-        }
-
         root.terminalCheckIndex = 0;
         root.detectedTerminal = "";
         if (root.terminalCandidates.length > 0) {
@@ -226,7 +255,7 @@ Item {
                         root.peerCount = data.peers?.total ?? peers.length;
                         root.peerConnected = data.peers?.connected ?? 0;
 
-                        if (root.showPing) {
+                        if (root.pingRequested) {
                             root.startPingQueue();
                         }
                     } else {
@@ -278,6 +307,7 @@ Item {
         onExited: function (exitCode, exitStatus) {
             var stdout = String(pingProcess.stdout.text || "").trim();
             var ip = root.currentPingIp;
+            if (!root.pingRequested || ip === "") return;
 
             if (exitCode === 0 && stdout.length > 0) {
                 var match = stdout.match(/\/([\d.]+)\//);
@@ -309,7 +339,7 @@ Item {
     }
 
     function processNextPing() {
-        if (root.pingQueue.length === 0) {
+        if (!root.pingRequested || root.pingQueue.length === 0) {
             root.currentPingIp = "";
             return;
         }
@@ -362,22 +392,6 @@ Item {
             toggleProcess.command = ["netbird", "up"];
         }
         toggleProcess.running = true;
-    }
-
-    Timer {
-        id: updateTimer
-        interval: refreshInterval
-        repeat: true
-        running: true
-        triggeredOnStart: true
-
-        onTriggered: {
-            if (root.netbirdInstalled === false) {
-                checkNetbirdInstalled();
-            } else {
-                updateNetbirdStatus();
-            }
-        }
     }
 
     Component.onCompleted: {

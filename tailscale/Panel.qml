@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import qs.Commons
 import qs.Widgets
+import qs.Portals
 import qs.Services.UI
 
 Item {
@@ -14,7 +15,7 @@ Item {
   readonly property var geometryPlaceholder: panelContainer
   readonly property bool allowAttach: true
 
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext)
 
   function copyToClipboard(text) {
     var escaped = text.replace(/'/g, "'\\''")
@@ -27,7 +28,7 @@ Item {
   property var sendTargetPeer: null
   property string searchQuery: ""
 
-  AtmoFilePicker {
+  PortalFilePicker {
     id: sendFilePicker
     title: pluginApi?.tr("file-picker.title")
     selectionMode: "files"

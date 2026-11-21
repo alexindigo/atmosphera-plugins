@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "T\u00f9y ch\u1ecdn th\u0103m d\u00f2, hi\u1ec3n th\u1ecb, m\u00e1y ch\u1ee7 \u0111\u0103ng nh\u1eadp v\u00e0 truy\u1ec1n t\u1ec7p \u00e1p d\u1ee5ng cho phi\u00ean b\u1ea3n n\u00e0y. VPN, \u0111\u1ed5i t\u00e0i kho\u1ea3n v\u00e0 Taildrop t\u00e1c \u0111\u1ed9ng \u0111\u1ebfn d\u1ecbch v\u1ee5 h\u1ec7 th\u1ed1ng v\u00e0 t\u1ec7p d\u00f9ng chung.",
     "title": "Cài đặt Tailscale",
     "description": "Cấu hình hiển thị trạng thái và hành vi của Tailscale",
     "refresh-interval": "Khoảng thời gian làm mới",

@@ -14,6 +14,35 @@ QtObject {
 
     property var pluginApi: null
 
+    property var _settingsConsumers: new Map()
+    property Component _clientFactory: Component { OpenvpnSettingsClient {} }
+    function settingsConsumerFor(context) {
+        if (!context || !context.current()) return null;
+        if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+        var client = _clientFactory.createObject(root, {
+            settingsContext: context,
+            observation: root,
+            retire: function(retired) {
+                root._settingsConsumers.delete(context);
+                root.updatePanelDemand();
+                retired.destroy();
+            }
+        });
+        _settingsConsumers.set(context, client);
+        return client;
+    }
+    readonly property var settingsConsumer: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
+    function updatePanelDemand() {
+        var panel = false, logs = false;
+        _settingsConsumers.forEach(function(client) {
+            panel = panel || (client.current && client.panelOpen);
+            logs = logs || (client.current && client.panelOpen && client.logStreamActive);
+        });
+        root.panelOpen = panel;
+        root.logStreamActive = logs;
+        _syncLogStream();
+    }
+
     property var configList: []
     property var sessionList: []
     property var configDetails: ({})
@@ -24,26 +53,9 @@ QtObject {
     readonly property int maxLogs: 100
     property real connectedCount: 0
     readonly property bool isLoading: Object.keys(root._pending).length > 0
-    readonly property bool panelOpen: pluginApi?.panelOpenScreen != null
+    property bool panelOpen: false
 
     property var _pending: ({})
-
-    // ==================== Two-tier polling ====================
-    // Light timer: configs + sessions only (keeps bar widget updated)
-    property var _lightTimer: Timer {
-        interval: root.pollInterval
-        running: true
-        repeat: true
-        onTriggered: root.refresh()
-    }
-
-    // Heavy timer: stats + details + logs (only when panel is open)
-    property var _heavyTimer: Timer {
-        interval: Math.max(root.pollInterval * 3, 15000)
-        running: root.panelOpen
-        repeat: true
-        onTriggered: root.refreshFull()
-    }
 
     property bool _heavyRefreshPending: false
 
@@ -303,15 +315,18 @@ QtObject {
     // ==================== Restart ====================
     property var _restartProc: Process {
         property string targetSession: ""
+        property bool notifyErrors: true
         onExited: (exitCode) => {
-            if (exitCode !== 0 && root.showNotifications)
+            if (exitCode !== 0 && notifyErrors)
                 toast.showError(pluginApi?.tr("errors.restart"))
             root._pending = {}
             root.refresh()
         }
     }
 
-    function restartSession(sessionPath) {
+    function restartSession(sessionPath, notificationPolicy) {
+        if (_restartProc.running) return
+        _restartProc.notifyErrors = notificationPolicy === undefined ? showNotifications : notificationPolicy
         _restartProc.targetSession = sessionPath
         _restartProc.command = ["openvpn3", "session-manage", "--path", sessionPath, "--restart"]
         _restartProc.running = true
@@ -320,8 +335,9 @@ QtObject {
     // ==================== Connect ====================
     property var _connectProc: Process {
         property string targetConfig: ""
+        property bool notifyErrors: true
         onExited: (exitCode) => {
-            if (exitCode !== 0 && root.showNotifications)
+            if (exitCode !== 0 && notifyErrors)
                 toast.showError(pluginApi?.tr("errors.connect"))
             root._pending = {}
             root.refresh()
@@ -331,8 +347,9 @@ QtObject {
     // ==================== Disconnect ====================
     property var _disconnectProc: Process {
         property string targetPath: ""
+        property bool notifyErrors: true
         onExited: (exitCode) => {
-            if (exitCode !== 0 && root.showNotifications)
+            if (exitCode !== 0 && notifyErrors)
                 toast.showError(pluginApi?.tr("errors.disconnect"))
             root._pending = {}
             root.refresh()
@@ -344,9 +361,10 @@ QtObject {
         property string importFilePath: ""
         property string importName: ""
         property bool importPersistent: true
+        property bool notifyErrors: true
         command: ["openvpn3", "config-import"]
         onExited: (exitCode) => {
-            if (exitCode !== 0 && root.showNotifications)
+            if (exitCode !== 0 && notifyErrors)
                 toast.showError(pluginApi?.tr("errors.import"))
             root._pending = {}
             root.refresh()
@@ -357,8 +375,9 @@ QtObject {
     property var _renameProc: Process {
         property string renameOldPath: ""
         property string renameNewName: ""
+        property bool notifyErrors: true
         onExited: (exitCode) => {
-            if (exitCode !== 0 && root.showNotifications)
+            if (exitCode !== 0 && notifyErrors)
                 toast.showError(pluginApi?.tr("errors.rename"))
             root._pending = {}
             root.refresh()
@@ -368,8 +387,9 @@ QtObject {
     // ==================== Delete ====================
     property var _deleteProc: Process {
         property string targetPath: ""
+        property bool notifyErrors: true
         onExited: (exitCode) => {
-            if (exitCode !== 0 && root.showNotifications)
+            if (exitCode !== 0 && notifyErrors)
                 toast.showError(pluginApi?.tr("errors.delete"))
             root._pending = {}
             root.refresh()
@@ -427,7 +447,9 @@ QtObject {
         _configProc.running = true
     }
 
-    function connectTo(configPath) {
+    function connectTo(configPath, notificationPolicy) {
+        if (_connectProc.running) return
+        _connectProc.notifyErrors = notificationPolicy === undefined ? showNotifications : notificationPolicy
         const p = Object.assign({}, _pending)
         p[configPath] = "connect"
         _pending = p
@@ -436,7 +458,9 @@ QtObject {
         _connectProc.running = true
     }
 
-    function disconnectFrom(sessionPath) {
+    function disconnectFrom(sessionPath, notificationPolicy) {
+        if (_disconnectProc.running) return
+        _disconnectProc.notifyErrors = notificationPolicy === undefined ? showNotifications : notificationPolicy
         const p = Object.assign({}, _pending)
         p[sessionPath] = "disconnect"
         _pending = p
@@ -445,7 +469,9 @@ QtObject {
         _disconnectProc.running = true
     }
 
-    function importConfig(filePath, name, persistent) {
+    function importConfig(filePath, name, persistent, notificationPolicy) {
+        if (_importProc.running) return
+        _importProc.notifyErrors = notificationPolicy === undefined ? showNotifications : notificationPolicy
         const p = Object.assign({}, _pending)
         p["import"] = "import"
         _pending = p
@@ -458,7 +484,9 @@ QtObject {
         _importProc.running = true
     }
 
-    function renameConfig(configPath, newName) {
+    function renameConfig(configPath, newName, notificationPolicy) {
+        if (_renameProc.running) return
+        _renameProc.notifyErrors = notificationPolicy === undefined ? showNotifications : notificationPolicy
         const p = Object.assign({}, _pending)
         p[configPath] = "rename"
         _pending = p
@@ -468,7 +496,9 @@ QtObject {
         _renameProc.running = true
     }
 
-    function deleteConfig(configPath) {
+    function deleteConfig(configPath, notificationPolicy) {
+        if (_deleteProc.running) return
+        _deleteProc.notifyErrors = notificationPolicy === undefined ? showNotifications : notificationPolicy
         const p = Object.assign({}, _pending)
         p[configPath] = "delete"
         _pending = p

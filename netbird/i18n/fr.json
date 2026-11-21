@@ -1,5 +1,6 @@
 {
-	"settings": {
+  "settings": {
+    "shared-effect": "L'interrogation, l'affichage et les actions des pairs sont propres \u00e0 cette instance. L'\u00e9tat et les pings sont partag\u00e9s ; les connexions affectent le service NetBird du syst\u00e8me.",
 		"title": "Paramètres NetBird",
 		"description": "Configurer l'affichage et le comportement du statut NetBird VPN",
 		"refresh-interval": "Intervalle de rafraîchissement",

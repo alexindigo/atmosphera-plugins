@@ -116,7 +116,7 @@
       "author": "Dvaxert",
       "description": "AMD discrete GPU monitoring via rocm-smi with graphs and configurable metrics.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Bar",
         "Panel",
@@ -253,7 +253,7 @@
       "author": "krteke",
       "description": "Extended battery monitor with current power draw, remaining time, battery health, and current power profile.",
       "license": "MIT",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "tags": [
         "Bar",
         "Panel",
@@ -1466,7 +1466,7 @@
       "author": "Cleboost",
       "description": "Show NetBird VPN status in the menu bar.",
       "license": "MIT",
-      "version": "1.1.8",
+      "version": "1.1.9",
       "tags": [
         "Bar",
         "Network",
@@ -1922,7 +1922,7 @@
       "author": "minh",
       "description": "Manage OpenVPN3 VPN connections from the bar and control center",
       "license": "MIT",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "tags": [
         "Bar",
         "Panel",
@@ -2501,7 +2501,7 @@
       "author": "nineluj",
       "description": "Show Tailscale status in the menu bar and send/receive files via Taildrop.",
       "license": "MIT",
-      "version": "1.5.10",
+      "version": "1.5.11",
       "tags": [
         "Bar",
         "Network",

@@ -25,6 +25,7 @@
     "unknown": "未知"
   },
   "settings": {
+    "shared-effect": "\u8bbe\u5907\u3001\u8f6e\u8be2\u548c\u663e\u793a\u9009\u9879\u4ec5\u5e94\u7528\u4e8e\u6b64\u5b9e\u4f8b\u3002\u7535\u6c60\u8bfb\u6570\u548c\u7cfb\u7edf\u7535\u6e90\u914d\u7f6e\u64cd\u4f5c\u662f\u5171\u4eab\u7684\u3002",
     "refreshInterval": {
       "desc": "bar 和 panel 刷新电池功率与时间文本的频率。",
       "label": "刷新间隔"

@@ -9,6 +9,25 @@ Item {
 
   property var pluginApi: null
 
+  property var _settingsConsumers: new Map()
+  Component { id: clientFactory; TailscaleSettingsClient {} }
+  function settingsConsumerFor(context) {
+    if (!context || !context.current()) return null;
+    if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+    var client = clientFactory.createObject(root, {
+      settingsContext: context,
+      observation: root,
+      retire: function(retired) {
+        root._settingsConsumers.delete(context);
+        root.cancelTaildropReceive(context);
+        retired.destroy();
+      }
+    });
+    _settingsConsumers.set(context, client);
+    return client;
+  }
+  readonly property var settingsConsumer: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
+
   onPluginApiChanged: {
     if (pluginApi) {
       settingsVersion++;
@@ -48,7 +67,6 @@ Item {
     compactMode = _computeCompactMode();
     showIpAddress = _computeShowIpAddress();
     showPeerCount = _computeShowPeerCount();
-    updateTimer.interval = refreshInterval;
   }
 
   property bool tailscaleInstalled: false
@@ -445,92 +463,43 @@ Item {
   // "pkexec"   = use pkexec to run as root
   readonly property string taildropReceiveMode: pluginApi?.pluginSettings?.taildropReceiveMode || pluginApi?.manifest?.metadata?.defaultSettings?.taildropReceiveMode || "operator"
 
-  // Snapshot of filenames in download dir taken just before receive starts
-  property var _preScanFiles: []
+  // The one receive owner retains its originating policy for the complete chain.
+  property var _taildropRequest: null
+  property var _taildropOperation: null
+  Component { id: receiveFactory; TaildropReceive {} }
 
-  Process {
-    id: preScanProcess
-    stdout: StdioCollector {}
-    stderr: StdioCollector {}
-
-    onExited: function (exitCode) {
-      if (exitCode === 0) {
-        var raw = String(preScanProcess.stdout.text || "").trim();
-        root._preScanFiles = raw.length > 0 ? raw.split("\n") : [];
-      } else {
-        root._preScanFiles = [];
-      }
-      Logger.d("Tailscale", "Pre-scan: " + root._preScanFiles.length + " files");
-      // Now start the actual receive
-      var dir = root.taildropDownloadDir;
-      if (root.taildropReceiveMode === "pkexec") {
-        taildropReceiveProcess.command = ["pkexec", "tailscale", "file", "get", dir];
-      } else {
-        taildropReceiveProcess.command = ["tailscale", "file", "get", dir];
-      }
-      taildropReceiveProcess.running = true;
-    }
+  function taildropRequestCurrent() {
+    return _taildropRequest !== null && _taildropRequest.current();
   }
 
-  Process {
-    id: postScanProcess
-    stdout: StdioCollector {}
-    stderr: StdioCollector {}
-
-    onExited: function (exitCode) {
-      var newFiles = [];
-      if (exitCode === 0) {
-        var raw = String(postScanProcess.stdout.text || "").trim();
-        var postFiles = raw.length > 0 ? raw.split("\n") : [];
-        var preSet = {};
-        for (var i = 0; i < root._preScanFiles.length; i++) {
-          preSet[root._preScanFiles[i]] = true;
-        }
-        for (var j = 0; j < postFiles.length; j++) {
-          if (!preSet[postFiles[j]]) {
-            newFiles.push(postFiles[j]);
-          }
-        }
-      }
-      Logger.i("Tailscale", "Taildrop received " + newFiles.length + " new file(s)");
-      if (newFiles.length > 0) {
-        ToastService.showNotice(pluginApi?.tr("toast.title"), newFiles.join("\n"), "file-download");
-      } else {
-        ToastService.showWarning(pluginApi?.tr("toast.title"), pluginApi?.tr("taildrop.toast.no-files"));
-      }
-    }
+  function cancelTaildropReceive(context) {
+    if (!_taildropRequest || _taildropRequest.context !== context) return;
+    const operation = _taildropOperation;
+    _taildropOperation = null;
+    _taildropRequest = null;
+    taildropState = "idle";
+    if (operation) { operation.cancel(); operation.destroy(); }
   }
 
-  Process {
-    id: taildropReceiveProcess
-    stdout: StdioCollector {}
-    stderr: StdioCollector {}
-
-    onStarted: {
-      root.taildropState = "receiving";
-      root.taildropMessage = "";
-      Logger.i("Tailscale", "Taildrop receive started in: " + root.taildropDownloadDir);
+  function receiveCompleted(operation, result) {
+    if (_taildropOperation !== operation || !taildropRequestCurrent()) return;
+    _taildropOperation = null;
+    _taildropRequest = null;
+    if (result.ok) {
+      taildropState = "idle";
+      taildropMessage = "";
+      Logger.i("Tailscale", "Taildrop received " + result.files.length + " new file(s)");
+      if (result.files.length > 0) ToastService.showNotice(pluginApi?.tr("toast.title"), result.files.join("\n"), "file-download");
+      else ToastService.showWarning(pluginApi?.tr("toast.title"), pluginApi?.tr("taildrop.toast.no-files"));
+    } else {
+      taildropState = "error";
+      const output = result.output;
+      const duplicate = output.indexOf("file exists") !== -1 || output.indexOf("refusing to overwrite") !== -1 || /moved 0\/\d+ files/.test(output);
+      taildropMessage = duplicate ? pluginApi?.tr("taildrop.error.file-exists") : output || pluginApi?.tr("taildrop.error.unknown");
+      ToastService.showError(pluginApi?.tr("toast.title"), taildropMessage, "file-x");
+      Logger.e("Tailscale", "Taildrop receive failed (exit " + result.exitCode + "): " + output);
     }
-
-    onExited: function (exitCode, exitStatus) {
-      var stderr = String(taildropReceiveProcess.stderr.text || "").trim();
-      var stdout = String(taildropReceiveProcess.stdout.text || "").trim();
-      var allOutput = (stderr + "\n" + stdout).trim();
-      if (exitCode === 0) {
-        root.taildropState = "idle";
-        root.taildropMessage = "";
-        // Scan post-receive to diff new files
-        postScanProcess.command = ["ls", "-1", root.taildropDownloadDir];
-        postScanProcess.running = true;
-        Logger.i("Tailscale", "Taildrop receive completed, running post-scan");
-      } else {
-        root.taildropState = "error";
-        var isDuplicateFile = allOutput.indexOf("file exists") !== -1 || allOutput.indexOf("refusing to overwrite") !== -1 || /moved 0\/\d+ files/.test(allOutput);
-        root.taildropMessage = isDuplicateFile ? pluginApi?.tr("taildrop.error.file-exists") : allOutput || pluginApi?.tr("taildrop.error.unknown");
-        ToastService.showError(pluginApi?.tr("toast.title"), root.taildropMessage, "file-x");
-        Logger.e("Tailscale", "Taildrop receive failed (exit " + exitCode + "): " + allOutput);
-      }
-    }
+    operation.destroy();
   }
 
   Process {
@@ -560,31 +529,43 @@ Item {
     }
   }
 
-  function startTaildropReceive() {
+  function startTaildropReceive(request) {
     if (!root.tailscaleInstalled || !root.tailscaleRunning) {
       Logger.w("Tailscale", "Cannot start receive: tailscale not running");
       return;
     }
-    if (!root.taildropEnabled) {
+    var captured = request || {
+      context: pluginApi.settingsContext,
+      enabled: taildropEnabled,
+      directory: taildropDownloadDir,
+      mode: taildropReceiveMode,
+      current: function() { return root.pluginApi.settingsContext.current(); }
+    };
+    if (!captured.current() || !captured.enabled) {
       Logger.w("Tailscale", "Taildrop is disabled in settings");
       return;
     }
-    if (root.taildropState === "receiving") {
+    if (root._taildropRequest !== null || root.taildropState === "receiving") {
       Logger.w("Tailscale", "Already receiving");
       return;
     }
-    // Pre-scan the download dir; the scan's onExited launches the actual receive
-    preScanProcess.command = ["ls", "-1", root.taildropDownloadDir];
-    preScanProcess.running = true;
+    root._taildropRequest = captured;
+    root.taildropState = "receiving";
+    root.taildropMessage = "";
+    root._taildropOperation = receiveFactory.createObject(root, {
+      request: captured,
+      completed: function(operation, result) { root.receiveCompleted(operation, result); }
+    });
+    root._taildropOperation.start();
   }
 
   // files: array of local file paths, peerTarget: "hostname:" or "ip:"
-  function sendFilesViaTaildrop(files, peerTarget) {
+  function sendFilesViaTaildrop(files, peerTarget, enabled) {
     if (!root.tailscaleInstalled || !root.tailscaleRunning) {
       Logger.w("Tailscale", "Cannot send: tailscale not running");
       return;
     }
-    if (!root.taildropEnabled) {
+    if (!(enabled === undefined ? root.taildropEnabled : enabled)) {
       Logger.w("Tailscale", "Taildrop is disabled in settings");
       return;
     }
@@ -700,7 +681,7 @@ Item {
    * Guard: no-op when not in NeedsLogin state to avoid disconnecting an
    * already-authenticated session.
    */
-  function loginTailscale() {
+  function loginTailscale(selectedLoginServer) {
     if (!root.tailscaleInstalled)
       return;
     if (!root.needsLogin) {
@@ -715,7 +696,7 @@ Item {
 
     // --force-reauth forces the daemon to regenerate the AuthURL even if a
     // (possibly expired) one is still cached in its session state.
-    var loginServer = pluginApi?.pluginSettings?.loginServer || "";
+    var loginServer = selectedLoginServer === undefined ? pluginApi?.pluginSettings?.loginServer || "" : selectedLoginServer;
     var cmd = ["tailscale", "up", "--accept-routes", "--force-reauth"];
     if (loginServer.trim() !== "") {
       cmd.push("--login-server=" + loginServer.trim());
@@ -726,22 +707,6 @@ Item {
     // Arm the safety-net timeout and kick an early status refresh
     loginTimeoutTimer.restart();
     statusDelayTimer.start();
-  }
-
-  Timer {
-    id: updateTimer
-    interval: refreshInterval
-    repeat: true
-    running: true
-    triggeredOnStart: true
-
-    onTriggered: {
-      if (root.tailscaleInstalled === false) {
-        checkTailscaleInstalled();
-      } else {
-        updateTailscaleStatus();
-      }
-    }
   }
 
   Component.onCompleted: {

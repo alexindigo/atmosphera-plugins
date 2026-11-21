@@ -17,7 +17,7 @@ Item {
 
     readonly property bool pillDirection: BarService.getPillDirection(root)
 
-    readonly property var mainInstance: pluginApi?.mainInstance
+    readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext)
 
     readonly property bool barIsVertical: Settings.data.bar.position === "left" || Settings.data.bar.position === "right"
 

@@ -61,6 +61,7 @@
     "username": "Tên người dùng"
   },
   "settings": {
+    "shared-effect": "T\u00f9y ch\u1ecdn th\u0103m d\u00f2, hi\u1ec3n th\u1ecb v\u00e0 th\u00f4ng b\u00e1o thao t\u00e1c \u00e1p d\u1ee5ng cho phi\u00ean b\u1ea3n n\u00e0y. Phi\u00ean VPN, thao t\u00e1c c\u1ea5u h\u00ecnh v\u00e0 lu\u1ed3ng nh\u1eadt k\u00fd l\u00e0 t\u00e0i nguy\u00ean h\u1ec7 th\u1ed1ng d\u00f9ng chung.",
     "bar": {
       "label": "Thanh trạng thái",
       "description": "Hiển thị trên thanh trạng thái"

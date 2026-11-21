@@ -27,7 +27,7 @@ ColumnLayout {
   readonly property var showSocclkField: pluginApi?.field("showSocclk") ?? null
   readonly property var showDcefclkField: pluginApi?.field("showDcefclk") ?? null
   readonly property var deviceIndexField: pluginApi?.field("deviceIndex") ?? null
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.runtimeContext)
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings ?? ({})
 
   readonly property bool valueShowGpuUse: (root.showGpuUseField?.value ?? true)
@@ -66,6 +66,14 @@ ColumnLayout {
   }
 
   spacing: Style.marginL
+
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    text: root.pluginApi?.tr("settings.shared-effect") || ""
+    wrapMode: Text.WordWrap
+    color: AtmoColor.mOnSurfaceVariant
+  }
 
   NText {
     text: pluginApi?.tr("settings.bar_section")

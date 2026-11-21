@@ -17,7 +17,7 @@ Item {
 
   readonly property bool pillDirection: BarService.getPillDirection(root)
 
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext)
   readonly property bool tailscaleConnected: mainInstance?.tailscaleRunning ?? false
   readonly property bool tailscaleConnecting: (mainInstance?.isRefreshing ?? false) && !(mainInstance?.tailscaleRunning ?? false)
 

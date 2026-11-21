@@ -31,6 +31,7 @@
     "activity": "Aktivität"
   },
   "settings": {
+    "shared-effect": "Ger\u00e4t und Anzeige gelten f\u00fcr diese Instanz. Ansichten derselben GPU teilen Messwerte und Verlauf.",
     "bar_section": "Bar-Widget",
     "compact_mode_label": "Kompaktmodus",
     "compact_mode_description": "Vertikale Mini-Anzeigen statt Prozenttext.",

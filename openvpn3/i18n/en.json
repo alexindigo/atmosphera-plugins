@@ -61,6 +61,7 @@
     "username": "Username"
   },
   "settings": {
+    "shared-effect": "Polling, display and action-notification choices apply to this instance. VPN sessions, configuration actions and the log stream are shared system resources.",
     "bar": {
       "label": "Bar",
       "description": "Appearance in the status bar"
