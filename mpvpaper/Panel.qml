@@ -16,6 +16,8 @@ Item {
     id: root
     
     property var pluginApi: null
+    onPluginApiChanged: pluginApi?.mainInstance?.registerRuntime(pluginApi)
+    Component.onCompleted: pluginApi?.mainInstance?.registerRuntime(pluginApi)
 
     readonly property var geometryPlaceholder: panelContainer
     readonly property bool allowAttach: true
@@ -174,7 +176,7 @@ Item {
                                             return;
                                         }
 
-                                        pluginApi.mainInstance.setWallpaper(wallpaper.path);
+                                        pluginApi.mainInstance.setWallpaper(wallpaper.path, pluginApi);
                                     }
 
                                     onEntered: TooltipService.show(wallpaperImage, wallpaper.path, "auto", 100);
@@ -195,13 +197,13 @@ Item {
 
             ToolRow {
                 pluginApi: root.pluginApi
+                randomAction: () => root.pluginApi.mainInstance.random(root.pluginApi)
+                clearAction: () => root.pluginApi.mainInstance.clear(root.pluginApi)
                 playingWriter: value => {
-                    root.pluginApi.pluginSettings.isPlaying = value;
-                    root.pluginApi.saveSettings();
+                    root.pluginApi.mainInstance.setPreference("isPlaying", value, root.pluginApi);
                 }
                 muteWriter: value => {
-                    root.pluginApi.pluginSettings.isMuted = value;
-                    root.pluginApi.saveSettings();
+                    root.pluginApi.mainInstance.setPreference("isMuted", value, root.pluginApi);
                 }
             }
         }
@@ -218,8 +220,7 @@ Item {
             if (paths.length > 0 && pluginApi != null) {
                 Logger.d("mpvpaper", "Selected the following wallpaper folder:", paths[0]);
 
-                pluginApi.pluginSettings.wallpapersFolder = paths[0];
-                pluginApi.saveSettings();
+                pluginApi.mainInstance.setPreference("wallpapersFolder", paths[0], pluginApi);
             }
         }
     }

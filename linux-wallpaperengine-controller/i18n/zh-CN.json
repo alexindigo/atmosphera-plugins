@@ -103,6 +103,7 @@
     "wallpaperVolume": "音量"
   },
   "settings": {
+    "shared-effect": "Wallpaper playback, screen choices, recovery and color effects are shared. Apply or a runtime action selects this instance's playback policy; the startup switch is controlled in plugin Settings.",
     "autoApplyOnStartup": {
       "description": "若至少一个屏幕已配置壁纸，启动时自动运行引擎",
       "label": "启动时自动应用"

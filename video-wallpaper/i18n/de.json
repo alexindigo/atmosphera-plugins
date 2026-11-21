@@ -66,6 +66,7 @@
     }
   },
   "settings": {
+    "shared-effect": "Apply or a runtime action selects this instance's policy for the shared per-screen wallpaper players and automation. Playback, wallpaper restoration and color changes affect every instance.",
     "toggle": {
       "label": "Video-Hintergrundbilder aktivieren",
       "description": "Aktiviere Video-Hintergrundbilder, die mit QtMultimedia angezeigt werden"

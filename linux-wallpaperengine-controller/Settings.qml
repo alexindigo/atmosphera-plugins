@@ -23,9 +23,10 @@ ColumnLayout {
       root._savePending = false;
       var main = root.pluginApi.mainInstance;
       if (main) {
-        main.refreshWallpaperCache(true, false);
+        main.activatePolicy(root.pluginApi.runtimeContext);
+        main.refreshWallpaperCache(true, false, root.pluginApi.runtimeContext);
         if (main.hasAnyConfiguredWallpaper())
-          main.reload();
+          main.reload(false, root.pluginApi.runtimeContext);
       }
     }
   }
@@ -86,6 +87,13 @@ ColumnLayout {
   readonly property string pluginCacheDir: ColorCacheHelpers.pluginCacheDir(Settings.cacheDir, pluginApi?.manifest?.id || pluginApi?.pluginId || "linux-wallpaperengine-controller")
 
   spacing: Style.marginL
+
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+  }
 
   function badgeLabel(key) {
     return BadgeHelpers.settingsBadgeLabel(key, badgeKey => pluginApi?.tr(badgeKey));
@@ -702,6 +710,7 @@ ColumnLayout {
           NPluginSettingsField {
             field: root.autoApplyOnStartupField
             NToggle {
+              enabled: root.pluginApi?.scopeKind !== "instance"
               Layout.fillWidth: true
               label: pluginApi?.tr("settings.autoApplyOnStartup.label")
               description: pluginApi?.tr("settings.autoApplyOnStartup.description")

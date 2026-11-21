@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
+import Qt.labs.folderlistmodel
 
 import Quickshell
 import "../common/MonitorCommands.js" as Commands
@@ -62,6 +63,62 @@ ColumnLayout {
 
   // Signals
   signal saveMonitorProperty(key: string, value: var)
+  signal saveWallpaperChoice(path: string, screens: var)
+  readonly property string randomFolderPath: Settings.preprocessPath(root.wallpapersFolder)
+  property var pendingRandom: null
+  property var randomChoices: null
+  onRandomFolderPathChanged: {
+    if (pendingRandom && pendingRandom.folder !== randomFolderPath) cancelRandomWallpaper();
+  }
+
+  function wallpaperScreens() {
+    return monitorSpecific ? [selectedMonitor] : Array.from(Quickshell.screens).map(screen => screen.name);
+  }
+
+  function stageWallpaper(path, screens) {
+    screens = screens || wallpaperScreens();
+    saveWallpaperChoice(path, screens);
+    if (screens.includes(selectedMonitor)) currentWallpaper = path;
+  }
+
+  function stageRandomWallpaper() {
+    cancelRandomWallpaper();
+    if (!Settings.preprocessPath(root.wallpapersFolder).length) return;
+    pendingRandom = {folder: Settings.preprocessPath(root.wallpapersFolder), screens: wallpaperScreens()};
+    randomChoices = wallpaperChoicesComponent.createObject(root, {sourceFolder: pendingRandom.folder});
+  }
+
+  function cancelRandomWallpaper() {
+    pendingRandom = null;
+    if (randomChoices) randomChoices.destroy();
+    randomChoices = null;
+  }
+
+  function finishRandomWallpaper(model) {
+    const request = pendingRandom;
+    if (!request || model !== randomChoices || request.folder !== randomFolderPath || model.status !== FolderListModel.Ready || String(model.folder) !== String(Qt.resolvedUrl("file://" + request.folder))) return;
+    pendingRandom = null;
+    if (model.count > 0) stageWallpaper(model.get(Math.floor(Math.random() * model.count), "filePath"), request.screens);
+    randomChoices = null;
+    Qt.callLater(function () { model.destroy(); });
+  }
+
+  function stageClearWallpaper() {
+    cancelRandomWallpaper();
+    stageWallpaper("");
+  }
+
+  Component {
+    id: wallpaperChoicesComponent
+    FolderListModel {
+      id: choices
+      required property string sourceFolder
+      folder: sourceFolder.length ? "file://" + sourceFolder : ""
+      nameFilters: ["*.mp4", "*.avi", "*.mov", "*.webm", "*.gif"]
+      showDirs: false
+      onStatusChanged: root.finishRandomWallpaper(choices)
+    }
+  }
 
   /***************************
   * EVENTS
@@ -103,8 +160,7 @@ ColumnLayout {
       onAccepted: paths => {
         if (paths.length > 0) {
           Logger.d("video-wallpaper", "Selected the following current wallpaper:", paths[0]);
-          root.currentWallpaper = paths[0];
-          edits.mark("currentWallpaper");
+          root.stageWallpaper(paths[0]);
         }
       }
     }
@@ -139,6 +195,8 @@ ColumnLayout {
     monitorSpecific: root.monitorSpecific
     screenName: root.selectedMonitor
     settingWriter: (key, value) => root.saveMonitorProperty(key, value)
+    randomAction: root.stageRandomWallpaper
+    clearAction: root.stageClearWallpaper
     settings: root.toolSettings
   }
 

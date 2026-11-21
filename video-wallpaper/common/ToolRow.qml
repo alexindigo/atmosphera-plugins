@@ -26,6 +26,8 @@ RowLayout {
     property var settings: pluginApi?.pluginSettings || ({})
     // The caller owns field staging or runtime publication, never this row.
     required property var settingWriter
+    required property var randomAction
+    required property var clearAction
 
     // Monitor specific properties
     readonly property bool isPlaying: Commands.value(settings.monitors, screenName, "isPlaying", pluginApi?.manifest?.metadata?.defaultSettings)
@@ -42,21 +44,11 @@ RowLayout {
     * FUNCTIONS
     ********************************/
     function random() {
-        if(pluginApi?.mainInstance == null) {
-            Logger.e("video-wallpaper", "Main instance isn't loaded");
-            return;
-        }
-
-        pluginApi.mainInstance.random(screenName);
+        randomAction();
     }
 
     function clear() {
-        if(pluginApi?.mainInstance == null) {
-            Logger.e("video-wallpaper", "Main instance isn't loaded");
-            return;
-        }
-
-        pluginApi.mainInstance.clear(screenName);
+        clearAction();
     }
 
     function togglePlaying() {

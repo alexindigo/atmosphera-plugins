@@ -9,6 +9,22 @@ import qs.Services.UI
 Item {
     id: root
     required property var pluginApi
+    required property var settingsContext
+    property var runtimeWriter: null
+    property var admittedContext: null
+    property int policyGeneration: 0
+
+    function replacePolicy() {
+        const generation = ++policyGeneration;
+        admittedContext = null;
+        deactivateMpvpaper();
+        Qt.callLater(function () {
+            if (generation !== root.policyGeneration || !root.settingsContext?.current()) return;
+            if (root.active && root.currentWallpaper !== "") root.activateMpvpaper();
+        });
+    }
+    onSettingsContextChanged: replacePolicy()
+    onMpvSocketChanged: replacePolicy()
 
     /***************************
     * PROPERTIES
@@ -53,6 +69,8 @@ Item {
     }
 
     function activateMpvpaper() {
+        if (!settingsContext?.current() || !active || currentWallpaper === "") return;
+        admittedContext = settingsContext;
         Logger.d("mpvpaper", "Activating mpvpaper...");
 
         // Save the old wallpapers of the user.
@@ -61,8 +79,8 @@ Item {
         mpvProc.command = buildMpvCommand();
         mpvProc.running = true;
 
-        pluginApi.pluginSettings.isPlaying = true;
-        pluginApi.saveSettings();
+        // Loading/replacing a physical backend is not a preference action.
+        // Main's explicit originating wallpaper action owns the playing intent.
     }
 
     function deactivateMpvpaper() {
@@ -76,6 +94,7 @@ Item {
     }
 
     function sendCommandToMPV(command: string) {
+        if (!settingsContext?.current() || admittedContext !== settingsContext) return;
         socket.connected = true;
         socket.path = mpvSocket;
         socket.write(`${command}\n`);
@@ -92,7 +111,7 @@ Item {
 
             activateMpvpaper();
 
-            thumbnails.startColorGen();
+            thumbnails.startColorGen(settingsContext, currentWallpaper);
         } else if(!root.active) {
             Logger.d("mpvpaper", "Turning mpvpaper off.");
 
@@ -117,7 +136,7 @@ Item {
                 activateMpvpaper();
             }
 
-            thumbnails.startColorGen();
+            thumbnails.startColorGen(settingsContext, currentWallpaper);
         } else if(mpvProc.running) {
             Logger.d("mpvpaper", "Current wallpaper is empty, turning mpvpaper off.");
 
@@ -206,8 +225,11 @@ Item {
 
         // Clamp the volume
         if(v != volume) {
-            pluginApi.pluginSettings.volume = v;
-            pluginApi.saveSettings();
+            const writer = runtimeWriter;
+            if (writer?.settingsContext === settingsContext && settingsContext.current()) {
+                writer.pluginSettings.volume = v;
+                writer.saveSettings();
+            }
         }
     }
 

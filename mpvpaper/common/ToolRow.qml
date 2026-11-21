@@ -22,6 +22,8 @@ RowLayout {
     // callers supply the action appropriate to their captured context.
     required property var playingWriter
     required property var muteWriter
+    required property var randomAction
+    required property var clearAction
 
 
     NButton {
@@ -61,21 +63,11 @@ RowLayout {
     * Button functionality
     ********************************/
     function random() {
-        if(pluginApi?.mainInstance == null) {
-            Logger.e("mpvpaper", "Main instance isn't loaded");
-            return;
-        }
-
-        pluginApi.mainInstance.random();
+        randomAction();
     }
 
     function clear() {
-        if(pluginApi?.mainInstance == null) {
-            Logger.e("mpvpaper", "Main instance isn't loaded");
-            return;
-        }
-
-        pluginApi.mainInstance.clear();
+        clearAction();
     }
 
     function togglePlaying() {

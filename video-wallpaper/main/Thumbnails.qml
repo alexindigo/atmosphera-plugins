@@ -7,6 +7,7 @@ import "../common"
 Item {
     id: root
     required property var pluginApi
+    property var settingsContext: pluginApi?.settingsContext
     required property var getThumbPath
     required property string thumbCacheFolderPath
     required property FolderModel folderModel
@@ -19,7 +20,7 @@ Item {
     readonly property bool thumbCacheReady: internal.ready
     readonly property bool generationFailed: internal.failed
     readonly property int generation: internal.generation
-    readonly property string wallpapersFolder: pluginApi?.pluginSettings?.wallpapersFolder ?? pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
+    readonly property string wallpapersFolder: settingsContext?.settingsView?.wallpapersFolder ?? pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
 
     QtObject {
         id: internal
