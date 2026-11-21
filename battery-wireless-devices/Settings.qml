@@ -25,6 +25,13 @@ ColumnLayout {
   spacing: Style.marginM
   Layout.fillWidth: true
 
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.WordWrap
+    text: root.pluginApi?.tr("settings.shared-observation") ?? ""
+  }
+
   // Working copy of the per-device config: { <id>: { enabled, icon, iconColor,
   // ringColor, launchCmd, name, type } }. Mutated in place by the controls so
   // the Repeater never rebuilds and loses edits.

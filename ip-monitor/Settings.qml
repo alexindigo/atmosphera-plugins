@@ -23,6 +23,13 @@ ColumnLayout {
 
   spacing: Style.marginL
 
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.WordWrap
+    text: root.pluginApi?.tr("settings.shared-observation") ?? ""
+  }
+
   Component.onCompleted: {
     Logger.d("IpMonitor", "Settings UI loaded");
   }

@@ -21,6 +21,13 @@ ColumnLayout {
   spacing: Style.marginM
 
   NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.WordWrap
+    text: root.pluginApi?.tr("settings.shared-observation") ?? ""
+  }
+
+  NText {
     text: pluginApi?.tr("settings.title")
     font.pointSize: Style.fontSizeXL
     font.bold: true

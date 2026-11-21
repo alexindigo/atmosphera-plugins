@@ -1,14 +1,44 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import qs.Commons
-import qs.Services.UI
 import "." as Local
+import qs.Commons
+import qs.Services.Plugins
+import qs.Services.UI
 
 Item {
   id: root
 
   property var pluginApi: null
+  property var _settingsConsumers: new Map()
+  Component {
+    id: pollFactory
+    PluginSettingsPoller {}
+  }
+  function settingsConsumerFor(context) {
+    if (!context || !context.current())
+      return null;
+    if (_settingsConsumers.has(context))
+      return _settingsConsumers.get(context);
+    var client = pollFactory.createObject(root, {
+                                            settingsContext: context,
+                                            sourceInterval: Qt.binding(function () {
+                                              return context.settingsView.refreshInterval ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval ?? 300;
+                                            }),
+                                            intervalScale: 1000,
+                                            requirePositiveInterval: true,
+                                            requestRefresh: function () {
+                                              service.fetchIp();
+                                            },
+                                            retire: function (retired) {
+                                              root._settingsConsumers.delete(context);
+                                              retired.destroy();
+                                            }
+                                          });
+    _settingsConsumers.set(context, client);
+    return client;
+  }
+  readonly property var settingsConsumer: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
 
   // IP Monitor Service
   Item {
@@ -22,10 +52,8 @@ Item {
     // Increment this to trigger refresh in all listening widgets (for IPC)
     property int refreshTrigger: 0
 
-    // Read global settings
-    readonly property var cfg: root.pluginApi?.pluginSettings || ({})
-    readonly property var defaults: root.pluginApi?.manifest?.metadata?.defaultSettings || ({})
-    readonly property int refreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 300
+    // Compatibility surface remains explicitly plugin-level; views own schedules.
+    readonly property int refreshInterval: root.settingsConsumer?.sourceInterval ?? 300
 
     // Process for fetching IP info
     property Process ipFetchProcess: Process {
@@ -86,13 +114,6 @@ Item {
       }
     }
 
-    property Timer autoRefreshTimer: Timer {
-      interval: service.refreshInterval * 1000
-      running: interval > 0
-      repeat: true
-      onTriggered: service.fetchIp()
-    }
-
     Component.onCompleted: {
       Logger.i("IpMonitor", "Service initialized, frist time fetching IP.");
       // Auto-fetch on startup
@@ -137,8 +158,8 @@ Item {
     function toggle() {
       if (pluginApi) {
         pluginApi.withCurrentScreen(screen => {
-					pluginApi.openPanel(screen);
-				});
+          pluginApi.openPanel(screen);
+        });
       }
     }
   }

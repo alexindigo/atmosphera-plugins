@@ -16,6 +16,7 @@
     "not-installed": "warp-cli not found. Install Cloudflare WARP to use this plugin."
   },
   "settings": {
+    "shared-observation": "This instance has its own polling interval. WARP status is shared; connecting or disconnecting affects the whole system.",
     "title": "Cloudflare WARP",
     "description": "Toggle Cloudflare WARP from the bar and customize how it looks.",
     "connected-color": "Connected color",

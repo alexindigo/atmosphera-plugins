@@ -2,8 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import qs.Commons
-import qs.Widgets
 import qs.Services.UI
+import qs.Widgets
 
 Item {
   id: root
@@ -13,6 +13,7 @@ Item {
   readonly property bool allowAttach: true
 
   readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var settingsConsumer: mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
   property real contentPreferredWidth: 300 * Style.uiScaleRatio
   property real contentPreferredHeight: contentColumn.implicitHeight + Style.marginM * 2
@@ -66,9 +67,7 @@ Item {
             }
 
             NText {
-              text: (mainInstance?.warpConnected ?? false)
-                ? pluginApi?.tr("panel.status.connected")
-                : pluginApi?.tr("panel.status.disconnected")
+              text: (mainInstance?.warpConnected ?? false) ? pluginApi?.tr("panel.status.connected") : pluginApi?.tr("panel.status.disconnected")
               pointSize: Style.fontSizeS
               color: (mainInstance?.warpConnected ?? false) ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
             }
@@ -128,17 +127,15 @@ Item {
 
       NButton {
         Layout.fillWidth: true
-        text: (mainInstance?.warpConnected ?? false)
-          ? pluginApi?.tr("context.disconnect")
-          : pluginApi?.tr("context.connect")
+        text: (mainInstance?.warpConnected ?? false) ? pluginApi?.tr("context.disconnect") : pluginApi?.tr("context.connect")
         icon: (mainInstance?.warpConnected ?? false) ? "plug-x" : "plug"
         backgroundColor: (mainInstance?.warpConnected ?? false) ? AtmoColor.mError : AtmoColor.mPrimary
         textColor: (mainInstance?.warpConnected ?? false) ? AtmoColor.mOnError : AtmoColor.mOnPrimary
         enabled: mainInstance?.warpInstalled ?? false
 
         onClicked: {
-          mainInstance?.toggleWarp()
-          pluginApi?.closePanel(pluginApi?.panelOpenScreen)
+          mainInstance?.toggleWarp();
+          pluginApi?.closePanel(pluginApi?.panelOpenScreen);
         }
       }
     }

@@ -1,18 +1,19 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import "." as Local
 import qs.Commons
 import qs.Modules.Bar.Extras
 import qs.Modules.Panels.Settings
 import qs.Services.UI
 import qs.Widgets
-import "." as Local
 
 Item {
   id: root
 
   property var pluginApi: null
   property var ipMonitorService: pluginApi?.mainInstance?.ipMonitorService || null
+  readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
   property ShellScreen screen
   property string widgetId: ""

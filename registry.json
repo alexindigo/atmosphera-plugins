@@ -290,7 +290,7 @@
       "author": "aslauw",
       "description": "Bar widget showing battery levels for wireless peripherals (mouse, keyboard, headset, etc.) via OpenRazer and Solaar.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.8",
       "tags": [
         "Bar",
         "Indicator",
@@ -299,7 +299,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": false,
       "upstreamPR": 912,
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "minNoctaliaVersion": "4.6.6",
       "minAtmospheraVersion": "0.10.0"
     },
@@ -477,13 +477,13 @@
       "author": "ToRvaLDz",
       "description": "Toggle Cloudflare WARP from the bar. Shows connection status and mode.",
       "license": "MIT",
-      "version": "1.0.8",
+      "version": "1.0.10",
       "tags": [
         "Bar",
         "Network",
         "Panel"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.0.0",
@@ -995,11 +995,11 @@
       "author": "deepalpha",
       "description": "Plugin showing current external IP",
       "license": "MIT",
-      "version": "0.1.8",
+      "version": "0.1.10",
       "tags": [
         "Development"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.3",
@@ -1335,13 +1335,13 @@
       "author": "ToRvaLDz",
       "description": "Switch monitor profiles from the bar. Shows the active profile and lets you switch between saved configurations.",
       "license": "MIT",
-      "version": "1.1.7",
+      "version": "1.1.9",
       "tags": [
         "Bar",
         "System",
         "Panel"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.0.0",

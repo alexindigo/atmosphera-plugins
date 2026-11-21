@@ -19,6 +19,7 @@
     }
   },
   "settings": {
+    "shared-observation": "This instance has its own polling interval. IP observations are shared; a refresh from any instance updates all instances.",
     "appearance": {
       "title": "Appearance"
     },
