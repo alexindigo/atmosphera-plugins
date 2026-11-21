@@ -8,6 +8,7 @@ Item {
     id: root
 
     property var pluginApi: null
+    readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
     property ShellScreen screen
     property string widgetId: ""
     property string section: ""
@@ -68,7 +69,7 @@ Item {
             if (pluginApi) {
                 if (clock.date.getTime() > pluginApi?.pluginSettings?.tokenExpiresAt) {
                     Logger.i("spotify-player", "Token expired, refreshing...")
-                    pluginApi?.mainInstance.refreshAccessToken()
+                    pluginApi?.mainInstance.refreshAccessToken(pluginApi)
                 }
                 pluginApi?.openPanel(root.screen, root)
             }
