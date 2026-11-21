@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "Filters and appearance apply to this instance. Device observations and access history are shared. Any configuration can request a common notification; disabling this instance's notifications does not silence others.",
     "hideInactive": {
       "desc": "Nascondi le icone di microfono, fotocamera e schermo quando sono inattive.",
       "label": "Nascondi stati inattivi"

@@ -12,6 +12,7 @@
     "subtitle": "バーで素早く計算"
   },
   "settings": {
+    "shared-effect": "Precision and the bar value display apply to this instance. All views share the current calculation; entering, clearing or evaluating changes that shared calculation.",
     "about": "このプラグインについて",
     "show-bar": "バーに数値を表示",
     "show-bar-desc": "電卓アイコンの横に現在の値を表示します",

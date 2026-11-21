@@ -17,6 +17,13 @@ ColumnLayout {
 
   spacing: Style.marginM
 
+  NText {
+    Layout.fillWidth: true
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+    wrapMode: Text.WordWrap
+  }
+
   function saveSettings() {
     if (!pluginApi?.pluginSettings)
       return;

@@ -15,7 +15,8 @@ Item {
     property int sectionWidgetIndex: -1
     property int sectionWidgetsCount: 0
 
-    readonly property var mainInst: pluginApi?.mainInstance ?? null
+    readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+    readonly property var mainInst: settingsConsumer
     readonly property bool isPanelOpen: pluginApi?.isPanelOpen ?? false
     readonly property bool isSelected: isPanelOpen
 

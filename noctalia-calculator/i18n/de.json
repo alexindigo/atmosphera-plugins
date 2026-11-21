@@ -16,6 +16,7 @@
     "copied": "Kopiert: {value}"
   },
   "settings": {
+    "shared-effect": "Precision and the bar value display apply to this instance. All views share the current calculation; entering, clearing or evaluating changes that shared calculation.",
     "about": "Über",
     "show-bar": "Wert in der Leiste anzeigen",
     "show-bar-desc": "Zeigt den aktuellen Wert neben dem Rechner-Symbol an",

@@ -12,6 +12,7 @@
     "subtitle": "Быстрый расчёт в панели"
   },
   "settings": {
+    "shared-effect": "Precision and the bar value display apply to this instance. All views share the current calculation; entering, clearing or evaluating changes that shared calculation.",
     "about": "О плагине",
     "show-bar": "Показывать значение в панели",
     "show-bar-desc": "Отображает текущее значение рядом с иконкой калькулятора",

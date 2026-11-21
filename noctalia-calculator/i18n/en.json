@@ -16,6 +16,7 @@
     "copied": "Copied: {value}"
   },
   "settings": {
+    "shared-effect": "Precision and the bar value display apply to this instance. All views share the current calculation; entering, clearing or evaluating changes that shared calculation.",
     "about": "About",
     "show-bar": "Show value in bar",
     "show-bar-desc": "Display the current value next to the calculator icon",

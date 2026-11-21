@@ -4,6 +4,7 @@ import Quickshell.Io
 import Quickshell.Services.Pipewire
 import qs.Commons
 import qs.Services.UI
+import "Projection.js" as Projection
 
 Item {
   id: root
@@ -11,11 +12,14 @@ Item {
 
   // --- Logic extracted from BarWidget.qml ---
 
-  property bool micActive: false
-  property bool camActive: false
+  property var rawMic: ({active: false, anonymous: false, apps: []})
+  property var rawCamera: []
+  readonly property var microphone: Projection.filteredMicrophone(rawMic, micFilterRegex)
+  readonly property bool micActive: microphone.active
+  readonly property bool camActive: camApps.length > 0
   property bool scrActive: false
-  property var micApps: []
-  property var camApps: []
+  readonly property var micApps: microphone.apps
+  readonly property var camApps: Projection.camera(rawCamera, camFilterRegex)
   property var scrApps: []
 
   property var accessHistory: []
@@ -33,6 +37,35 @@ Item {
   property string micFilterRegex: cfg.micFilterRegex ?? defaults.micFilterRegex ?? ""
   property string camFilterRegex: cfg.camFilterRegex ?? defaults.camFilterRegex ?? ""
 
+  property var _settingsConsumers: new Map()
+  property var _toastIssued: new Map()
+  Component { id: clientFactory; PrivacySettingsClient {} }
+  function settingsConsumerFor(context) {
+    if (!context || !context.current()) return null;
+    if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+    var client = clientFactory.createObject(root, {
+      settingsContext: context, observation: root,
+      retire: function(retired) { root._settingsConsumers.delete(context); retired.destroy(); }
+    });
+    _settingsConsumers.set(context, client);
+    return client;
+  }
+  readonly property var settingsConsumer: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
+  function requestToast(type, context) {
+    if (!context.current()) return;
+    if (root._toastIssued.has(type)) {
+      root._toastIssued.get(type).add(context);
+      return;
+    }
+    var requesters = new Set([context]);
+    root._toastIssued.set(type, requesters);
+    Qt.callLater(function() {
+      root._toastIssued.delete(type);
+      if (!Array.from(requesters).some(requester => requester.current())) return;
+      ToastService.showNotice(pluginApi?.tr("toast." + type + "-on"), "", {mic: "microphone", cam: "camera", screen: "screen-share"}[type]);
+    });
+  }
+
   PwObjectTracker {
     objects: Pipewire.ready ? Pipewire.nodes.values : []
   }
@@ -46,24 +79,7 @@ Item {
         var appsString = this.text.trim();
         var apps = appsString.length > 0 ? appsString.split(',') : [];
 
-        var filterRegex = null;
-        if (root.camFilterRegex && root.camFilterRegex.length > 0) {
-          try {
-            filterRegex = new RegExp(root.camFilterRegex);
-          } catch (e) {
-            Logger.w("PrivacyIndicator: Invalid camFilterRegex:", root.camFilterRegex);
-          }
-        }
-
-        var appNames = [];
-        for (var i = 0; i < apps.length; i++) {
-            var appName = apps[i];
-            if (filterRegex && appName && filterRegex.test(appName)) continue;
-            if (appName && appNames.indexOf(appName) === -1) appNames.push(appName);
-        }
-
-        root.camApps = appNames;
-        root.camActive = appNames.length > 0;
+        root.rawCamera = apps;
       }
     }
   }
@@ -90,35 +106,7 @@ Item {
   }
 
   function updateMicrophoneState(nodes, links) {
-    var appNames = [];
-    var isActive = false;
-
-    var filterRegex = null;
-    if (root.micFilterRegex && root.micFilterRegex.length > 0) {
-      try {
-        filterRegex = new RegExp(root.micFilterRegex);
-      } catch (e) {
-        Logger.w("PrivacyIndicator: Invalid micFilterRegex:", root.micFilterRegex);
-      }
-    }
-
-    for (var i = 0; i < nodes.length; i++) {
-      var node = nodes[i];
-      if (!node || !node.isStream || !node.audio || node.isSink) continue;
-      if (!hasNodeLinks(node, links) || !node.properties) continue;
-      var mediaClass = node.properties["media.class"] || "";
-      if (mediaClass === "Stream/Input/Audio") {
-        if (node.properties["stream.capture.sink"] === "true") continue;
-
-        var appName = getAppName(node);
-        if (filterRegex && appName && filterRegex.test(appName)) continue;
-
-        isActive = true;
-        if (appName && appNames.indexOf(appName) === -1) appNames.push(appName);
-      }
-    }
-    root.micActive = isActive;
-    root.micApps = appNames;
+    rawMic = Projection.microphone(nodes, links);
   }
 
   function updateCameraState() {
@@ -279,34 +267,11 @@ Item {
     checkAppChanges(micApps, _prevMicApps, "Microphone", "microphone", activeColorKey);
     _prevMicApps = micApps;
   }
-  // Helper to detect activation edge
-  property bool oldMicActive: false
-  onMicActiveChanged: {
-    if (enableToast && micActive && !oldMicActive) {
-        ToastService.showNotice(pluginApi?.tr("toast.mic-on"), "", "microphone");
-    }
-    oldMicActive = micActive
-  }
-
-  property bool oldCamActive: false
-  onCamActiveChanged: {
-      if (enableToast && camActive && !oldCamActive) {
-          ToastService.showNotice(pluginApi?.tr("toast.cam-on"), "", "camera");
-      }
-      oldCamActive = camActive
-  }
   onCamAppsChanged: {
     checkAppChanges(camApps, _prevCamApps, "Camera", "camera", activeColorKey);
     _prevCamApps = camApps;
   }
 
-  property bool oldScrActive: false
-  onScrActiveChanged: {
-      if (enableToast && scrActive && !oldScrActive) {
-          ToastService.showNotice(pluginApi?.tr("toast.screen-on"), "", "screen-share");
-      }
-      oldScrActive = scrActive
-  }
   onScrAppsChanged: {
     checkAppChanges(scrApps, _prevScrApps, "Screen", "screen-share", activeColorKey);
     _prevScrApps = scrApps;

@@ -12,6 +12,7 @@
     "subtitle": "栏内快速计算"
   },
   "settings": {
+    "shared-effect": "Precision and the bar value display apply to this instance. All views share the current calculation; entering, clearing or evaluating changes that shared calculation.",
     "about": "关于",
     "show-bar": "在栏中显示数值",
     "show-bar-desc": "在计算器图标旁显示当前数值",

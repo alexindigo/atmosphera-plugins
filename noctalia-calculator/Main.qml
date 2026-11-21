@@ -8,6 +8,18 @@ Item {
     id: root
 
     property var pluginApi: null
+    property var _settingsConsumers: new Map()
+    Component { id: clientFactory; CalculatorSettingsClient {} }
+    function settingsConsumerFor(context) {
+        if (!context || !context.current()) return null;
+        if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+        var client = clientFactory.createObject(root, {
+            settingsContext: context, calculation: root,
+            retire: function(retired) { root._settingsConsumers.delete(context); retired.destroy(); }
+        });
+        _settingsConsumers.set(context, client);
+        return client;
+    }
 
     readonly property var settings: pluginApi?.pluginSettings ?? ({})
     readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings ?? ({})
@@ -47,12 +59,13 @@ Item {
         return currentInput;
     }
 
-    function _numberToString(value) {
+    function _numberToString(value, selectedPrecision) {
         if (!Number.isFinite(value)) return null;
+        const digits = selectedPrecision === undefined ? precision : selectedPrecision;
 
         let rounded = value;
-        if (precision >= 0) {
-            rounded = Number(value.toFixed(precision));
+        if (digits >= 0) {
+            rounded = Number(value.toFixed(digits));
         }
         if (Object.is(rounded, -0)) rounded = 0;
 
@@ -62,17 +75,18 @@ Item {
         }
 
         if (text.length > 16 && rounded !== 0) {
-            text = rounded.toExponential(Math.max(0, Math.min(precision, 6))).replace("e+", "e");
+            text = rounded.toExponential(Math.max(0, Math.min(digits, 6))).replace("e+", "e");
         }
         return text;
     }
 
-    function compactDisplay(text, maxLength) {
+    function compactDisplay(text, maxLength, selectedPrecision) {
+        const digits = selectedPrecision === undefined ? precision : selectedPrecision;
         if (!text) return "";
         if (text.length <= maxLength) return text;
         const numeric = Number(text);
         if (!Number.isNaN(numeric) && Number.isFinite(numeric)) {
-            const exp = numeric.toExponential(Math.max(0, Math.min(precision, 3))).replace("e+", "e");
+            const exp = numeric.toExponential(Math.max(0, Math.min(digits, 3))).replace("e+", "e");
             if (exp.length <= maxLength) return exp;
         }
         return text.slice(0, Math.max(1, maxLength - 1)) + "~";
@@ -188,7 +202,7 @@ Item {
         justEvaluated = false;
     }
 
-    function applyPercent() {
+    function applyPercent(selectedPrecision) {
         if (errorState) return;
 
         const numeric = Number(_sanitizeCurrentInput());
@@ -197,7 +211,7 @@ Item {
             return;
         }
 
-        const formatted = _numberToString(numeric / 100);
+        const formatted = _numberToString(numeric / 100, selectedPrecision);
         if (formatted === null) {
             _setError();
             return;
@@ -288,7 +302,7 @@ Item {
         return _formatExpression(built);
     }
 
-    function evaluate() {
+    function evaluate(selectedPrecision) {
         if (errorState) return;
 
         const evaluationTokens = _buildEvaluationTokens();
@@ -302,7 +316,7 @@ Item {
             return;
         }
 
-        const formatted = _numberToString(result);
+        const formatted = _numberToString(result, selectedPrecision);
         if (formatted === null) {
             _setError();
             return;
@@ -316,7 +330,7 @@ Item {
         lastExpression = expression;
     }
 
-    function pressButton(action) {
+    function pressButton(action, selectedPrecision) {
         if (action >= "0" && action <= "9") {
             appendDigit(action);
             return;
@@ -327,8 +341,8 @@ Item {
         else if (action === "subtract") applyOperator("-");
         else if (action === "multiply") applyOperator("*");
         else if (action === "divide") applyOperator("/");
-        else if (action === "equals") evaluate();
-        else if (action === "percent") applyPercent();
+        else if (action === "equals") evaluate(selectedPrecision);
+        else if (action === "percent") applyPercent(selectedPrecision);
         else if (action === "sign") toggleSign();
         else if (action === "clear") clearAll();
         else if (action === "delete") deleteLastChar();
@@ -359,11 +373,11 @@ Item {
         return "";
     }
 
-    function handleKeyEvent(event) {
+    function handleKeyEvent(event, selectedPrecision) {
         const action = actionForKeyEvent(event);
         if (action === "") return false;
 
-        pressButton(action);
+        pressButton(action, selectedPrecision);
         return true;
     }
 

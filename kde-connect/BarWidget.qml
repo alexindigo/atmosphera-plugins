@@ -13,6 +13,7 @@ Item {
   id: root
 
   property var pluginApi: null
+  readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
   property ShellScreen screen
 
@@ -30,7 +31,7 @@ Item {
   visible: !hideIfNoDeviceConnected ? true : KDEConnect.anyDevicesConnected;
   opacity: (!hideIfNoDeviceConnected ? true : KDEConnect.anyDevicesConnected) ? 1.0 : 0.0;
 
-  property bool hideIfNoDeviceConnected: !(root.pluginApi?.mainInstance?.hideIfNoDeviceConnected ?? false)
+  property bool hideIfNoDeviceConnected: settingsConsumer?.hideIfNoDeviceConnected ?? false
 
 
   BarPill {
@@ -40,9 +41,9 @@ Item {
     oppositeDirection: BarService.getPillDirection(root)
     customIconColor: AtmoColor.resolveColorKeyOptional(root.iconColorKey)
     customTextColor: AtmoColor.resolveColorKeyOptional(root.textColorKey)
-    icon: KDEConnectUtils.getConnectionStateIcon(KDEConnect.mainDevice, KDEConnect.daemonAvailable)
+    icon: KDEConnectUtils.getConnectionStateIcon(root.settingsConsumer?.mainDevice ?? null, KDEConnect.daemonAvailable)
     autoHide: false // Important to be false so we can hover as long as we want
-    text: !KDEConnect.daemonAvailable || KDEConnect.mainDevice === null || KDEConnect.mainDevice.battery === -1 ? "" : (KDEConnect.mainDevice.battery + "%")
+    text: !KDEConnect.daemonAvailable || !root.settingsConsumer?.mainDevice || root.settingsConsumer.mainDevice.battery === -1 ? "" : (root.settingsConsumer.mainDevice.battery + "%")
     tooltipText: pluginApi?.tr("bar.tooltip")
     onClicked: {
       if (pluginApi) {

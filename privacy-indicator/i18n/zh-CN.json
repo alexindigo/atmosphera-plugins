@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "Filters and appearance apply to this instance. Device observations and access history are shared. Any configuration can request a common notification; disabling this instance's notifications does not silence others.",
     "hideInactive": {
       "desc": "在麦克风、摄像头和屏幕图标处于非活动状态时将其隐藏。",
       "label": "隐藏非活动状态"

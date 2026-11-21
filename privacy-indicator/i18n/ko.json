@@ -3,6 +3,7 @@
     "settings": "위젯 설정"
   },
   "settings": {
+    "shared-effect": "Filters and appearance apply to this instance. Device observations and access history are shared. Any configuration can request a common notification; disabling this instance's notifications does not silence others.",
     "activeColor": {
       "desc": "활성 상태일 때 아이콘에 적용되는 색상입니다.",
       "label": "활성 아이콘 색상"

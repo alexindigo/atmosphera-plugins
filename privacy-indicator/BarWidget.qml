@@ -26,7 +26,8 @@ Item {
   readonly property real barFontSize: Style.getBarFontSizeForScreen(screenName)
 
   // Access main instance for state
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+  readonly property var mainInstance: settingsConsumer
   
   property bool micActive: mainInstance ? mainInstance.micActive : false
   property bool camActive: mainInstance ? mainInstance.camActive : false

@@ -16,7 +16,8 @@ FocusScope {
     anchors.fill: parent
     focus: visible
 
-    readonly property var mainInst: pluginApi?.mainInstance ?? null
+    readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+    readonly property var mainInst: settingsConsumer
     property string flashedAction: ""
 
     readonly property var buttonModel: [
