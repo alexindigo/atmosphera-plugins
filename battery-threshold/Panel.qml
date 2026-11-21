@@ -9,7 +9,7 @@ Item {
     id: root
 
     property var pluginApi: null
-    property var service: pluginApi?.mainInstance?.service
+    readonly property var service: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
     readonly property var geometryPlaceholder: panelContainer
     property real contentPreferredWidth: 320 * Style.uiScaleRatio
     property real contentPreferredHeight: panelContent.implicitHeight + Style.marginL * 2
@@ -20,7 +20,7 @@ Item {
 
     FileView {
         id: modelNameView
-        path: `${pluginApi?.pluginSettings?.batteryDevice || service.batteries[0]}/model_name`
+        path: service?.batteryDevice ? service.batteryDevice + "/model_name" : ""
         printErrors: false
 
         onLoaded: {
@@ -30,9 +30,9 @@ Item {
     }
 
     function writeThreshold(value) {
-        if (!service.isWritable)
+        if (!service?.isWritable)
             return;
-        service.setThreshold(value);
+        service.setThreshold(value, pluginApi);
     }
 
     Rectangle {
@@ -58,8 +58,8 @@ Item {
                 }
 
                 NText {
-                    visible: !service.isAvailable || root.batteryModelName !== ""
-                    text: !service.isAvailable ? pluginApi?.tr("panel.not-available") : root.batteryModelName
+                    visible: !service?.isAvailable || root.batteryModelName !== ""
+                    text: !service?.isAvailable ? pluginApi?.tr("panel.not-available") : root.batteryModelName
                     pointSize: Style.fontSizeM
                     color: AtmoColor.mOnSurfaceVariant
                 }
@@ -70,13 +70,13 @@ Item {
                 height: 1
                 color: AtmoColor.mOutline
                 opacity: 0.3
-                visible: service.isAvailable
+                visible: service?.isAvailable ?? false
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: Style.marginS
-                visible: service.isAvailable
+                visible: service?.isAvailable ?? false
 
                 RowLayout {
                     Layout.fillWidth: true
@@ -89,7 +89,7 @@ Item {
                     }
 
                     NText {
-                        text: service.currentThreshold + "%"
+                        text: (service?.currentThreshold ?? 0) + "%"
                         pointSize: Style.fontSizeL
                         font.weight: Font.Bold
                         color: AtmoColor.mPrimary
@@ -112,9 +112,9 @@ Item {
                         from: 40
                         to: 100
                         stepSize: 5
-                        value: service.currentThreshold
-                        enabled: service.isWritable
-                        onValueChanged: root.writeThreshold(Math.round(value))
+                        value: service?.currentThreshold ?? 0
+                        enabled: (service?.isWritable ?? false) && !service.busy
+                        onMoved: root.writeThreshold(Math.round(value))
                     }
 
                     NText {
@@ -126,10 +126,24 @@ Item {
 
                 NText {
                     Layout.fillWidth: true
-                    text: service.isWritable ? pluginApi?.tr("panel.adjust-limit") : pluginApi?.tr("panel.read-only")
+                    text: service?.isWritable ? pluginApi?.tr("panel.adjust-limit") : pluginApi?.tr("panel.read-only")
                     pointSize: Style.fontSizeXS
-                    color: service.isWritable ? AtmoColor.mOnSurfaceVariant : AtmoColor.mTertiary
+                    color: service?.isWritable ? AtmoColor.mOnSurfaceVariant : AtmoColor.mTertiary
                     horizontalAlignment: Text.AlignHCenter
+                }
+                NText {
+                    Layout.fillWidth: true
+                    text: pluginApi?.tr("settings.shared-device") ?? ""
+                    wrapMode: Text.WordWrap
+                    color: AtmoColor.mOnSurfaceVariant
+                    pointSize: Style.fontSizeXS
+                }
+                NText {
+                    Layout.fillWidth: true
+                    visible: (service?.actionError ?? "") !== ""
+                    text: pluginApi?.tr("panel.action-failed") ?? ""
+                    wrapMode: Text.WordWrap
+                    color: AtmoColor.mError
                 }
             }
         }

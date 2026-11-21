@@ -1,138 +1,101 @@
 import QtQuick
-import Quickshell.Io
-import qs.Commons
 
+// One Main-owned configuration client, shared by all renderings of its API.
 Item {
     id: root
     visible: false
+    required property var settingsContext
+    required property var inventory
+    required property var deviceFor
+    required property var retire
+    readonly property bool current: settingsContext.current()
+    readonly property var cfg: current ? settingsContext.settingsView : ({})
+    readonly property var batteries: inventory.batteries
+    readonly property string batteryDevice: current ? (cfg.batteryDevice || batteries[0] || "") : ""
+    readonly property string thresholdFile: batteryDevice ? batteryDevice + "/charge_control_end_threshold" : ""
+    readonly property var device: batteryDevice ? deviceFor(batteryDevice) : null
+    readonly property int currentThreshold: device?.currentThreshold ?? 0
+    readonly property bool isAvailable: device?.isAvailable ?? false
+    readonly property bool isWritable: device?.isWritable ?? false
+    readonly property int batteryMinThresh: 40
+    readonly property int batteryMaxThresh: 100
+    readonly property bool busy: device?.busy ?? false
+    property string actionError: ""
+    property string _restoredPolicy: ""
+    property bool _restoreRequested: true
+    property string _expectedRestoreDevice: ""
+    readonly property string policy: current ? JSON.stringify([batteryDevice, cfg.chargeThreshold]) : ""
+    property var _lifetime: ({alive: true})
 
-    property var pluginApi: null
-    property int currentThreshold: 0
-    property bool isAvailable: false
-    property bool isWritable: false
-    property int batteryMinThresh: 40
-    property int batteryMaxThresh: 100
-
-    property list<string> batteries: []
-    property string thresholdFile: `${pluginApi?.pluginSettings?.batteryDevice || service.batteries[0]}/charge_control_end_threshold`
-
-    function start(api) {
-        pluginApi = api;
-        getBatteries();
-        batteryChecker.running = true;
-    }
-
-    function refresh() {
-        batteryChecker.running = true;
-        if (thresholdFileView.path !== "") {
-            thresholdFileView.reload();
-        }
+    function refresh(expectedDevice) {
+        _expectedRestoreDevice = expectedDevice || batteryDevice;
+        _restoreRequested = true;
+        device?.refresh();
+        Qt.callLater(restoreSavedThreshold);
     }
 
     function restoreSavedThreshold() {
-        if (!pluginApi?.pluginSettings)
+        if (!_restoreRequested || !current || !device || !device.ready || !isWritable || busy || (_expectedRestoreDevice && batteryDevice !== _expectedRestoreDevice))
             return;
-        const saved = pluginApi.pluginSettings.chargeThreshold;
-        // Skip if current threshold already matches saved value
-        if (currentThreshold === saved)
+        const saved = cfg.chargeThreshold;
+        if (typeof saved !== "number" || saved < batteryMinThresh || saved > batteryMaxThresh)
             return;
-        if (saved >= batteryMinThresh && saved <= batteryMaxThresh && isWritable) {
-            setThreshold(saved);
+        // Restore once per effective configuration, never on each redraw or
+        // physical observation. Another client may change this shared device.
+        const capturedPolicy = policy;
+        if (Math.round(saved) === currentThreshold) {
+            _restoredPolicy = capturedPolicy;
+            _restoreRequested = false;
+            return;
         }
+        const lifetime = _lifetime;
+        device.setThreshold(saved, function(ok) {
+            if (lifetime.alive && root.current && root.policy === capturedPolicy) {
+                root._restoredPolicy = capturedPolicy;
+                root._restoreRequested = false;
+                if (!ok)
+                    root.actionError = "device-write";
+            }
+        });
     }
 
-    function setThreshold(value) {
+    function setThreshold(value, runtimeApi) {
         const v = Math.round(value);
-        Logger.i("BatteryThreshold", "Restored charge threshold to " + v + "%");
-
-        thresholdWriter.pendingThreshold = v;
-        thresholdWriter.command = ["sh", "-c", `echo ${v} > ${thresholdFile}`];
-        thresholdWriter.running = true;
-    }
-
-    function getBatteries() {
-        Logger.i("BatteryThreshold", "Obtaining available batteries...");
-        batteryList.running = true;
-    }
-
-    onIsWritableChanged: {
-        if (isWritable)
-            restoreSavedThreshold();
-    }
-
-    onThresholdFileChanged: {
-        batteryChecker.running = true;
-    }
-
-    Process {
-        id: batteryChecker
-        command: ["test", "-f", root.thresholdFile]
-        running: false
-
-        onExited: function (exitCode) {
-            if (exitCode === 0 && root.batteries.length != 0) {
-                root.isAvailable = true;
-                thresholdFileView.path = root.thresholdFile;
-                writeAccessChecker.running = true;
-            }
+        if (!current || !runtimeApi || runtimeApi.settingsContext !== settingsContext || !isWritable || busy || v < batteryMinThresh || v > batteryMaxThresh) {
+            actionError = "action-unavailable";
+            return false;
         }
-    }
-
-    Process {
-        id: writeAccessChecker
-        command: ["sh", "-c", `test -w ${root.thresholdFile} && echo 1 || echo 0`]
-        running: false
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                root.isWritable = text.trim() === "1";
+        const capturedDevice = device;
+        const capturedPolicy = policy;
+        const lifetime = _lifetime;
+        actionError = "";
+        return capturedDevice.setThreshold(v, function(ok) {
+            if (!lifetime.alive || !root.current || root.device !== capturedDevice || root.policy !== capturedPolicy)
+                return;
+            if (!ok) {
+                root.actionError = "device-write";
+                return;
             }
-        }
+            // Physical success and preference persistence are distinct. The
+            // existing runtime writer stays scoped to the originating API.
+            runtimeApi.pluginSettings.chargeThreshold = v;
+            runtimeApi.saveSettings(function(result) {
+                if (lifetime.alive && root.current && (!result || (result.status !== "saved" && result.status !== "nothing_to_save") || (result.refreshState !== undefined && result.refreshState !== "current")))
+                    root.actionError = "preference-save";
+            });
+        });
     }
 
-    FileView {
-        id: thresholdFileView
-        path: root.thresholdFile
-        printErrors: false
-
-        onLoaded: {
-            const value = parseInt(text().trim());
-            // The range exposed by sysfs
-            if (!isNaN(value) && value >= 0 && value <= 100) {
-                root.currentThreshold = value;
-            }
-        }
+    onPolicyChanged: Qt.callLater(restoreSavedThreshold)
+    Connections {
+        target: root.device
+        function onReadyChanged() { Qt.callLater(root.restoreSavedThreshold); }
+        function onBusyChanged() { Qt.callLater(root.restoreSavedThreshold); }
     }
-
-    Process {
-        id: thresholdWriter
-        property int pendingThreshold: -1
-
-        running: false
-
-        onExited: function (exitCode) {
-            if (exitCode === 0) {
-                service.refresh();
-                if (pluginApi && pluginApi.pluginSettings.chargeThreshold != pendingThreshold) {
-                    pluginApi.pluginSettings.chargeThreshold = pendingThreshold;
-                    pluginApi.saveSettings();
-                }
-            } else {
-                Logger.w("BatteryThreshold", "Failed to write threshold, exitCode=" + exitCode);
-            }
-        }
+    onCurrentChanged: {
+        if (!current)
+            retire(root);
     }
-
-    Process {
-        id: batteryList
-        command: ["sh", "-c", "find /sys/class/power_supply -exec find {}/ ';' | grep charge_control_end_threshold"]
-        running: false
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                root.batteries = text.split("\n").slice(0, -1).map(path => path.split("/").slice(0, -1).join("/"));
-                Logger.i("BatteryThreshold", `Found batteries: ${root.batteries}`);
-            }
-        }
-    }
+    Component.onCompleted: Qt.callLater(restoreSavedThreshold)
+    Component.onDestruction: _lifetime.alive = false
 }

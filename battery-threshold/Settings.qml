@@ -9,7 +9,8 @@ ColumnLayout {
 
   property var pluginApi: null
   readonly property var batteryDeviceField: pluginApi?.field("batteryDevice") ?? null
-  property var service: pluginApi?.mainInstance?.service ?? null
+  readonly property var service: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.runtimeContext) ?? null
+  property var batteryModel: []
 
   readonly property string editBatteryDevice: root.batteryDeviceField?.value || root.service?.batteries[0] || "/sys/class/power_supply/BAT0"
   // Explicit field intents only; the selected session owns Apply/Reset.
@@ -21,12 +22,19 @@ ColumnLayout {
       if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current")
         return;
       root._applyEffectPending = false;
-      root.service?.refresh();
+      root.service?.refresh(root.editBatteryDevice);
       Logger.i("BatteryThreshold", "Current battery: " + root.pluginApi.pluginSettings.batteryDevice);
     }
   }
 
   spacing: Style.marginL
+
+  NText {
+    Layout.fillWidth: true
+    text: pluginApi?.tr("settings.shared-device") ?? ""
+    wrapMode: Text.WordWrap
+    color: AtmoColor.mOnSurfaceVariant
+  }
 
   NText {
     visible: !service?.isAvailable
@@ -43,15 +51,25 @@ ColumnLayout {
       label: pluginApi?.tr("settings.battery-device")
       description: pluginApi?.tr("settings.battery-device-desc")
 
-      model: (service?.batteries ?? []).map(path => ({
-        key: path,
-        name: `${modelNameOf(path)} (${path.split("/").slice(-1)})`
-      }))
+      model: root.batteryModel
 
       currentKey: root.editBatteryDevice
       onSelected: key => root.batteryDeviceField.set(key)
     }
   }
+
+  function refreshBatteryModel() {
+    batteryModel = (service?.batteries ?? []).map(path => ({
+      key: path,
+      name: `${modelNameOf(path)} (${path.split("/").slice(-1)})`
+    }));
+  }
+  Connections {
+    target: root.service
+    function onBatteriesChanged() { root.refreshBatteryModel(); }
+  }
+  onServiceChanged: refreshBatteryModel()
+  Component.onCompleted: refreshBatteryModel()
 
   function modelNameOf(battery) {
     modelNameView.path = `${battery}/model_name`;

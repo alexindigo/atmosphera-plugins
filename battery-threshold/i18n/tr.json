@@ -2,7 +2,8 @@
 	"settings": {
 		"battery-device": "Batarya Cihazı",
 		"battery-device-desc": "Alt Sınırı ayarlanacak batarya",
-		"no-battery-device": "Bu cihazda ayarlanabilecek batarya bulunamadı"
+		"no-battery-device": "Bu cihazda ayarlanabilecek batarya bulunamadı",
+		"shared-device": "Batarya se\u00e7imi bu yap\u0131land\u0131rmaya aittir. Fiziksel s\u0131n\u0131r ortakt\u0131r; ba\u015fka bir yap\u0131land\u0131rma bunu de\u011fi\u015ftirebilir. Kaydedilen s\u0131n\u0131r, etkinle\u015ftirildi\u011finde veya ayarlar uyguland\u0131\u011f\u0131nda bir kez geri y\u00fcklenir."
 	},
 	"actions": {
 		"widget-settings": "Widget Ayarları"
@@ -11,6 +12,7 @@
 		"title": "Batarya Alt Sınırı",
 		"not-available": "Bu cihazda kullanılamaz",
 		"adjust-limit": "Sınırı ayarlamak için kaydırıcıyı sürükleyin",
-		"read-only": "Salt-okunur: Yazma erişimi için udev kurallarını yükleyin"
+		"read-only": "Salt-okunur: Yazma erişimi için udev kurallarını yükleyin",
+		"action-failed": "S\u0131n\u0131r uygulanamad\u0131 veya kaydedilemedi. Yazma eri\u015fimini kontrol edip yeniden deneyin."
 	}
 }
