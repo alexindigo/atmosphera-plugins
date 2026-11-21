@@ -15,7 +15,8 @@ Item {
     property int sectionWidgetIndex: -1
     property int sectionWidgetsCount: 0
 
-    property var mainInstance: pluginApi?.mainInstance
+    readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+    readonly property var mainInstance: settingsConsumer
     property var activeProvider: mainInstance?.activeProvider
 
     readonly property string screenName: screen ? screen.name : ""

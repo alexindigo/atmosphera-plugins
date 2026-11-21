@@ -1,14 +1,14 @@
 import QtQuick
 import Quickshell
+import qs.Commons
 
-Item {
+ProviderLifetime {
     id: root
     visible: false
 
     property string providerId: "openrouter"
     property string providerName: "OpenRouter"
     property string providerIcon: "ai"
-    property bool enabled: false
     property bool ready: false
 
     property real rateLimitPercent: -1
@@ -37,7 +37,6 @@ Item {
     property real usageMonthly: 0
     property real spendingLimit: -1
     property real limitRemaining: -1
-    property var providerSettings: ({})
 
     property string apiKey: {
         const envKey = Quickshell.env("OPENROUTER_API_KEY") ?? "";
@@ -62,15 +61,15 @@ Item {
     }
 
     function fetchKeyInfo() {
-        if (!root.apiKey)
+        if (!root.enabled || !root.apiKey)
             return;
-
-        const xhr = new XMLHttpRequest();
+        root.cancelRequests();
+        const xhr = root.request();
         xhr.open("GET", "https://openrouter.ai/api/v1/key");
         xhr.setRequestHeader("Authorization", "Bearer " + root.apiKey);
 
         xhr.onreadystatechange = function () {
-            if (xhr.readyState !== XMLHttpRequest.DONE)
+            if (xhr.readyState !== XMLHttpRequest.DONE || !root.finishRequest(xhr))
                 return;
             if (xhr.status !== 200) {
                 Logger.e("model-usage/openrouter", "Key info request failed (status " + xhr.status + ")");
@@ -137,7 +136,7 @@ Item {
     }
 
     function fetchActivity() {
-        if (!root.apiKey)
+        if (!root.enabled || !root.apiKey)
             return;
 
         const today = new Date();
@@ -156,12 +155,12 @@ Item {
 
         for (let i = 0; i < days.length; i++) {
             const date = days[i];
-            const xhr = new XMLHttpRequest();
+            const xhr = root.request();
             xhr.open("GET", "https://openrouter.ai/api/v1/activity?date=" + date);
             xhr.setRequestHeader("Authorization", "Bearer " + root.apiKey);
 
             xhr.onreadystatechange = function () {
-                if (xhr.readyState !== XMLHttpRequest.DONE)
+                if (xhr.readyState !== XMLHttpRequest.DONE || !root.finishRequest(xhr))
                     return;
 
                 if (xhr.status === 200) {

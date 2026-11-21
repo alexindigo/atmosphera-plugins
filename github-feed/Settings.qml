@@ -67,6 +67,13 @@ ColumnLayout {
 
   spacing: Style.marginM
 
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+    wrapMode: Text.WordWrap
+  }
+
   NLabel {
     label: "Account"
   }

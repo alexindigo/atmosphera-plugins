@@ -33,6 +33,7 @@
     "title": "GitHub 动态"
   },
   "settings": {
+    "shared-effect": "Feed choices apply to this instance. Notifications and remote read actions affect the selected GitHub account; identical notifications are shared across views.",
     "account": "账户",
     "behavior": {
       "openInBrowser": {

@@ -1,15 +1,15 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.Commons
 
-Item {
+ProviderLifetime {
     id: root
     visible: false
 
     property string providerId: "claude"
     property string providerName: "Claude Code"
     property string providerIcon: "ai"
-    property bool enabled: false
     property bool ready: false
     property string usageStatusText: ""
 
@@ -45,7 +45,6 @@ Item {
     property double lastProbeAtMs: 0
     property int probeMinIntervalMs: 5 * 60 * 1000
 
-    property var providerSettings: ({})
 
     function resolvePath(p) {
         if (p && p.startsWith("~"))
@@ -55,10 +54,10 @@ Item {
 
     FileView {
         id: statsFile
-        path: root.resolvePath(root.providerSettings?.statsPath ?? "~/.claude/stats-cache.json")
+        path: root.enabled ? root.resolvePath(root.providerSettings?.statsPath ?? "~/.claude/stats-cache.json") : ""
         watchChanges: true
         onFileChanged: reload()
-        onLoaded: root.parseStats(text())
+        onLoaded: if (root.enabled) root.parseStats(text())
         onLoadFailed: error => {
             if (error === FileViewError.FileNotFound)
                 Logger.e("model-usage/claude", "stats-cache.json not found at", statsFile.path);
@@ -67,10 +66,10 @@ Item {
 
     FileView {
         id: historyFile
-        path: root.resolvePath("~/.claude/history.jsonl")
+        path: root.enabled ? root.resolvePath("~/.claude/history.jsonl") : ""
         watchChanges: true
         onFileChanged: reload()
-        onLoaded: root.parseHistory(text())
+        onLoaded: if (root.enabled) root.parseHistory(text())
         onLoadFailed: error => {
             if (error === FileViewError.FileNotFound)
                 Logger.e("model-usage/claude", "history.jsonl not found");
@@ -79,11 +78,12 @@ Item {
 
     FileView {
         id: credentialsFile
-        path: root.resolvePath(root.providerSettings?.credentialsPath ?? "~/.claude/.credentials.json")
+        path: root.enabled ? root.resolvePath(root.providerSettings?.credentialsPath ?? "~/.claude/.credentials.json") : ""
         watchChanges: true
         onFileChanged: reload()
-        onLoaded: root.parseCredentials(text())
+        onLoaded: if (root.enabled) root.parseCredentials(text())
         onLoadFailed: error => {
+            if (root.enabled) root.clearCredentials();
             if (error === FileViewError.FileNotFound)
                 Logger.e("model-usage/claude", "credentials.json not found at", credentialsFile.path);
         }
@@ -162,6 +162,7 @@ Item {
     }
 
     function parseCredentials(content) {
+        if (!enabled) return;
         try {
             const data = JSON.parse(content);
             const oauth = data.claudeAiOauth ?? {};
@@ -170,6 +171,7 @@ Item {
             const fileHasOAuth = fileAccessToken !== "";
 
             const tokenChanged = (root.oauthAccessToken !== fileAccessToken || root.oauthExpiresAtMs !== fileExpiresAtMs);
+            if (tokenChanged) { root.cancelRequests(); root.lastProbeAtMs = 0; }
             root.oauthAccessToken = fileAccessToken;
             root.oauthExpiresAtMs = fileExpiresAtMs;
             if (tokenChanged)
@@ -192,10 +194,17 @@ Item {
                 root.clearAuthoritativeRateLimits();
             }
         } catch (e) {
+            root.clearCredentials();
             Logger.e("model-usage/claude", "Failed to parse credentials.json:", e);
             root.usageStatusText = "Waiting for auth";
             root.clearAuthoritativeRateLimits();
         }
+    }
+
+    function clearCredentials() {
+        cancelRequests(); oauthAccessToken = ""; oauthExpiresAtMs = 0; lastProbeAtMs = 0;
+        authMode = "none"; subscriptionType = ""; rateLimitTier = ""; tierLabel = "";
+        usageStatusText = "Waiting for auth"; clearAuthoritativeRateLimits();
     }
 
     function formatTier() {
@@ -313,13 +322,14 @@ Item {
     }
 
     function probeOAuthUsage() {
-        const xhr = new XMLHttpRequest();
+        if (!enabled) return;
+        const xhr = root.request();
         xhr.open("GET", "https://api.anthropic.com/api/oauth/usage");
         xhr.setRequestHeader("Authorization", "Bearer " + root.oauthAccessToken);
         xhr.setRequestHeader("anthropic-beta", "oauth-2025-04-20");
         xhr.setRequestHeader("Accept", "application/json");
         xhr.onreadystatechange = function () {
-            if (xhr.readyState !== XMLHttpRequest.DONE)
+            if (xhr.readyState !== XMLHttpRequest.DONE || !root.finishRequest(xhr))
                 return;
 
             if (xhr.status >= 200 && xhr.status < 300) {
@@ -351,6 +361,7 @@ Item {
     }
 
     function refresh() {
+        if (!enabled) return;
         statsFile.reload();
         historyFile.reload();
         credentialsFile.reload();
@@ -374,6 +385,7 @@ Item {
     }
 
     function probeRateLimits() {
+        if (!enabled) return;
         if (!root.oauthAccessToken || root.authMode !== "oauth") {
             root.usageStatusText = "Waiting for auth";
             root.clearAuthoritativeRateLimits();

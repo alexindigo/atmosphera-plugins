@@ -41,6 +41,13 @@ ColumnLayout {
   spacing: Style.marginL
 
   NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+    wrapMode: Text.WordWrap
+  }
+
+  NText {
     text: "Model Usage Settings"
     pointSize: Style.fontSizeXL
     font.weight: Style.fontWeightBold

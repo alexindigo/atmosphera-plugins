@@ -36,6 +36,7 @@
     }
   },
   "settings": {
+    "shared-effect": "Prayer and display choices apply to this instance. Audio, notifications and the month calendar cache are shared. Preview plays sound immediately, outside Apply and Discard.",
     "location": {
       "header": "Konum",
       "desc": "Günlük namaz vakitlerini Aladhan API üzerinden almak için kullanılır."

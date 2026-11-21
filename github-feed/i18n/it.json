@@ -33,6 +33,7 @@
     "title": "Flusso GitHub"
   },
   "settings": {
+    "shared-effect": "Feed choices apply to this instance. Notifications and remote read actions affect the selected GitHub account; identical notifications are shared across views.",
     "account": "Konto",
     "behavior": {
       "openInBrowser": {

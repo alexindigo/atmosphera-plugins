@@ -1,15 +1,15 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.Commons
 
-Item {
+ProviderLifetime {
     id: root
     visible: false
 
     property string providerId: "copilot"
     property string providerName: "Copilot"
     property string providerIcon: "ai"
-    property bool enabled: false
     property bool ready: false
 
     property real rateLimitPercent: -1
@@ -37,7 +37,6 @@ Item {
     property string ghToken: ""
     property double lastRefreshAtMs: 0
     property int refreshMinIntervalMs: 5 * 60 * 1000
-    property var providerSettings: ({})
 
     Process {
         id: tokenProcess
@@ -46,6 +45,7 @@ Item {
         stdout: StdioCollector {
             id: tokenOutput
             onStreamFinished: {
+                if (!root.enabled) return;
                 const token = text.trim();
                 if (token) {
                     root.ghToken = token;
@@ -59,6 +59,7 @@ Item {
             }
         }
         onExited: (code, status) => {
+            if (!root.enabled) return;
             if (code !== 0) {
                 Logger.e("model-usage/copilot", "gh auth token failed (exit " + code + ")");
                 root.usageStatusText = "Not authenticated";
@@ -78,23 +79,26 @@ Item {
     onEnabledChanged: {
         if (enabled)
             refreshToken();
+        else tokenProcess.running = false;
     }
 
     function refreshToken() {
+        if (!enabled) return;
+        root.cancelRequests();
         tokenProcess.running = true;
     }
 
     function fetchUsage() {
-        if (!root.ghToken)
+        if (!root.enabled || !root.ghToken)
             return;
 
-        const xhr = new XMLHttpRequest();
+        const xhr = root.request();
         xhr.open("GET", "https://api.github.com/copilot_internal/user");
         xhr.setRequestHeader("Authorization", "token " + root.ghToken);
         xhr.setRequestHeader("Accept", "application/json");
 
         xhr.onreadystatechange = function () {
-            if (xhr.readyState !== XMLHttpRequest.DONE)
+            if (xhr.readyState !== XMLHttpRequest.DONE || !root.finishRequest(xhr))
                 return;
 
             if (xhr.status === 401 || xhr.status === 403) {
@@ -203,6 +207,7 @@ Item {
     }
 
     function refresh() {
+        if (!enabled) return;
         const now = Date.now();
         if (root.lastRefreshAtMs > 0 && (now - root.lastRefreshAtMs) < root.refreshMinIntervalMs)
             return;

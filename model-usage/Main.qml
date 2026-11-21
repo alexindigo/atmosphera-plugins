@@ -4,139 +4,53 @@ import "providers" as Providers
 
 Item {
     id: root
-    visible: false
-
     property var pluginApi: null
-    property var pluginSettings: pluginApi?.pluginSettings ?? ({})
-
-    Providers.Claude {
-        id: claudeProvider
-        enabled: root.providerEnabled("claude")
-        providerSettings: root.pluginSettings?.providers?.claude ?? ({})
+    property var _settingsConsumers: new Map()
+    property var _providerLeases: new Map()
+    Component { id: clientFactory; ModelUsageSettingsClient {} }
+    Component { id: claudeFactory; Providers.Claude {} }
+    Component { id: codexFactory; Providers.Codex {} }
+    Component { id: copilotFactory; Providers.Copilot {} }
+    Component { id: geminiFactory; Providers.Gemini {} }
+    Component { id: openRouterFactory; Providers.OpenRouter {} }
+    Component { id: zenFactory; Providers.Zen {} }
+    function sourceKeyFor(id, options) {
+        var home = Quickshell.env("HOME") ?? "/home";
+        function path(value) { return value && value.startsWith("~") ? home + value.substring(1) : value; }
+        if (id === "claude") return JSON.stringify([id, path(options.statsPath ?? "~/.claude/stats-cache.json"), path(options.credentialsPath ?? "~/.claude/.credentials.json")]);
+        if (id === "openrouter") return JSON.stringify([id, Quickshell.env("OPENROUTER_API_KEY") || (options.apiKey ?? "")]);
+        if (id === "zen") return JSON.stringify([id, options.apiBaseUrl ?? "https://opencode.ai/zen/v1", Quickshell.env("OPENCODE_ZEN_API_KEY") || Quickshell.env("OPENCODE_API_KEY") || Quickshell.env("ZEN_API_KEY") || (options.apiKey ?? "")]);
+        return JSON.stringify([id, home]);
     }
-
-    Providers.Codex {
-        id: codexProvider
-        enabled: root.providerEnabled("codex")
-        providerSettings: root.pluginSettings?.providers?.codex ?? ({})
-    }
-
-    Providers.OpenRouter {
-        id: openRouterProvider
-        enabled: root.providerEnabled("openrouter")
-        providerSettings: root.pluginSettings?.providers?.openrouter ?? ({})
-    }
-
-    Providers.Copilot {
-        id: copilotProvider
-        enabled: root.providerEnabled("copilot")
-        providerSettings: root.pluginSettings?.providers?.copilot ?? ({})
-    }
-
-    Providers.Gemini {
-        id: geminiProvider
-        enabled: root.providerEnabled("gemini")
-        providerSettings: root.pluginSettings?.providers?.gemini ?? ({})
-    }
-
-    Providers.Zen {
-        id: zenProvider
-        enabled: root.providerEnabled("zen")
-        providerSettings: root.pluginSettings?.providers?.zen ?? ({})
-    }
-
-    property var providers: [claudeProvider, codexProvider, copilotProvider, geminiProvider, openRouterProvider, zenProvider]
-
-    property var enabledProviders: {
-        const result = [];
-        if (claudeProvider.enabled)
-            result.push(claudeProvider);
-        if (codexProvider.enabled)
-            result.push(codexProvider);
-        if (copilotProvider.enabled)
-            result.push(copilotProvider);
-        if (geminiProvider.enabled)
-            result.push(geminiProvider);
-        if (openRouterProvider.enabled)
-            result.push(openRouterProvider);
-        if (zenProvider.enabled)
-            result.push(zenProvider);
-        return result;
-    }
-
-    property int activeIndex: 0
-    property var activeProvider: enabledProviders.length > 0 ? enabledProviders[Math.min(activeIndex, enabledProviders.length - 1)] : null
-
-    property string barDisplayMode: pluginSettings?.barDisplayMode ?? "active"
-    property int barCycleIntervalSec: pluginSettings?.barCycleIntervalSec ?? 5
-    property string barMetric: pluginSettings?.barMetric ?? "prompts"
-    property int refreshIntervalSec: pluginSettings?.refreshIntervalSec ?? 30
-
-    Timer {
-        interval: root.barCycleIntervalSec * 1000
-        running: root.barDisplayMode === "cycle" && root.enabledProviders.length > 1
-        repeat: true
-        onTriggered: {
-            root.activeIndex = (root.activeIndex + 1) % root.enabledProviders.length;
+    function acquireProvider(id, options) {
+        var key = sourceKeyFor(id, options);
+        if (_providerLeases.has(key)) {
+            var existing = _providerLeases.get(key); ++existing.leases; return existing;
         }
+        var factory = {claude: claudeFactory, codex: codexFactory, copilot: copilotFactory, gemini: geminiFactory, openrouter: openRouterFactory, zen: zenFactory}[id];
+        if (!factory) return null;
+        var provider = factory.createObject(root, {sourceSettings: JSON.parse(JSON.stringify(options)), leaseKey: key, leases: 1});
+        _providerLeases.set(key, provider); provider.enabled = true; return provider;
     }
-
-    Timer {
-        interval: root.refreshIntervalSec * 1000
-        running: true
-        repeat: true
-        onTriggered: root.refreshAll()
+    function releaseProvider(provider) {
+        if (--provider.leases > 0) return;
+        _providerLeases.delete(provider.leaseKey); provider.enabled = false; provider.cancelRequests(); provider.destroy();
     }
-
-    onEnabledProvidersChanged: {
-        if (enabledProviders.length === 0) {
-            activeIndex = 0;
-        } else if (activeIndex >= enabledProviders.length) {
-            activeIndex = 0;
-        }
+    function settingsConsumerFor(context) {
+        if (!context || !context.current()) return null;
+        if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+        var client = clientFactory.createObject(root, {settingsContext: context, observation: root,
+            retire: function(retired) { root._settingsConsumers.delete(context); retired.destroy(); }});
+        _settingsConsumers.set(context, client); return client;
     }
-
-    function providerEnabled(id) {
-        return pluginSettings?.providers?.[id]?.enabled ?? false;
-    }
-
-    function refresh() {
-        refreshAll();
-    }
-
-    function refreshAll() {
-        for (const p of providers) {
-            if (p.enabled)
-                p.refresh();
-        }
-    }
-
-    function formatTokenCount(n) {
-        if (n === undefined || n === null)
-            return "0";
-        if (n >= 1e9)
-            return (n / 1e9).toFixed(1) + "B";
-        if (n >= 1e6)
-            return (n / 1e6).toFixed(1) + "M";
-        if (n >= 1e3)
-            return (n / 1e3).toFixed(1) + "K";
-        return String(n);
-    }
-
-    function friendlyModelName(id) {
-        if (!id)
-            return "Unknown";
-        let name = id.replace(/^claude-/, "");
-        name = name.replace(/-\d{8}$/, "");
-        const parts = name.split("-");
-        if (parts.length >= 3) {
-            const family = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-            return family + " " + parts[1] + "." + parts[2];
-        }
-        if (parts.length === 2) {
-            const family = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-            return family + " " + parts[1];
-        }
-        return name.charAt(0).toUpperCase() + name.slice(1);
-    }
+    readonly property var settingsConsumer: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
+    readonly property var providers: settingsConsumer?.providers ?? []
+    readonly property var enabledProviders: settingsConsumer?.enabledProviders ?? []
+    readonly property var activeProvider: settingsConsumer?.activeProvider ?? null
+    readonly property string barDisplayMode: settingsConsumer?.barDisplayMode ?? "active"
+    readonly property string barMetric: settingsConsumer?.barMetric ?? "prompts"
+    function refresh() { settingsConsumer?.refresh(); }
+    function refreshAll() { settingsConsumer?.refreshAll(); }
+    function formatTokenCount(n) { return settingsConsumer?.formatTokenCount(n) ?? "0"; }
+    function friendlyModelName(id) { return settingsConsumer?.friendlyModelName(id) ?? "Unknown"; }
 }

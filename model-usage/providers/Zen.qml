@@ -1,14 +1,14 @@
 import QtQuick
 import Quickshell
+import qs.Commons
 
-Item {
+ProviderLifetime {
     id: root
     visible: false
 
     property string providerId: "zen"
     property string providerName: "Zen"
     property string providerIcon: "ai"
-    property bool enabled: false
     property bool ready: false
 
     property real rateLimitPercent: -1
@@ -32,7 +32,6 @@ Item {
     property string authHelpText: "Check your Zen API key."
     property bool hasLocalStats: true
 
-    property var providerSettings: ({})
     property string apiBaseUrl: providerSettings?.apiBaseUrl ?? "https://opencode.ai/zen/v1"
     property string apiKey: {
         const envZen = Quickshell.env("OPENCODE_ZEN_API_KEY") ?? "";
@@ -110,19 +109,20 @@ Item {
     }
 
     function validateApiKey() {
-        if (!root.apiKey)
+        if (!root.enabled || !root.apiKey)
             return;
 
-        const xhr = new XMLHttpRequest();
+        const xhr = root.request();
+        const capturedKey = root.apiKey;
         xhr.open("POST", root.apiBaseUrl + "/responses");
         xhr.setRequestHeader("Authorization", "Bearer " + root.apiKey);
         xhr.setRequestHeader("Content-Type", "application/json");
 
         xhr.onreadystatechange = function () {
-            if (xhr.readyState !== XMLHttpRequest.DONE)
+            if (xhr.readyState !== XMLHttpRequest.DONE || !root.finishRequest(xhr))
                 return;
 
-            root.validatedApiKey = root.apiKey;
+            root.validatedApiKey = capturedKey;
 
             if (xhr.status === 401 || xhr.status === 403) {
                 const msg = root.extractErrorMessage(xhr.responseText);
@@ -152,13 +152,14 @@ Item {
     }
 
     function fetchModels() {
-        const xhr = new XMLHttpRequest();
+        if (!enabled) return;
+        const xhr = root.request();
         xhr.open("GET", root.apiBaseUrl + "/models");
         if (root.apiKey)
             xhr.setRequestHeader("Authorization", "Bearer " + root.apiKey);
 
         xhr.onreadystatechange = function () {
-            if (xhr.readyState !== XMLHttpRequest.DONE)
+            if (xhr.readyState !== XMLHttpRequest.DONE || !root.finishRequest(xhr))
                 return;
 
             if (xhr.status !== 200) {
@@ -191,6 +192,8 @@ Item {
     }
 
     function refresh() {
+        if (!enabled) return;
+        root.cancelRequests();
         fetchModels();
         if (root.apiKey && (root.validatedApiKey !== root.apiKey || root.authState === "unknown" || root.authState === "checking"))
             validateApiKey();

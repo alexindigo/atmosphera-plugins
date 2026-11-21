@@ -2,14 +2,13 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-Item {
+ProviderLifetime {
     id: root
     visible: false
 
     property string providerId: "gemini"
     property string providerName: "Gemini"
     property string providerIcon: "ai"
-    property bool enabled: false
     property bool ready: false
 
     property real rateLimitPercent: -1
@@ -33,7 +32,6 @@ Item {
     property string authHelpText: "Gemini CLI usage from ~/.gemini/tmp"
     property bool hasLocalStats: true
 
-    property var providerSettings: ({})
 
     function resolvePath(p) {
         if (p && p.startsWith("~"))
@@ -52,6 +50,7 @@ Item {
     onEnabledChanged: {
         if (enabled)
             scanSessions();
+        else { sessionAggregator.running = false; sessionCounter.running = false; }
     }
 
     Process {
@@ -60,6 +59,7 @@ Item {
         running: false
         stdout: StdioCollector {
             onStreamFinished: {
+                if (!root.enabled) return;
                 root.parseSessionContent(text || "");
                 root.ready = true;
             }
@@ -72,12 +72,14 @@ Item {
         running: false
         stdout: StdioCollector {
             onStreamFinished: {
+                if (!root.enabled) return;
                 root.todaySessions = parseInt(text.trim()) || 0;
             }
         }
     }
 
     function scanSessions() {
+        if (!enabled) return;
         sessionAggregator.running = true;
         sessionCounter.running = true;
     }

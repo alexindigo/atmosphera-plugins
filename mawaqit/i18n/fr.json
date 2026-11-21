@@ -36,6 +36,7 @@
     }
   },
   "settings": {
+    "shared-effect": "Prayer and display choices apply to this instance. Audio, notifications and the month calendar cache are shared. Preview plays sound immediately, outside Apply and Discard.",
     "location": {
       "header": "Localisation",
       "desc": "Utilisé pour récupérer les temps de prières journaliers depuis l'API Aladhan."

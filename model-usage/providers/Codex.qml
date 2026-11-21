@@ -1,15 +1,15 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.Commons
 
-Item {
+ProviderLifetime {
     id: root
     visible: false
 
     property string providerId: "codex"
     property string providerName: "Codex"
     property string providerIcon: "ai"
-    property bool enabled: false
     property bool ready: false
 
     property real rateLimitPercent: -1
@@ -34,7 +34,6 @@ Item {
     property bool hasLocalStats: true
 
     property string configModel: ""
-    property var providerSettings: ({})
 
     function resolvePath(p) {
         if (p && p.startsWith("~"))
@@ -52,10 +51,10 @@ Item {
 
     FileView {
         id: historyFile
-        path: root.resolvePath("~/.codex/history.jsonl")
+        path: root.enabled ? root.resolvePath("~/.codex/history.jsonl") : ""
         watchChanges: true
         onFileChanged: reload()
-        onLoaded: root.parseHistory(text())
+        onLoaded: if (root.enabled) root.parseHistory(text())
         onLoadFailed: error => {
             if (error === FileViewError.FileNotFound)
                 Logger.e("model-usage/codex", "history.jsonl not found");
@@ -64,10 +63,10 @@ Item {
 
     FileView {
         id: configFile
-        path: root.resolvePath("~/.codex/config.toml")
+        path: root.enabled ? root.resolvePath("~/.codex/config.toml") : ""
         watchChanges: true
         onFileChanged: reload()
-        onLoaded: root.parseConfig(text())
+        onLoaded: if (root.enabled) root.parseConfig(text())
         onLoadFailed: error => {
             if (error === FileViewError.FileNotFound)
                 Logger.e("model-usage/codex", "config.toml not found");
@@ -81,6 +80,7 @@ Item {
         stdout: StdioCollector {
             id: sessionListerOutput
             onStreamFinished: {
+                if (!root.enabled) return;
                 const output = text;
                 if (output)
                     root.parseSessionList(output);
@@ -91,15 +91,16 @@ Item {
     property var sessionPaths: []
     property int sessionPathIndex: -1
     property bool sessionSearchInProgress: false
+    property int _searchGeneration: 0
     property string latestSessionPath: ""
     FileView {
         id: latestSessionFile
-        path: root.latestSessionPath
+        path: root.enabled ? root.latestSessionPath : ""
         watchChanges: true
         onFileChanged: reload()
-        onLoaded: root.parseSessionData(text())
+        onLoaded: if (root.enabled) root.parseSessionData(text())
         onLoadFailed: error => {
-            if (error === FileViewError.FileNotFound) {
+            if (root.enabled && error === FileViewError.FileNotFound) {
                 Logger.e("model-usage/codex", "Session file not found:", root.latestSessionPath);
                 root.loadPreviousSessionFile();
             }
@@ -108,10 +109,10 @@ Item {
 
     FileView {
         id: authFile
-        path: root.resolvePath("~/.codex/auth.json")
+        path: root.enabled ? root.resolvePath("~/.codex/auth.json") : ""
         watchChanges: true
         onFileChanged: reload()
-        onLoaded: root.parseAuth(text())
+        onLoaded: if (root.enabled) root.parseAuth(text())
         onLoadFailed: error => {
             if (error === FileViewError.FileNotFound)
                 Logger.e("model-usage/codex", "auth.json not found");
@@ -128,6 +129,7 @@ Item {
     onEnabledChanged: {
         if (enabled)
             scanSessions();
+        else sessionLister.running = false;
     }
 
     function parseHistory(content) {
@@ -183,6 +185,8 @@ Item {
     }
 
     function scanSessions() {
+        if (!enabled) return;
+        ++_searchGeneration;
         sessionLister.running = true;
     }
 
@@ -217,6 +221,17 @@ Item {
     }
 
     function loadPreviousSessionFile() {
+        if (!enabled) return;
+        // FileView emits loaded/loadFailed before clearing its completed operation.
+        // Admit the next path only after that callback, within this search lifetime.
+        const generation = _searchGeneration;
+        Qt.callLater(function() {
+            if (root.enabled && generation === root._searchGeneration)
+                root.advanceSessionFile();
+        });
+    }
+
+    function advanceSessionFile() {
         if (!root.sessionSearchInProgress)
             return;
         root.sessionPathIndex = root.sessionPathIndex - 1;
@@ -322,6 +337,7 @@ Item {
     }
 
     function refresh() {
+        if (!enabled) return;
         historyFile.reload();
         configFile.reload();
         authFile.reload();
