@@ -20,8 +20,8 @@ Item {
   readonly property bool loaded: main?.loaded || false
   readonly property bool loading: main?.loading || false
 
-  // Access Main.qml instance for shared state/functions
-  readonly property var main: pluginApi?.mainInstance
+  // One Main-owned client for this runtime context, shared across its views.
+  readonly property var main: pluginApi?.mainInstance && pluginApi?.settingsContext ? pluginApi.mainInstance.settingsConsumerFor(pluginApi.settingsContext) : null
 
   // Provider metadata
   property string name: "FX"

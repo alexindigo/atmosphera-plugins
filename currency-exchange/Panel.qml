@@ -21,7 +21,7 @@ Item {
   readonly property var geometryPlaceholder: panelContainer
   readonly property bool loaded: main?.loaded || false
   readonly property bool loading: main?.loading || false
-  readonly property var main: pluginApi?.mainInstance
+  readonly property var main: pluginApi?.mainInstance && pluginApi?.settingsContext ? pluginApi.mainInstance.settingsConsumerFor(pluginApi.settingsContext) : null
   property var pluginApi: null
   readonly property real rate: main ? main.getRate(fromCurrency, toCurrency) : 0
   readonly property real toAmount: main ? main.convert(fromAmount, fromCurrency, toCurrency) : 0

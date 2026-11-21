@@ -544,7 +544,7 @@
       "author": "balor",
       "description": "Currency conversion utility via launcher and bar widget",
       "license": "MIT",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "tags": [
         "Launcher",
         "Utility"
