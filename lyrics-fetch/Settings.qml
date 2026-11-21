@@ -7,6 +7,14 @@ import qs.Widgets
 ColumnLayout {
   id: root
   property var pluginApi: null
+  NText {
+    Layout.fillWidth: true
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+    wrapMode: Text.WordWrap
+    color: AtmoColor.mOnSurfaceVariant
+    pointSize: Style.fontSizeS
+  }
   readonly property var widgetWidthField: pluginApi?.field("widgetWidth") ?? null
   readonly property var scrollSpeedField: pluginApi?.field("scrollSpeed") ?? null
   readonly property var scrollModeField: pluginApi?.field("scrollMode") ?? null

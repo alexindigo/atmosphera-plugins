@@ -17,7 +17,7 @@ Item {
 
   readonly property bool pillDirection: BarService.getPillDirection(root)
 
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
   readonly property bool isActive: mainInstance && mainInstance.isPlaying
   readonly property bool hasContent: mainInstance && (mainInstance.currentLyric !== "" || mainInstance.trackTitle !== "")
   readonly property bool hideWhenInactive: pluginApi?.pluginSettings?.hideWhenInactive ??

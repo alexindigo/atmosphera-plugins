@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "Ez a példány választja ki a lekérdezést és a parancsokat. A frissítés futtatása minden példány számára módosítja a rendszert.",
     "changeIcon": {
       "label": "Ikon kiválasztása"
     },

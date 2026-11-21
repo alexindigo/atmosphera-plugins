@@ -6,6 +6,7 @@
     "next": "下一首"
   },
   "settings": {
+    "shared-effect": "此实例选择播放器和歌词更新频率。播放按钮会控制所有应用共享的该播放器。",
     "player-name": "播放器名称",
     "player-name-desc": "MPRIS 播放器名称（如 musicfox、spotify、firefox）",
     "hide-when-inactive": "空闲时隐藏",

@@ -37,7 +37,7 @@ ColumnLayout {
   readonly property var verifyTlsField: pluginApi?.field("verifyTls") ?? null
   readonly property var pollIntervalMsField: pluginApi?.field("pollIntervalMs") ?? null
   readonly property var folderIdsField: pluginApi?.field("folderIds") ?? null
-  readonly property var mainInst: pluginApi?.mainInstance ?? null
+  readonly property var mainInst: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.runtimeContext) ?? null
 
   readonly property bool valueEnabled: root.enabledField?.value ?? true
   readonly property string valueApiUrl: root.apiUrlField?.value ?? ""

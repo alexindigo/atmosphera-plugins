@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.Commons
+import qs.Services.Plugins
 import qs.Services.UI
 
 Item {
@@ -11,6 +12,47 @@ Item {
   // Settings access
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
+
+  property var _settingsConsumers: new Map()
+  Component {
+    id: clientFactory
+    PluginSettingsPoller {
+      id: client
+      readonly property var cfg: settingsContext.settingsView
+      sourceInterval: (cfg.pollInterval ?? root.defaults.pollInterval ?? 10) * 1000
+      readonly property var hostList: root.hostList
+      readonly property var activeSessions: root.activeSessions
+      readonly property int activeCount: root.activeCount
+      readonly property bool configLoaded: root.configLoaded
+      readonly property string detectedTerminal: root.detectedTerminal
+      readonly property bool terminalDetected: root.terminalDetected
+      readonly property string terminalCommand: {
+        var override = cfg.terminalCommand ?? root.defaults.terminalCommand ?? "";
+        return override !== "" ? override : root.detectedTerminal;
+      }
+      readonly property var sortedHosts: root.sortedHostsFor(cfg.showInactiveHosts ?? root.defaults.showInactiveHosts ?? true)
+      function fullRefresh() { if (current) root.fullRefresh(); }
+      function refreshSessions() { if (current) root.refreshSessions(); }
+      function isHostActive(name) { return root.isHostActive(name); }
+      function getHostDescription(host) { return root.getHostDescription(host); }
+      function connectToHost(name) { if (current) root.connectWithTerminal(name, terminalCommand); }
+    }
+  }
+  function settingsConsumerFor(context) {
+    if (!context || !context.current()) return null;
+    if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+    var client = clientFactory.createObject(root, {
+      settingsContext: context,
+      requestRefresh: function() { root.refreshSessions(); },
+      retire: function(retired) {
+        root._settingsConsumers.delete(context);
+        retired.destroy();
+      }
+    });
+    _settingsConsumers.set(context, client);
+    return client;
+  }
+  readonly property var settingsConsumer: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
 
   // Shared state
   property var hostList: []
@@ -57,14 +99,6 @@ Item {
         root.parseSshConfig(this.text)
       }
     }
-  }
-
-  // ======== Session poll timer ========
-  Timer {
-    interval: (root.cfg.pollInterval ?? root.defaults.pollInterval ?? 10) * 1000
-    running: true
-    repeat: true
-    onTriggered: root.refreshSessions()
   }
 
   // ======== IPC handler ========
@@ -279,16 +313,24 @@ Item {
   }
 
   function connectToHost(hostName) {
-    if (!terminalCommand) {
+    connectWithTerminal(hostName, terminalCommand);
+  }
+
+  function connectWithTerminal(hostName, selectedTerminal) {
+    if (!selectedTerminal) {
       Logger.w("SSH Sessions", "No terminal emulator configured")
       return
     }
-    Logger.i("SSH Sessions", "Connecting to " + hostName + " via " + terminalCommand)
-    Quickshell.execDetached([terminalCommand, "-e", "ssh", hostName])
+    Logger.i("SSH Sessions", "Connecting to " + hostName + " via " + selectedTerminal)
+    Quickshell.execDetached([selectedTerminal, "-e", "ssh", hostName])
   }
 
   function updateSortedHosts() {
     var showInactive = cfg.showInactiveHosts ?? defaults.showInactiveHosts ?? true
+    root.sortedHosts = sortedHostsFor(showInactive);
+  }
+
+  function sortedHostsFor(showInactive) {
     var active = []
     var inactive = []
     var matchedNames = {}
@@ -313,7 +355,7 @@ Item {
       }
     }
 
-    root.sortedHosts = active.concat(inactive)
+    return active.concat(inactive)
   }
 
   function getHostDescription(host) {

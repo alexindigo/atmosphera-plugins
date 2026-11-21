@@ -14,7 +14,7 @@ Item {
   property real contentPreferredWidth: 320 * Style.uiScaleRatio
   property real contentPreferredHeight: 400 * Style.uiScaleRatio
 
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
   readonly property int activeCount: mainInstance?.activeCount ?? 0
 
   // Search state

@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "Deze instantie kiest de controlefrequentie en opdrachten. Een update uitvoeren verandert het systeem voor alle instanties.",
     "changeIcon": {
       "label": "Pictogram kiezen"
     },

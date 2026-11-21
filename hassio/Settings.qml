@@ -6,6 +6,14 @@ import qs.Widgets
 ColumnLayout {
   id: root
   property var pluginApi: null
+  NText {
+    Layout.fillWidth: true
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+    wrapMode: Text.WordWrap
+    color: AtmoColor.mOnSurfaceVariant
+    pointSize: Style.fontSizeS
+  }
   readonly property var haUrlField: pluginApi?.field("haUrl") ?? null
   readonly property var haTokenField: pluginApi?.field("haToken") ?? null
 
@@ -21,7 +29,7 @@ ColumnLayout {
       if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current")
         return;
       root._applyEffectPending = false;
-      root.pluginApi.mainInstance?.reloadSettings();
+      root.pluginApi.mainInstance?.settingsConsumerFor(root.pluginApi.runtimeContext)?.reloadSettings();
     }
   }
 

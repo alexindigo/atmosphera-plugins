@@ -1,5 +1,6 @@
 {
     "settings": {
+        "shared-effect": "All instances observe the same player and lyrics. Pause and empty-state visibility, scrolling and typography use this instance's settings.",
         "title": "Settings",
         "font": {
             "title": "Font Family",

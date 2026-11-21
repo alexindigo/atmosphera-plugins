@@ -867,7 +867,7 @@
       "author": "Pozzoo",
       "description": "Monitor and control Home Assistant entities from the bar. Requires qt6-websockets.",
       "license": "MIT",
-      "version": "1.1.6",
+      "version": "1.1.7",
       "tags": [
         "Bar",
         "Panel",
@@ -1063,7 +1063,7 @@
       "author": "Noam Stolero",
       "description": "Duration+scope Keep Awake with persistent last-choice and partial/full inhibit modes.",
       "license": "MIT",
-      "version": "0.3.5",
+      "version": "0.3.6",
       "tags": [
         "Bar",
         "Panel",
@@ -1120,7 +1120,7 @@
       "author": "ultherego",
       "description": "Kubernetes context and namespace switcher with resource browser powered by kubectl.",
       "license": "MIT",
-      "version": "1.0.12",
+      "version": "1.0.13",
       "tags": [
         "Bar",
         "Panel",
@@ -1139,7 +1139,7 @@
       "author": "Borhaneddine GUEMIDI <guemidiborhane@gmail.com>",
       "description": "Network latency monitor — multi-host, windowed averages, sparkline graphs",
       "license": "MIT",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "tags": [
         "Bar",
         "Panel",
@@ -1191,7 +1191,7 @@
       "author": "Pever3ll",
       "description": "Uses MPRIS data to fetch song lyrics from lrclib.net and displays it in the bar.",
       "license": "GPLv3",
-      "version": "1.1.8",
+      "version": "1.1.9",
       "tags": [
         "Bar",
         "Music"
@@ -1392,7 +1392,7 @@
       "author": "DBeidachazi",
       "description": "Display synchronized lyrics from MPRIS-compatible music players (e.g., go-musicfox) in the bar.",
       "license": "MIT",
-      "version": "1.0.11",
+      "version": "1.0.12",
       "tags": [
         "Bar",
         "Music"
@@ -2120,7 +2120,7 @@
       "author": "User",
       "description": "Shows prayer times and a countdown to Iftar during Ramadan.",
       "license": "MIT",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "tags": [
         "Bar",
         "Panel"
@@ -2427,7 +2427,7 @@
       "author": "adriamartin91",
       "description": "Manage SSH connections from ~/.ssh/config with active session detection and launcher integration.",
       "license": "MIT",
-      "version": "1.1.9",
+      "version": "1.1.10",
       "tags": [
         "Bar",
         "Panel",
@@ -2465,7 +2465,7 @@
       "author": "Pir0c0pter0",
       "description": "Theme-aware Syncthing status plugin with bar and panel integration",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Bar",
         "Panel",
@@ -2641,7 +2641,7 @@
       "author": "BukoMoon",
       "description": "Checks for system updates and shows the update count. Click to run update command in a terminal.",
       "license": "GPLv3",
-      "version": "1.0.19",
+      "version": "1.0.20",
       "tags": [
         "Bar",
         "System"

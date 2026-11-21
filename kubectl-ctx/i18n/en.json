@@ -43,6 +43,7 @@
     "cancel": "Cancel"
   },
   "settings": {
+    "shared-effect": "This instance selects its kubeconfig, polling and presentation. Context, namespace and resource actions change the referenced kubeconfig or cluster, not a private instance.",
     "kubeconfigPath": {
       "label": "Kubeconfig path",
       "desc": "Path to kubeconfig file. Leave empty to use default (~/.kube/config).",

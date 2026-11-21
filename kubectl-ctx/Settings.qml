@@ -6,6 +6,14 @@ import qs.Widgets
 ColumnLayout {
   id: root
   property var pluginApi: null
+  NText {
+    Layout.fillWidth: true
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+    wrapMode: Text.WordWrap
+    color: AtmoColor.mOnSurfaceVariant
+    pointSize: Style.fontSizeS
+  }
   readonly property var kubeconfigPathField: pluginApi?.field("kubeconfigPath") ?? null
   readonly property var terminalField: pluginApi?.field("terminal") ?? null
   readonly property var pollIntervalField: pluginApi?.field("pollInterval") ?? null

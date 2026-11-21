@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "Diese Instanz wählt Abfrageintervall und Befehle. Eine Aktualisierung ändert das System für alle Instanzen.",
     "changeIcon": {
       "label": "Icon auswählen"
     },

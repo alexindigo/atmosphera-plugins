@@ -28,6 +28,7 @@
     "thermal-guard-off": "off"
   },
   "settings": {
+    "shared-effect": "This instance sets menu and display preferences. Keep-awake actions change the single system-wide session and affect every instance.",
     "default-scope": {
       "label": "Default scope",
       "desc": "partial = system awake, monitor may sleep; full = everything blocked"

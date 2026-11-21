@@ -22,13 +22,13 @@ Item {
   readonly property real capsuleHeight: Style.getCapsuleHeightForScreen(screenName)
   readonly property real barFontSize: Style.getBarFontSizeForScreen(screenName)
 
-  readonly property var mainInstance: pluginApi?.mainInstance
-  readonly property var hosts: mainInstance?.hosts
-  readonly property var displayHost: mainInstance?.displayHost
-  readonly property string status: mainInstance?.status
-  readonly property int thresholdGood: mainInstance?.thresholdGood
-  readonly property int thresholdWarn: mainInstance?.thresholdWarning
-  readonly property int showHostName: mainInstance?.showHostName
+  readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+  readonly property var hosts: mainInstance?.hosts ?? []
+  readonly property var displayHost: mainInstance?.displayHost ?? null
+  readonly property string status: mainInstance?.status ?? "unknown"
+  readonly property int thresholdGood: mainInstance?.thresholdGood ?? 20
+  readonly property int thresholdWarn: mainInstance?.thresholdWarning ?? 70
+  readonly property int showHostName: mainInstance?.showHostName ?? false
 
   readonly property string displayText: {
     if (!displayHost)
@@ -58,11 +58,11 @@ Item {
   readonly property color statusColor: {
     switch (status) {
     case "good":
-      return mainInstance?.colorGood;
+      return mainInstance?.colorGood ?? AtmoColor.mOnSurface;
     case "warning":
-      return mainInstance?.colorWarning;
+      return mainInstance?.colorWarning ?? AtmoColor.mOnSurface;
     case "critical":
-      return mainInstance?.colorCritical;
+      return mainInstance?.colorCritical ?? AtmoColor.mOnSurface;
     default:
       return AtmoColor.mOnSurface;
     }

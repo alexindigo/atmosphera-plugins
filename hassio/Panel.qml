@@ -14,7 +14,7 @@ Item {
     property real contentPreferredWidth: 420 * Style.uiScaleRatio
     property real contentPreferredHeight: 560 * Style.uiScaleRatio
 
-    property var main: pluginApi?.mainInstance ?? null
+    readonly property var main: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
     property string view: "list"
 

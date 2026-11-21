@@ -32,7 +32,7 @@ Item {
   readonly property bool showCountdown: cfg.showCountdown ?? defaults.showCountdown ?? true;
 
   // Access shared state from Main.qml
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
   readonly property var prayerTimings: mainInstance ? mainInstance.prayerTimings : null
   readonly property bool isRamadan: mainInstance ? mainInstance.isRamadan : false
   readonly property bool isLoading: mainInstance ? mainInstance.isLoading : false

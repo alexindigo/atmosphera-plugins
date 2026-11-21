@@ -8,6 +8,14 @@ ColumnLayout {
   spacing: Style.marginL
 
   property var pluginApi: null
+  NText {
+    Layout.fillWidth: true
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+    wrapMode: Text.WordWrap
+    color: AtmoColor.mOnSurfaceVariant
+    pointSize: Style.fontSizeS
+  }
   readonly property var playerNameField: pluginApi?.field("playerName") ?? null
   readonly property var updateIntervalField: pluginApi?.field("updateInterval") ?? null
   readonly property var widthField: pluginApi?.field("width") ?? null

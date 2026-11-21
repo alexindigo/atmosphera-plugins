@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "This instance selects polling and commands. Running an update changes the system for every instance.",
     "changeIcon": {
       "label": "Select Icon"
     },

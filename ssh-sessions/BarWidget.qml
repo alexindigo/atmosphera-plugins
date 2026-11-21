@@ -21,7 +21,7 @@ Item {
   readonly property real capsuleHeight: Style.getCapsuleHeightForScreen(screenName)
   readonly property real barFontSize: Style.getBarFontSizeForScreen(screenName)
 
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
   readonly property int activeCount: mainInstance?.activeCount ?? 0
 
   readonly property real contentWidth: capsuleRow.implicitWidth + Style.marginM * 2

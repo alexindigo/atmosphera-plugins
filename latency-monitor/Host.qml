@@ -12,6 +12,13 @@ QtObject {
   property int thresholdGood: 20
   property int thresholdWarning: 70
 
+  property bool active: true
+  function stop() {
+    active = false;
+    _timer.stop();
+    proc.running = false;
+  }
+
   property var samples: []      // [{ts: epoch-ms, rtt: int-ms}]
   property int lastRtt: -1      // -1 == no data / timed out
   property bool timedOut: false
@@ -82,6 +89,7 @@ QtObject {
     stdout: SplitParser {
       splitMarker: "\n"
       onRead: function (line) {
+        if (!root.active) return;
         const m = line.match(/time[=<](\d+(?:\.\d+)?)/);
         if (m)
           root._pendingRtt = Math.round(parseFloat(m[1]));
@@ -89,6 +97,7 @@ QtObject {
     }
 
     onExited: function () {
+      if (!root.active) return;
       if (root._pendingRtt >= 0) {
         root._commit(root._pendingRtt);
       } else {
@@ -103,10 +112,11 @@ QtObject {
 
   property var _timer: Timer {
     interval: root.intervalMs
-    running: true
+    running: root.active
     repeat: true
     triggeredOnStart: true
-    onTriggered: if (!proc.running)
+    onTriggered: if (root.active && !proc.running)
       proc.running = true
   }
+  Component.onDestruction: stop()
 }

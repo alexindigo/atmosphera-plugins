@@ -15,7 +15,7 @@ Item {
 
     anchors.fill: parent
 
-    readonly property var mainInst: pluginApi?.mainInstance ?? null
+    readonly property var mainInst: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
     readonly property string currentState: mainInst?.enabled ? (mainInst?.state ?? "unconfigured") : "disabled"
 
     function tr(key, params) {

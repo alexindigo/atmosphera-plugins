@@ -8,6 +8,14 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
+  NText {
+    Layout.fillWidth: true
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+    wrapMode: Text.WordWrap
+    color: AtmoColor.mOnSurfaceVariant
+    pointSize: Style.fontSizeS
+  }
   readonly property var updateIntervalMinutesField: pluginApi?.field("updateIntervalMinutes") ?? null
   readonly property var updateTerminalCommandField: pluginApi?.field("updateTerminalCommand") ?? null
   readonly property var currentIconNameField: pluginApi?.field("currentIconName") ?? null
@@ -31,7 +39,7 @@ ColumnLayout {
       if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current")
         return;
       root._applyEffectPending = false;
-      root.pluginApi.mainInstance?.startGetNumUpdates();
+      root.pluginApi.mainInstance?.settingsConsumerFor(root.pluginApi.runtimeContext)?.startGetNumUpdates();
       Logger.i("UpdateCount", "Settings saved successfully");
       root.pluginApi.withCurrentScreen(s => root.pluginApi.closePanel(s));
     }

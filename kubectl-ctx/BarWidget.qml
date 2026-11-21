@@ -20,7 +20,7 @@ Item {
 
   readonly property string iconColorKey: cfg.iconColor ?? defaults.iconColor
   readonly property bool showErrorBadge: cfg.showErrorBadge ?? defaults.showErrorBadge ?? true
-  readonly property var main: pluginApi?.mainInstance ?? null
+  readonly property var main: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
   readonly property string barPosition: Settings.getBarPositionForScreen(screen?.name)
   readonly property bool isVertical: barPosition === "left" || barPosition === "right"

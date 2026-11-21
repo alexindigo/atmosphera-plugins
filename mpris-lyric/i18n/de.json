@@ -6,6 +6,7 @@
     "next": "Vor"
   },
   "settings": {
+    "shared-effect": "Diese Instanz wählt einen Player und die Aktualisierung der Liedtexte. Die Wiedergabetasten steuern diesen gemeinsamen Player für alle Anwendungen.",
     "player-name": "Name des Players",
     "player-name-desc": "Bezeichnung des MPRIS-Players (z.B. musicfox, spotify, firefox)",
     "hide-when-inactive": "Bei Inaktivität ausblenden",

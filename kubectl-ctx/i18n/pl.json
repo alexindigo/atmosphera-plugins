@@ -43,6 +43,7 @@
     "cancel": "Anuluj"
   },
   "settings": {
+    "shared-effect": "Ta instancja wybiera swój kubeconfig, odpytywanie i wygląd. Działania dotyczące kontekstu, przestrzeni nazw i zasobów zmieniają wskazany kubeconfig lub klaster, a nie prywatną instancję.",
     "kubeconfigPath": {
       "label": "Ścieżka do kubeconfig",
       "desc": "Ścieżka do pliku kubeconfig. Zostaw puste aby użyć domyślnej (~/.kube/config).",

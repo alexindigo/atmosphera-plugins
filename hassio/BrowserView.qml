@@ -12,12 +12,41 @@ Item {
     property string _searchText: ""
     property bool _loading: false
     property int _pinVersion: 0
+    property int _requestId: 0
+    property bool _requested: false
+    property bool _constructed: false
+
+    function _invalidate() {
+        if (!_constructed) return;
+        _requestId++;
+        _allEntities = [];
+        _filteredModel.clear();
+        _loading = false;
+    }
+
+    onMainChanged: {
+        _invalidate();
+        if (_constructed) _fetchAll();
+    }
+
+    Connections {
+        target: root.main
+        function onSourceChanged() { root._invalidate(); }
+        function onAuthenticatedChanged() {
+            if (root.main?.authenticated) root._fetchAll();
+            else root._invalidate();
+        }
+    }
+
+    Component.onCompleted: _constructed = true
 
     clip: true
 
     function load() {
         searchInput.text = "";
         root._searchText = "";
+        _requested = true;
+        _invalidate();
         _fetchAll();
     }
 
@@ -59,8 +88,12 @@ Item {
     }
 
     function _fetchAll() {
+        if (!_requested || !root.main?.authenticated) return;
+        const owner = root.main;
+        const request = ++root._requestId;
         root._loading = true;
-        root.main.getAllStates(function (results) {
+        owner.getAllStates(function (results) {
+            if (root.main !== owner || root._requestId !== request) return;
             root._allEntities = results;
             root._refilter();
             root._loading = false;

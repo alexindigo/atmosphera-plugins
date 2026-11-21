@@ -1,5 +1,6 @@
 {
     "settings": {
+        "shared-effect": "Toutes les instances observent le même lecteur et les mêmes paroles. La visibilité en pause ou sans contenu, le défilement et la typographie utilisent les réglages de cette instance.",
         "title": "Paramètres",
         "font": {
             "title": "Police de caractères",
