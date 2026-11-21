@@ -8,6 +8,7 @@ Item {
   property string configPath: "~/.config/niri/config.kdl"
   property var outputs: []
   property bool loading: false
+  property bool cancelled: false
 
   signal parsed()
 
@@ -33,6 +34,7 @@ Item {
   readonly property var positionRe: /^position\s+x=(-?\d+)\s+y=(-?\d+)/
 
   function start() {
+    cancelled = false
     var resolved = configPath.replace(/^~/, homeDir)
     filesToParse = [resolved]
     parsedFiles = {}
@@ -43,6 +45,7 @@ Item {
   }
 
   function parseNextFile() {
+    if (cancelled) return
     if (parseDepth >= maxDepth || filesToParse.length === 0) {
       finalize()
       return
@@ -69,6 +72,7 @@ Item {
   }
 
   function finalize() {
+    if (cancelled) return
     outputs = parseOutputBlocks(collectedLines.join("\n"))
     collectedLines = []
     loading = false
@@ -80,6 +84,7 @@ Item {
   }
 
   function expandGlob(path) {
+    if (cancelled) return
     globProcess.expandedFiles = []
     globProcess.command = ["sh", "-c", "for f in " + path + "; do [ -f \"$f\" ] && echo \"$f\"; done"]
     globProcess.running = true
@@ -97,6 +102,7 @@ Item {
   }
 
   function queueIfNew(path) {
+    if (cancelled) return
     if (!parsedFiles[path] && filesToParse.indexOf(path) === -1) {
       filesToParse.push(path)
     }
@@ -108,6 +114,7 @@ Item {
 
     stdout: SplitParser {
       onRead: data => {
+        if (root.cancelled) return
         var trimmed = data.trim()
         if (trimmed.length > 0 && globProcess.expandedFiles.length < root.maxGlobMatches) {
           globProcess.expandedFiles.push(trimmed)
@@ -116,6 +123,7 @@ Item {
     }
 
     onExited: {
+      if (root.cancelled) return
       for (var i = 0; i < expandedFiles.length; i++) {
         root.queueIfNew(expandedFiles[i])
       }
@@ -130,6 +138,7 @@ Item {
 
     stdout: SplitParser {
       onRead: data => {
+        if (root.cancelled) return
         if (root.currentFileLines.length < root.maxLinesPerFile) {
           root.currentFileLines.push(data)
         }
@@ -137,6 +146,7 @@ Item {
     }
 
     onExited: exitCode => {
+      if (root.cancelled) return
       if (exitCode === 0 && root.currentFileLines.length > 0) {
         root.absorbLines(currentFilePath)
       }
@@ -146,6 +156,7 @@ Item {
   }
 
   function absorbLines(filePath) {
+    if (cancelled) return
     for (var i = 0; i < currentFileLines.length; i++) {
       var line = currentFileLines[i]
       collectedLines.push(line)
@@ -191,6 +202,17 @@ Item {
       applyConfigLine(current, line)
     }
     return outputs
+  }
+
+  function cancel() {
+    cancelled = true
+    readProcess.running = false
+    globProcess.running = false
+    filesToParse = []
+    currentFileLines = []
+    collectedLines = []
+    outputs = []
+    loading = false
   }
 
   function newConfigOutput(name) {

@@ -143,7 +143,7 @@ Item {
 
     var nextX = parseCoordinate(editPosX, selectedOutput.x);
     var nextY = parseCoordinate(editPosY, selectedOutput.y);
-    mainInstance.setOutputPosition(selectedOutput.outputId, nextX, nextY, true);
+    mainInstance.setOutputPosition(selectedOutput.outputId, nextX, nextY, true, root.pluginApi?.settingsContext);
     editPosX = String(nextX);
     editPosY = String(nextY);
   }
@@ -159,7 +159,7 @@ Item {
     }
 
     var nextScale = parseScaleValue(editScale, selectedOutput.scale);
-    mainInstance.setOutputScale(selectedOutput.outputId, nextScale);
+    mainInstance.setOutputScale(selectedOutput.outputId, nextScale, root.pluginApi?.settingsContext);
     editScale = String(nextScale);
   }
 
@@ -448,7 +448,7 @@ Item {
                         outputTile.dragOffsetSceneX = 0;
                         outputTile.dragOffsetSceneY = 0;
                         if (mainInstance) {
-                          mainInstance.selectOutput(outputData.outputId);
+                          mainInstance.selectOutput(outputData.outputId, root.pluginApi?.settingsContext);
                         }
                       }
 
@@ -478,7 +478,7 @@ Item {
                         var scenePoint = dragArea.mapToItem(sceneCanvas, mouse.x, mouse.y);
                         var deltaX = (scenePoint.x - outputTile.pressSceneX) / root.sceneScale;
                         var deltaY = (scenePoint.y - outputTile.pressSceneY) / root.sceneScale;
-                        mainInstance.setOutputPosition(outputData.outputId, outputTile.pressOutputX + deltaX, outputTile.pressOutputY + deltaY, true);
+                        mainInstance.setOutputPosition(outputData.outputId, outputTile.pressOutputX + deltaX, outputTile.pressOutputY + deltaY, true, root.pluginApi?.settingsContext);
 
                         outputTile.dragOffsetSceneX = 0;
                         outputTile.dragOffsetSceneY = 0;
@@ -570,7 +570,7 @@ Item {
                       currentKey: selectedOutput ? selectedOutput.modeId : ""
                       onSelected: key => {
                         if (selectedOutput && mainInstance) {
-                          mainInstance.setOutputResolution(selectedOutput.outputId, key);
+                          mainInstance.setOutputResolution(selectedOutput.outputId, key, root.pluginApi?.settingsContext);
                         }
                       }
                     }
@@ -695,21 +695,21 @@ Item {
                 Layout.fillWidth: true
                 text: pluginApi?.tr("actions.refresh")
                 enabled: mainInstance && !mainInstance.isRefreshing && !mainInstance.isApplying
-                onClicked: mainInstance.refreshOutputs()
+                onClicked: mainInstance.refreshOutputs(root.pluginApi?.settingsContext)
               }
 
               NButton {
                 Layout.fillWidth: true
                 text: pluginApi?.tr("actions.reset")
                 enabled: mainInstance && mainInstance.hasPendingChanges && !mainInstance.isApplying
-                onClicked: mainInstance.resetDraftOutputs()
+                onClicked: mainInstance.resetDraftOutputs(root.pluginApi?.settingsContext)
               }
 
               NButton {
                 Layout.fillWidth: true
                 text: pluginApi?.tr("actions.apply")
                 enabled: mainInstance && mainInstance.hasPendingChanges && !mainInstance.isApplying
-                onClicked: mainInstance.applyLayout()
+                onClicked: mainInstance.applyLayout(root.pluginApi?.settingsContext)
               }
             }
           }
@@ -776,7 +776,7 @@ Item {
                     NText {
                       text: {
                         if (!mainInstance) return "";
-                        var cfg = mainInstance.getConfigurationScript();
+                        var cfg = mainInstance.getConfigurationScript(root.pluginApi?.settingsContext);
                         if (cfg.error) return cfg.error;
                         return cfg.content || "";
                       }
@@ -800,16 +800,16 @@ Item {
               NButton {
                 Layout.fillWidth: true
                 text: pluginApi?.tr("actions.copyConfig")
-                enabled: mainInstance && !mainInstance.getConfigurationScript().error
+                enabled: mainInstance && !mainInstance.getConfigurationScript(root.pluginApi?.settingsContext).error
                 onClicked: {
-                  var cfg = mainInstance.getConfigurationScript();
+                  var cfg = mainInstance.getConfigurationScript(root.pluginApi?.settingsContext);
                   if (!cfg.error) {
                     var backend = cfg.backend || "unknown";
                     var header = "# " + backend + " monitor configuration\n";
                     var fullText = header + cfg.content;
 
                     copyToClipboard(fullText);
-                    mainInstance.statusText = pluginApi?.tr("status.configCopied");
+                    mainInstance.noteConfigurationCopied(root.pluginApi?.settingsContext);
                   }
                 }
               }
@@ -817,7 +817,7 @@ Item {
               NButton {
                 text: pluginApi?.tr("actions.refresh")
                 enabled: mainInstance && !mainInstance.isRefreshing && !mainInstance.isApplying
-                onClicked: mainInstance.refreshOutputs()
+                onClicked: mainInstance.refreshOutputs(root.pluginApi?.settingsContext)
               }
             }
           }

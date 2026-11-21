@@ -665,14 +665,14 @@
       "author": "fstanis",
       "description": "View live display settings from wlr-randr and permanent niri KDL output configuration",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Bar",
         "Panel",
         "System",
         "Utility"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
@@ -1353,7 +1353,7 @@
       "author": "Mathew-D",
       "description": "Arrange multiple displays visually and change their resolutions from a Noctalia panel.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Bar",
         "Panel",
@@ -1362,7 +1362,7 @@
         "Sway",
         "Hyprland"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
