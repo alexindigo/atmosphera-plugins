@@ -11,6 +11,7 @@
     "settings": "Configurações do widget"
   },
   "settings": {
+    "shared-effect": "All instances control one keyboard. Apply, Recheck or a widget action selects the applied backend and binary for that shared keyboard; another configuration can replace it. Display and availability follow this instance.",
     "backend": {
       "label": "Backend",
       "desc": "Qual teclado na tela controlar: auto, squeekboard ou wvkbd (auto detecta na inicialização)",

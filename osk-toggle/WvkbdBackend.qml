@@ -5,16 +5,22 @@ import Quickshell.Io
 Item {
     id: root
 
-    property var pluginApi: null
+    property var settingsContext: null
+    property bool _retired: false
+    property bool _constructed: false
+    property bool _ready: false
+    property bool _starting: false
+    readonly property bool current: !root._retired && (settingsContext?.current() ?? false)
+    readonly property bool quiescent: !availabilityChecker.running && !preemptChecker.running && !preemptKill.running && !wvkbd.running
 
     property bool _visible: false
     // Inverted so BarWidget's direct mapping matches wvkbd-toggle's icon convention.
     readonly property bool keyboardActive: !_visible
     property bool wvkbdOk: false
-    property bool available: wvkbdOk
+    property bool available: wvkbdOk && _ready
 
     readonly property string unavailableTooltipKey: "tooltip.noWvkbd"
-    readonly property string wvkbdBin: pluginApi?.pluginSettings?.wvkbdBin ?? "wvkbd-mobintl"
+    property string wvkbdBin: "wvkbd-mobintl"
     readonly property list<string> wvkbdBinParts: wvkbdBin.trim().split(/\s+/)
 
     // True when wvkbd should be made visible as soon as it finishes starting up.
@@ -26,6 +32,8 @@ Item {
     property bool _pendingRestart: false
 
     onWvkbdBinChanged: {
+        if (!root._constructed || !root.current) return;
+        root._ready = false;
         if (!wvkbd.running) {
             availabilityChecker.running = true
             return
@@ -40,10 +48,11 @@ Item {
         id: availabilityChecker
         command: ["which", root.wvkbdBinParts[0]]
         onExited: (exitCode, exitStatus) => {
+            if (!root.current) return;
             root.wvkbdOk = exitCode === 0
-            if (root.wvkbdOk && !wvkbd.running) preemptChecker.running = true
+            if (root.wvkbdOk && !wvkbd.running && !preemptChecker.running && !preemptKill.running) preemptChecker.running = true
         }
-        Component.onCompleted: running = true
+        Component.onCompleted: running = root.current
     }
 
     // --- 2. Detect any pre-existing wvkbd instance ---
@@ -51,7 +60,8 @@ Item {
         id: preemptChecker
         command: ["pgrep", "-x", root.wvkbdBinParts[0]]
         onExited: (exitCode, exitStatus) => {
-            root._pendingShow = exitCode === 0  // assume visible if already running
+            if (!root.current) return;
+            root._pendingShow = root._pendingShow || exitCode === 0  // preserve an admitted show while checking external ownership
             if (exitCode === 0) {
                 preemptKill.running = true
             } else {
@@ -65,6 +75,7 @@ Item {
         id: preemptKill
         command: ["pkill", "-x", root.wvkbdBinParts[0]]
         onExited: (exitCode, exitStatus) => {
+            if (!root.current) return;
             wvkbd.running = true
         }
     }
@@ -74,13 +85,15 @@ Item {
         id: wvkbd
         command: [...wvkbdBinParts, "--hidden"]
         onRunningChanged: {
-            if (running && root._pendingShow) {
-                root._pendingShow = false
+            if (root.current && running) {
+                root._starting = true;
                 showTimer.restart()
+                root._ready = true;
             }
         }
         onExited: (exitCode, exitStatus) => {
             root._visible = false
+            if (!root.current) return;
             if (root._pendingRestart) {
                 root._pendingRestart = false
                 availabilityChecker.running = true
@@ -93,20 +106,42 @@ Item {
         id: showTimer
         interval: 300
         onTriggered: {
-            wvkbd.signal(10)  // SIGUSR1 = show
-            root._visible = true
+            if (!root.current) return;
+            root._starting = false;
+            if (root._pendingShow && wvkbd.running) {
+                root._pendingShow = false;
+                wvkbd.signal(10)  // SIGUSR1 = show
+                root._visible = true;
+            }
         }
     }
 
-    Component.onDestruction: {
-        if (wvkbd.running) wvkbd.running = false
+    function retire() {
+        root._retired = true;
+        root._pendingRestart = false;
+        root._pendingShow = false;
+        root._starting = false;
+        showTimer.stop();
+        availabilityChecker.running = false;
+        preemptChecker.running = false;
+        preemptKill.running = false;
+        wvkbd.running = false;
     }
+    onCurrentChanged: { if (_constructed && !current) retire(); }
+    Component.onCompleted: { _constructed = true; if (!current) retire(); }
+    Component.onDestruction: retire()
 
     function recheckState() {
+        if (!root.current) return;
         availabilityChecker.running = true
     }
 
     function toggleKeyboard() {
+        if (!root.current) return;
+        if (root._starting) {
+            root._pendingShow = !root._pendingShow;
+            return;
+        }
         if (!wvkbd.running) {
             root._pendingShow = true
             wvkbd.running = true

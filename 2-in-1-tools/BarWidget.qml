@@ -22,14 +22,14 @@ AtmoIconButton {
     readonly property string configuredIcon: cfg.iconName ?? defaults.iconName ?? "rotate-cw"
     readonly property bool showTransformInTooltip: cfg.showTransformInTooltip ?? defaults.showTransformInTooltip ?? true
 
-    icon: backend?.buttonUsesManualRotate() ? configuredIcon : (backend?.buttonIconName() ?? "screen-rotation")
-    visible: backend?.buttonVisible(outputName) ?? false
-    enabled: backend?.buttonEnabled(outputName) ?? false
-    tooltipText: backend?.buttonUsesManualRotate()
+    icon: backend?.buttonUsesManualRotate(pluginApi?.settingsContext) ? configuredIcon : (backend?.buttonIconName(pluginApi?.settingsContext) ?? "screen-rotation")
+    visible: backend?.buttonVisible(outputName, pluginApi?.settingsContext) ?? false
+    enabled: backend?.buttonEnabled(outputName, pluginApi?.settingsContext) ?? false
+    tooltipText: backend?.buttonUsesManualRotate(pluginApi?.settingsContext)
         ? (showTransformInTooltip
             ? "Rotate display · Current: " + (backend?.transformLabel(currentTransform) ?? "Normal")
             : "Rotate display")
-        : (backend?.buttonTooltip(outputName) ?? "Auto-rotate")
+        : (backend?.buttonTooltip(outputName, pluginApi?.settingsContext) ?? "Auto-rotate")
     tooltipDirection: BarService.getTooltipDirection(screen?.name)
     baseSize: Style.getCapsuleHeightForScreen(screen?.name)
     applyUiScale: false
@@ -39,20 +39,20 @@ AtmoIconButton {
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
 
-    onClicked: backend?.activatePrimaryButton(outputName)
+    onClicked: backend?.activatePrimaryButton(outputName, pluginApi?.settingsContext)
     onRightClicked: PanelService.showContextMenu(contextMenu, root, screen)
 
-    Component.onCompleted: backend?.refreshTransform(outputName)
-    onScreenChanged: backend?.refreshTransform(outputName)
+    Component.onCompleted: backend?.refreshTransform(outputName, pluginApi?.settingsContext)
+    onScreenChanged: backend?.refreshTransform(outputName, pluginApi?.settingsContext)
 
     NPopupContextMenu {
         id: contextMenu
 
         model: [
             {
-                "label": backend?.buttonUsesManualRotate() ? "Rotate now" : "Toggle rotation lock",
+                "label": backend?.buttonUsesManualRotate(pluginApi?.settingsContext) ? "Rotate now" : "Toggle rotation lock",
                 "action": "rotate",
-                "icon": backend?.buttonUsesManualRotate() ? configuredIcon : (backend?.buttonIconName() ?? "screen-rotation")
+                "icon": backend?.buttonUsesManualRotate(pluginApi?.settingsContext) ? configuredIcon : (backend?.buttonIconName(pluginApi?.settingsContext) ?? "screen-rotation")
             },
             {
                 "label": "Rotate manually",
@@ -76,11 +76,11 @@ AtmoIconButton {
             PanelService.closeContextMenu(screen)
 
             if (action === "rotate")
-                backend?.activatePrimaryButton(outputName)
+                backend?.activatePrimaryButton(outputName, pluginApi?.settingsContext)
             else if (action === "manual-rotate")
-                backend?.cycleTransform(outputName)
+                backend?.cycleTransform(outputName, pluginApi?.settingsContext)
             else if (action === "refresh")
-                backend?.refreshTransform(outputName)
+                backend?.refreshTransform(outputName, pluginApi?.settingsContext)
             else if (action === "settings")
                 BarService.openPluginSettings(root.screen, pluginApi.manifest)
         }

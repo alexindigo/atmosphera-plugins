@@ -10,13 +10,13 @@ AtmoIconButtonHot {
     readonly property var backend: pluginApi?.mainInstance
     readonly property string currentTransform: backend?.transformForOutput(outputName) ?? "Normal"
 
-    icon: backend?.buttonIconName() ?? "rotate-cw"
-    visible: backend?.buttonVisible(outputName) ?? false
-    enabled: backend?.buttonEnabled(outputName) ?? false
-    tooltipText: backend?.buttonTooltip(outputName) ?? ("Rotate display · Current: " + (backend?.transformLabel(currentTransform) ?? "Normal"))
+    icon: backend?.buttonIconName(pluginApi?.settingsContext) ?? "rotate-cw"
+    visible: backend?.buttonVisible(outputName, pluginApi?.settingsContext) ?? false
+    enabled: backend?.buttonEnabled(outputName, pluginApi?.settingsContext) ?? false
+    tooltipText: backend?.buttonTooltip(outputName, pluginApi?.settingsContext) ?? ("Rotate display · Current: " + (backend?.transformLabel(currentTransform) ?? "Normal"))
 
-    onClicked: backend?.activatePrimaryButton(outputName)
+    onClicked: backend?.activatePrimaryButton(outputName, pluginApi?.settingsContext)
 
-    Component.onCompleted: backend?.refreshTransform(outputName)
-    onScreenChanged: backend?.refreshTransform(outputName)
+    Component.onCompleted: backend?.refreshTransform(outputName, pluginApi?.settingsContext)
+    onScreenChanged: backend?.refreshTransform(outputName, pluginApi?.settingsContext)
 }

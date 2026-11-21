@@ -40,7 +40,7 @@
       "author": "Codex",
       "description": "A Noctalia utility plugin for screen rotation tools on Niri and Hyprland.",
       "license": "MIT",
-      "version": "1.2.7",
+      "version": "1.2.8",
       "tags": [
         "Bar",
         "Control Center",
@@ -1942,7 +1942,7 @@
       "author": "blackteaextract",
       "description": "Toggle an on-screen keyboard (Squeekboard or wvkbd) with live availability detection, hover icons, and configurable settings. Supersedes squeekboard-toggle.",
       "license": "MIT",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "tags": [
         "System",
         "Bar",
