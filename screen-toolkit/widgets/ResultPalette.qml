@@ -55,7 +55,7 @@ Item {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: mainInstance?.runPalette()
+                onClicked: mainInstance?.runPalette(pluginApi)
             }
         }
         Column {
@@ -87,7 +87,7 @@ Item {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: mainInstance?.runPalette()
+                    onClicked: mainInstance?.runPalette(pluginApi)
                 }
             }
             Flow {

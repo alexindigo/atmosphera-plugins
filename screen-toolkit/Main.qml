@@ -14,6 +14,27 @@ import "tools"
 Item {
     id: root
     property var pluginApi: null
+    property var pendingPolicy: null
+
+    function capturePolicy(context) {
+        context = context || pluginApi?.settingsContext
+        if (!context?.current()) return null
+        const settings = context.settingsView
+        return { context: context, settings: settings }
+    }
+    function captureAction(runtimeApi) {
+        const api = runtimeApi || pluginApi
+        const policy = capturePolicy(api?.settingsContext)
+        if (!policy) return null
+        policy.api = api
+        return policy
+    }
+    function showResult(policy) {
+        if (!policy?.context.current()) return
+        policy.api.withCurrentScreen(screen => {
+            if (policy.context.current()) policy.api.openPanel(screen)
+        })
+    }
     readonly property string _scriptsDir: Qt.resolvedUrl("scripts/").toString().replace("file://", "")
     readonly property string _home: Quickshell.env("HOME")
     property bool   isRunning:              false
@@ -171,12 +192,14 @@ function clearPaletteResult() {
         target: recordOverlay
         function onRecordStateChanged() {
             if (!pluginApi) return
-            var skipConfirm = pluginApi.pluginSettings?.recordSkipConfirmation ?? false
-            var toClipboard = pluginApi.pluginSettings?.recordCopyToClipboard  ?? false
+            const policy = recordOverlay.actionPolicy
+            if (!policy?.context.current()) return
+            var skipConfirm = policy.settings.recordSkipConfirmation ?? false
+            var toClipboard = policy.settings.recordCopyToClipboard ?? false
             if (recordOverlay.recordState === "converting" && !skipConfirm && !toClipboard) {
                 var screen = recordOverlay._primaryScreen
-                if (screen) pluginApi.openPanel(screen)
-                else pluginApi.withCurrentScreen(sc => pluginApi.openPanel(sc))
+                if (screen) policy.api.openPanel(screen)
+                else showResult(policy)
             }
         }
         function onDismissed() {
@@ -187,8 +210,9 @@ function clearPaletteResult() {
         target: colorPickerOverlay
         function onDone() {
             root.isRunning  = false
+            if (!colorPickerOverlay.actionPolicy?.context.current()) { root.activeTool = ""; return }
             root.activeTool = "colorpicker"
-            pluginApi?.withCurrentScreen(screen => pluginApi.openPanel(screen))
+            root.showResult(colorPickerOverlay.actionPolicy)
         }
         function onFailed() {
             root.isRunning  = false
@@ -200,8 +224,9 @@ function clearPaletteResult() {
         target: ocrOverlay
         function onDone() {
             root.isRunning  = false
+            if (!ocrOverlay.actionPolicy?.context.current()) { root.activeTool = ""; return }
             root.activeTool = "ocr"
-            pluginApi?.withCurrentScreen(screen => pluginApi.openPanel(screen))
+            root.showResult(ocrOverlay.actionPolicy)
         }
         function onFailed(messageKey, messageArg) {
             root.isRunning  = false
@@ -215,8 +240,9 @@ function clearPaletteResult() {
         target: qrOverlay
         function onDone() {
             root.isRunning  = false
+            if (!qrOverlay.actionPolicy?.context.current()) { root.activeTool = ""; return }
             root.activeTool = "qr"
-            pluginApi?.withCurrentScreen(screen => pluginApi.openPanel(screen))
+            root.showResult(qrOverlay.actionPolicy)
         }
         function onFailed() {
             root.isRunning  = false
@@ -242,8 +268,9 @@ function clearPaletteResult() {
         target: paletteOverlay
         function onDone() {
             root.isRunning  = false
+            if (!paletteOverlay.actionPolicy?.context.current()) { root.activeTool = ""; return }
             root.activeTool = "palette"
-            pluginApi?.withCurrentScreen(screen => pluginApi.openPanel(screen))
+            root.showResult(paletteOverlay.actionPolicy)
         }
         function onFailed() {
             root.isRunning  = false
@@ -255,6 +282,10 @@ function clearPaletteResult() {
         id: regionSelector
         pluginApi: root.pluginApi
         onRegionSelected: (x, y, w, h, screen) => {
+            if (!root.pendingPolicy?.context.current()) {
+                root.isRunning = false
+                return
+            }
             root._regionX      = x; root._regionY = y
             root._regionW      = w; root._regionH = h
             root._regionScreen = screen
@@ -335,22 +366,22 @@ function clearPaletteResult() {
     }
     ToolProcess {
         id: annotateProc
+        property var actionPolicy: null
         onExited: (code) => {
             root.isRunning = false
+            const policy = actionPolicy
+            if (!policy?.context.current()) return
             if (code === 0) {
                 root.activeTool = ""
                 var region = annotateRegionState._pendingRegion
                 var screen = annotateRegionState._pendingScreen
                 annotateRegionState._pendingRegion = ""
                 annotateRegionState._pendingScreen = null
-                if (pluginApi) {
-                    pluginApi.withCurrentScreen(s => {
-                        pluginApi.closePanel(s)
-                        annotateOverlay.parseAndShow(region, TempPaths.path("screen-toolkit-annotate.png"), screen)
-                    })
-                } else {
-                    annotateOverlay.parseAndShow(region, TempPaths.path("screen-toolkit-annotate.png"), screen)
-                }
+                policy.api.withCurrentScreen(s => {
+                    if (!policy.context.current()) return
+                    policy.api.closePanel(s)
+                    annotateOverlay.parseAndShow(region, TempPaths.path("screen-toolkit-annotate.png"), screen, policy)
+                })
             } else {
                 root.activeTool = ""
                 ToastService.showError(pluginApi.tr("messages.capture-failed"))
@@ -364,9 +395,12 @@ function clearPaletteResult() {
     }
     ToolProcess {
         id: annotateWinProc
+        property var actionPolicy: null
         stdout: StdioCollector {}
         onExited: (code) => {
             root.isRunning = false
+            const policy = actionPolicy
+            if (!policy?.context.current()) return
             var geomStr = annotateWinProc.stdout.text.trim()
             if (code !== 0 || geomStr === "") {
                 root.activeTool = ""
@@ -384,21 +418,20 @@ function clearPaletteResult() {
             var screen    = root._findScreenForPoint(gx, gy)
             var regionStr = (gx - (screen?.x ?? 0)) + "," + (gy - (screen?.y ?? 0)) + " " + gw + "x" + gh
             root.activeTool = ""
-            if (pluginApi) {
-                pluginApi.withCurrentScreen(s => {
-                    pluginApi.closePanel(s)
-                    annotateOverlay.parseAndShow(regionStr, TempPaths.path("screen-toolkit-annotate.png"), screen)
-                })
-            } else {
-                annotateOverlay.parseAndShow(regionStr, TempPaths.path("screen-toolkit-annotate.png"), screen)
-            }
+            policy.api.withCurrentScreen(s => {
+                if (!policy.context.current()) return
+                policy.api.closePanel(s)
+                annotateOverlay.parseAndShow(regionStr, TempPaths.path("screen-toolkit-annotate.png"), screen, policy)
+            })
         }
     }
     ToolProcess {
         id: pinGrimProc
+        property var actionPolicy: null
         stdout: StdioCollector {}
         onExited: (code) => {
             root.isRunning = false
+            if (!actionPolicy?.context.current()) return
             var output = pinGrimProc.stdout.text.trim()
             if (code === 0 && output !== "") {
                 var parts = output.split("|")
@@ -417,8 +450,10 @@ function clearPaletteResult() {
     }
     ToolProcess {
         id: pinFileProc
+        property var actionPolicy: null
         stdout: StdioCollector {}
         onExited: (code) => {
+            if (!actionPolicy?.context.current()) return
             var path = pinFileProc.stdout.text.trim()
             if (code === 0 && path !== "") {
                 pinOverlay.addPin(path, 600, 400, root._regionScreen)
@@ -431,28 +466,35 @@ function clearPaletteResult() {
     ToolProcess { id: clipProc }
     Timer {
         id: launchColorPicker
+        property var actionPolicy: null
         interval: 220; repeat: false
-        onTriggered: colorPickerOverlay.run()
+        onTriggered: { if (actionPolicy?.context.current()) colorPickerOverlay.run(actionPolicy); else root.isRunning = false }
     }
     Timer {
         id: launchOcr
+        property var actionPolicy: null
         interval: 50; repeat: false
-        onTriggered: ocrOverlay.run(root._grimX, root._grimY, root._grimW, root._grimH, root.pendingLangStr)
+        onTriggered: { if (actionPolicy?.context.current()) ocrOverlay.run(root._grimX, root._grimY, root._grimW, root._grimH, root.pendingLangStr, actionPolicy); else root.isRunning = false }
     }
     Timer {
         id: launchQr
+        property var actionPolicy: null
         interval: 50; repeat: false
-        onTriggered: qrOverlay.run(root._grimGeometry)
+        onTriggered: { if (actionPolicy?.context.current()) qrOverlay.run(root._grimGeometry, actionPolicy); else root.isRunning = false }
     }
     Timer {
         id: launchLens
+        property var actionPolicy: null
         interval: 50; repeat: false
-        onTriggered: lensOverlay.run(root._grimX, root._grimY, root._grimW, root._grimH)
+        onTriggered: { if (actionPolicy?.context.current()) lensOverlay.run(root._grimX, root._grimY, root._grimW, root._grimH, actionPolicy); else root.isRunning = false }
     }
     Timer {
         id: launchAnnotate
+        property var actionPolicy: null
         interval: 50; repeat: false
         onTriggered: {
+            if (!actionPolicy?.context.current()) { root.isRunning = false; return }
+            annotateProc.actionPolicy = actionPolicy
             var regionStr = root._grimLocalX + "," + root._grimLocalY + " " + root._grimW + "x" + root._grimH
             annotateRegionState._pendingRegion = regionStr
             annotateRegionState._pendingScreen = root._regionScreen
@@ -463,16 +505,22 @@ function clearPaletteResult() {
     }
     Timer {
         id: launchAnnotateActiveWindow
+        property var actionPolicy: null
         interval: 360; repeat: false
         onTriggered: {
+            if (!actionPolicy?.context.current()) { root.isRunning = false; return }
+            annotateWinProc.actionPolicy = actionPolicy
             annotateWinProc.exec({ command: [root._scriptsDir + "capture.sh", "annotate-window"] })
         }
     }
     Timer {
         id: launchAnnotateFullscreen
+        property var actionPolicy: null
         interval: 380; repeat: false
         property var targetScreen: null
         onTriggered: {
+            if (!actionPolicy?.context.current()) { root.isRunning = false; return }
+            annotateProc.actionPolicy = actionPolicy
             var name = targetScreen?.name ?? ""
             annotateProc.exec({ command: name !== ""
                 ? ["grim", "-o", name, TempPaths.path("screen-toolkit-annotate.png")]
@@ -482,42 +530,53 @@ function clearPaletteResult() {
     }
     Timer {
         id: launchPin
+        property var actionPolicy: null
         interval: 50; repeat: false
         onTriggered: {
+            if (!actionPolicy?.context.current()) { root.isRunning = false; return }
+            pinGrimProc.actionPolicy = actionPolicy
             pinGrimProc.exec({ command: [root._scriptsDir + "capture.sh", "pin", root._grimGeometry] })
         }
     }
     Timer {
         id: launchPinFile
+        property var actionPolicy: null
         interval: 200; repeat: false
         onTriggered: {
+            if (!actionPolicy?.context.current()) return
+            pinFileProc.actionPolicy = actionPolicy
             pinFileProc.exec({ command: [root._scriptsDir + "pick-file.sh"] })
         }
     }
     Timer {
         id: launchPalette
+        property var actionPolicy: null
         interval: 50; repeat: false
-        onTriggered: paletteOverlay.run(root._grimGeometry)
+        onTriggered: { if (actionPolicy?.context.current()) paletteOverlay.run(root._grimGeometry, actionPolicy); else root.isRunning = false }
     }
     Timer {
         id: launchRecord
+        property var actionPolicy: null
         interval: 50; repeat: false
         onTriggered: {
+            if (!actionPolicy?.context.current()) { root.isRunning = false; return }
             root.isRunning  = false
             root.activeTool = "record"
             recordOverlay.startRecording(
                 root._grimGeometry, root.pendingRecordFormat,
                 root.pendingRecordAudioOut, root.pendingRecordAudioIn,
                 root.pendingRecordCursor, root._grimLocalX, root._grimLocalY,
-                root._regionScreen
+                root._regionScreen, actionPolicy
             )
         }
     }
     Timer {
         id: launchRecordFullscreen
+        property var actionPolicy: null
         interval: 50; repeat: false
         property var targetScreen: null
         onTriggered: {
+            if (!actionPolicy?.context.current()) { root.isRunning = false; return }
             var screen = targetScreen ?? Quickshell.screens[0] ?? null
             if (!screen) return
             var scale  = screen.devicePixelRatio ?? 1.0
@@ -529,17 +588,20 @@ function clearPaletteResult() {
             recordOverlay.startRecording(
                 region, root.pendingRecordFormat,
                 root.pendingRecordAudioOut, root.pendingRecordAudioIn,
-                root.pendingRecordCursor, 0, 0, screen
+                root.pendingRecordCursor, 0, 0, screen, actionPolicy
             )
         }
     }
     Timer {
         id: launchRegionSelector
+        property var actionPolicy: null
         interval: 220; repeat: false
         property var targetScreen: null
-        onTriggered: regionSelector.show(targetScreen)
+        onTriggered: { if (actionPolicy?.context.current()) regionSelector.show(targetScreen); else root.isRunning = false }
     }
     function _dispatchPendingTool() {
+        for (const timer of [launchOcr, launchQr, launchLens, launchAnnotate, launchPin, launchPalette, launchRecord])
+            timer.actionPolicy = root.pendingPolicy
         switch (root.pendingTool) {
             case "ocr":      launchOcr.start();      break
             case "qr":       launchQr.start();       break
@@ -558,32 +620,36 @@ function clearPaletteResult() {
         clipProc.exec({ command: ["bash", "-c",
             "printf '%s' " + U.shellEscape(text) + " | wl-copy 2>/dev/null"] })
     }
-    function closeThenLaunch(timer) {
-        if (!pluginApi) { timer.start(); return }
-        pluginApi.withCurrentScreen(screen => {
+    function closeThenLaunch(timer, policy) {
+        if (!policy?.context.current()) return
+        timer.actionPolicy = policy
+        policy.api.withCurrentScreen(screen => {
+            if (!policy.context.current()) { root.isRunning = false; return }
             if (timer === launchRegionSelector) launchRegionSelector.targetScreen = screen
-            pluginApi.closePanel(screen)
+            policy.api.closePanel(screen)
             timer.start()
         })
     }
     function runTranslate(text, targetLang) {
         ocrOverlay.runTranslate(text, targetLang)
     }
-    function runColorPicker() {
+    function runColorPicker(runtimeApi) {
         if (root.isRunning) return
+        const policy = captureAction(runtimeApi)
+        if (!policy) return
         root.isRunning  = true
         root.activeTool = ""
         colorPickerOverlay.clearResults()
-        closeThenLaunch(launchColorPicker)
+        closeThenLaunch(launchColorPicker, policy)
     }
-    function runOcr(langStr) {
+    function runOcr(langStr, runtimeApi) {
         if (root.isRunning) return
         root.pendingLangStr = (langStr && langStr !== "") ? langStr : "eng"
-        _runSlurpTool("ocr")
+        _runSlurpTool("ocr", runtimeApi)
     }
-    function runQr()       { _runSlurpTool("qr")      }
-    function runLens()     { _runSlurpTool("lens")     }
-    function runAnnotate() { _runSlurpTool("annotate") }
+    function runQr(runtimeApi)       { _runSlurpTool("qr", runtimeApi)      }
+    function runLens(runtimeApi)     { _runSlurpTool("lens", runtimeApi)     }
+    function runAnnotate(runtimeApi) { _runSlurpTool("annotate", runtimeApi) }
     function _findScreenForPoint(gx, gy) {
         var screens = Quickshell.screens
         for (var i = 0; i < screens.length; i++) {
@@ -593,12 +659,15 @@ function clearPaletteResult() {
         }
         return root._regionScreen ?? (screens.length > 0 ? screens[0] : null)
     }
-    function runAnnotateFullscreen() {
-        if (root.isRunning) return
+    function runAnnotateFullscreen(runtimeApi) {
+        if (root.isRunning || annotateOverlay.busy) return
+        const policy = captureAction(runtimeApi)
+        if (!policy) return
         root.isRunning = true
-        if (!pluginApi) { launchAnnotateFullscreen.start(); return }
-        pluginApi.withCurrentScreen(screen => {
-            pluginApi.closePanel(screen)
+        launchAnnotateFullscreen.actionPolicy = policy
+        policy.api.withCurrentScreen(screen => {
+            if (!policy.context.current()) { root.isRunning = false; return }
+            policy.api.closePanel(screen)
             root._regionScreen = screen
             root._regionX = 0; root._regionY = 0
             root._regionW = Math.round(screen.width  * (screen.devicePixelRatio ?? 1.0))
@@ -609,80 +678,88 @@ function clearPaletteResult() {
             launchAnnotateFullscreen.start()
         })
     }
-    function runAnnotateActiveWindow() {
-        if (root.isRunning) return
+    function runAnnotateActiveWindow(runtimeApi) {
+        if (root.isRunning || annotateOverlay.busy) return
+        const policy = captureAction(runtimeApi)
+        if (!policy) return
         root.isRunning = true
-        if (!pluginApi) { launchAnnotateActiveWindow.start(); return }
-        pluginApi.withCurrentScreen(screen => {
-            pluginApi.closePanel(screen)
+        launchAnnotateActiveWindow.actionPolicy = policy
+        policy.api.withCurrentScreen(screen => {
+            if (!policy.context.current()) { root.isRunning = false; return }
+            policy.api.closePanel(screen)
             root._regionScreen = screen
             launchAnnotateActiveWindow.start()
         })
     }
-    function runPalette() {
+    function runPalette(runtimeApi) {
         if (root.isRunning) return
-        _runSlurpTool("palette")
+        _runSlurpTool("palette", runtimeApi)
     }
-    function runPin() { _runSlurpTool("pin") }
-    function runPinFromFile() {
-        if (!pluginApi) { launchPinFile.start(); return }
-        pluginApi.withCurrentScreen(screen => {
-            pluginApi.closePanel(screen)
-            launchPinFile.start()
-        })
+    function runPin(runtimeApi) { _runSlurpTool("pin", runtimeApi) }
+    function runPinFromFile(runtimeApi) {
+        const policy = captureAction(runtimeApi)
+        if (!policy) return
+        closeThenLaunch(launchPinFile, policy)
     }
     function pinFile(path, screen) {
         if (!path || path === "") return
         pinOverlay.addPin(path, 600, 400, screen)
     }
-    function runMeasure() {
+    function runMeasure(runtimeApi) {
         if (root.isRunning) return
+        const policy = captureAction(runtimeApi)
+        if (!policy) return
         root.activeTool = "measure"
-        if (pluginApi) pluginApi.withCurrentScreen(screen => pluginApi.closePanel(screen))
-        measureOverlay.show()
+        policy.api.withCurrentScreen(screen => { if (policy.context.current()) policy.api.closePanel(screen) })
+        measureOverlay.show(policy)
     }
     function runRecordStop()    { recordOverlay.stopRecording() }
     function runRecordSave()    { recordOverlay._saveToFile() }
     function runRecordDiscard() { recordOverlay.dismiss() }
-    function runRecord(format, audioOut, audioIn, cursor) {
+    function runRecord(format, audioOut, audioIn, cursor, runtimeApi) {
         if (root.isRunning || recordOverlay.isRecording || recordOverlay.isConverting) return
         root.pendingRecordFormat   = format   || "gif"
         root.pendingRecordAudioOut = audioOut === true
         root.pendingRecordAudioIn  = audioIn  === true
         root.pendingRecordCursor   = cursor   === true
-        _runSlurpTool("record")
+        _runSlurpTool("record", runtimeApi)
     }
-    function runRecordFullscreen(format, audioOut, audioIn, cursor) {
+    function runRecordFullscreen(format, audioOut, audioIn, cursor, runtimeApi) {
         if (root.isRunning || recordOverlay.isRecording || recordOverlay.isConverting) return
+        const policy = captureAction(runtimeApi)
+        if (!policy) return
         root.pendingRecordFormat   = format   || "gif"
         root.pendingRecordAudioOut = audioOut === true
         root.pendingRecordAudioIn  = audioIn  === true
         root.pendingRecordCursor   = cursor   === true
-        if (!pluginApi) { launchRecordFullscreen.start(); return }
-        pluginApi.withCurrentScreen(screen => {
-            root.isRunning  = true
+        launchRecordFullscreen.actionPolicy = policy
+        root.isRunning = true
+        policy.api.withCurrentScreen(screen => {
+            if (!policy.context.current()) { root.isRunning = false; return }
             root.activeTool = "record"
-            pluginApi.closePanel(screen)
+            policy.api.closePanel(screen)
             launchRecordFullscreen.targetScreen = screen
             launchRecordFullscreen.start()
         })
     }
-    function runMirror() {
-        if (pluginApi) {
-            pluginApi.withCurrentScreen(screen => {
-                pluginApi.closePanel(screen)
-                if (!mirrorOverlay.isVisible) mirrorOverlay.show(screen)
-            })
-        } else {
-            if (!mirrorOverlay.isVisible) mirrorOverlay.show()
-        }
+    function runMirror(runtimeApi) {
+        const policy = captureAction(runtimeApi)
+        if (!policy) return
+        policy.api.withCurrentScreen(screen => {
+            if (!policy.context.current()) return
+            policy.api.closePanel(screen)
+            if (!mirrorOverlay.isVisible) mirrorOverlay.show(screen, policy)
+        })
     }
     function runMirrorClose() { mirrorOverlay.hide() }
-    function _runSlurpTool(tool) {
-        if (root.isRunning) return
+    function _runSlurpTool(tool, runtimeApi) {
+        if (root.isRunning || tool === "annotate" && annotateOverlay.busy) return
+        const policy = captureAction(runtimeApi)
+        if (!policy) return
+        root.pendingPolicy = policy
         root.pendingTool = tool
         root.isRunning   = true
-        closeThenLaunch(launchRegionSelector)
+        closeThenLaunch(launchRegionSelector, policy)
     }
     function detectCapabilities() {
         root._detectedLangs = []
@@ -691,8 +768,8 @@ function clearPaletteResult() {
         detectRecorderProc.exec({ command: ["bash", "-c", "which wl-screenrec 2>/dev/null || which wf-recorder 2>/dev/null"] })
     }
     function annotateScreenshotCmd(overlayTmpFile) {
-        var dir   = U.screenshotDir(root._home, pluginApi?.pluginSettings?.screenshotPath)
-        var fname = U.buildFilename("annotate", ".png", pluginApi?.pluginSettings?.filenameFormat)
+        var dir   = U.screenshotDir(root._home, annotateOverlay.actionPolicy?.settings.screenshotPath)
+        var fname = U.buildFilename("annotate", ".png", annotateOverlay.actionPolicy?.settings.filenameFormat)
         var dest  = dir + "/" + fname
         return "mkdir -p " + U.shellEscape(dir) + " && " +
                "magick " + TempPaths.shellPath("screen-toolkit-annotate.png") + " " + U.shellEscape(overlayTmpFile) +
@@ -701,8 +778,8 @@ function clearPaletteResult() {
                "echo " + U.shellEscape(dest)
     }
     function annotateScreenshotZoomCmd(imgPath) {
-        var dir   = U.screenshotDir(root._home, pluginApi?.pluginSettings?.screenshotPath)
-        var fname = U.buildFilename("annotate", ".png", pluginApi?.pluginSettings?.filenameFormat)
+        var dir   = U.screenshotDir(root._home, annotateOverlay.actionPolicy?.settings.screenshotPath)
+        var fname = U.buildFilename("annotate", ".png", annotateOverlay.actionPolicy?.settings.filenameFormat)
         var dest  = dir + "/" + fname
         return "mkdir -p " + U.shellEscape(dir) + " && " +
                "cp " + U.shellEscape(imgPath) + " " + U.shellEscape(dest) + " && " +

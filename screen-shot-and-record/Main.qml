@@ -13,6 +13,15 @@ Item {
     property bool recordingActive: false
     property string target: ""
     property string recordingCheckTarget: ""
+    property var recordingCheckPolicy: null
+    property var selectorPolicy: null
+
+    function capturePolicy(context) {
+        context = context || pluginApi?.settingsContext
+        if (!context?.current()) return null
+        const settings = context.settingsView
+        return { context: context, settings: settings }
+    }
 
     Process {
         id: recordingCheckProc
@@ -20,27 +29,31 @@ Item {
         running: false
         onExited: (exitCode) => {
             const requestedTarget = root.recordingCheckTarget
+            const policy = root.recordingCheckPolicy
             root.recordingCheckTarget = ""
+            root.recordingCheckPolicy = null
 
-            if (requestedTarget === "") {
+            if (requestedTarget === "" || !policy?.context.current()) {
                 return
             }
 
             if (exitCode === 0) {
-                root.stopRecording()
+                root.stopRecording(policy.context, policy)
                 return
             }
 
-            root.openSelector(requestedTarget)
+            root.openSelector(requestedTarget, policy)
         }
     }
 
-    function stopRecording() {
+    function stopRecording(context, admitted) {
+        const policy = admitted || capturePolicy(context)
+        if (!policy?.context.current()) return false
         if (!pluginApi?.pluginDir) {
             return
         }
 
-        const recordingNotificationsEnabled = pluginApi?.pluginSettings?.recordingNotifications
+        const recordingNotificationsEnabled = policy.settings.recordingNotifications
                                            ?? pluginApi?.manifest?.metadata?.defaultSettings?.recordingNotifications
                                            ?? true
 
@@ -65,8 +78,8 @@ Item {
         ]
     }
 
-    function openSelector(target) {
-        if (active) {
+    function openSelector(target, policy) {
+        if (active || !policy?.context.current()) {
             return
         }
 
@@ -78,6 +91,7 @@ Item {
         }
 
         root.target = target
+        root.selectorPolicy = policy
         active = true
     }
 
@@ -97,6 +111,7 @@ Item {
             source: root.selectorSource
             onLoaded: {
                 item.pluginApi = root.pluginApi
+                item.actionPolicy = root.selectorPolicy
                 item.screen = Quickshell.screens[index]
                 Logger.d("ScreenShot", (root.target))
                 item.target = root.target
@@ -108,23 +123,32 @@ Item {
         onObjectRemoved: (index, object) => Logger.d("ScreenShot", ("Selector removed for screen", index))
     }
 
-    function open(target) {
+    function open(target, context) {
+        return openAdmitted(target, capturePolicy(context))
+    }
+
+    // A Panel captures before requesting its own destruction. The subsequent
+    // teardown/preflight uses that operation, never a newer effective view.
+    function openAdmitted(target, policy) {
+        if (!policy?.context.current()) return false
         if (target === "record" || target === "recordsound") {
             if (root.recordingCheckTarget !== "") {
                 return
             }
 
             root.recordingCheckTarget = target
+            root.recordingCheckPolicy = policy
             recordingCheckProc.running = true
             return
         }
 
-        root.openSelector(target)
+        root.openSelector(target, policy)
     }
 
     function close() {
         active = false
         root.target = ""
+        root.selectorPolicy = null
     }
 
     IpcHandler {

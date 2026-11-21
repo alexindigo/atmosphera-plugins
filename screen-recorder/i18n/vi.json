@@ -26,6 +26,7 @@
   },
   "name": "Trình ghi màn hình",
   "settings": {
+    "shared-effect": "Capture actions use this instance's settings when started. Recording and replay state are shared across all instances; stopping affects the active operation.",
     "audio": {
       "audio-sources-both": "Âm thanh hệ thống + micro",
       "audio-sources-microphone-input": "Micro",

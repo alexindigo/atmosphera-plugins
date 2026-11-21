@@ -75,7 +75,7 @@ AtmoIconButton {
         }
 
         if (mainInstance) {
-            mainInstance.toggleRecording()
+            mainInstance.toggleRecording(pluginApi.settingsContext)
             if (!mainInstance.isRecording && !mainInstance.isPending) {
                 // Recording was stopped, close control center if open
                 var controlCenter = PanelService.getPanel("controlCenterPanel", screen)
@@ -98,7 +98,7 @@ AtmoIconButton {
             var items = [];
 
             // Replay controls (only when replay is enabled)
-            if (mainInstance?.replayEnabled) {
+            if (cfg.replayEnabled ?? defaults.replayEnabled ?? false) {
                 if (mainInstance?.isReplaying) {
                     items.push({
                         "label": pluginApi.tr("messages.save-replay"),
@@ -135,7 +135,7 @@ AtmoIconButton {
             if (action === "widget-settings") {
                 BarService.openPluginSettings(screen, pluginApi.manifest);
             } else if (action === "start-replay" && mainInstance) {
-                mainInstance.startReplay();
+                mainInstance.startReplay(pluginApi.settingsContext);
             } else if (action === "stop-replay" && mainInstance) {
                 mainInstance.stopReplay();
             } else if (action === "save-replay" && mainInstance) {

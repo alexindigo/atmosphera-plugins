@@ -7,6 +7,7 @@ import "../utils"
 Item {
     id: root
     property var    pluginApi:  null
+    property var actionPolicy: null
     property string scriptsDir: ""
 
     property var paletteColors: []
@@ -14,7 +15,9 @@ Item {
     signal done()
     signal failed()
 
-    function run(grimGeometry) {
+    function run(grimGeometry, policy) {
+        if (!policy?.context.current() || paletteProc.running) return false
+        actionPolicy = policy
         if (root.pluginApi) {
             root.pluginApi.pluginSettings.paletteColors = []
             root.pluginApi.saveSettings()
@@ -36,6 +39,7 @@ Item {
         id: paletteProc
         stdout: StdioCollector {}
         onExited: (code) => {
+            if (!root.actionPolicy?.context.current()) { root.done(); return }
             var raw = paletteProc.stdout.text.trim()
             if (code !== 0 || raw === "") { root.failed(); return }
 

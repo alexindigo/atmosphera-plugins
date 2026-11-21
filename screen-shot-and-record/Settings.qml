@@ -35,7 +35,12 @@ ColumnLayout {
 
   spacing: Style.marginM
 
-  // Your settings controls here
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+  }
 
   NPluginSettingsField {
     field: root.enableCrossField

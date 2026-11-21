@@ -26,6 +26,7 @@
   },
   "name": "Screen Recorder",
   "settings": {
+    "shared-effect": "Capture actions use this instance's settings when started. Recording and replay state are shared across all instances; stopping affects the active operation.",
     "audio": {
       "audio-sources-both": "System output + microphone input",
       "audio-sources-microphone-input": "Microphone input",

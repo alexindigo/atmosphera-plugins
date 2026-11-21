@@ -11,8 +11,14 @@ import "../utils"
 Item {
     id: root
     property var  pluginApi: null
+    property var actionPolicy: null
+    property var _shotPolicy: null
+    property var _recordPolicy: null
+    property bool _shotPending: false
     property bool isVisible: false
-    function show(screen) {
+    function show(screen, policy) {
+        if (!policy?.context.current()) return false
+        actionPolicy = policy
         if (screen) {
             var changed = screen !== _primaryScreen
             _primaryScreen = screen
@@ -31,8 +37,8 @@ Item {
         if (_isRecording) _doStopRecord()
         pluginApi?.withCurrentScreen(screen => pluginApi?.closePanel(screen))
     }
-    function toggle(screen) {
-        if (!isVisible) show(screen)
+    function toggle(screen, policy) {
+        if (!isVisible) show(screen, policy)
         else            hide()
     }
     property bool   isSquare:      true
@@ -91,13 +97,18 @@ Item {
         }
     }
     function _doScreenshot() {
-        if (!root._imgCapture) return
+        if (!root._imgCapture || root._shotPending || screenshotProc.running || !actionPolicy?.context.current()) return
+        root._shotPolicy = actionPolicy
+        root._shotPending = true
         root._imgCapture.captureToFile(TempPaths.path("mirror-shot-" + Date.now() + ".png"))
     }
     function _onImageCaptured(tmpPath) {
+        root._shotPending = false
+        const policy = root._shotPolicy
+        if (!policy?.context.current()) return false
         var home    = Quickshell.env("HOME")
-        var dir     = U.screenshotDir(home, pluginApi?.pluginSettings?.screenshotPath)
-        var file    = U.buildFilename("mirror", ".png", pluginApi?.pluginSettings?.filenameFormat)
+        var dir     = U.screenshotDir(home, policy.settings.screenshotPath)
+        var file    = U.buildFilename("mirror", ".png", policy.settings.filenameFormat)
         var filters = []
         if (root.isFlipped) filters.push("hflip")
         if (root.isSquare)  filters.push("crop=min(iw\\,ih):min(iw\\,ih)")
@@ -111,6 +122,7 @@ Item {
         id: screenshotProc
         property string destPath: ""
         onExited: (code) => {
+            if (!root._shotPolicy?.context.current()) return
             if (code === 0) {
                 if (root._pinOnShot) {
                     var mi = root.pluginApi?.mainInstance
@@ -126,7 +138,8 @@ Item {
         }
     }
     function _doStartRecord() {
-        if (!root._recorder) return
+        if (!root._recorder || root._isSaving || recSaveProc.running || !actionPolicy?.context.current()) return
+        root._recordPolicy = actionPolicy
         var tmpPath = TempPaths.path("mirror-record-" + Date.now() + ".mp4")
         root._recTmpPath  = tmpPath
         root._recorder.outputLocation = "file://" + tmpPath
@@ -144,9 +157,11 @@ Item {
         if (root._recorder) root._recorder.stop()
     }
     function _doSaveRecord() {
+        const policy = root._recordPolicy
+        if (!policy?.context.current()) { root._isSaving = false; return false }
         var home    = Quickshell.env("HOME")
-        var dir     = U.videoDir(home, pluginApi?.pluginSettings?.videoPath)
-        var file    = U.buildFilename("mirror", ".mp4", pluginApi?.pluginSettings?.filenameFormat)
+        var dir     = U.videoDir(home, policy.settings.videoPath)
+        var file    = U.buildFilename("mirror", ".mp4", policy.settings.filenameFormat)
         var filters = []
         if (root.isFlipped) filters.push("hflip")
         if (root.isSquare)  filters.push("crop=min(iw\\,ih):min(iw\\,ih)")
@@ -164,6 +179,7 @@ Item {
             root._isSaving   = false
             root._recElapsed = 0
             root._recTmpPath = ""
+            if (!root._recordPolicy?.context.current()) return
             if (code === 0)
                 ToastService.showNotice(
                     root.pluginApi?.tr("mirror.recordSaved"),
@@ -242,8 +258,10 @@ Item {
                                 imageCapture: ImageCapture {
                                     id: imgCap
                                     onImageSaved:    (id, path) => root._onImageCaptured(path)
-                                    onErrorOccurred: (id, err, msg) =>
-                                        ToastService.showError(root.pluginApi?.tr("mirror.screenshotFailed"))
+                                    onErrorOccurred: (id, err, msg) => {
+                                        root._shotPending = false
+                                        if (root._shotPolicy?.context.current()) ToastService.showError(root.pluginApi?.tr("mirror.screenshotFailed"))
+                                    }
                                 }
                                 recorder: MediaRecorder {
                                     id: mediaRec

@@ -4,7 +4,7 @@ import qs.Commons
 
 ScreenShot {
     id: root
-    readonly property bool enableWindowsSelection: pluginApi?.pluginSettings?.enableWindowsSelection
+    readonly property bool enableWindowsSelection: actionPolicy?.settings.enableWindowsSelection
                                                    ?? pluginApi?.manifest?.metadata?.defaultSettings?.enableWindowsSelection
                                                    ?? true
     property list<var> windowRegions: []

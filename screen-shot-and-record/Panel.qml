@@ -26,10 +26,19 @@ Item {
   property bool recording: false
 
   property string target: ""
+  property var admittedPolicy: null
+
+  function requestCapture(target) {
+    const policy = mainInstance?.capturePolicy(pluginApi?.settingsContext)
+    if (!policy) return
+    admittedPolicy = policy
+    root.target = target
+    pluginApi.closePanel(pluginApi.panelOpenScreen)
+  }
 
   Component.onDestruction: {
     if (target != ""){
-      mainInstance?.open(target)
+      mainInstance?.openAdmitted(target, admittedPolicy)
     }
   }
 
@@ -91,8 +100,7 @@ Item {
                   textColor: AtmoColor.mOnPrimary
                   Layout.fillWidth: true
                   onClicked: {
-                      root.target = "screenshot"
-                      pluginApi.closePanel(pluginApi.panelOpenScreen)
+                      root.requestCapture("screenshot")
                   }
               }
               NButton {
@@ -102,8 +110,7 @@ Item {
                   textColor: AtmoColor.mOnPrimary
                   Layout.fillWidth: true
                   onClicked: {
-                      root.target = "ocr"
-                      pluginApi.closePanel(pluginApi.panelOpenScreen)
+                      root.requestCapture("ocr")
                   }
               }
               NButton {
@@ -113,8 +120,7 @@ Item {
                   textColor: AtmoColor.mOnPrimary
                   Layout.fillWidth: true
                   onClicked: {
-                      root.target = "search"
-                      pluginApi.closePanel(pluginApi.panelOpenScreen)
+                      root.requestCapture("search")
                   }
               }
               NButton {
@@ -125,8 +131,7 @@ Item {
                   Layout.fillWidth: true
                   visible: !root.recording
                   onClicked: {
-                      root.target = "record"
-                      pluginApi.closePanel(pluginApi.panelOpenScreen)
+                      root.requestCapture("record")
                   }
               }
               NButton {
@@ -137,8 +142,7 @@ Item {
                   Layout.fillWidth: true
                   visible: !root.recording
                   onClicked: {
-                      root.target = "recordsound"
-                      pluginApi.closePanel(pluginApi.panelOpenScreen)
+                      root.requestCapture("recordsound")
                   }
               }
               NButton {
@@ -149,7 +153,7 @@ Item {
                   Layout.fillWidth: true
                   visible: root.recording
                   onClicked: {
-                      mainInstance?.stopRecording()
+                      mainInstance?.stopRecording(pluginApi.settingsContext)
                       pluginApi.closePanel(pluginApi.panelOpenScreen)
                   }
               }
