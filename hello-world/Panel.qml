@@ -83,7 +83,7 @@ Item {
 
           NText {
             Layout.alignment: Qt.AlignHCenter
-            text: pluginApi?.pluginSettings?.message || pluginApi?.manifest?.metadata?.defaultSettings?.message || ""
+            text: pluginApi?.pluginSettings?.message ?? pluginApi?.manifest?.metadata?.defaultSettings?.message ?? ""
             font.pointSize: Style.fontSizeXXL * Style.uiScaleRatio
             font.weight: Font.Bold
             color: AtmoColor.mPrimary
