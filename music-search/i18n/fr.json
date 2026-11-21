@@ -49,6 +49,8 @@
     "syncingFolder": "Synchronisation du dossier de la liste de lecture...",
     "savingMp3": "Enregistrement de la piste actuelle en MP3...",
     "downloadFolderUpdated": "Dossier de téléchargement mis à jour.",
+    "downloadFolderApplied": "Dossier de t\u00e9l\u00e9chargement d\u00e9fini sur {path}.",
+    "downloadLimitApplied": "Limite de t\u00e9l\u00e9chargement d\u00e9finie sur {limit} Mo. Les fichiers existants sont conserv\u00e9s.",
     "cacheLimitUpdated": "Limite de cache MP3 mise à jour.",
     "playlistEmpty": "La liste de lecture est vide.",
     "switchedTo": "Passé à {provider}.",
@@ -390,7 +392,10 @@
       "currentFolder": "Dossier actuel : {path}",
       "chooseFolder": "Choisir le dossier MP3",
       "applyFolder": "Appliquer le dossier",
-      "folderPickerTitle": "Choisir le dossier de téléchargement MP3"
+      "folderPickerTitle": "Choisir le dossier de téléchargement MP3",
+      "actionPending": "Application du param\u00e8tre de t\u00e9l\u00e9chargement...",
+      "actionBusy": "Une autre op\u00e9ration musicale est en cours. Votre saisie est conserv\u00e9e ; r\u00e9essayez une fois l'op\u00e9ration termin\u00e9e.",
+      "actionFailed": "Impossible d'appliquer le param\u00e8tre de t\u00e9l\u00e9chargement. Votre saisie est conserv\u00e9e ; r\u00e9essayez."
     },
     "cache": {
       "label": "Taille max du cache MP3",

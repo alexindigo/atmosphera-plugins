@@ -87,6 +87,24 @@ ColumnLayout {
   readonly property bool autoSaveMp3AfterPlayback: editPreferences.autoSaveMp3AfterPlayback ?? root.defaults.autoSaveMp3AfterPlayback ?? false
   property string editDownloadDirectory: root.currentDownloadDirectory
   property int editDownloadCacheMaxMb: root.currentDownloadCacheMaxMb
+  readonly property var downloadSettingsResult: root.mainInstance?.downloadSettingsResult ?? null
+  readonly property bool downloadActionFailed: downloadSettingsResult?.status === "failed" || downloadSettingsResult?.status === "rejected"
+  readonly property string downloadActionFeedback: {
+    var result = downloadSettingsResult;
+    if (!result)
+      return "";
+    if (result.status === "pending")
+      return pluginApi?.tr("settings.downloads.actionPending") ?? "";
+    if (result.status === "rejected" && result.errorCode === "busy")
+      return pluginApi?.tr("settings.downloads.actionBusy") ?? "";
+    if (result.status !== "saved")
+      return pluginApi?.tr("settings.downloads.actionFailed") ?? "";
+    return result.kind === "directory" ? pluginApi?.tr("notices.downloadFolderApplied", {
+                                                         path: result.appliedValue
+                                                       }) ?? "" : pluginApi?.tr("notices.downloadLimitApplied", {
+                                                                                  limit: result.appliedValue
+                                                                                }) ?? "";
+  }
 
   spacing: Style.marginL
 
@@ -264,6 +282,16 @@ ColumnLayout {
       text: pluginApi?.tr("settings.cache.apply")
       onClicked: root.applyCacheLimit()
     }
+  }
+
+  NText {
+    objectName: "music-download-action-feedback"
+    Layout.fillWidth: true
+    visible: root.downloadActionFeedback.length > 0
+    text: root.downloadActionFeedback
+    wrapMode: Text.Wrap
+    pointSize: Style.fontSizeS
+    color: root.downloadActionFailed ? AtmoColor.mError : AtmoColor.mOnSurface
   }
 
   NPluginSettingsField {
