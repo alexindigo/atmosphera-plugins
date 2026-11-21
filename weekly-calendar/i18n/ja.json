@@ -16,6 +16,7 @@
     "no_events": "予定はありません"
   },
   "settings": {
+    "shared-effect": "Calendar events and synchronization are shared. This instance has its own week, navigation and display settings.",
     "weekStart": "週の始まり",
     "weekStart_description": "カレンダーパネルにイベント（予定）を表示します。",
     "monday": "月曜日",

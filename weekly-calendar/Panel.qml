@@ -10,7 +10,7 @@ import qs.Widgets
 Item {
     id: root
     property var pluginApi: null
-    readonly property var mainInstance: pluginApi?.mainInstance
+    readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
     readonly property var geometryPlaceholder: panelContainer
     property real contentPreferredWidth: 950 * Style.uiScaleRatio
     property real contentPreferredHeight: 700 * Style.uiScaleRatio
@@ -23,20 +23,6 @@ Item {
     property real hourHeight: 50 * Style.uiScaleRatio
     property real timeColumnWidth: 65 * Style.uiScaleRatio
     property real daySpacing: 1 * Style.uiScaleRatio
-
-    // Attempt at live syncing
-    Connections {
-        target: CalendarService
-        enabled: root.visible
-        function onEventsChanged() { 
-            if (mainInstance) {
-                Qt.callLater(() => {
-                    mainInstance.updateEventsFromService()
-                    mainInstance.calculateAllDayEventLayout()
-                })
-            }
-        }
-    }
 
     Component.onCompleted: mainInstance?.initializePlugin()
     onVisibleChanged: if (visible && mainInstance) {
@@ -210,7 +196,7 @@ Item {
                     Rectangle {
                         id: allDayEventsSection
                         width: parent.width
-                        height: mainInstance.allDaySectionHeight
+                        height: mainInstance?.allDaySectionHeight ?? 0
                         color: AtmoColor.mSurfaceVariant
                         visible: height > 0
                         
@@ -224,7 +210,7 @@ Item {
                                 delegate: Rectangle {
                                     width: 1; height: parent.height
                                     x: (index + 1) * ((mainInstance?.dayColumnWidth) + (root.daySpacing)) - ((root.daySpacing) / 2)
-                                    color: Qt.alpha(mainInstance?.lineColor || AtmoColor.mOutline, mainInstance?.dayLineOpacitySetting || 0.9)
+                                    color: Qt.alpha(mainInstance?.lineColor || AtmoColor.mOutline, mainInstance?.dayLineOpacitySetting ?? 0.9)
                                 }
                             }
                             
@@ -368,7 +354,7 @@ Item {
                                         Rectangle {
                                             width: parent.width; height: 1
                                             y: index * (root.hourHeight)
-                                            color: Qt.alpha(mainInstance?.lineColor || AtmoColor.mOutline, mainInstance?.hourLineOpacitySetting || 0.5)
+                                            color: Qt.alpha(mainInstance?.lineColor || AtmoColor.mOutline, mainInstance?.hourLineOpacitySetting ?? 0.5)
                                         }
                                     }
                                     // Day Lines
@@ -377,7 +363,7 @@ Item {
                                         Rectangle {
                                             width: 1; height: parent.height
                                             x: (index + 1) * ((mainInstance?.dayColumnWidth) + (root.daySpacing)) - ((root.daySpacing) / 2)
-                                            color: Qt.alpha(mainInstance?.lineColor || AtmoColor.mOutline, mainInstance?.dayLineOpacitySetting || 0.9)
+                                            color: Qt.alpha(mainInstance?.lineColor || AtmoColor.mOutline, mainInstance?.dayLineOpacitySetting ?? 0.9)
                                         }
                                     }
                                     

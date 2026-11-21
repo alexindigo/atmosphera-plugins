@@ -16,6 +16,7 @@
     "no_events": "Geen evenementen"
   },
   "settings": {
+    "shared-effect": "Calendar events and synchronization are shared. This instance has its own week, navigation and display settings.",
     "weekStart": "Eerste dag van de week",
     "weekStart_description": "Kies welke dag de week in de kalender begint.",
     "monday": "Maandag",

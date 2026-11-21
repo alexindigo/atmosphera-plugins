@@ -16,6 +16,7 @@
     "no_events": "Etkinlik yok"
   },
   "settings": {
+    "shared-effect": "Calendar events and synchronization are shared. This instance has its own week, navigation and display settings.",
     "weekStart": "Haftanın ilk günü",
     "weekStart_description": "Takvimde haftanın hangi günü başladığını seçin.",
     "monday": "Pazartesi",

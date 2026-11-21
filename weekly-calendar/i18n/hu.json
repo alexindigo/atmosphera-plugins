@@ -16,6 +16,7 @@
     "no_events": "Nincs esemény"
   },
   "settings": {
+    "shared-effect": "Calendar events and synchronization are shared. This instance has its own week, navigation and display settings.",
     "weekStart": "A hét első napja",
     "weekStart_description": "Válassza ki, melyik nap kezdje a hetet a naptárban.",
     "monday": "Hétfő",

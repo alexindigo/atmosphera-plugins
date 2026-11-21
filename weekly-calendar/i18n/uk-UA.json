@@ -16,6 +16,7 @@
     "no_events": "Немає подій"
   },
   "settings": {
+    "shared-effect": "Calendar events and synchronization are shared. This instance has its own week, navigation and display settings.",
     "weekStart": "Перший день тижня",
     "weekStart_description": "Виберіть, який день починає тиждень у календарі.",
     "monday": "Понеділок",

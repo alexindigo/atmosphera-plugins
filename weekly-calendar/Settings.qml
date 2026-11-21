@@ -18,10 +18,17 @@ ColumnLayout {
   readonly property string timeFormat: root.timeFormatField?.value || "24h"
   readonly property string lineColorType: root.lineColorTypeField?.value || "mOutline"
   readonly property string panelMode: root.panelModeField?.value || "attached"
-  readonly property real hourLineOpacity: root.hourLineOpacityField?.value || 0.5
-  readonly property real dayLineOpacity: root.dayLineOpacityField?.value || 0.9
+  readonly property real hourLineOpacity: root.hourLineOpacityField?.value ?? 0.5
+  readonly property real dayLineOpacity: root.dayLineOpacityField?.value ?? 0.9
 
   spacing: Style.marginL
+
+  NText {
+    Layout.fillWidth: true
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+    wrapMode: Text.WordWrap
+  }
 
   Component.onCompleted: {
     Logger.i("WeeklyCalendar", "Settings UI loaded");
@@ -33,8 +40,8 @@ ColumnLayout {
     NToggle {
       label: pluginApi.tr("settings.timeFormat")
       description: pluginApi.tr("settings.timeFormat_description")
-      checked: root.timeFormat === pluginApi.tr("settings.12h")
-      onToggled: checked => root.timeFormatField.set(checked ? pluginApi.tr("settings.12h") : pluginApi.tr("settings.24h"))
+      checked: root.timeFormat === "12h"
+      onToggled: checked => root.timeFormatField.set(checked ? "12h" : "24h")
     }
   }
 

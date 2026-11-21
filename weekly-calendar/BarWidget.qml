@@ -9,7 +9,8 @@ Item {
     id: root
     
     property var pluginApi: null
-    readonly property QtObject pluginCore: pluginApi?.mainInstance
+    readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+    readonly property QtObject pluginCore: settingsConsumer
     
     property ShellScreen screen
     property string widgetId: ""
