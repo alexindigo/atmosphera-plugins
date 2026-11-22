@@ -1217,32 +1217,55 @@ Item {
         }
       }
 
-      // The trailing workspace reserves the maximum text height even when
-      // nothing is hovered. Anchor the text inside that strip structurally.
+      // This workspace reserves the info height and remains a scrolled drop
+      // target. Its text is presented separately in the visible viewport.
       Item {
+        id: trailingStrip
         y: Math.max(0, root.workspaceOrder().length - 1) * (root._monH * root._autoScale + root._rowGap)
         width: mapContent.width
         height: root._infoStripH
-        Column {
-          id: hoverLines
-          visible: root.hoverInfo && root._hoverInfoLines.length > 0
-          width: Math.max(0, parent.width - 16)
-          anchors.centerIn: parent
-          z: 90
-          Repeater {
-            model: root._hoverInfoLines.slice(0, root._hoverMaxLines)
-            NText {
-              required property var modelData
-              text: modelData.text
-              color: AtmoColor.mOnSurfaceVariant
-              pointSize: root._hoverPointSize
-              width: hoverLines.width
-              maximumLineCount: 1
-              wrapMode: Text.NoWrap
-              elide: modelData.elide
-              horizontalAlignment: Text.AlignHCenter
-            }
-          }
+      }
+    }
+  }
+
+  // Viewport-owned presentation: horizontal scrolling cannot move the text
+  // or enlarge its elision budget. Map the actual strip bounds vertically,
+  // so vertical scrolling, drag growth and zoom still follow the workspace.
+  Item {
+    id: hoverViewport
+    parent: flick
+    anchors.left: parent.left
+    anchors.right: parent.right
+    readonly property rect _stripBounds: {
+      flick.contentY;
+      mapContent.y;
+      mapContent.scale;
+      trailingStrip.y;
+      return trailingStrip.mapToItem(flick, Qt.rect(0, 0, trailingStrip.width, trailingStrip.height));
+    }
+    y: _stripBounds.y
+    height: _stripBounds.height
+    z: 90
+
+    Column {
+      id: hoverLines
+      visible: root.hoverInfo && root._hoverInfoLines.length > 0
+      scale: root._userScale
+      // Convert the visible width to local units without zooming its margin.
+      width: Math.max(0, (hoverViewport.width - 16) / scale)
+      anchors.centerIn: parent
+      Repeater {
+        model: root._hoverInfoLines.slice(0, root._hoverMaxLines)
+        NText {
+          required property var modelData
+          text: modelData.text
+          color: AtmoColor.mOnSurfaceVariant
+          pointSize: root._hoverPointSize
+          width: hoverLines.width
+          maximumLineCount: 1
+          wrapMode: Text.NoWrap
+          elide: modelData.elide
+          horizontalAlignment: Text.AlignHCenter
         }
       }
     }
