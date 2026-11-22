@@ -26,6 +26,7 @@ ColumnLayout {
   }
 
   property var pluginApi: null
+  readonly property bool sharedScope: pluginApi?.scopeKind === "plugin"
   readonly property var syncEnabledField: pluginApi?.field("syncEnabled") ?? null
   readonly property var githubTokenField: pluginApi?.field("githubToken") ?? null
 
@@ -36,26 +37,35 @@ ColumnLayout {
 
   spacing: Style.marginL
 
+  NText {
+    Layout.fillWidth: true
+    visible: !root.sharedScope
+    text: root.pluginApi?.tr("settings.sharedEffect")
+    wrapMode: Text.Wrap
+  }
+
   NPluginSettingsField {
     field: root.syncEnabledField
+    enabled: root.sharedScope
     NToggle {
       Layout.fillWidth: true
       label: pluginApi?.tr("settings.syncEnabled.label")
       description: pluginApi?.tr("settings.syncEnabled.desc")
       checked: root.valueSyncEnabled
-      onToggled: checked => root.syncEnabledField.set(checked)
+      onToggled: checked => { if (root.sharedScope) root.syncEnabledField.set(checked); }
     }
   }
 
   NPluginSettingsField {
     field: root.githubTokenField
+    enabled: root.sharedScope
     NTextInput {
       Layout.fillWidth: true
       label: pluginApi?.tr("settings.githubToken.label")
       description: pluginApi?.tr("settings.githubToken.desc")
       placeholderText: pluginApi?.tr("settings.githubToken.placeholder")
       text: root.valueGithubToken
-      onEditCommitted: root.githubTokenField.set(text.trim())
+      onEditCommitted: { if (root.sharedScope) root.githubTokenField.set(text.trim()); }
     }
   }
 

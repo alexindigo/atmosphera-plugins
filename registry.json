@@ -2447,13 +2447,13 @@
       "author": "sapjax",
       "description": "A local quick notes plugin with Markdown support.",
       "license": "MIT",
-      "version": "0.0.12",
+      "version": "0.0.13",
       "tags": [
         "Bar",
         "Panel",
         "Productivity"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-22",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",

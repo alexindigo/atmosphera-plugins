@@ -35,6 +35,7 @@
     "hint-esc-save": "ÉCHAP pour enregistrer"
   },
   "settings": {
+    "sharedEffect": "All widgets use the same shared notes and GitHub Gist. Configure synchronization in Settings > Plugins. Sync now updates that shared Gist after Apply; it does not use instance credentials.",
     "saved": "Paramètres des notes adhésives enregistrés",
     "syncNow": "Synchroniser maintenant",
     "syncEnabled": {
@@ -55,6 +56,7 @@
       "updated": "Notes synchronisées vers GitHub Gist."
     },
     "errors": {
+      "configuration-changed": "Sync stopped because its credentials or Gist changed. Sync again to use the applied settings.",
       "missing-token": "Le jeton GitHub est requis avant la synchronisation."
     }
   }
