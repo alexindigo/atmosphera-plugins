@@ -1,7 +1,7 @@
 {
   "id": "hermes-ssh-chat",
   "name": "Hermes SSH Terminal",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.10.0",
   "author": "focky",

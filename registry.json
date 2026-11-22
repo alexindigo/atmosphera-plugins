@@ -921,7 +921,7 @@
       "author": "focky",
       "description": "Use Hermes on a remote server through an interactive SSH terminal.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Bar",
         "Panel",
@@ -931,7 +931,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": false,
       "upstreamPR": 931,
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "minNoctaliaVersion": "4.6.6",
       "minAtmospheraVersion": "0.10.0"
     },

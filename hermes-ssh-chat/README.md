@@ -92,6 +92,13 @@ IPC bind above.
 
 ## Troubleshooting
 
+The bridge owns its SSH child. Disconnect, controller stdin closure and SIGTERM
+join the SSH process group. On abrupt bridge death, a Linux parent-death binding
+terminates its direct SSH child. The binding is installed in a thread-free
+same-script entry before exec, with a parent-race check; SSH/auth arguments are
+unchanged. This is local process lifetime, not a promise to terminate remote jobs
+or independently managed user services.
+
 ### The panel connects but Hermes does not open
 
 Run this manually from a terminal and fix any remote shell issues first:

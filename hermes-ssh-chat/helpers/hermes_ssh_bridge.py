@@ -15,6 +15,31 @@ from queue import Empty, Queue
 ANSI_RE_TEXT = "\x1b[@-_][0-?]*[ -/]*[@-~]|\x1b\\][^\a]*(?:\a|\x1b\\\\)"
 
 
+OWNER_CLOSED = object()
+
+
+def bind_parent_death(expected_parent):
+    # Use a fresh interpreter, never preexec_fn in the threaded bridge.
+    # Exec preserves this binding on the ordinary, non-setuid SSH executable.
+    import ctypes
+
+    libc = ctypes.CDLL(None, use_errno=True)
+    prctl = libc.prctl
+    prctl.argtypes = [ctypes.c_int, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_ulong]
+    prctl.restype = ctypes.c_int
+    if prctl(1, signal.SIGKILL, 0, 0, 0) != 0:  # PR_SET_PDEATHSIG
+        error = ctypes.get_errno()
+        raise OSError(error, os.strerror(error))
+    # The helper could exit between Popen and the prctl call.
+    if os.getppid() != expected_parent:
+        os.kill(os.getpid(), signal.SIGKILL)
+
+
+def owned_ssh_child(expected_parent, command):
+    bind_parent_death(expected_parent)
+    os.execvp(command[0], command)
+
+
 def emit(message):
     sys.stdout.write(json.dumps(message, ensure_ascii=False) + "\n")
     sys.stdout.flush()
@@ -36,6 +61,7 @@ def stdin_reader(queue):
             queue.put(json.loads(line))
         except json.JSONDecodeError as exc:
             emit({"type": "error", "message": f"invalid json command: {exc}"})
+    queue.put(OWNER_CLOSED)
 
 
 def set_winsize(fd, rows=32, cols=120):
@@ -66,7 +92,7 @@ class Session:
         env.setdefault("COLORTERM", "truecolor")
 
         self.proc = subprocess.Popen(
-            command,
+            [sys.executable, "-B", os.path.realpath(__file__), "--owned-ssh-child", str(os.getpid()), *command],
             stdin=slave_fd,
             stdout=slave_fd,
             stderr=slave_fd,
@@ -150,6 +176,13 @@ def ssh_command(host, port, user):
 
 
 def main():
+    stopping = False
+
+    def stop_requested(signum, frame):
+        nonlocal stopping
+        stopping = True
+
+    signal.signal(signal.SIGTERM, stop_requested)
     queue = Queue()
     threading.Thread(target=stdin_reader, args=(queue,), daemon=True).start()
     session = Session()
@@ -157,10 +190,12 @@ def main():
     emit({"type": "status", "status": "idle", "message": "Bridge ready"})
 
     try:
-        while True:
+        while not stopping:
             try:
-                while True:
+                while not stopping:
                     command = queue.get_nowait()
+                    if command is OWNER_CLOSED:
+                        return
                     command_type = command.get("type")
 
                     if command_type == "connect":
@@ -233,4 +268,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) >= 4 and sys.argv[1] == "--owned-ssh-child":
+        owned_ssh_child(int(sys.argv[2]), sys.argv[3:])
+    else:
+        main()
