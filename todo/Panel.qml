@@ -114,7 +114,7 @@ Item {
               fontSize: Style.fontSizeS
               onClicked: {
                 if (mainInstance) {
-                  mainInstance.doExportTodos();
+                  mainInstance.doExportTodos(pluginApi.settingsContext);
                 }
               }
             }

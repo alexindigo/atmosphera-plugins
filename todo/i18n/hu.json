@@ -12,6 +12,7 @@
     "items_count": "{active} / {total} elem"
   },
   "main": {
+    "export_busy": "An export is already running. Retry after it finishes.",
     "added_new_todo": "Új teendő hozzáadva:",
     "cleared_completed_todos": "Törölve",
     "cleared_all_todos": "Minden teendő törölve",
@@ -85,6 +86,7 @@
     }
   },
   "settings": {
+    "shared-effect": "Tasks and pages keep their existing shared owner. Display and export choices belong to this configuration; exporting uses the shared tasks.",
     "background_color": {
       "description": "A teendő widget háttérszíne",
       "label": "Háttérszín"

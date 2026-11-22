@@ -71,6 +71,13 @@ ColumnLayout {
 
   spacing: Style.marginL
 
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.WordWrap
+    text: pluginApi.tr("settings.shared-effect")
+  }
+
   Component.onCompleted: {
     Logger.i("Todo", "Settings UI loaded");
   }

@@ -62,6 +62,19 @@ qs -c noctalia-shell ipc call plugin:todo togglePanel
 
 ## Configuration
 
+Settings -> Plugins edits shared defaults. Placed-widget settings edit sparse
+instance configuration. Display filters, colors and export policy follow that
+configuration. A Panel export captures its directory, format and empty-section
+choice when clicked; IPC export explicitly uses plugin-level policy. The existing
+common Main task/page owner supplies the export content. A later preference or
+task edit cannot retarget an admitted export. Another export while the single
+export process is busy is visibly refused; retry after it finishes.
+
+Tasks/pages remain in their existing preference storage. Legacy placement
+content is retained without migration or deletion. Instance configuration
+Apply/Reset never collects that content. Runtime task management still uses the
+existing common Main owner; this change does not introduce independent task stores.
+
 - **Show Completed**: Toggle visibility of completed todos
 - **Show Background**: Toggle desktop widget background visibility
 - **Custom Priority Colors**: Enable and configure custom colors for priority levels

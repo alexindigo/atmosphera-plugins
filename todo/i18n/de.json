@@ -12,6 +12,7 @@
     "items_count": "{active} von {total} Einträgen"
   },
   "main": {
+    "export_busy": "An export is already running. Retry after it finishes.",
     "added_new_todo": "Neues Todo hinzugefügt:",
     "cleared_completed_todos": "Abgeschlossene Aufgaben gelöscht",
     "cleared_all_todos": "Alle Aufgaben gelöscht",
@@ -85,6 +86,7 @@
     }
   },
   "settings": {
+    "shared-effect": "Tasks and pages keep their existing shared owner. Display and export choices belong to this configuration; exporting uses the shared tasks.",
     "background_color": {
       "description": "Hintergrundfarbe des Todo-Widgets",
       "label": "Hintergrundfarbe"

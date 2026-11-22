@@ -12,6 +12,7 @@
     "items_count": "{active} / {total} 件"
   },
   "main": {
+    "export_busy": "An export is already running. Retry after it finishes.",
     "added_new_todo": "新しいToDoを追加しました: ",
     "cleared_completed_todos": "クリアしました",
     "cleared_all_todos": "すべてのToDoを削除しました",
@@ -85,6 +86,7 @@
     }
   },
   "settings": {
+    "shared-effect": "Tasks and pages keep their existing shared owner. Display and export choices belong to this configuration; exporting uses the shared tasks.",
     "background_color": {
       "description": "ToDoウィジェットの背景色",
       "label": "背景色"
