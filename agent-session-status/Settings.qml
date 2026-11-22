@@ -27,11 +27,18 @@ ColumnLayout {
       if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current")
         return;
       root._applyEffectPending = false;
-      root.pluginApi.mainInstance?.restartService();
+      root.pluginApi.mainInstance?.restartService(root.pluginApi.runtimeContext);
     }
   }
 
   spacing: Style.marginL
+
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    text: root.pluginApi?.tr("settings.shared-effect")
+    wrapMode: Text.WordWrap
+  }
 
   NPluginSettingsField {
     field: root.bindAddressField

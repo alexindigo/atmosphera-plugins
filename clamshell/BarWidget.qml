@@ -41,7 +41,7 @@ AtmoIconButton {
 
     onClicked: {
         if (root.main) {
-            root.main.toggle();
+            root.main.toggle(pluginApi);
         }
     }
 

@@ -12,7 +12,7 @@ ColumnLayout {
   readonly property var notifyField: pluginApi?.field("notify") ?? null
   readonly property var internalConnectorRegexField: pluginApi?.field("internalConnectorRegex") ?? null
   readonly property var inhibitorWhoField: pluginApi?.field("inhibitorWho") ?? null
-  readonly property var main: pluginApi ? pluginApi.mainInstance || ({}) : ({})
+  readonly property var main: pluginApi?.mainInstance ?? null
 
   readonly property bool editEnabled: root.enabledField?.value ?? true
   readonly property bool editAlwaysShowBarWidget: root.alwaysShowBarWidgetField?.value ?? false
@@ -28,13 +28,20 @@ ColumnLayout {
       if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current")
         return;
       root._applyEffectPending = false;
-      if (root.main.applySettings)
-        root.main.applySettings();
+      if (root.main?.applySettings)
+        root.main.applySettings(root.pluginApi.runtimeContext);
       Logger.i("Clamshell", "Settings saved successfully");
     }
   }
 
   spacing: Style.marginL
+
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    text: root.pluginApi?.tr("settings.shared-effect")
+    wrapMode: Text.WordWrap
+  }
 
   Component.onCompleted: {
     Logger.d("Clamshell", "Settings UI loaded");
@@ -95,7 +102,7 @@ ColumnLayout {
   }
 
   NText {
-    visible: root.main.inhibitorAvailable === false
+    visible: root.main?.inhibitorAvailable === false
     Layout.fillWidth: true
     text: pluginApi?.tr("error.noInhibit")
     color: AtmoColor.mError
@@ -117,7 +124,7 @@ ColumnLayout {
     NText {
       Layout.fillWidth: true
       text: pluginApi?.tr("status.state", {
-                            "value": root.main.stateLabel ? root.main.stateLabel() : pluginApi?.tr("status.unknown")
+                            "value": root.main?.stateLabel ? root.main.stateLabel() : pluginApi?.tr("status.unknown")
                           })
       color: AtmoColor.mOnSurfaceVariant
       wrapMode: Text.WordWrap
@@ -126,14 +133,14 @@ ColumnLayout {
     NText {
       Layout.fillWidth: true
       text: pluginApi?.tr("status.inhibitorPid", {
-                            "value": root.main.inhibitorPid > 0 ? String(root.main.inhibitorPid) : "-"
+                            "value": (root.main?.inhibitorPid ?? 0) > 0 ? String(root.main.inhibitorPid) : "-"
                           })
       color: AtmoColor.mOnSurfaceVariant
       wrapMode: Text.WordWrap
     }
 
     Repeater {
-      model: root.main.outputs || []
+      model: root.main?.outputs || []
 
       NText {
         Layout.fillWidth: true

@@ -76,7 +76,7 @@
       "author": "nzlov",
       "description": "Runs a local MCP HTTP service for agents to report session status and shows active sessions in the bar.",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "Bar",
         "Panel",
@@ -84,7 +84,7 @@
         "Indicator",
         "AI"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
@@ -381,7 +381,7 @@
       "author": "Sovego",
       "description": "Auto clamshell on external display, with manual override",
       "license": "MIT",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "tags": [
         "Bar",
         "System",
@@ -391,7 +391,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": false,
       "upstreamPR": 821,
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "minNoctaliaVersion": "3.6.0",
       "minAtmospheraVersion": "0.10.0"
     },

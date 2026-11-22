@@ -22,7 +22,11 @@ Item {
     // standard cfg/defaults fallback chain documented in AGENTS.md.
     property var pluginApi: null
 
-    readonly property var cfg: pluginApi?.pluginSettings || ({})
+    property var selectedContext: null
+    property bool retired: false
+    readonly property var policyContext: selectedContext || pluginApi?.settingsContext
+    readonly property bool policyCurrent: !retired && (policyContext?.current() ?? false)
+    readonly property var cfg: policyCurrent ? policyContext.settingsView : ({})
     readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings
         || pluginApi?.manifest?.defaultSettings
         || ({})
@@ -40,9 +44,9 @@ Item {
     // ───── Public state (consumed by widgets via mainInstance) ───────────
     // `enabled` is the user-facing toggle. Writes are immediately persisted
     // because widgets and IPC mutate this property directly.
-    property bool enabled: (cfg.enabled !== undefined)
+    readonly property bool enabled: policyCurrent && ((cfg.enabled !== undefined)
         ? cfg.enabled
-        : (defaults.enabled !== undefined ? defaults.enabled : true)
+        : (defaults.enabled !== undefined ? defaults.enabled : true))
 
     // `externalPresent` reflects whether at least one non-internal output is
     // physically connected (modes array non-empty), regardless of whether
@@ -69,11 +73,17 @@ Item {
     signal stateChanged
 
     onEnabledChanged: {
-        persistEnabled();
         stateChanged();
+        reconcileInhibitor();
     }
-    onExternalPresentChanged: stateChanged()
+    onExternalPresentChanged: { stateChanged(); reconcileInhibitor(); }
     onInhibitorActiveChanged: stateChanged()
+    onInhibitorWhoChanged: reconcileInhibitor()
+    onNotifyEnabledChanged: reconcileInhibitor()
+    onPolicyCurrentChanged: reconcileInhibitor()
+    onInternalConnectorRegexChanged: {
+        if (componentReady && lastOutputsPayload) classifyOutputs(lastOutputsPayload);
+    }
 
     // ───── Backoff state for event-stream reconnection ───────────────────
     // We start at 2 s and double up to 30 s; reset to 2 s on any successful
@@ -89,25 +99,27 @@ Item {
 
     // ─────────────────────────────────────────────────────────────────────
     // Public methods (spec §8).
-    function enable() {
+    function enable(runtimeApi) {
+        runtimeApi = runtimeApi || pluginApi;
+        if (retired || !runtimeApi?.settingsContext?.current()) return "error:retired";
         if (!root.inhibitorAvailable) {
-            root.enabled = false;
+            setEnabled(false, runtimeApi);
             return "error:no-systemd-inhibit";
         }
-        root.enabled = true;
+        setEnabled(true, runtimeApi);
         return "ok";
     }
 
-    function disable() {
-        root.enabled = false;
+    function disable(runtimeApi) {
+        if (!setEnabled(false, runtimeApi || pluginApi)) return "error:retired";
         return "ok";
     }
 
-    function toggle() {
+    function toggle(runtimeApi) {
         if (root.enabled) {
-            root.disable();
+            root.disable(runtimeApi);
         } else {
-            root.enable();
+            root.enable(runtimeApi);
         }
         return root.enabled ? "on" : "off";
     }
@@ -117,20 +129,23 @@ Item {
         return "ok";
     }
 
-    function applySettings() {
-        root.enabled = (cfg.enabled !== undefined)
-            ? cfg.enabled
-            : (defaults.enabled !== undefined ? defaults.enabled : true);
+    function applySettings(context) {
+        context = context || pluginApi?.settingsContext;
+        if (retired || !context?.current()) return false;
+        selectedContext = context;
         if (root.lastOutputsPayload) {
             classifyOutputs(root.lastOutputsPayload);
         }
+        reconcileInhibitor();
+        return true;
     }
 
-    function persistEnabled() {
-        if (!pluginApi || !pluginApi.pluginSettings) return;
-        if (pluginApi.pluginSettings.enabled === root.enabled) return;
-        pluginApi.pluginSettings.enabled = root.enabled;
-        pluginApi.saveSettings();
+    function setEnabled(value, runtimeApi) {
+        const context = runtimeApi?.settingsContext;
+        if (retired || !context?.current()) return false;
+        runtimeApi.pluginSettings.enabled = value;
+        runtimeApi.saveSettings();
+        return applySettings(context);
     }
 
     function status() {
@@ -432,9 +447,12 @@ Item {
                 Logger.d(root.logTag, "systemd-inhibit found");
             } else {
                 root.inhibitorAvailable = false;
-                root.enabled = false;
+                // The original startup capability failure persisted disabled
+                // through Main. It never grants a page an instance writer.
+                if (!root.selectedContext) root.setEnabled(false, root.pluginApi);
                 Logger.w(root.logTag, "systemd-inhibit not found in PATH (which exit=" + exitCode + ") — clamshell inhibition disabled");
             }
+            root.reconcileInhibitor();
         }
     }
 
@@ -444,15 +462,8 @@ Item {
     // process count at zero or one.
     Process {
         id: inhibitorProc
-        running: root.enabled && root.externalPresent && root.inhibitorAvailable
-        command: [
-            "systemd-inhibit",
-            "--what=handle-lid-switch",
-            "--who=" + root.inhibitorWho,
-            "--why=Clamshell mode - external display in use",
-            "--mode=block",
-            "sleep", "infinity"
-        ]
+        property var policy: null
+        running: false
 
         stdout: StdioCollector {}
         stderr: SplitParser {
@@ -466,17 +477,36 @@ Item {
 
         onStarted: {
             Logger.i(root.logTag, "systemd-inhibit started; pid=" + root.inhibitorPid);
-            root.notifyInhibitorChange(true);
+            root.notifyInhibitorChange(true, inhibitorProc.policy);
         }
 
         onExited: (exitCode, exitStatus) => {
             Logger.i(root.logTag, "systemd-inhibit exited; code=" + exitCode + " status=" + exitStatus);
-            root.notifyInhibitorChange(false);
+            root.notifyInhibitorChange(false, inhibitorProc.policy);
+            inhibitorProc.policy = null;
+            Qt.callLater(root.reconcileInhibitor);
         }
     }
 
-    function notifyInhibitorChange(active) {
-        if (!root.componentReady || !root.notifyEnabled) return;
+    function reconcileInhibitor() {
+        if (!componentReady || retired) return;
+        const wanted = policyCurrent && enabled && externalPresent && inhibitorAvailable;
+        const previous = inhibitorProc.policy;
+        if (inhibitorProc.running) {
+            if (!wanted || !previous || previous.context !== policyContext || previous.who !== inhibitorWho || previous.notify !== notifyEnabled)
+                inhibitorProc.running = false;
+            return;
+        }
+        if (!wanted) return;
+        const policy = {context: policyContext, who: inhibitorWho, notify: notifyEnabled};
+        inhibitorProc.policy = policy;
+        inhibitorProc.command = ["systemd-inhibit", "--what=handle-lid-switch", "--who=" + policy.who,
+            "--why=Clamshell mode - external display in use", "--mode=block", "sleep", "infinity"];
+        inhibitorProc.running = true;
+    }
+
+    function notifyInhibitorChange(active, policy) {
+        if (!root.componentReady || retired || !policy?.context?.current() || !policy.notify) return;
 
         var msg = active
             ? pluginApi?.tr("notify.on")
@@ -497,6 +527,7 @@ Item {
     }
 
     Component.onDestruction: {
+        root.retired = true;
         root.componentReady = false;
         // Stop the long-lived stream cleanly so we don't leak processes
         // across Noctalia reloads. Quickshell's Process should SIGTERM on
