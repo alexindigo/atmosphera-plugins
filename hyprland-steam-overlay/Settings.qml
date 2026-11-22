@@ -32,6 +32,12 @@ ColumnLayout {
 
   spacing: Style.marginM
 
+  NLabel {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    description: root.pluginApi?.tr("settings.shared-effect")
+  }
+
   Component.onCompleted: {
     Logger.i("SteamOverlay", "Settings UI loaded");
   }
