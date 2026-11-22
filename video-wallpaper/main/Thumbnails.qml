@@ -1,23 +1,24 @@
 pragma ComponentBehavior: Bound
 import QtQuick
-import Quickshell.Io
 import qs.Commons
+import qs.Services.UI
 import "../common"
 
 Item {
     id: root
     required property var pluginApi
-    required property var getThumbPath
-    required property string thumbCacheFolderPath
     required property FolderModel folderModel
-    required property FolderModel thumbFolderModel
     // Selected files can live outside the browsed directory. They use this
-    // producer too, never a second process owned by a color consumer.
+    // producer too, never a second request owned by a color consumer.
     property var requestedPaths: []
 
+    // Video frames come from the shell's image owner (validated PNG
+    // thumbnails); this producer only holds one interest per current video.
     // Cache readiness belongs to this generation, never to preference files.
     readonly property bool thumbCacheReady: internal.ready
     readonly property bool generationFailed: internal.failed
+    // Every current video has its thumbnail or a labelled failure.
+    readonly property bool settled: internal.settled
     readonly property int generation: internal.generation
     readonly property string wallpapersFolder: pluginApi?.pluginSettings?.wallpapersFolder ?? pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
 
@@ -25,82 +26,109 @@ Item {
         id: internal
         property bool ready: false
         property bool failed: false
-        property bool initialized: false
+        property bool settled: false
         property bool pending: true
-        property bool rebuild: false
-        property bool awaitingCache: false
+        property bool retry: false
         property int generation: 0
-        property int runningGeneration: -1
-        property int index: 0
         property var paths: []
+        // video path -> {token, state: "loading" | "ready" | "unavailable", path}
+        property var entries: ({})
     }
 
-    function invalidate(rebuild) {
+    function invalidate(retry) {
         internal.generation++;
         internal.ready = false;
         internal.failed = false;
+        internal.settled = false;
         internal.pending = true;
-        internal.rebuild = internal.rebuild || rebuild;
-        internal.awaitingCache = false;
+        internal.retry = internal.retry || retry;
         Qt.callLater(pump);
     }
 
+    // Refresh: ask the owner again for every video, including failed ones.
     function thumbRegenerate() {
         invalidate(true);
         folderModel.forceReload();
-        if (!internal.initialized && !thumbInit.running) thumbInit.running = true;
     }
 
+    // A thumbnail is the owner's output, never a user's own wallpaper.
     function ownsPath(path) {
-        return path !== "" && path.indexOf(thumbCacheFolderPath + "/") === 0;
+        return ImageCacheService.isGeneratedImage(path);
+    }
+
+    // The owner's thumbnail of a video once it exists, "" before or without one.
+    function thumbnailFor(videoPath) {
+        const entry = internal.entries[videoPath];
+        return entry && entry.state === "ready" ? entry.path : "";
+    }
+
+    // The owner's failure for a video's thumbnail ({code, reason}, empty when none).
+    function failureFor(videoPath) {
+        const entry = internal.entries[videoPath];
+        return entry && entry.state === "unavailable" ? { code: entry.code, reason: entry.reason } : { code: "", reason: "" };
     }
 
     function pathFor(videoPath) {
         if (!thumbCacheReady || internal.paths.indexOf(videoPath) === -1) return "";
-        return getThumbPath(videoPath);
+        return thumbnailFor(videoPath);
     }
 
-    function fail() {
-        internal.ready = false;
-        internal.failed = true;
-        internal.awaitingCache = false;
-        Logger.e("video-wallpaper", "Thumbnail generation failed; cache remains unready.");
+    function request(videoPath, retry) {
+        const entry = { token: "", state: "loading", path: "", code: "", reason: "" };
+        entry.token = ImageCacheService.acquireSource({
+            source: videoPath,
+            width: 1024,
+            height: 1024,
+            fit: "contain",
+            animationIntent: "still",
+            operation: "video-thumbnail",
+            retry: retry
+        }, function (reply) {
+            if (internal.entries[videoPath] !== entry) return;
+            const ready = (reply.status === "hit" || reply.status === "generated") && reply.url !== "";
+            if (!ready) Logger.w("video-wallpaper", "Thumbnail unavailable:", videoPath, reply.reason || "");
+            entry.state = ready ? "ready" : "unavailable";
+            entry.path = ready ? decodeURIComponent(String(reply.url).replace(/^file:\/\//, "")) : "";
+            entry.code = ready ? "" : (reply.code || "decode-unavailable");
+            entry.reason = ready ? "" : (reply.reason || "");
+            internal.entries = Object.assign({}, internal.entries);
+            root.settle();
+        });
+        return entry;
+    }
+
+    function release(entries) {
+        for (const path in entries)
+            ImageCacheService.releaseSource(entries[path].token);
     }
 
     function pump() {
-        if (thumbGenerationProc.running || thumbRegenerationProc.running || !internal.initialized || !folderModel.ready || !thumbFolderModel.ready) return;
-        if (internal.pending) {
-            internal.runningGeneration = internal.generation;
-            if (internal.rebuild) {
-                internal.rebuild = false;
-                thumbRegenerationProc.running = true;
-                return;
-            }
-            internal.pending = false;
-            internal.paths = Array.from(new Set(Array.from(folderModel.files).concat(requestedPaths).filter(path => path !== "")));
-            internal.index = 0;
-            advance();
-        } else if (internal.awaitingCache) {
-            internal.awaitingCache = false;
-            if (internal.runningGeneration !== internal.generation) return;
-            if (!internal.paths.every(path => thumbFolderModel.indexOf(root.getThumbPath(path)) !== -1)) { fail(); return; }
-            internal.ready = true;
-        }
+        if (!internal.pending || !folderModel.ready) return;
+        internal.pending = false;
+        const retry = internal.retry;
+        internal.retry = false;
+        const paths = Array.from(new Set(Array.from(folderModel.files).concat(requestedPaths).filter(path => path !== "")));
+        const previous = internal.entries;
+        const entries = {};
+        for (const path of paths)
+            entries[path] = previous[path] && !retry ? previous[path] : request(path, retry);
+        const retired = {};
+        for (const path in previous)
+            if (entries[path] !== previous[path]) retired[path] = previous[path];
+        internal.paths = paths;
+        internal.entries = entries;
+        release(retired);
+        settle();
     }
 
-    function advance() {
-        if (internal.runningGeneration !== internal.generation) { pump(); return; }
-        while (internal.index < internal.paths.length) {
-            const videoPath = internal.paths[internal.index++];
-            const thumbPath = getThumbPath(videoPath);
-            if (thumbFolderModel.indexOf(thumbPath) !== -1) continue;
-            const staging = thumbPath + ".pending.bmp";
-            thumbGenerationProc.command = ["sh", "-c", "trap 'rm -f -- \"$2\"' EXIT; ffmpeg -nostdin -y -i \"$1\" -vf 'scale=iw/2:-1, format=rgb24' -vframes:v 1 \"$2\" && mv -f -- \"$2\" \"$3\"", "video-thumbnail", videoPath, staging, thumbPath];
-            thumbGenerationProc.running = true;
-            return;
-        }
-        internal.awaitingCache = true;
-        thumbFolderModel.forceReload();
+    function settle() {
+        if (internal.pending) return;
+        const states = internal.paths.map(path => internal.entries[path].state);
+        const failed = states.indexOf("unavailable") !== -1;
+        internal.ready = !failed && states.every(state => state === "ready");
+        internal.settled = states.indexOf("loading") === -1;
+        if (failed && !internal.failed) Logger.e("video-wallpaper", "Thumbnail generation failed; cache remains unready.");
+        internal.failed = failed;
     }
 
     onWallpapersFolderChanged: invalidate(false)
@@ -112,35 +140,6 @@ Item {
             else Qt.callLater(root.pump);
         }
     }
-    Connections {
-        target: root.thumbFolderModel
-        function onReadyChanged() { if (root.thumbFolderModel.ready) Qt.callLater(root.pump); }
-    }
-
-    Process {
-        id: thumbInit
-        command: ["mkdir", "-p", "--", root.thumbCacheFolderPath]
-        running: true
-        onExited: exitCode => {
-            if (exitCode !== 0) { root.fail(); return; }
-            internal.initialized = true;
-            root.thumbFolderModel.forceReload();
-        }
-    }
-    Process {
-        id: thumbGenerationProc
-        onExited: exitCode => {
-            if (internal.runningGeneration !== internal.generation) { root.thumbFolderModel.forceReload(); return; }
-            if (exitCode !== 0) { root.fail(); return; }
-            root.advance();
-        }
-    }
-    Process {
-        id: thumbRegenerationProc
-        command: ["sh", "-c", "rm -rf -- \"$1\" && mkdir -p -- \"$1\"", "thumbnail-cache", root.thumbCacheFolderPath]
-        onExited: exitCode => {
-            if (exitCode !== 0 && internal.runningGeneration === internal.generation) { root.fail(); internal.pending = false; return; }
-            root.thumbFolderModel.forceReload();
-        }
-    }
+    Component.onCompleted: Qt.callLater(pump)
+    Component.onDestruction: release(internal.entries)
 }

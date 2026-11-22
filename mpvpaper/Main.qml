@@ -134,6 +134,11 @@ Item {
         return thumbnails.getThumbUrl(videoPath);
     }
 
+    // The owner's failure for a video's thumbnail ({code, reason})
+    function getThumbFailure(videoPath: string): var {
+        return thumbnails.getThumbFailure(videoPath);
+    }
+
     function thumbRegenerate() {
         thumbnails.thumbRegenerate();
     }

@@ -96,7 +96,7 @@ ShellRoot {
                         if (mode === "init-retry") {
                             if (!main.thumbnailGenerationFailed) return;
                             check(!main.thumbCacheReady && saves === 0, "failed real mkdir cannot publish cache readiness or preferences");
-                            command(["chmod", "755", ImageCacheService.wpThumbDir], "init-repaired");
+                            command(["chmod", "755", ImageCacheService.thumbnailDir], "init-repaired");
                             return;
                         }
                         if (mode === "refresh-membership" && main.thumbCacheReady && WallpaperService.getWallpaper(name) === main.getThumbPath(outside)) {
@@ -128,7 +128,9 @@ ShellRoot {
                     }
                     if (phase === "replacement" && calls === 2) {
                         check(!main.thumbCacheReady, "obsolete generation cannot acknowledge the replacement");
-                        check(effects.indexOf(main.getThumbPath(first)) === -1, "old completion never applies old colors");
+                        // The owner's thumbnail of the first video may still be finishing
+                        // (two decode slots); the end of the case checks it once it exists.
+                        check(main.getThumbPath(first) === "" || effects.indexOf(main.getThumbPath(first)) === -1, "old completion never applies old colors");
                         command(["touch", work + "/release-2"], "replacement-released"); return;
                     }
                     if (phase === "disabled" && main.thumbCacheReady) {
@@ -157,13 +159,14 @@ ShellRoot {
                         var added = work + "/media/added.mp4";
                         check(producer.folderModel.indexOf(added) !== -1 && producer.folderModel.indexOf(first) === -1, "Refresh observes added and removed real media");
                         check(producer.pathFor(added) !== "" && producer.pathFor(first) === "", "current thumbnail inventory follows refreshed source membership");
-                        check(producer.thumbFolderModel.indexOf(main.getThumbPath(first)) === -1, "deleted media thumbnail is removed");
+                        check(ImageCacheService.sourceInterestSources().indexOf(first) === -1 && main.getThumbPath(first) === "", "deleted media thumbnail is removed");
                         select(added); phase = "refresh-selected";
                     }
                     var selected = phase === "refresh-selected" ? work + "/media/added.mp4" : phase === "replacement-released" || phase === "baseline-replaced" ? outside : first;
                     if (["retrying", "replacement-released", "baseline-retrying", "baseline-replaced", "init-retrying", "refresh-selected"].indexOf(phase) !== -1 && WallpaperService.getWallpaper(name) === main.getThumbPath(selected)) {
                         check(!colorConsumer.generationFailed && main.thumbCacheReady, "consumer sees repaired current generation");
-                        if (phase === "baseline-replaced") check(effects.indexOf(main.getThumbPath(first)) === -1, "obsolete baseline receipt cannot apply old colors");
+                        if (phase === "baseline-replaced") check(main.getThumbPath(first) !== "" && effects.indexOf(main.getThumbPath(first)) === -1, "obsolete baseline receipt cannot apply old colors");
+                        if (phase === "replacement-released") check(main.getThumbPath(first) !== "" && effects.indexOf(main.getThumbPath(first)) === -1, "old completion never applies old colors");
                         pass();
                     }
                 }
@@ -180,7 +183,7 @@ ShellRoot {
                         try {
                             root.check(root.colorConsumer.reviewAttempts === root.attempts, "no event-loop polling without a dependency change: " + root.attempts + " -> " + root.colorConsumer.reviewAttempts);
                             if (root.phase === "settle-disabled") {
-                                root.check(WallpaperService.getWallpaper(root.name) === root.original && root.effects.indexOf(root.main.getThumbPath(root.first)) === -1, "disabled request cannot apply late colors");
+                                root.check(WallpaperService.getWallpaper(root.name) === root.original && root.main.getThumbPath(root.first) !== "" && root.effects.indexOf(root.main.getThumbPath(root.first)) === -1, "disabled request cannot apply late colors");
                                 root.pass(); return;
                             }
                             if (root.phase === "settle-baseline") {
