@@ -26,8 +26,9 @@ AtmoIconButton {
     property ShellScreen screen
 
     // Plugin API (injected by PluginPanelSlot)
-    property QtObject pluginApi: null
-    readonly property QtObject pluginCore: pluginApi?.mainInstance
+    property var pluginApi: null
+    readonly property var pluginCore: pluginApi?.mainInstance
+    readonly property var settingsConsumer: pluginCore?.settingsConsumerFor(pluginApi?.settingsContext)
 
     readonly property string currentIcon: pluginCore?.getModeIcon(pluginCore.mode) ?? ""
 

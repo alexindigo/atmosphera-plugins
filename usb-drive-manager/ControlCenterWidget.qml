@@ -69,9 +69,9 @@ AtmoIconButtonHot {
             } else if (action === "refresh") {
                 mainInstance?.refreshDevices()
             } else if (action === "unmount-all") {
-                mainInstance?.unmountAll()
+                mainInstance?.unmountAll(pluginApi?.settingsContext)
             } else if (action === "eject-all") {
-                mainInstance?.ejectAll()
+                mainInstance?.ejectAll(pluginApi?.settingsContext)
             } else if (action === "settings") {
                 if (pluginApi?.manifest) {
                     BarService.openPluginSettings(screen, pluginApi.manifest)

@@ -40,6 +40,7 @@
     "path-copied": "路径已复制"
   },
   "settings": {
+    "shared-effect": "Device observations and mount actions are shared. Actions use this instance's applied choices. Applying these settings selects the shared automatic policy until another policy is applied.",
     "section-bar": "任务栏组件",
     "hide-when-empty": "无设备时隐藏",
     "hide-when-empty-desc": "没有 USB 设备连接时隐藏任务栏图标",

@@ -16,6 +16,7 @@
     "Vfio": "Passagem direta VFIO"
   },
   "settings": {
+    "shared-effect": "GPU mode and device observations are shared. Polling and requests use this instance's applied policy; mode changes affect every instance. ROG notification control remains unavailable.",
     "debug": {
       "description": "Imprimir informações de depuração no console.",
       "label": "Modo de depuração"

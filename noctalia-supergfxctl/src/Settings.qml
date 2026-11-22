@@ -33,6 +33,13 @@ ColumnLayout {
 
   spacing: Style.marginM
 
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+  }
+
   // https://github.com/noctalia-dev/noctalia-shell/blob/main/Widgets/NText.qml
   NText {
     text: "ROG Control Center"
@@ -172,6 +179,9 @@ ColumnLayout {
     }
 
     // Completion observer only; the session owns publication.
-    root.pluginApi.saveSettings();
+    root.pluginApi.saveSettings(result => {
+      if ((result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        root.pluginApi.mainInstance?.settingsConsumerFor(root.pluginApi.runtimeContext)?.refresh();
+    });
   }
 }

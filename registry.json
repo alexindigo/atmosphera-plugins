@@ -1700,7 +1700,7 @@
       "author": "cod3d <cod3ddot@proton.me>",
       "description": "GPU control with supergfxctl for noctalia.",
       "license": "MIT",
-      "version": "0.0.8",
+      "version": "0.0.9",
       "tags": [
         "Bar",
         "Panel",
@@ -2658,7 +2658,7 @@
       "author": "hennifant",
       "description": "Manage USB drives: detect, mount, unmount, safely eject, and browse files",
       "license": "MIT",
-      "version": "1.4.6",
+      "version": "1.4.7",
       "tags": [
         "Bar",
         "Panel",

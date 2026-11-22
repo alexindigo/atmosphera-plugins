@@ -40,10 +40,20 @@ ColumnLayout {
   function saveSettings() {
     if (!pluginApi)
       return;
-    pluginApi.saveSettings();
+    pluginApi.saveSettings(result => {
+      if ((result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        pluginApi.mainInstance?.activatePolicy(pluginApi.runtimeContext);
+    });
   }
 
   // ===== UI =====
+
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+  }
 
   // ── Section: Bar Widget ───────────────────────────────────────────────────
   NText {
