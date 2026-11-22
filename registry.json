@@ -23,7 +23,7 @@
       "author": "Atmosphera",
       "description": "Spatial overview map of niri windows: workspaces, columns and tiles. Click tiles to focus and rows to switch workspace. Reliable startup focus and drag require the stale-seed shell fix in Atmosphera PR #29.",
       "license": "GPL-3.0",
-      "version": "1.0.9",
+      "version": "1.0.11",
       "tags": [
         "Panel",
         "Niri",
@@ -31,7 +31,7 @@
       ],
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
-      "lastUpdated": "2026-11-18",
+      "lastUpdated": "2026-11-21",
       "minAtmospheraVersion": "0.10.0"
     },
     {

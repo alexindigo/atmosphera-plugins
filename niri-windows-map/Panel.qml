@@ -99,12 +99,12 @@ Item {
     }
   }
 
-  // Presets choose the workspace row height. The shared screen-relative
-  // limits only cap the panel; light desks never grow to fill them.
+  // Presets choose the row height and width cap. Light desks never grow
+  // to fill the screen-relative limits.
   readonly property string _sizeKey: pluginApi?.pluginSettings?.panelSize || "regular"
   readonly property real _screenW: root.screen?.width || 1920
   readonly property real _screenH: root.screen?.height || 1080
-  readonly property real _panelLimitW: Math.round(_screenW * 0.5)
+  readonly property real _panelLimitW: Math.round(_screenW * (_sizeKey === "compact" ? 0.25 : (_sizeKey === "large" ? 0.5 : 0.375)))
   readonly property real _panelLimitH: Math.round(_screenH * 0.7)
 
   // Bounding box is the UPPER LIMIT; the visible panel hugs the content
