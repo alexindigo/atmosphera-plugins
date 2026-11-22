@@ -32,10 +32,9 @@ Item {
     readonly property int pollIntervalMs: 2000
     readonly property int refreshDelayMs: 300
 
-    property int fanRpm: 0
-    property string fanLevel: levelAuto
-    property int currentTemp: 0
-    property bool isInitialized: false
+    readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+    readonly property int fanRpm: settingsConsumer?.fanRpm ?? 0
+    readonly property string fanLevel: settingsConsumer?.fanLevel ?? levelAuto
 
     // ===== READING NATIVE NOCTALIA SETTINGS =====
     readonly property bool colorizeByStatus:
@@ -75,87 +74,6 @@ Item {
     readonly property real contentHeight: capsuleHeight
     implicitWidth: contentWidth
     implicitHeight: Style.barHeight
-
-    Component.onCompleted: {
-        if (pluginApi) {
-            pluginApi.mainInstance = root;
-        }
-        fanLoader.reload();
-        tempLoader.reload();
-    }
-
-    // Hardware fan monitoring (passive tracking bound to thinkfan)
-    FileView {
-        id: fanLoader
-        path: "/proc/acpi/ibm/fan"
-        printErrors: false
-        onLoaded: {
-            let content = text();
-            if (content) {
-                let lines = content.split("\n");
-                let parsedRpm = 0;
-                let parsedLevel = root.levelAuto;
-
-                for (let i = 0; i < lines.length; i++) {
-                    let line = lines[i].trim();
-                    if (line.indexOf("speed:") === 0) {
-                        parsedRpm = parseInt(line.split(":")[1].trim());
-                        if (isNaN(parsedRpm)) parsedRpm = 0;
-                    } else if (line.indexOf("level:") === 0) {
-                        parsedLevel = line.split(":")[1].replace(/[\r\n\t]/g, "").trim().toLowerCase();
-                    }
-                }
-
-                root.fanRpm = parsedRpm;
-                root.fanLevel = parsedLevel;
-                root.isInitialized = true;
-            }
-        }
-    }
-
-    // System temperature monitoring
-    FileView {
-        id: tempLoader
-        path: "/sys/class/thermal/thermal_zone0/temp"
-        printErrors: false
-        onLoaded: {
-            let val = text();
-            if (val) {
-                let parsed = parseInt(val.trim());
-                if (!isNaN(parsed)) {
-                    root.currentTemp = Math.round(parsed / 1000);
-                }
-            }
-        }
-    }
-
-    // Persistent process responsible for applying fan level changes
-    Process {
-        id: fanProcess
-        onExited: (exitCode, exitStatus) => {
-            refreshTimer.start();
-        }
-    }
-
-    // Executing ACPI fan commands
-    function setFanSpeed(targetLevel) {
-        if (!root.isInitialized) {
-            return;
-        }
-
-        let cleanLevel = String(targetLevel).replace(/[\r\n\t]/g, "").trim().toLowerCase();
-        if (!cleanLevel || cleanLevel === root.levelUnknown) {
-            return;
-        }
-
-        root.fanLevel = cleanLevel;
-        fanProcess.running = false;
-        fanProcess.command = ["sh", "-c", "echo level " + cleanLevel + " > /proc/acpi/ibm/fan"];
-        fanProcess.running = true;
-    }
-
-    Timer { id: refreshTimer; interval: root.refreshDelayMs; repeat: false; onTriggered: { fanLoader.reload(); tempLoader.reload(); } }
-    Timer { interval: root.pollIntervalMs; running: true; repeat: true; triggeredOnStart: true; onTriggered: { fanLoader.reload(); tempLoader.reload(); } }
 
     readonly property bool isCustomActive: root.fanLevel !== root.levelAuto && root.fanLevel !== root.levelOff
     readonly property bool isOff: root.fanLevel === root.levelOff

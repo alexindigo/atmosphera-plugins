@@ -198,7 +198,7 @@
       "author": "4rmcyt",
       "description": "Monitor and control auto-cpufreq daemon: governor, turbo boost, CPU stats, and force-override.",
       "license": "MIT",
-      "version": "2.6.7",
+      "version": "2.6.8",
       "tags": [
         "Bar",
         "Panel",
@@ -208,7 +208,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": false,
       "upstreamPR": 914,
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "minNoctaliaVersion": "4.4.1",
       "minAtmospheraVersion": "0.10.0"
     },
@@ -234,14 +234,14 @@
       "author": "Piero-93",
       "description": "A lightweight, efficient battery status bar widget and interactive control popup. This plugin displays real-time battery diagnostics (including dynamic power draw in Watts) and provides desktop controls to switch system power profiles or adjust hardware battery charge thresholds safely without needing root privileges.",
       "license": "GPLv3",
-      "version": "1.1.6",
+      "version": "1.1.7",
       "tags": [
         "Bar",
         "System",
         "Indicator",
         "Utility"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.0.0",
@@ -2537,14 +2537,14 @@
       "author": "Piero-93",
       "description": "Monitors system temperatures and provides manual overrides for fan speed profiles via sysfs.",
       "license": "GPLv3",
-      "version": "1.1.5",
+      "version": "1.1.6",
       "tags": [
         "Bar",
         "Indicator",
         "System",
         "Utility"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.0.0",

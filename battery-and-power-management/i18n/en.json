@@ -9,6 +9,7 @@
     "remaining": "Remaining: {time}"
   },
   "settings": {
+    "shared-effect": "Display and battery selection belong to this instance. Power profiles affect the whole system; charge thresholds and observations are shared by instances selecting the same battery.",
     "dynamic-coloring": "Dynamic coloring",
     "dynamic-coloring-desc": "Change the status bar capsule color based on the selected profile",
     "show-profile": "Show profile",
