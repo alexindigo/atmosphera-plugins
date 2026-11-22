@@ -35,13 +35,15 @@ def main():
     for name in ('source', 'plugins', 'guest-profile', 'output'):
         parser.add_argument('--' + name, type=Path, required=True)
     parser.add_argument('--case', choices=CASES + ('all',), default='all')
+    # The guest this profile must describe (the profile itself verifies the live guest).
+    parser.add_argument('--expected-guest-uuid', default='12f17a02-25e9-474c-9dae-fea092c2d2be')
     args = parser.parse_args()
     source, plugins, output = (p.resolve() for p in (args.source, args.plugins, args.output))
     sys.path.insert(0, str(source / 'Scripts/dev'))
     from guest_profile import activate_profile
     from probe_files import ProbeFiles
     profile = activate_profile(args.guest_profile.resolve())
-    assert profile.uuid == '12f17a02-25e9-474c-9dae-fea092c2d2be' and not profile.console.records
+    assert profile.uuid == args.expected_guest_uuid and not profile.console.records
     output.mkdir(parents=True, exist_ok=False)
     rows = []
 
