@@ -25,6 +25,7 @@
     "filter-files-count": "ファイル ({count})"
   },
   "settings": {
+    "shared-effect": "History, pins and clipboard actions are shared. This instance selects its history limit, image previews and density.",
     "tab-general": "一般",
     "max-history-size": "最大履歴サイズ",
     "max-history-size-description": "履歴に保持するクリップボードエントリの数。次回更新時に適用されます。",

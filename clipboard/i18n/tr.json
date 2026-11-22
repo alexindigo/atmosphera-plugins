@@ -25,6 +25,7 @@
     "filter-files-count": "Dosyalar ({count})"
   },
   "settings": {
+    "shared-effect": "History, pins and clipboard actions are shared. This instance selects its history limit, image previews and density.",
     "tab-general": "Genel",
     "max-history-size": "Maksimum gecmis boyutu",
     "max-history-size-description": "Gecmiste tutulan pano girdisi sayisi. Bir sonraki yenilemede gecerli olur.",

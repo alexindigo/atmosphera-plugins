@@ -420,7 +420,7 @@
       "author": "yanekyuk",
       "description": "Clipboard history panel with search, pinning, and image previews.",
       "license": "MIT",
-      "version": "1.0.11",
+      "version": "1.0.12",
       "tags": [
         "Utility",
         "Bar",

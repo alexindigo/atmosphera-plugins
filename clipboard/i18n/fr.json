@@ -25,6 +25,7 @@
     "filter-files-count": "Fichiers ({count})"
   },
   "settings": {
+    "shared-effect": "History, pins and clipboard actions are shared. This instance selects its history limit, image previews and density.",
     "tab-general": "Général",
     "max-history-size": "Taille maximale de l'historique",
     "max-history-size-description": "Nombre d'entrées conservées dans l'historique. Prend effet au prochain rafraîchissement.",

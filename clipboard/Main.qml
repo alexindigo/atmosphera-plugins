@@ -23,6 +23,50 @@ Item {
     // Injected by the shell after instantiation. Always null-guard access with
     // optional chaining (?.) — see docs/specs/plugin-qml-idioms.md.
     property var pluginApi: null
+    property string rawHistory: ""
+    property var _settingsConsumers: new Map()
+    property var decodingOwners: []
+    property var decodeOwners: ({})
+    readonly property bool decodingCurrent: decodingOwners.some(context => root.imageOwnerCurrent(context))
+    onDecodingCurrentChanged: {
+        if (!decodingCurrent && decodingId) {
+            decodingId = "";
+            decodeProc.running = false;
+        }
+    }
+    Component { id: historyFactory; HistoryClient {} }
+
+    function settingsConsumerFor(context) {
+        if (!context || !context.current()) return null;
+        if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+        const client = historyFactory.createObject(root, {
+            settingsContext: context, owner: root,
+            retire: function(retired) {
+                root._settingsConsumers.delete(context);
+                retired.destroy();
+            }
+        });
+        _settingsConsumers.set(context, client);
+        return client;
+    }
+
+    function parseItems(raw) {
+        const parsed = [];
+        for (const line of String(raw).split("\n")) {
+            const tab = line.indexOf("\t");
+            if (tab === -1) continue;
+            const preview = line.substring(tab + 1);
+            const imageRx = /^\[\[\s*binary data\s+[\d.]+\s+\w+\s+\w+\s+\d+x\d+\s*\]\]$/i;
+            const fileRx = /^(file:\/\/\S+|\/\S+)$/;
+            parsed.push({id: line.substring(0, tab), preview: preview,
+                         type: imageRx.test(preview) ? "image" : fileRx.test(preview) ? "file" : "text"});
+        }
+        return parsed;
+    }
+
+    function imageOwnerCurrent(context) {
+        return !!context && context.current() && (context.settingsView.showImagePreviews ?? true);
+    }
 
     // --- Shared state exposed via pluginApi.mainInstance ---------------------
 
@@ -317,8 +361,7 @@ Item {
 
     // --- Processes -----------------------------------------------------------
 
-    // Lists the current clipboard history. Piped through `head` so the shell's
-    // maxHistorySize setting caps the result — see manifest.json defaultSettings.
+    // One complete content observation. Selected limits belong to HistoryClient.
     Process {
         id: listProc
 
@@ -327,46 +370,15 @@ Item {
 
         onExited: exitCode => {
             if (exitCode !== 0) {
+                root.rawHistory = "";
                 root.items = [];
                 root.itemsRevision++;
                 return;
             }
             try {
                 const raw = String(listProc.stdout.text);
-                const lines = raw.length > 0 ? raw.split("\n") : [];
-                const parsed = [];
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i];
-                    if (!line)
-                        continue;
-                    const tab = line.indexOf("\t");
-                    if (tab === -1)
-                        continue;
-                    const preview = line.substring(tab + 1);
-                    // Classification:
-                    //   - "image" — cliphist's binary marker with pixel
-                    //     dimensions at the end (e.g. "png 664x532").
-                    //   - "file"  — a single-line preview beginning with
-                    //     "file://". File managers copy URIs as plain
-                    //     text; cliphist's preview is only the first line
-                    //     so a multi-URI entry still passes this test.
-                    //   - "text"  — everything else, including generic
-                    //     "[[ binary data ... ]]" blobs with no pixel
-                    //     dimensions. Those have no filename / size we
-                    //     can usefully surface, so they fall through to
-                    //     the text path with the raw marker as preview —
-                    //     same behavior as before file type existed.
-                    // See docs/specs/file-items.md for the rationale.
-                    const imageRx = /^\[\[\s*binary data\s+[\d.]+\s+\w+\s+\w+\s+\d+x\d+\s*\]\]$/i;
-                    const fileRx = /^(file:\/\/\S+|\/\S+)$/;
-                    const type = imageRx.test(preview) ? "image"
-                               : fileRx.test(preview) ? "file" : "text";
-                    parsed.push({
-                        id: line.substring(0, tab),
-                        preview: preview,
-                        type: type
-                    });
-                }
+                const parsed = root.parseItems(raw);
+                root.rawHistory = raw;
                 root.items = parsed;
                 // --- Relative-time timestamps ----------------------------
                 //
@@ -386,7 +398,7 @@ Item {
                 }
                 // Ids no longer in `parsed` are dropped (implicit: we only
                 // copied keys that exist in parsed), so copiedAt tracks the
-                // cliphist set exactly and cannot grow past maxHistorySize.
+                // complete cliphist set, independent of any selected limit.
                 root.copiedAt = nextCopiedAt;
                 // Persist the updated map so timestamps survive a shell
                 // restart. Gated on copiedAtLoaded inside saveCopiedAt()
@@ -394,6 +406,7 @@ Item {
                 // on-disk snapshot before we have read it.
                 root.saveCopiedAt();
             } catch (e) {
+                root.rawHistory = "";
                 root.items = [];
             }
             root.itemsRevision++;
@@ -590,7 +603,9 @@ Item {
         onExited: exitCode => {
             const id = root.decodingId;
             root.decodingId = "";
-            if (exitCode === 0 && id) {
+            const admitted = root.decodingOwners;
+            root.decodingOwners = [];
+            if (exitCode === 0 && id && admitted.some(context => root.imageOwnerCurrent(context))) {
                 // cliphist decode redirected to a stable path — same id always
                 // targets the same file. Shell reload scenarios re-decode into
                 // the same path, which is safe (overwrite, not append).
@@ -635,8 +650,7 @@ Item {
     function refresh() {
         if (listProc.running)
             return;
-        const cap = pluginApi?.pluginSettings?.maxHistorySize ?? 100;
-        listProc.command = ["bash", "-c", "cliphist list | head -n " + cap];
+        listProc.command = ["cliphist", "list"];
         listProc.running = true;
     }
 
@@ -893,6 +907,15 @@ Item {
             return;
         const sid = root.decodeQueue[0];
         root.decodeQueue = root.decodeQueue.slice(1);
+        const owners = root.decodeOwners[sid] || [];
+        const next = Object.assign({}, root.decodeOwners);
+        delete next[sid];
+        root.decodeOwners = next;
+        if (!owners.some(context => root.imageOwnerCurrent(context))) {
+            root._processNextDecode();
+            return;
+        }
+        root.decodingOwners = owners;
         root.decodingId = sid;
         decodeProc.command = ["bash", "-c", `cliphist decode ${sid} > /tmp/clipboard-${sid}.png`];
         decodeProc.running = true;
@@ -1113,10 +1136,11 @@ Item {
         _processNextMeta();
     }
 
-    function getImage(id) {
+    function getImage(id, context) {
         if (!id)
             return;
-        if (!(pluginApi?.pluginSettings?.showImagePreviews ?? true))
+        context = context || pluginApi?.settingsContext;
+        if (!root.imageOwnerCurrent(context))
             return;
         // Reject non-numeric ids defensively. cliphist ids are always
         // integers, so anything else is malformed or — worst case — shell
@@ -1131,8 +1155,15 @@ Item {
         if (root.imageCache[sid] !== undefined)
             return;
         // Already queued or in flight — don't enqueue twice.
-        if (root.decodingId === sid || root.decodeQueue.indexOf(sid) !== -1)
+        if (root.decodingId === sid) {
+            if (root.decodingOwners.indexOf(context) === -1)
+                root.decodingOwners = [...root.decodingOwners, context];
             return;
+        }
+        const owners = root.decodeOwners[sid] || [];
+        if (owners.indexOf(context) === -1)
+            root.decodeOwners = Object.assign({}, root.decodeOwners, {[sid]: [...owners, context]});
+        if (root.decodeQueue.indexOf(sid) !== -1) return;
         root.decodeQueue = [...root.decodeQueue, sid];
         _processNextDecode();
     }
