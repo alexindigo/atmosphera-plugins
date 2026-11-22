@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import qs.Commons
 import qs.Services.UI
 import qs.Widgets
+import qs.Portals
 import Quickshell
 
 Item {
@@ -210,7 +211,7 @@ Item {
                 Layout.fillWidth: true
               }
 
-              AtmoFilePicker {
+              PortalFilePicker {
                 id: shareFilePicker
                 title: pluginApi?.tr("panel.send-file-picker")
                 selectionMode: "files"

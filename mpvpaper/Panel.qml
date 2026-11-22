@@ -7,6 +7,7 @@ import Quickshell.Io
 
 import qs.Commons
 import qs.Widgets
+import qs.Portals
 import qs.Services.UI
 
 import "./common"
@@ -201,7 +202,7 @@ Item {
     }
 
 
-    AtmoFilePicker {
+    PortalFilePicker {
         id: wallpapersFolderPicker
         title: pluginApi?.tr("settings.wallpapers_folder.file_picker_title") || "Choose wallpapers folder"
         initialPath: root.wallpapersFolder

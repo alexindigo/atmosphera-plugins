@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import qs.Commons
 import qs.Widgets
+import qs.Portals
 import qs.Services.UI
 
 Item {
@@ -27,7 +28,7 @@ Item {
   property var sendTargetPeer: null
   property string searchQuery: ""
 
-  AtmoFilePicker {
+  PortalFilePicker {
     id: sendFilePicker
     title: pluginApi?.tr("file-picker.title")
     selectionMode: "files"

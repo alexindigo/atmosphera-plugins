@@ -1044,7 +1044,7 @@
       "author": "WerWolv",
       "description": "A Plugin integrating your mobile devices into a panel using KDEConnect",
       "license": "GPLv2",
-      "version": "1.2.7",
+      "version": "1.2.8",
       "tags": [
         "Bar",
         "Panel",
@@ -1409,7 +1409,7 @@
       "author": "spiros132",
       "description": "A plugin that allows having video wallpapers using mpvpaper.",
       "license": "MIT",
-      "version": "1.6.10",
+      "version": "1.6.11",
       "tags": [
         "Bar",
         "Panel",
@@ -1922,7 +1922,7 @@
       "author": "minh",
       "description": "Manage OpenVPN3 VPN connections from the bar and control center",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "Bar",
         "Panel",
@@ -2501,7 +2501,7 @@
       "author": "nineluj",
       "description": "Show Tailscale status in the menu bar and send/receive files via Taildrop.",
       "license": "MIT",
-      "version": "1.5.8",
+      "version": "1.5.9",
       "tags": [
         "Bar",
         "Network",
@@ -2676,7 +2676,7 @@
       "author": "Suyash",
       "description": "A plugin integrating your mobile devices into a panel using Valent",
       "license": "GPLv2",
-      "version": "1.2.6",
+      "version": "1.2.7",
       "tags": [
         "Bar",
         "Panel",
