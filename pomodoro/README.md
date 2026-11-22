@@ -58,7 +58,12 @@ qs -c noctalia-shell ipc call plugin:pomodoro resetAll
 
 ## Settings
 
-***Note:*** These settings are stored in the settings.json file and can be changed by opening the widget settings.
+Settings -> Plugins edits the plugin-level timer. Placed widget settings edit
+sparse instance overrides; unset fields inherit plugin-level values. All views
+of one instance share its timer, while other instances keep independent timers.
+IPC and the legacy settings.json source retain the plugin-level owner. Timer
+state is transient, not copied or migrated. Notifications and alarm audio use
+the common shell services; they do not create independent audio devices.
 
 | Setting | Default | Description |
 |---|---|---|

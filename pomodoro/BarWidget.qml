@@ -18,7 +18,7 @@ Item {
 
   readonly property bool pillDirection: BarService.getPillDirection(root)
 
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.timerFor(pluginApi)
   readonly property bool isActive: mainInstance && (mainInstance.pomodoroRunning || mainInstance.pomodoroRemainingSeconds > 0 || mainInstance.pomodoroTotalSeconds > 0)
 
   readonly property int modeWork: 0

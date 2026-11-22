@@ -36,8 +36,7 @@ ColumnLayout {
       if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current")
         return;
       root._applyEffectPending = false;
-      if (root.pluginApi.mainInstance)
-        root.pluginApi.mainInstance.settingsVersion++;
+      root.pluginApi.mainInstance?.settingsConsumerFor(root.pluginApi.runtimeContext)?.refresh();
     }
   }
 

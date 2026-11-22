@@ -2028,12 +2028,12 @@
       "author": "notprayasmitra",
       "description": "A pomodoro timer plugin to help boost productivity.",
       "license": "MIT",
-      "version": "1.2.5",
+      "version": "1.2.6",
       "tags": [
         "Bar",
         "Productivity"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-22",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.0.0",

@@ -16,7 +16,7 @@ Item {
   readonly property int modeShortBreak: 1
   readonly property int modeLongBreak: 2
 
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.timerFor(pluginApi)
 
   onPluginApiChanged: {
     // Force re-evaluation of mainInstance binding when pluginApi changes
@@ -320,4 +320,3 @@ Item {
     }
   }
 }
-
