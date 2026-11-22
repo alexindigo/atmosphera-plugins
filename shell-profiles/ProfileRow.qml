@@ -76,7 +76,7 @@ NBox {
     onTriggered: action => {
                    contextMenu.close();
                    if (action === "overwrite") {
-                     service?.saveProfile(root.profileName);
+                      service?.saveProfile(root.profileName, null, root.pluginApi);
                    } else if (action === "rename") {
                      renameInput.text = root.profileName;
                      renameError.text = "";
@@ -148,7 +148,7 @@ NBox {
           Layout.fillWidth: true
           onClicked: {
             deleteDialog.close();
-            service?.deleteProfile(root.profileName);
+            service?.deleteProfile(root.profileName, null, root.pluginApi);
           }
         }
       }
@@ -228,7 +228,7 @@ NBox {
                 renameDialog.close();
               else
                 renameError.text = msg;
-            });
+            }, root.pluginApi);
           }
         }
       }
@@ -312,7 +312,7 @@ NBox {
       enabled: !(service?.isBusy ?? false)
       Layout.alignment: Qt.AlignVCenter
       onClicked: {
-        service?.applyProfile(root.profileName, root.includeWallpapers);
+        service?.applyProfile(root.profileName, root.includeWallpapers, null, root.pluginApi);
         if (root.panelRef)
           pluginApi?.closePanel(pluginApi.panelOpenScreen);
       }

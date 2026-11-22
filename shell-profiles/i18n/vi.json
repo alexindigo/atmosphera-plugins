@@ -22,6 +22,7 @@
     "delete-confirm-message": "Xóa \"{name}\"? Không thể hoàn tác."
   },
   "settings": {
+    "shared-effect": "This widget selects the profile folder and backup policy. Applying a profile changes the shared shell configuration, colors, plugins and optional wallpapers for every widget.",
     "dir-label": "Thư mục hồ sơ",
     "dir-description": "Nơi lưu các hồ sơ trên đĩa",
     "dir-select": "Chọn thư mục",

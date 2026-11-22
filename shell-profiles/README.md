@@ -62,6 +62,16 @@ To keep the plugin repository lightweight, the themes shown in the screenshots a
 
 ## Profile structure
 
+Each widget selects its effective profile folder and backup policy. Its Panel
+and profile rows share one Main-owned listing. Applying a profile still changes
+the shared shell settings, colors, plugin registry and optional wallpapers, not
+an independent desktop per widget. IPC explicitly uses plugin-level settings.
+Profile actions capture their folder, wallpaper choice and backup policy before
+IO; later preferences cannot retarget them. The last-applied marker is saved only
+through the originating runtime API. If applying a profile removes that origin,
+published files stay applied but the marker result fails rather than writing to
+a replacement widget. Configuration Discard does not undo profile actions.
+
 ```
 ~/.config/noctalia/profiles/
 ├── my-profile/

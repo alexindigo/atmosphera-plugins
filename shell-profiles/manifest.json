@@ -1,7 +1,7 @@
 {
   "id": "shell-profiles",
   "name": "Profiles",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.10.0",
   "author": "Archlexx",

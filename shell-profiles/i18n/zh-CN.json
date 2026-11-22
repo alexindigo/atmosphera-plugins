@@ -22,6 +22,7 @@
     "delete-confirm-message": "删除 \"{name}\"？此操作无法撤销。"
   },
   "settings": {
+    "shared-effect": "This widget selects the profile folder and backup policy. Applying a profile changes the shared shell configuration, colors, plugins and optional wallpapers for every widget.",
     "dir-label": "配置文件目录",
     "dir-description": "配置文件在磁盘上的存储位置",
     "dir-select": "选择文件夹",

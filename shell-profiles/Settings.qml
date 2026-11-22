@@ -30,6 +30,13 @@ ColumnLayout {
 
   spacing: Style.marginM
 
+  NText {
+    visible: pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.WordWrap
+    text: pluginApi?.tr("settings.shared-effect") ?? ""
+  }
+
   // ── Profiles directory ──────────────────────────────────────────────────
 
   NPluginSettingsField {

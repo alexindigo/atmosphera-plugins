@@ -11,9 +11,12 @@ Item {
   property var pluginApi: null
 
   // Reactive state consumed by BarWidget and Panel
-  property var profiles: []
-  property var profileMeta: ({})
-  property string lastAppliedProfile: ""
+  readonly property var sharedClient: pluginApi?.settingsContext ? settingsConsumerFor(pluginApi.settingsContext) : null
+  readonly property var profiles: sharedClient?.profiles ?? []
+  readonly property var profileMeta: sharedClient?.profileMeta ?? ({})
+  readonly property string lastAppliedProfile: sharedClient?.lastAppliedProfile ?? ""
+  property var _settingsConsumers: new Map()
+  Component { id: clientFactory; ProfileSettingsClient {} }
   property bool isBusy: false
   property var _lifetime: ({alive: true})
   signal operationCompleted(var result)
@@ -39,8 +42,41 @@ Item {
 
   // ─── Helpers ────────────────────────────────────────────────────────────────
 
-  function _profilePath(name) {
-    return profilesDir + name.trim()
+  function settingsConsumerFor(context) {
+    if (!context || !context.current()) return null;
+    if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+    var client = clientFactory.createObject(root, {
+      settingsContext: context, scriptsDir: scriptsDir,
+      isBusy: Qt.binding(function() { return root.isBusy; }),
+      validate: function(name) { return root.validateName(name); },
+      saveAction: function(name, callback, api) { return root.saveProfile(name, callback, api); },
+      applyAction: function(name, includeWallpapers, callback, api) { return root.applyProfile(name, includeWallpapers, callback, api); },
+      deleteAction: function(name, callback, api) { return root.deleteProfile(name, callback, api); },
+      renameAction: function(oldName, newName, callback, api) { return root.renameProfile(oldName, newName, callback, api); },
+      retire: function(retired) { root._settingsConsumers.delete(context); retired.destroy(); }
+    });
+    _settingsConsumers.set(context, client); return client;
+  }
+
+  function _capture(origin) {
+    var api = origin === undefined ? pluginApi : origin;
+    if (!api || !api.settingsContext || !api.settingsContext.current() || !api.settingsReady) return null;
+    var cfg = api.pluginSettings;
+    var path = cfg.profilesDir || "";
+    if (!path || path.trim() === "") path = Settings.configDir + "profiles/";
+    else if (!path.endsWith("/")) path += "/";
+    return {api: api, context: api.settingsContext, directory: path, backups: path + "_backups/",
+      backupEnabled: cfg.backupEnabled ?? true, backupCount: Math.max(1, Math.min(20, cfg.backupCount ?? 5)),
+      icon: cfg.icon || api.manifest?.metadata?.defaultSettings?.icon || "bookmark", tr: api.tr,
+      lastApplied: settingsConsumerFor(api.settingsContext).lastAppliedProfile};
+  }
+
+  function _current(request) {
+    return request && request.context.current() && request.api && request.api.settingsContext === request.context;
+  }
+
+  function _refreshListings() {
+    for (var client of _settingsConsumers.values()) client.listProfiles();
   }
 
   function _timestamp() {
@@ -65,35 +101,6 @@ Item {
     return ""
   }
 
-  // ─── Process: directory listing ─────────────────────────────────────────────
-
-  Process {
-    id: listProc
-    stdout: StdioCollector { id: listOutput }
-    stderr: StdioCollector {}
-    onExited: function(exitCode, exitStatus) {
-      var names = []
-      var meta = {}
-      if (exitCode === 0) {
-        var lines = listOutput.text.split('\n')
-        for (var i = 0; i < lines.length; i++) {
-          var line = lines[i]
-          if (line.trim() === "") continue
-          var parts = line.split('\t')
-          var name = parts[0].trim()
-          var savedAt = parts.length > 1 ? parts[1].trim() : ""
-          if (name && !name.startsWith('.') && !name.startsWith('_')) {
-            names.push(name)
-            meta[name] = { savedAt: savedAt }
-          }
-        }
-      }
-      Logger.i("ShellProfiles", "Profiles found:", names.length)
-      root.profiles = names
-      root.profileMeta = meta
-    }
-  }
-
   // ─── Process: general commands ──────────────────────────────────
 
   Process {
@@ -102,15 +109,21 @@ Item {
     stderr: StdioCollector { id: commandErrors }
     property var pendingCallback: null
     onExited: function(exitCode, exitStatus) {
-      var cb = pendingCallback
-      pendingCallback = null
-      if (cb) cb(exitCode, commandOutput.text, commandErrors.text)
+      root._settleCommand(exitCode, commandOutput.text, commandErrors.text)
     }
+    onRunningChanged: if (!running && root._lifetime.alive) root._settleCommand(-1, "", "profile-command-start")
+  }
+
+  function _settleCommand(code, stdout, stderr) {
+    var callback = cmdProc.pendingCallback;
+    cmdProc.pendingCallback = null;
+    if (callback) callback(code, stdout, stderr);
   }
 
   function _runCommand(cmd, callback) {
     if (cmdProc.running || cmdProc.pendingCallback) {
-      Qt.callLater(function () { callback(1, "", "profile-command-busy") })
+      var lifetime = _lifetime;
+      Qt.callLater(function () { if (lifetime.alive) callback(1, "", "profile-command-busy"); })
       return false
     }
     cmdProc.pendingCallback = callback
@@ -121,8 +134,8 @@ Item {
 
   // ─── Backup helpers ──────────────────────────────────────────────────────────
 
-  function _createBackup(beforeProfileName, callback, hidden) {
-    var base = hidden ? Settings.configDir + ".profile-operations/baselines/" : backupsDir
+  function _createBackup(request, beforeProfileName, callback, hidden) {
+    var base = hidden ? Settings.configDir + ".profile-operations/baselines/" : request.backups
     var backupDir = base + _timestamp() + "-" + Date.now()
     var metaJson = JSON.stringify({
       "savedAt": new Date().toISOString(),
@@ -162,9 +175,8 @@ Item {
     return "Profile settings blocked by unresolved workflow: " + workflows.join(", ")
   }
 
-  function _pruneBackups(bDir, callback) {
-    var maxCount = Math.max(1, Math.min(20, pluginApi?.pluginSettings?.backupCount ?? 5))
-    _runCommand(["sh", scriptsDir + "/prune-backups.sh", bDir, String(maxCount)], function(code) {
+  function _pruneBackups(request, callback) {
+    _runCommand(["sh", scriptsDir + "/prune-backups.sh", request.backups, String(request.backupCount)], function(code) {
       if (callback) callback(code === 0)
     })
   }
@@ -195,89 +207,98 @@ Item {
     Quickshell.execDetached(["mkdir", "-p", profilesDir])
     Quickshell.execDetached(["mkdir", "-p", backupsDir])
     listProfiles()
-    lastAppliedProfile = pluginApi?.pluginSettings?.lastAppliedProfile || ""
   }
 
   // ─── Public API ──────────────────────────────────────────────────────────────
 
   function listProfiles() {
-    if (listProc.running) return
-    listProc.command = ["sh", scriptsDir + "/list-profiles.sh", profilesDir]
-    listProc.running = true
+    if (sharedClient) sharedClient.listProfiles();
   }
 
-  function saveProfile(name, callback) {
+  function saveProfile(name, callback, origin) {
     var err = validateName(name)
     if (err) { if (callback) callback(false, err); return }
     if (isBusy) { if (callback) callback(false, "profile-busy"); return }
+    var request = _capture(origin);
+    if (!request) { if (callback) callback(false, "profile-origin-retired"); return false; }
     var trimmed = name.trim()
-    var dirPath = _profilePath(trimmed)
+    var dirPath = request.directory + trimmed
     var wallpapersJson = _wallpapersJson()
     var metaJson = JSON.stringify({savedAt: new Date().toISOString()})
     isBusy = true
     _settleOwners("save", function (ready, receipt) {
-      if (!ready) { _complete("save", trimmed, false, _settingsFailure(receipt, "profile-settings-receipt"), callback, {settings: receipt}); return }
+      if (!ready || !_current(request)) { _complete(request, "save", trimmed, false, !ready ? _settingsFailure(receipt, "profile-settings-receipt") : "profile-origin-retired", callback, {settings: receipt}); return }
       _runCommand(["sh", scriptsDir + "/save-profile.sh", Settings.configDir, dirPath,
         wallpapersJson, metaJson], function(code, stdout, stderr) {
-        _complete("save", trimmed, code === 0, code === 0 ? "" : stderr.trim() || "profile-copy-failed", callback, {settings: receipt})
+        _complete(request, "save", trimmed, code === 0, code === 0 ? "" : stderr.trim() || "profile-copy-failed", callback, {settings: receipt})
       })
     })
   }
 
-  function _complete(operation, name, success, message, callback, outcomes) {
+  function _complete(request, operation, name, success, message, callback, outcomes) {
     isBusy = false
     var result = {operation: operation, name: name, status: success ? "completed" : "failed", outcomes: outcomes || {}}
     operationCompleted(result)
+    _refreshListings()
+    if (!_current(request)) return;
     if (success) {
-      listProfiles()
       var key = {save: "toast.saved", apply: "toast.applied", delete: "toast.deleted"}[operation]
-      if (key) ToastService.showNotice(pluginApi?.tr("panel.title"), pluginApi?.tr(key, {name: name}), pluginIcon)
+      if (key) ToastService.showNotice(request.tr("panel.title"), request.tr(key, {name: name}), request.icon)
     } else {
-      ToastService.showError(pluginApi?.tr("panel.title"), message)
+      ToastService.showError(request.tr("panel.title"), message)
     }
     if (callback) callback(success, message, result)
   }
 
-  function _rememberProfile(name, callback) {
-    if (!pluginApi?.settingsReady) { callback(false, {status: "failed", error: {code: "profile-plugin-owner"}}); return }
+  function _rememberProfile(request, name, callback) {
+    if (!_current(request)) { callback(false, {status: "failed", error: {code: "profile-origin-retired"}}); return }
+    var api = request.api;
+    var address = api.runtime ? PluginInstances.address(api.placement) : null;
+    var handle = address ? Settings.store : api.settingsHandle;
+    var path = address ? address.path : ["lastAppliedProfile"];
+    if (!handle) { callback(false, {status: "failed", error: {code: "profile-plugin-owner"}}); return; }
     var lifetime = _lifetime
-    pluginApi.pluginSettings.lastAppliedProfile = name
-    var input = pluginApi.settingsHandle.info(["lastAppliedProfile"]).latestInput
-    pluginApi.saveSettings(function (receipt) {
+    api.pluginSettings.lastAppliedProfile = name
+    var input = handle.info(path).latestInput
+    api.saveSettings(function (receipt) {
       if (!lifetime.alive) return
-      var ok = ["saved", "nothing_to_save"].indexOf(receipt.status) !== -1 &&
-        pluginApi.settingsHandle.info(["lastAppliedProfile"]).latestInput === input &&
+      var ok = _current(request) && ["saved", "nothing_to_save"].indexOf(receipt.status) !== -1 &&
+        handle.info(path).latestInput === input &&
         (!receipt.unresolvedGroups || !receipt.unresolvedGroups.length)
-      if (ok) root.lastAppliedProfile = name
+      if (ok) {
+        var client = root.settingsConsumerFor(request.context);
+        if (client) client.lastAppliedProfile = name;
+      }
       callback(ok, receipt)
     })
   }
 
-  function applyProfile(name, includeWallpapers, callback) {
+  function applyProfile(name, includeWallpapers, callback, origin) {
     var err = validateName(name)
     if (err) { if (callback) callback(false, err); return }
     if (isBusy) { if (callback) callback(false, "profile-busy"); return }
+    var request = _capture(origin);
+    if (!request) { if (callback) callback(false, "profile-origin-retired"); return false; }
     var trimmed = name.trim()
-    var dirPath = _profilePath(trimmed)
+    var dirPath = request.directory + trimmed
     var cfg = Settings.configDir
-    var backupEnabled = pluginApi?.pluginSettings?.backupEnabled ?? true
-    var pruneDirectory = backupsDir
+    var backupEnabled = request.backupEnabled
     var lifetime = _lifetime
     var outcomes = {settings: {status: "not_requested"}, wallpapers: {status: "not_requested"}}
     isBusy = true
     function fail(code) {
-      if (lifetime.alive) root._complete("apply", trimmed, false, code, callback, outcomes)
+      if (lifetime.alive) root._complete(request, "apply", trimmed, false, code, callback, outcomes)
     }
     function remember() {
-      _rememberProfile(trimmed, function (ok, receipt) {
+      _rememberProfile(request, trimmed, function (ok, receipt) {
         outcomes.lastApplied = receipt
         if (!ok) { fail("profile-last-applied-receipt"); return }
-        root._complete("apply", trimmed, true, "", callback, outcomes)
+        root._complete(request, "apply", trimmed, true, "", callback, outcomes)
       })
     }
     function finish() {
       if (!backupEnabled) { remember(); return }
-      _pruneBackups(pruneDirectory, function (ok) {
+      _pruneBackups(request, function (ok) {
         if (!ok) { fail("profile-backup-prune"); return }
         remember()
       })
@@ -330,7 +351,8 @@ Item {
     _settleOwners("save", function (ok, receipt) {
       outcomes.before = receipt
       if (!ok) { fail(_settingsFailure(receipt, "profile-settings-receipt")); return }
-      _createBackup(trimmed, function (backedUp, baseline) {
+      if (!_current(request)) { fail("profile-origin-retired"); return; }
+      _createBackup(request, trimmed, function (backedUp, baseline) {
         if (!backedUp) { fail("profile-backup-failed"); return }
         outcomes.backup = {status: "saved", directory: baseline, automatic: backupEnabled}
         if (!includeWallpapers) { publish(baseline, []); return }
@@ -349,49 +371,53 @@ Item {
     })
   }
 
-  function deleteProfile(name, callback) {
+  function deleteProfile(name, callback, origin) {
     var err = validateName(name)
     if (err) { if (callback) callback(false, err); return }
     if (isBusy) { if (callback) callback(false, "profile-busy"); return }
 
+    var request = _capture(origin);
+    if (!request) { if (callback) callback(false, "profile-origin-retired"); return false; }
     var trimmed = name.trim()
     isBusy = true
-    _runCommand(["rm", "-rf", _profilePath(trimmed)], function(code, stdout, stderr) {
+    _runCommand(["rm", "-rf", request.directory + trimmed], function(code, stdout, stderr) {
       if (code === 0) {
-        if (root.lastAppliedProfile === trimmed) {
-          _rememberProfile("", function (ok, receipt) {
-            _complete("delete", trimmed, ok, ok ? "" : "profile-last-applied-receipt", callback, {lastApplied: receipt})
+        if (request.lastApplied === trimmed) {
+          _rememberProfile(request, "", function (ok, receipt) {
+            _complete(request, "delete", trimmed, ok, ok ? "" : "profile-last-applied-receipt", callback, {lastApplied: receipt})
           })
         } else {
-          _complete("delete", trimmed, true, "", callback)
+          _complete(request, "delete", trimmed, true, "", callback)
         }
       } else {
-        _complete("delete", trimmed, false, stderr.trim() || "profile-delete-failed", callback)
+        _complete(request, "delete", trimmed, false, stderr.trim() || "profile-delete-failed", callback)
       }
     })
   }
 
-  function renameProfile(oldName, newName, callback) {
+  function renameProfile(oldName, newName, callback, origin) {
     var err = validateName(oldName) || validateName(newName)
     if (err) { if (callback) callback(false, err); return }
     if (isBusy) { if (callback) callback(false, "profile-busy"); return }
 
+    var request = _capture(origin);
+    if (!request) { if (callback) callback(false, "profile-origin-retired"); return false; }
     var oldT = oldName.trim()
     var newT = newName.trim()
     if (oldT === newT) { if (callback) callback(true, ""); return }
 
     isBusy = true
-    _runCommand(["mv", _profilePath(oldT), _profilePath(newT)], function(code, stdout, stderr) {
+    _runCommand(["mv", request.directory + oldT, request.directory + newT], function(code, stdout, stderr) {
       if (code === 0) {
-        if (root.lastAppliedProfile === oldT) {
-          _rememberProfile(newT, function (ok, receipt) {
-            _complete("rename", newT, ok, ok ? "" : "profile-last-applied-receipt", callback, {lastApplied: receipt})
+        if (request.lastApplied === oldT) {
+          _rememberProfile(request, newT, function (ok, receipt) {
+            _complete(request, "rename", newT, ok, ok ? "" : "profile-last-applied-receipt", callback, {lastApplied: receipt})
           })
         } else {
-          _complete("rename", newT, true, "", callback)
+          _complete(request, "rename", newT, true, "", callback)
         }
       } else {
-        _complete("rename", newT, false, stderr.trim() || "profile-rename-failed", callback)
+        _complete(request, "rename", newT, false, stderr.trim() || "profile-rename-failed", callback)
       }
     })
   }
