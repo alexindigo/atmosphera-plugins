@@ -53,6 +53,7 @@ ColumnLayout {
     }
     
     Text {
+        textFormat: Text.PlainText
         text: `${root.editDebounce}ms`
         color: AtmoColor.mOnSurfaceVariant
         font.pointSize: Style.fontSizeS

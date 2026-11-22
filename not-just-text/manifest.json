@@ -1,7 +1,7 @@
 {
   "id": "not-just-text",
   "name": "Not Just Text",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "minNoctaliaVersion": "4.4.1",
   "minAtmospheraVersion": "0.10.0",
   "author": "blackteaextract",

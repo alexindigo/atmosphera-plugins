@@ -122,6 +122,7 @@ ColumnLayout {
             }
 
             Text {
+                textFormat: Text.PlainText
                 text: pluginApi?.tr("settings.seconds", "seconds") || "seconds"
                 color: AtmoColor.mOnSurfaceVariant
                 font.pixelSize: Style.fontSizeM
@@ -198,6 +199,7 @@ ColumnLayout {
 
     // Feeds Management
     Text {
+        textFormat: Text.PlainText
         text: pluginApi?.tr("settings.feeds", "RSS Feeds") || "RSS Feeds"
         font.pixelSize: Style.fontSizeL
         font.bold: true
@@ -210,6 +212,7 @@ ColumnLayout {
         spacing: Style.marginS
 
         Text {
+            textFormat: Text.PlainText
             text: pluginApi?.tr("settings.addFeed", "Add New Feed") || "Add New Feed"
             font.bold: true
             color: AtmoColor.mOnSurface
@@ -225,6 +228,7 @@ ColumnLayout {
                 spacing: 4
 
                 Text {
+                    textFormat: Text.PlainText
                     text: pluginApi?.tr("settings.feedName", "Feed Name") || "Feed Name"
                     font.pixelSize: Style.fontSizeS
                     color: AtmoColor.mOnSurfaceVariant
@@ -243,6 +247,7 @@ ColumnLayout {
                 spacing: 4
 
                 Text {
+                    textFormat: Text.PlainText
                     text: pluginApi?.tr("settings.feedUrl", "Feed URL") || "Feed URL"
                     font.pixelSize: Style.fontSizeS
                     color: AtmoColor.mOnSurfaceVariant
@@ -295,6 +300,7 @@ ColumnLayout {
                         spacing: 4
 
                         Text {
+                            textFormat: Text.PlainText
                             text: modelData.name
                             font.pixelSize: Style.fontSizeM
                             font.bold: true
@@ -303,6 +309,7 @@ ColumnLayout {
                         }
 
                         Text {
+                            textFormat: Text.PlainText
                             text: modelData.url
                             font.pixelSize: Style.fontSizeS
                             color: AtmoColor.mOnSurfaceVariant
@@ -319,6 +326,7 @@ ColumnLayout {
             }
 
             Text {
+                textFormat: Text.PlainText
                 visible: feeds.length === 0
                 anchors.centerIn: parent
                 text: pluginApi?.tr("settings.noFeeds", "No feeds configured. Add one above!") || "No feeds configured. Add one above!"

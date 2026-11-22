@@ -164,6 +164,7 @@ Rectangle {
                         clip: true
 
                         Text {
+                            textFormat: Text.PlainText
                             anchors.fill: parent
                             verticalAlignment: Text.AlignVCenter
                             horizontalAlignment: Text.AlignLeft

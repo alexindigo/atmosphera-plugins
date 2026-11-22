@@ -399,6 +399,7 @@ ColumnLayout {
 
                 Text {
                     id: previewText
+                    textFormat: Text.PlainText
                     anchors.centerIn: parent
                     text: modelData
                     color: parent.previewFg

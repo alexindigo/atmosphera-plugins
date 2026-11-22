@@ -186,6 +186,7 @@ Item {
                             spacing: Style.marginM
 
                             Text {
+                                textFormat: Text.PlainText
                                 text: {
                                     if (root.currentTabIndex === 0) return "Containers";
                                     if (root.currentTabIndex === 1) return "Images";
@@ -456,6 +457,7 @@ Item {
             }
 
             Text {
+                textFormat: Text.PlainText
                 text: sideItem.itemText
                 color: AtmoColor.mOnSurface
                 font.weight: root.currentTabIndex === idx ? Font.DemiBold : Font.Normal

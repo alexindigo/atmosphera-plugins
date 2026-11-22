@@ -346,6 +346,7 @@ FocusScope {
                                         spacing: Style.marginXS
 
                                         Text {
+                                            textFormat: Text.PlainText
                                             width: parent.width
                                             text: itemRect.itemData.name || ""
                                             font.pointSize: Style.fontSizeM
@@ -355,6 +356,7 @@ FocusScope {
                                         }
 
                                         Text {
+                                            textFormat: Text.PlainText
                                             width: parent.width
                                             visible: (itemRect.itemData.description || "") !== ""
                                             text: itemRect.itemData.description || ""

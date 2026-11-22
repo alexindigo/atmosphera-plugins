@@ -68,6 +68,7 @@ Item {
     }
 
     Text {
+        textFormat: Text.PlainText
         z: 3
         x: (host?.regionX ?? 0) + (host?.regionWidth ?? 0) - width - (8 * (host?.uiScale ?? 1))
         y: (host?.regionY ?? 0) + (host?.regionHeight ?? 0) + (8 * (host?.uiScale ?? 1))

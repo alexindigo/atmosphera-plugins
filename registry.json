@@ -362,7 +362,7 @@
       "author": "MannuVilasara",
       "description": "A cute animated cat for your bar.",
       "license": "MIT",
-      "version": "1.1.12",
+      "version": "1.1.13",
       "tags": [
         "Bar",
         "Desktop",
@@ -459,7 +459,7 @@
       "author": "blackbartblues",
       "description": "Advanced clipboard manager with history, search, keyboard navigation, ToDo integration, pinned items, notecards/sticky notes, and selection-to-notecard feature. Fully translated with comprehensive i18n support.",
       "license": "MIT",
-      "version": "2.4.8",
+      "version": "2.4.9",
       "tags": [
         "Utility",
         "Bar",
@@ -495,7 +495,7 @@
       "author": "DanisDeveloper",
       "description": "Simple bar widget with notification about result",
       "license": "MIT",
-      "version": "1.2.6",
+      "version": "1.2.7",
       "minAtmospheraVersion": "0.10.0",
       "tags": [
         "Bar"
@@ -684,7 +684,7 @@
       "author": "Ben Hilton",
       "description": "An IPC-driven dmenu replacement that lets external scripts present choices through a Noctalia panel.",
       "license": "MIT",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "tags": [
         "Panel",
         "Productivity",
@@ -1011,7 +1011,7 @@
       "author": "Kainoa Kanter",
       "description": "Get AI answers from Kagi in your launcher",
       "license": "MIT",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "tags": [
         "Launcher",
         "Productivity"
@@ -1226,7 +1226,7 @@
       "author": "User",
       "description": "Shows prayer times with a live countdown and a Hijri calendar with Islamic events.",
       "license": "MIT",
-      "version": "1.3.11",
+      "version": "1.3.12",
       "tags": [
         "Bar",
         "Panel"
@@ -1262,7 +1262,7 @@
       "author": "MannuVilasara",
       "description": "Manage Docker containers, images, volumes & networks",
       "license": "MIT",
-      "version": "2.2.4",
+      "version": "2.2.5",
       "tags": [
         "Bar",
         "Panel",
@@ -1758,7 +1758,7 @@
       "author": "blackteaextract",
       "description": "Displays custom text, fortune quotes, or a random entry from a user-provided text file in the bar.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Bar",
         "Fun"
@@ -2137,7 +2137,7 @@
       "author": "Lokize",
       "description": "Monitor and read RSS/Atom feeds directly from your desktop",
       "license": "MIT",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "tags": [],
       "lastUpdated": "2026-11-05",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
@@ -2202,7 +2202,7 @@
       "author": "Pulsar",
       "description": "A screenshot plugin with OCR, Google Lens integration, and screen recording. Supports Sway, Hyprland and MangoWM.",
       "license": "GPL-3.0-or-later",
-      "version": "1.0.9",
+      "version": "1.0.10",
       "tags": [
         "Bar",
         "Panel",
@@ -2299,7 +2299,7 @@
       "author": "onez3r0",
       "description": "Floating OSD that displays keyboard input in real-time via evtest.",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "Indicator",
         "System"
@@ -2334,7 +2334,7 @@
       "author": "tui",
       "description": "A bongo cat that sits in your bar and slaps when you type.",
       "license": "MIT",
-      "version": "0.8.4",
+      "version": "0.8.5",
       "tags": [
         "Bar",
         "Audio",
@@ -2519,7 +2519,7 @@
       "author": "Joaquin Righetti, Lucia Bollati",
       "description": "A lightweight taskbar Tamagotchi that lives and evolves while you use your computer.",
       "license": "MIT",
-      "version": "1.1.8",
+      "version": "1.1.9",
       "tags": [
         "Bar",
         "Fun",
@@ -2765,7 +2765,7 @@
       "author": "yngwe",
       "description": "Browse and pick wallpapers with a fullscreen skewed carousel overlay",
       "license": "MIT",
-      "version": "0.8.5",
+      "version": "0.8.6",
       "tags": [
         "Theming",
         "Wallpaper"

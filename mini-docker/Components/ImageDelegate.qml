@@ -51,6 +51,7 @@ Rectangle {
                     z: 1
 
                     Text {
+                        textFormat: Text.PlainText
                         text: "" + model.repository + ":" + model.tag
                         font.bold: true
                         color: AtmoColor.mOnSurface
@@ -59,6 +60,7 @@ Rectangle {
                     }
 
                     Text {
+                        textFormat: Text.PlainText
                         text: "" + model.size + " • " + model.created
                         color: AtmoColor.mOnSurfaceVariant
                         font.pixelSize: 11
@@ -128,6 +130,7 @@ Rectangle {
                         font.bold: true
                     }
                     Text {
+                        textFormat: Text.PlainText
                         text: model.id
                         color: AtmoColor.mOnSurface
                         Layout.fillWidth: true
@@ -141,6 +144,7 @@ Rectangle {
                         font.bold: true
                     }
                     Text {
+                        textFormat: Text.PlainText
                         text: model.size
                         color: AtmoColor.mOnSurface
                         Layout.fillWidth: true
@@ -152,6 +156,7 @@ Rectangle {
                         font.bold: true
                     }
                     Text {
+                        textFormat: Text.PlainText
                         text: model.created
                         color: AtmoColor.mOnSurface
                         Layout.fillWidth: true

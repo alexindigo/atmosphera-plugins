@@ -592,6 +592,7 @@ Item {
                 font.pixelSize: 24; font.bold: true; color: "white"
             }
             Text {
+                textFormat: Text.PlainText
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "The configured directory '" + (root.cfg.wallpaperDirectory ?? "") + "' does not exist.\nCheck the path in Wallpaper Carousel settings."
                 font.pixelSize: 14; color: "#BBBBBB"; horizontalAlignment: Text.AlignHCenter; lineHeight: 1.4
@@ -610,11 +611,13 @@ Item {
             visible: overlay.visible && folderModel.status === FolderListModel.Ready && folderModel.count === 0
 
             Text {
+                textFormat: Text.PlainText
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.hasWallpaperConfigured ? "No images found in wallpaper folder" : "No wallpaper configured"
                 font.pixelSize: 24; font.bold: true; color: "white"
             }
             Text {
+                textFormat: Text.PlainText
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.hasWallpaperConfigured
                     ? "The folder '" + root.wallpaperFolder + "' is empty.\nAdd images or choose a different wallpaper directory."
