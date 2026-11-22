@@ -41,14 +41,12 @@ Item {
   property bool audioIndicators: true
   // Show the hovered window's identity lines in the reserved info strip
   property bool hoverInfo: true
-  // Current panel size preset ("compact"/"regular"/"large") — info line
-  // count and tile icon padding scale with it
+  // Current preset controls row height, spacing and hover typography.
   property string sizeKey: "regular"
   property real _userScale: 1.0
-  property real _iconPad: sizeKey === "large" ? 16 : 8
   property real _faviconCap: sizeKey === "large" ? 32 : 16
   property real _hoverPointSize: sizeKey === "compact" ? 8 : (sizeKey === "large" ? 11 : 9)
-  readonly property int _hoverMaxLines: sizeKey === "compact" ? 2 : (sizeKey === "large" ? 4 : 3)
+  readonly property int _hoverMaxLines: 2
   readonly property real _presetRowH: (sizeKey === "compact" ? 32 : (sizeKey === "large" ? 88 : 56)) * Style.uiScaleRatio
   // Measure the actual NText font, including font/UI scale and line spacing.
   // This reservation never depends on the hovered text or its visibility.
@@ -61,11 +59,6 @@ Item {
     text: Array(root._hoverMaxLines).fill("Ag").join("\n")
   }
 
-  Behavior on _iconPad {
-    NumberAnimation {
-      duration: Style.animationNormal
-    }
-  }
   Behavior on _faviconCap {
     NumberAnimation {
       duration: Style.animationNormal
@@ -270,19 +263,19 @@ Item {
       var brw = browserInfo ? browserInfo[w.id] : null;
       var parts = [];
       if (term && (term.cwdDisp || term.cwd)) {
-        parts.push(term.cwdDisp || term.cwd);
+        parts.push({text: term.cwdDisp || term.cwd, elide: Text.ElideMiddle});
         if (term.fg)
-          parts.push(term.fg);
+          parts.push({text: term.fg, elide: Text.ElideRight});
       } else if (brw && brw.host) {
-        parts.push(brw.host);
+        parts.push({text: brw.host, elide: Text.ElideMiddle});
         if (w.title)
-          parts.push(w.title);
+          parts.push({text: w.title, elide: Text.ElideRight});
       } else if (w.title) {
-        parts.push(w.title);
+        parts.push({text: w.title, elide: Text.ElideRight});
       }
       if (parts.length === 0 && appName)
-        parts.push(appName);
-      info[w.id] = parts.slice(0, 3);
+        parts.push({text: appName, elide: Text.ElideRight});
+      info[w.id] = parts.slice(0, _hoverMaxLines);
     }
     return info;
   }
@@ -307,9 +300,9 @@ Item {
   // ListModel imperatively re-evaluate (ListModel reads aren't tracked).
   property int _wsRev: 0
 
-  readonly property real _winGap: 1 // between stacked tiles within a column
-  readonly property real _colGap: 2 // between columns
-  readonly property real _rowGap: 2 // between workspace rows (slot stride = monH + _rowGap)
+  readonly property real _winGap: Math.max(1, Math.round(_presetRowH / 32)) // stacked tiles
+  readonly property real _colGap: Math.max(2, Math.round(_presetRowH / 16)) // columns
+  readonly property real _rowGap: _colGap // workspace rows
   readonly property real _barWidth: 4
   readonly property real _leftInset: 12 // 4px bar + 8px gap before the first column
 
@@ -800,9 +793,8 @@ Item {
           // (empty slot + ghost) is unmistakable
           readonly property real _dragDim: (root._dragging && modelData.id !== root._dragWinId) ? 0.55 : 1.0
 
-          // Total padding subtracted from the icon box: 8px/side on Large
-          // tiles, 4px/side otherwise
-          readonly property real _iconPad: root._iconPad
+          // One proportional box drives the app icon and its overlays.
+          readonly property real _iconSize: Math.min(width, height) * 0.6
 
           // Contrast glyph color derived from the tile's EFFECTIVE
           // background (tile color at its opacity, blended over the panel
@@ -859,9 +851,8 @@ Item {
           Item {
             id: iconWrap
             anchors.centerIn: parent
-            // Square icon filling the tile with a uniform 4px padding on all
-            // sides (sized from the tile's smaller dimension)
-            width: Math.max(4, Math.min(parent.width, parent.height) - winRect._iconPad)
+            // Centered, uniform space on every side of the smaller tile axis.
+            width: winRect._iconSize
             height: width
             // Hide icons on tiles too small to read them — evaluated at the
             // rendered size, so zooming in (Ctrl+scroll) reveals icons as
@@ -949,7 +940,7 @@ Item {
             anchors.rightMargin: 2
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 2
-            readonly property real _box: Math.max(4, Math.min(parent.width, parent.height) - winRect._iconPad)
+            readonly property real _box: winRect._iconSize
             // Per-mode rendered px cap: 32 on Large, 16 on Compact/Regular
             readonly property real _favCap: root._faviconCap
             // Native-res clamp with the mode cap on top
@@ -1076,7 +1067,7 @@ Item {
             anchors.leftMargin: 2
             anchors.top: parent.top
             anchors.topMargin: 2
-            readonly property real _box: Math.max(4, Math.min(parent.width, parent.height) - winRect._iconPad)
+            readonly property real _box: winRect._iconSize
             width: Math.max(5, _box * 0.33)
             height: width
             visible: root.audioIndicators && !winRect._dragged && !!winRect._audio && !!winRect._audio.player && iconWrap.visible
@@ -1133,7 +1124,7 @@ Item {
             anchors.rightMargin: 2
             anchors.top: parent.top
             anchors.topMargin: 2
-            readonly property real _box: Math.max(4, Math.min(parent.width, parent.height) - winRect._iconPad)
+            readonly property real _box: winRect._iconSize
             width: Math.max(5, _box * 0.33)
             height: width
             visible: root.audioIndicators && !winRect._dragged && !!winRect._audio && iconWrap.visible
@@ -1226,26 +1217,55 @@ Item {
         }
       }
 
-      // The trailing workspace reserves the maximum text height even when
-      // nothing is hovered. Anchor the text inside that strip structurally.
+      // This workspace reserves the info height and remains a scrolled drop
+      // target. Its text is presented separately in the visible viewport.
       Item {
+        id: trailingStrip
         y: Math.max(0, root.workspaceOrder().length - 1) * (root._monH * root._autoScale + root._rowGap)
         width: mapContent.width
         height: root._infoStripH
+      }
+    }
+  }
+
+  // Viewport-owned presentation: horizontal scrolling cannot move the text
+  // or enlarge its elision budget. Map the actual strip bounds vertically,
+  // so vertical scrolling, drag growth and zoom still follow the workspace.
+  Item {
+    id: hoverViewport
+    parent: flick
+    anchors.left: parent.left
+    anchors.right: parent.right
+    readonly property rect _stripBounds: {
+      flick.contentY;
+      mapContent.y;
+      mapContent.scale;
+      trailingStrip.y;
+      return trailingStrip.mapToItem(flick, Qt.rect(0, 0, trailingStrip.width, trailingStrip.height));
+    }
+    y: _stripBounds.y
+    height: _stripBounds.height
+    z: 90
+
+    Column {
+      id: hoverLines
+      visible: root.hoverInfo && root._hoverInfoLines.length > 0
+      scale: root._userScale
+      // Convert the visible width to local units without zooming its margin.
+      width: Math.max(0, (hoverViewport.width - 16) / scale)
+      anchors.centerIn: parent
+      Repeater {
+        model: root._hoverInfoLines.slice(0, root._hoverMaxLines)
         NText {
-          readonly property var _lines: root._hoverInfoLines
-          visible: root.hoverInfo && _lines.length > 0
-          text: _lines.join("\n")
+          required property var modelData
+          text: modelData.text
           color: AtmoColor.mOnSurfaceVariant
-          // Fixed per size preset (independent of the map scale)
           pointSize: root._hoverPointSize
-          width: mapContent.width - 16
-          maximumLineCount: root._hoverMaxLines
-          wrapMode: Text.WordWrap
-          elide: Text.ElideRight
+          width: hoverLines.width
+          maximumLineCount: 1
+          wrapMode: Text.NoWrap
+          elide: modelData.elide
           horizontalAlignment: Text.AlignHCenter
-          anchors.centerIn: parent
-          z: 90
         }
       }
     }
