@@ -44,6 +44,14 @@ Gateway (local)     Bridge (remote)
                     Gateway (remote)
 ```
 
+## Finite CLI lifetime
+
+The local bridge owns its finite oneshot and gateway start/stop CLI invocations.
+On Linux each invocation binds its lifetime to the bridge before executing its
+literal argv. Bridge exit or the existing request timeout stops that invocation;
+this does not stop intentionally independent gateway services or remote jobs.
+No shell command interpretation or new process supervisor is introduced.
+
 ## Model picker
 
 The Settings dropdown lists providers and models from three sources:
