@@ -401,7 +401,7 @@
       "author": "d7om",
       "description": "Claude Code (Anthropic agentic CLI) with full tool access, permission controls, session management, MCP servers, and device integration",
       "license": "MIT",
-      "version": "0.2.4",
+      "version": "0.2.5",
       "tags": [
         "Bar",
         "Panel",
