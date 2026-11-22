@@ -2519,13 +2519,13 @@
       "author": "Joaquin Righetti, Lucia Bollati",
       "description": "A lightweight taskbar Tamagotchi that lives and evolves while you use your computer.",
       "license": "MIT",
-      "version": "1.1.10",
+      "version": "1.1.11",
       "tags": [
         "Bar",
         "Fun",
         "Gaming"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",

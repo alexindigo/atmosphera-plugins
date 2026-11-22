@@ -10,6 +10,7 @@ Rectangle {
     color: !pressed ? AtmoColor.mPrimary : AtmoColor.mSecondary
 
     property var pluginApi: null
+    property var game: null
     property bool pressed: false
 
     Behavior on color {
@@ -41,7 +42,7 @@ Rectangle {
         onPressed: root.pressed = true
         onReleased: {
             root.pressed = false;
-            pluginApi?.mainInstance?.sleep();
+            root.game?.sleep();
         }
     }
 }

@@ -7,13 +7,16 @@ Item {
     id: root
 
     property var pluginApi: null
+    property var game: null
+    signal foodBurstRequested()
+    signal cleanBurstRequested()
 
     width: animCtrl.frameW
     height: animCtrl.frameH
 
     AnimationController {
         id: animCtrl
-        pluginApi: root.pluginApi
+        game: root.game
         anchors.centerIn: parent
         frameH: 220
         frameW: 220
@@ -38,6 +41,11 @@ Item {
                 resetPosition();
             }
 
+            Connections {
+                target: root
+                function onFoodBurstRequested() { foodParticle.burst(); }
+            }
+
             function resetPosition() {
                 startX = root.width / 2 + (Math.random() * 60 - 30);
                 startY = root.height / 2;
@@ -51,11 +59,11 @@ Item {
 
                 visible = true;
                 opacity = 1;
-                burstAnim.restart();
+                foodBurstAnim.restart();
             }
 
             SequentialAnimation {
-                id: burstAnim
+                id: foodBurstAnim
 
                 ParallelAnimation {
                     NumberAnimation {
@@ -104,6 +112,11 @@ Item {
                 resetPosition();
             }
 
+            Connections {
+                target: root
+                function onCleanBurstRequested() { cleanParticle.burst(); }
+            }
+
             function resetPosition() {
                 startX = root.width / 2 + (Math.random() * 60 - 30);
                 startY = root.height / 2;
@@ -117,11 +130,11 @@ Item {
 
                 visible = true;
                 opacity = 1;
-                burstAnim.restart();
+                cleanBurstAnim.restart();
             }
 
             SequentialAnimation {
-                id: burstAnim
+                id: cleanBurstAnim
 
                 ParallelAnimation {
                     NumberAnimation {
@@ -165,13 +178,9 @@ Item {
         onDropped: drop => {
             drop.acceptProposedAction();
 
-            if (drop.source) {
-                drop.source.wasDropped = true;
-            }
-
-            if (pluginApi?.mainInstance?.petState === "sleeping")
+            if (root.game?.petState === "sleeping")
                 return;
-            pluginApi?.mainInstance?.feed(10);
+            root.game?.feed(10);
             soundEat.play();
             root.burstFood();
         }
@@ -226,24 +235,16 @@ Item {
         repeat: true
 
         onTriggered: {
-            pluginApi?.mainInstance?.clean(2.5);
+            root.game?.clean(2.5);
             root.burstClean();
         }
     }
 
     function burstFood() {
-        for (var i = 0; i < foodParticles.count; i++) {
-            var item = foodParticles.itemAt(i);
-            if (item)
-                item.burst();
-        }
+        foodBurstRequested();
     }
 
     function burstClean() {
-        for (var i = 0; i < cleanParticles.count; i++) {
-            var item = cleanParticles.itemAt(i);
-            if (item)
-                item.burst();
-        }
+        cleanBurstRequested();
     }
 }

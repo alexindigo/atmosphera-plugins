@@ -3,6 +3,14 @@
 A simple virtual pet that lives in your taskbar.
 It passively runs while you use your computer, changing its mood over time based on basic needs like hunger, energy, cleanliness, and happiness.
 
+Each placed instance uses its own effective configuration and existing native
+game fields. Views of the same instance share one Main-owned game; opening
+another view does not start another timer. Plugin-level actions and the
+background game remain plugin-level. Retiring an instance stops its game and
+refuses queued actions. Settings never resets or migrates stored game state.
+The original integer stat conversion, random factors and 30-second cadence are
+preserved; this is not a change to game difficulty or decay formulas.
+
 ---
 
 ## 🧠 How it works

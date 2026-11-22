@@ -8,6 +8,7 @@ Item {
     id: root
 
     property var pluginApi: null
+    readonly property var game: pluginApi?.settingsReady ? pluginApi?.mainInstance?.gameFor(pluginApi) : null
     property string widgetId: ""
     property string section: ""
     property int sectionWidgetIndex: -1
@@ -19,10 +20,11 @@ Item {
     implicitHeight: capsuleHeight
     implicitWidth: content.implicitWidth + Style.marginM * 2
 
-    readonly property int _minStat: Math.min(pluginApi?.mainInstance?.hunger, pluginApi?.mainInstance?.happiness, pluginApi?.mainInstance?.cleanliness)
+    readonly property int _minStat: Math.min(game?.hunger ?? 100, game?.happiness ?? 100, game?.cleanliness ?? 100)
 
     readonly property string _statIcon: {
-        var ts = pluginApi?.mainInstance;
+        var ts = root.game;
+        if (!ts) return "";
         var mn = Math.min(ts.hunger, ts.happiness, ts.cleanliness);
         if (mn === ts.hunger)
             return "🍗";
@@ -33,7 +35,7 @@ Item {
     }
 
     readonly property string _petEmoji: {
-        var s = pluginApi?.mainInstance?.petState;
+        var s = root.game?.petState;
         var map = {
             "idle": "🐸",
             "sleeping": "😴",

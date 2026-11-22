@@ -8,6 +8,7 @@ Item {
     id: root
 
     property var pluginApi: null
+    readonly property var game: pluginApi?.settingsReady ? pluginApi?.mainInstance?.gameFor(pluginApi) : null
     property real contentPreferredWidth: 400 * Style.uiScaleRatio
     property real contentPreferredHeight: 430 * Style.uiScaleRatio
     readonly property var geometryPlaceholder: root
@@ -23,6 +24,7 @@ Item {
         StatBars {
             Layout.fillWidth: true
             pluginApi: root.pluginApi
+            game: root.game
         }
 
         Item {
@@ -31,6 +33,7 @@ Item {
 
             Pet {
                 pluginApi: root.pluginApi
+                game: root.game
                 anchors.centerIn: parent
             }
 
@@ -44,6 +47,7 @@ Item {
 
                 Bed {
                     pluginApi: root.pluginApi
+                    game: root.game
                 }
 
                 Item {
@@ -52,6 +56,7 @@ Item {
 
                 Food {
                     pluginApi: root.pluginApi
+                    game: root.game
                 }
 
                 Item {
@@ -67,11 +72,13 @@ Item {
         }
 
         Ball {
+            game: root.game
             Layout.alignment: Qt.AlignHCenter
         }
 
         DebugButtons {
             pluginApi: root.pluginApi
+            game: root.game
             Layout.alignment: Qt.AlignHCenter
         }
     }
