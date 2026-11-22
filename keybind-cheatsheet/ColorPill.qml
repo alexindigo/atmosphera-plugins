@@ -42,7 +42,7 @@ Rectangle {
       var dialog = dialogFactory.createObject(Overlay.overlay, {
         "selectedColor": startColor,
         "screen": pill.screen
-      });
+      }) as NColorPickerDialog;
       if (!dialog) return;
       dialog.colorSelected.connect(function(c) {
         pill.colorPicked(c);

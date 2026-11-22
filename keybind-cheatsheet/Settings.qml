@@ -886,7 +886,7 @@ ColumnLayout {
               text: pluginApi?.tr("settings.refresh-keybinds")
               icon: "refresh"
               onClicked: {
-                pluginApi?.mainInstance?.refresh();
+                pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.runtimeContext)?.refresh();
                 ToastService.showNotice(pluginApi?.tr("settings.refresh-message"));
               }
             }
@@ -920,7 +920,7 @@ ColumnLayout {
                   return root.editMangoConfigPath;
                 });
 
-                // Apply refreshes the shared parser cache after these choices save.
+                // Apply refreshes this selected parser after these choices save.
               }
             }
           }
@@ -1199,12 +1199,7 @@ ColumnLayout {
                   root.keyTextSuperField.set(hex);
                   root._applyPreview("keyTextSuper", hex);
                 }
-                onResetRequested: {
-                  root.keyColorSuperField.set("");
-                  root._applyPreview("keyColorSuper", "");
-                  root.keyTextSuperField.set("");
-                  root._applyPreview("keyTextSuper", "");
-                }
+                onResetRequested: pluginApi.resetFields(["keyColorSuper", "keyTextSuper"])
               }
             }
           }
@@ -1239,12 +1234,7 @@ ColumnLayout {
                   root.keyTextCtrlField.set(hex);
                   root._applyPreview("keyTextCtrl", hex);
                 }
-                onResetRequested: {
-                  root.keyColorCtrlField.set("");
-                  root._applyPreview("keyColorCtrl", "");
-                  root.keyTextCtrlField.set("");
-                  root._applyPreview("keyTextCtrl", "");
-                }
+                onResetRequested: pluginApi.resetFields(["keyColorCtrl", "keyTextCtrl"])
               }
             }
           }
@@ -1279,12 +1269,7 @@ ColumnLayout {
                   root.keyTextShiftField.set(hex);
                   root._applyPreview("keyTextShift", hex);
                 }
-                onResetRequested: {
-                  root.keyColorShiftField.set("");
-                  root._applyPreview("keyColorShift", "");
-                  root.keyTextShiftField.set("");
-                  root._applyPreview("keyTextShift", "");
-                }
+                onResetRequested: pluginApi.resetFields(["keyColorShift", "keyTextShift"])
               }
             }
           }
@@ -1319,13 +1304,7 @@ ColumnLayout {
                   root.keyTextAltField.set(hex);
                   root._applyPreview("keyTextAlt", hex);
                 }
-                onResetRequested: {
-                  var d = defaults.keyColorAlt || "#FF6B6B";
-                  root.keyColorAltField.set(d);
-                  root._applyPreview("keyColorAlt", d);
-                  root.keyTextAltField.set("");
-                  root._applyPreview("keyTextAlt", "");
-                }
+                onResetRequested: pluginApi.resetFields(["keyColorAlt", "keyTextAlt"])
               }
             }
           }
@@ -1378,14 +1357,7 @@ ColumnLayout {
                     root.keyLabelMod3Field.set(t);
                     root._applyPreview("keyLabelMod3", t);
                   }
-                  onResetRequested: {
-                    root.keyColorMod3Field.set("");
-                    root._applyPreview("keyColorMod3", "");
-                    root.keyTextMod3Field.set("");
-                    root._applyPreview("keyTextMod3", "");
-                    root.keyLabelMod3Field.set("");
-                    root._applyPreview("keyLabelMod3", "");
-                  }
+                  onResetRequested: pluginApi.resetFields(["keyColorMod3", "keyTextMod3", "keyLabelMod3"])
                 }
               }
             }
@@ -1429,14 +1401,7 @@ ColumnLayout {
                     root.keyLabelMod2Field.set(t);
                     root._applyPreview("keyLabelMod2", t);
                   }
-                  onResetRequested: {
-                    root.keyColorMod2Field.set("");
-                    root._applyPreview("keyColorMod2", "");
-                    root.keyTextMod2Field.set("");
-                    root._applyPreview("keyTextMod2", "");
-                    root.keyLabelMod2Field.set("");
-                    root._applyPreview("keyLabelMod2", "");
-                  }
+                  onResetRequested: pluginApi.resetFields(["keyColorMod2", "keyTextMod2", "keyLabelMod2"])
                 }
               }
             }
@@ -1480,14 +1445,7 @@ ColumnLayout {
                     root.keyLabelMod5Field.set(t);
                     root._applyPreview("keyLabelMod5", t);
                   }
-                  onResetRequested: {
-                    root.keyColorMod5Field.set("");
-                    root._applyPreview("keyColorMod5", "");
-                    root.keyTextMod5Field.set("");
-                    root._applyPreview("keyTextMod5", "");
-                    root.keyLabelMod5Field.set("");
-                    root._applyPreview("keyLabelMod5", "");
-                  }
+                  onResetRequested: pluginApi.resetFields(["keyColorMod5", "keyTextMod5", "keyLabelMod5"])
                 }
               }
             }
@@ -1523,13 +1481,7 @@ ColumnLayout {
                   root.keyTextXF86Field.set(hex);
                   root._applyPreview("keyTextXF86", hex);
                 }
-                onResetRequested: {
-                  var d = defaults.keyColorXF86 || "#4ECDC4";
-                  root.keyColorXF86Field.set(d);
-                  root._applyPreview("keyColorXF86", d);
-                  root.keyTextXF86Field.set("");
-                  root._applyPreview("keyTextXF86", "");
-                }
+                onResetRequested: pluginApi.resetFields(["keyColorXF86", "keyTextXF86"])
               }
             }
           }
@@ -1564,13 +1516,7 @@ ColumnLayout {
                   root.keyTextPrintField.set(hex);
                   root._applyPreview("keyTextPrint", hex);
                 }
-                onResetRequested: {
-                  var d = defaults.keyColorPrint || "#95E1D3";
-                  root.keyColorPrintField.set(d);
-                  root._applyPreview("keyColorPrint", d);
-                  root.keyTextPrintField.set("");
-                  root._applyPreview("keyTextPrint", "");
-                }
+                onResetRequested: pluginApi.resetFields(["keyColorPrint", "keyTextPrint"])
               }
             }
           }
@@ -1605,13 +1551,7 @@ ColumnLayout {
                   root.keyTextNumericField.set(hex);
                   root._applyPreview("keyTextNumeric", hex);
                 }
-                onResetRequested: {
-                  var d = defaults.keyColorNumeric || "#A8DADC";
-                  root.keyColorNumericField.set(d);
-                  root._applyPreview("keyColorNumeric", d);
-                  root.keyTextNumericField.set("");
-                  root._applyPreview("keyTextNumeric", "");
-                }
+                onResetRequested: pluginApi.resetFields(["keyColorNumeric", "keyTextNumeric"])
               }
             }
           }
@@ -1646,13 +1586,7 @@ ColumnLayout {
                   root.keyTextMouseField.set(hex);
                   root._applyPreview("keyTextMouse", hex);
                 }
-                onResetRequested: {
-                  var d = defaults.keyColorMouse || "#F38181";
-                  root.keyColorMouseField.set(d);
-                  root._applyPreview("keyColorMouse", d);
-                  root.keyTextMouseField.set("");
-                  root._applyPreview("keyTextMouse", "");
-                }
+                onResetRequested: pluginApi.resetFields(["keyColorMouse", "keyTextMouse"])
               }
             }
           }
@@ -1687,13 +1621,7 @@ ColumnLayout {
                   root.keyTextDefaultField.set(hex);
                   root._applyPreview("keyTextDefault", hex);
                 }
-                onResetRequested: {
-                  var d = defaults.keyColorDefault || "#6C757D";
-                  root.keyColorDefaultField.set(d);
-                  root._applyPreview("keyColorDefault", d);
-                  root.keyTextDefaultField.set("");
-                  root._applyPreview("keyTextDefault", "");
-                }
+                onResetRequested: pluginApi.resetFields(["keyColorDefault", "keyTextDefault"])
               }
             }
           }
@@ -1719,10 +1647,7 @@ ColumnLayout {
                 root.descriptionTextColorField.set(hex);
                 root._applyPreview("descriptionTextColor", hex);
               }
-              onResetRequested: {
-                root.descriptionTextColorField.set("");
-                root._applyPreview("descriptionTextColor", "");
-              }
+              onResetRequested: pluginApi.resetFields(["descriptionTextColor"])
             }
           }
 
@@ -1764,7 +1689,7 @@ ColumnLayout {
     target: root.pluginApi
     function onSettingsCompleted(result) {
       if ((result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current") {
-        root.pluginApi.mainInstance?.refresh();
+        root.pluginApi.mainInstance?.settingsConsumerFor(root.pluginApi.runtimeContext)?.refresh();
         ToastService.showNotice(root.pluginApi.tr("settings.saved"));
       }
     }

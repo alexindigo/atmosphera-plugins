@@ -1081,7 +1081,7 @@
       "author": "blacku",
       "description": "Universal keyboard shortcuts keymap that automatically detects and displays keybindings for Hyprland, Niri, or MangoWC compositors.",
       "license": "MIT",
-      "version": "3.7.11",
+      "version": "3.7.12",
       "tags": [
         "Bar",
         "Panel",
@@ -1091,7 +1091,7 @@
         "Niri",
         "MangoWC"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-22",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",

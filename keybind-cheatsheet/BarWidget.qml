@@ -36,12 +36,12 @@ AtmoIconButton {
 
     model: [
       {
-        "label": pluginApi?.tr("barwidget.open"),
+        "label": root.pluginApi?.tr("barwidget.open"),
         "action": "open-panel",
         "icon": "keyboard"
       },
       {
-        "label": pluginApi?.tr("barwidget.settings"),
+        "label": root.pluginApi?.tr("barwidget.settings"),
         "action": "plugin-settings",
         "icon": "settings"
       },
@@ -52,12 +52,12 @@ AtmoIconButton {
       PanelService.closeContextMenu(screen);
 
       if (action === "open-panel") {
-        if (pluginApi) {
-          pluginApi.openPanel(screen);
+        if (root.pluginApi) {
+          root.pluginApi.openPanel(root.screen);
         }
       } else if (action === "plugin-settings") {
-        if (pluginApi) {
-          BarService.openPluginSettings(screen, pluginApi.manifest);
+        if (root.pluginApi) {
+          BarService.openPluginSettings(root.screen, root.pluginApi.manifest);
         }
       }
     }
