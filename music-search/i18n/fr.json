@@ -51,7 +51,7 @@
     "downloadFolderUpdated": "Dossier de téléchargement mis à jour.",
     "downloadFolderApplied": "Dossier de t\u00e9l\u00e9chargement d\u00e9fini sur {path}.",
     "downloadLimitApplied": "Limite de t\u00e9l\u00e9chargement d\u00e9finie sur {limit} Mo. Les fichiers existants sont conserv\u00e9s.",
-    "cacheLimitUpdated": "Limite de cache MP3 mise à jour.",
+    "cacheLimitUpdated": "Limite de t\u00e9l\u00e9chargement MP3 mise \u00e0 jour. Les fichiers existants sont conserv\u00e9s.",
     "playlistEmpty": "La liste de lecture est vide.",
     "switchedTo": "Passé à {provider}.",
     "ytClientSet": "Client du lecteur YouTube réglé sur {client}.",
@@ -398,9 +398,9 @@
       "actionFailed": "Impossible d'appliquer le param\u00e8tre de t\u00e9l\u00e9chargement. Votre saisie est conserv\u00e9e ; r\u00e9essayez."
     },
     "cache": {
-      "label": "Taille max du cache MP3",
-      "desc": "Limitez la taille du dossier de téléchargement en Mo. Les fichiers plus anciens sont purgés après les téléchargements. Réglez à 0 pour illimité.",
-      "apply": "Appliquer la limite de cache"
+      "label": "Limite de t\u00e9l\u00e9chargement MP3 (Mo)",
+      "desc": "Seuls les fichiers t\u00e9l\u00e9charg\u00e9s par Music Search dans ce dossier sont compt\u00e9s. Une fois la limite atteinte, les nouveaux t\u00e9l\u00e9chargements s'arr\u00eatent ; aucun fichier n'est supprim\u00e9. Le dernier t\u00e9l\u00e9chargement peut d\u00e9passer la limite. R\u00e9glez \u00e0 0 pour ne pas limiter.",
+      "apply": "Appliquer la limite de t\u00e9l\u00e9chargement"
     },
     "autoSave": {
       "label": "Enregistrer les pistes distantes en MP3 après le début de la lecture",
