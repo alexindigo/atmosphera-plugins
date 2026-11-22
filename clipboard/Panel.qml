@@ -33,6 +33,7 @@ Item {
 
     // --- Shell-injected properties ------------------------------------------
     property var pluginApi: null
+    readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
     // --- SmartPanel required / read-back properties ------------------------
     // The shell reads these off the root to size and position the panel.
@@ -58,7 +59,7 @@ Item {
     // pixels. Row height (44) and image cell aspect (0.65) match the delegate
     // sizes set in the ListView / GridView below.
     property var contentPreferredHeight: {
-        const _rev = pluginApi?.mainInstance?.itemsRevision ?? 0;
+        const _rev = root.settingsConsumer?.itemsRevision ?? 0;
         const count = root.filteredItems.length;
         const scale = Style.uiScaleRatio;
         // Overhead = header card (title row + tab bar rows) + search input +
@@ -375,9 +376,9 @@ Item {
     // docs/specs/pinned-items.md §Behavior — pinned items appear in every
     // tab whose type matches.
     function countForType(typeIndex) {
-        const _rev = pluginApi?.mainInstance?.itemsRevision ?? 0;
+        const _rev = root.settingsConsumer?.itemsRevision ?? 0;
         const _prev = pluginApi?.mainInstance?.pinnedRevision ?? 0;
-        const all = pluginApi?.mainInstance?.items ?? [];
+        const all = root.settingsConsumer?.items ?? [];
         const pinned = pluginApi?.mainInstance?.pinnedItems ?? [];
         const typeMap = ["text", "image", "file"];
         const t = typeMap[typeIndex];
@@ -490,9 +491,9 @@ Item {
     // pinnedRevision (pin/unpin), currentTypeFilter (tab switch),
     // searchQuery (debounced input).
     readonly property var filteredItems: {
-        const _rev = pluginApi?.mainInstance?.itemsRevision ?? 0;
+        const _rev = root.settingsConsumer?.itemsRevision ?? 0;
         const _prev = pluginApi?.mainInstance?.pinnedRevision ?? 0;
-        const all = pluginApi?.mainInstance?.items ?? [];
+        const all = root.settingsConsumer?.items ?? [];
         const pinned = pluginApi?.mainInstance?.pinnedItems ?? [];
         const typeMap = ["text", "image", "file"];
         const t = typeMap[root.currentTypeFilter];
@@ -869,8 +870,8 @@ Item {
                         id: typeFilterBar
                         Layout.fillWidth: true
                         visible: {
-                            const _rev = pluginApi?.mainInstance?.itemsRevision ?? 0;
-                            return (pluginApi?.mainInstance?.items?.length ?? 0) > 0;
+                            const _rev = root.settingsConsumer?.itemsRevision ?? 0;
+                            return (root.settingsConsumer?.items?.length ?? 0) > 0;
                         }
                         currentIndex: root.currentTypeFilter
                         tabHeight: Style.toOdd(Style.baseWidgetSize * 0.8)
@@ -923,8 +924,8 @@ Item {
                 id: searchInput
                 Layout.fillWidth: true
                 visible: {
-                    const _rev = pluginApi?.mainInstance?.itemsRevision ?? 0;
-                    return (pluginApi?.mainInstance?.items?.length ?? 0) > 0;
+                    const _rev = root.settingsConsumer?.itemsRevision ?? 0;
+                    return (root.settingsConsumer?.items?.length ?? 0) > 0;
                 }
                 label: ""
                 description: ""

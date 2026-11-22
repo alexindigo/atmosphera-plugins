@@ -35,6 +35,16 @@ qs -c noctalia-shell ipc call plugin:clamshell refresh
 `status` returns JSON with `enabled`, `externalPresent`, `inhibitorActive`, the
 inhibitor PID, and the detected outputs.
 
+## Instance policy
+
+There is one output observer and one lid-switch inhibitor. Applying instance
+Settings or toggling its widget selects that instance's enabled, connector,
+inhibitor-name and notification policy for the common machine effect. Runtime
+toggles save through their originating instance; Settings completion does not
+resave through Main. Bar visibility remains instance-specific. Main/IPC starts
+with plugin-level policy. Retiring an admitted context stops its inhibitor while
+the common output observation remains available.
+
 ## niri Keybinding
 
 Add a binding like this to `~/.config/niri/config.kdl`:

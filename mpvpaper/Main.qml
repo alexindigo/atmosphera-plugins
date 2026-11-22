@@ -11,41 +11,81 @@ import "./main"
 Item {
     id: root
     property var pluginApi: null
+    // One physical playback/automation owner, driven by the last admitted origin.
+    // Main's plugin API remains the shared operational/cache owner.
+    property var selectedContext: null
+    property var runtimeWriter: null
+    property var runtimeOrigins: []
+    property var pendingBrowse: null
+    property var browseChoices: null
+    readonly property var policyContext: selectedContext || pluginApi?.settingsContext
+    readonly property bool policyCurrent: policyContext?.current() ?? false
+    readonly property var cfg: policyContext?.settingsView ?? ({})
+
+    function activatePolicy(context) {
+        context = context || pluginApi?.settingsContext;
+        if (!context?.current()) return false;
+        if (policyContext !== context) cancelBrowse();
+        runtimeWriter = runtimeOrigins.find(api => api.settingsContext === context && context.current()) || (context === pluginApi?.settingsContext ? pluginApi : null);
+        selectedContext = context;
+        return true;
+    }
+
+    // Runtime views register their existing API, never a writer on the page API.
+    // Several views of one context still share this single physical owner.
+    function registerRuntime(runtimeApi) {
+        if (!runtimeApi?.settingsContext?.current()) return false;
+        runtimeOrigins = runtimeOrigins.filter(api => api?.settingsContext?.current());
+        if (!runtimeOrigins.includes(runtimeApi)) runtimeOrigins = runtimeOrigins.concat([runtimeApi]);
+        if (policyContext === runtimeApi.settingsContext) runtimeWriter = runtimeApi;
+        return true;
+    }
+
+    function setPreference(key, value, runtimeApi) {
+        runtimeApi = runtimeApi || pluginApi;
+        if (!["active", "isPlaying", "isMuted", "wallpapersFolder", "volume", "hardwareAcceleration"].includes(key) || !runtimeApi?.settingsContext?.current()) return false;
+        registerRuntime(runtimeApi);
+        runtimeApi.pluginSettings[key] = value;
+        runtimeApi.saveSettings();
+        activatePolicy(runtimeApi.settingsContext);
+        runtimeWriter = runtimeApi;
+        return true;
+    }
 
     readonly property bool active: 
-        pluginApi.pluginSettings.active || 
+        policyCurrent && cfg.active ||
         false
 
     readonly property bool automation:
-        pluginApi.pluginSettings.automation ||
+        policyCurrent && cfg.automation ||
         false
 
     readonly property string automationMode:
-        pluginApi.pluginSettings.automationMode ||
+        cfg.automationMode ||
         "random"
 
     readonly property real automationTime:
-        pluginApi.pluginSettings.automationTime ||
+        cfg.automationTime ||
         5 * 60
 
     readonly property string currentWallpaper: 
-        pluginApi.pluginSettings.currentWallpaper || 
+        cfg.currentWallpaper ||
         ""
 
     readonly property bool hardwareAcceleration:
-        pluginApi.pluginSettings.hardwareAcceleration ||
+        cfg.hardwareAcceleration ||
         false
 
     readonly property bool isMuted:
-        pluginApi.pluginSettings.isMuted ||
+        cfg.isMuted ||
         false
 
     readonly property bool isPlaying:
-        pluginApi.pluginSettings.isPlaying ||
+        cfg.isPlaying ||
         false
 
     readonly property string mpvSocket: 
-        pluginApi.pluginSettings.mpvSocket || 
+        cfg.mpvSocket ||
         pluginApi.manifest.metadata.defaultSettings.mpvSocket || 
         "/tmp/mpv-socket"
 
@@ -54,12 +94,12 @@ Item {
         ({})
 
     readonly property string profile:
-        pluginApi.pluginSettings.profile ||
+        cfg.profile ||
         pluginApi.manifest.metadata.defaultSettings.profile ||
         "default"
 
     readonly property string fillMode:
-        pluginApi.pluginSettings.fillMode ||
+        cfg.fillMode ||
         pluginApi.manifest.metadata.defaultSettings.fillMode ||
         "fit"
     
@@ -69,11 +109,11 @@ Item {
         false
 
     readonly property real volume:
-        pluginApi.pluginSettings.volume ||
+        cfg.volume ||
         100
 
     readonly property string wallpapersFolder: 
-        pluginApi.pluginSettings.wallpapersFolder || 
+        cfg.wallpapersFolder ||
         pluginApi.manifest.metadata.defaultSettings.wallpapersFolder || 
         "~/Pictures/Wallpapers"
 
@@ -81,44 +121,74 @@ Item {
     /***************************
     * WALLPAPER FUNCTIONALITY
     ***************************/
-    function random() {
-        if (wallpapersFolder === "" || folderModel.count === 0) {
-            Logger.e("mpvpaper", "Empty wallpapers folder or no files found!");
+    function random(runtimeApi) { return browse("random", runtimeApi); }
+
+    function clear(runtimeApi) {
+        setWallpaper("", runtimeApi);
+    }
+
+    function nextWallpaper(runtimeApi) { return browse("next", runtimeApi); }
+
+    function browse(mode, runtimeApi) {
+        runtimeApi = runtimeApi || pluginApi;
+        if (!registerRuntime(runtimeApi) || !activatePolicy(runtimeApi.settingsContext)) return false;
+        cancelBrowse();
+        const settings = runtimeApi.settingsContext.settingsView;
+        pendingBrowse = {writer: runtimeApi, context: runtimeApi.settingsContext,
+            folder: String(settings.wallpapersFolder ?? ""), current: String(settings.currentWallpaper ?? ""), mode: mode};
+        if (!pendingBrowse.folder.length) { cancelBrowse(); return false; }
+        browseChoices = browseChoicesComponent.createObject(root, {sourceFolder: Settings.preprocessPath(pendingBrowse.folder)});
+        return true;
+    }
+
+    function cancelBrowse() {
+        pendingBrowse = null;
+        if (browseChoices) browseChoices.destroy();
+        browseChoices = null;
+    }
+
+    function pumpBrowse(model) {
+        const request = pendingBrowse;
+        if (!request || model !== browseChoices) return;
+        if (!request.context.current() || request.context !== policyContext || request.folder !== String(request.context.settingsView.wallpapersFolder ?? "")) {
+            cancelBrowse();
             return;
         }
-
-        const rand = Math.floor(Math.random() * folderModel.count);
-        const url = folderModel.get(rand, "filePath");
-        setWallpaper(url);
+        if (model.status !== FolderListModel.Ready || String(model.folder) !== String(Qt.resolvedUrl("file://" + Settings.preprocessPath(request.folder)))) return;
+        pendingBrowse = null;
+        if (model.count > 0) {
+            const index = request.mode === "random" ? Math.floor(Math.random() * model.count) : (model.indexOf(request.current) + 1) % model.count;
+            setWallpaper(model.get(index, "filePath"), request.writer);
+        } else Logger.e("mpvpaper", "Empty wallpapers folder or no files found!");
+        browseChoices = null;
+        Qt.callLater(function () { model.destroy(); });
     }
 
-    function clear() {
-        setWallpaper("");
-    }
-
-    function nextWallpaper() {
-        if (wallpapersFolder === "" || folderModel.count === 0) {
-            Logger.e("mpvpaper", "Empty wallpapers folder or no files found!");
-            return;
+    Component {
+        id: browseChoicesComponent
+        FolderListModel {
+            id: choices
+            required property string sourceFolder
+            folder: "file://" + sourceFolder
+            nameFilters: ["*.mp4", "*.avi", "*.mov"]
+            showDirs: false
+            onStatusChanged: root.pumpBrowse(choices)
         }
-
-        Logger.d("mpvpaper", "Choosing next wallpaper...");
-
-        // Even if the file is not in wallpapers folder, aka -1, it sets the nextIndex to 0 then
-        const currentIndex = folderModel.indexOf(root.currentWallpaper);
-        const nextIndex = (currentIndex + 1) % folderModel.count;
-        const url = folderModel.get(nextIndex, "filePath");
-        setWallpaper(url);
     }
 
-    function setWallpaper(path) {
-        if (root.pluginApi == null) {
+    function setWallpaper(path, runtimeApi) {
+        runtimeApi = runtimeApi || pluginApi;
+        if (!runtimeApi?.settingsContext?.current()) {
             Logger.e("mpvpaper", "Can't set the wallpaper because pluginApi is null.");
             return;
         }
 
-        pluginApi.pluginSettings.currentWallpaper = path;
-        pluginApi.saveSettings();
+        registerRuntime(runtimeApi);
+        runtimeApi.pluginSettings.currentWallpaper = path;
+        runtimeApi.pluginSettings.isPlaying = true;
+        runtimeApi.saveSettings();
+        activatePolicy(runtimeApi.settingsContext);
+        runtimeWriter = runtimeApi;
     }
 
 
@@ -146,6 +216,8 @@ Item {
         // Contains all the mpvpaper specific functionality
         id: mpvpaper
         pluginApi: root.pluginApi
+        settingsContext: root.policyContext
+        runtimeWriter: root.runtimeWriter
 
         active: root.active
         currentWallpaper: root.currentWallpaper
@@ -191,8 +263,15 @@ Item {
         automationMode: root.automationMode
         automationTime: root.automationTime
 
-        random: root.random
-        nextWallpaper: root.nextWallpaper
+        random: function () { const writer = root.runtimeWriterForPolicy(); if (writer) root.random(writer); }
+        nextWallpaper: function () { const writer = root.runtimeWriterForPolicy(); if (writer) root.nextWallpaper(writer); }
+    }
+
+    // A read-only Settings completion does not grant a native runtime writer.
+    // Automatic wallpaper actions must be admitted by a runtime origin first.
+    function runtimeWriterForPolicy() {
+        if (runtimeWriter?.settingsContext === policyContext && policyCurrent) return runtimeWriter;
+        return policyContext === pluginApi?.settingsContext ? pluginApi : null;
     }
 
 
@@ -228,95 +307,86 @@ Item {
         }
 
         function getWallpaper(): string {
-            return root.currentWallpaper;
+            return root.pluginApi?.pluginSettings.currentWallpaper || "";
         }
 
         // Active
         function setActive(isActive: bool) {
             if (root.pluginApi == null) return;
 
-            root.pluginApi.pluginSettings.active = isActive;
-            root.pluginApi.saveSettings();
+            root.setPreference("active", isActive, root.pluginApi);
         }
 
         function getActive(): bool {
-            return root.active;
+            return root.pluginApi?.pluginSettings.active || false;
         }
 
         function toggleActive() {
-            setActive(!root.active);
+            setActive(!getActive());
         }
 
         // Is playing
         function resume() {
             if (root.pluginApi == null) return;
 
-            root.pluginApi.pluginSettings.isPlaying = true;
-            root.pluginApi.saveSettings();
+            root.setPreference("isPlaying", true, root.pluginApi);
         }
 
         function pause() {
             if (root.pluginApi == null) return;
 
-            root.pluginApi.pluginSettings.isPlaying = false;
-            root.pluginApi.saveSettings();
+            root.setPreference("isPlaying", false, root.pluginApi);
         }
 
         function togglePlaying() {
             if (root.pluginApi == null) return;
 
-            root.pluginApi.pluginSettings.isPlaying = !root.isPlaying;
-            root.pluginApi.saveSettings();
+            root.setPreference("isPlaying", !(root.pluginApi.pluginSettings.isPlaying || false), root.pluginApi);
         }
 
         // Mute / unmute
         function mute() {
             if (root.pluginApi == null) return;
 
-            root.pluginApi.pluginSettings.isMuted = true;
-            root.pluginApi.saveSettings();
+            root.setPreference("isMuted", true, root.pluginApi);
         }
 
         function unmute() {
             if (root.pluginApi == null) return;
 
-            root.pluginApi.pluginSettings.isMuted = false;
-            root.pluginApi.saveSettings();
+            root.setPreference("isMuted", false, root.pluginApi);
         }
 
         function toggleMute() {
             if (root.pluginApi == null) return;
 
-            root.pluginApi.pluginSettings.isMuted = !root.isMuted;
-            root.pluginApi.saveSettings();
+            root.setPreference("isMuted", !(root.pluginApi.pluginSettings.isMuted || false), root.pluginApi);
         }
 
         // Volume
         function setVolume(volume: real) {
             if (root.pluginApi == null) return;
 
-            root.pluginApi.pluginSettings.volume = volume;
-            root.pluginApi.saveSettings();
+            root.setPreference("volume", volume, root.pluginApi);
         }
 
         function increaseVolume() {
-            setVolume(root.volume + Settings.data.audio.volumeStep);
+            setVolume((root.pluginApi.pluginSettings.volume || 100) + Settings.data.audio.volumeStep);
         }
 
         function decreaseVolume() {
-            setVolume(root.volume - Settings.data.audio.volumeStep);
+            setVolume((root.pluginApi.pluginSettings.volume || 100) - Settings.data.audio.volumeStep);
         }
 
         // Hardware acceleration
         function setHardwareAcceleration(active: bool) {
             if (root.pluginApi == null) return;
 
-            root.pluginApi.pluginSettings.hardwareAcceleration = active;
-            root.pluginApi.saveSettings();
+            root.setPreference("hardwareAcceleration", active, root.pluginApi);
         }
 
         function toggleHardwareAcceleration() {
-            setHardwareAcceleration(!root.hardwareAcceleration);
+            setHardwareAcceleration(!(root.pluginApi.pluginSettings.hardwareAcceleration || false));
         }
     }
 }

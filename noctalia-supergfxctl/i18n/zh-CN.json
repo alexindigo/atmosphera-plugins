@@ -16,6 +16,7 @@
     "Vfio": "VFIO 直通"
   },
   "settings": {
+    "shared-effect": "GPU mode and device observations are shared. Polling and requests use this instance's applied policy; mode changes affect every instance. ROG notification control remains unavailable.",
     "debug": {
       "description": "将调试信息打印到控制台。",
       "label": "调试模式"

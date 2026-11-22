@@ -11,6 +11,19 @@ Item {
 
   property var pluginApi: null
   property bool syncInProgress: false
+  property var syncOperation: null
+  property var lifetime: ({alive: true})
+  readonly property bool syncCurrent: syncOperation ? syncOperation.current() : false
+  onSyncCurrentChanged: {
+    const operation = syncOperation;
+    if (operation && !syncCurrent) Qt.callLater(function() {
+      if (root && root.syncOperation === operation && !operation.current()) root.retireSync();
+    });
+  }
+  Component.onDestruction: {
+    lifetime.alive = false;
+    retireSync();
+  }
   property bool lastSyncOk: false
   property string lastSyncMessage: ""
   property double lastSyncAt: 0
@@ -186,10 +199,38 @@ Item {
       syncNotes = loadStoredNotes();
     }
 
+    const context = pluginApi.settingsContext;
+    if (!context?.current()) return;
+    const alive = lifetime;
+    const api = pluginApi;
+    const operation = {
+      token: String(api.pluginSettings.githubToken ?? "").trim(),
+      gistId: String(api.pluginSettings.githubGistId ?? "").trim(),
+      requests: [],
+      cancelled: false,
+      tr: function(key) { return api.tr(key); },
+      current: function() {
+        return alive.alive && !operation.cancelled && context.current()
+          && String(api.pluginSettings.githubToken ?? "").trim() === operation.token
+          && String(api.pluginSettings.githubGistId ?? "").trim() === operation.gistId;
+      },
+      publishGistId: function(gistId) {
+        if (!operation.current() || !gistId) return false;
+        if (operation.gistId !== gistId) {
+          operation.gistId = gistId;
+          api.pluginSettings.githubGistId = gistId;
+          api.saveSettings();
+        }
+        return true;
+      }
+    };
+    syncOperation = operation;
     syncInProgress = true;
     lastSyncMessage = pluginApi.tr("sync.syncing");
 
-    GistSync.syncNotes(pluginApi, syncNotes, function(success, message) {
+    GistSync.syncNotes(operation, JSON.parse(JSON.stringify(syncNotes)), function(success, message) {
+      if (!operation.current() || root.syncOperation !== operation) return;
+      root.syncOperation = null;
       syncInProgress = false;
       lastSyncOk = success;
       lastSyncMessage = message || (success ? "Sync completed" : "Sync failed");
@@ -203,6 +244,20 @@ Item {
         ToastService.showError(lastSyncMessage);
       }
     });
+  }
+
+  function retireSync() {
+    const operation = syncOperation;
+    if (!operation) return;
+    operation.cancelled = true;
+    syncOperation = null;
+    const requests = operation.requests;
+    operation.requests = [];
+    for (const request of requests) request.abort();
+    syncInProgress = false;
+    lastSyncOk = false;
+    lastSyncMessage = pluginApi?.tr("sync.errors.configuration-changed") || "";
+    lastSyncAt = Date.now();
   }
 
   function manualSync() {

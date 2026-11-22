@@ -7,12 +7,15 @@ import qs.Services.UI
 Item {
     id: root
     required property var pluginApi
+    property var settingsContext: pluginApi?.settingsContext
+    readonly property bool policyCurrent: settingsContext?.current() ?? false
+    readonly property var cfg: settingsContext?.settingsView ?? ({})
     required property string screenName
     required property var thumbnailSource
     required property var baselineSource
 
-    readonly property string currentWallpaper: Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.currentWallpaper ?? ""
-    readonly property bool wallpaperEnabled: pluginApi?.pluginSettings?.enabled ?? false
+    readonly property string currentWallpaper: Commands.record(cfg.monitors, screenName)?.currentWallpaper ?? ""
+    readonly property bool wallpaperEnabled: policyCurrent && (cfg.enabled ?? false)
     readonly property bool generationFailed: wallpaperEnabled && currentWallpaper !== "" && (thumbnailSource.generationFailed || baselineSource.failed)
     property bool _initialized: false
     property string _appliedWallpaper: ""

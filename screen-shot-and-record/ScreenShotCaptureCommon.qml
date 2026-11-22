@@ -61,7 +61,9 @@ QtObject {
     }
 
     function processRegion(host, x, y, width, height, mode) {
+        if (!host.actionPolicy?.context.current()) return false
         const pluginApi = host.pluginApi
+        const settings = host.actionPolicy.settings
 
         const scale = Number(host.screen?.scale ?? 1)
         const dpr = Number(host.screen?.devicePixelRatio ?? 1)
@@ -88,7 +90,7 @@ QtObject {
         var safeOutputName = outputName.replace(/[^a-zA-Z0-9_-]/g, "_")
         var tempFile = `/tmp/screen-${safeOutputName}.png`
 
-        var configuredSavePath = pluginApi?.pluginSettings?.savePath
+        var configuredSavePath = settings.savePath
                                  ?? pluginApi?.manifest?.metadata?.defaultSettings?.savePath
                                  ?? ""
         var screenshotDir = Settings.preprocessPath(configuredSavePath)
@@ -116,11 +118,11 @@ QtObject {
                 Logger.d("ScreenShot", "[Panel] Executing copy command:", copyCmd)
                 Quickshell.execDetached(["sh", "-c", copyCmd])
             } else if (mode === "edit") {
-                const editor = pluginApi?.pluginSettings?.screenshotEditor
+                const editor = settings.screenshotEditor
                                ?? pluginApi?.manifest?.metadata?.defaultSettings?.screenshotEditor
                                ?? "swappy"
 
-                const keepSourceScreenshot = pluginApi?.pluginSettings?.keepSourceScreenshot
+                const keepSourceScreenshot = settings.keepSourceScreenshot
                                            ?? pluginApi?.manifest?.metadata?.defaultSettings?.keepSourceScreenshot
                                            ?? false
 
@@ -152,7 +154,7 @@ QtObject {
             Quickshell.execDetached(["sh", "-c", ocrCmd])
         } else if (host.target === "record" || host.target === "recordsound") {
             const scriptPath = pluginApi.pluginDir + "/record.sh"
-            var configuredRecordingSavePath = pluginApi?.pluginSettings?.recordingSavePath
+            var configuredRecordingSavePath = settings.recordingSavePath
                                             ?? pluginApi?.manifest?.metadata?.defaultSettings?.recordingSavePath
                                             ?? ""
             var recordingDir = Settings.preprocessPath(configuredRecordingSavePath)
@@ -160,7 +162,7 @@ QtObject {
                 recordingDir = Quickshell.env("HOME") + "/Videos"
             }
 
-            var recordingNotificationsEnabled = pluginApi?.pluginSettings?.recordingNotifications
+            var recordingNotificationsEnabled = settings.recordingNotifications
                                                ?? pluginApi?.manifest?.metadata?.defaultSettings?.recordingNotifications
                                                ?? true
 

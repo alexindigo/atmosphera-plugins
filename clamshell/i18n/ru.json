@@ -9,6 +9,7 @@
     "off": "Clamshell ВЫКЛ - штатное поведение крышки"
   },
   "settings": {
+    "shared-effect": "One lid-switch inhibitor and output observer are shared by all instances. Apply or a widget toggle selects this instance's enabled, connector and notification policy for that common inhibitor. Bar visibility remains instance-specific. Hardware effects are visible to every instance.",
     "enabled": "Включить clamshell-режим",
     "alwaysShowBarWidget": "Всегда показывать иконку в баре",
     "notify": "Показывать уведомления",

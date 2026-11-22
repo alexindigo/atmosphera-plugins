@@ -123,6 +123,7 @@
     "approvedBadge": "Recommended"
   },
   "settings": {
+    "shared-effect": "Wallpaper playback, screen choices, recovery and color effects are shared. Apply or a runtime action selects this instance's playback policy; the startup switch is controlled in plugin Settings.",
     "category": {
       "interfaceTitle": "Interface",
       "performanceTitle": "Performance",

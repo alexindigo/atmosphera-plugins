@@ -42,6 +42,7 @@
     "path-copied": "Path copied"
   },
   "settings": {
+    "shared-effect": "Device observations and mount actions are shared. Actions use this instance's applied choices. Applying these settings selects the shared automatic policy until another policy is applied.",
     "section-bar": "Bar Widget",
     "hide-when-empty": "Hide when no devices",
     "hide-when-empty-desc": "Hide the bar icon when no USB devices are connected",

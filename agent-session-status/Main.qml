@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.Commons
+import qs.Services.Plugins
 import qs.Services.UI
 
 Item {
@@ -9,15 +10,62 @@ Item {
 
   property var pluginApi: null
 
-  property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-
-  readonly property string bindAddress: cfg.bindAddress ?? defaults.bindAddress ?? "127.0.0.1"
-  readonly property int port: Number(cfg.port ?? defaults.port ?? 55854)
-  readonly property string token: cfg.token ?? defaults.token ?? ""
-  readonly property int pollIntervalSec: Math.max(1, Number(cfg.pollIntervalSec ?? defaults.pollIntervalSec ?? 2))
+  property bool retired: false
+  property var servicePolicy: null
+  property var pendingPolicy: null
+  property var requests: []
+  property var _settingsConsumers: new Map()
+  readonly property string bindAddress: servicePolicy?.host ?? ""
+  readonly property int port: servicePolicy?.port ?? 0
+  readonly property string token: servicePolicy?.token ?? ""
   readonly property string serverUrl: "http://" + bindAddress + ":" + port
   readonly property string scriptPath: (pluginApi?.pluginDir || "") + "/server.py"
+
+  // Preserve the original QML int boundary after Number(), before argv and
+  // seconds scaling. These are admission slots, never a preference store.
+  property int admittedPort: 0
+  function capturePolicy(context) {
+    context = context || pluginApi?.settingsContext;
+    if (retired || !context?.current()) return null;
+    const values = context.settingsView;
+    admittedPort = Number(values.port ?? defaults.port ?? 55854);
+    return {context: context, host: String(values.bindAddress ?? defaults.bindAddress ?? "127.0.0.1"),
+      port: admittedPort, token: String(values.token ?? defaults.token ?? "")};
+  }
+  Component { id: pollFactory; PluginSettingsPoller {} }
+  function settingsConsumerFor(context) {
+    if (retired || !context?.current()) return null;
+    if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+    const client = pollFactory.createObject(root, {
+      settingsContext: context,
+      sourceInterval: Qt.binding(function() { return Math.max(1, Number(context.settingsView.pollIntervalSec ?? defaults.pollIntervalSec ?? 2)); }),
+      intervalScale: 1000,
+      pollingEnabled: Qt.binding(function() { return !root.retired && (root.serviceRunning || root.serviceStarting); }),
+      requestRefresh: function() { root.refresh(context); },
+      retire: function(value) { root._settingsConsumers.delete(context); value.destroy(); }
+    });
+    _settingsConsumers.set(context, client);
+    return client;
+  }
+  readonly property var settingsConsumer: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
+  readonly property int pollIntervalSec: settingsConsumer?.sourceInterval ?? 2
+  readonly property bool serviceCurrent: !retired && (servicePolicy?.context?.current() ?? false)
+  onServiceCurrentChanged: {
+    const policy = servicePolicy;
+    if (!serviceCurrent && policy) Qt.callLater(function() {
+      if (!root) return;
+      if (root.servicePolicy === policy && !root.policyCurrent(policy)) root.stopService();
+    });
+  }
+  readonly property bool pendingCurrent: !retired && (pendingPolicy?.context?.current() ?? false)
+  onPendingCurrentChanged: {
+    const policy = pendingPolicy;
+    if (!pendingCurrent && policy) Qt.callLater(function() {
+      if (!root) return;
+      if (root.pendingPolicy === policy && !policy.context.current()) { root.pendingPolicy = null; restartDelay.stop(); }
+    });
+  }
 
   property bool serviceRunning: false
   property bool serviceStarting: false
@@ -32,15 +80,8 @@ Item {
   }
 
   Component.onDestruction: {
+    retired = true
     stopService()
-  }
-
-  Timer {
-    id: pollTimer
-    interval: root.pollIntervalSec * 1000
-    repeat: true
-    running: root.serviceRunning
-    onTriggered: root.refresh()
   }
 
   Timer {
@@ -90,21 +131,24 @@ Item {
     onStarted: {
       root.serviceStarting = true
       root.serviceError = ""
-      pollTimer.restart()
-      Qt.callLater(root.refresh)
+      const admitted = root.servicePolicy
+      Qt.callLater(function() { if (root && root.policyCurrent(admitted)) root.refresh(); })
     }
     onExited: (exitCode, exitStatus) => {
       root.serviceRunning = false
       root.serviceStarting = false
-      pollTimer.stop()
-      if (exitCode !== 0) {
+      if (exitCode !== 0 && root.serviceCurrent) {
         root.serviceError = pluginApi?.tr("service.exited", { code: exitCode })
       }
     }
   }
 
   function startService() {
-    if (!pluginApi || serviceProcess.running) return
+    if (!pendingCurrent) return
+    // Process.running stays true until exit; no new server may bind before it.
+    if (serviceProcess.running) { restartDelay.restart(); return; }
+    servicePolicy = pendingPolicy
+    pendingPolicy = null
     if (!root.token || root.token.trim() === "") {
       root.serviceError = pluginApi?.tr("service.missingToken")
       root.serviceRunning = false
@@ -125,20 +169,37 @@ Item {
   }
 
   function stopService() {
+    servicePolicy = null
+    pendingPolicy = null
+    restartDelay.stop()
+    const old = requests
+    requests = []
+    for (const request of old) request.abort()
     if (serviceProcess.running) {
       serviceProcess.signal(15)
       serviceProcess.running = false
     }
-    pollTimer.stop()
     serviceRunning = false
+    serviceStarting = false
+    runningCount = 0
+    agents = []
+    lastUpdatedAt = 0
   }
 
-  function restartService() {
+  function restartService(context) {
+    const policy = capturePolicy(context)
+    if (!policy) return false
     stopService()
+    pendingPolicy = policy
     runningCount = 0
     agents = []
     lastUpdatedAt = 0
     restartDelay.restart()
+    return true
+  }
+
+  function policyCurrent(policy) {
+    return !retired && policy && policy === servicePolicy && policy.context.current();
   }
 
   function applySnapshot(payload) {
@@ -150,48 +211,42 @@ Item {
     root.serviceError = ""
   }
 
-  function refresh() {
-    var xhr = new XMLHttpRequest()
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState !== XMLHttpRequest.DONE) return
-      if (xhr.status !== 200) {
-        root.serviceError = pluginApi?.tr("service.refreshFailed", { status: xhr.status })
-        return
-      }
-      try {
-        var payload = JSON.parse(xhr.responseText)
-        root.applySnapshot(payload)
-      } catch (e) {
-        root.serviceError = pluginApi?.tr("service.badResponse")
-      }
-    }
-    xhr.onerror = function() {
-      root.serviceError = pluginApi?.tr("service.unreachable")
-    }
-    xhr.open("GET", root.serverUrl + "/sessions")
-    xhr.send()
+  function refresh(context) {
+    return requestSnapshot(false, context);
   }
 
-  function refreshAndPrune() {
+  function refreshAndPrune(context) {
+    return requestSnapshot(true, context);
+  }
+
+  function requestSnapshot(prune, context) {
+    context = context || pluginApi?.settingsContext;
+    const policy = servicePolicy;
+    if (!context?.current() || !policyCurrent(policy)) return false;
     var xhr = new XMLHttpRequest()
+    requests = requests.concat([xhr]);
     xhr.onreadystatechange = function() {
       if (xhr.readyState !== XMLHttpRequest.DONE) return
+      requests = requests.filter(function(request) { return request !== xhr; });
+      if (!context.current() || !policyCurrent(policy)) return;
       if (xhr.status !== 200) {
         root.serviceError = pluginApi?.tr("service.refreshFailed", { status: xhr.status })
         return
       }
       try {
         var payload = JSON.parse(xhr.responseText)
-        root.applySnapshot(payload.snapshot ?? payload)
+        root.applySnapshot(prune ? (payload.snapshot ?? payload) : payload)
       } catch (e) {
         root.serviceError = pluginApi?.tr("service.badResponse")
       }
     }
     xhr.onerror = function() {
-      root.serviceError = pluginApi?.tr("service.unreachable")
+      if (context.current() && policyCurrent(policy)) root.serviceError = pluginApi?.tr("service.unreachable")
     }
-    xhr.open("POST", root.serverUrl + "/sessions/prune-inactive")
-    xhr.setRequestHeader("Authorization", "Bearer " + root.token)
+    const url = "http://" + policy.host + ":" + policy.port;
+    xhr.open(prune ? "POST" : "GET", url + (prune ? "/sessions/prune-inactive" : "/sessions"))
+    if (prune) xhr.setRequestHeader("Authorization", "Bearer " + policy.token)
     xhr.send()
+    return true;
   }
 }

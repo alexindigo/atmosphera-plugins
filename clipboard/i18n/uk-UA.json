@@ -25,6 +25,7 @@
     "filter-files-count": "Файли ({count})"
   },
   "settings": {
+    "shared-effect": "History, pins and clipboard actions are shared. This instance selects its history limit, image previews and density.",
     "tab-general": "Загальні",
     "max-history-size": "Максимальний розмір історії",
     "max-history-size-description": "Кількість записів буфера обміну в історії. Набуває чинності при наступному оновленні.",

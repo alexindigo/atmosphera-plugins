@@ -59,6 +59,11 @@ fullscreen. Won't work on Hyprland / Sway / labwc without porting.
 
 ## Settings
 
+All instances share one external config, idle entry and hook registration.
+Apply selects that owner's effective policy. Manual launch/stop and the Bar's
+delayed smart-toggle use their originating applied command configuration;
+Discard does not undo an explicit action. User-authored hooks are never replaced.
+
 Each field in the plugin's Settings tab maps to a key in the shell-format
 config the bash CLI reads. Changing a value writes the file on save and
 re-syncs the idle hook.

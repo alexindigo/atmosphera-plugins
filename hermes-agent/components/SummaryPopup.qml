@@ -9,15 +9,14 @@ PopupWindow {
   id: root
 
   property var pluginApi: null
-  property var state: ({})
-  property ShellScreen screen: null
+  property var bridgeState: ({})
   property var anchorItem: null
 
-  readonly property var bridge: state.bridge || ({})
-  readonly property var hermes: state.hermes || ({})
-  readonly property var session: state.session || ({})
-  readonly property var approval: state.approval || ({})
-  readonly property var summary: state.summary || ({})
+  readonly property var bridge: bridgeState.bridge || ({})
+  readonly property var hermes: bridgeState.hermes || ({})
+  readonly property var session: bridgeState.session || ({})
+  readonly property var approval: bridgeState.approval || ({})
+  readonly property var summary: bridgeState.summary || ({})
   readonly property var model: summary.model || ({})
   readonly property var mcp: summary.mcp || ({})
   readonly property var cron: summary.cron || ({})

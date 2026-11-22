@@ -35,6 +35,7 @@
     "hint-esc-save": "ESC 保存"
   },
   "settings": {
+    "sharedEffect": "All widgets use the same shared notes and GitHub Gist. Configure synchronization in Settings > Plugins. Sync now updates that shared Gist after Apply; it does not use instance credentials.",
     "saved": "便利贴设置已保存",
     "syncNow": "立即同步",
     "syncEnabled": {
@@ -55,6 +56,7 @@
       "updated": "已同步到 GitHub Gist。"
     },
     "errors": {
+      "configuration-changed": "Sync stopped because its credentials or Gist changed. Sync again to use the applied settings.",
       "missing-token": "请先填写 GitHub token 再执行同步。"
     }
   }

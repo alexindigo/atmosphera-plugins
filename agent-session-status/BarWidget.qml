@@ -21,6 +21,7 @@ Item {
   readonly property real capsuleHeight: Style.getCapsuleHeightForScreen(screenName)
   readonly property real barFontSize: Style.getBarFontSizeForScreen(screenName)
   readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var settingsConsumer: mainInstance?.settingsConsumerFor(pluginApi.settingsContext)
   readonly property int runningCount: mainInstance?.runningCount ?? 0
   readonly property bool hideWhenEmpty: pluginApi?.pluginSettings?.hideWhenEmpty ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideWhenEmpty ?? false
 
@@ -42,9 +43,9 @@ Item {
       contextMenu.close()
       PanelService.closeContextMenu(screen)
       if (action === "refresh") {
-        root.mainInstance?.refreshAndPrune()
+        root.mainInstance?.refreshAndPrune(pluginApi.settingsContext)
       } else if (action === "restart") {
-        root.mainInstance?.restartService()
+        root.mainInstance?.restartService(pluginApi.settingsContext)
       } else if (action === "settings" && pluginApi) {
         BarService.openPluginSettings(screen, pluginApi.manifest)
       }
@@ -94,7 +95,7 @@ Item {
       } else if (mouse.button === Qt.RightButton) {
         PanelService.showContextMenu(contextMenu, root, screen)
       } else if (mouse.button === Qt.MiddleButton) {
-        root.mainInstance?.refreshAndPrune()
+        root.mainInstance?.refreshAndPrune(pluginApi.settingsContext)
       }
     }
 

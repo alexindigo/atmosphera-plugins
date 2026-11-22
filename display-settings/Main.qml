@@ -7,18 +7,33 @@ Item {
   id: root
   property var pluginApi: null
 
+  property var configClients: new Map()
+  readonly property var sharedConfig: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
+
+  function settingsConsumerFor(context) {
+    context = context || pluginApi?.settingsContext;
+    if (!context?.current()) return null;
+    if (configClients.has(context)) return configClients.get(context);
+    const client = configComponent.createObject(root, {pluginApi: pluginApi, settingsContext: context,
+      retire: function (retired) { root.configClients.delete(context); retired.destroy(); }});
+    configClients.set(context, client);
+    return client;
+  }
+  Component { id: configComponent; DisplayConfigClient {} }
+
   readonly property var liveOutputs: isNiri ? niriProvider.outputs : wlrProvider.outputs
-  readonly property var niriOutputs: configParser.outputs
+  readonly property var niriOutputs: sharedConfig?.outputs ?? []
   readonly property bool isNiri: CompositorService.isNiri
-  readonly property bool loading: niriProvider.loading || wlrProvider.loading || configParser.loading
+  readonly property bool liveLoading: niriProvider.loading || wlrProvider.loading
+  readonly property bool loading: liveLoading || (sharedConfig?.loading ?? false)
   readonly property bool modifying: niriProvider.modifying
 
   Component.onCompleted: { if (pluginApi) refresh() }
   onPluginApiChanged: { if (pluginApi) refresh() }
 
-  function refresh() {
+  function refresh(context) {
     refreshLive()
-    if (isNiri) refreshConfig()
+    if (isNiri) refreshConfig(context)
   }
 
   function refreshLive() {
@@ -26,9 +41,8 @@ Item {
     else wlrProvider.refresh()
   }
 
-  function refreshConfig() {
-    configParser.configPath = pluginApi?.pluginSettings?.niriConfigPath || "~/.config/niri/config.kdl"
-    configParser.start()
+  function refreshConfig(context) {
+    return settingsConsumerFor(context)?.refresh() ?? false;
   }
 
   function setMode(name, mode) { niriProvider.setMode(name, mode) }
@@ -47,7 +61,7 @@ Item {
 
   WlrOutputProvider { id: wlrProvider }
 
-  NiriConfigParser { id: configParser }
+  Component.onDestruction: { for (const client of configClients.values()) client.destroy(); }
 
   UdevMonitor {
     id: udev

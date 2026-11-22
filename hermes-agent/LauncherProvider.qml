@@ -11,9 +11,12 @@ Item {
   property string supportedLayouts: "list"
 
   readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var settingsConsumer: mainInstance?.settingsConsumerFor(pluginApi?.settingsContext) ?? null
+  property var _lifetime: ({alive:true})
+  Component.onDestruction: _lifetime.alive = false
   readonly property var cfg: pluginApi?.pluginSettings || ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-  readonly property string prefix: cfg.launcherPrefix ?? defaults.launcherPrefix ?? ">hermes"
+  readonly property string prefix: settingsConsumer?.launcherPrefix ?? ">hermes"
 
   function handleCommand(searchText) {
     return searchText.startsWith(prefix);
@@ -38,7 +41,7 @@ Item {
 
   function openPanel() {
     if (mainInstance && typeof mainInstance.openPreferredPanel === "function") {
-      mainInstance.openPreferredPanel(null, null);
+      mainInstance.openPreferredPanel(null, null, pluginApi);
     } else {
       pluginApi?.openPanel(pluginApi?.panelOpenScreen);
     }
@@ -47,6 +50,10 @@ Item {
 
   function getResults(searchText) {
     if (!searchText.startsWith(prefix)) return [];
+
+    const life = _lifetime;
+    const api = pluginApi;
+    const owner = mainInstance;
 
     var content = searchText.slice(prefix.length).replace(/^\s+/, "");
     var results = [];
@@ -60,8 +67,7 @@ Item {
         "isImage": false,
         "_score": 1000,
         "onActivate": function() {
-          mainInstance?.oneShot(content);
-          root.openPanel();
+          if (life.alive && api?.settingsContext.current() && owner?.oneShot(content, api.settingsContext)) root.openPanel();
         }
       });
     } else {
@@ -83,7 +89,7 @@ Item {
       "isTablerIcon": true,
       "isImage": false,
       "_score": 950,
-      "onActivate": root.openPanel
+      "onActivate": function() { if (life.alive && api?.settingsContext.current()) root.openPanel(); }
     });
 
     results.push({
@@ -94,8 +100,7 @@ Item {
       "isImage": false,
       "_score": 900,
       "onActivate": function() {
-        mainInstance?.createSession();
-        root.openPanel();
+        if (life.alive && api?.settingsContext.current() && owner?.createSession(api.settingsContext)) root.openPanel();
       }
     });
 
@@ -107,8 +112,9 @@ Item {
       "isImage": false,
       "_score": 850,
       "onActivate": function() {
-        var storedId = ((mainInstance?.state || {}).session || {}).stored_id || "";
-        if (storedId !== "") mainInstance?.resumeSession(storedId);
+        if (!life.alive || !api?.settingsContext.current()) return;
+        var storedId = ((owner?.state || {}).session || {}).stored_id || "";
+        if (storedId !== "") owner?.resumeSession(storedId, api.settingsContext);
         root.openPanel();
       }
     });

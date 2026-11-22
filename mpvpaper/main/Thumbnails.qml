@@ -20,6 +20,7 @@ Item {
 
     readonly property string thumbCacheFolder: ImageCacheService.wpThumbDir + "mpvpaper"
     property int _thumbGenIndex: 0
+    property var colorRequest: null
 
 
     /***************************
@@ -52,7 +53,9 @@ Item {
     }
 
 
-    function startColorGen() {
+    function startColorGen(context, path) {
+        if (!context?.current()) return;
+        colorRequest = {context: context, path: String(path)};
         thumbColorGenTimer.start();
     }
 
@@ -124,20 +127,24 @@ Item {
         triggeredOnStart: false
 
         onTriggered: {
+            const request = root.colorRequest;
+            if (!request?.context?.current()) return;
             if(thumbFolderModel.status == FolderListModel.Ready) {
                 root.pluginApi.withCurrentScreen(screen => {
-                    const thumbPath = root.getThumbPath(root.currentWallpaper);
+                    if (root.colorRequest !== request || !request.context.current()) return;
+                    const thumbPath = root.getThumbPath(request.path);
                     if(thumbFolderModel.indexOf("file://" + thumbPath) !== -1) {
                         Logger.d("mpvpaper", "Generating color scheme based on video wallpaper!");
                         WallpaperService.changeWallpaper(thumbPath);
                     } else {
                         // Try to create the thumbnail again
                         // just a fail safe if the current wallpaper isn't included in the wallpapers folder
-                        const videoUrl = folderModel.get(root._thumbGenIndex, "fileUrl");
+                        const videoUrl = request.path;
                         const thumbUrl = root.getThumbUrl(videoUrl);
 
                         Logger.d("mpvpaper", "Thumbnail not found:", thumbPath);
                         thumbColorGenTimerProc.command = ["sh", "-c", `ffmpeg -y -i ${videoUrl} -vframes:v 1 ${thumbUrl}`]
+                        thumbColorGenTimerProc.request = request;
                         thumbColorGenTimerProc.running = true;
                     }
                 });
@@ -149,7 +156,10 @@ Item {
 
     Process {
         id: thumbColorGenTimerProc
-        onExited: thumbColorGenTimer.start();
+        property var request: null
+        onExited: {
+            if (request === root.colorRequest && request?.context?.current()) thumbColorGenTimer.start();
+        }
     }
 
     // Process to create the thumbnail folder

@@ -59,6 +59,8 @@
   },
   "settings": {
     "title": "Hermes Settings",
+    "sharedEffect": "All instances share one active chat, bridge and gateway. Display and polling use this instance's settings. Connection changes keep the chat and apply at explicit New Session or session replacement.",
+    "pendingRestart": "Connection settings pending restart. The current chat and its connection are unchanged; choose New Session or a session to use the saved connection.",
     "bridgeHost": "Bridge host",
     "bridgePort": "Bridge port",
     "stateFile": "State file",

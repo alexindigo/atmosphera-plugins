@@ -8,6 +8,7 @@ Item {
     id: root
 
     property var    pluginApi:       null
+    property var actionPolicy: null
     property string scriptsDir:      ""
     property string ocrResult:       ""
     property string ocrCapturePath:  ""
@@ -18,7 +19,9 @@ Item {
     signal done()
     signal failed(string messageKey, string messageArg)
 
-    function run(grimX, grimY, grimW, grimH, langStr) {
+    function run(grimX, grimY, grimW, grimH, langStr, policy) {
+        if (!policy?.context.current() || ocrProc.running) return false
+        actionPolicy = policy
         _stdoutBuf = ""
         var area        = grimW * grimH
         var upscale     = grimH < 30 ? "-resize 400%" : (area < 50000 || grimW < 200) ? "-resize 200%" : ""
@@ -63,6 +66,7 @@ Item {
         }
 
         onExited: code => {
+            if (!root.actionPolicy?.context.current()) { root.done(); return }
             switch (code) {
                 case 0:
                     var text = root._stdoutBuf.trim()

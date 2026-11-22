@@ -40,9 +40,16 @@ Settings are stored in `~/.config/noctalia/plugins/clipboard/settings.json` (cre
 
 | Key | Default | Description |
 |---|---|---|
-| `maxHistorySize` | `100` | Maximum number of entries retained in history. |
+| `maxHistorySize` | `100` | Maximum number of shared history entries shown by this instance. |
 | `showImagePreviews` | `true` | Show image thumbnails inline in the history panel. |
 | `density` | `"comfortable"` | Visual density of the list. `"comfortable"` or `"compact"`. |
+
+Placed Settings edits use sparse instance overrides; Settings -> Plugins edits
+the inherited plugin values. History limits, preview admission and density are
+selected per instance. Main still owns one full clipboard observation, shared
+pins, timestamps and image cache. Copy, delete, wipe and pin actions affect that
+shared content immediately; preference Discard does not undo a content action.
+Selected limits never prune clipboard content or its common timestamp map.
 
 ## IPC
 

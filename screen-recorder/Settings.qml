@@ -108,6 +108,13 @@ ColumnLayout {
         Logger.i("ScreenRecorder", "Settings saved successfully");
     });
   }
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+  }
+
   // Icon Color
   NPluginSettingsField {
     field: root.iconColorField

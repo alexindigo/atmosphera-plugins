@@ -12,6 +12,7 @@
         }
     },
     "settings": {
+        "shared-effect": "Capture actions use this instance's settings when requested. Capture selectors and the active recorder are shared; stopping affects the active recording.",
         "enableCross": {
             "label": "启用十字线瞄准",
             "description": "是否启用十字线瞄准。"

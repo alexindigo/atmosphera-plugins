@@ -44,6 +44,15 @@ ColumnLayout {
   // Explicit field intents only; the selected session owns Apply/Reset.
   readonly property bool settingsDirty: false
 
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("settings.shared-effect")
+    Layout.fillWidth: true
+    wrapMode: Text.WordWrap
+    color: AtmoColor.mOnSurface
+    pointSize: Style.fontSizeS
+  }
+
   function saveSettings() {
     pluginApi.saveSettings(function (result) {
       if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
@@ -210,7 +219,7 @@ ColumnLayout {
                 backgroundColor: AtmoColor.mError
                 outlined: false
                 onClicked: {
-                  main.removeConnection(root.pendingDeleteUuid);
+                  main.removeConnection(root.pendingDeleteUuid, pluginApi.runtimeContext);
                   root.pendingDeleteUuid = "";
                   root.pendingDeleteName = "";
                 }

@@ -14,6 +14,9 @@ import qs.Services.UI
 PanelWindow {
     id: root
     required property var pluginApi
+    property var settingsContext: pluginApi?.settingsContext
+    readonly property bool policyCurrent: settingsContext?.current() ?? false
+    readonly property var cfg: settingsContext?.settingsView ?? ({})
 
 
     /***************************
@@ -26,15 +29,15 @@ PanelWindow {
     required property int    screenHeight
 
     // Monitor specific properties
-    readonly property string currentWallpaper: Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.currentWallpaper ?? ""
-    readonly property string fillMode:         Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.fillMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? ""
-    readonly property bool isMuted: Commands.value(pluginApi?.pluginSettings?.monitors, screenName, "isMuted", pluginApi?.manifest?.metadata?.defaultSettings)
-    readonly property bool isPlaying: Commands.value(pluginApi?.pluginSettings?.monitors, screenName, "isPlaying", pluginApi?.manifest?.metadata?.defaultSettings)
-    readonly property int orientation: Commands.value(pluginApi?.pluginSettings?.monitors, screenName, "orientation", pluginApi?.manifest?.metadata?.defaultSettings)
-    readonly property double volume: Commands.value(pluginApi?.pluginSettings?.monitors, screenName, "volume", pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property string currentWallpaper: Commands.record(cfg.monitors, screenName)?.currentWallpaper ?? ""
+    readonly property string fillMode: Commands.record(cfg.monitors, screenName)?.fillMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? ""
+    readonly property bool isMuted: Commands.value(cfg.monitors, screenName, "isMuted", pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property bool isPlaying: Commands.value(cfg.monitors, screenName, "isPlaying", pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property int orientation: Commands.value(cfg.monitors, screenName, "orientation", pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property double volume: Commands.value(cfg.monitors, screenName, "volume", pluginApi?.manifest?.metadata?.defaultSettings)
 
     // Global properties
-    readonly property bool enabled: pluginApi?.pluginSettings?.enabled ?? false
+    readonly property bool enabled: policyCurrent && (cfg.enabled ?? false)
 
 
     /***************************

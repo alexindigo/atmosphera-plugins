@@ -25,6 +25,7 @@
     "filter-files-count": "Fájlok ({count})"
   },
   "settings": {
+    "shared-effect": "History, pins and clipboard actions are shared. This instance selects its history limit, image previews and density.",
     "tab-general": "Általános",
     "max-history-size": "Maximális előzményméret",
     "max-history-size-description": "A vágólap előzményeiben tárolt bejegyzések száma. A következő frissítéskor lép érvénybe.",

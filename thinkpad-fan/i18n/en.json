@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "Popup and palette choices belong to this instance. Fan speed actions affect the shared hardware, and every instance observes the same fan and temperature.",
     "title": "ThinkPad - Fan & Thermal Control - Settings",
     "dynamic-coloring": "Dynamic coloring",
     "dynamic-coloring-desc": "Changes the color of the bar capsule when the fan is stopped or at a custom level",

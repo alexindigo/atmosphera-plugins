@@ -8,6 +8,14 @@ It allows you to quickly jot down thoughts, code snippets, and to-do lists in be
 
 ## IPC
 
+Notes and GitHub Gist synchronization have one shared Main owner. Configure sync
+and its token in Settings > Plugins. Instance Settings explains that shared
+effect and disables independent sync controls; existing overrides are preserved.
+Sync now keeps its existing Apply-completion gate and updates the shared Gist.
+Each sync captures its notes, credentials and target. Credential/target changes
+or owner retirement cancel pending HTTP continuations and Gist-ID publication.
+Notes, Gist IDs and legacy instance content are not migrated or deleted.
+
 Use Noctalia IPC to control the panel:
 
 ```bash

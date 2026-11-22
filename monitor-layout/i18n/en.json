@@ -34,6 +34,7 @@
     "configDescription": "Copy the configuration command for your compositor below. Add it to your config file to make your display layout permanent."
   },
   "settings": {
+    "shared-effect": "This instance selects backend, grid and command policy. All instances edit one shared layout; applying it changes the same physical displays.",
     "backend": {
       "label": "Backend",
       "desc": "Choose how Layout Mon should talk to the compositor.",

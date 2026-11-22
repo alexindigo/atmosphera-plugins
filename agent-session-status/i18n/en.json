@@ -24,6 +24,7 @@
     "unreachable": "Session service is unreachable."
   },
   "settings": {
+    "shared-effect": "One service and session list are shared by all instances. Apply or Restart selects this instance's service address, port and token and clears the common session list. Polling and bar visibility remain instance-specific; Refresh prunes the active service's common sessions.",
     "bindAddress": {
       "label": "Listen address",
       "desc": "Address for the local MCP HTTP service to bind."

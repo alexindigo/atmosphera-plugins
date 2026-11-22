@@ -9,27 +9,56 @@ Item {
   property bool steamRunning: false
   property bool overlayActive: false
   property var steamWindows: []
+  property var _overlayPolicy: null
+  property bool _opening: false
+  property bool _retired: false
+  readonly property bool _policyCurrent: !_retired && (_overlayPolicy?.current ?? false)
+  readonly property bool _observationsReady: luaModeProbed && resolutionProbed
+
+  Component { id: policyComponent; OverlayPolicy {} }
+
+  function policyCurrent(policy) {
+    return !_retired && policy && policy === _overlayPolicy && policy.current;
+  }
+
+  function capturePolicy(context) {
+    context = context || pluginApi?.settingsContext;
+    if (_retired || !context?.current()) return null;
+    return policyComponent.createObject(root, {context: context, values: context.settingsView,
+      defaults: defaults, screenWidth: screenWidth, screenHeight: screenHeight, luaMode: luaMode});
+  }
+
+  function stopPolicy() {
+    for (const process of [detectWindows, detectAllWindows, moveAllWindows, moveWindows,
+      showWorkspace, hideWorkspace, focusAdditionalWindows, executeFocus, detectNewWindows, moveNewWindows])
+      process.running = false;
+    _opening = false;
+  }
+
+  on_PolicyCurrentChanged: { if (!_policyCurrent) stopPolicy(); }
+  on_ObservationsReadyChanged: { if (_observationsReady) beginOpening(_overlayPolicy); }
+  Component.onDestruction: { _retired = true; stopPolicy(); }
+
+  function beginOpening(policy) {
+    if (!policyCurrent(policy) || !_opening || !_observationsReady || overlayActive) return;
+    // Configuration was captured at invocation. Settle common startup observations
+    // once, before any request query or compositor effect can use this policy.
+    policy.screenWidth = screenWidth;
+    policy.screenHeight = screenHeight;
+    policy.luaMode = luaMode;
+    steamWindows = [];
+    detectWindows.lines = [];
+    detectWindows.policy = policy;
+    detectWindows.running = true;
+  }
 
   // Auto-detect screen resolution
   property int screenWidth: 3440  // Default, will be updated
   property int screenHeight: 1440  // Default, will be updated
+  property bool resolutionProbed: false
 
-  // Shortcut to settings and defaults
-  readonly property var cfg: pluginApi?.pluginSettings || ({})
+  // The shared API supplies reference defaults, never an active caller's policy.
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-
-  // User-configurable settings with fallback chain
-  readonly property int gapSize: cfg.gapSize ?? defaults.gapSize ?? 10
-  readonly property real topMarginPercent: cfg.topMarginPercent ?? defaults.topMarginPercent ?? 2.5
-  readonly property real windowHeightPercent: cfg.windowHeightPercent ?? defaults.windowHeightPercent ?? 95
-  readonly property real friendsWidthPercent: cfg.friendsWidthPercent ?? defaults.friendsWidthPercent ?? 10
-  readonly property real mainWidthPercent: cfg.mainWidthPercent ?? defaults.mainWidthPercent ?? 60
-  readonly property real chatWidthPercent: cfg.chatWidthPercent ?? defaults.chatWidthPercent ?? 25
-
-  // When true, the plugin does NOT float/resize/position windows itself.
-  // Instead it relies on a Hyprland custom Lua layout (lua:steam) assigned
-  // to the special:steam workspace. See steam-layout.lua + README.
-  readonly property bool useCustomLayout: cfg.useCustomLayout ?? defaults.useCustomLayout ?? false
 
   // Hyprland >= 0.55 deprecated hyprlang (.conf) in favour of Lua (.lua).
   // Under a Lua config, `hyprctl dispatch <name> <args>` is parsed AS LUA
@@ -37,17 +66,6 @@ Item {
   // at startup and emit the correct syntax for whichever config is active.
   property bool luaMode: false
   property bool luaModeProbed: false
-
-  // Calculate pixel values from percentages (updates automatically when screen size changes)
-  readonly property int topMargin: Math.round(screenHeight * (topMarginPercent / 100))
-  readonly property int windowHeight: Math.round(screenHeight * (windowHeightPercent / 100))
-  readonly property int friendsWidth: Math.round((screenWidth * (friendsWidthPercent / 100)) - gapSize)
-  readonly property int mainWidth: Math.round((screenWidth * (mainWidthPercent / 100)) - (gapSize * 2))
-  readonly property int chatWidth: Math.round((screenWidth * (chatWidthPercent / 100)) - gapSize)
-
-  // Calculate center offset for horizontal centering
-  readonly property int totalWidth: friendsWidth + gapSize + mainWidth + gapSize + chatWidth
-  readonly property int centerOffset: Math.round((screenWidth - totalWidth) / 2)
 
   onPluginApiChanged: {
     if (pluginApi) {
@@ -119,6 +137,7 @@ Item {
         }
       }
     }
+    onExited: root.resolutionProbed = true
   }
 
   // Detect Steam windows (only Friends List, Main, and small Chat windows)
@@ -128,6 +147,7 @@ Item {
     running: false
 
     property var lines: []
+    property var policy: null
 
     stdout: SplitParser {
       onRead: data => {
@@ -136,6 +156,8 @@ Item {
     }
 
     onExited: (exitCode, exitStatus) => {
+      const admitted = policy;
+      if (!root.policyCurrent(admitted)) { lines = []; return; }
       if (exitCode === 0 && lines.length > 0) {
         var allWindows = lines.map(line => JSON.parse(line));
 
@@ -152,43 +174,56 @@ Item {
           if (title === "Steam") return true;
 
           // Accept chat windows (< 30% screen width and < 100% screen height)
-          var maxChatWidth = screenWidth * 0.30;
-          var maxChatHeight = screenHeight * 1.0;
+          var maxChatWidth = admitted.screenWidth * 0.30;
+          var maxChatHeight = admitted.screenHeight * 1.0;
           if (width < maxChatWidth && height < maxChatHeight) return true;
 
           // Reject everything else (games, large auxiliary windows, etc.)
           return false;
         });
 
-        lines = [];
       }
+      lines = [];
+      if (exitCode === 0 && steamWindows.length > 0) {
+        detectAllWindows.allSteamWindows = [];
+        detectAllWindows.policy = admitted;
+        detectAllWindows.running = true;
+      } else root._opening = false;
     }
   }
 
   // Move and position windows
   Process {
     id: moveWindows
+    property var policy: null
     command: ["bash", "-c", ""]
     running: false
 
     onExited: (exitCode, exitStatus) => {
-      if (exitCode === 0) {
-        root.doShowWorkspace();
-      }
+      if (!root.policyCurrent(policy)) return;
+      if (exitCode === 0) root.doShowWorkspace(policy);
+      else root._opening = false;
     }
   }
 
   // Show special workspace (only when opening overlay)
   Process {
     id: showWorkspace
+    property var policy: null
     command: ["bash", "-c", ""]
     running: false
 
     onExited: (exitCode, exitStatus) => {
+      const admitted = policy;
+      if (!root.policyCurrent(admitted)) return;
+      root._opening = false;
       if (exitCode === 0) {
         overlayActive = true;
-        if (!root.useCustomLayout) {
+        if (!admitted.useCustomLayout) {
           Qt.callLater(() => {
+            if (!root.policyCurrent(admitted) || !overlayActive) return;
+            focusAdditionalWindows.addresses = [];
+            focusAdditionalWindows.policy = admitted;
             focusAdditionalWindows.running = true;
           });
         }
@@ -199,11 +234,14 @@ Item {
   // Hide special workspace (only when closing overlay)
   Process {
     id: hideWorkspace
+    property var policy: null
     command: ["bash", "-c", ""]
     running: false
 
     onExited: (exitCode, exitStatus) => {
+      if (!root.policyCurrent(policy)) return;
       overlayActive = false;
+      root._opening = false;
     }
   }
 
@@ -214,6 +252,7 @@ Item {
     running: false
 
     property var addresses: []
+    property var policy: null
 
     stdout: SplitParser {
       onRead: data => {
@@ -225,6 +264,8 @@ Item {
     }
 
     onExited: (exitCode, exitStatus) => {
+      const admitted = policy;
+      if (!root.policyCurrent(admitted) || !overlayActive) { addresses = []; return; }
       if (exitCode === 0 && addresses.length > 0) {
         var focusCommands = [];
 
@@ -243,12 +284,13 @@ Item {
 
           // Bring additional windows to top (without focusing/moving cursor)
           if (!isMain) {
-            focusCommands.push(root.hdAlterTop(addr));
+            focusCommands.push(root.hdAlterTop(addr, admitted));
           }
         }
 
         if (focusCommands.length > 0) {
           executeFocus.command = ["bash", "-c", focusCommands.join(" && ")];
+          executeFocus.policy = admitted;
           executeFocus.running = true;
         }
       }
@@ -259,6 +301,7 @@ Item {
   // Execute focus commands
   Process {
     id: executeFocus
+    property var policy: null
     command: ["bash", "-c", ""]
     running: false
   }
@@ -280,11 +323,12 @@ Item {
     id: newWindowMonitor
     interval: 150
     repeat: true
-    running: overlayActive
+    running: overlayActive && root._policyCurrent && !root._opening
 
     onTriggered: {
       if (!detectNewWindows.running) {
         detectNewWindows.windowData = [];
+        detectNewWindows.policy = root._overlayPolicy;
         detectNewWindows.running = true;
       }
     }
@@ -297,6 +341,7 @@ Item {
     running: false
 
     property var windowData: []
+    property var policy: null
 
     stdout: SplitParser {
       onRead: data => {
@@ -310,6 +355,8 @@ Item {
     }
 
     onExited: (exitCode, exitStatus) => {
+      const admitted = policy;
+      if (!root.policyCurrent(admitted) || !overlayActive) { windowData = []; return; }
       if (exitCode === 0 && windowData.length > 0) {
         var windowsToMove = [];
 
@@ -329,14 +376,15 @@ Item {
           var commands = [];
           for (var j = 0; j < windowsToMove.length; j++) {
             var addr = windowsToMove[j];
-            commands.push(root.hdMoveToSpecial(addr));
-            if (!root.useCustomLayout) {
-              commands.push(root.hdSetFloating(addr));
-              commands.push(root.hdAlterTop(addr));
+            commands.push(root.hdMoveToSpecial(addr, admitted));
+            if (!admitted.useCustomLayout) {
+              commands.push(root.hdSetFloating(addr, admitted));
+              commands.push(root.hdAlterTop(addr, admitted));
             }
           }
-          moveNewWindows.command = ["bash", "-c", commands.join(" && ")];
           if (!moveNewWindows.running) {
+            moveNewWindows.command = ["bash", "-c", commands.join(" && ")];
+            moveNewWindows.policy = admitted;
             moveNewWindows.running = true;
           }
         }
@@ -347,6 +395,7 @@ Item {
   // Execute move commands for new windows
   Process {
     id: moveNewWindows
+    property var policy: null
     command: ["bash", "-c", ""]
     running: false
   }
@@ -358,6 +407,7 @@ Item {
     running: false
 
     property var allSteamWindows: []
+    property var policy: null
 
     stdout: SplitParser {
       onRead: data => {
@@ -371,6 +421,8 @@ Item {
     }
 
     onExited: (exitCode, exitStatus) => {
+      const admitted = policy;
+      if (!root.policyCurrent(admitted)) { allSteamWindows = []; return; }
       if (exitCode === 0 && allSteamWindows.length > 0) {
         var commands = [];
 
@@ -386,17 +438,18 @@ Item {
 
           // Move all Steam windows to the overlay workspace. With the custom
           // Lua layout active the layout tiles them, so we must NOT float.
-          commands.push(root.hdMoveToSpecial(addr));
-          if (!root.useCustomLayout) {
-            commands.push(root.hdSetFloating(addr));
+          commands.push(root.hdMoveToSpecial(addr, admitted));
+          if (!admitted.useCustomLayout) {
+            commands.push(root.hdSetFloating(addr, admitted));
           }
         }
 
         if (commands.length > 0) {
           moveAllWindows.command = ["bash", "-c", commands.join(" && ")];
+          moveAllWindows.policy = admitted;
           moveAllWindows.running = true;
-        }
-      }
+        } else root._opening = false;
+      } else root._opening = false;
       allSteamWindows = [];
     }
   }
@@ -404,20 +457,24 @@ Item {
   // Execute move all windows commands
   Process {
     id: moveAllWindows
+    property var policy: null
     command: ["bash", "-c", ""]
     running: false
 
     onExited: (exitCode, exitStatus) => {
+      const admitted = policy;
+      if (!root.policyCurrent(admitted)) return;
       if (exitCode === 0) {
         Qt.callLater(() => {
-          if (root.useCustomLayout) {
+          if (!root.policyCurrent(admitted)) return;
+          if (admitted.useCustomLayout) {
             // Hyprland's lua:steam layout arranges the windows; just reveal.
-            root.doShowWorkspace();
+            root.doShowWorkspace(admitted);
           } else if (steamWindows.length > 0) {
-            moveWindowsToOverlay();
+            moveWindowsToOverlay(admitted);
           }
         });
-      }
+      } else root._opening = false;
     }
   }
 
@@ -425,76 +482,79 @@ Item {
   // ---- Dual-mode hyprctl dispatch builders -------------------------------
   // Each returns a full `hyprctl dispatch ...` shell fragment, using Lua
   // (hl.dsp.*) syntax under a Lua config or classic syntax under hyprlang.
-  function hdToggleSpecial() {
-    return root.luaMode
+  function hdToggleSpecial(policy) {
+    return policy.luaMode
       ? "hyprctl dispatch 'hl.dsp.workspace.toggle_special(\"steam\")'"
       : "hyprctl dispatch togglespecialworkspace steam";
   }
 
-  function hdMoveToSpecial(addr) {
-    return root.luaMode
+  function hdMoveToSpecial(addr, policy) {
+    return policy.luaMode
       ? "hyprctl dispatch 'hl.dsp.window.move({ workspace = \"special:steam\", follow = false, window = \"address:" + addr + "\" })'"
       : "hyprctl dispatch movetoworkspacesilent special:steam,address:" + addr;
   }
 
-  function hdSetFloating(addr) {
-    return root.luaMode
+  function hdSetFloating(addr, policy) {
+    return policy.luaMode
       ? "hyprctl dispatch 'hl.dsp.window.float({ action = \"enable\", window = \"address:" + addr + "\" })'"
       : "hyprctl dispatch setfloating address:" + addr;
   }
 
-  function hdAlterTop(addr) {
-    return root.luaMode
+  function hdAlterTop(addr, policy) {
+    return policy.luaMode
       ? "hyprctl dispatch 'hl.dsp.window.alter_zorder({ mode = \"top\", window = \"address:" + addr + "\" })'"
       : "hyprctl dispatch alterzorder top,address:" + addr;
   }
 
-  function hdResize(w, h, addr) {
-    return root.luaMode
+  function hdResize(w, h, addr, policy) {
+    return policy.luaMode
       ? "hyprctl dispatch 'hl.dsp.window.resize({ x = " + w + ", y = " + h + ", exact = true, window = \"address:" + addr + "\" })'"
       : "hyprctl dispatch resizewindowpixel exact " + w + " " + h + ",address:" + addr;
   }
 
-  function hdMovePixel(x, y, addr) {
-    return root.luaMode
+  function hdMovePixel(x, y, addr, policy) {
+    return policy.luaMode
       ? "hyprctl dispatch 'hl.dsp.window.move({ x = " + x + ", y = " + y + ", window = \"address:" + addr + "\" })'"
       : "hyprctl dispatch movewindowpixel exact " + x + " " + y + ",address:" + addr;
   }
 
-  function doShowWorkspace() {
-    showWorkspace.command = ["bash", "-c", hdToggleSpecial()];
+  function doShowWorkspace(policy) {
+    if (!policyCurrent(policy)) return;
+    showWorkspace.policy = policy;
+    showWorkspace.command = ["bash", "-c", hdToggleSpecial(policy)];
     showWorkspace.running = true;
   }
 
-  function doHideWorkspace() {
-    hideWorkspace.command = ["bash", "-c", hdToggleSpecial()];
+  function doHideWorkspace(policy) {
+    if (!policyCurrent(policy)) return;
+    hideWorkspace.policy = policy;
+    hideWorkspace.command = ["bash", "-c", hdToggleSpecial(policy)];
     hideWorkspace.running = true;
   }
 
-  function toggleOverlay() {
+  function toggleOverlay(context) {
+    context = context || pluginApi?.settingsContext;
+    if (_retired || !context?.current() || _opening) return false;
     if (!steamRunning) {
       launchSteam.running = true;
-      return;
+      return true;
     }
-
+    stopPolicy();
+    const previous = _overlayPolicy;
+    _overlayPolicy = capturePolicy(context);
+    if (previous) previous.destroy();
+    if (!_overlayPolicy) return false;
+    _opening = true;
     if (overlayActive) {
-      root.doHideWorkspace();
+      root.doHideWorkspace(_overlayPolicy);
     } else {
-
-      // Show overlay - detect main windows first, then all windows
-      detectWindows.running = true;
-
-      // Wait for main windows detection, then detect all windows
-      Qt.callLater(() => {
-        if (steamWindows.length > 0) {
-          // Now detect and move ALL Steam windows
-          detectAllWindows.running = true;
-        }
-      });
+      beginOpening(_overlayPolicy);
     }
+    return true;
   }
 
-  function moveWindowsToOverlay() {
+  function moveWindowsToOverlay(policy) {
+    if (!policyCurrent(policy)) return;
     var commands = [];
 
     for (var i = 0; i < steamWindows.length; i++) {
@@ -503,29 +563,30 @@ Item {
       var title = win.title;
 
       // Position based on title with percentage layout + center offset
-      var x = 0, y = topMargin, w = 800, h = windowHeight;
+      var x = 0, y = policy.topMargin, w = 800, h = policy.windowHeight;
 
       if (title === "Steam") {
         // Main window: center + friends + gap
-        x = centerOffset + friendsWidth + gapSize;
-        w = mainWidth;
+        x = policy.centerOffset + policy.friendsWidth + policy.gapSize;
+        w = policy.mainWidth;
       } else if (title === "Friends List") {
         // Friends: center offset (left side)
-        x = centerOffset;
-        w = friendsWidth;
+        x = policy.centerOffset;
+        w = policy.friendsWidth;
       } else {
         // Chat: center + friends + gap + main + gap
-        x = centerOffset + friendsWidth + gapSize + mainWidth + gapSize;
-        w = chatWidth;
+        x = policy.centerOffset + policy.friendsWidth + policy.gapSize + policy.mainWidth + policy.gapSize;
+        w = policy.chatWidth;
       }
 
       // Position and size the 3 main windows (they are already floating and in overlay)
-      commands.push(root.hdResize(w, h, addr));
-      commands.push(root.hdMovePixel(x, y, addr));
+      commands.push(root.hdResize(w, h, addr, policy));
+      commands.push(root.hdMovePixel(x, y, addr, policy));
     }
 
     if (commands.length > 0) {
       moveWindows.command = ["bash", "-c", commands.join(" && ")];
+      moveWindows.policy = policy;
       moveWindows.running = true;
     }
   }

@@ -9,6 +9,10 @@ import "../common"
 Item {
     id: root
     required property var pluginApi
+    property var settingsContext: pluginApi?.settingsContext
+    property var runtimeWriter: pluginApi
+    readonly property bool policyCurrent: settingsContext?.current() ?? false
+    readonly property var cfg: settingsContext?.settingsView ?? ({})
 
 
     /***************************
@@ -21,11 +25,11 @@ Item {
     required property FolderModel thumbFolderModel
 
     // Monitor specific properties
-    readonly property string currentWallpaper:  Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.currentWallpaper ?? ""
-    readonly property string noctaliaWallpaper: Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.noctaliaWallpaper ?? ""
+    readonly property string currentWallpaper: Commands.record(cfg.monitors, screenName)?.currentWallpaper ?? ""
+    readonly property string noctaliaWallpaper: Commands.record(cfg.monitors, screenName)?.noctaliaWallpaper ?? ""
 
     // Global properties
-    readonly property bool wallpaperEnabled: pluginApi?.pluginSettings?.enabled ?? false
+    readonly property bool wallpaperEnabled: policyCurrent && (cfg.enabled ?? false)
     required property bool thumbCacheReady
     property var thumbnailSource: null
     property bool _initialized: false
@@ -54,8 +58,10 @@ Item {
 
         if (!(thumbnailSource ? thumbnailSource.ownsPath(noctaliaWallpaper) : thumbFolderModel.indexOf(noctaliaWallpaper) !== -1) && !isSimilarToThumbnailGen) {
             _runtimeWallpaper = noctaliaWallpaper;
-            saveTimer.save("noctaliaWallpaper", noctaliaWallpaper, revision);
-            return;
+            if (runtimeWriter?.settingsContext === settingsContext && policyCurrent) {
+                saveTimer.save("noctaliaWallpaper", noctaliaWallpaper, revision);
+                return;
+            }
         }
 
         baselineReady = true;
@@ -84,6 +90,7 @@ Item {
     ***************************/
     onCurrentWallpaperChanged: requestBaseline()
     onWallpaperEnabledChanged: requestBaseline()
+    onSettingsContextChanged: requestBaseline()
 
     Component.onCompleted: {
         // Attaching an enabled plugin is not a preference action. Capture the
@@ -104,7 +111,7 @@ Item {
     ***************************/
     SaveTimer {
         id: saveTimer
-        pluginApi: root.pluginApi
+        pluginApi: root.runtimeWriter
         screenName: root.screenName
         onCompleted: (result, context) => {
             if (context !== root.revision || !root.wallpaperEnabled || root.currentWallpaper === "") {

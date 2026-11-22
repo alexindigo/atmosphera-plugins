@@ -28,14 +28,21 @@ ColumnLayout {
   Connections {
     target: root.pluginApi
     function onSettingsCompleted(result) {
-      if (!root._restartPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current")
+      if (!result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current")
         return;
       root._restartPending = false;
-      root.pluginApi.mainInstance?.restartDaemon();
+      root.pluginApi.mainInstance?.applySettings(root.pluginApi.runtimeContext);
     }
   }
 
   spacing: Style.marginM
+
+  NText {
+    Layout.fillWidth: true
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+    wrapMode: Text.WordWrap
+  }
 
   function saveSettings(restart) {
     if (!pluginApi)

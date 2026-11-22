@@ -17,6 +17,7 @@
     "settings": "设置"
   },
   "settings": {
+    "shared-effect": "Auto-Tile uses one daemon for the desktop. Apply or a runtime action selects its policy; changes affect the same windows for every instance.",
     "enabled": "启用 Auto-Tile",
     "enabled-desc": "在窗口打开或关闭时自动重新分配列宽",
     "per-workspace": "按工作区",

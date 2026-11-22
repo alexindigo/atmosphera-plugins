@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import qs.Commons
 import qs.Widgets
+import qs.Services.UI
 
 Item {
     id: root
@@ -144,10 +145,10 @@ Item {
                                 pluginApi: root.pluginApi
                                 mainInstance: root.mainInstance
 
-                                onMountRequested: (path, label) => mainInstance?.mountDevice(path, label)
-                                onUnmountRequested: (path, label) => mainInstance?.unmountDevice(path, label)
-                                onEjectRequested: (path, parentPath, label) => mainInstance?.ejectDevice(path, parentPath, label)
-                                onOpenRequested: mountpoint => mainInstance?.openInFileBrowser(mountpoint)
+                                onMountRequested: (path, label) => mainInstance?.mountDevice(path, label, root.pluginApi?.settingsContext)
+                                onUnmountRequested: (path, label) => mainInstance?.unmountDevice(path, label, root.pluginApi?.settingsContext)
+                                onEjectRequested: (path, parentPath, label) => mainInstance?.ejectDevice(path, parentPath, label, root.pluginApi?.settingsContext)
+                                onOpenRequested: mountpoint => mainInstance?.openInFileBrowser(mountpoint, root.pluginApi?.settingsContext)
                                 onCopyPathRequested: mountpoint => root.copyToClipboard(mountpoint)
                             }
                         }
@@ -175,7 +176,7 @@ Item {
                                 text: pluginApi?.tr("panel.unmount-all")
                                 icon: "plug-connected-x"
                                 enabled: mountedCount > 0
-                                onClicked: mainInstance?.unmountAll()
+                                onClicked: mainInstance?.unmountAll(root.pluginApi?.settingsContext)
                             }
 
                             NButton {
@@ -183,7 +184,7 @@ Item {
                                 text: pluginApi?.tr("panel.eject-all")
                                 icon: "player-eject"
                                 enabled: devices.length > 0
-                                onClicked: mainInstance?.ejectAll()
+                                onClicked: mainInstance?.ejectAll(root.pluginApi?.settingsContext)
                             }
                         }
                     }

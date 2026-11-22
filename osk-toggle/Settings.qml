@@ -23,6 +23,13 @@ ColumnLayout {
 
   spacing: Style.marginL
 
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+  }
+
   NPluginSettingsField {
     field: root.backendField
     NComboBox {
@@ -102,7 +109,7 @@ ColumnLayout {
       text: recheckDone ? pluginApi?.tr("settings.recheck.done") : pluginApi?.tr("settings.recheck.label")
       property bool recheckDone: false
       onClicked: {
-        pluginApi?.mainInstance?.recheckState();
+        pluginApi?.mainInstance?.recheckState(pluginApi.runtimeContext);
         recheckDone = true;
         recheckTimer.restart();
       }
@@ -117,6 +124,9 @@ ColumnLayout {
   function saveSettings() {
     if (!pluginApi)
       return;
-    pluginApi.saveSettings();
+    pluginApi.saveSettings(result => {
+      if ((result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        pluginApi.mainInstance?.activatePolicy(pluginApi.runtimeContext);
+    });
   }
 }

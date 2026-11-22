@@ -6,6 +6,7 @@
     }
   },
   "settings": {
+    "shared-effect": "Recording is shared across widgets. This widget uses its own frame rate, duration and output folder when starting the recorder; stopping affects the shared recording.",
     "outputDir": {
       "label": "Output directory",
       "description": "Where to save the .gif files. Leading ~ is expanded to $HOME."

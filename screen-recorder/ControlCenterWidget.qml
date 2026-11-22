@@ -16,7 +16,7 @@ AtmoIconButton {
     colorBg: mainInstance?.isRecording ? AtmoColor.mPrimary : (mainInstance?.isReplaying ? Qt.alpha(AtmoColor.mSecondary, 0.25) : Style.capsuleColor)
     onClicked: {
         if (pluginApi && pluginApi.mainInstance) {
-            pluginApi.mainInstance.toggleRecording();
+            pluginApi.mainInstance.toggleRecording(pluginApi.settingsContext);
         }
     }
 }

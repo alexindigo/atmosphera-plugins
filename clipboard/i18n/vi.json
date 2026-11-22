@@ -25,6 +25,7 @@
     "filter-files-count": "Tep ({count})"
   },
   "settings": {
+    "shared-effect": "History, pins and clipboard actions are shared. This instance selects its history limit, image previews and density.",
     "tab-general": "Chung",
     "max-history-size": "Kich thuoc lich su toi da",
     "max-history-size-description": "So luong muc bang nho tam trong lich su. Co hieu luc khi lam moi lan tiep theo.",

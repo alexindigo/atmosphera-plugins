@@ -40,6 +40,7 @@ ColumnLayout {
             return false;
         }
 
+        if (!pluginApi.mainInstance?.admitRuntime(pluginApi)) return false;
         var names = monitorSpecific ? [screenName] : Array.from(Quickshell.screens).map(screen => screen.name);
         return names.length > 0 && monitorCommand.submit(names.map(name => ({op: "set", screen: name, field: key, value: value})));
     }
@@ -148,6 +149,8 @@ ColumnLayout {
     ToolRow {
         pluginApi:       root.pluginApi
         screenName:      root.screenName
+        randomAction: () => root.pluginApi.mainInstance.random(root.screenName, root.pluginApi)
+        clearAction: () => root.pluginApi.mainInstance.clear(root.screenName, root.pluginApi)
         settingWriter: (key, value) => {
             if (root.saveMonitorProperty(key, value)) root.pluginApi.saveSettings();
         }

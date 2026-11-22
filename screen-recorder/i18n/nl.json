@@ -25,6 +25,7 @@
   },
   "name": "Schermrecorder",
   "settings": {
+    "shared-effect": "Capture actions use this instance's settings when started. Recording and replay state are shared across all instances; stopping affects the active operation.",
     "audio": {
       "audio-sources-both": "Systeemuitvoer + microfooningang",
       "audio-sources-microphone-input": "Microfooningang",

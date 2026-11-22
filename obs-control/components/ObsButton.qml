@@ -10,7 +10,7 @@ AtmoIconButtonHot {
   property ShellScreen screen
   property var pluginApi
 
-  readonly property var service: root.pluginApi?.mainInstance
+  readonly property var service: root.pluginApi?.mainInstance?.settingsConsumerFor(root.pluginApi.settingsContext)
   readonly property bool actionBusy: root.service?.actionBusy ?? false
   readonly property bool obsRunning: root.service?.obsRunning ?? false
   readonly property bool websocket: root.service?.websocket ?? false
@@ -64,7 +64,7 @@ AtmoIconButtonHot {
       return
     }
 
-    root.service.runPrimaryAction(root.screen, root)
+    root.service.runPrimaryAction(root.screen, root, root.pluginApi)
   }
 
   onRightClicked: {

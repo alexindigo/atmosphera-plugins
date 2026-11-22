@@ -25,6 +25,7 @@
     "filter-files-count": "Pel ({count})"
   },
   "settings": {
+    "shared-effect": "History, pins and clipboard actions are shared. This instance selects its history limit, image previews and density.",
     "tab-general": "Giştî",
     "max-history-size": "Mezinahiya here zede ya diroke",
     "max-history-size-description": "Hejmara ketinen panoya yen di diroke de. Di nuvekirin a pe de bi bandor dibe.",

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import Qt.labs.folderlistmodel
 
 import "./common"
 import "./settings"
@@ -13,6 +14,52 @@ ColumnLayout {
   readonly property var activeField: pluginApi?.field("active") ?? null
   readonly property var isPlayingField: pluginApi?.field("isPlaying") ?? null
   readonly property var isMutedField: pluginApi?.field("isMuted") ?? null
+  readonly property var currentWallpaperField: pluginApi?.field("currentWallpaper") ?? null
+  readonly property string randomFolderPath: Settings.preprocessPath(root.wallpapersFolder)
+  property var pendingRandom: null
+  property var randomChoices: null
+  onRandomFolderPathChanged: {
+    if (pendingRandom && pendingRandom.folder !== randomFolderPath) cancelRandomWallpaper();
+  }
+
+  function cancelRandomWallpaper() {
+    pendingRandom = null;
+    if (randomChoices) randomChoices.destroy();
+    randomChoices = null;
+  }
+
+  function stageRandomWallpaper() {
+    cancelRandomWallpaper();
+    if (!Settings.preprocessPath(root.wallpapersFolder).length) return;
+    pendingRandom = {folder: Settings.preprocessPath(root.wallpapersFolder)};
+    randomChoices = wallpaperChoicesComponent.createObject(root, {sourceFolder: pendingRandom.folder});
+  }
+
+  function finishRandomWallpaper(model) {
+    const request = pendingRandom;
+    if (!request || model !== randomChoices || request.folder !== randomFolderPath || model.status !== FolderListModel.Ready || String(model.folder) !== String(Qt.resolvedUrl("file://" + request.folder))) return;
+    pendingRandom = null;
+    if (model.count > 0) currentWallpaperField.set(model.get(Math.floor(Math.random() * model.count), "filePath"));
+    randomChoices = null;
+    Qt.callLater(function () { model.destroy(); });
+  }
+
+  function stageClearWallpaper() {
+    cancelRandomWallpaper();
+    currentWallpaperField.set("");
+  }
+
+  Component {
+    id: wallpaperChoicesComponent
+    FolderListModel {
+      id: choices
+      required property string sourceFolder
+      folder: sourceFolder.length ? "file://" + sourceFolder : ""
+      nameFilters: ["*.mp4", "*.avi", "*.mov"]
+      showDirs: false
+      onStatusChanged: root.finishRandomWallpaper(choices)
+    }
+  }
 
   readonly property bool active: root.activeField?.value || false
   readonly property bool isPlaying: root.isPlayingField?.value || false
@@ -31,6 +78,13 @@ ColumnLayout {
   readonly property bool settingsDirty: false
 
   spacing: Style.marginM
+
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+  }
 
   // Active toggle
   NPluginSettingsField {
@@ -58,6 +112,8 @@ ColumnLayout {
         isMuted: root.isMuted
         playingWriter: value => root.isPlayingField.set(value)
         muteWriter: value => root.isMutedField.set(value)
+        randomAction: root.stageRandomWallpaper
+        clearAction: root.stageClearWallpaper
       }
     }
   }
@@ -145,8 +201,10 @@ ColumnLayout {
   Connections {
     target: root.pluginApi
     function onSettingsCompleted(result) {
-      if ((result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+      if ((result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current") {
+        root.pluginApi.mainInstance?.activatePolicy(root.pluginApi.runtimeContext);
         Logger.d("mpvpaper", "Settings saved");
+      }
     }
   }
 }

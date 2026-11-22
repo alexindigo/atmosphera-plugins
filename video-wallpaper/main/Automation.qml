@@ -9,16 +9,19 @@ import "../common/MonitorCommands.js" as Commands
 Item {
     id: root
     required property var pluginApi
+    property var settingsContext: pluginApi?.settingsContext
+    readonly property bool policyCurrent: settingsContext?.current() ?? false
+    readonly property var cfg: settingsContext?.settingsView ?? ({})
 
 
     /***************************
     * PROPERTIES
     ***************************/
-    readonly property var globalSettings: Commands.automationSettings(pluginApi?.pluginSettings, null, pluginApi?.manifest?.metadata?.defaultSettings)
-    readonly property bool   automation:      globalSettings.automation
+    readonly property var globalSettings: Commands.automationSettings(cfg, null, pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property bool   automation: policyCurrent && globalSettings.automation
     readonly property string automationMode:  globalSettings.automationMode
     readonly property real   automationTime:  globalSettings.automationTime
-    readonly property bool   monitorSpecific: pluginApi?.pluginSettings?.monitorSpecific ?? false
+    readonly property bool   monitorSpecific: cfg.monitorSpecific ?? false
 
     signal random(screenName: var)
     signal nextWallpaper(screenName: var)
@@ -82,13 +85,13 @@ Item {
         model: Quickshell.screens
         Timer {
             required property var modelData
-            readonly property var selectedSettings: Commands.automationSettings(root.globalSettings, Commands.record(root.pluginApi?.pluginSettings?.monitors, modelData.name))
+            readonly property var selectedSettings: Commands.automationSettings(root.globalSettings, Commands.record(root.cfg.monitors, modelData.name))
             readonly property bool selectedAutomation: selectedSettings.automation
             readonly property string selectedMode: selectedSettings.automationMode
             readonly property real selectedTime: selectedSettings.automationTime
             interval: selectedTime * 1000
             repeat: true
-            running: root.monitorSpecific && selectedAutomation
+            running: root.policyCurrent && root.monitorSpecific && selectedAutomation
             onTriggered: {
                 var name = modelData.name;
                 if (selectedMode === "random") root.random(name);

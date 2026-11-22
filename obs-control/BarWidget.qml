@@ -18,7 +18,7 @@ Item {
 
   readonly property bool pillDirection: BarService.getPillDirection(root)
 
-  readonly property var service: root.pluginApi?.mainInstance
+  readonly property var service: root.pluginApi?.mainInstance?.settingsConsumerFor(root.pluginApi.settingsContext)
   readonly property bool actionBusy: root.service?.actionBusy ?? false
   readonly property bool obsRunning: root.service?.obsRunning ?? false
   readonly property bool websocket: root.service?.websocket ?? false
@@ -197,7 +197,7 @@ Item {
       }
 
       if (mouse.button === Qt.LeftButton) {
-        root.service.runPrimaryAction(root.screen, root)
+        root.service.runPrimaryAction(root.screen, root, root.pluginApi)
       } else if (mouse.button === Qt.RightButton) {
         root.service.runSecondaryAction()
       } else if (mouse.button === Qt.MiddleButton) {

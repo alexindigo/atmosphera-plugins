@@ -25,6 +25,7 @@
     "filter-files-count": "Archivos ({count})"
   },
   "settings": {
+    "shared-effect": "History, pins and clipboard actions are shared. This instance selects its history limit, image previews and density.",
     "tab-general": "General",
     "max-history-size": "Tamaño máximo del historial",
     "max-history-size-description": "Número de entradas del portapapeles en el historial. Se aplica en la próxima actualización.",

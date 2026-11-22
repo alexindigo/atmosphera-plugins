@@ -67,6 +67,13 @@ ColumnLayout {
 
   spacing: Style.marginL
 
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+  }
+
   RowLayout {
     Layout.fillWidth: true
     spacing: Style.marginM
@@ -253,7 +260,10 @@ ColumnLayout {
   function saveSettings() {
     if (!pluginApi)
       return;
-    pluginApi.saveSettings();
+    pluginApi.saveSettings(result => {
+      if ((result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        pluginApi.mainInstance?.activatePolicy(pluginApi.runtimeContext);
+    });
   }
 
   Process {

@@ -12,6 +12,8 @@ import sys
 import time
 import uuid
 import argparse
+import ctypes
+import signal
 from copy import deepcopy
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -19,6 +21,35 @@ from typing import Any
 
 
 FALSE_VALUES = {"false", "0", "no", "off", "disabled", "paused"}
+
+
+def run_owned_command(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess:
+    """Own each finite CLI call, including calls from HTTP request threads.
+
+    A fresh interpreter binds before exec instead of using preexec_fn after a
+    threaded fork. This owns the invoked CLI, not independent gateway services.
+    subprocess.run's existing timeout still kills and joins that same process.
+    """
+    return subprocess.run(
+        [sys.executable, "-B", str(Path(__file__).resolve()),
+         "--owned-cli-child", str(os.getpid()), *command],
+        **kwargs,
+    )
+
+
+def exec_owned_command(parent_pid: int, command: list[str]) -> None:
+    libc = ctypes.CDLL(None, use_errno=True)
+    prctl = libc.prctl
+    prctl.argtypes = [ctypes.c_int, ctypes.c_ulong, ctypes.c_ulong,
+                      ctypes.c_ulong, ctypes.c_ulong]
+    prctl.restype = ctypes.c_int
+    if prctl(1, signal.SIGKILL, 0, 0, 0) != 0:  # Linux PR_SET_PDEATHSIG
+        raise OSError(ctypes.get_errno(), "cannot bind Hermes CLI lifetime")
+    if parent_pid <= 1 or os.getppid() != parent_pid:
+        raise SystemExit("Hermes CLI owner already retired")
+    if not command:
+        raise SystemExit("Hermes CLI command missing")
+    os.execvp(command[0], command)
 
 
 def detect_hermes_home() -> str:
@@ -1071,7 +1102,7 @@ def create_server(
     httpd.state = state
     httpd.rpc = rpc
     httpd.hermes_command = hermes_command
-    httpd.command_runner = subprocess.run
+    httpd.command_runner = run_owned_command
     httpd.bridge_token = ""  # set by run_server after token load
     state._state["bridge"]["status"] = "online"
     state._state["bridge"]["error"] = ""
@@ -1113,6 +1144,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     argv = list(argv if argv is not None else sys.argv[1:])
+    # Handle the private exec mode before venv re-exec or server initialization.
+    if argv and argv[0] == "--owned-cli-child":
+        exec_owned_command(int(argv[1]), argv[2:])
+        return 0  # exec never returns
     args = parse_args(argv)
     reexec_with_hermes_python(args, argv)
     if args.once_health:

@@ -51,13 +51,11 @@ Item {
         return AtmoColor.mOnSurface;
 }
 
-    property int batPercent: 0
-    property real wattNum: 0.0
-    property string batStatus: pluginApi.tr("battery.status-unknown")
-    property string timeRemaining: "..."
-    
-    property string currentProfile: "balanced"
-    property int batteryThreshold: 80
+    readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+    readonly property int batPercent: settingsConsumer?.batPercent ?? 0
+    readonly property real wattNum: settingsConsumer?.wattNum ?? 0
+    readonly property string batStatus: settingsConsumer?.batStatus ?? ""
+    readonly property string currentProfile: settingsConsumer?.currentProfile ?? "balanced"
 
     readonly property real contentWidth: layout.implicitWidth + Style.marginM * 2
     readonly property real contentHeight: capsuleHeight
@@ -90,187 +88,7 @@ Item {
         false
 
     function getBatteryIcon() {
-        if (root.batStatus === pluginApi.tr("battery.status-charging")) {
-            return "battery-charging";
-        }
-        if (root.batStatus === pluginApi.tr("battery.status-full")) {
-            return "battery-charging-2";
-        }
-        
-        if (root.batPercent >= 86) return "battery-4";
-        if (root.batPercent >= 56) return "battery-3";
-        if (root.batPercent >= 31) return "battery-2";
-        if (root.batPercent >= 11) return "battery-1";
-        return "battery";
-    }
-
-    // ===== Helpers =====
-
-    function parseEta(out) {
-        if (!out) return "...";
-        let lines = out.split("\n");
-        for (let i = 0; i < lines.length; i++) {
-            let line = lines[i].trim();
-            if (line.indexOf("time to empty:") === 0 || line.indexOf("time to full:") === 0) {
-                let value = line.substring(line.indexOf(":") + 1).trim();
-                return formatUpowerTime(value);
-            }
-        }
-        return "...";
-    }
-
-    function formatUpowerTime(value) {
-        let parts = value.split(/\s+/);
-        let num = parseFloat(parts[0]);
-        let unit = parts.length > 1 ? parts[1] : "";
-        if (isNaN(num)) return "...";
-        let minutes = 0;
-        if (unit.indexOf("hour") === 0) minutes = num * 60;
-        else if (unit.indexOf("minute") === 0) minutes = num;
-        else if (unit.indexOf("second") === 0) minutes = num / 60;
-        else if (unit.indexOf("day") === 0) minutes = num * 1440;
-        else return value;
-        let total = Math.round(minutes);
-        let h = Math.floor(total / 60);
-        let m = total % 60;
-        return h > 0 ? (h + "h " + m + "m") : (m + "m");
-    }
-
-    // ===== Power Profiles =====
-
-    Process {
-        id: profileGetter
-        command: ["powerprofilesctl", "get"]
-        running: false
-        stdout: SplitParser {
-            onRead: data => {
-                root.currentProfile = data.trim();
-            }
-        }
-    }
-
-    Process {
-        id: profileSetter
-        running: false
-    }
-
-    function updatePowerProfile() {
-        profileGetter.running = true;
-    }
-
-    function setPowerProfile(profile) {
-        profileSetter.command = ["powerprofilesctl", "set", profile];
-        profileSetter.running = true;
-        root.currentProfile = profile;
-    }
-
-    Component.onCompleted: {
-        if (pluginApi) {
-            pluginApi.mainInstance = root;
-        }
-        updatePowerProfile();
-        thresholdLoader.reload();
-    }
-
-    // ===== Battery Logic =====
-
-    function setBatteryThreshold(value) {
-        root.batteryThreshold = value;
-        let devPath = pluginApi?.pluginSettings?.batteryDevice ?? "/sys/class/power_supply/BAT0";
-        thresholdSetter.running = false;
-        thresholdSetter.command = ["sh", "-c", "echo " + value + " > " + devPath + "/charge_control_end_threshold"];
-        thresholdSetter.running = true;
-    }
-
-    Process {
-        id: thresholdSetter
-        onExited: (code) => {
-            if (code !== 0) {
-                Logger.e("BatteryAndPowerManagement", "Error writing battery threshold.");
-            }
-        }
-    }
-
-    // ===== ETA via upower =====
-
-    Process {
-        id: etaGetter
-        running: false
-        stdout: StdioCollector {
-            onStreamFinished: {
-                root.timeRemaining = root.parseEta(text);
-            }
-        }
-        onExited: (code) => {
-            if (code !== 0) {
-                root.timeRemaining = "...";
-            }
-        }
-    }
-
-    Timer {
-        id: globalRefreshTimer
-        interval: 2000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: {
-            let devPath = pluginApi?.pluginSettings?.batteryDevice ?? "/sys/class/power_supply/BAT0";
-            let dev = devPath.split("/").pop() || "BAT0";
-            batLoader.device = dev;
-            batLoader.reload();
-            thresholdLoader.reload();
-
-            etaGetter.running = false;
-            etaGetter.command = ["upower", "-i", "/org/freedesktop/UPower/devices/battery_" + dev];
-            etaGetter.running = true;
-        }
-    }
-
-    FileView {
-        id: thresholdLoader
-        path: (pluginApi?.pluginSettings?.batteryDevice ?? "/sys/class/power_supply/BAT0") + "/charge_control_end_threshold"
-        printErrors: false
-        onLoaded: {
-            let val = text();
-            if (val) {
-                let parsed = parseInt(val.trim());
-                if (!isNaN(parsed) && parsed >= 50 && parsed <= 100) root.batteryThreshold = parsed;
-            }
-        }
-    }
-
-    FileView {
-        id: batLoader
-        property string device: "BAT0"
-        path: "/sys/class/power_supply/" + device + "/uevent"
-        printErrors: false
-
-        onLoaded: {
-            let content = text();
-            if (!content) return;
-
-            let lines = content.split("\n");
-            let cap = 0, rate = 0;
-            let statusRaw = "Unknown";
-
-            for (let i = 0; i < lines.length; i++) {
-                let line = lines[i].trim();
-                if (line.indexOf("POWER_SUPPLY_CAPACITY=") === 0) cap = parseInt(line.split("=")[1]) || 0;
-                else if (line.indexOf("POWER_SUPPLY_POWER_NOW=") === 0) rate = parseInt(line.split("=")[1]) || 0;
-                else if (line.indexOf("POWER_SUPPLY_STATUS=") === 0) statusRaw = line.split("=")[1] || "Unknown";
-            }
-
-            root.batPercent = cap;
-            
-            if (statusRaw === "Charging") root.batStatus = pluginApi.tr("battery.status-charging");
-            else if (statusRaw === "Full") root.batStatus = pluginApi.tr("battery.status-full");
-            else if (statusRaw === "Discharging") root.batStatus = pluginApi.tr("battery.status-discharging");
-            else if (statusRaw === "Not charging") root.batStatus = pluginApi.tr("battery.status-not-charging");
-            else root.batStatus = pluginApi.tr("battery.status-unknown");
-
-            root.wattNum = rate / 1000000.0;
-        }
+        return settingsConsumer?.getBatteryIcon() ?? "battery";
     }
 
     // ===== UI =====
@@ -331,8 +149,7 @@ Item {
             if (mouse.button === Qt.RightButton) {
                 PanelService.showContextMenu(contextMenu, root, screen)
             } else {
-                root.updatePowerProfile();
-                thresholdLoader.reload();
+                root.settingsConsumer?.refreshAll();
                 pluginApi.openPanel(root.screen, root);
             }
         }

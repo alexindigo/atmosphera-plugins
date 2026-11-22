@@ -17,6 +17,7 @@
     "settings": "설정"
   },
   "settings": {
+    "shared-effect": "Auto-Tile uses one daemon for the desktop. Apply or a runtime action selects its policy; changes affect the same windows for every instance.",
     "enabled": "Auto-Tile 활성화",
     "enabled-desc": "창을 열거나 닫을 때 열 너비를 자동으로 재분배합니다",
     "per-workspace": "워크스페이스별",

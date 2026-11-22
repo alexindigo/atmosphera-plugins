@@ -12,6 +12,7 @@
     "vpnRemoveError": "Der VPN \"{name}\" konnte nicht entfernt werden"
   },
   "settings": {
+    "shared-effect": "VPN connections are shared across the system. This widget keeps its own display and action notification choices; connecting, disconnecting or removing a VPN affects every widget.",
     "pluginSettings": "Plugin Einstellungen",
     "connectedColor": "Verknüpfte Farbe",
     "connectedColorDescription": "Wähle die Farbe für das Symbol und den Text aus, die bei bestehender Verbindung angezeigt werden sollen",

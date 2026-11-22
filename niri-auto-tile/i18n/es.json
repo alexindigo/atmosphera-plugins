@@ -17,6 +17,7 @@
     "settings": "Ajustes"
   },
   "settings": {
+    "shared-effect": "Auto-Tile uses one daemon for the desktop. Apply or a runtime action selects its policy; changes affect the same windows for every instance.",
     "enabled": "Activar Auto-Tile",
     "enabled-desc": "Redistribuir automaticamente los anchos de columna al abrir o cerrar ventanas",
     "per-workspace": "Por espacio de trabajo",

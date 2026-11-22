@@ -26,6 +26,7 @@
   },
   "name": "屏幕录制器",
   "settings": {
+    "shared-effect": "Capture actions use this instance's settings when started. Recording and replay state are shared across all instances; stopping affects the active operation.",
     "audio": {
       "audio-sources-both": "系统输出 + 麦克风输入",
       "audio-sources-microphone-input": "麦克风输入",

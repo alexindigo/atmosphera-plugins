@@ -17,10 +17,11 @@ Item {
   anchors.fill: parent
 
   readonly property var mainInst: pluginApi?.mainInstance
+  readonly property var configClient: mainInst?.settingsConsumerFor(pluginApi?.settingsContext)
   readonly property var liveOutputs: mainInst?.liveOutputs || []
-  readonly property var niriOutputs: mainInst?.niriOutputs || []
+  readonly property var niriOutputs: configClient?.outputs || []
   readonly property bool isNiri: mainInst?.isNiri || false
-  readonly property bool loading: mainInst?.loading || false
+  readonly property bool loading: (mainInst?.liveLoading || false) || (configClient?.loading || false)
   readonly property bool modifying: mainInst?.modifying || false
 
   readonly property var transforms: ["normal", "90", "180", "270", "flipped", "flipped-90", "flipped-180", "flipped-270"]
@@ -35,7 +36,7 @@ Item {
   onVisibleChanged: {
     if (!mainInst) return
     if (visible) {
-      mainInst.refresh()
+      mainInst.refresh(root.pluginApi?.settingsContext)
       mainInst.startMonitor()
     } else {
       mainInst.stopMonitor()
@@ -73,7 +74,7 @@ Item {
         AtmoIconButton {
           icon: "reload"; baseSize: 28
           enabled: !root.loading && !root.modifying
-          onClicked: { if (root.mainInst) root.mainInst.refresh() }
+          onClicked: { if (root.mainInst) root.mainInst.refresh(root.pluginApi?.settingsContext) }
         }
 
         AtmoIconButton {

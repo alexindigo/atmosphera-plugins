@@ -44,6 +44,13 @@ ColumnLayout {
 
   spacing: Style.marginM
 
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+  }
+
   /***************************
   * PROPERTIES
   ***************************/
@@ -265,6 +272,9 @@ ColumnLayout {
                        })
 
         onSaveMonitorProperty: (key, value) => root.saveMonitorProperty(key, value)
+        onSaveWallpaperChoice: (path, screens) => {
+          if (screens.length) root.monitorCommand.submit(screens.map(name => ({op: "set", screen: name, field: "currentWallpaper", value: path})));
+        }
       }
 
       AutomationTab {
@@ -307,6 +317,7 @@ ColumnLayout {
 
     pluginApi.saveSettings(function (result) {
       if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current") {
+        root.pluginApi.mainInstance?.activatePolicy(root.pluginApi.runtimeContext);
         general.acknowledgeSettings(captured.general);
         automation.acknowledgeSettings(captured.automation);
         advanced.acknowledgeSettings(captured.advanced);

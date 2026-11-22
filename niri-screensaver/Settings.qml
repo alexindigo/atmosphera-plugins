@@ -1,9 +1,7 @@
 // Settings.qml - niri-screensaver plugin settings tab
 //
-// Edit-copy pattern: form fields write to local `edit*` properties; the shell
-// calls saveSettings() when the user clicks Apply, at which point we copy the
-// edit values back into pluginApi.pluginSettings and call saveSettings() on
-// the plugin API. This matches the noctalia-plugins AGENTS.md convention.
+// Explicit field intents stage through the selected editor. Only accepted
+// Apply selects the common config/idle owner's applied runtime context.
 //
 // SPDX-License-Identifier: GPL-3.0-only
 import Qt.labs.folderlistmodel
@@ -35,6 +33,13 @@ ColumnLayout {
   readonly property var showNowPlayingField: pluginApi?.field("showNowPlaying") ?? null
   readonly property var nowPlayingDurationField: pluginApi?.field("nowPlayingDuration") ?? null
   spacing: Style.marginL
+
+  NText {
+    Layout.fillWidth: true
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+    wrapMode: Text.WordWrap
+  }
 
   // ----- Settings access (cfg → defaults → hardcoded) -----
   property var cfg: pluginApi?.pluginSettings || ({})
@@ -70,6 +75,13 @@ ColumnLayout {
   // ----- Save handler (called by the shell on Apply) -----
   // Explicit field intents only; the selected session owns Apply/Reset.
   readonly property bool settingsDirty: false
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root.mainInstance?.applySettings(root.pluginApi.runtimeContext);
+    }
+  }
 
   function saveSettings() {
     if (!pluginApi) {
@@ -463,9 +475,9 @@ ColumnLayout {
       text: pluginApi?.tr("settings.trigger-now")
       icon: "player-play"
       onClicked: {
-        var argv = root.mainInstance ? root.mainInstance._launcherArgv() : ["niri-screensaver-launch", "launch"];
+        var argv = root.mainInstance ? root.mainInstance._launcherArgv(root.pluginApi.runtimeContext) : [];
         triggerNowProcess.command = argv;
-        triggerNowProcess.running = true;
+        triggerNowProcess.running = argv.length > 0;
       }
     }
     NButton {
@@ -473,9 +485,9 @@ ColumnLayout {
       icon: "stop"
       outlined: true
       onClicked: {
-        var argv = root.mainInstance ? root.mainInstance._killArgv() : ["niri-screensaver-launch", "kill"];
+        var argv = root.mainInstance ? root.mainInstance._killArgv(root.pluginApi.runtimeContext) : [];
         stopNowProcess.command = argv;
-        stopNowProcess.running = true;
+        stopNowProcess.running = argv.length > 0;
       }
     }
   }

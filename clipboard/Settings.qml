@@ -19,9 +19,8 @@ import qs.Widgets
 //   showImagePreviews  — NToggle, default true
 //   density            — NComboBox (compact/comfortable/spacious), default "comfortable"
 //
-// The two-phase save pattern means edits are held in local "value*"
-// properties until the user clicks Apply; saveSettings() flushes them into
-// pluginApi.pluginSettings and calls pluginApi.saveSettings().
+// Controls submit explicit field intent. The selected host owns Apply/Reset;
+// this page never reconstructs or publishes a preference snapshot.
 ColumnLayout {
   id: root
   spacing: Style.marginM
@@ -35,22 +34,21 @@ ColumnLayout {
 
   // --- Pending state ------------------------------------------------------
   //
-  // Local buffer. UI controls bind to and mutate these properties; they
-  // are flushed into pluginApi.pluginSettings only when the user clicks
-  // Apply. The ?? fallbacks MUST match manifest.json metadata.defaultSettings
-  // exactly — drift between the two is a real bug (a plugin instance that
-  // predates a defaults change falls back to the QML literal here, not
-  // the manifest value).
+  // Read-only presentation of the selected native field handles.
   readonly property int valueMaxHistorySize: root.maxHistorySizeField?.value ?? 100
   readonly property bool valueShowImagePreviews: root.showImagePreviewsField?.value ?? true
   readonly property string valueDensity: root.densityField?.value ?? "comfortable"
 
   // --- Controls -----------------------------------------------------------
+  NText {
+    Layout.fillWidth: true
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("settings.shared-effect")
+    wrapMode: Text.WordWrap
+    color: AtmoColor.mOnSurfaceVariant
+  }
 
-  // maxHistorySize — number of cliphist entries kept in the list.
-  // Takes effect on the next refresh (Main.qml's refresh() reads
-  // pluginSettings.maxHistorySize on every call, so no explicit signal
-  // is needed — see docs/specs/settings-panel.md §Constraints).
+  // maxHistorySize limits this context's projection, not shared content.
   NPluginSettingsField {
     field: root.maxHistorySizeField
     NSpinBox {
@@ -113,10 +111,7 @@ ColumnLayout {
 
   // --- Save contract ------------------------------------------------------
   //
-  // Called by the shell when the user clicks the global "Apply" button in
-  // the Noctalia Settings dialog. Flushes pending values into
-  // pluginApi.pluginSettings, then calls pluginApi.saveSettings() which
-  // persists settings.json to ~/.config/noctalia/plugins/clipboard/.
+  // Observe the selected host's eventual completion. No direct publication.
   //
   // Null-guard matches the idiom used in every other entry point — if the
   // shell calls saveSettings() before injecting pluginApi (edge case on

@@ -10,6 +10,8 @@ import "./common/MonitorCommands.js" as Commands
 Item {
     id: root
     property var pluginApi: null
+    onPluginApiChanged: pluginApi?.mainInstance?.registerRuntime(pluginApi)
+    Component.onCompleted: pluginApi?.mainInstance?.registerRuntime(pluginApi)
     readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
         function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
         function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
@@ -44,6 +46,7 @@ Item {
             return;
         }
 
+        if (!pluginApi.mainInstance?.admitRuntime(pluginApi)) return;
         var names = monitorSpecific ? [screen.name] : Array.from(Quickshell.screens).map(screen => screen.name);
         if (names.length) monitorCommand.submit(names.map(name => ({op: "set", screen: name, field: key, value: value})));
     }
@@ -97,10 +100,12 @@ Item {
                     root.pluginApi?.openPanel(root.screen, root);
                     break;
                 case "enable":
+                    root.pluginApi.mainInstance?.admitRuntime(root.pluginApi);
                     root.pluginApi.pluginSettings.enabled = true;
                     root.pluginApi.saveSettings();
                     break;
                 case "disable":
+                    root.pluginApi.mainInstance?.admitRuntime(root.pluginApi);
                     root.pluginApi.pluginSettings.enabled = false;
                     root.pluginApi.saveSettings();
                     break;

@@ -16,6 +16,7 @@
     "Vfio": "VFIO Passthrough"
   },
   "settings": {
+    "shared-effect": "GPU mode and device observations are shared. Polling and requests use this instance's applied policy; mode changes affect every instance. ROG notification control remains unavailable.",
     "debug": {
       "description": "Виводить доп. інформацію в консоль.",
       "label": "Режим налагодження"

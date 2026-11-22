@@ -19,8 +19,9 @@ Item {
     id: root
 
     // Plugin API (injected by PluginPanelSlot)
-    property QtObject pluginApi: null
-    readonly property QtObject pluginCore: pluginApi?.mainInstance
+    property var pluginApi: null
+    readonly property var pluginCore: pluginApi?.mainInstance
+    readonly property var settingsConsumer: pluginCore?.settingsConsumerFor(pluginApi?.settingsContext)
 
     // SmartPanel properties (required for panel behavior)
     readonly property Rectangle geometryPlaceholder: panelContainer
@@ -172,7 +173,7 @@ Item {
         TapHandler {
             enabled: gpuButton._interactive
             gesturePolicy: TapHandler.ReleaseWithinBounds
-            onTapped: root.pluginCore?.setMode(gpuButton.mode)
+            onTapped: root.pluginCore?.setMode(gpuButton.mode, root.pluginApi?.settingsContext)
         }
 
         HoverHandler {
@@ -228,7 +229,7 @@ Item {
                 tooltipText: I18n.tr("tooltips.refresh")
                 baseSize: Style.baseWidgetSize * 0.8
                 enabled: root.pluginCore?.available && !root.pluginCore?.busy
-                onClicked: root.pluginCore?.refresh()
+                onClicked: root.settingsConsumer?.refresh()
 
                 RotationAnimation {
                     id: rotationAnimator

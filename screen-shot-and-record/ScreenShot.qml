@@ -10,6 +10,7 @@ import QtQuick.Layouts
 PanelWindow {
     id: root
     property var pluginApi: null
+    property var actionPolicy: null
     visible: true
     color: "transparent"
     WlrLayershell.layer: WlrLayer.Overlay
@@ -24,7 +25,7 @@ PanelWindow {
     }
 
     property var target: ""
-    property bool enableCross: pluginApi?.pluginSettings?.enableCross
+    property bool enableCross: actionPolicy?.settings.enableCross
                                ?? pluginApi?.manifest?.metadata?.defaultSettings?.enableCross
                                ?? true
 
@@ -40,14 +41,15 @@ PanelWindow {
         id: checkRecordingProc
         command: ["pidof", "wf-recorder"]
         running: false
-        onExited: (exitCode) => {
+         onExited: (exitCode) => {
+            if (!root.actionPolicy?.context.current()) return
             if (exitCode === 0) {
                 if (root.target === "record" || root.target === "recordsound"){
                     // Stop flow: if recorder is already running, stop it immediately.
                     if (pluginApi?.mainInstance) {
                         pluginApi.mainInstance.recordingActive = false
                     }
-                    const stopRecordingNotificationsEnabled = pluginApi?.pluginSettings?.recordingNotifications
+                    const stopRecordingNotificationsEnabled = root.actionPolicy.settings.recordingNotifications
                                                           ?? pluginApi?.manifest?.metadata?.defaultSettings?.recordingNotifications
                                                           ?? true
                     const stopArgs = ["bash", pluginApi.pluginDir + "/record.sh"]
@@ -75,6 +77,7 @@ PanelWindow {
     }
 
     function startCapture() {
+        if (!actionPolicy?.context.current()) return false
         const isRecordingTarget = (root.target === "record" || root.target === "recordsound")
         if (isRecordingTarget) {
             checkRecordingProc.running = true
@@ -134,6 +137,10 @@ PanelWindow {
     }
 
     function finish() {
+        if (!actionPolicy?.context.current()) {
+            closeSelector()
+            return
+        }
         const mode = (root.mouseButton === Qt.RightButton) ? "edit" : "copy"
 
         if (root.regionWidth > 0 && root.regionHeight > 0) {

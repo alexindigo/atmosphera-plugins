@@ -21,6 +21,15 @@ ColumnLayout {
 
   spacing: Style.marginL
 
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("settings.shared-effect")
+    Layout.fillWidth: true
+    wrapMode: Text.WordWrap
+    color: AtmoColor.mOnSurface
+    pointSize: Style.fontSizeS
+  }
+
   NPluginSettingsField {
     field: root.outputDirField
     NTextInput {

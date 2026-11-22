@@ -1192,12 +1192,12 @@ Item {
                             root.selectedIndex = index;
                             root.pluginApi?.mainInstance?.copyToClipboard(clipboardId);
                             if (root.pluginApi) {
-                                root.pluginApi.closePanel(screen);
                                 const autoPaste = root.pluginApi.settingsView?.autoPaste ?? false;
                                 const rmbOnly = root.pluginApi.settingsView?.autoPasteOnRightClick ?? false;
                                 if (autoPaste && !rmbOnly) {
-                                    root.pluginApi.mainInstance?.triggerAutoPaste(root.pluginApi.settingsView?.autoPasteDelay);
+                                    root.pluginApi.mainInstance?.triggerAutoPaste(root.pluginApi.settingsView?.autoPasteDelay, root.pluginApi.settingsContext);
                                 }
+                                root.pluginApi.closePanel(screen);
                             }
                         }
 
@@ -1208,8 +1208,8 @@ Item {
                             if (autoPaste && rmbOnly) {
                                 root.pluginApi?.mainInstance?.copyToClipboard(clipboardId);
                                 if (root.pluginApi) {
+                                    root.pluginApi.mainInstance?.triggerAutoPaste(root.pluginApi.settingsView?.autoPasteDelay, root.pluginApi.settingsContext);
                                     root.pluginApi.closePanel(screen);
-                                    root.pluginApi.mainInstance?.triggerAutoPaste(root.pluginApi.settingsView?.autoPasteDelay);
                                 }
                             }
                         }
@@ -1236,7 +1236,7 @@ Item {
                         onAddToTodoClicked: {
                             if (preview) {
                                 // Direct call to Main.qml function (no internal IPC)
-                                root.pluginApi?.mainInstance?.addTodoWithText(preview.substring(0, 200), 0);
+                                root.pluginApi?.mainInstance?.addTodoWithText(preview.substring(0, 200), 0, root.pluginApi.settingsContext);
                             }
                         }
                     }
@@ -1317,12 +1317,12 @@ Item {
                         onClicked: {
                             root.pluginApi?.mainInstance?.copyPinnedToClipboard(modelData.id);
                             if (root.pluginApi) {
-                                root.pluginApi.closePanel(screen);
                                 const autoPaste = root.pluginApi.settingsView?.autoPaste ?? false;
                                 const rmbOnly = root.pluginApi.settingsView?.autoPasteOnRightClick ?? false;
                                 if (autoPaste && !rmbOnly) {
-                                    root.pluginApi.mainInstance?.triggerAutoPaste(root.pluginApi.settingsView?.autoPasteDelay);
+                                    root.pluginApi.mainInstance?.triggerAutoPaste(root.pluginApi.settingsView?.autoPasteDelay, root.pluginApi.settingsContext);
                                 }
+                                root.pluginApi.closePanel(screen);
                             }
                         }
 
@@ -1332,8 +1332,8 @@ Item {
                             if (autoPaste && rmbOnly) {
                                 root.pluginApi?.mainInstance?.copyPinnedToClipboard(modelData.id);
                                 if (root.pluginApi) {
+                                    root.pluginApi.mainInstance?.triggerAutoPaste(root.pluginApi.settingsView?.autoPasteDelay, root.pluginApi.settingsContext);
                                     root.pluginApi.closePanel(screen);
-                                    root.pluginApi.mainInstance?.triggerAutoPaste(root.pluginApi.settingsView?.autoPasteDelay);
                                 }
                             }
                         }

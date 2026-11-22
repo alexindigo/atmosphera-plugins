@@ -6,6 +6,12 @@ import qs.Widgets
 ColumnLayout {
   id: root
   property var pluginApi: null
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+  }
   readonly property var screenshotPathField: pluginApi?.field("screenshotPath") ?? null
   readonly property var videoPathField: pluginApi?.field("videoPath") ?? null
   readonly property var filenameFormatField: pluginApi?.field("filenameFormat") ?? null

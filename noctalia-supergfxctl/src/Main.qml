@@ -31,7 +31,15 @@ QtObject {
         Nothing
     }
 
-    property QtObject pluginApi: null
+    property var pluginApi: null
+    property bool _retired: false
+    property var _settingsConsumers: new Map()
+    property var _refreshPolicy: null
+    property var _pendingRefreshPolicy: null
+    property var _modePolicy: null
+    property int _modeTarget: Main.SGFXMode.None
+    readonly property bool _refreshCurrent: !root._retired && (root._refreshPolicy?.context?.current() ?? false)
+    readonly property bool _modeCurrent: !root._retired && (root._modePolicy?.context?.current() ?? false)
     readonly property string pluginId: pluginApi?.pluginId
     readonly property string pluginVersion: pluginApi?.manifest.version ?? "???"
 
@@ -67,6 +75,32 @@ QtObject {
     readonly property int pendingAction: sgfx.pendingAction
     readonly property bool hasPendingAction: sgfx.pendingAction !== Main.SGFXAction.Nothing
     readonly property int pendingMode: sgfx.pendingMode
+
+    readonly property Component clientFactory: Component { GpuSettingsClient {} }
+    function settingsConsumerFor(context) {
+        if (!context?.current() || _retired) return null;
+        if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+        const client = clientFactory.createObject(root, {
+            settingsContext: context, defaults: root.pluginApi.manifest.metadata.defaultSettings,
+            available: Qt.binding(function () { return root.available; }),
+            busy: Qt.binding(function () { return root.busy; }),
+            requestRefresh: function () { root.refresh(context); },
+            retire: function (retired) { root._settingsConsumers.delete(context); retired.destroy(); }
+        });
+        _settingsConsumers.set(context, client);
+        return client;
+    }
+
+    function capturePolicy(context) {
+        context = context || pluginApi?.settingsContext;
+        const client = settingsConsumerFor(context);
+        if (!client?.current) return null;
+        return {context: context, debug: client.debug, patchPending: client.patchPending};
+    }
+
+    on_RefreshCurrentChanged: { if (!_refreshCurrent) refreshProc.running = false; }
+    on_ModeCurrentChanged: { if (!_modeCurrent) setModeProc.running = false; }
+    Component.onDestruction: { _retired = true; refreshProc.running = false; setModeProc.running = false; }
 
     Component.onCompleted: {
         refresh();
@@ -154,12 +188,44 @@ QtObject {
         return `${label} | ${root.getActionLabel(root.pendingAction)}`;
     }
 
-    function refresh(): void {
-        sgfx.refresh();
+    function refresh(context): bool {
+        return _refreshWithPolicy(capturePolicy(context));
     }
 
-    function setMode(mode: int): bool {
-        return sgfx.setMode(mode);
+    function _refreshWithPolicy(policy): bool {
+        if (_retired || !policy?.context?.current()) return false;
+        // Process.running=true used to queue one further query. Retain its
+        // admitted policy rather than dropping it or pairing old output with it.
+        _pendingRefreshPolicy = policy;
+        _pumpRefresh();
+        return true;
+    }
+
+    function _pumpRefresh() {
+        if (_retired || refreshProc.running || !_pendingRefreshPolicy) return;
+        const policy = _pendingRefreshPolicy;
+        _pendingRefreshPolicy = null;
+        if (!policy.context.current()) return;
+        _refreshPolicy = policy;
+        sgfx.refresh(policy);
+    }
+
+    function setMode(mode: int, context): bool {
+        const policy = capturePolicy(context);
+        if (!policy || setModeProc.running) return false;
+        _modePolicy = policy;
+        _modeTarget = mode;
+        return sgfx.setMode(mode, policy);
+    }
+
+    function logFor(policy, ...msg): void {
+        if (policy?.debug) Logger.i(root.pluginId, `v${pluginVersion}/${version}`, ...msg);
+    }
+    function warnFor(policy, ...msg): void {
+        if (policy?.debug) Logger.w(root.pluginId, `v${pluginVersion}/${version}`, ...msg);
+    }
+    function errorFor(policy, ...msg): void {
+        if (policy?.debug) Logger.e(root.pluginId, `v${pluginVersion}/${version}`, ...msg);
     }
 
     function log(...msg): void {
@@ -187,34 +253,25 @@ QtObject {
         stdout: StdioCollector {
             // TODO: supergfxctl sometimes takes time to exit after printing
             // investigate or find a workaround
-            onStreamFinished: sgfx.parseOutput(text.trim())
+            onStreamFinished: {
+                if (root._refreshCurrent) sgfx.parseOutput(text.trim(), root._refreshPolicy);
+            }
         }
         onExited: exitCode => {
-            if (exitCode !== 0) {
+            if (root._refreshCurrent && exitCode !== 0) {
                 sgfx.available = false;
             }
+            Qt.callLater(root._pumpRefresh);
         }
     }
 
-    readonly property Timer pollingTimer: Timer {
-        interval: root.pluginSettings.supergfxctl.pollingInterval
-        repeat: true
-        running: root.available && !root.busy && root.pluginSettings.supergfxctl.polling
-
-        onTriggered: {
-            if (root.busy) {
-                root.log("poll skipped: supergfxctl is busy");
-                return;
-            }
-
-            root.refresh();
-        }
-    }
+    readonly property var settingsConsumer: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
+    readonly property var pollingTimer: settingsConsumer?.pollingTimer ?? null
 
     readonly property Connections notificationListener: Connections {
         target: NotificationServer {
             onNotification: notification => {
-                root.log(notification);
+                if (!root._retired) root.log(notification);
             }
         }
     }
@@ -222,19 +279,22 @@ QtObject {
     readonly property Process setModeProc: Process {
         stderr: StdioCollector {
             onStreamFinished: {
-                if (root.debug && text) {
-                    root.error(text);
-                }
+                if (root._modeCurrent && text) root.errorFor(root._modePolicy, text);
             }
         }
         onExited: exitCode => {
+            const policy = root._modePolicy;
+            if (!root._modeCurrent) return;
             // pending mode has been set manually in sgfx.setMode
             // if process exited successfully, set pending action
             // if not, clear pending mode
-            if (root.pluginSettings.supergfxctl.patchPending) {
+            if (policy.patchPending) {
                 if (exitCode === 0) {
-                    root.sgfx.pendingAction = root.sgfx.requiredAction(root.sgfx.pendingMode, root.sgfx.mode);
+                    const action = root.sgfx.requiredAction(root._modeTarget, root.sgfx.manualRequest.baseMode);
+                    root.sgfx.manualRequest = Object.assign({}, root.sgfx.manualRequest, {action: action});
+                    root.sgfx.pendingAction = action;
                 } else {
+                    root.sgfx.manualRequest = null;
                     root.sgfx.pendingMode = Main.SGFXMode.None;
                 }
             }
@@ -263,7 +323,7 @@ QtObject {
             //
             // for now, we provide the user with 2 options:
             // guess the required action ourselves or rely on supergfxctl
-            root.sgfx.refresh();
+            root._refreshWithPolicy(policy);
         }
     }
 
@@ -274,6 +334,8 @@ QtObject {
         property int mode: Main.SGFXMode.None
         property int pendingAction: Main.SGFXAction.Nothing
         property int pendingMode: Main.SGFXMode.None
+        // A daemon-reported pending mode is not an admitted manual command.
+        property var manualRequest: null
         property int supportedModesMask: 0
 
         function isValidMode(v: int): bool {
@@ -352,31 +414,28 @@ QtObject {
                     })
             })
 
-        function setMode(modeEnum: int): bool {
+        function setMode(modeEnum: int, policy): bool {
             if (!isValidMode(modeEnum)) {
-                root.error("tried setting mode to invalid int", modeEnum);
+                root.errorFor(policy, "tried setting mode to invalid int", modeEnum);
                 return false;
             }
 
             // manually set pending mode
             // pending action will be set on process exit if it was successfull
-            if (root.pluginSettings.supergfxctl.patchPending) {
+            manualRequest = policy.patchPending ? {baseMode: mode, targetMode: modeEnum, action: Main.SGFXAction.Nothing} : null;
+            if (policy.patchPending) {
                 pendingMode = modeEnum;
             }
             setModeProc.command = ["supergfxctl", "--mode", modeEnumReversed[modeEnum]];
             setModeProc.running = true;
 
-            if (root.debug) {
-                root.log(`Setting mode ${modeEnum}`);
-            }
+            root.logFor(policy, `Setting mode ${modeEnum}`);
 
             return true;
         }
 
-        function refresh(): void {
-            if (root.debug) {
-                root.log("refreshing...");
-            }
+        function refresh(policy): void {
+            root.logFor(policy, "refreshing...");
             refreshProc.running = true;
         }
 
@@ -386,8 +445,9 @@ QtObject {
             }) > 0;
         }
 
-        function parseOutput(text: string): bool {
-            root.log("[parseOutput] start");
+        function parseOutput(text: string, policy): bool {
+            if (root._retired || !policy?.context?.current()) return false;
+            root.logFor(policy, "[parseOutput] start");
 
             if (text == "") {
                 available = false;
@@ -411,7 +471,7 @@ QtObject {
             // mainly so that .log functions print correct version
             version = lineVersion;
 
-            root.log(`[parseOutput] version=${lineVersion}, mode=${lineMode}, pendingMode=${linePendMode}, pendingAction=${linePendAction}`);
+            root.logFor(policy, `[parseOutput] version=${lineVersion}, mode=${lineMode}, pendingMode=${linePendMode}, pendingAction=${linePendAction}`);
 
             if (linePendMode === "Unknown") {
                 linePendMode = "None";
@@ -430,7 +490,7 @@ QtObject {
                 // for versions < 5.2.7, add Integrated and Hybrid if current mode is AsusMuxDgpu
                 // https://gitlab.com/asus-linux/supergfxctl/-/merge_requests/44
                 if (!isVersionGreater(lineVersion, "5.2.7") && newMode === Main.SGFXMode.AsusMuxDgpu) {
-                    root.warn("fixing supergfxctl bug [merge request #44]: adding missing Integrated and Hybrid modes");
+                    root.warnFor(policy, "fixing supergfxctl bug [merge request #44]: adding missing Integrated and Hybrid modes");
 
                     if (!modeEnums.includes(Main.SGFXMode.Integrated))
                         modeEnums.push(Main.SGFXMode.Integrated);
@@ -442,32 +502,32 @@ QtObject {
                     newSupportedMask |= 1 << modeEnums[i];
                 }
             } else {
-                root.warn("[parseOutput] no supported modes reported");
+                root.warnFor(policy, "[parseOutput] no supported modes reported");
             }
 
             supportedModesMask = newSupportedMask;
 
-            if (!root.pluginSettings.supergfxctl.patchPending) {
+            if (!policy.patchPending) {
                 mode = newMode;
                 pendingMode = newPendingMode;
                 pendingAction = newPendingAction;
             } else {
-                // only set if pending mode has not been set manually
-                // generally, this is the case when launch supergfxctl for the first time
-                // and there is a pending mode
-                if (pendingMode === Main.SGFXMode.None) {
+                if (!manualRequest) {
                     mode = newMode;
                     pendingMode = newPendingMode;
-                    pendingAction = requiredAction(root.sgfx.mode, newPendingMode);
-                    root.log("[parseOutput] state updated:", `mode=${mode}, pendingMode=${pendingMode}, pendingAction=${pendingAction}`);
+                    pendingAction = requiredAction(mode, newPendingMode);
+                    root.logFor(policy, "[parseOutput] state updated:", `mode=${mode}, pendingMode=${pendingMode}, pendingAction=${pendingAction}`);
                 } else {
-                    root.log("[parseOutput] pending mode already set manually, skipping mode update");
+                    mode = manualRequest.baseMode;
+                    pendingMode = manualRequest.targetMode;
+                    pendingAction = manualRequest.action;
+                    root.logFor(policy, "[parseOutput] retaining admitted manual mode request");
                 }
             }
 
             available = true;
 
-            root.log(`[parseOutput] completed successfully (available=${available}, supportedMask=0x${newSupportedMask.toString(16)})`);
+            root.logFor(policy, `[parseOutput] completed successfully (available=${available}, supportedMask=0x${newSupportedMask.toString(16)})`);
 
             return available;
         }

@@ -15,6 +15,8 @@ import "./panel"
 Item {
     id: root
     property var pluginApi: null
+    onPluginApiChanged: pluginApi?.mainInstance?.registerRuntime(pluginApi)
+    Component.onCompleted: pluginApi?.mainInstance?.registerRuntime(pluginApi)
 
     readonly property var geometryPlaceholder: panelContainer
     readonly property bool allowAttach: true
@@ -113,6 +115,7 @@ Item {
 
                     onClicked: {
                         if (root.pluginApi == null) return
+                        if (!root.pluginApi.mainInstance?.admitRuntime(root.pluginApi)) return;
 
                         root.pluginApi.pluginSettings.monitorSpecific = !root.monitorSpecific;
                         root.pluginApi.saveSettings();
@@ -127,6 +130,7 @@ Item {
                     checked: root.wallpaperEnabled
                     onToggled: checked => {
                         if(root.pluginApi == null) return;
+                        if (!root.pluginApi.mainInstance?.admitRuntime(root.pluginApi)) return;
 
                         root.pluginApi.pluginSettings.enabled = checked;
                         root.pluginApi.saveSettings();
@@ -177,6 +181,7 @@ Item {
 
         onAccepted: paths => {
             if (paths.length > 0 && root.pluginApi != null) {
+                if (!root.pluginApi.mainInstance?.admitRuntime(root.pluginApi)) return;
                 Logger.d("video-wallpaper", "Selected the following wallpaper folder:", paths[0]);
 
                 root.pluginApi.pluginSettings.wallpapersFolder = paths[0];

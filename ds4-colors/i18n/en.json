@@ -18,6 +18,7 @@
     "error": "Error: {msg}"
   },
   "settings": {
+    "shared-effect": "Color choices belong to this instance. Applying a color changes the same connected controllers for every instance. Automatic reconnect restoration uses plugin-level settings.",
     "lightbar_color": "Lightbar Color",
     "recent_colors": "Recent Colors",
     "widget_settings": "Widget Settings",

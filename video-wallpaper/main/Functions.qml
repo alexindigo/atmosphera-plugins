@@ -8,9 +8,13 @@ import "../common/MonitorCommands.js" as Commands
 Item {
     id: root
     required property var pluginApi
-    readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
-        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
-        function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
+    property var settingsContext: pluginApi?.settingsContext
+    readonly property var cfg: settingsContext?.settingsView ?? pluginApi?.pluginSettings
+    property var pendingBrowse: null
+    property var browseChoices: null
+    onSettingsContextChanged: {
+        if (pendingBrowse && pendingBrowse.context !== settingsContext) cancelBrowse();
+    }
 
 
     /***************************
@@ -20,67 +24,91 @@ Item {
     required property FolderModel folderModel
 
     // Global properties
-    readonly property bool   monitorSpecific:  pluginApi?.pluginSettings?.monitorSpecific  ?? false
-    readonly property string wallpapersFolder: pluginApi?.pluginSettings?.wallpapersFolder ?? pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
+    readonly property bool   monitorSpecific: cfg?.monitorSpecific ?? false
+    readonly property string wallpapersFolder: cfg?.wallpapersFolder ?? pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
 
 
     /***************************
     * FUNCTIONS
     ***************************/
-    function random(screen) {
-        if (wallpapersFolder === "") {
-            Logger.e("video-wallpaper", "Wallpapers folder is empty!");
-            return;
-        }
-        if (folderModel.count === 0) {
-            Logger.e("video-wallpaper", "No valid video files found!");
-            return;
-        }
-
-        const rand = Math.floor(Math.random() * folderModel.count);
-        const url = folderModel.get(rand, "filePath");
-        setWallpaper(url, screen);
+    function random(screen, runtimeApi) {
+        return browse("random", screen, runtimeApi);
     }
 
-    function clear(screen) {
-        setWallpaper("", screen);
+    function clear(screen, runtimeApi) {
+        setWallpaper("", screen, runtimeApi);
     }
 
-    function nextWallpaper(screen) {
-        if (wallpapersFolder === "") {
-            Logger.e("video-wallpaper", "Wallpapers folder is empty!");
-            return;
-        }
-        if (folderModel.count === 0) {
-            Logger.e("video-wallpaper", "No valid video files found!");
-            return;
-        }
+    function nextWallpaper(screen, runtimeApi) {
+        return browse("next", screen, runtimeApi);
+    }
 
-        Logger.d("video-wallpaper", "Choosing next wallpaper...");
+    function cancelBrowse() {
+        pendingBrowse = null;
+        if (browseChoices) browseChoices.destroy();
+        browseChoices = null;
+    }
 
-        // Even if the file is not in wallpapers folder, aka -1, it sets the nextIndex to 0 then
+    function browse(mode, screen, runtimeApi) {
+        runtimeApi = runtimeApi || pluginApi;
+        if (!runtimeApi?.settingsContext?.current()) return false;
+        cancelBrowse();
+        const selected = runtimeApi.settingsContext.settingsView;
+        const names = selected.monitorSpecific && typeof screen === "string" ? [screen] : Array.from(Quickshell.screens).map(value => value.name);
         const name = typeof screen === "string" ? screen : Quickshell.screens[0]?.name;
-        const currentIndex = folderModel.indexOf(Commands.record(pluginApi?.pluginSettings?.monitors, name)?.currentWallpaper);
-        const nextIndex = (currentIndex + 1) % folderModel.count;
-        const url = folderModel.get(nextIndex);
-        setWallpaper(url, screen);
+        pendingBrowse = {writer: runtimeApi, context: runtimeApi.settingsContext, folder: String(selected.wallpapersFolder ?? ""),
+            screens: names, current: Commands.record(selected.monitors, name)?.currentWallpaper ?? "", mode: mode};
+        if (!pendingBrowse.folder.length) { cancelBrowse(); return false; }
+        browseChoices = browseChoicesComponent.createObject(root, {sourceFolder: Settings.preprocessPath(pendingBrowse.folder)});
+        return true;
     }
 
-    function setWallpaper(path, screen) {
-        if (root.pluginApi == null) {
+    function finishBrowse(model) {
+        const request = pendingBrowse;
+        if (!request || model !== browseChoices) return;
+        if (!request.context.current() || request.context !== settingsContext || request.folder !== String(request.context.settingsView.wallpapersFolder ?? "")) { cancelBrowse(); return; }
+        if (!model.ready) return;
+        pendingBrowse = null;
+        if (model.count > 0) {
+            const index = request.mode === "random" ? Math.floor(Math.random() * model.count) : (model.indexOf(request.current) + 1) % model.count;
+            setWallpaper(model.get(index), undefined, request.writer, request.screens);
+        }
+        browseChoices = null;
+        Qt.callLater(function () { model.destroy(); });
+    }
+
+    Component {
+        id: browseChoicesComponent
+        FolderModel {
+            id: choices
+            required property string sourceFolder
+            folder: sourceFolder
+            filters: ["*.mp4", "*.avi", "*.mov", "*.webm", "*.gif"]
+            onReadyChanged: root.finishBrowse(choices)
+        }
+    }
+
+    function setWallpaper(path, screen, runtimeApi, admittedScreens) {
+        runtimeApi = runtimeApi || pluginApi;
+        if (!runtimeApi?.settingsContext?.current()) {
             Logger.e("video-wallpaper", "Can't set the wallpaper because pluginApi is null.");
             return;
         }
 
-        var names = monitorSpecific && typeof screen === "string" ? [screen] : Array.from(Quickshell.screens).map(value => value.name);
+        const selected = runtimeApi.settingsContext.settingsView;
+        var names = admittedScreens || (selected.monitorSpecific && typeof screen === "string" ? [screen] : Array.from(Quickshell.screens).map(value => value.name));
         if (!names.length) return;
         var edits = [];
         for (var name of names) {
             edits.push({op: "set", screen: name, field: "currentWallpaper", value: path});
             edits.push({op: "set", screen: name, field: "isPlaying", value: true});
         }
+        const writer = runtimeApi;
+        const monitorCommand = Commands.create(function () { return writer.pluginSettings.monitors; },
+            function (value) { writer.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
+            function () { return writer.manifest?.metadata?.defaultSettings; });
         monitorCommand.submit(edits);
 
-        pluginApi.saveSettings();
+        writer.saveSettings();
     }
 }

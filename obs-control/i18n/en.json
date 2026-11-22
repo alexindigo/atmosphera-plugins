@@ -63,6 +63,7 @@
     }
   },
   "settings": {
+    "shared-effect": "OBS, its connection, output state and managed launches are shared. This instance selects its display, polling and action policy; its actions affect the same OBS process.",
     "header": {
       "label": "OBS Control",
       "description": "Choose how OBS appears in the bar, Control Center, and quick actions."

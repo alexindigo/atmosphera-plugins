@@ -35,6 +35,7 @@
     "hint-esc-save": "İptal etmek için ESC"
   },
   "settings": {
+    "sharedEffect": "All widgets use the same shared notes and GitHub Gist. Configure synchronization in Settings > Plugins. Sync now updates that shared Gist after Apply; it does not use instance credentials.",
     "saved": "Yapışkan Notlar ayarları kaydedildi",
     "syncNow": "Şimdi eşitle",
     "syncEnabled": {
@@ -55,6 +56,7 @@
       "updated": "Notlar Github Gist'e kaydedildi."
     },
     "errors": {
+      "configuration-changed": "Sync stopped because its credentials or Gist changed. Sync again to use the applied settings.",
       "missing-token": "Eşitlemeden önce Github tokeni gereklidir."
     }
   }

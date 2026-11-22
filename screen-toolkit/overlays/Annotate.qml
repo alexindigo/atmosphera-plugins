@@ -11,6 +11,8 @@ Variants {
     id: root
     property string imagePath: TempPaths.path("screen-toolkit-annotate.png")
     property var    mainInstance: null
+    property var actionPolicy: null
+    readonly property bool busy: instances.some(window => window.operationBusy)
     property bool   isVisible: false
     property int    regionX: 0
     property int    regionY: 0
@@ -19,7 +21,9 @@ Variants {
     property real   zoomScale:  1.0
     property string lastRegion: ""
     property var _primaryScreen: null
-    function parseAndShow(regionStr, imgPath, screen) {
+    function parseAndShow(regionStr, imgPath, screen, policy) {
+        if (busy || !policy?.context.current()) return false
+        actionPolicy = policy
         var parts = regionStr.trim().split(" ")
         if (parts.length < 2) return
         var xy = parts[0].split(",")
@@ -36,6 +40,7 @@ Variants {
         isVisible    = true
     }
     function parseAndShowZoomed(regionStr, imgPath, scale) {
+        if (!actionPolicy?.context.current()) return false
         var parts = regionStr.trim().split(" ")
         if (parts.length < 2) return
         var xy = parts[0].split(",")
@@ -55,7 +60,7 @@ Variants {
         _primaryScreen = null
     }
     function _annotateOutputDir() {
-        var custom = mainInstance?.pluginApi?.pluginSettings?.screenshotPath ?? ""
+        var custom = actionPolicy?.settings.screenshotPath ?? ""
         if (custom.trim() !== "") return U.expandPath(custom.trim().replace(/\/$/, ""), Quickshell.env("HOME"))
         return "__auto__"
     }
@@ -63,6 +68,7 @@ Variants {
     delegate: PanelWindow {
         id: overlayWin
         required property ShellScreen modelData
+        readonly property bool operationBusy: isSaving || isUploading || zoomProc.running
         readonly property bool isPrimary: modelData === root._primaryScreen
         screen: modelData
         anchors { top: true; bottom: true; left: true; right: true }
@@ -301,6 +307,7 @@ Variants {
             ctx.restore()
         }
         function requestZoom(scale) {
+            if (!root.actionPolicy?.context.current()) return false
             var region = root.lastRegion
             if (region === "") return
             if (scale === 1.0) {
@@ -312,7 +319,7 @@ Variants {
                 for (var ri = 0; ri < overlayWin.strokes.length; ri++)
                     if (overlayWin.strokes[ri].type === "step") restoredCount++
                 overlayWin.stepCounter = restoredCount
-                root.parseAndShow(region, TempPaths.path("screen-toolkit-annotate.png"), root._primaryScreen)
+                root.parseAndShow(region, TempPaths.path("screen-toolkit-annotate.png"), root._primaryScreen, root.actionPolicy)
                 _invalidateCache()
                 drawCanvas.requestPaint()
                 return
@@ -324,6 +331,7 @@ Variants {
                 overlayWin.stepCounter   = 1
             }
             _pendingZoomScale = scale
+            zoomProc.actionPolicy = root.actionPolicy
             overlayWin.panX   = 0.0
             overlayWin.panY   = 0.0
             var newW = Math.round(root.regionW * scale)
@@ -372,7 +380,9 @@ Variants {
         }
         ToolProcess {
             id: zoomProc
+            property var actionPolicy: null
             onExited: (code) => {
+                if (actionPolicy !== root.actionPolicy || !actionPolicy?.context.current()) return
                 if (code === 0) {
                     root.parseAndShowZoomed(
                         root.lastRegion,
@@ -383,8 +393,10 @@ Variants {
         }
         ToolProcess {
             id: copyProc
+            property var actionPolicy: null
             onExited: (code) => {
                 overlayWin.isSaving = false
+                if (actionPolicy !== root.actionPolicy || !actionPolicy?.context.current()) return
                 if (code === 0) {
                     ToastService.showNotice(root.mainInstance?.pluginApi?.tr("annotate.copied"), "", "copy")
                     root.hide()
@@ -395,8 +407,10 @@ Variants {
         }
         ToolProcess {
             id: clipFlattenProc
+            property var actionPolicy: null
             onExited: (code) => {
                 overlayWin.isSaving = false
+                if (actionPolicy !== root.actionPolicy || !actionPolicy?.context.current()) return
                 if (code === 0) {
                     ToastService.showNotice(root.mainInstance?.pluginApi?.tr("annotate.copied"), "", "copy")
                     root.hide()
@@ -407,9 +421,11 @@ Variants {
         }
         ToolProcess {
             id: saveFileProc
+            property var actionPolicy: null
             stdout: StdioCollector {}
             onExited: (code) => {
                 overlayWin.isSaving = false
+                if (actionPolicy !== root.actionPolicy || !actionPolicy?.context.current()) return
                 if (code === 0) {
                     var dest = saveFileProc.stdout.text.trim()
                     ToastService.showNotice(
@@ -440,21 +456,25 @@ Variants {
         }
         ToolProcess {
             id: flattenForShareProc
+            property var actionPolicy: null
             onExited: (code) => {
+                if (!actionPolicy?.context.current()) { overlayWin.isUploading = false; return }
                 if (code !== 0) {
                     overlayWin.isUploading  = false
                     overlayWin.uploadFailed = true
                     return
                 }
-                overlayWin._doUpload(TempPaths.path("screen-toolkit-share.png"))
+                overlayWin._doUpload(TempPaths.path("screen-toolkit-share.png"), actionPolicy)
             }
         }
         ToolProcess {
-			id: uploadProc
+            id: uploadProc
+            property var actionPolicy: null
 			stdout: StdioCollector {}
 			onExited: (code) => {
 				overlayWin.isUploading = false
-				var skipPop = root.mainInstance?.pluginApi?.pluginSettings?.shareSkipPopover ?? false
+				if (!actionPolicy?.context.current()) return
+				var skipPop = actionPolicy.settings.shareSkipPopover ?? false
 				if (code === 0) {
 					var url = uploadProc.stdout.text.trim()
 					if (url.startsWith("http")) {
@@ -1415,7 +1435,7 @@ Variants {
                     ActionBtn {
                         iconName:  "refresh"
                         tip:       root.mainInstance?.pluginApi?.tr("annotate.refresh")
-                        onClicked: { root.hide(); root.mainInstance?.runAnnotate() }
+                    onClicked: { const api = root.actionPolicy?.api; root.hide(); root.mainInstance?.runAnnotate(api) }
                     }
                     ActionBtn {
                         iconName:  "x"
@@ -1510,7 +1530,7 @@ Variants {
                     ActionBtn {
                         iconName:  "refresh"
                         tip:       root.mainInstance?.pluginApi?.tr("annotate.refresh")
-                        onClicked: { root.hide(); root.mainInstance?.runAnnotate() }
+                        onClicked: { const api = root.actionPolicy?.api; root.hide(); root.mainInstance?.runAnnotate(api) }
                     }
                     ActionBtn {
                         iconName:  "x"
@@ -1647,28 +1667,34 @@ Variants {
                 }
             }
         }
-        function _doUpload(file) {
-            var apiKey     = (root.mainInstance?.pluginApi?.pluginSettings?.x02ApiKey ?? "").trim()
-            var expiry     = (root.mainInstance?.pluginApi?.pluginSettings?.x02Expiry ?? "7d").trim()
+        function _doUpload(file, policy) {
+            if (!policy?.context.current()) return false
+            var apiKey     = (policy.settings.x02ApiKey ?? "").trim()
+            var expiry     = (policy.settings.x02Expiry ?? "7d").trim()
             var scriptPath = Qt.resolvedUrl("../scripts/share-upload.sh").toString().replace("file://", "")
+            uploadProc.actionPolicy = policy
             uploadProc.exec({ command: ["bash", scriptPath, file, apiKey, expiry] })
         }
         function flattenAndShare() {
             if (overlayWin.isUploading || overlayWin.isSaving) return
-            var skipPop = root.mainInstance?.pluginApi?.pluginSettings?.shareSkipPopover ?? false
+            const policy = root.actionPolicy
+            if (!policy?.context.current()) return false
+            var skipPop = policy.settings.shareSkipPopover ?? false
             overlayWin.isUploading      = true
             overlayWin.shareUrl         = ""
             overlayWin.uploadFailed     = false
             overlayWin.showSharePopover = !skipPop
             if (root.zoomScale > 1.0) {
-                _doUpload(root.imagePath)
+                _doUpload(root.imagePath, policy)
             } else {
                 drawCanvas.grabToImage(function(result) {
+                    if (!policy.context.current()) { overlayWin.isUploading = false; return }
                     if (!result || !result.saveToFile(TempPaths.path("screen-toolkit-overlay.png"))) {
                         overlayWin.isUploading  = false
                         overlayWin.uploadFailed = true
                         return
                     }
+                    flattenForShareProc.actionPolicy = policy
                     flattenForShareProc.exec({ command: [
                         "bash", overlayWin._annotateScript, "share-flatten",
                         TempPaths.path("screen-toolkit-annotate.png"),
@@ -1679,9 +1705,12 @@ Variants {
         }
         function flattenAndSave() {
             if (overlayWin.isSaving) return
+            const policy = root.actionPolicy
+            if (!policy?.context.current()) return false
             overlayWin.isSaving = true
             var home     = Quickshell.env("HOME") || ""
-            var settings = root.mainInstance?.pluginApi?.pluginSettings
+            var settings = policy.settings
+            saveFileProc.actionPolicy = policy
             var filename = U.buildFilename("annotate", ".png", settings?.filenameFormat)
             var custom   = root._annotateOutputDir()
             if (root.zoomScale > 1.0) {
@@ -1700,6 +1729,7 @@ Variants {
                 }
             } else {
                 drawCanvas.grabToImage(function(result) {
+                    if (!policy.context.current()) { overlayWin.isSaving = false; return }
                     if (!result || !result.saveToFile(TempPaths.path("screen-toolkit-overlay.png"))) {
                         overlayWin.isSaving = false
                         ToastService.showError(root.mainInstance?.pluginApi?.tr("annotate.saveFileFailed"))
@@ -1727,6 +1757,10 @@ Variants {
         }
         function flattenAndCopy() {
             if (overlayWin.isSaving) return
+            const policy = root.actionPolicy
+            if (!policy?.context.current()) return false
+            copyProc.actionPolicy = policy
+            clipFlattenProc.actionPolicy = policy
             overlayWin.isSaving = true
             if (root.zoomScale > 1.0) {
                 copyProc.exec({ command: [
@@ -1734,6 +1768,7 @@ Variants {
                 ]})
             } else {
                 drawCanvas.grabToImage(function(result) {
+                    if (!policy.context.current()) { overlayWin.isSaving = false; return }
                     if (!result || !result.saveToFile(TempPaths.path("screen-toolkit-overlay.png"))) {
                         overlayWin.isSaving = false
                         ToastService.showError(root.mainInstance?.pluginApi?.tr("annotate.copyFailed"))
@@ -1749,4 +1784,3 @@ Variants {
         }
     }
 }
-

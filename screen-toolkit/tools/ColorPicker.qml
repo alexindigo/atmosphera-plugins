@@ -7,6 +7,7 @@ import "../utils"
 Item {
     id: root
     property var    pluginApi:  null
+    property var actionPolicy: null
     property string scriptsDir: ""
 
     property string resultHex:        ""
@@ -20,7 +21,9 @@ Item {
     signal done()
     signal failed()
 
-    function run() {
+    function run(policy) {
+        if (!policy?.context.current() || colorPickerProc.running) return false
+        actionPolicy = policy
         colorPickerProc.exec({ command: [
             root.scriptsDir + "color-picker.sh",
             TempPaths.path("screen-toolkit-colorpicker.png")
@@ -50,6 +53,7 @@ Item {
         id: colorPickerProc
         stdout: StdioCollector {}
         onExited: (code) => {
+            if (!root.actionPolicy?.context.current()) { root.done(); return }
             var output = colorPickerProc.stdout.text.trim()
             if (code !== 0 || output === "") { root.failed(); return }
 

@@ -71,6 +71,12 @@ Item {
   property string queueControlAction: ""
   property string queueCommandAction: ""
   property bool queueLaunchBusy: false
+  // The helper's queue/playback is shared; only the admitted follow-up policy
+  // belongs to the caller. Never replace Main's API with a placement API.
+  property var playbackPolicy: null
+  property var queuePolicy: null
+  property var queueBatchPolicy: null
+  property var autoplayPolicy: null
 
   property bool playbackBusy: false
   property string playbackCommandAction: ""
@@ -174,6 +180,8 @@ Item {
 
     onExited: function (exitCode) {
       var commandAction = root.playbackCommandAction || "";
+      var policy = root.playbackPolicy;
+      root.playbackPolicy = null;
       root.playbackCommandAction = "";
       root.playbackBusy = false;
       root.playbackStarting = false;
@@ -189,8 +197,8 @@ Item {
         root.lastError = stderrText;
       }
 
-      if (commandAction === "play" && exitCode === 0 && root.autoSaveMp3AfterPlayback) {
-        root.maybeAutoDownloadCurrentTrack();
+      if (commandAction === "play" && exitCode === 0 && policy?.context?.current() && policy.autoSaveMp3AfterPlayback) {
+        root.maybeAutoDownloadCurrentTrack(policy);
       }
 
       if (commandAction === "play" && exitCode !== 0) {
@@ -308,7 +316,7 @@ Item {
             root.pendingAutoplaySaved = false;
             root.pendingAutoplaySavedShuffle = false;
             if (root.queueEntries.length > 0) {
-              root.startQueue();
+              root.startQueue(undefined, root.autoplayPolicy);
               if (!root.isPlaying) {
                 root.lastNotice = shouldShuffle ? root.pluginApi?.tr("queue.playingShuffledSaved") : root.pluginApi?.tr("queue.playingSaved");
               }
@@ -758,10 +766,19 @@ Item {
     return normalized.length === 0 || normalized === root.customUrlLabel.toLowerCase() || normalized === root.queuedUrlLabel.toLowerCase() || normalized === root.downloadedTrackLabel.toLowerCase();
   }
 
-  function playEntry(entry) {
-    if (!entry || !entry.url) {
+  function capturePolicy(context) {
+    context = context || pluginApi?.settingsContext;
+    if (!context?.current()) return null;
+    return {context: context, autoSaveMp3AfterPlayback: context.settingsView.autoSaveMp3AfterPlayback ?? false};
+  }
+
+  function playEntry(entry, context, retainedPolicy) {
+    const policy = retainedPolicy || capturePolicy(context);
+    if (!entry || !entry.url || !policy?.context?.current() || root.playbackBusy) {
       return;
     }
+    // Copy scalar targets before asynchronous helper completion or queue edits.
+    root.playbackPolicy = {context: policy.context, autoSaveMp3AfterPlayback: policy.autoSaveMp3AfterPlayback, entry: copyEntry(entry)};
 
     root.lastError = "";
     root.lastNotice = "";
@@ -787,7 +804,7 @@ Item {
                          });
   }
 
-  function playUrl(url, label) {
+  function playUrl(url, label, context) {
     var cleanedUrl = normalizeUrl(url);
     if (cleanedUrl.length === 0) {
       return;
@@ -800,10 +817,11 @@ Item {
       "uploader": "",
       "duration": 0
     };
-    playEntry(customEntry);
+    playEntry(customEntry, context);
   }
 
   function stopPlayback() {
+    root.playbackPolicy = null;
     root.lastError = "";
     root.lastNotice = "";
     root.playbackBusy = true;
@@ -1336,6 +1354,10 @@ Item {
     if (!root.queueBatchBusy) {
       return;
     }
+    if (!root.queueBatchPolicy?.context?.current()) {
+      root.finishQueueBatch("", "");
+      return;
+    }
 
     if (root.queueBatchIndex < root.queueBatchEntries.length) {
       var entry = root.queueBatchEntries[root.queueBatchIndex];
@@ -1347,9 +1369,9 @@ Item {
 
     if (root.queueBatchFinalAction.length > 0) {
       if (root.queueBatchFinalAction === "skip") {
-        root.skipQueue();
+        root.skipQueue(undefined, root.queueBatchPolicy);
       } else if (root.queueBatchFinalAction === "start") {
-        root.startQueue();
+        root.startQueue(undefined, root.queueBatchPolicy);
       } else if (root.queueBatchFinalAction === "stop") {
         root.stopQueue();
       }
@@ -1360,8 +1382,9 @@ Item {
     root.finishQueueBatch("", root.queueBatchDoneNotice);
   }
 
-  function startQueueBatch(entries, options) {
-    if (root.queueBusy || root.queueBatchBusy) {
+  function startQueueBatch(entries, options, context) {
+    const policy = capturePolicy(context);
+    if (!policy || root.queueBusy || root.queueBatchBusy) {
       return;
     }
 
@@ -1389,6 +1412,7 @@ Item {
     root.queueBusy = true;
     root.queueBatchBusy = true;
     root.queueBatchEntries = filteredEntries;
+    root.queueBatchPolicy = policy;
     root.queueBatchIndex = 0;
     root.queueBatchFinalAction = finalAction;
     root.queueBatchDoneNotice = doneNotice;
@@ -1404,7 +1428,7 @@ Item {
     root.runNextQueueBatchStep();
   }
 
-  function queuePlaylist(playlistId, shuffle) {
+  function queuePlaylist(playlistId, shuffle, context) {
     var playlist = findPlaylistById(playlistId);
     var entries = playlistTracks(playlistId, shuffle);
     var playlistName = playlist?.name || root.pluginApi?.tr("playlists.untitled");
@@ -1414,12 +1438,12 @@ Item {
                                                                              "name": playlistName
                                                                            })) : (root.pluginApi?.tr("notices.addedPlaylistToQueue", {
                                                                                                        "name": playlistName
-                                                                                                     })),
+                                                                                                        })),
                       "emptyNotice": root.pluginApi?.tr("notices.playlistEmpty")
-                    });
+                    }, context);
   }
 
-  function playPlaylist(playlistId, shuffle) {
+  function playPlaylist(playlistId, shuffle, context) {
     var playlist = findPlaylistById(playlistId);
     var entries = playlistTracks(playlistId, shuffle);
     if (entries.length === 0) {
@@ -1438,7 +1462,7 @@ Item {
                                                                                                        "name": playlistName
                                                                                                      })),
                       "emptyNotice": root.pluginApi?.tr("notices.playlistEmpty")
-                    });
+                    }, context);
   }
 
   function applyQueue(rawText) {
@@ -1513,28 +1537,32 @@ Item {
                       });
   }
 
-  function launchQueueEntry(entry) {
+  function launchQueueEntry(entry, context, retainedPolicy) {
+    const policy = retainedPolicy || capturePolicy(context);
     var normalized = copyEntry(entry);
-    if (!normalized.url || root.queueLaunchBusy || root.playbackBusy) {
+    if (!policy?.context?.current() || !normalized.url || root.queueLaunchBusy || root.playbackBusy) {
       return;
     }
 
     root.queueActive = true;
+    root.queuePolicy = policy;
     root.pendingQueueLaunchEntry = normalized;
     root.pendingQueueLaunchEntryId = normalized.id;
     root.queueLaunchBusy = true;
-    playEntry(normalized);
+    playEntry(normalized, undefined, policy);
   }
 
-  function playQueueEntryNow(entry) {
+  function playQueueEntryNow(entry, context) {
     if (!entry || !entry.url) {
       return;
     }
 
-    launchQueueEntry(entry);
+    launchQueueEntry(entry, context);
   }
 
-  function startQueue() {
+  function startQueue(context, retainedPolicy) {
+    const policy = retainedPolicy || capturePolicy(context);
+    if (!policy?.context?.current()) return;
     if (root.queueEntries.length === 0) {
       root.queueActive = false;
       root.lastError = "";
@@ -1543,8 +1571,9 @@ Item {
     }
 
     root.queueActive = true;
+    root.queuePolicy = policy;
     if (!root.isPlaying && !root.playbackBusy) {
-      root.launchQueueEntry(root.queueEntries[0]);
+      root.launchQueueEntry(root.queueEntries[0], undefined, policy);
     } else {
       root.lastError = "";
       root.lastNotice = root.pluginApi?.tr("queue.armed");
@@ -1559,7 +1588,9 @@ Item {
     root.lastNotice = root.pluginApi?.tr("queue.stopped");
   }
 
-  function skipQueue() {
+  function skipQueue(context, retainedPolicy) {
+    const policy = retainedPolicy || capturePolicy(context);
+    if (!policy?.context?.current()) return;
     if (root.queueEntries.length === 0) {
       root.queueActive = false;
       root.lastError = "";
@@ -1567,17 +1598,19 @@ Item {
       return;
     }
 
-    root.launchQueueEntry(root.queueEntries[0]);
+    root.launchQueueEntry(root.queueEntries[0], undefined, policy);
   }
 
-  function autoplaySavedTracks(shuffle) {
-    if (root.queueBusy || root.queueBatchBusy) {
+  function autoplaySavedTracks(shuffle, context) {
+    const policy = capturePolicy(context);
+    if (!policy || root.queueBusy || root.queueBatchBusy) {
       return;
     }
 
     root.queueActive = false;
     root.pendingAutoplaySaved = shuffle !== true;
     root.pendingAutoplaySavedShuffle = shuffle === true;
+    root.autoplayPolicy = policy;
     root.lastError = "";
     root.lastNotice = shuffle === true ? root.pluginApi?.tr("queue.loadingShuffledSaved") : root.pluginApi?.tr("queue.loadingSaved");
     root.queueBusy = true;
@@ -1732,8 +1765,9 @@ Item {
     downloadEntry(entry);
   }
 
-  function maybeAutoDownloadCurrentTrack() {
-    var entry = currentTrackEntry();
+  function maybeAutoDownloadCurrentTrack(policy) {
+    if (!policy?.context?.current()) return;
+    var entry = policy.entry;
     if (!entry.url || root.downloadBusy || isLocalEntry(entry)) {
       return;
     }
@@ -1960,7 +1994,10 @@ Item {
         root.lastHandledQueueUpdate = root.currentUpdatedAt;
         root.queueLaunchBusy = false;
         if (root.queueEntries.length > 0) {
-          root.launchQueueEntry(root.queueEntries[0]);
+          if (root.queuePolicy?.context?.current())
+            root.launchQueueEntry(root.queueEntries[0], undefined, root.queuePolicy);
+          else
+            root.queueActive = false;
         } else {
           root.queueActive = false;
           if (root.currentEndReason === "error") {

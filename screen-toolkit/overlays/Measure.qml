@@ -11,7 +11,8 @@ Variants {
     id: measureVariants
     property bool isVisible: false
     property var mainInstance: null
-    function show() { isVisible = true }
+    property var actionPolicy: null
+    function show(policy) { if (!policy?.context.current()) return false; actionPolicy = policy; isVisible = true }
     function hide() { isVisible = false }
     model: Quickshell.screens
     delegate: PanelWindow {
@@ -62,6 +63,7 @@ Variants {
         }
         function clearAll() { pinned = [] }
         property var _shotMeasure: null
+        property var _shotPolicy: null
         property string _shotColor: "#ffffff"
         function _tr(key, interp) {
             return measureVariants.mainInstance?.pluginApi?.tr(key, interp ?? {})
@@ -71,7 +73,9 @@ Variants {
             stdout: StdioCollector {}
             onExited: (code) => {
                 overlayWin._isShooting = false
-                measureVariants.isVisible = true
+                if (!overlayWin._shotPolicy?.context.current()) return
+                if (overlayWin._shotPolicy === measureVariants.actionPolicy)
+                    measureVariants.isVisible = true
                 if (code === 0) {
                     var savedPath = shotProc.stdout.text.trim()
                     ToastService.showNotice(_tr("messages.measure-saved"), savedPath, "camera")
@@ -85,6 +89,7 @@ Variants {
             interval: 400
             repeat: false
             onTriggered: {
+                if (!overlayWin._shotPolicy?.context.current()) { overlayWin._isShooting = false; return }
                 var m = overlayWin._shotMeasure
                 if (!m) {
                     overlayWin._isShooting = false
@@ -110,7 +115,7 @@ Variants {
                 var lw    = Math.abs(lx2 - lx1)
                 var lh    = Math.abs(ly2 - ly1)
                 var home     = Quickshell.env("HOME")
-                var settings = measureVariants.mainInstance?.pluginApi?.pluginSettings
+                var settings = overlayWin._shotPolicy.settings
                 var destDir  = U.screenshotDir(home, settings?.screenshotPath)
                 var baseName = U.buildFilename("measure", ".png", settings?.filenameFormat)
                 var fullPath = destDir + "/" + baseName
@@ -129,7 +134,8 @@ Variants {
             }
         }
         function doScreenshot(m, color) {
-            if (_isShooting) return
+            if (_isShooting || !measureVariants.actionPolicy?.context.current()) return
+            _shotPolicy = measureVariants.actionPolicy
             _shotMeasure = m
             _shotColor   = color || "#ffffff"
             _isShooting  = true

@@ -37,6 +37,7 @@
     "widget-settings": "Widget settings"
   },
   "settings": {
+    "shared-effect": "Polling and display choices belong to this instance. Governor and turbo actions affect the shared CPU and daemon; every instance observes those changes.",
     "compact": {
       "label": "Compact mode",
       "desc": "Show only the CPU icon, hide governor and turbo text"
