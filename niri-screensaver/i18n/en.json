@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "The screensaver config, idle entry and hooks are shared. Apply selects their policy. Runtime actions use this instance's applied commands; launching or stopping affects every instance.",
     "title": "Niri Screensaver",
     "description": "TerminalTextEffects screensaver wired into Noctalia's IdleService. Settings here write to ~/.config/niri-screensaver/config and update the idle hook automatically.",
 

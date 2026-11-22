@@ -21,6 +21,35 @@ import qs.Commons
 Item {
   id: root
   property var pluginApi: null
+  property var selectedContext: null
+  property bool retired: false
+  property bool componentReady: false
+  property int generation: 0
+  property string ownedHook: ""
+  property var queuedConfig: null
+  readonly property var policyContext: selectedContext || pluginApi?.settingsContext
+  readonly property bool policyCurrent: !retired && (policyContext?.current() ?? false)
+  readonly property var cfg: policyCurrent ? policyContext.settingsView : ({})
+  readonly property string policySignature: JSON.stringify(cfg)
+  onPolicySignatureChanged: if (componentReady) syncDebounce.restart()
+  onPolicyCurrentChanged: {
+    if (componentReady && !policyCurrent) {
+      generation++
+      syncDebounce.stop()
+      queuedConfig = null
+      writeConfigProcess.running = false
+      _removeRegistration()
+    }
+  }
+
+  function applySettings(context) {
+    context = context || pluginApi?.settingsContext
+    if (retired || !context?.current()) return false
+    generation++
+    selectedContext = context
+    syncDebounce.restart()
+    return true
+  }
 
   // Identifier used to find / remove our entry in Noctalia's idle.customCommands
   readonly property string entryName: "Niri Screensaver"
@@ -40,13 +69,14 @@ Item {
 
   // ----- Lifecycle -----
   Component.onCompleted: {
+    componentReady = true
     if (pluginApi) {
       _syncAll()
       _detectCli()
     }
   }
   onPluginApiChanged: {
-    if (pluginApi) {
+    if (componentReady && pluginApi) {
       _syncAll()
       _detectCli()
     }
@@ -60,16 +90,12 @@ Item {
     onTriggered: root._syncAll()
   }
 
-  Connections {
-    target: pluginApi ? pluginApi.settingsHandle : null
-    enabled: pluginApi !== null
-    function onSettingValuesChanged(paths) { syncDebounce.restart() }
-  }
-
   function _syncAll() {
-    _writeShellConfig()
-    _syncIdleEntry()
-    _syncHooks()
+    if (!componentReady || !policyCurrent) return
+    const policy = {context: policyContext, generation: generation, values: cfg}
+    _writeShellConfig(policy)
+    _syncIdleEntry(policy.values)
+    _syncHooks(policy.values)
   }
 
   // ----- Resolve a "command-or-default" setting into an exec array -----
@@ -80,16 +106,20 @@ Item {
     if (!value || value === fallbackString) return directArgv
     return ["sh", "-c", String(value)]
   }
-  function _launcherArgv() {
+  function _launcherArgv(context) {
+    context = context || pluginApi?.settingsContext
+    if (retired || !context?.current()) return []
     return _resolveCommand(
-      root.pluginApi?.pluginSettings?.launcherCommand,
+      context.settingsView.launcherCommand,
       defaultLauncherCommand,
       ["niri-screensaver-launch", "launch"]
     )
   }
-  function _killArgv() {
+  function _killArgv(context) {
+    context = context || pluginApi?.settingsContext
+    if (retired || !context?.current()) return []
     return _resolveCommand(
-      root.pluginApi?.pluginSettings?.killCommand,
+      context.settingsView.killCommand,
       defaultKillCommand,
       ["niri-screensaver-launch", "kill"]
     )
@@ -103,8 +133,7 @@ Item {
   }
 
   // ----- Shell config writer -----
-  function _renderShellConfig() {
-    var s = pluginApi.pluginSettings
+  function _renderShellConfig(s) {
     var bool = function (b) { return b ? "true" : "false" }
     return [
       "# niri-screensaver config (managed by Noctalia plugin)",
@@ -140,10 +169,13 @@ Item {
 
   Process {
     id: writeConfigProcess
+    property var policy: null
     onExited: function (code) {
       if (code !== 0) {
         Logger.w("NiriScreensaver", "config write exited with code", code, "for", root.configFile)
       }
+      policy = null
+      Qt.callLater(function() { if (root) root._writeNextConfig(); })
     }
   }
 
@@ -152,21 +184,29 @@ Item {
   //   value cannot escape into the script body.
   // - The heredoc marker is randomized and collision-checked against the
   //   content, so a user-supplied config value cannot terminate the heredoc.
-  function _writeShellConfig() {
-    if (!pluginApi) return
-    var content = _renderShellConfig()
+  function _writeShellConfig(policy) {
+    queuedConfig = policy
+    _writeNextConfig()
+  }
+  function _writeNextConfig() {
+    if (writeConfigProcess.running) return
+    const policy = queuedConfig
+    queuedConfig = null
+    if (!policyCurrent || !policy || policy.generation !== generation || policy.context !== policyContext || !policy.context.current()) return
+    var content = _renderShellConfig(policy.values)
     var eof = "__NIRI_SS_EOF_" + Math.random().toString(36).slice(2)
     while (content.indexOf(eof) !== -1) {
       eof = "__NIRI_SS_EOF_" + Math.random().toString(36).slice(2)
     }
     var script = 'mkdir -p "$1" && cat > "$2" <<\'' + eof + "'\n" + content + eof + "\n"
     writeConfigProcess.command = ["sh", "-c", script, "sh", root.configDir, root.configFile]
+    writeConfigProcess.policy = policy
     writeConfigProcess.running = true
   }
 
   // ----- Noctalia idle wiring -----
-  function _syncIdleEntry() {
-    if (!pluginApi) return
+  function _syncIdleEntry(s) {
+    if (!policyCurrent) return
     var raw = ""
     try {
       raw = Settings.data.idle.customCommands || "[]"
@@ -181,12 +221,12 @@ Item {
     // Remove any existing entry of ours
     arr = arr.filter(function (e) { return e && e.name !== root.entryName })
 
-    if (pluginApi.pluginSettings.enabled) {
+    if (s.enabled) {
       arr.push({
         name: root.entryName,
-        timeout: parseInt(pluginApi.pluginSettings.idleSeconds) || 300,
-        command: pluginApi.pluginSettings.launcherCommand || root.defaultLauncherCommand,
-        resumeCommand: pluginApi.pluginSettings.killCommand || root.defaultKillCommand
+        timeout: parseInt(s.idleSeconds) || 300,
+        command: s.launcherCommand || root.defaultLauncherCommand,
+        resumeCommand: s.killCommand || root.defaultKillCommand
       })
     }
     Settings.data.idle.customCommands = JSON.stringify(arr)
@@ -200,28 +240,29 @@ Item {
   // Requires Settings.data.hooks.enabled = true to actually fire — the plugin
   // does not flip that master toggle for the user.
   function _hookKillCmd() {
-    return pluginApi?.pluginSettings?.killCommand || root.defaultKillCommand
+    return cfg.killCommand || root.defaultKillCommand
   }
 
-  function _syncHooks() {
-    if (!pluginApi) return
+  function _syncHooks(s) {
+    if (!policyCurrent) return
     if (!Settings.data.hooks) return  // Older Noctalia builds may lack hooks
 
-    var killCmd = _hookKillCmd()
+    var killCmd = s.killCommand || root.defaultKillCommand
     var lockNow   = Settings.data.hooks.screenLock || ""
     var unlockNow = Settings.data.hooks.screenUnlock || ""
 
-    if (pluginApi.pluginSettings.enabled) {
-      if (lockNow === "" || lockNow === killCmd) {
+    if (s.enabled) {
+      if (lockNow === "" || lockNow === killCmd || (ownedHook && lockNow === ownedHook)) {
         Settings.data.hooks.screenLock = killCmd
       }
-      if (unlockNow === "" || unlockNow === killCmd) {
+      if (unlockNow === "" || unlockNow === killCmd || (ownedHook && unlockNow === ownedHook)) {
         Settings.data.hooks.screenUnlock = killCmd
       }
     } else {
-      if (lockNow === killCmd)   Settings.data.hooks.screenLock = ""
-      if (unlockNow === killCmd) Settings.data.hooks.screenUnlock = ""
+      if (lockNow === killCmd || (ownedHook && lockNow === ownedHook)) Settings.data.hooks.screenLock = ""
+      if (unlockNow === killCmd || (ownedHook && unlockNow === ownedHook)) Settings.data.hooks.screenUnlock = ""
     }
+    ownedHook = s.enabled ? killCmd : ""
 
     if (typeof Settings.saveImmediate === "function") {
       Settings.saveImmediate()
@@ -251,17 +292,18 @@ Item {
 
     function launch() {
       ipcLaunchProcess.command = root._launcherArgv()
-      ipcLaunchProcess.running = true
+      ipcLaunchProcess.running = ipcLaunchProcess.command.length > 0
     }
     function kill() {
       ipcKillProcess.command = root._killArgv()
-      ipcKillProcess.running = true
+      ipcKillProcess.running = ipcKillProcess.command.length > 0
     }
     function toggle() {
       if (!root.pluginApi) return
       var enabled = root.pluginApi.pluginSettings.enabled === true
       root.pluginApi.pluginSettings.enabled = !enabled
       root.pluginApi.saveSettings()
+      root.applySettings(root.pluginApi.settingsContext)
     }
   }
 
@@ -279,8 +321,8 @@ Item {
   }
 
   // ----- Cleanup on plugin disable / unload -----
-  Component.onDestruction: {
-    if (pluginApi) {
+  function _removeRegistration() {
+    if (componentReady) {
       // Best-effort: remove our customCommands entry so we don't leave a dangling hook
       try {
         var arr = JSON.parse(Settings.data.idle.customCommands || "[]")
@@ -290,10 +332,10 @@ Item {
 
       // Mirror cleanup for hook slots — only clear values we wrote
       try {
-        var killCmd = _hookKillCmd()
+        var killCmd = ownedHook
         if (Settings.data.hooks) {
-          if (Settings.data.hooks.screenLock === killCmd)   Settings.data.hooks.screenLock = ""
-          if (Settings.data.hooks.screenUnlock === killCmd) Settings.data.hooks.screenUnlock = ""
+          if (killCmd && Settings.data.hooks.screenLock === killCmd) Settings.data.hooks.screenLock = ""
+          if (killCmd && Settings.data.hooks.screenUnlock === killCmd) Settings.data.hooks.screenUnlock = ""
         }
       } catch (e) { /* ignore */ }
 
@@ -301,5 +343,14 @@ Item {
         Settings.saveImmediate()
       }
     }
+  }
+  Component.onDestruction: {
+    retired = true
+    generation++
+    syncDebounce.stop()
+    queuedConfig = null
+    writeConfigProcess.running = false
+    _removeRegistration()
+    componentReady = false
   }
 }
