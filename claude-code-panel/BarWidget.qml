@@ -17,10 +17,11 @@ Item {
   property int sectionWidgetsCount: 0
 
   readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var settingsConsumer: mainInstance && pluginApi ? mainInstance.settingsConsumerFor(pluginApi.settingsContext) : null
   readonly property bool isGenerating: mainInstance?.isGenerating || false
   readonly property bool binaryAvailable: mainInstance?.binaryAvailable || false
-  readonly property string permissionMode: mainInstance?.permissionMode || "default"
-  readonly property bool dangerouslySkip: mainInstance?.dangerouslySkip || false
+  readonly property string permissionMode: settingsConsumer?.permissionMode || "default"
+  readonly property bool dangerouslySkip: settingsConsumer?.dangerouslySkip || false
   readonly property int messageCount: mainInstance?.messages?.length || 0
   readonly property string sessionId: mainInstance?.sessionId || ""
 
@@ -116,10 +117,10 @@ Item {
       contextMenu.close();
       PanelService.closeContextMenu(screen);
       if (action === "open") { pluginApi?.openPanel(root.screen, root); }
-      else if (action === "newSession") { mainInstance?.newSession(); }
+      else if (action === "newSession") { mainInstance?.newSession(pluginApi?.settingsContext); }
       else if (action === "stop") { mainInstance?.stopGeneration(); }
       else if (action === "clear") {
-        mainInstance?.clearMessages();
+        mainInstance?.clearMessages(pluginApi?.settingsContext);
         ToastService.showNotice(pluginApi?.tr("toast.historyCleared"));
       } else if (action === "settings") {
         BarService.openPluginSettings(screen, pluginApi.manifest);

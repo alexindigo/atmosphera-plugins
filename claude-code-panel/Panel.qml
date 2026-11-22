@@ -14,6 +14,7 @@ Item {
   property var pluginApi: null
 
   readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var settingsConsumer: mainInstance && pluginApi ? mainInstance.settingsConsumerFor(pluginApi.settingsContext) : null
   readonly property var geometryPlaceholder: panelContainer
 
   readonly property string _panelPosition: pluginApi?.pluginSettings?.panelPosition ?? "right"
@@ -40,8 +41,8 @@ Item {
 
   anchors.fill: parent
 
-  readonly property string permissionMode: mainInstance?.permissionMode || "default"
-  readonly property bool dangerouslySkip: mainInstance?.dangerouslySkip || false
+  readonly property string permissionMode: settingsConsumer?.permissionMode || "default"
+  readonly property bool dangerouslySkip: settingsConsumer?.dangerouslySkip || false
   readonly property bool isGenerating: mainInstance?.isGenerating || false
 
   // ----- Slash-command autocomplete -----
@@ -168,7 +169,7 @@ Item {
                 var sid = mainInstance?.sessionId || "";
                 parts.push(sid ? pluginApi?.tr("panel.sessionIdValue", { id: sid.slice(0, 8) }) : pluginApi?.tr("panel.noSession"));
                 if (mainInstance?.lastModel) { parts.push(mainInstance.lastModel); }
-                var wd = mainInstance?.workingDir || "";
+                var wd = settingsConsumer?.workingDir || "";
                 if (wd) { parts.push(pluginApi?.tr("panel.cwdValue", { path: wd })); }
                 return parts.join(" · ");
               }
@@ -180,7 +181,7 @@ Item {
           NButton {
             text: pluginApi?.tr("panel.newSession")
             icon: "plus"
-            onClicked: mainInstance?.newSession()
+            onClicked: mainInstance?.newSession(pluginApi?.settingsContext)
             enabled: !!mainInstance
           }
         }
@@ -531,7 +532,7 @@ Item {
               onTextChanged: {
                 if (mainInstance && mainInstance.inputText !== text) {
                   mainInstance.inputText = text;
-                  mainInstance.saveState();
+                  mainInstance.saveState(pluginApi?.settingsContext);
                 }
                 root._updateSlashMenu(text, cursorPosition);
               }
@@ -597,18 +598,18 @@ Item {
     if (!t || t.trim() === "") { return; }
     var trimmed = t.trim();
     // Local slash command? Handle and bail without touching Claude.
-    if (trimmed[0] === "/" && mainInstance.handleSlashCommand(trimmed)) {
+    if (trimmed[0] === "/" && mainInstance.handleSlashCommand(trimmed, pluginApi)) {
       inputArea.text = "";
       mainInstance.inputText = "";
       mainInstance.inputCursor = 0;
-      mainInstance.saveState();
+      mainInstance.saveState(pluginApi?.settingsContext);
       return;
     }
-    mainInstance.sendMessage(trimmed);
+    if (!mainInstance.sendMessage(trimmed, pluginApi?.settingsContext)) return;
     inputArea.text = "";
     mainInstance.inputText = "";
     mainInstance.inputCursor = 0;
-    mainInstance.saveState();
+    mainInstance.saveState(pluginApi?.settingsContext);
   }
 
   Component.onCompleted: {

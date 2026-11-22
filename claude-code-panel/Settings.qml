@@ -267,6 +267,14 @@ Item {
           Layout.fillHeight: true
         }
 
+        NText {
+          visible: root.pluginApi?.scopeKind === "instance"
+          Layout.fillWidth: true
+          text: pluginApi?.tr("settings.sharedContent")
+          wrapMode: Text.Wrap
+          pointSize: Style.fontSizeXS
+        }
+
         // Reset button at the bottom of the rail.
         Rectangle {
           Layout.fillWidth: true

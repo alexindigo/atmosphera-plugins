@@ -289,3 +289,17 @@ PRs welcome against [`noctalia-dev/noctalia-plugins`](https://github.com/noctali
 ## License
 
 MIT
+# Scoped configuration and common conversation
+
+All widgets retain one conversation, draft input, history cache and serial ACP
+session owner. Each runtime request captures its originating widget's applied
+working directory, first-turn prefix and history limit. Another origin gets a
+new ACP process/session after the preceding turn, not a new conversation. Source
+replacement and widget retirement fence pending work. Permission buttons remain
+manual and belong to the exact process, session and RPC request. Settings never
+launches or authorizes a tool. Stop, Clear and New session affect everyone.
+
+Runtime `/cwd` and `/model` writes use their originating widget; IPC remains
+plugin-level. The existing fixed `claude-code-acp` discovery and ACP feature set
+are unchanged. This does not implement currently unused CLI binary/model/tool/
+MCP/resume/permission options or certify their backend effects.
