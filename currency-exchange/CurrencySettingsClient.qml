@@ -62,14 +62,14 @@ Item {
   Process {
     id: apiProcess
     command: ["curl", "-sf", "--connect-timeout", "5", "--max-time", "10", "-L", "https://api.frankfurter.app/latest?from=USD"]
-    stdout: StdioCollector {}
+    stdout: StdioCollector { id: ratesOutput }
     onExited: exitCode => {
       if (!root.current)
         return;
       root.loading = false;
       if (exitCode === 0) {
         try {
-          var response = JSON.parse(stdout.text);
+          var response = JSON.parse(ratesOutput.text);
           if (response.rates) {
             response.rates["USD"] = 1.0;
             root.cachedRates = response.rates;
