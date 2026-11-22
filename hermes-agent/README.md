@@ -54,6 +54,20 @@ No shell command interpretation or new process supervisor is introduced.
 
 ## Model picker
 
+### Scoped settings and active chat
+
+Placed-widget settings edit that instance; Settings > Plugins edits the shared
+defaults. All views share one chat, bridge and gateway. Display and polling use
+the selected context. Merely opening another Panel never selects its connection
+or pin policy. A runtime pin action saves through its originating API.
+
+Apply keeps the current chat, process and matching state/token readers. Changed
+connection inputs show "pending restart" until explicit New Session or session
+replacement. Finishing a prompt is not a restart boundary. Default model changes
+use the acknowledged selected context; they are deferred with a pending connection
+handoff. Test Connection probes the draft target independently and never selects
+or restarts the running bridge. Local mode still fixes the bind host/default port.
+
 The Settings dropdown lists providers and models from three sources:
 
 1. **Provider config models** — your `config.yaml` providers section (e.g. `ollama-local.models`)
@@ -62,13 +76,18 @@ The Settings dropdown lists providers and models from three sources:
 
 The list mirrors what `hermes --tui` shows. A provider may appear even without explicit config if Hermes ships a built-in overlay for it (like `minimax-oauth` or `kimi-for-coding`). Whether the model actually works depends on your API key and credentials.
 
-To change the active model, select a provider/model in Settings and click Apply. This calls `config.set` through the bridge, which updates the Hermes config. If you check Persist, the change is global; otherwise it applies to the current session only.
+To change the active model, select a provider/model in Settings and use the host's
+Apply. Accepted completion calls `config.set` on the current bridge for the
+selected configuration, unless its connection handoff is pending. The page's
+Apply Model button requests trimming of the model/provider at that completion;
+it does not publish the preference draft on its own.
 
 ## New Session and Reset
 
 **New Session** tells the bridge to start a fresh Hermes RPC session. Chat history clears. This is the equivalent of `/session new` in the TUI.
 
-**Reset** clears the local chat pane without a server roundtrip. Visible when the pane has messages. Does not create a new Hermes session.
+The chat Panel's **Reset** starts a new Hermes session, like New Session. It is
+distinct from the generic Settings host's staged configuration Reset.
 
 ## Client-only mode (remote bridge)
 

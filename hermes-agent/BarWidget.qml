@@ -17,11 +17,12 @@ Item {
   property int sectionWidgetsCount: 0
 
   readonly property var mainInstance: pluginApi?.mainInstance
-  readonly property var state: mainInstance?.state || ({})
-  readonly property var bridge: state.bridge || ({})
-  readonly property var hermes: state.hermes || ({})
-  readonly property var session: state.session || ({})
-  readonly property var summary: state.summary || ({})
+  readonly property var settingsConsumer: mainInstance?.settingsConsumerFor(pluginApi?.settingsContext) ?? null
+  readonly property var bridgeState: mainInstance?.state || ({})
+  readonly property var bridge: bridgeState.bridge || ({})
+  readonly property var hermes: bridgeState.hermes || ({})
+  readonly property var session: bridgeState.session || ({})
+  readonly property var summary: bridgeState.summary || ({})
   readonly property string gatewayStatus: (summary.gateway && summary.gateway.status) || "unknown"
   readonly property var cfg: pluginApi?.pluginSettings || ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
@@ -34,7 +35,7 @@ Item {
   readonly property real capsuleHeight: Style.getCapsuleHeightForScreen(screenName)
   readonly property real barFontSize: Style.getBarFontSizeForScreen(screenName)
 
-  readonly property bool hideWhenIdle: cfg.hideWhenIdle ?? defaults.hideWhenIdle ?? false
+  readonly property bool hideWhenIdle: settingsConsumer?.hideWhenIdle ?? false
   readonly property string bridgeStatus: bridge.status || "offline"
   readonly property string hermesStatus: hermes.status || "unknown"
   readonly property bool bridgeOnline: bridgeStatus === "online"
@@ -97,7 +98,7 @@ Item {
 
   function openHermesPanel() {
     if (mainInstance && typeof mainInstance.openPreferredPanel === "function") {
-      mainInstance.openPreferredPanel(root.screen, root);
+      mainInstance.openPreferredPanel(root.screen, root, pluginApi);
       return;
     }
     pluginApi?.openPanel(root.screen, root);
@@ -231,14 +232,14 @@ Item {
       if (action === "open") {
         root.openHermesPanel();
       } else if (action === "new-session") {
-        mainInstance?.createSession();
+        mainInstance?.createSession(pluginApi.settingsContext);
         root.openHermesPanel();
       } else if (action === "interrupt") {
-        mainInstance?.interrupt();
+        mainInstance?.interrupt(pluginApi.settingsContext);
       } else if (action === "refresh") {
-        mainInstance?.refreshState();
+        mainInstance?.refreshState(pluginApi.settingsContext);
       } else if (action === "start-gateway") {
-        mainInstance?.startGateway();
+        mainInstance?.startGateway(pluginApi.settingsContext);
       } else if (action === "settings") {
         BarService.openPluginSettings(root.screen, pluginApi?.manifest);
       }
@@ -248,16 +249,16 @@ Item {
   Components.SummaryPopup {
     id: summaryPopup
     pluginApi: root.pluginApi
-    state: root.state
+    bridgeState: root.bridgeState
     screen: root.screen
 
     onOpenPanel: root.openHermesPanel()
     onNewSession: {
-      mainInstance?.createSession();
+      mainInstance?.createSession(pluginApi.settingsContext);
       root.openHermesPanel();
     }
-    onInterrupt: mainInstance?.interrupt()
-    onRefresh: mainInstance?.refreshState()
+    onInterrupt: mainInstance?.interrupt(pluginApi.settingsContext)
+    onRefresh: mainInstance?.refreshState(pluginApi.settingsContext)
     onSettings: BarService.openPluginSettings(root.screen, pluginApi?.manifest)
   }
 }

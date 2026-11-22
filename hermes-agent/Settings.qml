@@ -10,17 +10,26 @@ ColumnLayout {
   readonly property bool settingsDirty: false
   property bool _savePending: false
   property bool _trimModelPending: false
+  property var _probeLifetime: ({alive:true})
+  property var _probe: null
+  property int _probeGeneration: 0
+  readonly property string probeTarget: JSON.stringify([valueBridgeHost,valueBridgePort,valueBridgeTokenManual])
+  onProbeTargetChanged: cancelProbe()
+  function cancelProbe() {
+    _probeGeneration++;
+    if (_probe) { _probe.onreadystatechange = null; _probe.abort(); _probe = null; }
+    testResult = "";
+  }
+  Component.onDestruction: { _probeLifetime.alive = false; cancelProbe(); }
   Connections {
     target: root.pluginApi
     function onSettingsCompleted(result) {
       if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current")
         return;
       root._savePending = false;
-      var cfg = root.pluginApi.pluginSettings;
       var trim = root._trimModelPending;
       root._trimModelPending = false;
-      root.mainInstance?.setPinnedPanelRequested(cfg.panelPinned);
-      root.mainInstance?.setModel(trim ? cfg.defaultProvider.trim() : cfg.defaultProvider, trim ? cfg.defaultModel.trim() : cfg.defaultModel, false);
+      root.mainInstance?.applySettings(root.pluginApi.runtimeContext, trim);
     }
   }
 
@@ -61,8 +70,8 @@ ColumnLayout {
   readonly property string valueLauncherPrefix: root.launcherPrefixField?.value ?? ">hermes"
   readonly property bool valuePanelPinned: root.panelPinnedField?.value ?? false
   readonly property bool valueShowToolActivity: root.showToolActivityField?.value ?? false
-  readonly property string valueDefaultProvider: (detectedModel.provider || root.defaultProviderField?.value || "")
-  readonly property string valueDefaultModel: (detectedModel.name || root.defaultModelField?.value || "")
+  readonly property string valueDefaultProvider: root.defaultProviderField?.value ?? ""
+  readonly property string valueDefaultModel: root.defaultModelField?.value ?? ""
   readonly property string selectedModelKey: modelKey(valueDefaultProvider, valueDefaultModel)
   property bool showAdvanced: false
   property string testResult: ""
@@ -76,6 +85,21 @@ ColumnLayout {
     font.weight: Style.fontWeightBold
     color: AtmoColor.mOnSurface
     Layout.fillWidth: true
+  }
+
+  NText {
+    objectName: "hermes-shared-effect"
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+    text: pluginApi?.tr("settings.sharedEffect")
+  }
+  NText {
+    objectName: "hermes-pending-restart"
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+    visible: root.mainInstance?.pendingRestart ?? false
+    text: pluginApi?.tr("settings.pendingRestart")
+    color: AtmoColor.mOnSurface
   }
 
   ColumnLayout {
@@ -377,6 +401,7 @@ ColumnLayout {
   }
 
   function testConnection() {
+    cancelProbe();
     root.testResult = pluginApi?.tr("settings.testing");
     root.testResultColor = AtmoColor.mOnSurface;
     var host = root.valueBridgeHost;
@@ -384,9 +409,14 @@ ColumnLayout {
     var token = root.valueBridgeTokenManual;
     var url = "http://" + host + ":" + port + "/health";
     var xhr = new XMLHttpRequest();
+    _probe = xhr;
+    const life = _probeLifetime;
+    const generation = _probeGeneration;
     xhr.onreadystatechange = function () {
-      if (xhr.readyState !== XMLHttpRequest.DONE)
+      if (!life.alive || xhr.readyState !== XMLHttpRequest.DONE)
         return;
+      if (generation !== root._probeGeneration || root._probe !== xhr) return;
+      root._probe = null;
       if (xhr.status === 0) {
         root.testResult = pluginApi?.tr("settings.testFailedUnreachable");
         root.testResultColor = AtmoColor.mError;

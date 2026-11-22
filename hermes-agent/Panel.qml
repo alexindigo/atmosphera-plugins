@@ -12,22 +12,25 @@ Item {
   property var pluginApi: null
 
   readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var settingsConsumer: mainInstance?.settingsConsumerFor(pluginApi?.settingsContext) ?? null
+  property var _lifetime: ({alive:true})
+  Component.onDestruction: _lifetime.alive = false
   readonly property var cfg: pluginApi?.pluginSettings || ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-  readonly property var state: mainInstance?.state || ({})
-  readonly property var bridge: state.bridge || ({})
-  readonly property var hermes: state.hermes || ({})
-  readonly property var session: state.session || ({})
-  readonly property var approval: state.approval || ({})
-  readonly property var messages: state.messages || []
-  readonly property var summary: state.summary || ({})
+  readonly property var bridgeState: mainInstance?.state || ({})
+  readonly property var bridge: bridgeState.bridge || ({})
+  readonly property var hermes: bridgeState.hermes || ({})
+  readonly property var session: bridgeState.session || ({})
+  readonly property var approval: bridgeState.approval || ({})
+  readonly property var messages: bridgeState.messages || []
+  readonly property var summary: bridgeState.summary || ({})
   readonly property var activity: summary.activity || ({})
   readonly property var modelSummary: summary.model || ({})
   readonly property bool hasSession: (session.id || session.stored_id || "") !== ""
   readonly property bool bridgeOnline: (bridge.status || "offline") === "online"
   readonly property bool isBusy: session.running || (hermes.status || "") === "busy"
-  readonly property bool pinned: cfg.panelPinned ?? defaults.panelPinned ?? false
-  readonly property bool showToolActivity: cfg.showToolActivity ?? defaults.showToolActivity ?? false
+  readonly property bool pinned: settingsConsumer?.panelPinned ?? false
+  readonly property bool showToolActivity: settingsConsumer?.showToolActivity ?? false
   property var sessionList: []
   property bool sessionsLoaded: false
   readonly property string hermesIconPath: pluginApi?.pluginDir ? "file://" + pluginApi.pluginDir + "/assets/hermes-icon.png" : ""
@@ -82,23 +85,23 @@ Item {
   function sendComposerPrompt() {
     var text = composer.text.trim();
     if (text === "") return;
-    composer.text = "";
-    if (!root.hasSession && root.mainInstance) {
-      root.mainInstance.createSession();
-    }
-    root.mainInstance?.sendPrompt(text);
+    if (root.mainInstance?.sendPrompt(text, pluginApi?.settingsContext)) composer.text = "";
   }
 
   function setPinned(value) {
-    if (!pluginApi) return;
-    pluginApi.pluginSettings.panelPinned = value;
-    pluginApi.saveSettings();
-    root.mainInstance?.setPinnedPanelRequested(value);
+    const api = pluginApi;
+    if (!api?.settingsContext.current()) return;
+    const life = _lifetime;
+    api.pluginSettings.panelPinned = value;
+    api.saveSettings(function(result) {
+      if (life.alive && api.settingsContext.current() && ["saved","nothing_to_save"].includes(result?.status) && result.publicationState === "known")
+        root.mainInstance?.setPinnedPanelRequested(value, api);
+    });
   }
 
   function closePanel() {
     if (root.pinned) {
-      root.mainInstance?.closePinnedPanel();
+      root.mainInstance?.closePinnedPanel(pluginApi?.settingsContext);
       return;
     }
     root.pluginApi?.closePanel(root.pluginApi?.panelOpenScreen);
@@ -180,11 +183,14 @@ Item {
           tooltipText: pluginApi?.tr("panel.sessions")
           onClicked: {
             var btn = this;
+            const life = root._lifetime;
+            const api = root.pluginApi;
             root.mainInstance?.listSessions(function(list) {
+              if (!life.alive || !api?.settingsContext.current()) return;
               root.sessionList = list;
               root.sessionsLoaded = true;
               sessionPopup.openNear(btn);
-            });
+            }, api?.settingsContext);
           }
         }
 
@@ -199,10 +205,10 @@ Item {
         pluginApi: root.pluginApi
         approval: root.approval
         onApprove: function(all) {
-          if (mainInstance) mainInstance.respondApproval("approved", all);
+          if (mainInstance) mainInstance.respondApproval("approved", all, pluginApi?.settingsContext);
         }
         onDeny: function() {
-          if (mainInstance) mainInstance.respondApproval("denied", false);
+          if (mainInstance) mainInstance.respondApproval("denied", false, pluginApi?.settingsContext);
         }
       }
 
@@ -298,7 +304,7 @@ Item {
         NButton {
           text: pluginApi?.tr("panel.newSession")
           icon: "plus"
-          onClicked: mainInstance?.createSession()
+          onClicked: mainInstance?.createSession(pluginApi?.settingsContext)
         }
 
         NButton {
@@ -306,7 +312,7 @@ Item {
           icon: "close"
           outlined: true
           enabled: root.messages.length > 0
-          onClicked: mainInstance?.createSession()
+          onClicked: mainInstance?.createSession(pluginApi?.settingsContext)
         }
 
         NTextInput {
@@ -323,7 +329,7 @@ Item {
           enabled: root.bridgeOnline && (root.isBusy || composer.text.trim() !== "")
           onClicked: {
             if (root.isBusy) {
-              mainInstance?.interrupt();
+              mainInstance?.interrupt(pluginApi?.settingsContext);
             } else {
               root.sendComposerPrompt();
             }
@@ -346,13 +352,14 @@ Item {
     interval: 100
     repeat: false
     onTriggered: {
-      transcriptScroll.contentItem.contentY = Math.max(0, transcriptScroll.contentItem.contentHeight - transcriptScroll.height);
+      const flickable = transcriptScroll.contentItem;
+      if (flickable && "contentY" in flickable && "contentHeight" in flickable)
+        flickable.contentY = Math.max(0, flickable.contentHeight - transcriptScroll.height);
     }
   }
 
   Component.onCompleted: {
-    mainInstance?.setPinnedPanelRequested(root.pinned);
-    mainInstance?.refreshState();
+    mainInstance?.refreshState(pluginApi?.settingsContext);
   }
 
   Components.SessionPopup {
@@ -362,7 +369,7 @@ Item {
     screen: root.pluginApi?.panelOpenScreen
     sessions: root.sessionList
     onSessionSelected: function(sid) {
-      root.mainInstance?.resumeSession(sid);
+      root.mainInstance?.resumeSession(sid, pluginApi?.settingsContext);
     }
   }
 }
