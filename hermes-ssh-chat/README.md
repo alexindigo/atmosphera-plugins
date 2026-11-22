@@ -10,7 +10,7 @@ Run **Hermes Agent** on a remote machine from the Noctalia bar through an intera
 - Interactive SSH session that launches `hermes` on the remote host.
 - Terminal-like input for Enter, Backspace, arrow keys, Ctrl+C, Ctrl+D, Ctrl+L, and Tab.
 - Panel state survives closing and reopening while the SSH session is active.
-- Optional automatic connection on Noctalia startup.
+- Optional automatic connection when the first runtime view activates its session.
 - Passwords are never saved; use SSH keys for unattended startup connections.
 
 ## Requirements
@@ -85,10 +85,24 @@ IPC bind above.
 | Panel width / height | Preferred panel dimensions. |
 | Terminal columns / rows | PTY size sent to the remote session. |
 | Terminal font size | Font size used by the terminal renderer. |
-| Connect on startup | Starts the SSH session when Noctalia loads the plugin. |
+| Connect on startup | Starts once when this configuration's first Bar or Panel activates, not on Main-only loading. |
 | Remember last target | Saves the last host, port, and user after connecting. |
 | Show text in bar | Shows the Hermes label next to the bar icon. |
 | Toggle shortcut name | Hyprland global shortcut id used to open/close the panel (default `hermes-toggle`). |
+
+Settings -> Plugins edits shared defaults. Placed-widget settings edit sparse
+instance overrides. Main owns one session per runtime context: Bars and reopened
+Panels of that context share their connection and terminal buffer, while another
+context has its own target, status and terminal. Remember last target writes only
+through the runtime API that admitted Connect; passwords remain transient.
+
+IPC and the one global shortcut deliberately open the plugin-level panel. The
+shortcut control is therefore shown only in plugin-level Settings. Existing
+instance shortcut overrides are retained, not applied to that common shortcut.
+Changing saved targets does not retarget an active connection. Explicit Connect
+replaces only its own connection. Replacing or retiring an owner fences queued
+automatic attempts, old output and exit callbacks. A terminal changing session
+replays that session's buffer instead of retaining another stream's screen.
 
 ## Troubleshooting
 

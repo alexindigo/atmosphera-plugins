@@ -6,6 +6,19 @@ import Quickshell.Hyprland
 Item {
   id: root
   property var pluginApi: null
+  property var _settingsConsumers: new Map()
+  Component { id: sessionFactory; HermesSession {} }
+
+  function settingsConsumerFor(context) {
+    if (!context || !context.current()) return null;
+    if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+    var client = sessionFactory.createObject(root, {
+      settingsContext: context,
+      retire: function(retired) { root._settingsConsumers.delete(context); retired.destroy(); }
+    });
+    _settingsConsumers.set(context, client);
+    return client;
+  }
 
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})

@@ -45,6 +45,14 @@ ColumnLayout {
 
   spacing: Style.marginL
 
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.WordWrap
+    color: AtmoColor.mOnSurfaceVariant
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+  }
+
   NPluginSettingsField {
     field: root.hostField
     NTextInput {
@@ -171,6 +179,7 @@ ColumnLayout {
 
   NPluginSettingsField {
     field: root.toggleShortcutNameField
+    visible: root.pluginApi?.scopeKind !== "instance"
     NTextInput {
       Layout.fillWidth: true
       label: pluginApi?.tr("settings.toggleShortcut.label")

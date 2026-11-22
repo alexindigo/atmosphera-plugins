@@ -5,13 +5,14 @@ import qs.Commons
 import qs.Modules.Bar.Extras
 import qs.Services.UI
 import qs.Widgets
-import "." as Local
 
 Item {
   id: root
 
   property ShellScreen screen
   property var pluginApi: null
+  readonly property var mainInstance: pluginApi?.mainInstance ?? null
+  readonly property var settingsConsumer: pluginApi?.settingsContext?.current() ? mainInstance?.settingsConsumerFor(pluginApi.settingsContext) : null
   property string widgetId: ""
   property string section: ""
   property int sectionWidgetIndex: -1
@@ -22,13 +23,14 @@ Item {
   readonly property bool isVertical: barPosition === "left" || barPosition === "right"
   readonly property real capsuleHeight: Style.getCapsuleHeightForScreen(screenName)
   readonly property real barFontSize: Style.getBarFontSizeForScreen(screenName)
-  readonly property bool showBarText: Local.HermesSession.setting("showBarText", true)
-  readonly property color stateColor: Local.HermesSession.connected ? AtmoColor.mPrimary : (Local.HermesSession.connecting ? AtmoColor.mSecondary : AtmoColor.mOnSurfaceVariant)
+  readonly property bool showBarText: settingsConsumer?.setting("showBarText", true) ?? true
+  readonly property color stateColor: settingsConsumer?.connected ? AtmoColor.mPrimary : (settingsConsumer?.connecting ? AtmoColor.mSecondary : AtmoColor.mOnSurfaceVariant)
 
   implicitWidth: isVertical ? capsuleHeight : Math.round(contentRow.implicitWidth + Style.margin2M)
   implicitHeight: isVertical ? Math.round(contentRow.implicitHeight + Style.margin2M) : capsuleHeight
 
-  Component.onCompleted: Local.HermesSession.setPluginApi(pluginApi)
+  onSettingsConsumerChanged: settingsConsumer?.activate(pluginApi)
+  Component.onCompleted: settingsConsumer?.activate(pluginApi)
 
   NPopupContextMenu {
     id: contextMenu
@@ -72,12 +74,12 @@ Item {
         fillMode: Image.PreserveAspectFit
         smooth: true
         mipmap: true
-        opacity: Local.HermesSession.sessionActive ? 1.0 : 0.72
+        opacity: root.settingsConsumer?.sessionActive ? 1.0 : 0.72
       }
 
       NText {
         visible: root.showBarText && !root.isVertical
-        text: Local.HermesSession.connecting ? pluginApi?.tr("widget.connecting") : pluginApi?.tr("widget.label")
+        text: root.settingsConsumer?.connecting ? pluginApi?.tr("widget.connecting") : pluginApi?.tr("widget.label")
         pointSize: root.barFontSize
         applyUiScale: false
         color: root.stateColor
@@ -96,7 +98,7 @@ Item {
           PanelService.showContextMenu(contextMenu, root, screen);
         }
       }
-      onEntered: TooltipService.show(root, Local.HermesSession.statusText)
+      onEntered: TooltipService.show(root, root.settingsConsumer?.statusText ?? "")
       onExited: TooltipService.hide()
     }
   }
