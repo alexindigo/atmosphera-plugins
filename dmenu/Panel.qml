@@ -326,18 +326,17 @@ FocusScope {
                                             color: itemRect.isSelected ? AtmoColor.mOnPrimary : AtmoColor.mOnSurface
                                         }
 
-                                        // File image (when image path is set)
-                                        Image {
+                                        // File image (when image path is set), through
+                                        // the shared image owner
+                                        NImageIcon {
                                             anchors.centerIn: parent
                                             width: 28
                                             height: 28
                                             visible: (itemRect.itemData.image || "") !== ""
-                                            source: (itemRect.itemData.image || "") !== ""
-                                                ? "file://" + itemRect.itemData.image : ""
+                                            source: itemRect.itemData.image || ""
                                             fillMode: Image.PreserveAspectFit
                                             smooth: true
-                                            sourceSize.width: 56
-                                            sourceSize.height: 56
+                                            sourceSize: Qt.size(56, 56)
                                         }
                                     }
 

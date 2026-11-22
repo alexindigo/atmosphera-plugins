@@ -886,31 +886,27 @@ Item {
 
         Component {
           id: textBlockComp
-          TextEdit {
+          // Markdown that can carry images: through NImageText.
+          NImageText {
             text: blockData.text || ""
-            readOnly: true
             selectByMouse: true
             persistentSelection: true
             wrapMode: TextEdit.WordWrap
             // PlainText while streaming; MarkdownText (or PlainText for tool I/O)
             // once finalized so we don't keep re-parsing partial markdown.
-            textFormat: {
-              if (blockData.kind === "tool") return TextEdit.PlainText;
-              if (entry && entry.streaming === true) return TextEdit.PlainText;
-              return TextEdit.MarkdownText;
+            format: {
+              if (blockData.kind === "tool") return "plain";
+              if (entry && entry.streaming === true) return "plain";
+              return "markdown";
             }
             color: AtmoColor.mOnSurface
-            font.pointSize: Style.fontSizeS * Style.uiScaleRatio
-            font.family: blockData.kind === "tool"
+            pointSize: Style.fontSizeS
+            fontScale: Style.uiScaleRatio
+            family: blockData.kind === "tool"
                            ? "monospace"
                            : (Settings.data.ui.fontDefault || "sans-serif")
             selectionColor: Qt.alpha(AtmoColor.mPrimary, 0.45)
-            selectedTextColor: AtmoColor.mOnPrimary
             onLinkActivated: function (url) { Qt.openUrlExternally(url); }
-            // Render-as-rich URLs; passes Qt's safety check.
-            HoverHandler {
-              cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.IBeamCursor
-            }
           }
         }
 

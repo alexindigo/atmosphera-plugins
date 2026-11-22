@@ -198,22 +198,17 @@ Item {
                         clip:         true
                         opacity:      pinDelegate.pinOpacity
                         Behavior on border.color { ColorAnimation { duration: 120 } }
-                        Image {
+                        // A pinned image can be any format: the shared image
+                        // owner decides by content, keeps animation (WebP,
+                        // GIF...) and labels a failure.
+                        NImageIcon {
                             anchors.fill: parent
-                            visible:      pinDelegate.fileType === "image"
-                            source:       pinDelegate.fileType === "image" && pinDelegate.pinImgPath !== ""
-                                              ? "file://" + pinDelegate.pinImgPath : ""
+                            visible:      pinDelegate.fileType !== "video"
+                            source:       pinDelegate.fileType !== "video" ? pinDelegate.pinImgPath : ""
+                            animationIntent: "preserve"
                             fillMode:     pinDelegate.resolveFillMode(pinDelegate.fillMode)
-                            smooth: true; asynchronous: true
-                        }
-                        AnimatedImage {
-                            anchors.fill: parent
-                            visible:      pinDelegate.fileType === "gif"
-                            source:       pinDelegate.fileType === "gif" && pinDelegate.pinImgPath !== ""
-                                              ? "file://" + pinDelegate.pinImgPath : ""
-                            fillMode:     pinDelegate.resolveFillMode(pinDelegate.fillMode)
-                            playing:      pinDelegate._playing && pinDelegate.visible
-                            smooth: true; asynchronous: true
+                            paused:       !(pinDelegate._playing && pinDelegate.visible)
+                            smooth: true
                         }
                         MediaPlayer {
                             id: mediaPlayer

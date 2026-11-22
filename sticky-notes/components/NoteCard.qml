@@ -141,18 +141,18 @@ Rectangle {
         width: noteContentCol.width
         implicitHeight: Math.ceil(noteContent.contentHeight) + 1
 
-        TextEdit {
+        // Note images (Markdown ![]()) through the shared image owner.
+        NImageText {
           id: noteContent
           width: parent.width
           height: contentHeight
           text: noteCard.renderedContent
-          textFormat: TextEdit.RichText
-          font.pointSize: Style.fontSizeS * Style.uiScaleRatio
+          format: "rich"
+          pointSize: Style.fontSizeS
+          fontScale: Style.uiScaleRatio
           color: "#37474F"
           wrapMode: TextEdit.Wrap
-          readOnly: true
           selectByMouse: true
-          activeFocusOnTab: false
           visible: (noteCard.content || "").length > 0
 
           onLinkActivated: (link) => Qt.openUrlExternally(link)

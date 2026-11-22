@@ -23,7 +23,7 @@
       "author": "Atmosphera",
       "description": "Spatial overview map of niri windows: workspaces, columns and tiles. Click tiles to focus and rows to switch workspace. Reliable startup focus and drag require the stale-seed shell fix in Atmosphera PR #29.",
       "license": "GPL-3.0",
-      "version": "1.0.11",
+      "version": "1.0.12",
       "tags": [
         "Panel",
         "Niri",
@@ -140,7 +140,7 @@
       "author": "Ast",
       "description": "A plugin to manage updates on Arch",
       "license": "MIT",
-      "version": "2.1.14",
+      "version": "2.1.15",
       "tags": [
         "Bar",
         "Desktop",
@@ -161,7 +161,7 @@
       "author": "j-1in",
       "description": "AI Chat and Translation panel",
       "license": "MIT",
-      "version": "2.1.10",
+      "version": "2.1.11",
       "tags": [
         "Bar",
         "Panel",
@@ -401,7 +401,7 @@
       "author": "d7om",
       "description": "Claude Code (Anthropic agentic CLI) with full tool access, permission controls, session management, MCP servers, and device integration",
       "license": "MIT",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "tags": [
         "Bar",
         "Panel",
@@ -420,7 +420,7 @@
       "author": "yanekyuk",
       "description": "Clipboard history panel with search, pinning, and image previews.",
       "license": "MIT",
-      "version": "1.0.9",
+      "version": "1.0.10",
       "tags": [
         "Utility",
         "Bar",
@@ -595,7 +595,7 @@
       "author": "spiros132",
       "description": "Custom stickers (images) that you can put on the desktop as desktop widgets.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "minAtmospheraVersion": "0.10.0",
       "tags": [
         "Desktop",
@@ -612,7 +612,7 @@
       "author": "Vikthor",
       "description": "Desktop widget that displays a daily quote with a scramble decode animation",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Desktop",
         "Fun"
@@ -684,7 +684,7 @@
       "author": "Ben Hilton",
       "description": "An IPC-driven dmenu replacement that lets external scripts present choices through a Noctalia panel.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Panel",
         "Productivity",
@@ -848,7 +848,7 @@
       "author": "vasqs",
       "description": "Habitica dashboard and task scorer for Noctalia Shell with official avatar sprite rendering.",
       "license": "MIT",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "tags": [
         "Bar",
         "Panel",
@@ -901,7 +901,7 @@
       "author": "nomadx, FelipeMayerDev",
       "description": "Native Noctalia status and side-panel interface for Hermes Agent. Supports a client-only mode to drive a Hermes bridge running on a remote server over SSH.",
       "license": "MIT",
-      "version": "1.1.4",
+      "version": "1.1.5",
       "tags": [
         "Bar",
         "Panel",
@@ -955,7 +955,7 @@
       "author": "XimoCP",
       "description": "Elevate your Hyprland experience. A modular plugin to safely inject custom animations, borders, and visual effects on the fly.",
       "license": "MIT",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "tags": [
         "Panel",
         "Bar",
@@ -1011,7 +1011,7 @@
       "author": "Kainoa Kanter",
       "description": "Get AI answers from Kagi in your launcher",
       "license": "MIT",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "tags": [
         "Launcher",
         "Productivity"
@@ -1044,7 +1044,7 @@
       "author": "WerWolv",
       "description": "A Plugin integrating your mobile devices into a panel using KDEConnect",
       "license": "GPLv2",
-      "version": "1.2.6",
+      "version": "1.2.7",
       "tags": [
         "Bar",
         "Panel",
@@ -1173,7 +1173,7 @@
       "author": "PaloMiku",
       "description": "Control linux-wallpaperengine from Noctalia with per-screen wallpaper selection.",
       "license": "MIT",
-      "version": "1.3.4",
+      "version": "1.3.5",
       "tags": [
         "Bar",
         "Panel",
@@ -1374,7 +1374,7 @@
       "author": "Ido Perlmuter",
       "description": "MPD plugin for Noctalia",
       "license": "MIT",
-      "version": "1.1.5",
+      "version": "1.1.6",
       "tags": [
         "Bar",
         "Audio",
@@ -1960,7 +1960,7 @@
       "author": "Qholin",
       "description": "A customizable parallax effect for the wallpaper based on the active workspace.",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "minAtmospheraVersion": "0.10.0",
       "tags": [
         "Desktop"
@@ -1993,7 +1993,7 @@
       "author": "blacku",
       "description": "A full-featured plugin manager with browsing, installation, and README viewer for Noctalia plugins.",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "Bar",
         "Panel",
@@ -2151,7 +2151,7 @@
       "author": "Kermut572",
       "description": "A simple plugin that fetches the current, past, and future weeks menu for UCLouvain's Restaurants Universitaires",
       "license": "MIT",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Bar",
         "Panel"
@@ -2222,7 +2222,7 @@
       "author": "ycf-anon",
       "description": "A set of screen tools: color picker, annotate, record, pin, OCR, QR scanner, palette, measure, and webcam mirror (deps: README).",
       "license": "MIT",
-      "version": "1.3.8",
+      "version": "1.3.9",
       "tags": [
         "Panel",
         "Bar",
@@ -2352,7 +2352,7 @@
       "author": "yhordi45",
       "description": "A full-screen power menu for Noctalia Shell, inspired by the wlogout design.",
       "license": "MIT",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "tags": [
         "Bar",
         "Panel",
@@ -2447,7 +2447,7 @@
       "author": "sapjax",
       "description": "A local quick notes plugin with Markdown support.",
       "license": "MIT",
-      "version": "0.0.10",
+      "version": "0.0.11",
       "tags": [
         "Bar",
         "Panel",
@@ -2676,7 +2676,7 @@
       "author": "Suyash",
       "description": "A plugin integrating your mobile devices into a panel using Valent",
       "license": "GPLv2",
-      "version": "1.2.5",
+      "version": "1.2.6",
       "tags": [
         "Bar",
         "Panel",
@@ -2714,7 +2714,7 @@
       "author": "c1ph3r-1337",
       "description": "A rotational disc app launcher plugin",
       "license": "unknown",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "tags": [
         "Launcher"
       ],
@@ -2748,7 +2748,7 @@
       "author": "tonigineer",
       "description": "A `lively` wallpaper selector.",
       "license": "MIT",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "tags": [
         "Desktop",
         "Theming"
@@ -2765,7 +2765,7 @@
       "author": "yngwe",
       "description": "Browse and pick wallpapers with a fullscreen skewed carousel overlay",
       "license": "MIT",
-      "version": "0.8.4",
+      "version": "0.8.5",
       "tags": [
         "Theming",
         "Wallpaper"
@@ -2853,7 +2853,7 @@
       "author": "doughbran",
       "description": "Workspace overview with live window previews and wallpaper backgrounds for Hyprland.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Hyprland",
         "Bar",

@@ -5,6 +5,7 @@ import qs.Commons
 import qs.Services.Compositor
 import qs.Services.Power
 import qs.Services.UI
+import qs.Widgets
 
 Variants {
   id: backgroundVariants
@@ -88,6 +89,19 @@ Variants {
       property real transitionProgress: 0
       property bool isStartupTransition: true
       property bool wallpaperReady: false
+      // Wallpapers go through the shared image owner, as the shell's own
+      // background does: two NImage buffers, the shown one is replaced only
+      // once the next one is Ready; a failure keeps it.
+      property string errorReason: ""
+      property int _front: 0
+      property int _pending: -1
+      property int _generation: 0
+      property int _candidateGeneration: -1
+      property bool _animateCandidate: false
+      property string _displayedPath: ""
+      property var _acknowledgment: null
+      readonly property var currentWallpaper: _front === 0 ? firstWallpaper : secondWallpaper
+      readonly property var nextWallpaper: _front === 0 ? secondWallpaper : firstWallpaper
 
       visible: wallpaperReady
 
@@ -169,16 +183,6 @@ Variants {
             return;
           }
 
-          if (isStartupTransition) {
-            const compositorScale = CompositorService.getDisplayScale(modelData.name);
-            const targetWidth = Math.round(modelData.width * compositorScale);
-            const targetHeight = Math.round(modelData.height * compositorScale);
-            ImageCacheService.getLarge(currentPath, targetWidth, targetHeight, function (cachedPath, success) {
-              WallpaperService.wallpaperProcessingComplete(modelData.name, currentPath, success ? cachedPath : "");
-            });
-            return;
-          }
-
           requestPreprocessedWallpaper(currentPath);
         }
       }
@@ -188,8 +192,21 @@ Variants {
         startupTransitionTimer.stop();
         debounceTimer.stop();
         shaderLoader.active = false;
-        currentWallpaper.source = "";
-        nextWallpaper.source = "";
+        ++_generation;
+        firstWallpaper.active = secondWallpaper.active = false;
+        firstWallpaper.source = secondWallpaper.source = "";
+      }
+
+      // The selection is acknowledged once the new wallpaper is on screen.
+      Connections {
+        target: shaderLoader.Window.window
+        function onFrameSwapped() {
+          var acknowledgment = root._acknowledgment;
+          if (!acknowledgment || acknowledgment.generation !== root._generation || root.transitioning || root._pending >= 0)
+            return;
+          root._acknowledgment = null;
+          WallpaperService.wallpaperProcessingComplete(modelData.name, acknowledgment.path, acknowledgment.output);
+        }
       }
 
       Connections {
@@ -238,50 +255,34 @@ Variants {
         onTriggered: _executeStartupTransition()
       }
 
-      Image {
-        id: currentWallpaper
-
+      NImage {
+        id: firstWallpaper
+        anchors.fill: parent
+        active: false
         source: ""
+        normalize: true
+        animationIntent: "still"
+        imageTransform: "contain"
+        fillMode: Image.Stretch // The wallpaper shader owns fit/crop exactly once.
         smooth: true
         mipmap: false
         visible: false
-        cache: true
-        asynchronous: true
-        onStatusChanged: {
-          if (status === Image.Error) {
-            Logger.w("Parallax Wallpaper", "Current wallpaper failed to load:", source);
-          } else if (status === Image.Ready && !wallpaperReady) {
-            wallpaperReady = true;
-          }
-        }
+        onStatusChanged: Qt.callLater(root._settleCandidate, 0)
       }
 
-      Image {
-        id: nextWallpaper
-
-        property bool pendingTransition: false
-
+      NImage {
+        id: secondWallpaper
+        anchors.fill: parent
+        active: false
         source: ""
+        normalize: true
+        animationIntent: "still"
+        imageTransform: "contain"
+        fillMode: Image.Stretch
         smooth: true
         mipmap: false
         visible: false
-        cache: false
-        asynchronous: true
-        onStatusChanged: {
-          if (status === Image.Error) {
-            Logger.w("Parallax Wallpaper", "Next wallpaper failed to load:", source);
-            pendingTransition = false;
-          } else if (status === Image.Ready) {
-            if (!wallpaperReady) {
-              wallpaperReady = true;
-            }
-            if (pendingTransition) {
-              pendingTransition = false;
-              currentWallpaper.asynchronous = false;
-              transitionAnimation.start();
-            }
-          }
-        }
+        onStatusChanged: Qt.callLater(root._settleCandidate, 1)
       }
 
       // Shader loader with parallax transform
@@ -329,16 +330,16 @@ Variants {
         ShaderEffect {
           anchors.fill: parent
 
-          property variant source1: currentWallpaper
-          property variant source2: nextWallpaper
+          property variant source1: root.currentWallpaper.textureItem
+          property variant source2: root.nextWallpaper.status === Image.Ready ? root.nextWallpaper.textureItem : root.currentWallpaper.textureItem
           property real progress: root.transitionProgress
 
           property real fillMode: root.fillMode
           property vector4d fillColor: root.fillColor
-          property real imageWidth1: source1.sourceSize.width
-          property real imageHeight1: source1.sourceSize.height
-          property real imageWidth2: source2.sourceSize.width
-          property real imageHeight2: source2.sourceSize.height
+          property real imageWidth1: root.currentWallpaper.decodedSize.width
+          property real imageHeight1: root.currentWallpaper.decodedSize.height
+          property real imageWidth2: root.nextWallpaper.status === Image.Ready ? root.nextWallpaper.decodedSize.width : imageWidth1
+          property real imageHeight2: root.nextWallpaper.status === Image.Ready ? root.nextWallpaper.decodedSize.height : imageHeight1
           property real screenWidth: width
           property real screenHeight: height
 
@@ -357,18 +358,18 @@ Variants {
         ShaderEffect {
           anchors.fill: parent
 
-          property variant source1: currentWallpaper
-          property variant source2: nextWallpaper
+          property variant source1: root.currentWallpaper.textureItem
+          property variant source2: root.nextWallpaper.status === Image.Ready ? root.nextWallpaper.textureItem : root.currentWallpaper.textureItem
           property real progress: root.transitionProgress
           property real smoothness: root.edgeSmoothness
           property real direction: root.wipeDirection
 
           property real fillMode: root.fillMode
           property vector4d fillColor: root.fillColor
-          property real imageWidth1: source1.sourceSize.width
-          property real imageHeight1: source1.sourceSize.height
-          property real imageWidth2: source2.sourceSize.width
-          property real imageHeight2: source2.sourceSize.height
+          property real imageWidth1: root.currentWallpaper.decodedSize.width
+          property real imageHeight1: root.currentWallpaper.decodedSize.height
+          property real imageWidth2: root.nextWallpaper.status === Image.Ready ? root.nextWallpaper.decodedSize.width : imageWidth1
+          property real imageHeight2: root.nextWallpaper.status === Image.Ready ? root.nextWallpaper.decodedSize.height : imageHeight1
           property real screenWidth: width
           property real screenHeight: height
 
@@ -387,8 +388,8 @@ Variants {
         ShaderEffect {
           anchors.fill: parent
 
-          property variant source1: currentWallpaper
-          property variant source2: nextWallpaper
+          property variant source1: root.currentWallpaper.textureItem
+          property variant source2: root.nextWallpaper.status === Image.Ready ? root.nextWallpaper.textureItem : root.currentWallpaper.textureItem
           property real progress: root.transitionProgress
           property real smoothness: root.edgeSmoothness
           property real aspectRatio: root.width / root.height
@@ -397,10 +398,10 @@ Variants {
 
           property real fillMode: root.fillMode
           property vector4d fillColor: root.fillColor
-          property real imageWidth1: source1.sourceSize.width
-          property real imageHeight1: source1.sourceSize.height
-          property real imageWidth2: source2.sourceSize.width
-          property real imageHeight2: source2.sourceSize.height
+          property real imageWidth1: root.currentWallpaper.decodedSize.width
+          property real imageHeight1: root.currentWallpaper.decodedSize.height
+          property real imageWidth2: root.nextWallpaper.status === Image.Ready ? root.nextWallpaper.decodedSize.width : imageWidth1
+          property real imageHeight2: root.nextWallpaper.status === Image.Ready ? root.nextWallpaper.decodedSize.height : imageHeight1
           property real screenWidth: width
           property real screenHeight: height
 
@@ -419,8 +420,8 @@ Variants {
         ShaderEffect {
           anchors.fill: parent
 
-          property variant source1: currentWallpaper
-          property variant source2: nextWallpaper
+          property variant source1: root.currentWallpaper.textureItem
+          property variant source2: root.nextWallpaper.status === Image.Ready ? root.nextWallpaper.textureItem : root.currentWallpaper.textureItem
           property real progress: root.transitionProgress
           property real smoothness: root.edgeSmoothness
           property real aspectRatio: root.width / root.height
@@ -429,10 +430,10 @@ Variants {
 
           property real fillMode: root.fillMode
           property vector4d fillColor: root.fillColor
-          property real imageWidth1: source1.sourceSize.width
-          property real imageHeight1: source1.sourceSize.height
-          property real imageWidth2: source2.sourceSize.width
-          property real imageHeight2: source2.sourceSize.height
+          property real imageWidth1: root.currentWallpaper.decodedSize.width
+          property real imageHeight1: root.currentWallpaper.decodedSize.height
+          property real imageWidth2: root.nextWallpaper.status === Image.Ready ? root.nextWallpaper.decodedSize.width : imageWidth1
+          property real imageHeight2: root.nextWallpaper.status === Image.Ready ? root.nextWallpaper.decodedSize.height : imageHeight1
           property real screenWidth: width
           property real screenHeight: height
 
@@ -451,17 +452,17 @@ Variants {
         ShaderEffect {
           anchors.fill: parent
 
-          property variant source1: currentWallpaper
-          property variant source2: nextWallpaper
+          property variant source1: root.currentWallpaper.textureItem
+          property variant source2: root.nextWallpaper.status === Image.Ready ? root.nextWallpaper.textureItem : root.currentWallpaper.textureItem
           property real progress: root.transitionProgress
           property real maxBlockSize: root.pixelateMaxBlockSize
 
           property real fillMode: root.fillMode
           property vector4d fillColor: root.fillColor
-          property real imageWidth1: source1.sourceSize.width
-          property real imageHeight1: source1.sourceSize.height
-          property real imageWidth2: source2.sourceSize.width
-          property real imageHeight2: source2.sourceSize.height
+          property real imageWidth1: root.currentWallpaper.decodedSize.width
+          property real imageHeight1: root.currentWallpaper.decodedSize.height
+          property real imageWidth2: root.nextWallpaper.status === Image.Ready ? root.nextWallpaper.decodedSize.width : imageWidth1
+          property real imageHeight2: root.nextWallpaper.status === Image.Ready ? root.nextWallpaper.decodedSize.height : imageHeight1
           property real screenWidth: width
           property real screenHeight: height
 
@@ -480,8 +481,8 @@ Variants {
         ShaderEffect {
           anchors.fill: parent
 
-          property variant source1: currentWallpaper
-          property variant source2: nextWallpaper
+          property variant source1: root.currentWallpaper.textureItem
+          property variant source2: root.nextWallpaper.status === Image.Ready ? root.nextWallpaper.textureItem : root.currentWallpaper.textureItem
           property real progress: root.transitionProgress
           property real cellSize: root.honeycombCellSize
           property real centerX: root.honeycombCenterX
@@ -490,10 +491,10 @@ Variants {
 
           property real fillMode: root.fillMode
           property vector4d fillColor: root.fillColor
-          property real imageWidth1: source1.sourceSize.width
-          property real imageHeight1: source1.sourceSize.height
-          property real imageWidth2: source2.sourceSize.width
-          property real imageHeight2: source2.sourceSize.height
+          property real imageWidth1: root.currentWallpaper.decodedSize.width
+          property real imageHeight1: root.currentWallpaper.decodedSize.height
+          property real imageWidth2: root.nextWallpaper.status === Image.Ready ? root.nextWallpaper.decodedSize.width : imageWidth1
+          property real imageHeight2: root.nextWallpaper.status === Image.Ready ? root.nextWallpaper.decodedSize.height : imageHeight1
           property real screenWidth: width
           property real screenHeight: height
 
@@ -514,32 +515,7 @@ Variants {
         to: 1.0
         duration: Settings.data.wallpaper.transitionDuration
         easing.type: Easing.InOutCubic
-        onFinished: {
-          transitioningToOriginalPath = "";
-
-          isSolid1 = isSolid2;
-          _solidColor1 = _solidColor2;
-
-          const tempSource = nextWallpaper.source;
-          currentWallpaper.source = tempSource;
-          transitionProgress = 0.0;
-
-          Qt.callLater(() => {
-                         nextWallpaper.source = "";
-                         isSolid2 = false;
-                         Qt.callLater(() => {
-                                        currentWallpaper.asynchronous = true;
-                                      });
-                       });
-        }
-      }
-
-      function _pathStr(p) {
-        var s = p.toString();
-        if (s.startsWith("file://")) {
-          return s.substring(7);
-        }
-        return s;
+        onFinished: root._promote(true)
       }
 
       function setWallpaperInitial() {
@@ -552,170 +528,107 @@ Variants {
           return;
         }
 
-        if (Settings.data.wallpaper.useSolidColor) {
-          var solidPath = WallpaperService.createSolidColorPath(Settings.data.wallpaper.solidColor.toString());
-          futureWallpaper = solidPath;
-          performStartupTransition();
-          WallpaperService.wallpaperProcessingComplete(modelData.name, solidPath, "");
-          return;
-        }
-
-        const wallpaperPath = WallpaperService.getWallpaper(modelData.name);
-
-        if (WallpaperService.isSolidColorPath(wallpaperPath)) {
-          futureWallpaper = wallpaperPath;
-          performStartupTransition();
-          WallpaperService.wallpaperProcessingComplete(modelData.name, wallpaperPath, "");
-          return;
-        }
-
-        const compositorScale = CompositorService.getDisplayScale(modelData.name);
-        const targetWidth = Math.round(modelData.width * compositorScale);
-        const targetHeight = Math.round(modelData.height * compositorScale);
-
-        ImageCacheService.getLarge(wallpaperPath, targetWidth, targetHeight, function (cachedPath, success) {
-          if (success) {
-            futureWallpaper = cachedPath;
-          } else {
-            futureWallpaper = wallpaperPath;
-          }
-          performStartupTransition();
-          WallpaperService.wallpaperProcessingComplete(modelData.name, wallpaperPath, success ? cachedPath : "");
-        });
+        requestPreprocessedWallpaper(Settings.data.wallpaper.useSolidColor ? WallpaperService.createSolidColorPath(Settings.data.wallpaper.solidColor.toString()) : WallpaperService.getWallpaper(modelData.name));
       }
 
       function requestPreprocessedWallpaper(originalPath) {
-        if (transitioning && originalPath === transitioningToOriginalPath) {
+        if (!originalPath)
           return;
+        ++_generation;
+        _acknowledgment = null;
+        startupTransitionTimer.stop();
+        debounceTimer.stop();
+        if (transitioning) {
+          transitionAnimation.stop();
+          _promote(false);
         }
-
-        transitioningToOriginalPath = originalPath;
-
-        if (WallpaperService.isSolidColorPath(originalPath)) {
-          futureWallpaper = originalPath;
+        _pending = -1;
+        nextWallpaper.active = false;
+        nextWallpaper.source = "";
+        isSolid2 = false;
+        errorReason = "";
+        futureWallpaper = String(originalPath);
+        transitioningToOriginalPath = futureWallpaper;
+        if (isStartupTransition)
+          performStartupTransition();
+        else
           debounceTimer.restart();
-          WallpaperService.wallpaperProcessingComplete(modelData.name, originalPath, "");
-          return;
-        }
-
-        const compositorScale = CompositorService.getDisplayScale(modelData.name);
-        const targetWidth = Math.round(modelData.width * compositorScale);
-        const targetHeight = Math.round(modelData.height * compositorScale);
-
-        ImageCacheService.getLarge(originalPath, targetWidth, targetHeight, function (cachedPath, success) {
-          if (originalPath !== transitioningToOriginalPath) {
-            return;
-          }
-          if (success) {
-            futureWallpaper = cachedPath;
-          } else {
-            futureWallpaper = originalPath;
-          }
-
-          if (_pathStr(futureWallpaper) === _pathStr(currentWallpaper.source)) {
-            transitioningToOriginalPath = "";
-            WallpaperService.wallpaperProcessingComplete(modelData.name, originalPath, success ? cachedPath : "");
-            return;
-          }
-
-          debounceTimer.restart();
-          WallpaperService.wallpaperProcessingComplete(modelData.name, originalPath, success ? cachedPath : "");
-        });
       }
 
       function setWallpaperImmediate(source) {
-        transitionAnimation.stop();
-        transitionProgress = 0.0;
-
-        var isSolidSource = WallpaperService.isSolidColorPath(source);
-        isSolid1 = isSolidSource;
-        isSolid2 = false;
-
-        if (isSolidSource) {
-          var colorStr = WallpaperService.getSolidColor(source);
-          _solidColor1 = colorStr;
-          currentWallpaper.source = "";
-          nextWallpaper.source = "";
-          if (!wallpaperReady) {
-            wallpaperReady = true;
-          }
-          return;
-        }
-
-        nextWallpaper.source = "";
-        nextWallpaper.sourceSize = undefined;
-
-        currentWallpaper.source = "";
-
-        Qt.callLater(() => {
-                       currentWallpaper.source = source;
-                     });
+        _startTransitionTo(source, WallpaperService.isSolidColorPath(source), false);
       }
 
       function setWallpaperWithTransition(source) {
-        var isSolidSource = WallpaperService.isSolidColorPath(source);
-
-        if (isSolidSource && isSolid1) {
-          var newColor = WallpaperService.getSolidColor(source);
-          if (newColor === _solidColor1.toString()) {
-            return;
-          }
-        }
-
-        if (!isSolidSource && _pathStr(source) === _pathStr(currentWallpaper.source)) {
-          return;
-        }
-
-        if (transitioning && source === nextWallpaper.source) {
-          return;
-        }
-
-        if (transitioning) {
-          transitionAnimation.stop();
-          transitionProgress = 0;
-
-          isSolid1 = isSolid2;
-          _solidColor1 = _solidColor2;
-          const newCurrentSource = nextWallpaper.source;
-          currentWallpaper.source = newCurrentSource;
-
-          Qt.callLater(() => {
-                         nextWallpaper.source = "";
-                         isSolid2 = false;
-
-                         Qt.callLater(() => {
-                                        _startTransitionTo(source, isSolidSource);
-                                      });
-                       });
-          return;
-        }
-
-        _startTransitionTo(source, isSolidSource);
+        _startTransitionTo(source, WallpaperService.isSolidColorPath(source), true);
       }
 
-      function _startTransitionTo(source, isSolidSource) {
+      function _startTransitionTo(source, isSolidSource, animate) {
+        _pending = 1 - _front;
+        _candidateGeneration = _generation;
+        _animateCandidate = animate;
         isSolid2 = isSolidSource;
-
+        nextWallpaper.active = false;
+        nextWallpaper.source = "";
         if (isSolidSource) {
-          var colorStr = WallpaperService.getSolidColor(source);
-          _solidColor2 = colorStr;
-          nextWallpaper.source = "";
-          if (!wallpaperReady) {
-            wallpaperReady = true;
-          }
-          currentWallpaper.asynchronous = false;
-          transitionAnimation.start();
+          _solidColor2 = WallpaperService.getSolidColor(source);
+          _candidateReady();
         } else {
+          var scale = CompositorService.getDisplayScale(modelData.name);
+          nextWallpaper.sourceSize = Qt.size(Math.max(1, Math.round(modelData.width * scale)), Math.max(1, Math.round(modelData.height * scale)));
           nextWallpaper.source = source;
-          if (nextWallpaper.status === Image.Ready) {
-            if (!wallpaperReady) {
-              wallpaperReady = true;
-            }
-            currentWallpaper.asynchronous = false;
-            transitionAnimation.start();
-          } else {
-            nextWallpaper.pendingTransition = true;
-          }
+          nextWallpaper.active = true;
+        }
+      }
+
+      function _settleCandidate(index) {
+        if (_pending !== index || _candidateGeneration !== _generation || isSolid2 || transitioning)
+          return;
+        if (nextWallpaper.status === Image.Ready) {
+          _candidateReady();
+        } else if (nextWallpaper.status === Image.Error) {
+          errorReason = nextWallpaper.errorReason;
+          Logger.w("Parallax Wallpaper", "Wallpaper unavailable:", errorReason);
+          _pending = -1;
+          transitioningToOriginalPath = "";
+          nextWallpaper.active = false;
+          nextWallpaper.source = "";
+        }
+      }
+
+      function _candidateReady() {
+        wallpaperReady = true;
+        if (_animateCandidate)
+          transitionAnimation.start();
+        else
+          _promote(true);
+      }
+
+      function _promote(acknowledge) {
+        if (_pending < 0)
+          return;
+        var generation = _generation;
+        var path = transitioningToOriginalPath;
+        isSolid1 = isSolid2;
+        _solidColor1 = _solidColor2;
+        _front = _pending;
+        _pending = -1;
+        _displayedPath = path;
+        transitionProgress = 0;
+        nextWallpaper.active = false;
+        nextWallpaper.source = "";
+        isSolid2 = false;
+        isStartupTransition = false;
+        transitioningToOriginalPath = "";
+        var output = isSolid1 ? "" : currentWallpaper.outputUrl;
+        if (acknowledge) {
+          _acknowledgment = {
+            generation: generation,
+            path: path,
+            output: output
+          };
+          if (shaderLoader.Window.window)
+            shaderLoader.Window.window.update();
         }
       }
 

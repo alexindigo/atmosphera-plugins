@@ -182,10 +182,13 @@ Item {
           Layout.preferredHeight: width
           Layout.alignment: Qt.AlignHCenter
 
-          IconImage {
+          // Theme lookup, then the shared image owner (labelled on failure).
+          AtmoAppIcon {
             anchors.fill: parent
-            source: diskView.currentItemData ? ThemeIcons.iconFromName(diskView.currentItemData.icon, "application-x-executable") : ""
-            asynchronous: true
+            size: Math.max(width, height)
+            name: diskView.currentItemData ? diskView.currentItemData.icon || "" : ""
+            fallbackName: "application-x-executable"
+            visible: !!diskView.currentItemData
           }
         }
 
@@ -310,9 +313,11 @@ Item {
 
         required property var modelData
 
-        IconImage {
+        AtmoAppIcon {
           anchors.fill: parent
-          source: ThemeIcons.iconFromName(modelData.icon, "application-x-executable")
+          size: Math.max(width, height)
+          name: modelData.icon || ""
+          fallbackName: "application-x-executable"
         }
 
         TapHandler {

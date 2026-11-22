@@ -115,18 +115,20 @@ ColumnLayout {
     color: AtmoColor.mSurfaceVariant
     clip: true
 
-    Image {
+    // Previews through the shared image owner; motion previews keep moving.
+    NImage {
       anchors.fill: parent
       visible: root.selectedWallpaperData && (!root.selectedWallpaperData.motionPreview || root.selectedWallpaperData.motionPreview.length === 0) && root.selectedWallpaperData.thumb && root.selectedWallpaperData.thumb.length > 0
-      source: visible ? ("file://" + root.selectedWallpaperData.thumb) : ""
+      source: visible ? root.selectedWallpaperData.thumb : ""
       fillMode: Image.PreserveAspectCrop
       cache: false
     }
 
-    AnimatedImage {
+    NImage {
       anchors.fill: parent
       visible: root.selectedWallpaperData && root.selectedWallpaperData.motionPreview && root.selectedWallpaperData.motionPreview.length > 0 && !(root.isVideoMotion && root.isVideoMotion(root.selectedWallpaperData.motionPreview))
-      source: visible ? ("file://" + root.selectedWallpaperData.motionPreview) : ""
+      source: visible ? root.selectedWallpaperData.motionPreview : ""
+      animationIntent: "preserve"
       fillMode: Image.PreserveAspectCrop
       cache: false
       playing: visible
@@ -325,23 +327,24 @@ ColumnLayout {
       border.color: Qt.alpha(AtmoColor.mOutline, 0.22)
       clip: true
 
-      NText {
+      // Workshop descriptions are outside markup: images through the
+      // shared image owner.
+      NImageText {
         id: descriptionMeasureText
         visible: false
         width: descriptionText.width
         text: root.selectedDescriptionMarkup
-        textFormat: Text.RichText
+        format: "rich"
         wrapMode: Text.Wrap
-        font: descriptionText.font
         onContentHeightChanged: descriptionCollapseEvalTimer.restart()
       }
 
-      NText {
+      NImageText {
         id: descriptionText
         anchors.fill: parent
         anchors.margins: Style.marginS
         text: root.selectedDescriptionMarkup
-        textFormat: Text.RichText
+        format: "rich"
         color: AtmoColor.mOnSurfaceVariant
         wrapMode: Text.Wrap
         linkColor: AtmoColor.mPrimary

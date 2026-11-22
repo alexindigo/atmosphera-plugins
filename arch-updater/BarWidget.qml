@@ -83,7 +83,7 @@ Item {
                     color: mouseArea.containsMouse ? AtmoColor.mOnHover : (root.pluginApi.mainInstance.noctaliaUpdate ? AtmoColor.mHover : root.iconColor)
                     icon: (root.pluginApi.mainInstance.noctaliaUpdate | mouseArea.containsMouse) ? root.iconName + "-filled" : root.iconName
                 }
-                IconImage { // Custom file or distro logo
+                NImageIcon { // Custom file or distro logo, through the shared image owner
                     visible: !root.pluginApi.mainInstance.refreshing && (root.useDistroLogo || root.customIconPath !== "")
                     Layout.preferredWidth: root.capsuleHeight * 0.6
                     Layout.preferredHeight: root.capsuleHeight * 0.6
@@ -93,7 +93,6 @@ Item {
                         return ""
                     }
                     smooth: true
-                    asynchronous: true
                     layer.enabled: root.enableColorization && (root.useDistroLogo || root.customIconPath !== "")
                     layer.effect: ShaderEffect {
                         property color targetColor: mouseArea.containsMouse ? AtmoColor.mOnHover : root.iconColor
@@ -143,7 +142,7 @@ Item {
                     color: mouseArea.containsMouse ? AtmoColor.mOnHover : (root.pluginApi.mainInstance.noctaliaUpdate ? AtmoColor.mHover : root.iconColor)
                     icon: (root.pluginApi.mainInstance.noctaliaUpdate | mouseArea.containsMouse) ? root.iconName + "-filled" : root.iconName
                 }
-                IconImage { // Custom file or distro logo
+                NImageIcon { // Custom file or distro logo, through the shared image owner
                     visible: !root.pluginApi.mainInstance.refreshing && (root.useDistroLogo || root.customIconPath !== "")
                     Layout.preferredWidth: root.capsuleHeight * 0.6
                     Layout.preferredHeight: root.capsuleHeight * 0.6
@@ -153,7 +152,6 @@ Item {
                         return ""
                     }
                     smooth: true
-                    asynchronous: true
                     layer.enabled: root.enableColorization && (root.useDistroLogo || root.customIconPath !== "")
                     layer.effect: ShaderEffect {
                         property color targetColor: mouseArea.containsMouse ? AtmoColor.mOnHover : root.iconColor

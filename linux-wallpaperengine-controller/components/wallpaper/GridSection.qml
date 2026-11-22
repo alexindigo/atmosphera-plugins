@@ -112,10 +112,11 @@ Rectangle {
           color: AtmoColor.mSurfaceVariant
           clip: true
 
-          Image {
+          // Workshop previews can be any format: through the shared owner.
+          NImage {
             anchors.fill: parent
             visible: modelData.thumb && modelData.thumb.length > 0
-            source: visible ? ("file://" + modelData.thumb) : ""
+            source: visible ? modelData.thumb : ""
             fillMode: Image.PreserveAspectCrop
             cache: false
           }
@@ -129,9 +130,10 @@ Rectangle {
           Component {
             id: motionAnimatedComponent
 
-            AnimatedImage {
+            NImage {
               anchors.fill: parent
-              source: "file://" + modelData.motionPreview
+              source: modelData.motionPreview || ""
+              animationIntent: "preserve"
               fillMode: Image.PreserveAspectCrop
               cache: false
               playing: tileCard.isInView

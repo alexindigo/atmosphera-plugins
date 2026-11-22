@@ -130,17 +130,17 @@ Item {
             ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
             gradientColor: Qt.tint(root.noteColor || "#FFF9C4", Qt.rgba(1, 1, 1, 0.28))
 
-            TextArea {
+            // Note images (Markdown ![]()) through the shared image owner.
+            NImageText {
               id: previewText
+              width: previewScrollView.availableWidth
               text: Markdown.render(root.content || "", { noteColor: root.noteColor || "#FFF9C4" })
-              textFormat: TextEdit.RichText
-              font.pointSize: Style.fontSizeM * Style.uiScaleRatio
+              format: "rich"
+              pointSize: Style.fontSizeM
+              fontScale: Style.uiScaleRatio
               color: "#37474F"
-              wrapMode: TextArea.Wrap
-              readOnly: true
+              wrapMode: TextEdit.Wrap
               selectByMouse: true
-              activeFocusOnTab: false
-              background: Item {}
 
               onLinkActivated: (link) => Qt.openUrlExternally(link)
             }

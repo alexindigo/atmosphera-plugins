@@ -11,16 +11,14 @@ Item {
   property real iconSize: Style.fontSizeXL
   property real dotSize: 8 * Style.uiScaleRatio
 
-  Image {
+  // Through the shared image owner; a failure is labelled.
+  NImageIcon {
     id: avatarImage
     anchors.fill: parent
     source: root.iconPath
-    sourceSize.width: width
-    sourceSize.height: height
     fillMode: Image.PreserveAspectFit
     smooth: true
-    mipmap: true
-    visible: status === Image.Ready
+    visible: status === Image.Ready || failed
   }
 
   AtmoIcon {
