@@ -17,6 +17,7 @@ Item {
     property int sectionWidgetsCount: 0
 
     readonly property var mainInstance: pluginApi?.mainInstance
+    readonly property var settingsConsumer: pluginApi?.settingsContext?.current() ? mainInstance?.settingsConsumerFor(pluginApi.settingsContext) : null
     readonly property string screenName: screen?.name ?? ""
     readonly property string resolvedBarPosition: Settings.getBarPositionForScreen(screenName)
     readonly property bool isBarVertical: resolvedBarPosition === "left" || resolvedBarPosition === "right"
@@ -24,8 +25,8 @@ Item {
     readonly property real barFontSize: Style.getBarFontSizeForScreen(screenName)
 
     // Settings tie-ins
-    readonly property real catSize: mainInstance?.catSize ?? 1.0
-    readonly property real catOffsetY: mainInstance?.catOffsetY ?? 0.0
+    readonly property real catSize: settingsConsumer?.catSize ?? 1.0
+    readonly property real catOffsetY: settingsConsumer?.catOffsetY ?? 0.0
     readonly property real widthPadding: pluginApi?.pluginSettings?.widthPadding ?? 0.2
 
     // Orientation-aware cat sizing (both driven by the catSize slider)
@@ -38,13 +39,13 @@ Item {
     readonly property string sleepGlyph: "ef"
     readonly property string blinkGlyph: "gh"
 
-    readonly property int catState: mainInstance?.catState ?? 0
+    readonly property int catState: settingsConsumer?.catState ?? 0
     readonly property bool paused: mainInstance?.paused ?? false
-    readonly property bool waiting: mainInstance?.waiting ?? false
-    readonly property string catColorKey: mainInstance?.catColor ?? "default"
-    readonly property bool blinking: mainInstance?.blinking ?? false
-    readonly property bool showRainbowColor: mainInstance?.showRainbowColor ?? false
-    readonly property string rainbowColor: mainInstance?.currentRainbowColor ?? "#ff0000"
+    readonly property bool waiting: settingsConsumer?.waiting ?? false
+    readonly property string catColorKey: settingsConsumer?.catColor ?? "default"
+    readonly property bool blinking: settingsConsumer?.blinking ?? false
+    readonly property bool showRainbowColor: settingsConsumer?.showRainbowColor ?? false
+    readonly property string rainbowColor: settingsConsumer?.currentRainbowColor ?? "#ff0000"
 
     function resolveColor(key) {
         switch (key) {

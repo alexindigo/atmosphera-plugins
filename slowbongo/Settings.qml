@@ -9,6 +9,13 @@ ColumnLayout {
   spacing: Style.marginL
 
   property var pluginApi: null
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.WordWrap
+    color: AtmoColor.mOnSurfaceVariant
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+  }
   readonly property var inputDevicesField: pluginApi?.field("inputDevices") ?? null
   readonly property var catColorField: pluginApi?.field("catColor") ?? null
   readonly property var catSizeField: pluginApi?.field("catSize") ?? null

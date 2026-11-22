@@ -2334,13 +2334,13 @@
       "author": "tui",
       "description": "A bongo cat that sits in your bar and slaps when you type.",
       "license": "MIT",
-      "version": "0.8.6",
+      "version": "0.8.7",
       "tags": [
         "Bar",
         "Audio",
         "Fun"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",

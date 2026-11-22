@@ -1,6 +1,7 @@
 {
   "description": "A bongo cat that sits in your bar and slaps when you type.",
   "settings": {
+    "shared-effect": "Input and audio observations are shared. This widget selects its own devices and animation settings; pausing affects all SlowBongo widgets.",
     "requirements": "Requirements",
     "input-devices": "Input Devices",
     "colours": "Colours",
