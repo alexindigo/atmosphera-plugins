@@ -161,7 +161,7 @@
       "author": "j-1in",
       "description": "AI Chat and Translation panel",
       "license": "MIT",
-      "version": "2.1.12",
+      "version": "2.1.13",
       "tags": [
         "Bar",
         "Panel",
@@ -169,7 +169,7 @@
         "Productivity",
         "Network"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-22",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.1.2",

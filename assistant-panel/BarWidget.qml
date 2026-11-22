@@ -163,7 +163,7 @@ Item {
         pluginApi?.openPanel(root.screen, root);
       } else if (action === "clear") {
         if (mainInstance) {
-          mainInstance.clearMessages();
+          mainInstance.clearMessages(pluginApi?.settingsContext);
           ToastService.showNotice(pluginApi?.tr("toast.historyCleared"));
         }
       } else if (action === "settings") {

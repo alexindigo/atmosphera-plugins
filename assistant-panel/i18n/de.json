@@ -64,6 +64,7 @@
     "vi": "Vietnamesisch"
   },
   "settings": {
+    "sharedContent": "Provider and translation choices follow this widget. Conversation, input, translation results and history are shared; clear and stop affect everyone.",
     "aiSection": "KI Chat Einstellungen",
     "provider": "KI Anbieter",
     "providerDesc": "Wähle deinen bevorzugten KI-Anbieter aus",

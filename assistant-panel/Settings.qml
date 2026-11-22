@@ -44,6 +44,15 @@ ColumnLayout {
     return root.translatorField.set(Object.assign(Object.create(null), root.translatorValue, patch));
   }
 
+  NText {
+    Layout.fillWidth: true
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: pluginApi?.tr("settings.sharedContent")
+    wrapMode: Text.Wrap
+    color: AtmoColor.mOnSurfaceVariant
+    pointSize: Style.fontSizeS
+  }
+
   // AI Settings
   readonly property string editProvider: aiValue.provider || Constants.Providers.GOOGLE
   readonly property var editModels: aiValue.models || ({})

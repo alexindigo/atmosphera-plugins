@@ -31,6 +31,15 @@ https://github.com/user-attachments/assets/0d1fb5eb-0b16-4ff4-a6ed-f78c196f756f
 
 ## Configuration
 
+Placed widgets use their own provider, model, translation and history policy.
+All views still share one conversation, input, translation result and history
+cache. Sending captures the originating applied policy; changing its source or
+removing that origin cancels its pending request, not the common conversation.
+Clear/stop affect that common conversation. IPC remains explicitly plugin-level.
+History-save truncation uses the policy captured by the admitted content edit,
+not another view's configuration when the debounce expires. Settings Apply and
+Discard do not undo already admitted chat, translation or content actions.
+
 ### AI Provider Setup
 
 1. Obtain API key from your AI provider (if using a remote service).
