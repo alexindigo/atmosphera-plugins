@@ -17,15 +17,15 @@ Item {
 
     readonly property var mainInstance: pluginApi?.mainInstance
     readonly property bool isRunning: mainInstance?.running ?? false
-    readonly property bool isEnabled: mainInstance?.enabled ?? false
-    readonly property bool perWorkspace: mainInstance?.perWorkspace ?? false
-    readonly property int globalMaxVisible: mainInstance?.maxVisible ?? 4
+    readonly property bool isEnabled: pluginApi?.pluginSettings?.enabled ?? true
+    readonly property bool perWorkspace: pluginApi?.pluginSettings?.perWorkspace ?? false
+    readonly property int globalMaxVisible: pluginApi?.pluginSettings?.maxVisible ?? 4
 
     // Current workspace detection
     property int currentWorkspaceId: -1
     property int currentMaxVisible: {
         if (perWorkspace && currentWorkspaceId > 0 && mainInstance) {
-            return mainInstance.getMaxVisibleForWorkspace(currentWorkspaceId);
+            return mainInstance.getMaxVisibleForWorkspace(currentWorkspaceId, pluginApi.settingsContext);
         }
         return globalMaxVisible;
     }
@@ -57,9 +57,9 @@ Item {
     function selectColumns(count) {
         if (!mainInstance) return;
         if (perWorkspace && currentWorkspaceId > 0) {
-            mainInstance.setWorkspaceMaxVisible(currentWorkspaceId, count);
+            mainInstance.setWorkspaceMaxVisible(currentWorkspaceId, count, pluginApi);
         } else {
-            mainInstance.setMaxVisible(count);
+            mainInstance.setMaxVisible(count, pluginApi);
         }
     }
 
@@ -107,10 +107,7 @@ Item {
                         NToggle {
                             checked: root.isEnabled
                             onToggled: checked => {
-                                if (pluginApi?.pluginSettings) {
-                                    pluginApi.pluginSettings.enabled = checked;
-                                    pluginApi.saveSettings();
-                                }
+                                root.mainInstance?.setEnabled(checked, root.pluginApi);
                             }
                         }
                     }

@@ -17,6 +17,7 @@
     "settings": "設定"
   },
   "settings": {
+    "shared-effect": "Auto-Tile uses one daemon for the desktop. Apply or a runtime action selects its policy; changes affect the same windows for every instance.",
     "enabled": "Auto-Tile を有効にする",
     "enabled-desc": "ウィンドウの開閉時にカラム幅を自動的に再分配します",
     "per-workspace": "ワークスペースごと",

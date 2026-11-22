@@ -1558,7 +1558,7 @@
       "author": "pir0c0pter0",
       "description": "Automatically redistributes niri column widths evenly when windows open or close",
       "license": "MIT",
-      "version": "1.4.7",
+      "version": "1.4.8",
       "tags": [
         "Bar",
         "Utility",

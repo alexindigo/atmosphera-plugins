@@ -19,8 +19,8 @@ Item {
 
     readonly property var mainInstance: pluginApi?.mainInstance
     readonly property bool isRunning: mainInstance?.running ?? false
-    readonly property bool isEnabled: mainInstance?.enabled ?? false
-    readonly property int maxVisible: mainInstance?.maxVisible ?? 4
+    readonly property bool isEnabled: pluginApi?.pluginSettings?.enabled ?? true
+    readonly property int maxVisible: pluginApi?.pluginSettings?.maxVisible ?? 4
 
     readonly property string screenName: screen ? screen.name : ""
     readonly property string barPosition: Settings.getBarPositionForScreen(screenName)
@@ -106,12 +106,8 @@ Item {
             if (action === "widget-settings") {
                 BarService.openPluginSettings(screen, pluginApi.manifest);
             } else if (action === "toggle" && mainInstance) {
-                mainInstance.setMaxVisible(isEnabled ? 0 : 4);
-                const newState = !isEnabled;
-                if (pluginApi?.pluginSettings) {
-                    pluginApi.pluginSettings.enabled = newState;
-                    pluginApi.saveSettings();
-                }
+                if (!isEnabled) mainInstance.setMaxVisible(4, pluginApi);
+                mainInstance.setEnabled(!isEnabled, pluginApi);
             }
         }
     }
