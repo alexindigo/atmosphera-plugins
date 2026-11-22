@@ -14,21 +14,27 @@ Item {
   height: 0
 
   readonly property var defaults: pluginApi.manifest?.metadata?.defaultSettings ?? ({})
-  readonly property var settings: pluginApi.pluginSettings ?? ({})
+  property bool retired: false
+  property var _lifetime: ({alive:true})
+  property var _settingsConsumers: new Map()
+  Component { id: clientFactory; ObsClient {} }
+  function settingsConsumerFor(context) {
+    if (retired || !context?.current()) return null;
+    if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+    const client = clientFactory.createObject(root, {owner:root,settingsContext:context,retire:function(value) {
+      root._settingsConsumers.delete(context); value.destroy();
+    }});
+    _settingsConsumers.set(context,client);
+    return client;
+  }
+  readonly property var settingsConsumer: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
   readonly property string homeDir: Quickshell.env("HOME") ?? ""
   readonly property string runtimeDir: Quickshell.env("XDG_RUNTIME_DIR") ?? "/tmp"
   readonly property string userName: Quickshell.env("USER") ?? "user"
   readonly property string managedStatePath: `${runtimeDir}/noctalia-obs-control-${userName}.json`
-  readonly property string configuredVideosPath: (settings.videosPath ?? defaults.videosPath ?? "").trim()
-  readonly property string videosOpener: (settings.videosOpener ?? defaults.videosOpener ?? "xdg-open").trim()
   readonly property string defaultVideosPath: Quickshell.env("XDG_VIDEOS_DIR") ?? `${homeDir}/Videos`
-  readonly property string videosPath: configuredVideosPath === ""
-                                       ? defaultVideosPath
-                                       : configuredVideosPath === "~"
-                                         ? homeDir
-                                         : configuredVideosPath.startsWith("~/")
-                                           ? `${homeDir}/${configuredVideosPath.slice(2)}`
-                                           : configuredVideosPath
+  readonly property string videosOpener: settingsConsumer?.videosOpener ?? ""
+  readonly property string videosPath: settingsConsumer?.videosPath ?? ""
   readonly property int minimumPollIntervalMs: 750
   readonly property int defaultPollIntervalMs: 2500
   readonly property int defaultWebsocketPort: 4455
@@ -37,22 +43,13 @@ Item {
   readonly property int displayTickMs: 1000
   readonly property int successToastDurationMs: 3200
   readonly property int errorToastDurationMs: 4200
-  readonly property int pollIntervalMs: Math.max(minimumPollIntervalMs, Number(settings.pollIntervalMs ?? defaults.pollIntervalMs ?? defaultPollIntervalMs))
-  readonly property string leftClickAction: settings.leftClickAction ?? defaults.leftClickAction ?? "panel"
-  readonly property string launchBehavior: settings.launchBehavior ?? defaults.launchBehavior ?? "minimized-to-tray"
-  readonly property string barLabelMode: settings.barLabelMode ?? defaults.barLabelMode ?? "short-label"
-  readonly property bool showBarWhenRecording: settings.showBarWhenRecording ?? defaults.showBarWhenRecording ?? true
-  readonly property bool showBarWhenReplay: settings.showBarWhenReplay ?? defaults.showBarWhenReplay ?? false
-  readonly property bool showBarWhenStreaming: settings.showBarWhenStreaming ?? defaults.showBarWhenStreaming ?? true
-  // Stored under the legacy showBarWhenReady key for settings compatibility.
-  readonly property bool alwaysShowInBar: settings.showBarWhenReady ?? defaults.showBarWhenReady ?? true
-  readonly property bool showControlCenterWhenRecording: settings.showControlCenterWhenRecording ?? defaults.showControlCenterWhenRecording ?? true
-  readonly property bool showControlCenterWhenReplay: settings.showControlCenterWhenReplay ?? defaults.showControlCenterWhenReplay ?? true
-  readonly property bool showControlCenterWhenStreaming: settings.showControlCenterWhenStreaming ?? defaults.showControlCenterWhenStreaming ?? true
-  readonly property bool showControlCenterWhenReady: settings.showControlCenterWhenReady ?? defaults.showControlCenterWhenReady ?? false
-  readonly property bool autoCloseManagedObs: settings.autoCloseManagedObs ?? defaults.autoCloseManagedObs ?? true
-  readonly property bool openVideosAfterStop: settings.openVideosAfterStop ?? defaults.openVideosAfterStop ?? true
-  readonly property bool showElapsedInBar: settings.showElapsedInBar ?? defaults.showElapsedInBar ?? false
+  readonly property int pollIntervalMs: settingsConsumer?.pollIntervalMs ?? defaultPollIntervalMs
+  readonly property string leftClickAction: settingsConsumer?.leftClickAction ?? "panel"
+  readonly property string launchBehavior: settingsConsumer?.launchBehavior ?? "minimized-to-tray"
+  readonly property string barLabelMode: settingsConsumer?.barLabelMode ?? "short-label"
+  readonly property bool autoCloseManagedObs: settingsConsumer?.autoCloseManagedObs ?? true
+  readonly property bool openVideosAfterStop: settingsConsumer?.openVideosAfterStop ?? true
+  readonly property bool showElapsedInBar: settingsConsumer?.showElapsedInBar ?? false
   readonly property string websocketConfigPath: `${Quickshell.env("XDG_CONFIG_HOME") ?? `${homeDir}/.config`}/obs-studio/plugin_config/obs-websocket/config.json`
   readonly property string websocketUrl: websocketConfigAvailable ? `ws://127.0.0.1:${websocketPort}` : ""
   readonly property bool websocketSupportMissing: websocketLoader.status === Loader.Error
@@ -62,6 +59,16 @@ Item {
   readonly property bool canOpenVideos: videosPath !== "" && videosOpener !== ""
 
   property bool actionBusy: false
+  property var activeAction: null
+  property var refreshPolicy: null
+  readonly property bool actionCurrent: !retired && !!activeAction && activeAction.context.current()
+  onActionCurrentChanged: {
+    const policy = activeAction;
+    const lifetime = _lifetime;
+    if (policy && !actionCurrent) Qt.callLater(function() {
+      if (lifetime.alive && root.activeAction === policy && !policy.context.current()) root.finishAction(false);
+    });
+  }
 
   property bool websocketConfigAvailable: false
   property int websocketPort: defaultWebsocketPort
@@ -70,6 +77,7 @@ Item {
   property var obsProbeCallbacks: []
   property var terminateCallbacks: []
   property var shutdownConfirmCallback: null
+  property var shutdownConfirmPolicy: null
 
   property bool obsRunning: false
   property bool websocket: false
@@ -89,18 +97,8 @@ Item {
     recordDurationMs: recordDurationMs,
     streamDurationMs: streamDurationMs,
   })
-  readonly property var visibilitySettings: ({
-    showBarWhenRecording: showBarWhenRecording,
-    showBarWhenReplay: showBarWhenReplay,
-    showBarWhenStreaming: showBarWhenStreaming,
-    alwaysShowInBar: alwaysShowInBar,
-    showControlCenterWhenRecording: showControlCenterWhenRecording,
-    showControlCenterWhenReplay: showControlCenterWhenReplay,
-    showControlCenterWhenStreaming: showControlCenterWhenStreaming,
-    showControlCenterWhenReady: showControlCenterWhenReady,
-  })
-  readonly property bool showInBar: Ui.shouldShowInBar(outputState, visibilitySettings)
-  readonly property bool showInControlCenter: Ui.shouldShowInControlCenter(outputState, visibilitySettings, connected)
+  readonly property bool showInBar: settingsConsumer?.showInBar ?? false
+  readonly property bool showInControlCenter: settingsConsumer?.showInControlCenter ?? false
   readonly property string primaryActionText: Ui.primaryActionText(pluginApi, leftClickAction)
 
   function updateTransportCredentials() {
@@ -145,19 +143,41 @@ Item {
     }))
   }
 
-  function beginAction() {
-    if (actionBusy) {
-      return false
-    }
-
+  function capturePolicy(context) {
+    context = context || pluginApi?.settingsContext;
+    const client = settingsConsumerFor(context);
+    if (!client) return null;
+    // An operation's scalar input, not another preference store or live writer.
+    return {context:context,launchBehavior:client.launchBehavior,autoCloseManagedObs:client.autoCloseManagedObs,
+      openVideosAfterStop:client.openVideosAfterStop,videosPath:client.videosPath,videosOpener:client.videosOpener};
+  }
+  function beginAction(context) {
+    if (actionBusy) return null;
+    const policy = capturePolicy(context);
+    if (!policy) return null;
+    activeAction = policy
     actionBusy = true
-    return true
+    return policy
+  }
+  function actionCallback(policy, callback) {
+    const lifetime = _lifetime;
+    return function(...args) {
+      if (!lifetime.alive || root.activeAction !== policy) return;
+      if (!policy.context.current()) { root.finishAction(false); return; }
+      callback(...args);
+    };
   }
 
   function finishAction(refreshSoon) {
+    const policy = activeAction
+    activeAction = null
     actionBusy = false
+    shutdownConfirmTimer.stop()
+    shutdownConfirmCallback = null
+    shutdownConfirmPolicy = null
 
     if (refreshSoon !== false) {
+      refreshPolicy = policy
       actionRefreshTimer.restart()
     }
   }
@@ -402,27 +422,30 @@ Item {
     }
   }
 
-  function terminateObsAndConfirm(callback) {
-    terminateObs(function() {
+  function terminateObsAndConfirm(callback, policy) {
+    terminateObs(actionCallback(policy, function() {
       shutdownConfirmCallback = callback
+      shutdownConfirmPolicy = policy
       shutdownConfirmTimer.restart()
-    })
+    }))
   }
 
-  function openVideos() {
-    if (videosPath === "" || videosOpener === "") {
-      return
-    }
-
-    Quickshell.execDetached([videosOpener, videosPath])
+  function openVideos(context) {
+    const policy = capturePolicy(context);
+    if (policy) openVideosForPolicy(policy);
+  }
+  function openVideosForPolicy(policy) {
+    if (retired || !policy?.context.current() || policy.videosPath === "" || policy.videosOpener === "") return;
+    Quickshell.execDetached([policy.videosOpener, policy.videosPath])
   }
 
-  function showActionToast(payload) {
+  function showActionToast(payload, policy) {
     const translated = Ui.toastPayload(pluginApi, payload)
-    const showOpenVideosAction = payload.openVideos && openVideosAfterStop && canOpenVideos
+    const showOpenVideosAction = payload.openVideos && policy.openVideosAfterStop && policy.videosPath !== "" && policy.videosOpener !== ""
     const actionLabel = showOpenVideosAction ? pluginApi.tr("toast.actions.open_videos") : ""
+    const lifetime = _lifetime;
     const actionCallback = showOpenVideosAction ? function() {
-      root.openVideos()
+      if (lifetime.alive) root.openVideosForPolicy(policy)
     } : null
 
     ToastService.showNotice(translated.title, translated.body, "", successToastDurationMs, actionLabel, actionCallback)
@@ -463,12 +486,13 @@ Item {
     showProcessErrorToast(transportUnavailableBody())
   }
 
-  function openControls(screen, anchorItem) {
-    if (!screen) {
+  function openControls(screen, anchorItem, runtimeApi) {
+    runtimeApi = runtimeApi || pluginApi
+    if (!screen || !runtimeApi?.settingsContext.current()) {
       return
     }
 
-    pluginApi.togglePanel(screen, anchorItem)
+    runtimeApi.togglePanel(screen, anchorItem)
   }
 
   function openSettings(screen, closePanelFirst) {
@@ -504,12 +528,13 @@ Item {
     })
   }
 
-  function launchObs() {
-    if (!beginAction()) {
+  function launchObs(context) {
+    const policy = beginAction(context)
+    if (!policy) {
       return
     }
 
-    probeObsRunning(function(running) {
+    probeObsRunning(actionCallback(policy, function(running) {
       obsRunning = running
 
       if (!running) {
@@ -518,7 +543,7 @@ Item {
         managedObsLaunch = false
         saveManagedLaunchState()
 
-        if (launchBehavior === "minimized-to-tray") {
+        if (policy.launchBehavior === "minimized-to-tray") {
           args.push("--minimize-to-tray")
         }
 
@@ -526,39 +551,39 @@ Item {
       }
 
       finishAction()
-    })
+    }))
   }
 
-  function launchObsForOutputStart(startArgs, startedLaunchEvent) {
-    managedObsLaunch = autoCloseManagedObs
+  function launchObsForOutputStart(startArgs, startedLaunchEvent, policy) {
+    managedObsLaunch = policy.autoCloseManagedObs
     saveManagedLaunchState()
     Quickshell.execDetached(["obs", "--minimize-to-tray"].concat(startArgs ?? []))
-    showActionToast({ event: startedLaunchEvent })
+    showActionToast({ event: startedLaunchEvent }, policy)
     finishAction()
   }
 
-  function finishOutputStop(stopEvent, autoClosedStopEvent, openVideosOnStop) {
+  function finishOutputStop(stopEvent, autoClosedStopEvent, openVideosOnStop, policy) {
     if (!managedObsLaunch) {
       showActionToast({
         event: stopEvent,
         openVideos: openVideosOnStop,
-      })
+      }, policy)
       finishAction()
       return
     }
 
-    fetchAutoCloseState(function(state) {
+    fetchAutoCloseState(actionCallback(policy, function(state) {
       const hasActiveOutputs = state.recordActive || state.replayActive || state.streamActive || state.virtualCamActive
       if (hasActiveOutputs) {
         showActionToast({
           event: stopEvent,
           openVideos: openVideosOnStop,
-        })
+        }, policy)
         finishAction()
         return
       }
 
-      terminateObsAndConfirm(function(closed) {
+      terminateObsAndConfirm(actionCallback(policy, function(closed) {
         if (closed) {
           managedObsLaunch = false
           saveManagedLaunchState()
@@ -567,28 +592,29 @@ Item {
         showActionToast({
           event: closed ? autoClosedStopEvent : stopEvent,
           openVideos: openVideosOnStop,
-        })
+        }, policy)
         finishAction()
-      })
-    }, function() {
+      }), policy)
+    }), actionCallback(policy, function() {
       showActionToast({
         event: stopEvent,
         openVideos: openVideosOnStop,
-      })
+      }, policy)
       finishAction()
-    })
+    }))
   }
 
-  function toggleOutput(startArgs, startedLaunchEvent, statusRequestType, stopRequestType, startRequestType, startedEvent, stoppedEvent, autoClosedStoppedEvent, openVideosOnStop) {
-    if (!beginAction()) {
+  function toggleOutput(startArgs, startedLaunchEvent, statusRequestType, stopRequestType, startRequestType, startedEvent, stoppedEvent, autoClosedStoppedEvent, openVideosOnStop, context) {
+    const policy = beginAction(context)
+    if (!policy) {
       return
     }
 
-    probeObsRunning(function(running) {
+    probeObsRunning(actionCallback(policy, function(running) {
       obsRunning = running
 
       if (!running) {
-        launchObsForOutputStart(startArgs, startedLaunchEvent)
+        launchObsForOutputStart(startArgs, startedLaunchEvent, policy)
         return
       }
 
@@ -598,30 +624,30 @@ Item {
         return
       }
 
-      requestObs(statusRequestType, {}, function(status) {
+      requestObs(statusRequestType, {}, actionCallback(policy, function(status) {
         const outputActive = status?.outputActive ?? false
         const requestType = outputActive ? stopRequestType : startRequestType
 
-        requestObs(requestType, {}, function() {
+        requestObs(requestType, {}, actionCallback(policy, function() {
           if (!outputActive) {
-            showActionToast({ event: startedEvent })
+            showActionToast({ event: startedEvent }, policy)
             finishAction()
             return
           }
 
-          finishOutputStop(stoppedEvent, autoClosedStoppedEvent, openVideosOnStop)
-        }, function(error) {
+          finishOutputStop(stoppedEvent, autoClosedStoppedEvent, openVideosOnStop, policy)
+        }), actionCallback(policy, function(error) {
           showProcessErrorToast(error)
           finishAction(false)
-        })
-      }, function(error) {
+        }))
+      }), actionCallback(policy, function(error) {
         showProcessErrorToast(error)
         finishAction(false)
-      })
-    })
+      }))
+    }))
   }
 
-  function toggleRecord() {
+  function toggleRecord(context) {
     toggleOutput(
       ["--startrecording"],
       "record-started-launch",
@@ -631,11 +657,11 @@ Item {
       "record-started",
       "record-stopped",
       "record-stopped-autoclose",
-      true
+      true, context
     )
   }
 
-  function toggleReplay() {
+  function toggleReplay(context) {
     toggleOutput(
       ["--startreplaybuffer"],
       "replay-started-launch",
@@ -645,11 +671,11 @@ Item {
       "replay-started",
       "replay-stopped",
       "replay-stopped-autoclose",
-      false
+      false, context
     )
   }
 
-  function toggleStream() {
+  function toggleStream(context) {
     toggleOutput(
       ["--startstreaming"],
       "stream-started-launch",
@@ -659,20 +685,21 @@ Item {
       "stream-started",
       "stream-stopped",
       "stream-stopped-autoclose",
-      false
+      false, context
     )
   }
 
-  function saveReplay() {
-    if (!beginAction()) {
+  function saveReplay(context) {
+    const policy = beginAction(context)
+    if (!policy) {
       return
     }
 
-    probeObsRunning(function(running) {
+    probeObsRunning(actionCallback(policy, function(running) {
       obsRunning = running
 
       if (!running) {
-        showActionToast({ event: "offline" })
+        showActionToast({ event: "offline" }, policy)
         finishAction(false)
         return
       }
@@ -683,41 +710,47 @@ Item {
         return
       }
 
-      requestObs("SaveReplayBuffer", {}, function() {
+      requestObs("SaveReplayBuffer", {}, actionCallback(policy, function() {
         showActionToast({
           event: "replay-saved",
           openVideos: true,
-        })
+        }, policy)
         finishAction()
-      }, function(error) {
+      }), actionCallback(policy, function(error) {
         showProcessErrorToast(error)
         finishAction(false)
-      })
-    })
+      }))
+    }))
   }
 
-  function runPrimaryAction(screen, anchorItem) {
-    if (leftClickAction === "toggle-record") {
-      toggleRecord()
+  function runPrimaryAction(screen, anchorItem, context, runtimeApi) {
+    context = context || pluginApi?.settingsContext
+    const client = settingsConsumerFor(context)
+    if (!client) return
+    if (client.leftClickAction === "toggle-record") {
+      toggleRecord(context)
       return
     }
 
-    if (leftClickAction === "toggle-stream") {
-      toggleStream()
+    if (client.leftClickAction === "toggle-stream") {
+      toggleStream(context)
       return
     }
 
-    openControls(screen, anchorItem)
+    if (context === pluginApi.settingsContext || runtimeApi?.settingsContext === context)
+      openControls(screen, anchorItem, runtimeApi)
   }
 
-  function runSecondaryAction() {
+  function runSecondaryAction(context) {
+    context = context || pluginApi?.settingsContext
+    if (!context?.current()) return
     if (!obsRunning) {
-      launchObs()
+      launchObs(context)
       return
     }
 
     if (connected) {
-      toggleRecord()
+      toggleRecord(context)
       return
     }
 
@@ -729,9 +762,11 @@ Item {
     refresh()
   }
 
-  function runMiddleAction() {
+  function runMiddleAction(context) {
+    context = context || pluginApi?.settingsContext
+    if (!context?.current()) return
     if (connected) {
-      toggleReplay()
+      toggleReplay(context)
       return
     }
 
@@ -743,6 +778,10 @@ Item {
   Component.onCompleted: {
     managedStateFile.reload()
     refresh()
+  }
+  Component.onDestruction: {
+    _lifetime.alive = false
+    retired = true
   }
 
   Loader {
@@ -791,19 +830,10 @@ Item {
     interval: root.actionRefreshDelayMs
     running: false
     repeat: false
-    onTriggered: root.refresh()
-  }
-
-  Timer {
-    id: pollTimer
-    interval: root.pollIntervalMs
-    running: true
-    repeat: true
-
     onTriggered: {
-      if (!root.actionBusy) {
-        root.refresh()
-      }
+      const policy = root.refreshPolicy
+      root.refreshPolicy = null
+      if (policy?.context.current()) root.refresh()
     }
   }
 
@@ -814,14 +844,12 @@ Item {
     repeat: false
 
     onTriggered: {
-      root.probeObsRunning(function(running) {
-        const callback = root.shutdownConfirmCallback
-        root.shutdownConfirmCallback = null
-
-        if (callback) {
-          callback(!running)
-        }
-      })
+      const callback = root.shutdownConfirmCallback
+      const policy = root.shutdownConfirmPolicy
+      root.shutdownConfirmCallback = null
+      root.shutdownConfirmPolicy = null
+      if (callback && root.activeAction === policy && policy.context.current())
+        root.probeObsRunning(root.actionCallback(policy, function(running) { callback(!running); }))
     }
   }
 

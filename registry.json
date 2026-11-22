@@ -1869,14 +1869,14 @@
       "author": "ayagmar",
       "description": "OBS recording, replay, and stream status widget for Noctalia.",
       "license": "MIT",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "tags": [
         "Bar",
         "Panel",
         "Indicator",
         "Utility"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-21",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",

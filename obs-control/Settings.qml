@@ -63,6 +63,14 @@ ColumnLayout {
     description: root.pluginApi.tr("settings.header.description")
   }
 
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.WordWrap
+    color: AtmoColor.mOnSurfaceVariant
+    text: root.pluginApi.tr("settings.shared-effect")
+  }
+
   NBox {
     visible: root.service?.websocketSupportMissing || root.service?.websocketConfigMissing
     Layout.fillWidth: true

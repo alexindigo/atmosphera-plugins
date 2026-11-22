@@ -7,7 +7,7 @@ Item {
   property var pluginApi
   property var screen
 
-  readonly property var service: root.pluginApi?.mainInstance
+  readonly property var service: root.pluginApi?.mainInstance?.settingsConsumerFor(root.pluginApi.settingsContext)
   readonly property bool showShortcut: root.service?.showInControlCenter ?? false
 
   visible: root.showShortcut

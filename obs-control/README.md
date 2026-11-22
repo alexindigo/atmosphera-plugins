@@ -67,6 +67,14 @@ binds {
 
 ## Settings
 
+Placed Bar and Control Center widgets use their own inherited configuration for
+display, polling and actions. Their panel keeps that origin. OBS, its connection,
+output state and managed-launch state remain shared; actions affect the same OBS
+process. An action retains its admitted launch/video policy through completion,
+including a later Open Videos toast action, and refuses retired origins. Main/IPC
+and the panel's explicitly plugin-level Settings gear use plugin-level settings.
+No recording content, credentials or stored configuration is moved.
+
 You can open settings from:
 
 - **Plugins → OBS Control → Configure** in Noctalia
