@@ -1139,7 +1139,7 @@
       "author": "Borhaneddine GUEMIDI <guemidiborhane@gmail.com>",
       "description": "Network latency monitor — multi-host, windowed averages, sparkline graphs",
       "license": "MIT",
-      "version": "1.0.9",
+      "version": "1.0.10",
       "tags": [
         "Bar",
         "Panel",

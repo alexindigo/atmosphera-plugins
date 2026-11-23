@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.Commons
 import qs.Widgets
+import "ThresholdPolicy.js" as ThresholdPolicy
 
 ColumnLayout {
   id: root
@@ -21,7 +22,8 @@ ColumnLayout {
 
   readonly property int valueIntervalSeconds: root.intervalSecondsField?.value ?? defaults.intervalSeconds
   readonly property int valueThresholdGood: root.thresholdGoodField?.value ?? defaults.thresholdGood
-  readonly property int valueThresholdWarning: root.thresholdWarningField?.value ?? defaults.thresholdWarning
+  // Project the effective range without rewriting the independently resettable warning preference.
+  readonly property int valueThresholdWarning: ThresholdPolicy.effectiveWarning(valueThresholdGood, root.thresholdWarningField?.value ?? defaults.thresholdWarning)
   readonly property bool valueShowHostName: root.showHostNameField?.value ?? defaults.showHostName
   readonly property string valueBarHost: root.barHostField?.value ?? defaults.barHost
   readonly property string valueColorGood: root.colorGoodField?.value ?? defaults.colorGood
@@ -257,7 +259,7 @@ ColumnLayout {
       id: rangeValueThresholdWarning
       objectName: "settings-range-valueThresholdWarning"
       Layout.fillWidth: true
-      from: root.valueThresholdGood + 5   // can't go below good threshold
+      from: ThresholdPolicy.minimumWarning(root.valueThresholdGood)
       to: 500
       stepSize: 5
       value: root.valueThresholdWarning

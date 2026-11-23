@@ -1,5 +1,6 @@
 import QtQuick
 import qs.Commons
+import "ThresholdPolicy.js" as ThresholdPolicy
 
 Item {
   id: root
@@ -14,7 +15,7 @@ Item {
 
   readonly property int intervalSeconds: cfg.intervalSeconds ?? defaults.intervalSeconds ?? 5
   readonly property int thresholdGood: cfg.thresholdGood ?? defaults.thresholdGood ?? 20
-  readonly property int thresholdWarning: cfg.thresholdWarning ?? defaults.thresholdWarning ?? 70
+  readonly property int thresholdWarning: ThresholdPolicy.effectiveWarning(thresholdGood, cfg.thresholdWarning ?? defaults.thresholdWarning ?? 70)
   readonly property bool showHostName: cfg.showHostName ?? defaults.showHostName ?? true
   readonly property string barHost: cfg.barHost ?? defaults.barHost ?? "worst"
   readonly property string colorGood: cfg.colorGood ?? defaults.colorGood ?? "#00ff7f"
