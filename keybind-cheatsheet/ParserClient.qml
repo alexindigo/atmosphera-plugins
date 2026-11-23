@@ -9,7 +9,7 @@ Item {
   required property var retire
   property bool retired: false
   readonly property bool current: settingsContext.current()
-  readonly property var cfg: current ? settingsContext.settingsView : ({})
+  readonly property var cfg: current ? settingsContext.appliedSettings : ({})
   readonly property string compositor: CompositorService.isHyprland ? "hyprland" : CompositorService.isNiri ? "niri" : CompositorService.isSway ? "sway" : CompositorService.isLabwc ? "labwc" : CompositorService.isMango ? "mango" : "unknown"
   // Only parser inputs invalidate a result. Colors and column policy are views.
   readonly property string sourceKey: JSON.stringify([compositor, cfg.niriConfigPath, cfg.hyprlandConfigPath, cfg.hyprlandLuaConfigPath, cfg.hyprlandParserMode, cfg.mangoConfigPath, cfg.modKeyVariable, cfg.showUndescribedBinds, cfg.mergeSequentialBinds, cfg.bindOverrides])
