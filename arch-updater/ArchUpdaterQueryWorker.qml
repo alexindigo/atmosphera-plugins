@@ -101,14 +101,6 @@ Item {
     getSystemUpdates.running = true;
   }
 
-  function update() {
-    if (!active)
-      return;
-    Logger.i("Arch Updater", "Updating...");
-    runUpdate.command = ["sh", "-c", actionSettings().updateCmd];
-    runUpdate.running = true;
-  }
-
   function rows(output, source, separator, nameColumn, oldColumn, newColumn) {
     var names = [];
     var result = [];
@@ -223,13 +215,6 @@ Item {
         }
         root.refreshing = false;
       }
-    }
-  }
-
-  Process {
-    id: runUpdate
-    stdout: StdioCollector {
-      onStreamFinished: root.refresh()
     }
   }
 

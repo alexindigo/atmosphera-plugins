@@ -25,6 +25,9 @@ Item {
     var client = clientFactory.createObject(root, {
                                               settingsContext: context,
                                               pluginApi: pluginApi,
+                                              admitUpdate: function (command, toast) {
+                                                return root._admitUpdate(context, command, toast);
+                                              },
                                               retire: function (retired) {
                                                 root._settingsConsumers.delete(context);
                                                 retired.destroy();
@@ -168,9 +171,59 @@ Item {
   }
 
   function update() {
-    if (settingsConsumer)
-      settingsConsumer.update();
+    return settingsConsumer?.update() ?? false;
   }
+
+  // Package updates affect one machine. After admission, neither a query
+  // generation nor the originating settings client owns this Process.
+  property var _admittedUpdate: null
+  readonly property bool updating: _admittedUpdate !== null
+  function _admitUpdate(context, command, toast) {
+    if (!context.current() || !command)
+      return false;
+    if (updating) {
+      if (toast)
+        ToastService.showNotice("An update command is already running");
+      return false;
+    }
+    _admittedUpdate = { context, toast };
+    Logger.i("Arch Updater", "Updating...");
+    runUpdate.command = ["sh", "-c", command];
+    runUpdate.running = true;
+    return true;
+  }
+
+  function _finishUpdate(message, success, refreshOrigin) {
+    var admission = _admittedUpdate;
+    if (!admission)
+      return;
+    _admittedUpdate = null;
+    if (success) {
+      Logger.i("Arch Updater", message);
+      if (admission.toast)
+        ToastService.showNotice(message);
+    } else {
+      Logger.w("Arch Updater", message);
+      if (admission.toast)
+        ToastService.showError(message);
+    }
+    if (refreshOrigin && admission.context.current())
+      _settingsConsumers.get(admission.context)?.refreshAfterUpdate();
+  }
+
+  Process {
+    id: runUpdate
+    onExited: function (code, status) {
+      var message = "Update command exited with status " + code;
+      if (status !== 0)
+        message += " (abnormal exit)";
+      root._finishUpdate(message, code === 0 && status === 0, true);
+    }
+    // Quickshell's FailedToStart clears running without emitting exited.
+    onRunningChanged: if (!running) root._finishUpdate("Update command failed to start", false, false)
+  }
+
+  Component.onDestruction: if (updating) Logger.w("Arch Updater", "Update command cancelled because the plugin is unloading")
 
   IpcHandler {
     target: "plugin:arch-updater"

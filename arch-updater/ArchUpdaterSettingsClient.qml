@@ -8,6 +8,7 @@ Item {
   required property var settingsContext
   required property var pluginApi
   required property var retire
+  required property var admitUpdate
   readonly property bool current: settingsContext.current()
   readonly property var cfg: current ? settingsContext.settingsView : ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
@@ -28,7 +29,6 @@ Item {
   function actionSettings() {
     return {
       toast: cfg.toast ?? defaults.toast ?? true,
-      updateCmd: cfg.updateCmd || defaults.updateCmd || "",
       aurHomepageCmd: cfg.aurHomepageCmd || defaults.aurHomepageCmd || ""
     };
   }
@@ -37,8 +37,14 @@ Item {
       _worker.refresh();
   }
   function update() {
-    if (_worker)
-      _worker.update();
+    if (!current)
+      return false;
+    return admitUpdate(cfg.updateCmd || defaults.updateCmd || "", actionSettings().toast);
+  }
+  function refreshAfterUpdate() {
+    // A pre-exit query may still be in flight. Replace that read so it cannot
+    // publish an old package list or absorb the post-update refresh.
+    _replaceQuery();
   }
   function openHomepage(source, id) {
     if (_worker)
