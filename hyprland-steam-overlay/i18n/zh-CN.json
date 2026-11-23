@@ -12,7 +12,7 @@
     "ipc_received": "已接收IPC切换"
   },
   "settings": {
-    "shared-effect": "Steam windows and the overlay are shared. Opening from this widget uses its applied layout for that overlay session; later settings changes apply on the next opening.",
+    "shared-effect": "Steam 窗口和叠加界面是共享的。从此小组件打开叠加界面时，本次会话使用该小组件已应用的布局。之后更改的设置将在下次打开时生效。",
     "custom-layout-label": "Use custom Hyprland layout (Lua)",
     "custom-layout-description": "Let a Hyprland custom Lua layout tile the windows instead of floating+positioning them. Requires Hyprland 0.55+ Lua config and steam-layout.lua (see README). When enabled, the width sliders below are handled by the Lua layout."
   }
