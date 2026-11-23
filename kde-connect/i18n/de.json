@@ -47,7 +47,7 @@
     }
   },
   "settings": {
-    "shared-effect": "The selected device and appearance apply to this instance. Device discovery, pairing and file transfers use the shared KDE Connect service and affect the actual device.",
+    "shared-effect": "Das ausgewählte Gerät und das Erscheinungsbild gelten für diese Instanz. Die Gerätesuche, das Koppeln und Dateiübertragungen nutzen den gemeinsamen KDE-Connect-Dienst und wirken sich auf das tatsächliche Gerät aus.",
     "no-device-connected-hide": {
       "label": "Verstecken wenn nicht verbunden",
       "description": "Verstecke den Knopf in der Leiste, wenn kein Gerät verbunden ist"

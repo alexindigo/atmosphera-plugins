@@ -1,5 +1,5 @@
 {
-  "settings": {"shared-effect": "The selected device and appearance apply to this instance. Device discovery, pairing and file transfers use the shared KDE Connect service and affect the actual device."},
+  "settings": {"shared-effect": "Выбор устройства и внешний вид относятся только к этому экземпляру. Поиск устройств, сопряжение и передача файлов выполняются через общую службу KDE Connect и затрагивают само устройство."},
   "panel": {
     "title": "Подключённые устройства",
     "signal": {
