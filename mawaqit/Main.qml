@@ -47,7 +47,8 @@ Item {
 
   function cacheOwner(client) { return client && client.current && client === settingsConsumer && pluginApi.settingsContext.current(); }
   function cacheFor(client) {
-    if (!cacheOwner(client)) return null;
+    // The shared client publishes the week; any live matching source can read it.
+    if (!client?.current || !pluginApi?.settingsContext.current()) return null;
     try {
       var cached = JSON.parse(pluginApi.pluginSettings._cacheData || "null");
       return cached?.schema === 1 && cached.source === client.sourceKey ? cached.days : null;
