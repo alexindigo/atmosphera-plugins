@@ -179,7 +179,7 @@ ColumnLayout {
           stepSize: 30
           value: root.editIdleSeconds
           defaultValue: root.defaults.idleSeconds
-          onValueModified: value => root.idleSecondsField.set(value)
+          requestValue: value => root.idleSecondsField.set(value)
         }
       }
     }
@@ -215,7 +215,7 @@ ColumnLayout {
           stepSize: 5
           value: root.editBatteryMinPercent
           defaultValue: root.defaults.batteryMinPercent
-          onValueModified: value => root.batteryMinPercentField.set(value)
+          requestValue: value => root.batteryMinPercentField.set(value)
         }
       }
     }
@@ -460,7 +460,7 @@ ColumnLayout {
           stepSize: 1
           value: root.editNowPlayingDuration
           defaultValue: root.defaults.nowPlayingDuration
-          onValueModified: value => root.nowPlayingDurationField.set(value)
+          requestValue: value => root.nowPlayingDurationField.set(value)
         }
       }
     }

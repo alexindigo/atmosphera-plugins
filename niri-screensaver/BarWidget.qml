@@ -82,11 +82,13 @@ Item {
   }
 
   function _runLaunch() {
+    statusProbe.policy = null
     var argv = root.mainInstance ? root.mainInstance._launcherArgv(root.pluginApi.settingsContext) : []
     launchProc.command = argv
     launchProc.running = argv.length > 0
   }
   function _runKill() {
+    statusProbe.policy = null
     var argv = root.mainInstance ? root.mainInstance._killArgv(root.pluginApi.settingsContext) : []
     killProc.command = argv
     killProc.running = argv.length > 0
@@ -139,6 +141,7 @@ Item {
     }
   }
   function _runReload() {
+    statusProbe.policy = null
     if (root.pluginApi) {
       root.pluginApi.pluginSettings.enabled = true
       root.pluginApi.saveSettings()

@@ -1630,7 +1630,7 @@
       "author": "jfreed-dev",
       "description": "Idle-aware terminal screensaver for niri, driven by TerminalTextEffects.",
       "license": "GPL-3.0-only",
-      "version": "0.8.10",
+      "version": "0.8.11",
       "tags": [
         "Bar",
         "Utility",

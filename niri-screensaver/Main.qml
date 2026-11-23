@@ -25,7 +25,8 @@ Item {
   property bool retired: false
   property bool componentReady: false
   property int generation: 0
-  property string ownedHook: ""
+  property string ownedLockHook: ""
+  property string ownedUnlockHook: ""
   property var queuedConfig: null
   readonly property var policyContext: selectedContext || pluginApi?.settingsContext
   readonly property bool policyCurrent: !retired && (policyContext?.current() ?? false)
@@ -234,35 +235,31 @@ Item {
 
   // ----- Noctalia Hooks wiring (screenLock / screenUnlock) -----
   //
-  // Only write to a hook slot if it's currently empty OR already holds our
-  // command. That way we never clobber a hook the user authored manually.
-  // On disable we mirror the same rule: only clear if the value is still ours.
+  // Claim an empty slot, or replace/clear only a value we wrote to that slot.
+  // Matching command text alone does not establish ownership of a manual hook.
   // Requires Settings.data.hooks.enabled = true to actually fire — the plugin
   // does not flip that master toggle for the user.
-  function _hookKillCmd() {
-    return cfg.killCommand || root.defaultKillCommand
+  function _syncHookSlot(slot, owned, desired) {
+    const hooks = Settings.data.hooks
+    if (!hooks) return ""
+    const current = hooks[slot] || ""
+    if ((owned && current === owned) || (desired && !current)) {
+      hooks[slot] = desired
+      return desired
+    }
+    return ""
+  }
+
+  function _syncHookSlots(command) {
+    ownedLockHook = _syncHookSlot("screenLock", ownedLockHook, command)
+    ownedUnlockHook = _syncHookSlot("screenUnlock", ownedUnlockHook, command)
   }
 
   function _syncHooks(s) {
     if (!policyCurrent) return
     if (!Settings.data.hooks) return  // Older Noctalia builds may lack hooks
 
-    var killCmd = s.killCommand || root.defaultKillCommand
-    var lockNow   = Settings.data.hooks.screenLock || ""
-    var unlockNow = Settings.data.hooks.screenUnlock || ""
-
-    if (s.enabled) {
-      if (lockNow === "" || lockNow === killCmd || (ownedHook && lockNow === ownedHook)) {
-        Settings.data.hooks.screenLock = killCmd
-      }
-      if (unlockNow === "" || unlockNow === killCmd || (ownedHook && unlockNow === ownedHook)) {
-        Settings.data.hooks.screenUnlock = killCmd
-      }
-    } else {
-      if (lockNow === killCmd || (ownedHook && lockNow === ownedHook)) Settings.data.hooks.screenLock = ""
-      if (unlockNow === killCmd || (ownedHook && unlockNow === ownedHook)) Settings.data.hooks.screenUnlock = ""
-    }
-    ownedHook = s.enabled ? killCmd : ""
+    _syncHookSlots(s.enabled ? (s.killCommand || root.defaultKillCommand) : "")
 
     if (typeof Settings.saveImmediate === "function") {
       Settings.saveImmediate()
@@ -332,11 +329,7 @@ Item {
 
       // Mirror cleanup for hook slots — only clear values we wrote
       try {
-        var killCmd = ownedHook
-        if (Settings.data.hooks) {
-          if (killCmd && Settings.data.hooks.screenLock === killCmd) Settings.data.hooks.screenLock = ""
-          if (killCmd && Settings.data.hooks.screenUnlock === killCmd) Settings.data.hooks.screenUnlock = ""
-        }
+        _syncHookSlots("")
       } catch (e) { /* ignore */ }
 
       if (typeof Settings.saveImmediate === "function") {
