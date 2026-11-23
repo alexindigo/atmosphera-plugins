@@ -185,9 +185,9 @@ GpuReadings {
     id: pollTimer
     interval: root.pollIntervalMs
     repeat: true
-    running: root.shouldPoll && !rocmProcess.running
+    running: root.shouldPoll
     triggeredOnStart: true
-    onTriggered: rocmProcess.running = true
+    onTriggered: root.refreshNow()
   }
 
 }

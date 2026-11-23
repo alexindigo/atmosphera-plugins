@@ -116,7 +116,7 @@
       "author": "Dvaxert",
       "description": "AMD discrete GPU monitoring via rocm-smi with graphs and configurable metrics.",
       "license": "MIT",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "tags": [
         "Bar",
         "Panel",
@@ -130,7 +130,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": false,
       "upstreamPR": 940,
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-22",
       "minNoctaliaVersion": "4.0.0",
       "minAtmospheraVersion": "0.10.0"
     },
