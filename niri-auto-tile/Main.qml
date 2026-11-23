@@ -23,7 +23,6 @@ Item {
     readonly property bool running: daemonProcess.running
     property string status: "stopped"
     property var activePolicy: null
-    property var pendingLaunch: null
     property var queuedConfig: null
     property int generation: 0
     property int admittedMaxVisible: 4
@@ -71,8 +70,7 @@ Item {
     }
     function startDaemon() {
         if (!componentReady || !automationEnabled || daemonProcess.running) return;
-        const policy = pendingLaunch || capturePolicy();
-        pendingLaunch = null;
+        const policy = capturePolicy();
         if (!current(policy)) return;
         activePolicy = policy;
         const args = ["python3", scriptPath, "--max-visible", String(policy.maxVisible),
@@ -87,7 +85,6 @@ Item {
         generation++;
         restartTimer.stop();
         queuedConfig = null;
-        pendingLaunch = null;
         configWriter.running = false;
         if (daemonProcess.running) daemonProcess.signal(15);
     }
@@ -95,7 +92,6 @@ Item {
         if (context) return applySettings(context);
         if (!componentReady || retired) return false;
         stopDaemon();
-        pendingLaunch = capturePolicy();
         restartTimer.restart();
         return true;
     }

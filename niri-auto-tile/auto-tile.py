@@ -12,6 +12,7 @@ import ctypes
 import json
 import logging
 import os
+import queue
 import signal
 import subprocess
 import sys
@@ -43,9 +44,11 @@ _prev_col_counts: dict[int, int] = {}  # workspace_id -> column count
 _known_window_ids: set[int] = set()    # track known windows to detect new ones
 _debounce_timer: threading.Timer | None = None
 _lock = threading.Lock()
+_focus_lock = threading.RLock()
 _event_count = 0
 _event_window_start = 0.0
 _config_generation = 0
+_stopping = False
 
 
 # ─── Validation ───
@@ -111,7 +114,7 @@ def niri_cmd(*args) -> str:
 
 def niri_action(*args, generation: int | None = None) -> None:
     """Run a niri msg action."""
-    if generation is not None and generation != _config_generation:
+    if _stopping or (generation is not None and generation != _config_generation):
         return
     try:
         result = subprocess.run(
@@ -287,6 +290,12 @@ def _redistribute_workspace(ws_id: int, focused_id: int | None,
 
 def redistribute() -> None:
     """Redistribute all active workspaces, restoring original focus afterwards."""
+    with _focus_lock:
+        if not _stopping:
+            _redistribute_focused()
+
+
+def _redistribute_focused() -> None:
     generation = _config_generation
     original_ws, original_focused = get_focused_workspace()
 
@@ -315,6 +324,8 @@ def debounced_redistribute() -> None:
     now = time.monotonic()
 
     with _lock:
+        if _stopping:
+            return
         # Rate limiter: sliding window
         if now - _event_window_start > 1.0:
             _event_window_start = now
@@ -474,6 +485,12 @@ def parse_args() -> argparse.Namespace:
 # ─── Hot Reload ───
 def reload_config() -> None:
     """Reload configuration from CONFIG_FILE and trigger redistribution."""
+    with _focus_lock:
+        if not _stopping:
+            _reload_config_focused()
+
+
+def _reload_config_focused() -> None:
     global MAX_VISIBLE, PER_WORKSPACE, WORKSPACE_MAX_VISIBLE, ONLY_AT_MAX, _config_generation
 
     if not CONFIG_FILE or not os.path.isfile(CONFIG_FILE):
@@ -490,9 +507,7 @@ def reload_config() -> None:
     if not isinstance(cfg, dict):
         return
 
-    # A reload can interrupt an older redistribution at a subprocess boundary.
-    # That generation may finish its admitted child, but cannot start another
-    # compositor action after the new policy has been admitted.
+    # Admit the new policy only after any old pass has restored its focus.
     _config_generation += 1
 
     old_max = MAX_VISIBLE
@@ -517,6 +532,25 @@ def reload_config() -> None:
     with _lock:
         _prev_col_counts.clear()
     redistribute()
+
+
+def _stop_work() -> None:
+    global _stopping, _config_generation
+    _stopping = True
+    _config_generation += 1
+    # Signal handler must not wait on a lock held by the interrupted thread.
+    if _debounce_timer is not None:
+        _debounce_timer.cancel()
+
+
+def _reload_worker(requests: queue.SimpleQueue) -> None:
+    while requests.get():
+        if _stopping:
+            return
+        try:
+            reload_config()
+        except (ValueError, TypeError):
+            log.exception("invalid config values")
 
 
 # ─── Main ───
@@ -554,18 +588,19 @@ def main() -> None:
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    # Handle SIGTERM for graceful shutdown
+    # Signals only publish intents. The reload worker can wait for focus
+    # ownership without blocking a signal-interrupted main-thread pass.
+    requests = queue.SimpleQueue()
+    threading.Thread(target=_reload_worker, args=(requests,), daemon=True).start()
     def _shutdown(signum, frame):
-        # Timer.cancel() is thread-safe; avoid _lock here to prevent deadlock
-        t = _debounce_timer
-        if t is not None:
-            t.cancel()
+        _stop_work()
+        requests.put(False)
         raise KeyboardInterrupt
     signal.signal(signal.SIGTERM, _shutdown)
 
     # Handle SIGUSR1 for hot config reload (no restart needed)
     def _reload(signum, frame):
-        reload_config()
+        requests.put(True)
     signal.signal(signal.SIGUSR1, _reload)
 
     mode = "per-workspace" if PER_WORKSPACE else "global"

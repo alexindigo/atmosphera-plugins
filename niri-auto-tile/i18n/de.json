@@ -17,7 +17,7 @@
     "settings": "Einstellungen"
   },
   "settings": {
-    "shared-effect": "Auto-Tile uses one daemon for the desktop. Apply or a runtime action selects its policy; changes affect the same windows for every instance.",
+    "shared-effect": "Auto-Tile verwendet einen gemeinsamen Dienst für den Desktop. Durch Anwenden oder eine Aktion im laufenden Betrieb werden dessen Einstellungen ausgewählt. Änderungen betreffen für alle Instanzen dieselben Fenster.",
     "enabled": "Aktiviere Auto-Tile",
     "enabled-desc": "Spaltenbreiten automatisch neu verteilen, wenn Fenster geoffnet oder geschlossen werden",
     "per-workspace": "Pro Arbeitsbereich",
