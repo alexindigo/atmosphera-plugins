@@ -790,7 +790,7 @@ Item {
                                     "clearFirst": true,
                                     "finalAction": "skip",
                                     "emptyNotice": pluginApi?.tr("panel.emptyScopedLibrary")
-                                  });
+                                  }, pluginApi?.settingsContext);
   }
 
   function queueCurrentLibrarySelection(shuffle) {
@@ -798,7 +798,7 @@ Item {
     mainInstance?.startQueueBatch(entries, {
                                     "clearFirst": false,
                                     "emptyNotice": pluginApi?.tr("panel.emptyScopedLibrary")
-                                  });
+                                  }, pluginApi?.settingsContext);
   }
 
   function formatRating(rating) {

@@ -1329,12 +1329,14 @@ Item {
   }
 
   function finishQueueBatch(errorText, noticeText) {
+    if (errorText && root.queueBatchIndex > 0) root.queueActive = false;
     root.queueBatchBusy = false;
     root.queueBusy = false;
     root.queueBatchEntries = [];
     root.queueBatchIndex = 0;
     root.queueBatchFinalAction = "";
     root.queueBatchDoneNotice = "";
+    root.queueBatchPolicy = null;
     root.queueControlAction = "";
     root.queueCommandAction = "";
 
@@ -1355,6 +1357,7 @@ Item {
       return;
     }
     if (!root.queueBatchPolicy?.context?.current()) {
+      if (root.queueBatchIndex > 0) root.queueActive = false;
       root.finishQueueBatch("", "");
       return;
     }
@@ -1367,7 +1370,11 @@ Item {
       return;
     }
 
+    // Admit one policy for the shared queue only once the batch is complete.
+    // Append keeps an armed queue armed, but future launches use this origin.
+    root.queuePolicy = root.queueBatchPolicy;
     if (root.queueBatchFinalAction.length > 0) {
+      root.lastHandledQueueUpdate = root.currentUpdatedAt;
       if (root.queueBatchFinalAction === "skip") {
         root.skipQueue(undefined, root.queueBatchPolicy);
       } else if (root.queueBatchFinalAction === "start") {
@@ -1380,11 +1387,12 @@ Item {
     }
 
     root.finishQueueBatch("", root.queueBatchDoneNotice);
+    root.advanceQueueAfterPlayback();
   }
 
   function startQueueBatch(entries, options, context) {
-    const policy = capturePolicy(context);
-    if (!policy || root.queueBusy || root.queueBatchBusy) {
+    const policy = context ? capturePolicy(context) : null;
+    if (!policy || root.queueBusy || root.queueBatchBusy || root.queueLaunchBusy) {
       return;
     }
 
@@ -1418,6 +1426,8 @@ Item {
     root.queueBatchDoneNotice = doneNotice;
 
     if (clearFirst) {
+      root.queueActive = false;
+      root.queuePolicy = null;
       root.queueControlAction = "clear";
       queueControlProcess.exec({
                                  "command": buildQueueCommand("clear", [])
@@ -1990,27 +2000,31 @@ Item {
         root.pendingQueueLaunchEntryId = "";
       }
 
-      if (root.queueActive && !root.isPlaying && root.currentUpdatedAt.length > 0 && root.currentUpdatedAt !== root.lastHandledQueueUpdate && (root.currentEndReason === "finished" || root.currentEndReason === "error")) {
-        root.lastHandledQueueUpdate = root.currentUpdatedAt;
-        root.queueLaunchBusy = false;
-        if (root.queueEntries.length > 0) {
-          if (root.queuePolicy?.context?.current())
-            root.launchQueueEntry(root.queueEntries[0], undefined, root.queuePolicy);
-          else
-            root.queueActive = false;
-        } else {
-          root.queueActive = false;
-          if (root.currentEndReason === "error") {
-            root.lastNotice = "";
-            root.lastError = root.pluginApi?.tr("queue.errorExhausted");
-          } else {
-            root.lastError = "";
-            root.lastNotice = root.pluginApi?.tr("queue.finished");
-          }
-        }
-      }
+      root.advanceQueueAfterPlayback();
     } catch (error) {
       Logger.w("MusicSearch", "Failed to parse music state:", error);
+    }
+  }
+
+  function advanceQueueAfterPlayback() {
+    if (root.queueBatchBusy || !root.queueActive || root.isPlaying || !root.currentUpdatedAt.length
+        || root.currentUpdatedAt === root.lastHandledQueueUpdate || !["finished", "error"].includes(root.currentEndReason)) return;
+    root.lastHandledQueueUpdate = root.currentUpdatedAt;
+    root.queueLaunchBusy = false;
+    if (root.queueEntries.length > 0) {
+      if (root.queuePolicy?.context?.current())
+        root.launchQueueEntry(root.queueEntries[0], undefined, root.queuePolicy);
+      else
+        root.queueActive = false;
+    } else {
+      root.queueActive = false;
+      if (root.currentEndReason === "error") {
+        root.lastNotice = "";
+        root.lastError = root.pluginApi?.tr("queue.errorExhausted");
+      } else {
+        root.lastError = "";
+        root.lastNotice = root.pluginApi?.tr("queue.finished");
+      }
     }
   }
 

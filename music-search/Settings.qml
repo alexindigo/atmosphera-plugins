@@ -87,7 +87,18 @@ ColumnLayout {
   readonly property bool autoSaveMp3AfterPlayback: editPreferences.autoSaveMp3AfterPlayback ?? root.defaults.autoSaveMp3AfterPlayback ?? false
   property string editDownloadDirectory: root.currentDownloadDirectory
   property int editDownloadCacheMaxMb: root.currentDownloadCacheMaxMb
+  property int directoryEditRevision: 0
+  property int cacheEditRevision: 0
+  property var downloadSubmission: null
+  onEditDownloadDirectoryChanged: ++directoryEditRevision
+  onEditDownloadCacheMaxMbChanged: ++cacheEditRevision
   readonly property var downloadSettingsResult: root.mainInstance?.downloadSettingsResult ?? null
+  onDownloadSettingsResultChanged: {
+    const result = downloadSettingsResult;
+    const submission = downloadSubmission;
+    if (submission && result?.kind === submission.kind && result.requestedValue === submission.value
+        && (result.status === "saved" || result.status === "failed")) downloadSubmission = null;
+  }
   readonly property bool downloadActionFailed: downloadSettingsResult?.status === "failed" || downloadSettingsResult?.status === "rejected"
   readonly property string downloadActionFeedback: {
     var result = downloadSettingsResult;
@@ -127,24 +138,31 @@ ColumnLayout {
       return;
     }
     editDownloadDirectory = target;
-    pluginApi?.mainInstance?.setDownloadDirectory(target);
+    if (mainInstance?.setDownloadDirectory(target))
+      downloadSubmission = {kind: "directory", value: target, revision: directoryEditRevision};
   }
 
   function applyCacheLimit() {
     var target = Math.max(0, Math.floor(editDownloadCacheMaxMb || 0));
     editDownloadCacheMaxMb = target;
-    pluginApi?.mainInstance?.setDownloadCacheMaxMb(target);
+    if (mainInstance?.setDownloadCacheMaxMb(target))
+      downloadSubmission = {kind: "limit", value: target, revision: cacheEditRevision};
+  }
+
+  function followsAppliedValue(kind, edit, previousValue, revision) {
+    const submitted = downloadSubmission;
+    return submitted?.kind === kind ? submitted.revision === revision : edit === previousValue;
   }
 
   property string _lastDirectory: currentDownloadDirectory
   property int _lastCacheLimit: currentDownloadCacheMaxMb
   onCurrentDownloadDirectoryChanged: {
-    if (editDownloadDirectory === _lastDirectory)
+    if (followsAppliedValue("directory", editDownloadDirectory, _lastDirectory, directoryEditRevision))
       editDownloadDirectory = currentDownloadDirectory;
     _lastDirectory = currentDownloadDirectory;
   }
   onCurrentDownloadCacheMaxMbChanged: {
-    if (editDownloadCacheMaxMb === _lastCacheLimit)
+    if (followsAppliedValue("limit", editDownloadCacheMaxMb, _lastCacheLimit, cacheEditRevision))
       editDownloadCacheMaxMb = currentDownloadCacheMaxMb;
     _lastCacheLimit = currentDownloadCacheMaxMb;
   }
