@@ -1299,7 +1299,7 @@
       "author": "cmptr",
       "description": "Shows AI coding assistant usage stats in the bar with detail panel (Claude Code, Codex, Copilot, Gemini, OpenRouter, Zen)",
       "license": "MIT",
-      "version": "0.3.8",
+      "version": "0.3.9",
       "tags": [
         "Bar",
         "Productivity",

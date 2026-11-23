@@ -56,14 +56,16 @@ ProviderLifetime {
     }
 
     onApiKeyChanged: {
+        root.cancelRequests();
         if (enabled && apiKey !== "")
             fetchKeyInfo();
     }
 
     function fetchKeyInfo() {
-        if (!root.enabled || !root.apiKey)
+        // Normal refreshes join this credential's active request batch. Only
+        // key changes and lost ownership cancel requests.
+        if (!root.enabled || !root.apiKey || root.hasPendingRequests())
             return;
-        root.cancelRequests();
         const xhr = root.request();
         xhr.open("GET", "https://openrouter.ai/api/v1/key");
         xhr.setRequestHeader("Authorization", "Bearer " + root.apiKey);
