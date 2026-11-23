@@ -51,7 +51,7 @@ function buildGeminiCommand(endpointUrl, model, apiKey, systemPrompt, history, t
   return {
     "url": finalUrl,
     "payload": JSON.stringify(payload),
-    "args": ["curl", "-s", "--no-buffer", "-X", "POST", "-H", "Content-Type: application/json", "-d", JSON.stringify(payload), finalUrl]
+    "args": ["-s", "--no-buffer", "-X", "POST", "-H", "Content-Type: application/json", "-d", JSON.stringify(payload), finalUrl]
   };
 }
 
@@ -129,7 +129,7 @@ function buildOpenAICommand(endpointUrl, apiKey, model, systemPrompt, history, t
     "stream": true
   };
 
-  var args = ["curl", "-s", "-S", "--no-buffer", "-X", "POST", "-H", "Content-Type: application/json"];
+  var args = ["-s", "-S", "--no-buffer", "-X", "POST", "-H", "Content-Type: application/json"];
 
   if (apiKey && apiKey.trim() !== "") {
     args.push("-H", "Authorization: Bearer " + apiKey);
@@ -193,7 +193,7 @@ function buildGoogleTranslateCommand(text, targetLang, sourceLang) {
   var url = "https://translate.google.com/translate_a/single?client=gtx" + "&sl=" + encodeURIComponent(sourceLang || "auto") + "&tl=" + encodeURIComponent(targetLang) + "&dt=t&q=" + encodeURIComponent(text);
 
   return {
-    "args": ["curl", "-s", url]
+    "args": ["-s", url]
   };
 }
 
@@ -208,7 +208,7 @@ function buildDeepLTranslateCommand(text, targetLang, apiKey) {
   var url = "https://" + host + "/v2/translate";
 
   return {
-    "args": ["curl", "-s", "-X", "POST", url, "-H", "Authorization: DeepL-Auth-Key " + apiKey, "-H", "Content-Type: application/x-www-form-urlencoded", "-d", "text=" + encodeURIComponent(text) + "&target_lang=" + targetLang.toUpperCase()]
+    "args": ["-s", "-X", "POST", url, "-H", "Authorization: DeepL-Auth-Key " + apiKey, "-H", "Content-Type: application/x-www-form-urlencoded", "-d", "text=" + encodeURIComponent(text) + "&target_lang=" + targetLang.toUpperCase()]
   };
 }
 
@@ -278,9 +278,17 @@ function processLoadedState(content) {
   }
 }
 
-function prepareStateForSave(messages, activeTab, maxHistory, chatInputText, chatInputCursorPosition) {
-  var maxLog = maxHistory || 100;
-  var toSave = messages.slice(-maxLog);
+function requestError(body) {
+  try {
+    var message = JSON.parse(body).error?.message;
+    return typeof message === "string" ? message : "";
+  } catch (error) {
+    return "";
+  }
+}
+
+function prepareStateForSave(conversation, activeTab, chatInputText, chatInputCursorPosition) {
+  var toSave = conversation.historyLimit === null ? conversation.messages : conversation.messages.slice(-conversation.historyLimit);
 
   return JSON.stringify({
     messages: toSave,

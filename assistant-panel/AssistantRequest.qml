@@ -6,8 +6,11 @@ import Quickshell.Io
 Process {
   id: worker
   required property var policy
+  required property var curlArgs
   required property var delivered
   required property var settled
+  command: ["curl", "--fail-with-body", ...curlArgs]
+  function rejectedHttp(code) { return code === 22; } // curl's HTTP rejection, not a connection failure
   property bool streaming: false
   property string output: ""
   property bool _finished: false

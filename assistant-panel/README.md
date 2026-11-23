@@ -36,8 +36,9 @@ All views still share one conversation, input, translation result and history
 cache. Sending captures the originating applied policy; changing its source or
 removing that origin cancels its pending request, not the common conversation.
 Clear/stop affect that common conversation. IPC remains explicitly plugin-level.
-History-save truncation uses the policy captured by the admitted content edit,
-not another view's configuration when the debounce expires. Settings Apply and
+History-save truncation uses the policy captured by the admitted content edit.
+Tab and draft saves persist their fields without changing that history policy.
+An HTTP rejection does not append an assistant reply or clear the draft. Settings Apply and
 Discard do not undo already admitted chat, translation or content actions.
 
 ### AI Provider Setup

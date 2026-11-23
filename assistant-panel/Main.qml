@@ -10,7 +10,8 @@ Item {
   id: root
   property var pluginApi: null
   // Conversation, input, translation and the existing cache remain common.
-  property var messages: []
+  property var _conversation: ({messages: [], historyLimit: null})
+  readonly property var messages: _conversation.messages
   property bool isGenerating: false
   property string currentResponse: ""
   property string errorMessage: ""
@@ -35,7 +36,6 @@ Item {
   property var _chatRequest: null
   property var _translationRequest: null
   property var _lifetime: ({alive: true})
-  property real _saveHistoryLength: 100
   property bool saveStateQueued: false
   Component { id: clientFactory; AssistantSettingsClient {} }
   Component { id: requestFactory; AssistantRequest {} }
@@ -85,35 +85,37 @@ Item {
     var result = ProviderLogic.processLoadedState(stateCacheFile.text());
     if (!result) return;
     if (result.error) { Logger.e("AssistantPanel", "Failed to parse state cache: " + result.error); return; }
-    messages = result.messages; activeTab = result.activeTab;
+    _conversation = {messages: result.messages, historyLimit: null}; activeTab = result.activeTab;
     chatInputText = result.chatInputText; chatInputCursorPosition = result.chatInputCursorPosition;
   }
   Timer { id: saveStateTimer; interval: 500; onTriggered: root.performSaveState() }
   function saveState(context) {
-    var client = _consumer(context);
-    if (!client) return false;
-    _queueState(client.maxHistoryLength);
+    if (!_consumer(context)) return false;
+    _queueState();
     return true;
   }
-  function _queueState(limit) { _saveHistoryLength = limit; saveStateQueued = true; saveStateTimer.restart(); }
+  function _queueState() { saveStateQueued = true; saveStateTimer.restart(); }
+  function _recordConversation(next, limit) {
+    _conversation = {messages: next, historyLimit: limit};
+    _queueState();
+  }
   function performSaveState() {
     if (!saveStateQueued || !cacheDir) return;
     saveStateQueued = false;
     try {
       ensureCacheDir();
-      stateCacheFile.setText(ProviderLogic.prepareStateForSave(messages, activeTab, _saveHistoryLength, chatInputText, chatInputCursorPosition));
+      stateCacheFile.setText(ProviderLogic.prepareStateForSave(_conversation, activeTab, chatInputText, chatInputCursorPosition));
     } catch(error) { Logger.e("AssistantPanel", "Failed to save state cache: " + error); }
   }
-  function addMessage(role, content, limit) {
+  function addMessage(role, content, limit, prefix = messages) {
     var message = {id: Date.now().toString(), role: role, content: content, timestamp: new Date().toISOString()};
-    messages = [...messages, message];
-    _queueState(limit === undefined ? settingsConsumer?.maxHistoryLength || 100 : limit);
+    _recordConversation([...prefix, message], limit);
     return message;
   }
   function clearMessages(context) {
     var client = _consumer(context);
     if (!client) return false;
-    _cancelChat(false); messages = []; _queueState(client.maxHistoryLength);
+    _cancelChat(false); _recordConversation([], client.maxHistoryLength);
     return true;
   }
   function _chatPolicy(context) {
@@ -139,8 +141,7 @@ Item {
     if (index === -1) return false;
     var policy = _chatPolicy(context);
     if (!policy) return false;
-    messages = messages.slice(0, index);
-    addMessage("user", text.trim(), policy.maxHistoryLength); _startChat(policy); return true;
+    addMessage("user", text.trim(), policy.maxHistoryLength, messages.slice(0, index)); _startChat(policy); return true;
   }
   function regenerateLastResponse(context) {
     if (isGenerating || messages.length < 2) return false;
@@ -148,7 +149,7 @@ Item {
     if (!policy) return false;
     for (var index = messages.length - 1; index >= 0; --index) {
       if (messages[index].role !== "assistant") continue;
-      messages = messages.slice(0, index); _queueState(policy.maxHistoryLength); _startChat(policy); return true;
+      _recordConversation(messages.slice(0, index), policy.maxHistoryLength); _startChat(policy); return true;
     }
     return false;
   }
@@ -160,9 +161,9 @@ Item {
       : ProviderLogic.buildOpenAICommand(policy.openaiBaseUrl, policy.apiKey, policy.model, policy.systemPrompt, history, policy.temperature);
     isGenerating = true; currentResponse = ""; errorMessage = "";
     var life = _lifetime;
-    var worker = requestFactory.createObject(root, {policy: policy, command: command.args, streaming: true,
+    var worker = requestFactory.createObject(root, {policy: policy, curlArgs: command.args, streaming: true,
       delivered: function(source, data) { if (life.alive) root._chatData(source, data); },
-      settled: function(source, code, output, errors) { if (life.alive) root._chatDone(source, code, errors); }});
+      settled: function(source, code, output, errors) { if (life.alive) root._chatDone(source, code, output, errors); }});
     _chatRequest = worker; worker.start();
   }
   function _chatData(worker, data) {
@@ -178,7 +179,7 @@ Item {
       } catch(error) {} // Incomplete JSON stream, same provider parser policy.
     }
   }
-  function _chatDone(worker, code, errors) {
+  function _chatDone(worker, code, output, errors) {
     if (_chatRequest !== worker) return;
     var policy = worker.policy;
     if (!policy.context.current()) { _cancelChat(false); return; }
@@ -186,11 +187,15 @@ Item {
     if (errors && policy.provider === Constants.Providers.GOOGLE) {
       try { var error = JSON.parse(errors); if (error.error?.message) errorMessage = error.error.message; } catch(error) {}
     }
-    if (code !== 0 && currentResponse === "") {
+    if (worker.rejectedHttp(code)) {
+      // Curl preserves the error body, but none of it is a successful message.
+      currentResponse = "";
+      errorMessage = ProviderLogic.requestError(output) || errorMessage || pluginApi?.tr("errors.requestFailed");
+    } else if (code !== 0 && currentResponse === "") {
       if (errorMessage === "") errorMessage = pluginApi?.tr(policy.provider === Constants.Providers.OPENAI_COMPATIBLE && policy.openaiLocal ? "errors.localNotRunning" : "errors.requestFailed");
     } else {
       if (currentResponse.trim() !== "") addMessage("assistant", currentResponse.trim(), policy.maxHistoryLength);
-      chatInputText = ""; chatInputCursorPosition = 0; _queueState(policy.maxHistoryLength);
+      chatInputText = ""; chatInputCursorPosition = 0; _queueState();
     }
     worker.destroy();
   }
@@ -215,7 +220,7 @@ Item {
     if (!command || command.error) { translationError = pluginApi?.tr("errors.noDeeplKey"); return false; }
     isTranslating = true;
     var life = _lifetime;
-    var worker = requestFactory.createObject(root, {policy: policy, command: command.args, delivered: function() {},
+    var worker = requestFactory.createObject(root, {policy: policy, curlArgs: command.args, delivered: function() {},
       settled: function(request, code, output, errors) { if (life.alive) root._translationDone(request, code, output); }});
     _translationRequest = worker; worker.start(); return true;
   }
