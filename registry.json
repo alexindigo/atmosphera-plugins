@@ -921,7 +921,7 @@
       "author": "focky",
       "description": "Use Hermes on a remote server through an interactive SSH terminal.",
       "license": "MIT",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "tags": [
         "Bar",
         "Panel",

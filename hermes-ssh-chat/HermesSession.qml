@@ -5,6 +5,7 @@ Item {
   id: root
   required property var settingsContext
   required property var retire
+  required property var newConnection
   readonly property bool current: settingsContext.current()
   readonly property var cfg: settingsContext.settingsView
   readonly property string autoSource: JSON.stringify([cfg.host, cfg.port, cfg.user, cfg.autoConnectOnStartup, cfg.terminalRows, cfg.terminalCols])
@@ -30,7 +31,6 @@ Item {
   readonly property string targetLabel: user && host ? user + "@" + host : "Hermes"
   signal terminalOutput(string text)
   signal terminalReset()
-  Component { id: connectionFactory; HermesConnection {} }
 
   function tr(key, args) { return _tr ? _tr(key, args || ({})) : key; }
   function setting(key, fallback) { var value = cfg[key]; return value === undefined ? fallback : value; }
@@ -61,7 +61,7 @@ Item {
   function stopConnection() {
     var previous = _connection;
     _connection = null; // Fence callbacks before termination can emit anything.
-    if (previous) { previous.stop(); previous.destroy(); }
+    if (previous) previous.retire();
   }
   function connect(api, targetHost, targetPort, targetUser, targetPassword, rows, cols) {
     if (!accepts(api)) return false;
@@ -79,11 +79,8 @@ Item {
     }
     stopConnection(); resetTerminal(); status = "connecting";
     statusText = tr("status.connecting", {target: targetLabel});
-    _connection = connectionFactory.createObject(root, {
-      session: root,
-      request: JSON.stringify({type: "connect", host: host, port: port, user: user, password: password,
-        rows: Math.max(1, Number(rows || setting("terminalRows", 32))), cols: Math.max(1, Number(cols || setting("terminalCols", 180)))}) + "\n"
-    });
+    _connection = newConnection(root, JSON.stringify({type: "connect", host: host, port: port, user: user, password: password,
+      rows: Math.max(1, Number(rows || setting("terminalRows", 32))), cols: Math.max(1, Number(cols || setting("terminalCols", 180)))}) + "\n");
     _connection.start();
     return true;
   }

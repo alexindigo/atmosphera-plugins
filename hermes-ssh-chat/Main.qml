@@ -8,12 +8,16 @@ Item {
   property var pluginApi: null
   property var _settingsConsumers: new Map()
   Component { id: sessionFactory; HermesSession {} }
+  Component { id: connectionFactory; HermesConnection {} }
 
   function settingsConsumerFor(context) {
     if (!context || !context.current()) return null;
     if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
     var client = sessionFactory.createObject(root, {
       settingsContext: context,
+      newConnection: function(session, request) {
+        return connectionFactory.createObject(root, {session: session, request: request});
+      },
       retire: function(retired) { root._settingsConsumers.delete(context); retired.destroy(); }
     });
     _settingsConsumers.set(context, client);
