@@ -21,6 +21,9 @@ ColumnLayout {
   onRandomFolderPathChanged: {
     if (pendingRandom && pendingRandom.folder !== randomFolderPath) cancelRandomWallpaper();
   }
+  onCurrentWallpaperChanged: {
+    if (pendingRandom) cancelRandomWallpaper();
+  }
 
   function cancelRandomWallpaper() {
     pendingRandom = null;
@@ -39,14 +42,18 @@ ColumnLayout {
     const request = pendingRandom;
     if (!request || model !== randomChoices || request.folder !== randomFolderPath || model.status !== FolderListModel.Ready || String(model.folder) !== String(Qt.resolvedUrl("file://" + request.folder))) return;
     pendingRandom = null;
-    if (model.count > 0) currentWallpaperField.set(model.get(Math.floor(Math.random() * model.count), "filePath"));
     randomChoices = null;
     Qt.callLater(function () { model.destroy(); });
+    if (model.count > 0) stageWallpaper(model.get(Math.floor(Math.random() * model.count), "filePath"));
+  }
+
+  function stageWallpaper(path) {
+    cancelRandomWallpaper();
+    currentWallpaperField.set(path);
   }
 
   function stageClearWallpaper() {
-    cancelRandomWallpaper();
-    currentWallpaperField.set("");
+    stageWallpaper("");
   }
 
   Component {
@@ -160,6 +167,7 @@ ColumnLayout {
       id: playback
       pluginApi: root.pluginApi
       active: root.active
+      onWallpaperSelected: path => root.stageWallpaper(path)
     }
 
     AudioTab {

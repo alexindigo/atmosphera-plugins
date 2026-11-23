@@ -22,6 +22,7 @@ ColumnLayout {
   readonly property string wallpapersFolder: root.wallpapersFolderField?.value || "~/Pictures/Wallpapers"
 
   readonly property string currentWallpaper: root.currentWallpaperField?.value || ""
+  signal wallpaperSelected(string path)
 
   // Wallpaper Folder
   ColumnLayout {
@@ -99,7 +100,7 @@ ColumnLayout {
       onAccepted: paths => {
         if (paths.length > 0) {
           Logger.d("mpvpaper", "Selected the following current wallpaper:", paths[0]);
-          root.currentWallpaperField.set(paths[0]);
+          root.wallpaperSelected(paths[0]);
         }
       }
     }

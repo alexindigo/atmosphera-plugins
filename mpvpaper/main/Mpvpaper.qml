@@ -51,6 +51,7 @@ Item {
             `input-ipc-server='${root.mpvSocket}'`,
             `profile='${root.profile}'`,
             `panscan=${root.fillMode === "fit" ? 0 : 1}`,
+            `pause=${root.isPlaying ? "no" : "yes"}`,
             "loop"
         ];
 
@@ -62,10 +63,7 @@ Item {
             options.push("no-audio");
         }
 
-        const optionsString = options.join(" ");
-        const command = `mpvpaper -o "${optionsString}" ALL "${root.currentWallpaper}"`;
-
-        return ["sh", "-c", command];
+        return ["mpvpaper", "-o", options.join(" "), "ALL", root.currentWallpaper];
     }
 
     function activateMpvpaper() {
@@ -78,6 +76,7 @@ Item {
 
         mpvProc.command = buildMpvCommand();
         mpvProc.running = true;
+        thumbnails.startColorGen(settingsContext, currentWallpaper);
 
         // Loading/replacing a physical backend is not a preference action.
         // Main's explicit originating wallpaper action owns the playing intent.
@@ -85,6 +84,7 @@ Item {
 
     function deactivateMpvpaper() {
         Logger.d("mpvpaper", "Deactivating mpvpaper...");
+        thumbnails?.cancelColorGen();
 
         // Apply the old wallpapers back
         innerService.applyOldWallpapers();
@@ -110,8 +110,6 @@ Item {
             Logger.d("mpvpaper", "Turning mpvpaper on.");
 
             activateMpvpaper();
-
-            thumbnails.startColorGen(settingsContext, currentWallpaper);
         } else if(!root.active) {
             Logger.d("mpvpaper", "Turning mpvpaper off.");
 
@@ -131,13 +129,13 @@ Item {
             if(mpvProc.running) {
                 // If mpvpaper is already running
                 sendCommandToMPV(`loadfile "${root.currentWallpaper}"`);
+                thumbnails.startColorGen(settingsContext, currentWallpaper);
             } else {
                 // Start mpvpaper
                 activateMpvpaper();
             }
 
-            thumbnails.startColorGen(settingsContext, currentWallpaper);
-        } else if(mpvProc.running) {
+        } else {
             Logger.d("mpvpaper", "Current wallpaper is empty, turning mpvpaper off.");
 
             deactivateMpvpaper();

@@ -32,7 +32,7 @@
     "loading": "加载中..."
   },
   "settings": {
-    "shared-effect": "Apply or a runtime action selects this instance's policy for the one shared wallpaper player and automation timer. Playback, wallpaper restoration and color changes affect every instance.",
+    "shared-effect": "点击应用或执行操作后，共享的壁纸播放器和自动化计时器将采用此实例的设置。播放、恢复壁纸和更改配色会影响所有实例。",
     "toggle": {
       "label": "启用mpvpaper",
       "description": "启用mpvpaper集成"

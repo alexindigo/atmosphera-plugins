@@ -155,13 +155,14 @@ Item {
             return;
         }
         if (model.status !== FolderListModel.Ready || String(model.folder) !== String(Qt.resolvedUrl("file://" + Settings.preprocessPath(request.folder)))) return;
+        // Release ownership before forwarding the choice to the common writer.
         pendingBrowse = null;
+        browseChoices = null;
+        Qt.callLater(function () { model.destroy(); });
         if (model.count > 0) {
             const index = request.mode === "random" ? Math.floor(Math.random() * model.count) : (model.indexOf(request.current) + 1) % model.count;
             setWallpaper(model.get(index, "filePath"), request.writer);
         } else Logger.e("mpvpaper", "Empty wallpapers folder or no files found!");
-        browseChoices = null;
-        Qt.callLater(function () { model.destroy(); });
     }
 
     Component {
@@ -183,6 +184,7 @@ Item {
             return;
         }
 
+        cancelBrowse();
         registerRuntime(runtimeApi);
         runtimeApi.pluginSettings.currentWallpaper = path;
         runtimeApi.pluginSettings.isPlaying = true;
@@ -238,6 +240,8 @@ Item {
         id: thumbnails
         pluginApi: root.pluginApi
 
+        active: root.active
+        settingsContext: root.policyContext
         currentWallpaper: root.currentWallpaper
         thumbCacheReady: root.thumbCacheReady
 
