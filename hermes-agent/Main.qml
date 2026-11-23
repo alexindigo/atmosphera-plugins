@@ -105,6 +105,12 @@ Scope {
     if (retiringConnection === value) retiringConnection = null;
     value.destroy();
     const boundary = pendingBoundary;
+    if (boundary?.connection === value) {
+      // This POST may already have changed the session. Reconnect for state,
+      // but never issue the transition twice on the user's behalf.
+      pendingBoundary = null;
+      setBridgeError("Session request lost its connection; check the current session before retrying");
+    }
     if (boundary?.policy.context.current()) activatePolicy(boundary.policy);
     else pendingBoundary = null;
   }
@@ -128,16 +134,16 @@ Scope {
     const active = connection;
     if (!boundary || !active?.ready || !boundary.policy.context.current()) return;
     // Leave the boundary busy until its own endpoint acknowledges it.
-    if (boundary.dispatched) return;
-    boundary.dispatched = true;
+    if (boundary.connection) return;
     const life = _lifetime;
-    active.requestJson("POST", boundary.path, boundary.payload, function(data) {
+    const accepted = active.requestJson("POST", boundary.path, boundary.payload, function(data) {
       if (!life.alive || root.pendingBoundary !== boundary) return;
       root.pendingBoundary = null;
       if (!data) return;
       active.acceptState(data.state || data);
       root.flushModel();
     }, boundary.policy.context);
+    if (accepted) boundary.connection = active;
   }
   function ensureBridge(context) {
     context = context || pluginApi?.settingsContext;
