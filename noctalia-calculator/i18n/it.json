@@ -12,7 +12,7 @@
     "subtitle": "Calcolo rapido nella barra"
   },
   "settings": {
-    "shared-effect": "Precision and the bar value display apply to this instance. All views share the current calculation; entering, clearing or evaluating changes that shared calculation.",
+    "shared-effect": "La precisione e la visualizzazione del valore nella barra si applicano a questa istanza. Tutte le viste condividono il calcolo corrente; inserire, cancellare o valutare un'espressione modifica il calcolo condiviso.",
     "about": "Informazioni",
     "show-bar": "Mostra valore nella barra",
     "show-bar-desc": "Visualizza il valore corrente accanto all'icona della calcolatrice",

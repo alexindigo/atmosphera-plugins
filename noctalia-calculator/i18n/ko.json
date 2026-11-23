@@ -12,7 +12,7 @@
     "subtitle": "바에서 빠른 계산"
   },
   "settings": {
-    "shared-effect": "Precision and the bar value display apply to this instance. All views share the current calculation; entering, clearing or evaluating changes that shared calculation.",
+    "shared-effect": "정밀도와 바의 값 표시는 이 인스턴스에만 적용됩니다. 모든 보기가 현재 계산을 공유하므로 식을 입력하거나 지우거나 계산하면 공유된 계산이 바뀝니다.",
     "about": "정보",
     "show-bar": "바에 값 표시",
     "show-bar-desc": "계산기 아이콘 옆에 현재 값을 표시합니다",

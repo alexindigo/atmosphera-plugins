@@ -1682,7 +1682,7 @@
       "author": "pir0c0pter0",
       "description": "Theme-aware calculator plugin for Noctalia on Niri with bar widget, floating panel and keyboard support",
       "license": "MIT",
-      "version": "1.1.10",
+      "version": "1.1.11",
       "tags": [
         "Bar",
         "Panel",
