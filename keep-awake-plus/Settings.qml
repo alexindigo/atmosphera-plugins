@@ -84,7 +84,7 @@ ColumnLayout {
       to: 240
       stepSize: 5
       value: root.quickExtendMinutes
-      onValueModified: value => root.quickExtendMinutesField.set(value)
+      requestValue: value => root.quickExtendMinutesField.set(value)
     }
   }
 

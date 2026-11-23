@@ -1063,7 +1063,7 @@
       "author": "Noam Stolero",
       "description": "Duration+scope Keep Awake with persistent last-choice and partial/full inhibit modes.",
       "license": "MIT",
-      "version": "0.3.6",
+      "version": "0.3.7",
       "tags": [
         "Bar",
         "Panel",
