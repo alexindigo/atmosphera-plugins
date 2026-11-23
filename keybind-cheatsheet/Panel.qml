@@ -38,7 +38,7 @@ Item {
     id: loadingTimeoutTimer
     interval: 4000
     repeat: false
-    running: false
+    running: root.isLoading
     onTriggered: {
       if (root.isLoading) {
         root.loadingTimedOut = true;
@@ -48,11 +48,8 @@ Item {
 
   Component.onCompleted: {
     categories = processCategories(rawCategories);
-    // Start timeout timer if we have no data yet
-    if (root.isLoading) {
-      loadingTimeoutTimer.start();
-    }
   }
+  onIsLoadingChanged: loadingTimedOut = false
 
 
   // Dynamic column items (up to 4 columns)
@@ -69,7 +66,6 @@ Item {
   Component.onDestruction: {
     // Stop timer to prevent firing after destruction
     columnUpdateDebounce.stop();
-    loadingTimeoutTimer.stop();
 
     // Clear column items
     columnItems = [];
@@ -178,7 +174,8 @@ Item {
   readonly property int workspaceSplitThreshold: cfg.workspaceSplitThreshold ?? defaults.workspaceSplitThreshold ?? 12
 
   // Data is loaded by Main.qml, we just display it
-  property bool isLoading: rawCategories.length === 0
+  readonly property string parseStatus: settingsConsumer?.parseStatus ?? "loading"
+  readonly property bool isLoading: rawCategories.length === 0 && parseStatus === "loading"
 
   function calculateDynamicHeight() {
     // If auto height is disabled, use manual height (but still respect screen limit)
@@ -244,6 +241,12 @@ Item {
         // Title section (centered)
         Item { Layout.fillWidth: true }
 
+        NText {
+          visible: root.parseStatus === "failed" && root.rawCategories.length > 0
+          text: root.pluginApi?.tr("panel.refresh-failed")
+          color: AtmoColor.mError
+        }
+
         AtmoIcon {
           icon: "keyboard"
           pointSize: Style.fontSizeM
@@ -297,8 +300,10 @@ Item {
     NText {
       id: loadingText
       anchors.centerIn: parent
-      text: root.loadingTimedOut ? root.pluginApi?.tr("panel.loading-timeout") : root.pluginApi?.tr("panel.loading")
-      visible: root.isLoading
+      text: root.pluginApi?.tr(root.parseStatus === "failed" ? "panel.refresh-failed"
+                      : root.loadingTimedOut ? "panel.loading-timeout"
+                      : root.isLoading ? "panel.loading" : "panel.no-binds")
+      visible: root.rawCategories.length === 0
       font.pointSize: Style.fontSizeL
       color: AtmoColor.mOnSurface
     }

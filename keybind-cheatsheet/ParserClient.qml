@@ -14,6 +14,8 @@ Item {
   // Only parser inputs invalidate a result. Colors and column policy are views.
   readonly property string sourceKey: JSON.stringify([compositor, cfg.niriConfigPath, cfg.hyprlandConfigPath, cfg.hyprlandLuaConfigPath, cfg.hyprlandParserMode, cfg.mangoConfigPath, cfg.modKeyVariable, cfg.showUndescribedBinds, cfg.mergeSequentialBinds, cfg.bindOverrides])
   property var categories: []
+  property string parseStatus: "loading"
+  property string _activeSource: ""
   property int cheatsheetDataVersion: 0
   property bool constructed: false
   property var worker: null
@@ -28,24 +30,44 @@ Item {
   function replaceParser(useCache) {
     if (!constructed || retired) return;
     releaseWorker();
-    categories = [];
-    if (!current) return;
-    if (useCache && publishCache && pluginApi.state?.cheatsheetSource === sourceKey) {
-      categories = pluginApi.state.cheatsheetData ?? [];
-      cheatsheetDataVersion++;
-      return;
-    }
     const source = sourceKey;
+    if (_activeSource !== source) {
+      _activeSource = source;
+      categories = [];
+    }
+    if (!current) return;
+    if (useCache && publishCache) {
+      const state = pluginApi.state;
+      if (state?.cheatsheetSource === source && state.cheatsheetData?.length > 0) {
+        categories = state.cheatsheetData;
+        parseStatus = "ready";
+        cheatsheetDataVersion++;
+        return;
+      }
+      // Legacy rows and compositor must come from the same document. A
+      // compositor match admits display only, never source-qualified reuse.
+      if (!state?.cheatsheetSource) {
+        for (const cache of [state, cfg]) {
+          if (cache?.detectedCompositor === compositor && cache.cheatsheetData?.length > 0) {
+            categories = cache.cheatsheetData;
+            break;
+          }
+        }
+      }
+    }
+    parseStatus = "loading";
     const generation = parserFactory.createObject(root, {
       pluginApi: pluginApi, cfg: cfg, compositor: compositor,
       isCurrent: function() { return root.current && !root.retired && root.sourceKey === source; }
     });
     worker = generation;
-    generation.finished.connect(function(data) {
+    generation.finished.connect(function(status, data) {
       if (!root.current || root.retired || root.sourceKey !== source || root.worker !== generation) return;
-      root.categories = data;
+      root.parseStatus = status;
+      if (status === "ready" || (root.categories.length === 0 && data?.length > 0))
+        root.categories = data;
       root.cheatsheetDataVersion++;
-      if (root.publishCache) root.publishCache(source, data, root.compositor);
+      if (status === "ready" && root.publishCache) root.publishCache(source, data, root.compositor);
     });
     generation.runParser();
   }

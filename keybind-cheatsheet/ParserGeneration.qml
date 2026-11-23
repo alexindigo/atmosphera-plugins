@@ -14,7 +14,8 @@ Item {
   required property var isCurrent
   property bool active: true
   readonly property bool current: active && isCurrent()
-  signal finished(var data)
+  signal finished(string status, var data)
+  property string primaryFile: ""
   function getCurrentCompositor() { return compositor; }
 
   // Get user-friendly message for unsupported compositors
@@ -102,11 +103,9 @@ Item {
     // Detect compositor using CompositorService
     var compositorName = getCurrentCompositor();
     if (compositor !== "hyprland" && compositor !== "niri" && compositor !== "mango") {
-      isCurrentlyParsing = false;
-
       Logger.w("KeybindCheatsheet", "Unsupported compositor:", compositorName);
       var unsupportedMsg = getUnsupportedCompositorMessage(compositorName);
-      saveToDb([{
+      settle("unsupported", [{
         "title": pluginApi?.tr("error.unsupported-compositor"),
         "binds": [
           { "keys": compositorName.toUpperCase(), "desc": unsupportedMsg.short },
@@ -118,9 +117,8 @@ Item {
 
     var homeDir = Quickshell.env("HOME");
     if (!homeDir) {
-      isCurrentlyParsing = false;
       Logger.e("KeybindCheatsheet", "Cannot resolve $HOME environment variable");
-      saveToDb([{
+      settle("failed", [{
         "title": "ERROR",
         "binds": [{ "keys": "ERROR", "desc": "Cannot get $HOME" }]
       }]);
@@ -158,6 +156,7 @@ Item {
     }
 
     filePath = filePath.replace(/^~/, homeDir);
+    primaryFile = filePath;
     filesToParse = [filePath];
 
     if (compositor === "niri") {
@@ -188,7 +187,7 @@ Item {
     if (!current) return;
     if (parseDepthCounter >= maxParseDepth) {
       Logger.w("KeybindCheatsheet", "Niri parser hit max recursion depth (" + maxParseDepth + "), aborting");
-      isCurrentlyParsing = false;
+      settle("failed", []);
       clearParsingData();
       return;
     }
@@ -267,6 +266,7 @@ Item {
 
     onSettled: (exitCode, exitStatus) => {
       if (!root.current) return;
+      if (root.primaryReadFailed(currentFilePath, exitCode, exitStatus)) return;
       if (exitCode === 0 && root.currentLines.length > 0) {
         // First pass: find includes (Bug 1: skip commented-out lines)
         for (var i = 0; i < root.currentLines.length; i++) {
@@ -505,8 +505,7 @@ Item {
       categories = mergeSequentialBindsInCategories(categories);
     }
 
-    saveToDb(categories);
-    isCurrentlyParsing = false;
+    settle("ready", categories);
     clearParsingData();
   }
 
@@ -631,6 +630,7 @@ Item {
 
   function startHyprlandConfTor() {
     if (!current) return;
+    primaryFile = hyprConfPath;
     filesToParse = [hyprConfPath];
     parseNextHyprlandFile();
   }
@@ -764,11 +764,10 @@ Item {
       if (exitCode !== 0 || root.hyprctlChunks.length === 0) {
         Logger.e("keybind-cheatsheet", "hyprctl binds -j failed (exit " + exitCode + ")");
         root.hyprctlChunks = [];
-        root.saveToDb([{
+        root.settle("failed", [{
           "title": root.pluginApi?.tr("error.unsupported-compositor"),
           "binds": [{ "keys": "hyprctl", "desc": root.pluginApi?.tr("error.hyprctl-failed") }]
         }]);
-        root.isCurrentlyParsing = false;
         root.clearParsingData();
         return;
       }
@@ -778,9 +777,16 @@ Item {
         binds = JSON.parse(root.hyprctlChunks.join("\n"));
       } catch (e) {
         Logger.e("keybind-cheatsheet", "hyprctl JSON parse failed: " + e);
-        binds = [];
+        root.settle("failed", []);
+        root.clearParsingData();
+        return;
       }
       root.hyprctlChunks = [];
+      if (!Array.isArray(binds)) {
+        root.settle("failed", []);
+        root.clearParsingData();
+        return;
+      }
       root.buildCategoriesFromHyprctl(binds);
     }
   }
@@ -889,8 +895,7 @@ Item {
     // skipped it, so the toggle had no effect for Hyprland (hyprctl-sourced) binds.
     if (cfg.mergeSequentialBinds ?? true)
       categories = mergeSequentialBindsInCategories(categories);
-    saveToDb(categories);
-    isCurrentlyParsing = false;
+    settle("ready", categories);
     clearParsingData();
   }
 
@@ -899,18 +904,14 @@ Item {
     if (!current) return;
     if (parseDepthCounter >= maxParseDepth) {
       Logger.w("KeybindCheatsheet", "Hyprland parser hit max recursion depth (" + maxParseDepth + "), aborting");
-      isCurrentlyParsing = false;
+      settle("failed", []);
       clearParsingData();
       return;
     }
     parseDepthCounter++;
 
     if (filesToParse.length === 0) {
-      if (accumulatedLines.length > 0) {
-        parseHyprlandConfig(accumulatedLines.join("\n"));
-      } else {
-        isCurrentlyParsing = false;
-      }
+      parseHyprlandConfig(accumulatedLines.join("\n"));
       return;
     }
 
@@ -982,6 +983,7 @@ Item {
 
     onSettled: (exitCode, exitStatus) => {
       if (!root.current) return;
+      if (root.primaryReadFailed(currentFilePath, exitCode, exitStatus)) return;
       if (exitCode === 0 && root.currentLines.length > 0) {
         for (var i = 0; i < root.currentLines.length; i++) {
           var line = root.currentLines[i];
@@ -1116,8 +1118,7 @@ Item {
       categories = mergeSequentialBindsInCategories(categories);
     }
 
-    saveToDb(categories);
-    isCurrentlyParsing = false;
+    settle("ready", categories);
     clearParsingData();
   }
 
@@ -1309,8 +1310,20 @@ Item {
     return "Other";
   }
 
-  function saveToDb(data) {
-    if (current) finished(data);
+  function settle(status, data) {
+    if (!current || !isCurrentlyParsing) return;
+    isCurrentlyParsing = false;
+    finished(status, data);
+  }
+
+  // Included files can be optional. Failure to read the selected primary
+  // source is never a successful empty result.
+  function primaryReadFailed(path, exitCode, exitStatus) {
+    if (path !== primaryFile || (exitCode === 0 && exitStatus === 0)) return false;
+    Logger.w("KeybindCheatsheet", "Cannot read parser source", path);
+    settle("failed", []);
+    clearParsingData();
+    return true;
   }
 
   // ========== MANGO LOOKUP TABLES ==========
@@ -1363,7 +1376,7 @@ Item {
     if (!current) return;
     if (parseDepthCounter >= maxParseDepth) {
       Logger.w("KeybindCheatsheet", "Mango parser hit max recursion depth (" + maxParseDepth + "), aborting");
-      isCurrentlyParsing = false;
+      settle("failed", []);
       clearParsingData();
       return;
     }
@@ -1442,6 +1455,7 @@ Item {
 
     onSettled: (exitCode, exitStatus) => {
       if (!root.current) return;
+      if (root.primaryReadFailed(currentFilePath, exitCode, exitStatus)) return;
       if (exitCode === 0 && root.currentLines.length > 0) {
         // First pass: find source/source-optional includes
         for (var i = 0; i < root.currentLines.length; i++) {
@@ -1601,8 +1615,7 @@ Item {
       Logger.w("KeybindCheatsheet", "Mango parser produced no binds; check config path and bind= directives");
     }
 
-    saveToDb(categories);
-    isCurrentlyParsing = false;
+    settle("ready", categories);
     clearParsingData();
   }
 

@@ -86,6 +86,13 @@ ColumnLayout {
     patch[key] = value;
     return pluginApi.previewSettings(patch);
   }
+  function _resetPreview(keys) {
+    // Attach the selected native draft without writing a fallback value.
+    // Reset owns the removal; the preview only presents that same draft.
+    if (pluginApi?.previewSettings({}))
+      return pluginApi.resetFields(keys);
+    return false;
+  }
 
   // Edit-copy properties for non-preview settings (window, layout, parsing, paths)
   readonly property int editWindowWidth: root.windowWidthField?.value ?? 1400
@@ -1184,22 +1191,18 @@ ColumnLayout {
                 textFallback: root.valueKeyLabelColor
                 clipboardHex: root.clipboardHex
                 onBgPicked: c => {
-                  root.keyColorSuperField.set(c.toString());
                   root._applyPreview("keyColorSuper", c.toString());
                 }
                 onTextPicked: c => {
-                  root.keyTextSuperField.set(c.toString());
                   root._applyPreview("keyTextSuper", c.toString());
                 }
                 onBgPasted: hex => {
-                  root.keyColorSuperField.set(hex);
                   root._applyPreview("keyColorSuper", hex);
                 }
                 onTextPasted: hex => {
-                  root.keyTextSuperField.set(hex);
                   root._applyPreview("keyTextSuper", hex);
                 }
-                onResetRequested: pluginApi.resetFields(["keyColorSuper", "keyTextSuper"])
+                onResetRequested: root._resetPreview(["keyColorSuper", "keyTextSuper"])
               }
             }
           }
@@ -1219,22 +1222,18 @@ ColumnLayout {
                 textFallback: root.valueKeyLabelColor
                 clipboardHex: root.clipboardHex
                 onBgPicked: c => {
-                  root.keyColorCtrlField.set(c.toString());
                   root._applyPreview("keyColorCtrl", c.toString());
                 }
                 onTextPicked: c => {
-                  root.keyTextCtrlField.set(c.toString());
                   root._applyPreview("keyTextCtrl", c.toString());
                 }
                 onBgPasted: hex => {
-                  root.keyColorCtrlField.set(hex);
                   root._applyPreview("keyColorCtrl", hex);
                 }
                 onTextPasted: hex => {
-                  root.keyTextCtrlField.set(hex);
                   root._applyPreview("keyTextCtrl", hex);
                 }
-                onResetRequested: pluginApi.resetFields(["keyColorCtrl", "keyTextCtrl"])
+                onResetRequested: root._resetPreview(["keyColorCtrl", "keyTextCtrl"])
               }
             }
           }
@@ -1254,22 +1253,18 @@ ColumnLayout {
                 textFallback: root.valueKeyLabelColor
                 clipboardHex: root.clipboardHex
                 onBgPicked: c => {
-                  root.keyColorShiftField.set(c.toString());
                   root._applyPreview("keyColorShift", c.toString());
                 }
                 onTextPicked: c => {
-                  root.keyTextShiftField.set(c.toString());
                   root._applyPreview("keyTextShift", c.toString());
                 }
                 onBgPasted: hex => {
-                  root.keyColorShiftField.set(hex);
                   root._applyPreview("keyColorShift", hex);
                 }
                 onTextPasted: hex => {
-                  root.keyTextShiftField.set(hex);
                   root._applyPreview("keyTextShift", hex);
                 }
-                onResetRequested: pluginApi.resetFields(["keyColorShift", "keyTextShift"])
+                onResetRequested: root._resetPreview(["keyColorShift", "keyTextShift"])
               }
             }
           }
@@ -1289,22 +1284,18 @@ ColumnLayout {
                 textFallback: root.valueKeyLabelColor
                 clipboardHex: root.clipboardHex
                 onBgPicked: c => {
-                  root.keyColorAltField.set(c.toString());
                   root._applyPreview("keyColorAlt", c.toString());
                 }
                 onTextPicked: c => {
-                  root.keyTextAltField.set(c.toString());
                   root._applyPreview("keyTextAlt", c.toString());
                 }
                 onBgPasted: hex => {
-                  root.keyColorAltField.set(hex);
                   root._applyPreview("keyColorAlt", hex);
                 }
                 onTextPasted: hex => {
-                  root.keyTextAltField.set(hex);
                   root._applyPreview("keyTextAlt", hex);
                 }
-                onResetRequested: pluginApi.resetFields(["keyColorAlt", "keyTextAlt"])
+                onResetRequested: root._resetPreview(["keyColorAlt", "keyTextAlt"])
               }
             }
           }
@@ -1338,26 +1329,21 @@ ColumnLayout {
                   textFallback: root.valueKeyLabelColor
                   clipboardHex: root.clipboardHex
                   onBgPicked: c => {
-                    root.keyColorMod3Field.set(c.toString());
                     root._applyPreview("keyColorMod3", c.toString());
                   }
                   onTextPicked: c => {
-                    root.keyTextMod3Field.set(c.toString());
                     root._applyPreview("keyTextMod3", c.toString());
                   }
                   onBgPasted: hex => {
-                    root.keyColorMod3Field.set(hex);
                     root._applyPreview("keyColorMod3", hex);
                   }
                   onTextPasted: hex => {
-                    root.keyTextMod3Field.set(hex);
                     root._applyPreview("keyTextMod3", hex);
                   }
                   onLabelEdited: t => {
-                    root.keyLabelMod3Field.set(t);
                     root._applyPreview("keyLabelMod3", t);
                   }
-                  onResetRequested: pluginApi.resetFields(["keyColorMod3", "keyTextMod3", "keyLabelMod3"])
+                  onResetRequested: root._resetPreview(["keyColorMod3", "keyTextMod3", "keyLabelMod3"])
                 }
               }
             }
@@ -1382,26 +1368,21 @@ ColumnLayout {
                   textFallback: root.valueKeyLabelColor
                   clipboardHex: root.clipboardHex
                   onBgPicked: c => {
-                    root.keyColorMod2Field.set(c.toString());
                     root._applyPreview("keyColorMod2", c.toString());
                   }
                   onTextPicked: c => {
-                    root.keyTextMod2Field.set(c.toString());
                     root._applyPreview("keyTextMod2", c.toString());
                   }
                   onBgPasted: hex => {
-                    root.keyColorMod2Field.set(hex);
                     root._applyPreview("keyColorMod2", hex);
                   }
                   onTextPasted: hex => {
-                    root.keyTextMod2Field.set(hex);
                     root._applyPreview("keyTextMod2", hex);
                   }
                   onLabelEdited: t => {
-                    root.keyLabelMod2Field.set(t);
                     root._applyPreview("keyLabelMod2", t);
                   }
-                  onResetRequested: pluginApi.resetFields(["keyColorMod2", "keyTextMod2", "keyLabelMod2"])
+                  onResetRequested: root._resetPreview(["keyColorMod2", "keyTextMod2", "keyLabelMod2"])
                 }
               }
             }
@@ -1426,26 +1407,21 @@ ColumnLayout {
                   textFallback: root.valueKeyLabelColor
                   clipboardHex: root.clipboardHex
                   onBgPicked: c => {
-                    root.keyColorMod5Field.set(c.toString());
                     root._applyPreview("keyColorMod5", c.toString());
                   }
                   onTextPicked: c => {
-                    root.keyTextMod5Field.set(c.toString());
                     root._applyPreview("keyTextMod5", c.toString());
                   }
                   onBgPasted: hex => {
-                    root.keyColorMod5Field.set(hex);
                     root._applyPreview("keyColorMod5", hex);
                   }
                   onTextPasted: hex => {
-                    root.keyTextMod5Field.set(hex);
                     root._applyPreview("keyTextMod5", hex);
                   }
                   onLabelEdited: t => {
-                    root.keyLabelMod5Field.set(t);
                     root._applyPreview("keyLabelMod5", t);
                   }
-                  onResetRequested: pluginApi.resetFields(["keyColorMod5", "keyTextMod5", "keyLabelMod5"])
+                  onResetRequested: root._resetPreview(["keyColorMod5", "keyTextMod5", "keyLabelMod5"])
                 }
               }
             }
@@ -1466,22 +1442,18 @@ ColumnLayout {
                 textFallback: root.valueKeyLabelColor
                 clipboardHex: root.clipboardHex
                 onBgPicked: c => {
-                  root.keyColorXF86Field.set(c.toString());
                   root._applyPreview("keyColorXF86", c.toString());
                 }
                 onTextPicked: c => {
-                  root.keyTextXF86Field.set(c.toString());
                   root._applyPreview("keyTextXF86", c.toString());
                 }
                 onBgPasted: hex => {
-                  root.keyColorXF86Field.set(hex);
                   root._applyPreview("keyColorXF86", hex);
                 }
                 onTextPasted: hex => {
-                  root.keyTextXF86Field.set(hex);
                   root._applyPreview("keyTextXF86", hex);
                 }
-                onResetRequested: pluginApi.resetFields(["keyColorXF86", "keyTextXF86"])
+                onResetRequested: root._resetPreview(["keyColorXF86", "keyTextXF86"])
               }
             }
           }
@@ -1501,22 +1473,18 @@ ColumnLayout {
                 textFallback: root.valueKeyLabelColor
                 clipboardHex: root.clipboardHex
                 onBgPicked: c => {
-                  root.keyColorPrintField.set(c.toString());
                   root._applyPreview("keyColorPrint", c.toString());
                 }
                 onTextPicked: c => {
-                  root.keyTextPrintField.set(c.toString());
                   root._applyPreview("keyTextPrint", c.toString());
                 }
                 onBgPasted: hex => {
-                  root.keyColorPrintField.set(hex);
                   root._applyPreview("keyColorPrint", hex);
                 }
                 onTextPasted: hex => {
-                  root.keyTextPrintField.set(hex);
                   root._applyPreview("keyTextPrint", hex);
                 }
-                onResetRequested: pluginApi.resetFields(["keyColorPrint", "keyTextPrint"])
+                onResetRequested: root._resetPreview(["keyColorPrint", "keyTextPrint"])
               }
             }
           }
@@ -1536,22 +1504,18 @@ ColumnLayout {
                 textFallback: root.valueKeyLabelColor
                 clipboardHex: root.clipboardHex
                 onBgPicked: c => {
-                  root.keyColorNumericField.set(c.toString());
                   root._applyPreview("keyColorNumeric", c.toString());
                 }
                 onTextPicked: c => {
-                  root.keyTextNumericField.set(c.toString());
                   root._applyPreview("keyTextNumeric", c.toString());
                 }
                 onBgPasted: hex => {
-                  root.keyColorNumericField.set(hex);
                   root._applyPreview("keyColorNumeric", hex);
                 }
                 onTextPasted: hex => {
-                  root.keyTextNumericField.set(hex);
                   root._applyPreview("keyTextNumeric", hex);
                 }
-                onResetRequested: pluginApi.resetFields(["keyColorNumeric", "keyTextNumeric"])
+                onResetRequested: root._resetPreview(["keyColorNumeric", "keyTextNumeric"])
               }
             }
           }
@@ -1571,22 +1535,18 @@ ColumnLayout {
                 textFallback: root.valueKeyLabelColor
                 clipboardHex: root.clipboardHex
                 onBgPicked: c => {
-                  root.keyColorMouseField.set(c.toString());
                   root._applyPreview("keyColorMouse", c.toString());
                 }
                 onTextPicked: c => {
-                  root.keyTextMouseField.set(c.toString());
                   root._applyPreview("keyTextMouse", c.toString());
                 }
                 onBgPasted: hex => {
-                  root.keyColorMouseField.set(hex);
                   root._applyPreview("keyColorMouse", hex);
                 }
                 onTextPasted: hex => {
-                  root.keyTextMouseField.set(hex);
                   root._applyPreview("keyTextMouse", hex);
                 }
-                onResetRequested: pluginApi.resetFields(["keyColorMouse", "keyTextMouse"])
+                onResetRequested: root._resetPreview(["keyColorMouse", "keyTextMouse"])
               }
             }
           }
@@ -1606,22 +1566,18 @@ ColumnLayout {
                 textFallback: root.valueKeyLabelColor
                 clipboardHex: root.clipboardHex
                 onBgPicked: c => {
-                  root.keyColorDefaultField.set(c.toString());
                   root._applyPreview("keyColorDefault", c.toString());
                 }
                 onTextPicked: c => {
-                  root.keyTextDefaultField.set(c.toString());
                   root._applyPreview("keyTextDefault", c.toString());
                 }
                 onBgPasted: hex => {
-                  root.keyColorDefaultField.set(hex);
                   root._applyPreview("keyColorDefault", hex);
                 }
                 onTextPasted: hex => {
-                  root.keyTextDefaultField.set(hex);
                   root._applyPreview("keyTextDefault", hex);
                 }
-                onResetRequested: pluginApi.resetFields(["keyColorDefault", "keyTextDefault"])
+                onResetRequested: root._resetPreview(["keyColorDefault", "keyTextDefault"])
               }
             }
           }
@@ -1640,14 +1596,12 @@ ColumnLayout {
               textFallback: AtmoColor.mOnSurface
               clipboardHex: root.clipboardHex
               onTextPicked: c => {
-                root.descriptionTextColorField.set(c.toString());
                 root._applyPreview("descriptionTextColor", c.toString());
               }
               onTextPasted: hex => {
-                root.descriptionTextColorField.set(hex);
                 root._applyPreview("descriptionTextColor", hex);
               }
-              onResetRequested: pluginApi.resetFields(["descriptionTextColor"])
+              onResetRequested: root._resetPreview(["descriptionTextColor"])
             }
           }
 
@@ -1663,7 +1617,7 @@ ColumnLayout {
             text: pluginApi?.tr("settings.reset-all-colors")
             icon: "rotate"
             // One multi-field Reset: every color leaf reveals its inherited value.
-            onClicked: pluginApi.resetFields(["descriptionTextColor", "keyColorAlt", "keyColorCtrl", "keyColorDefault", "keyColorMod2", "keyColorMod3", "keyColorMod5", "keyColorMouse", "keyColorNumeric", "keyColorPrint", "keyColorShift", "keyColorSuper", "keyColorXF86", "keyLabelColor", "keyLabelMod2", "keyLabelMod3", "keyLabelMod5", "keyTextAlt",
+            onClicked: root._resetPreview(["descriptionTextColor", "keyColorAlt", "keyColorCtrl", "keyColorDefault", "keyColorMod2", "keyColorMod3", "keyColorMod5", "keyColorMouse", "keyColorNumeric", "keyColorPrint", "keyColorShift", "keyColorSuper", "keyColorXF86", "keyLabelColor", "keyLabelMod2", "keyLabelMod3", "keyLabelMod5", "keyTextAlt",
                                               "keyTextCtrl", "keyTextDefault", "keyTextMod2", "keyTextMod3", "keyTextMod5", "keyTextMouse", "keyTextNumeric", "keyTextPrint", "keyTextShift", "keyTextSuper", "keyTextXF86"])
           }
         }

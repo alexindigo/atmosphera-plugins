@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import Quickshell
+import Quickshell.Io
 import qs.Commons
 import qs.Services.Plugins
 import qs.Widgets
@@ -22,6 +23,8 @@ ShellRoot {
   property var manifest: JSON.parse(Quickshell.env("KEYBIND_CACHE_MANIFEST"))
   property int parserVersion: 0
   property string legacyData: ""
+  readonly property string startup: Quickshell.env("KEYBIND_CACHE_STARTUP")
+  readonly property string sourcePath: Quickshell.env("KEYBIND_CACHE_SOURCE")
   function check(ok, label) { if (!ok) throw new Error("KEYBIND_CACHE_ASSERT: " + phase + " " + label); }
   function create(file, properties) {
     var component = Qt.createComponent("file://" + Registry.getPluginDir("keybind-cheatsheet") + "/" + file);
@@ -71,6 +74,10 @@ ShellRoot {
           main = create("Main.qml", {pluginApi: api});
           api.mainInstance = main;
           panel = create("Panel.qml", {pluginApi: api});
+          if (startup) {
+            phase = "startup";
+            return;
+          }
           if (Quickshell.env("KEYBIND_CACHE_COLD") === "1") {
             phase = "cold";
             return;
@@ -81,8 +88,27 @@ ShellRoot {
       });
     });
   }
+  function refreshPanel() {
+    var button = find(panel, item => item.icon === "refresh" && typeof item.clicked === "function");
+    check(!!button, "actual Panel Refresh");
+    button.clicked();
+  }
   function drive() {
-    if (phase === "warm-ready" && main.settingsConsumer && main.settingsConsumer.worker && !main.settingsConsumer.worker.isCurrentlyParsing) {
+    var client = main?.settingsConsumer;
+    if (phase === "startup") {
+      if (startup === "empty") {
+        check(!!client?.worker, "matching empty state must still launch a parser");
+        if (client.worker.isCurrentlyParsing) return;
+        check(JSON.stringify(panel.rawCategories).includes("Run: fixture-command"), "empty startup cache replaced by actual parsed binds");
+      } else {
+        if (client?.worker?.isCurrentlyParsing) return;
+        check(JSON.stringify(panel.rawCategories).includes("unqualified legacy") === (startup === "legacy-match"), "only matching legacy rows reach the shared Panel");
+        check(!api.state.cheatsheetSource, "failed parse must not stamp source provenance");
+        check(client.parseStatus === "failed" && !panel.isLoading, "missing source settles to a retryable failure");
+      }
+      console.log("KEYBIND_CACHE: STARTUP_PASS " + startup);
+      Qt.exit(0);
+    } else if (phase === "warm-ready" && client?.worker && !client.worker.isCurrentlyParsing) {
       check(popup.openPluginSettings(manifest, "settings"), "actual shared page opens");
       phase = "first";
     } else if (phase === "first" && popup.opened && popup.settingsPage) {
@@ -118,8 +144,19 @@ ShellRoot {
       check(JSON.stringify(api.pluginSettings.cheatsheetData) === legacyData, "derived cache never mutates preference input");
       check(api.pluginSettings.detectedCompositor === "", "detected compositor stays out of preference input");
       check(JSON.stringify(api.state.cheatsheetData).includes("Run: fixture-command"), "shared cache belongs to state owner");
-      popup.requestClose();
       console.log("KEYBIND_CACHE: SAVED_PASS");
+      popup.requestClose();
+      Qt.exit(0);
+    } else if (phase === "refresh-failed" && !client.worker?.isCurrentlyParsing) {
+      check(client.parseStatus === "failed" && !panel.isLoading, "failed refresh settles without returning to Loading");
+      check(JSON.stringify(panel.rawCategories).includes("Run: fixture-command"), "failed refresh preserves actual Panel rows");
+      check(JSON.stringify(api.state.cheatsheetData).includes("Run: fixture-command"), "failed refresh does not overwrite state");
+      phase = "source-back";
+      moveSource.command = ["mv", "--", sourcePath + ".held", sourcePath];
+      moveSource.running = true;
+    } else if (phase === "refresh-retried" && !client.worker?.isCurrentlyParsing) {
+      check(client.parseStatus === "ready" && JSON.stringify(panel.rawCategories).includes("Run: fixture-command"), "retry settles with rendered binds");
+      console.log("KEYBIND_CACHE: REFRESH_PASS");
       Qt.exit(0);
     } else if (phase === "cold") {
       check(main.settingsConsumer && main.settingsConsumer.worker === null, "cold startup selected the existing cache without launching the parser");
@@ -127,8 +164,25 @@ ShellRoot {
       check(JSON.stringify(panel.rawCategories).includes("Run: fixture-command"), "cold state cache reaches actual Panel");
       check(api.state.detectedCompositor === "niri", "cold compositor state");
       check(main.cheatsheetDataVersion === 1 && api.state.cheatsheetSource === main.settingsConsumer.sourceKey, "cold consumer did not need a parser refresh");
+      if (Quickshell.env("KEYBIND_CACHE_REFRESH") === "1") {
+        phase = "source-away";
+        moveSource.command = ["mv", "--", sourcePath, sourcePath + ".held"];
+        moveSource.running = true;
+        return;
+      }
       console.log("KEYBIND_CACHE: COLD_PASS");
       Qt.exit(0);
+    }
+  }
+  Process {
+    id: moveSource
+    onExited: (code, status) => {
+      try {
+        root.check(code === 0, "move owned fixture source");
+        root.phase = root.phase === "source-away" ? "refresh-failed" : "refresh-retried";
+        root.refreshPanel();
+        root.check(JSON.stringify(root.panel.rawCategories).includes("Run: fixture-command"), "same-source Refresh must not clear visible rows");
+      } catch (error) { console.error(String(error)); Qt.exit(2); }
     }
   }
   FloatingWindow {
