@@ -1502,7 +1502,7 @@
       "author": "nZO",
       "description": "Connect to VPN via NetworkManager",
       "license": "MIT",
-      "version": "1.3.6",
+      "version": "1.3.7",
       "tags": [
         "Bar",
         "Panel",

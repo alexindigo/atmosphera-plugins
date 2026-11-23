@@ -25,6 +25,16 @@ ColumnLayout {
 
   property string pendingDeleteUuid: ""
   property string pendingDeleteName: ""
+  property bool deleteBusy: false
+  onPendingDeleteUuidChanged: deleteBusy = false
+
+  function confirmRemoval() {
+    const result = main?.removeConnection(pendingDeleteUuid, pluginApi?.runtimeContext);
+    deleteBusy = result === "busy";
+    if (result !== "accepted") return;
+    pendingDeleteUuid = "";
+    pendingDeleteName = "";
+  }
 
   readonly property var displayModeModel: [
     {
@@ -136,6 +146,14 @@ ColumnLayout {
         Layout.leftMargin: Style.marginXS
       }
 
+      NText {
+        Layout.fillWidth: true
+        visible: root.deleteBusy
+        text: root.pluginApi?.tr("common.actionBusy") ?? ""
+        wrapMode: Text.WordWrap
+        color: AtmoColor.mOnSurfaceVariant
+      }
+
       Repeater {
         model: root.vpnList
 
@@ -218,11 +236,7 @@ ColumnLayout {
                 fontSize: Style.fontSizeXS
                 backgroundColor: AtmoColor.mError
                 outlined: false
-                onClicked: {
-                  main.removeConnection(root.pendingDeleteUuid, pluginApi.runtimeContext);
-                  root.pendingDeleteUuid = "";
-                  root.pendingDeleteName = "";
-                }
+                onClicked: root.confirmRemoval()
               }
 
               NButton {

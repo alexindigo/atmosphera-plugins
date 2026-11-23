@@ -19,6 +19,13 @@ Item {
   readonly property var inactiveList: vpnList.filter(v => !v.connected && !v.isLoading)
   property real contentPreferredWidth: Math.round(500 * Style.uiScaleRatio)
   property real contentPreferredHeight: Math.min(500, mainColumn.implicitHeight + Style.marginL * 2)
+  property bool actionBusy: false
+
+  function requestConnection(uuid, connect) {
+    const context = pluginApi?.settingsContext;
+    const result = connect ? main?.connectTo(uuid, context) : main?.disconnectFrom(uuid, context);
+    actionBusy = result === "busy";
+  }
 
   Component.onCompleted: {
     if (main)
@@ -35,6 +42,14 @@ Item {
       anchors.fill: parent
       anchors.margins: Style.marginL
       spacing: Style.marginM
+
+      NText {
+        Layout.fillWidth: true
+        visible: root.actionBusy
+        text: root.pluginApi?.tr("common.actionBusy") ?? ""
+        wrapMode: Text.WordWrap
+        color: AtmoColor.mOnSurfaceVariant
+      }
 
       // HEADER
       NBox {
@@ -127,11 +142,7 @@ Item {
                   type: modelData.type
                   isConnected: true
                   isLoading: modelData.isLoading
-                  onButtonClicked: {
-                    if (!main)
-                      return;
-                    main.disconnectFrom(modelData.uuid, pluginApi.settingsContext);
-                  }
+                  onButtonClicked: root.requestConnection(modelData.uuid, false)
                 }
               }
             }
@@ -168,11 +179,7 @@ Item {
                   type: modelData.type
                   isConnected: false
                   isLoading: modelData.isLoading
-                  onButtonClicked: {
-                    if (!main)
-                      return;
-                    main.connectTo(modelData.uuid, pluginApi.settingsContext);
-                  }
+                  onButtonClicked: root.requestConnection(modelData.uuid, true)
                 }
               }
             }

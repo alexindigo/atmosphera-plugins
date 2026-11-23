@@ -26,6 +26,7 @@
     "disableToastNotificationsDescription": "Do not show toast notifications when a VPN connects or disconnects"
   },
   "common": {
+    "actionBusy": "That VPN action is already running. Try again when it finishes.",
     "vpn": "VPN",
     "refresh": "Refresh",
     "connected": "Connected",

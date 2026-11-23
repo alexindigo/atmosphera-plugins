@@ -192,8 +192,8 @@ QtObject {
 
   function connectTo(uuid, context) {
     const policy = capturePolicy(context);
-    if (!policy || _connectProc.running)
-      return false;
+    if (!policy) return "stale";
+    if (_connectProc.running) return "busy";
     _connectProc.actionPolicy = policy;
     const p = Object.assign({}, _pending);
     p[uuid] = "connect";
@@ -212,12 +212,13 @@ QtObject {
     _connectProc.targetName = name;
     _connectProc.targetUuid = uuid;
     _connectProc.running = true;
+    return "accepted";
   }
 
   function disconnectFrom(uuid, context) {
     const policy = capturePolicy(context);
-    if (!policy || _disconnectProc.running)
-      return false;
+    if (!policy) return "stale";
+    if (_disconnectProc.running) return "busy";
     _disconnectProc.actionPolicy = policy;
     const p = Object.assign({}, _pending);
     p[uuid] = "disconnect";
@@ -236,6 +237,7 @@ QtObject {
     _disconnectProc.targetName = name;
     _disconnectProc.targetUuid = uuid;
     _disconnectProc.running = true;
+    return "accepted";
   }
 
   function addConnection(type) {
@@ -254,8 +256,8 @@ QtObject {
 
   function removeConnection(uuid, context) {
     const policy = capturePolicy(context);
-    if (!policy || _removeProc.running)
-      return false;
+    if (!policy) return "stale";
+    if (_removeProc.running) return "busy";
     _removeProc.actionPolicy = policy;
     const vpn = vpnList.find(v => {
       return v.uuid === uuid;
@@ -263,6 +265,7 @@ QtObject {
     _removeProc.targetName = vpn ? vpn.name : uuid;
     _removeProc.targetUuid = uuid;
     _removeProc.running = true;
+    return "accepted";
   }
 
   Component.onCompleted: {
