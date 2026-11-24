@@ -11,7 +11,7 @@
     "settings": "Widget ayarları"
   },
   "settings": {
-    "shared-effect": "All instances control one keyboard. Apply, Recheck or a widget action selects the applied backend and binary for that shared keyboard; another configuration can replace it. Display and availability follow this instance.",
+    "shared-effect": "Tüm örnekler aynı klavyeyi denetler. Uygula, Yeniden Denetle veya bir araç takımı eylemi, paylaşılan klavye için kullanılacak arka ucu ve çalıştırılabilir dosyayı seçer; başka bir yapılandırma bu seçimi değiştirebilir. Görünüm ve kullanılabilirlik bu örneğe bağlıdır.",
     "backend": {
       "label": "Backend",
       "desc": "Hangi ekran klavyesini kontrol edeceğini seçin: auto, squeekboard veya wvkbd (auto başlangıçta otomatik algılar)",

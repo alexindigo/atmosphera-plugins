@@ -11,7 +11,7 @@
     "settings": "Mîhengên widgetê"
   },
   "settings": {
-    "shared-effect": "All instances control one keyboard. Apply, Recheck or a widget action selects the applied backend and binary for that shared keyboard; another configuration can replace it. Display and availability follow this instance.",
+    "shared-effect": "Hemû mînak heman klavyeyê kontrol dikin. Sepandin, Dîsa kontrol bike an çalakiyek widgetê pergala paşîn û bernameya cîbicîkirinê ji bo vê klavyeya hevpar hilbijêre; mîhengek din dikare vê hilbijartinê biguherîne. Nîşandan û berdestbûn li gorî vê mînakê ne.",
     "backend": {
       "label": "Backend",
       "desc": "Kîjan klavyeya ekranê kontrol bike: auto, squeekboard, an jî wvkbd (auto di destpêkê de xweser tespît dike)",

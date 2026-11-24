@@ -11,7 +11,7 @@
     "settings": "Widget beállítások"
   },
   "settings": {
-    "shared-effect": "All instances control one keyboard. Apply, Recheck or a widget action selects the applied backend and binary for that shared keyboard; another configuration can replace it. Display and availability follow this instance.",
+    "shared-effect": "Minden példány ugyanazt a billentyűzetet vezérli. Az Alkalmazás, az Újraellenőrzés vagy a widget egy művelete kiválasztja a közös billentyűzet háttérrendszerét és futtatható programját; egy másik konfiguráció felülírhatja ezt a választást. A megjelenítés és az elérhetőség ezt a példányt követi.",
     "backend": {
       "label": "Backend",
       "desc": "Melyik képernyő-billentyűzetet irányítsa: auto, squeekboard vagy wvkbd (az auto indításkor automatikusan felismeri)",

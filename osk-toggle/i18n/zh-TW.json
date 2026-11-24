@@ -11,7 +11,7 @@
     "settings": "小工具設定"
   },
   "settings": {
-    "shared-effect": "All instances control one keyboard. Apply, Recheck or a widget action selects the applied backend and binary for that shared keyboard; another configuration can replace it. Display and availability follow this instance.",
+    "shared-effect": "所有執行個體都控制同一個鍵盤。「套用」、「重新檢查」或小工具操作會為共用鍵盤選擇生效的後端和執行檔；其他設定可以取代此選擇。顯示與可用性依此執行個體而定。",
     "backend": {
       "label": "後端",
       "desc": "要控制哪個螢幕鍵盤：auto、squeekboard 或 wvkbd（auto 在啟動時自動偵測）",

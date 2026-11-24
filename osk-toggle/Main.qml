@@ -22,6 +22,7 @@ Item {
     property bool _constructed: false
     property bool _retired: false
     property var _settingsConsumers: new Map()
+    property bool _observeSqueekboard: false
 
     // Compatibility observations remain the one physical keyboard's state.
     property bool keyboardActive: _backend?.keyboardActive ?? false
@@ -32,7 +33,47 @@ Item {
     onWvkbdBinChanged: _resolveBackend()
     onPolicyCurrentChanged: _resolveBackend()
     Component.onCompleted: { _constructed = true; _resolveBackend(); }
-    Component.onDestruction: { _retired = true; autoDetect.running = false; _backend?.retire(); }
+    Component.onDestruction: { _retired = true; _observeSqueekboard = false; autoDetect.running = false; _backend?.retire(); }
+
+    // Read-only capability sampling is shared by inactive consumers. It never
+    // selects a policy, creates a backend, or changes keyboard state.
+    readonly property bool _sampleSqueekboard: _observeSqueekboard && resolvedBackend !== "squeekboard"
+    property bool _sampledBusOk: false
+    property bool _sampledGsettingsOk: false
+    readonly property bool _squeekboardBusOk: resolvedBackend === "squeekboard" ? (_backend?.squeekboardOk ?? false) : _sampledBusOk
+    readonly property bool _squeekboardGsettingsOk: resolvedBackend === "squeekboard" ? (_backend?.gsettingsOk ?? false) : _sampledGsettingsOk
+
+    function _updateSqueekboardInterest() {
+        _observeSqueekboard = !_retired && Array.from(_settingsConsumers.values()).some(client => client.observesSqueekboard);
+    }
+
+    on_SampleSqueekboardChanged: {
+        if (_sampleSqueekboard) return;
+        passiveBus.running = false;
+        passiveGsettings.running = false;
+        _sampledBusOk = false;
+        _sampledGsettingsOk = false;
+    }
+    Timer {
+        running: root._sampleSqueekboard
+        repeat: true
+        triggeredOnStart: true
+        interval: 2000
+        onTriggered: {
+            if (!passiveBus.running) passiveBus.running = true;
+            if (!passiveGsettings.running) passiveGsettings.running = true;
+        }
+    }
+    Process {
+        id: passiveBus
+        command: ["busctl", "--user", "call", "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "GetNameOwner", "s", "sm.puri.OSK0"]
+        onExited: code => { if (root._sampleSqueekboard) root._sampledBusOk = code === 0; }
+    }
+    Process {
+        id: passiveGsettings
+        command: ["gsettings", "get", "org.gnome.desktop.a11y.applications", "screen-keyboard-enabled"]
+        onExited: code => { if (root._sampleSqueekboard) root._sampledGsettingsOk = code === 0; }
+    }
 
     Component { id: clientFactory; OskSettingsClient {} }
     function settingsConsumerFor(context) {
@@ -44,11 +85,15 @@ Item {
             activePolicy: Qt.binding(function () { return root._loadedRequest === root._request && root._request?.context === context; }),
             physicalAvailable: Qt.binding(function () { return root.available; }),
             physicalTooltip: Qt.binding(function () { return root.unavailableTooltipKey; }),
+            busOk: Qt.binding(function () { return root._squeekboardBusOk; }),
+            gsettingsOk: Qt.binding(function () { return root._squeekboardGsettingsOk; }),
             requestToggle: function () { root.toggleKeyboard(context); },
             requestRecheck: function () { root.recheckState(context); },
-            retire: function (retired) { root._settingsConsumers.delete(context); retired.destroy(); }
+            retire: function (retired) { root._settingsConsumers.delete(context); root._updateSqueekboardInterest(); retired.destroy(); }
         });
         _settingsConsumers.set(context, client);
+        client.observesSqueekboardChanged.connect(root._updateSqueekboardInterest);
+        _updateSqueekboardInterest();
         return client;
     }
 

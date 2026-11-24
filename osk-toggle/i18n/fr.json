@@ -11,7 +11,7 @@
     "settings": "Paramètres du widget"
   },
   "settings": {
-    "shared-effect": "All instances control one keyboard. Apply, Recheck or a widget action selects the applied backend and binary for that shared keyboard; another configuration can replace it. Display and availability follow this instance.",
+    "shared-effect": "Toutes les instances contrôlent le même clavier. Appliquer, Vérifier à nouveau ou une action du widget sélectionne le moteur et l’exécutable de ce clavier partagé ; une autre configuration peut remplacer cette sélection. L’affichage et la disponibilité dépendent de cette instance.",
     "backend": {
       "label": "Backend",
       "desc": "Quel clavier virtuel contrôler : auto, squeekboard ou wvkbd (auto détecte au démarrage)",

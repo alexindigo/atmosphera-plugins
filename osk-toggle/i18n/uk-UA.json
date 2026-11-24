@@ -11,7 +11,7 @@
     "settings": "Налаштування віджета"
   },
   "settings": {
-    "shared-effect": "All instances control one keyboard. Apply, Recheck or a widget action selects the applied backend and binary for that shared keyboard; another configuration can replace it. Display and availability follow this instance.",
+    "shared-effect": "Усі екземпляри керують однією клавіатурою. Застосування, повторна перевірка або дія віджета вибирає модуль і виконуваний файл для спільної клавіатури; інша конфігурація може змінити цей вибір. Відображення й доступність залежать від цього екземпляра.",
     "backend": {
       "label": "Бекенд",
       "desc": "Яку екранну клавіатуру використовувати: auto, squeekboard або wvkbd (auto визначає при запуску)",

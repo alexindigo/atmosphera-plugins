@@ -1942,7 +1942,7 @@
       "author": "blackteaextract",
       "description": "Toggle an on-screen keyboard (Squeekboard or wvkbd) with live availability detection, hover icons, and configurable settings. Supersedes squeekboard-toggle.",
       "license": "MIT",
-      "version": "1.0.9",
+      "version": "1.0.10",
       "tags": [
         "System",
         "Bar",

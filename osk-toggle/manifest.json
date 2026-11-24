@@ -1,7 +1,7 @@
 {
   "id": "osk-toggle",
   "name": "OSK Toggle",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "minNoctaliaVersion": "4.4.3",
   "minAtmospheraVersion": "0.10.0",
   "author": "blackteaextract",

@@ -11,7 +11,7 @@
     "settings": "ウィジェット設定"
   },
   "settings": {
-    "shared-effect": "All instances control one keyboard. Apply, Recheck or a widget action selects the applied backend and binary for that shared keyboard; another configuration can replace it. Display and availability follow this instance.",
+    "shared-effect": "すべてのインスタンスが同じキーボードを操作します。適用、再確認、またはウィジェットでの操作により、共有キーボードのバックエンドと実行ファイルが選択されます。この選択は別の設定で置き換えられます。表示と利用可否はこのインスタンスに従います。",
     "backend": {
       "label": "バックエンド",
       "desc": "操作するスクリーンキーボード：auto、squeekboard、または wvkbd（auto は起動時に自動検出）",
