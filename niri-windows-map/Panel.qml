@@ -66,8 +66,13 @@ Item {
   // matched to a live output stream (sticky cache in AudioMap)
   readonly property bool audioIndicators: pluginApi?.pluginSettings?.audioIndicators ?? true
 
+  MapFacade {
+    id: facadeAdapter
+  }
+
   AudioMap {
     id: audioMap
+    windows: facadeAdapter.mapState.windows
     // NOT tied to root.visible: the sticky stream↔window cache must stay
     // warm while the map is closed, or pairs formed during the
     // single-stream era are lost before the map ever opens
@@ -116,6 +121,7 @@ Item {
 
   MapCanvas {
     id: mapCanvas
+    mapFacade: facadeAdapter
     anchors.fill: parent
     anchors.margins: 8
     screen: root.screen

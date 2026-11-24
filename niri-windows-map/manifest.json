@@ -1,10 +1,10 @@
 {
   "id": "niri-windows-map",
   "name": "Niri Windows Map",
-  "version": "1.0.13",
+  "version": "1.0.17",
   "author": "Atmosphera",
   "license": "GPL-3.0",
-  "description": "Spatial overview map of niri windows: workspaces, columns and tiles. Click tiles to focus and rows to switch workspace. Reliable startup focus and drag require the stale-seed shell fix in Atmosphera PR #29.",
+  "description": "Spatial overview map of niri windows and workspaces. Click tiles to focus, click rows to switch, or drag a window to move it.",
   "minAtmospheraVersion": "0.11.0",
   "defaultEnabled": false,
   "tags": [
