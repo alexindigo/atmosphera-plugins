@@ -76,7 +76,7 @@
       "author": "nzlov",
       "description": "Runs a local MCP HTTP service for agents to report session status and shows active sessions in the bar.",
       "license": "MIT",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "tags": [
         "Bar",
         "Panel",
@@ -84,7 +84,7 @@
         "Indicator",
         "AI"
       ],
-      "lastUpdated": "2026-11-21",
+      "lastUpdated": "2026-11-23",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",

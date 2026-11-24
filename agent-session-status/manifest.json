@@ -1,7 +1,7 @@
 {
   "id": "agent-session-status",
   "name": "Agent Session Status",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "minNoctaliaVersion": "4.6.6",
   "minAtmospheraVersion": "0.10.0",
   "author": "nzlov",
