@@ -1793,7 +1793,7 @@
       "author": "maxe",
       "description": "Subscribe to ntfy topics and receive push notifications directly in your bar, with full theming support",
       "license": "MIT",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "tags": [
         "Bar",
         "Panel",

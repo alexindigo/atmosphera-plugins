@@ -26,15 +26,17 @@ Item {
   readonly property string topics: settingsConsumer?.topics ?? ""
   // The pre-existing protected operational leaf retains its one Main writer.
   readonly property var readMessageIds: pluginApi?.pluginSettings?.readMessageIds ?? []
+  readonly property var readMessageIdIndex: new Set(readMessageIds)
   function pollMessages() { settingsConsumer?.pollMessages(); }
   function isMessageRead(messageId) { return settingsConsumer?.isMessageRead(messageId) ?? false; }
   function markAsRead(messageId) { settingsConsumer?.markAsRead(messageId); }
   function markAllAsRead() { settingsConsumer?.markAllAsRead(); }
   function persistReadIds(caller, ids) {
     if (!caller.current || _settingsConsumers.get(caller.settingsContext) !== caller || !pluginApi?.settingsContext.current()) return;
-    var merged = readMessageIds.slice();
-    for (var id of ids) if (merged.indexOf(id) === -1) merged.push(id);
-    pluginApi.pluginSettings.readMessageIds = merged;
+    var merged = new Set(readMessageIdIndex);
+    for (var id of ids) merged.add(id);
+    if (merged.size === readMessageIdIndex.size) return;
+    pluginApi.pluginSettings.readMessageIds = Array.from(merged);
     pluginApi.saveSettings();
   }
   function showToasts(caller, server, incoming) {

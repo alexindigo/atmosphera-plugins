@@ -30,7 +30,7 @@
   },
   "settings": {
     "shared-effect-label": "Shared read status and notifications",
-    "shared-effect": "This instance selects its own server and topics. Read status is shared across instances, and each incoming message shows at most one desktop notification.",
+    "shared-effect": "Diese Instanz wählt ihren eigenen Server und ihre eigenen Themen. Der Lesestatus gilt für alle Instanzen, und für jede eingehende Nachricht wird höchstens eine Desktop-Benachrichtigung angezeigt.",
     "server": {
       "label": "Server-URL",
       "desc": "Die ntfy Server-URL (Standard: https://ntfy.sh)"
