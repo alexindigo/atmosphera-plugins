@@ -299,7 +299,7 @@ ColumnLayout {
       from: 0
       to: 7
       value: root.valueDeviceIndex
-      onValueModified: value => root.deviceIndexField.set(value)
+      requestValue: value => root.deviceIndexField.set(value)
     }
   }
 

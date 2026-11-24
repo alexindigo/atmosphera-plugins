@@ -519,7 +519,7 @@ Item {
                   to: 9999
                   stepSize: 1
                   value: root.editMaxTurns
-                  onValueModified: value => root.set("maxTurns", value)
+                  requestValue: value => root.set("maxTurns", value)
                 }
                 NCheckbox {
                   Layout.fillWidth: true
@@ -640,7 +640,7 @@ Item {
                     to: 1600
                     stepSize: 10
                     value: root.editPanelWidth
-                    onValueModified: value => root.panelWidthField.set(value)
+                    requestValue: value => root.panelWidthField.set(value)
                   }
                 }
                 NPluginSettingsField {
@@ -654,7 +654,7 @@ Item {
                     to: 100
                     stepSize: 1
                     value: root.editPanelHeightPercent
-                    onValueModified: value => root.panelHeightRatioField.set(value / 100)
+                    requestValue: value => root.panelHeightRatioField.set(value / 100)
                   }
                 }
               }

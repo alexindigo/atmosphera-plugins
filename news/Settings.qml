@@ -256,7 +256,7 @@ ColumnLayout {
       to: 1440
       stepSize: 5
       value: refreshIntervalValue
-      onValueModified: value => {
+      requestValue: value => {
         root.refreshIntervalField.set(value);
       }
     }
@@ -270,7 +270,7 @@ ColumnLayout {
       from: 1
       to: 100
       value: maxHeadlinesValue
-      onValueModified: value => {
+      requestValue: value => {
         root.maxHeadlinesField.set(value);
       }
     }
@@ -285,7 +285,7 @@ ColumnLayout {
       to: 1000
       stepSize: 10
       value: widgetWidthValue
-      onValueModified: value => {
+      requestValue: value => {
         root.widgetWidthField.set(value);
       }
     }
@@ -300,7 +300,7 @@ ColumnLayout {
       to: 200
       stepSize: 10
       value: rollingSpeedValue
-      onValueModified: value => {
+      requestValue: value => {
         root.rollingSpeedField.set(value);
       }
     }

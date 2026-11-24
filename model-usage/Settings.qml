@@ -137,7 +137,7 @@ ColumnLayout {
             to: 60
             value: root.editCycleInterval
             stepSize: 1
-            onValueModified: value => root.barCycleIntervalSecField.set(value)
+            requestValue: value => root.barCycleIntervalSecField.set(value)
           }
         }
       }
@@ -209,7 +209,7 @@ ColumnLayout {
             to: 300
             value: root.editRefreshInterval
             stepSize: 5
-            onValueModified: value => root.refreshIntervalSecField.set(value)
+            requestValue: value => root.refreshIntervalSecField.set(value)
           }
         }
       }

@@ -395,7 +395,7 @@ ColumnLayout {
           from: 400
           to: 3840
           stepSize: 50
-          onValueModified: value => {
+          requestValue: value => {
             root.panelWidthField.set(value);
             root._applyPreview("panelWidth", value);
           }
@@ -416,7 +416,7 @@ ColumnLayout {
           from: 0
           to: 2160
           stepSize: 50
-          onValueModified: value => {
+          requestValue: value => {
             root.panelHeightField.set(value);
             root._applyPreview("panelHeight", value);
           }

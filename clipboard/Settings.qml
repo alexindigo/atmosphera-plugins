@@ -59,7 +59,7 @@ ColumnLayout {
       to: 500
       stepSize: 10
       value: root.valueMaxHistorySize
-      onValueModified: value => root.maxHistorySizeField.set(value)
+      requestValue: value => root.maxHistorySizeField.set(value)
     }
   }
 

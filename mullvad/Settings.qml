@@ -62,7 +62,7 @@ ColumnLayout {
       to: 60000
       stepSize: 500
       value: root.refreshInterval
-      onValueModified: value => root.refreshIntervalField.set(value)
+      requestValue: value => root.refreshIntervalField.set(value)
     }
   }
 
@@ -144,7 +144,7 @@ ColumnLayout {
       from: 0
       to: 90
       value: root.expiryWarningDays
-      onValueModified: value => root.expiryWarningDaysField.set(value)
+      requestValue: value => root.expiryWarningDaysField.set(value)
     }
   }
 

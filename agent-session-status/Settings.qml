@@ -59,7 +59,7 @@ ColumnLayout {
       from: 1
       to: 65535
       value: root.editPort
-      onValueModified: value => root.portField.set(value)
+      requestValue: value => root.portField.set(value)
     }
   }
 
@@ -82,7 +82,7 @@ ColumnLayout {
       from: 1
       to: 30
       value: root.editPollIntervalSec
-      onValueModified: value => root.pollIntervalSecField.set(value)
+      requestValue: value => root.pollIntervalSecField.set(value)
     }
   }
 

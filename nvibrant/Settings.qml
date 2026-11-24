@@ -35,7 +35,7 @@ ColumnLayout {
       to: 1023
       stepSize: 64
       value: root.vibranceValueField?.value ?? 512
-      onValueModified: value => root.vibranceValueField.set(value)
+      requestValue: value => root.vibranceValueField.set(value)
     }
   }
 
@@ -60,7 +60,7 @@ ColumnLayout {
       to: 8
       stepSize: 1
       value: root.displayIndexField?.value ?? 1
-      onValueModified: value => root.displayIndexField.set(value)
+      requestValue: value => root.displayIndexField.set(value)
     }
   }
 

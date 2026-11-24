@@ -76,7 +76,7 @@
       "author": "nzlov",
       "description": "Runs a local MCP HTTP service for agents to report session status and shows active sessions in the bar.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Bar",
         "Panel",
@@ -116,7 +116,7 @@
       "author": "Dvaxert",
       "description": "AMD discrete GPU monitoring via rocm-smi with graphs and configurable metrics.",
       "license": "MIT",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "tags": [
         "Bar",
         "Panel",
@@ -290,7 +290,7 @@
       "author": "aslauw",
       "description": "Bar widget showing battery levels for wireless peripherals (mouse, keyboard, headset, etc.) via OpenRazer and Solaar.",
       "license": "MIT",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "tags": [
         "Bar",
         "Indicator",
@@ -401,7 +401,7 @@
       "author": "d7om",
       "description": "Claude Code (Anthropic agentic CLI) with full tool access, permission controls, session management, MCP servers, and device integration",
       "license": "MIT",
-      "version": "0.2.6",
+      "version": "0.2.7",
       "tags": [
         "Bar",
         "Panel",
@@ -420,7 +420,7 @@
       "author": "yanekyuk",
       "description": "Clipboard history panel with search, pinning, and image previews.",
       "license": "MIT",
-      "version": "1.0.12",
+      "version": "1.0.13",
       "tags": [
         "Utility",
         "Bar",
@@ -459,7 +459,7 @@
       "author": "blackbartblues",
       "description": "Advanced clipboard manager with history, search, keyboard navigation, ToDo integration, pinned items, notecards/sticky notes, and selection-to-notecard feature. Fully translated with comprehensive i18n support.",
       "license": "MIT",
-      "version": "2.4.11",
+      "version": "2.4.12",
       "tags": [
         "Utility",
         "Bar",
@@ -791,7 +791,7 @@
       "author": "Thomas Philippo",
       "description": "Monitor your git repositories from the Noctalia bar. See open issues and pull requests at a glance, without leaving your desktop.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Development",
         "Bar",
@@ -901,7 +901,7 @@
       "author": "nomadx, FelipeMayerDev",
       "description": "Native Noctalia status and side-panel interface for Hermes Agent. Supports a client-only mode to drive a Hermes bridge running on a remote server over SSH.",
       "license": "MIT",
-      "version": "1.1.9",
+      "version": "1.1.10",
       "tags": [
         "Bar",
         "Panel",
@@ -921,7 +921,7 @@
       "author": "focky",
       "description": "Use Hermes on a remote server through an interactive SSH terminal.",
       "license": "MIT",
-      "version": "1.0.9",
+      "version": "1.0.10",
       "tags": [
         "Bar",
         "Panel",
@@ -1081,7 +1081,7 @@
       "author": "blacku",
       "description": "Universal keyboard shortcuts keymap that automatically detects and displays keybindings for Hyprland, Niri, or MangoWC compositors.",
       "license": "MIT",
-      "version": "3.7.14",
+      "version": "3.7.15",
       "tags": [
         "Bar",
         "Panel",
@@ -1299,7 +1299,7 @@
       "author": "cmptr",
       "description": "Shows AI coding assistant usage stats in the bar with detail panel (Claude Code, Codex, Copilot, Gemini, OpenRouter, Zen)",
       "license": "MIT",
-      "version": "0.3.9",
+      "version": "0.3.10",
       "tags": [
         "Bar",
         "Productivity",
@@ -1428,7 +1428,7 @@
       "author": "OCSPG",
       "description": "Control Mullvad VPN from the bar: connect/disconnect, pick relays, toggle lockdown mode, multihop and more.",
       "license": "MIT",
-      "version": "0.1.6",
+      "version": "0.1.7",
       "tags": [
         "Bar",
         "Network",
@@ -1520,7 +1520,7 @@
       "author": "LazarH",
       "description": "Display scrolling news headlines from various sources using NewsAPI.org",
       "license": "MIT",
-      "version": "1.2.13",
+      "version": "1.2.14",
       "tags": [
         "Bar",
         "Panel",
@@ -1793,7 +1793,7 @@
       "author": "maxe",
       "description": "Subscribe to ntfy topics and receive push notifications directly in your bar, with full theming support",
       "license": "MIT",
-      "version": "1.0.9",
+      "version": "1.0.10",
       "tags": [
         "Bar",
         "Panel",
@@ -1812,7 +1812,7 @@
       "author": "NoFilterA1",
       "description": "Toggle NVIDIA digital vibrance (color saturation) via nvibrant.",
       "license": "MIT",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "tags": [
         "Bar",
         "System",
@@ -2028,7 +2028,7 @@
       "author": "notprayasmitra",
       "description": "A pomodoro timer plugin to help boost productivity.",
       "license": "MIT",
-      "version": "1.2.6",
+      "version": "1.2.7",
       "tags": [
         "Bar",
         "Productivity"
@@ -2137,7 +2137,7 @@
       "author": "Lokize",
       "description": "Monitor and read RSS/Atom feeds directly from your desktop",
       "license": "MIT",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "tags": [],
       "lastUpdated": "2026-11-20",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
@@ -2390,7 +2390,7 @@
       "author": "suvi",
       "description": "Control spotify_player from a bar widget.",
       "license": "GPL 3.0",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "tags": [
         "Bar",
         "Panel",
@@ -2872,7 +2872,7 @@
       "author": "Lokize",
       "description": "Display time from multiple timezones around the world with automatic rotation.",
       "license": "MIT",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "tags": [],
       "lastUpdated": "2026-11-20",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",

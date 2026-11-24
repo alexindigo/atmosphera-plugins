@@ -274,7 +274,7 @@ ColumnLayout {
               to: 65535
               value: root.valueBridgePort
               stepSize: 1
-              onValueModified: value => root.bridgePortField.set(value)
+              requestValue: value => root.bridgePortField.set(value)
             }
           }
         }
@@ -299,7 +299,7 @@ ColumnLayout {
               to: 300
               value: root.valueStatusPollIntervalSec
               stepSize: 5
-              onValueModified: value => root.statusPollIntervalSecField.set(value)
+              requestValue: value => root.statusPollIntervalSecField.set(value)
             }
           }
         }

@@ -54,7 +54,7 @@ ColumnLayout {
       description: root.pluginApi?.tr("settings.callback_warning") || ""
       from: 0; to: 65535
       value: root.callbackPortField?.value ?? 8888
-      onValueModified: value => root.callbackPortField.set(value)
+      requestValue: value => root.callbackPortField.set(value)
     }
   }
   NPluginSettingsField {

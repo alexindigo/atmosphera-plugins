@@ -84,7 +84,7 @@ ColumnLayout {
       to: 65535
       stepSize: 1
       value: root.valuePort
-      onValueModified: value => root.portField.set(value)
+      requestValue: value => root.portField.set(value)
     }
   }
 
@@ -97,7 +97,7 @@ ColumnLayout {
       to: 1800
       stepSize: 20
       value: root.valuePanelWidth
-      onValueModified: value => root.panelWidthField.set(value)
+      requestValue: value => root.panelWidthField.set(value)
     }
   }
 
@@ -110,7 +110,7 @@ ColumnLayout {
       to: 1200
       stepSize: 20
       value: root.valuePanelHeight
-      onValueModified: value => root.panelHeightField.set(value)
+      requestValue: value => root.panelHeightField.set(value)
     }
   }
 
@@ -122,7 +122,7 @@ ColumnLayout {
       to: 240
       stepSize: 5
       value: root.valueTerminalCols
-      onValueModified: value => root.terminalColsField.set(value)
+      requestValue: value => root.terminalColsField.set(value)
     }
   }
 
@@ -134,7 +134,7 @@ ColumnLayout {
       to: 80
       stepSize: 1
       value: root.valueTerminalRows
-      onValueModified: value => root.terminalRowsField.set(value)
+      requestValue: value => root.terminalRowsField.set(value)
     }
   }
 
@@ -146,7 +146,7 @@ ColumnLayout {
       to: 20
       stepSize: 1
       value: root.valueTerminalFontSize
-      onValueModified: value => root.terminalFontSizeField.set(value)
+      requestValue: value => root.terminalFontSizeField.set(value)
     }
   }
 

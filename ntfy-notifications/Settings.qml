@@ -155,7 +155,7 @@ ColumnLayout {
       to: 3600
       stepSize: 15
       value: root.editPollInterval
-      onValueModified: value => {
+      requestValue: value => {
         root.pollIntervalField.set(value);
       }
     }
@@ -184,7 +184,7 @@ ColumnLayout {
       to: 500
       stepSize: 10
       value: root.editMaxMessages
-      onValueModified: value => {
+      requestValue: value => {
         root.maxMessagesField.set(value);
       }
     }

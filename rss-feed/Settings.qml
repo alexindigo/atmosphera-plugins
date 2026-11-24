@@ -94,7 +94,7 @@ ColumnLayout {
           from: 60
           to: 3600
           value: updateInterval
-          onValueModified: value => {
+          requestValue: value => {
             root.updateIntervalField.set(value);
           }
         }
@@ -126,7 +126,7 @@ ColumnLayout {
         from: 5
         to: 50
         value: maxItemsPerFeed
-        onValueModified: value => {
+        requestValue: value => {
           root.maxItemsPerFeedField.set(value);
         }
       }

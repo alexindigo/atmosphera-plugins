@@ -553,7 +553,7 @@ ColumnLayout {
                 from: 4
                 to: 50
                 stepSize: 1
-                onValueModified: value => {
+                requestValue: value => {
                   root.workspaceSplitThresholdField.set(value);
                 }
               }

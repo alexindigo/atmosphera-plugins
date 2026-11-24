@@ -60,7 +60,7 @@ ColumnLayout {
         to: 180
         stepSize: 5
         value: root.editWorkDuration
-        onValueModified: value => {
+        requestValue: value => {
           if (value !== root.editWorkDuration)
             root.workDurationField.set(value);
         }
@@ -86,7 +86,7 @@ ColumnLayout {
         to: 60
         stepSize: 1
         value: root.editShortBreakDuration
-        onValueModified: value => {
+        requestValue: value => {
           if (value !== root.editShortBreakDuration)
             root.shortBreakDurationField.set(value);
         }
@@ -112,7 +112,7 @@ ColumnLayout {
         to: 120
         stepSize: 5
         value: root.editLongBreakDuration
-        onValueModified: value => {
+        requestValue: value => {
           if (value !== root.editLongBreakDuration)
             root.longBreakDurationField.set(value);
         }
@@ -138,7 +138,7 @@ ColumnLayout {
         to: 10
         stepSize: 1
         value: root.editSessionsBeforeLongBreak
-        onValueModified: value => {
+        requestValue: value => {
           if (value !== root.editSessionsBeforeLongBreak)
             root.sessionsBeforeLongBreakField.set(value);
         }

@@ -299,7 +299,7 @@ ColumnLayout {
       stepSize: 10
       suffix: "s"
       value: root.editRefreshInterval
-      onValueModified: value => root.refreshIntervalField.set(value)
+      requestValue: value => root.refreshIntervalField.set(value)
     }
   }
 

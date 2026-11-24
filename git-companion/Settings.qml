@@ -64,7 +64,7 @@ ColumnLayout {
       from: 30
       to: 90
       value: root.interval?.value ?? 60
-      onValueModified: root.interval.set(value)
+      requestValue: value => root.interval.set(value)
     }
   }
   function saveSettings() {

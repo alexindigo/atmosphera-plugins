@@ -304,7 +304,7 @@ ColumnLayout {
           to: 60
           value: root.rotationInterval
           suffix: " s"
-          onValueModified: value => {
+          requestValue: value => {
             root.rotationIntervalField.set(value * 1000);
           }
         }
