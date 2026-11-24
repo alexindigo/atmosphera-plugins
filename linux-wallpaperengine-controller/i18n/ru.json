@@ -103,7 +103,7 @@
     "wallpaperVolume": "Громкость"
   },
   "settings": {
-    "shared-effect": "Wallpaper playback, screen choices, recovery and color effects are shared. Apply or a runtime action selects this instance's playback policy; the startup switch is controlled in plugin Settings.",
+    "shared-effect": "Воспроизведение обоев, выбор экранов, восстановление и цветовые эффекты являются общими. Применение настроек или действие во время работы выбирает правила воспроизведения этого экземпляра. Переключатель запуска находится в настройках плагина.",
     "autoApplyOnStartup": {
       "description": "Если хотя бы для одного экрана настроены обои, автоматически запускать движок при старте",
       "label": "Автоприменение при запуске"

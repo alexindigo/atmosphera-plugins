@@ -581,7 +581,7 @@ ColumnLayout {
               stepSize: 1
               value: root.editWallpaperScanCacheMinutes
               suffix: pluginApi?.tr("settings.units.minutes")
-              onValueModified: value => {
+              requestValue: value => {
                 if (value !== root.editWallpaperScanCacheMinutes)
                   root.wallpaperScanCacheMinutesField.set(value);
               }
@@ -678,7 +678,7 @@ ColumnLayout {
               stepSize: 1
               value: root.editDefaultFps
               suffix: pluginApi?.tr("settings.units.fps")
-              onValueModified: value => {
+              requestValue: value => {
                 if (value !== root.editDefaultFps)
                   root.defaultFpsField.set(value);
               }
@@ -755,7 +755,7 @@ ColumnLayout {
               suffix: pluginApi?.tr("settings.units.percent")
               value: root.editDefaultVolume
               enabled: !root.editDefaultMuted
-              onValueModified: value => {
+              requestValue: value => {
                 if (value !== root.editDefaultVolume)
                   root.defaultVolumeField.set(value);
               }

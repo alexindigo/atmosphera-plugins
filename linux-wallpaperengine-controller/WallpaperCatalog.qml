@@ -35,6 +35,7 @@ Item {
       cachedWallpaperItems = [];
       wallpapersFolderAccessible = false;
       lastWallpaperScanAt = 0;
+      if (showToast) ToastService.showWarning(pluginApi.tr("panel.title"), pluginApi.tr("toast.refreshSkippedNoFolder"));
       return false;
     }
     if (scanner.running) return false;

@@ -437,11 +437,12 @@ Item {
 
   function persistPanelMemory(flushToDisk = false) {
     const next = String(pendingPath || "");
-    if (root.lastPersistedPath === next) {
+    if (!flushToDisk && root.lastPersistedPath === next) {
       return;
     }
-    root.lastPersistedPath = next;
-    mainInstance?.rememberPanelPath(next, flushToDisk);
+    if (mainInstance?.rememberPanelPath(next, flushToDisk)) {
+      root.lastPersistedPath = next;
+    }
   }
 
   function resetPendingToGlobalDefaults() {
