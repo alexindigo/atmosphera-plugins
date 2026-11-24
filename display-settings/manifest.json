@@ -1,9 +1,9 @@
 {
   "id": "display-settings",
   "name": "Display Settings",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "minNoctaliaVersion": "3.6.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "fstanis",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

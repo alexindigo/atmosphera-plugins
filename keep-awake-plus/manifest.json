@@ -1,9 +1,9 @@
 {
   "id": "keep-awake-plus",
   "name": "Keep Awake+",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "minNoctaliaVersion": "3.6.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "Noam Stolero",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

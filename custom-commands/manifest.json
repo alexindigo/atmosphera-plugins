@@ -1,13 +1,13 @@
 {
   "id": "custom-commands",
   "name": "Custom Commands",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Define and run custom shell commands from the launcher",
   "tags": [
     "Launcher"
   ],
   "minNoctaliaVersion": "4.4.1",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "Noctalia Team",
   "official": true,
   "license": "MIT",

@@ -12,9 +12,8 @@ Item {
     id: root
     property var  pluginApi: null
     property var actionPolicy: null
-    property var _shotPolicy: null
+    property var _pendingShot: null
     property var _recordPolicy: null
-    property bool _shotPending: false
     property bool isVisible: false
     function show(screen, policy) {
         if (!policy?.context.current()) return false
@@ -31,6 +30,7 @@ Item {
     }
     function hide() {
         isVisible      = false
+        _pendingShot   = null
         _cameraActive  = false
         _primaryScreen = null
         _cancelCountdown()
@@ -97,14 +97,24 @@ Item {
         }
     }
     function _doScreenshot() {
-        if (!root._imgCapture || root._shotPending || screenshotProc.running || !actionPolicy?.context.current()) return
-        root._shotPolicy = actionPolicy
-        root._shotPending = true
-        root._imgCapture.captureToFile(TempPaths.path("mirror-shot-" + Date.now() + ".png"))
+        const camera = _imgCapture
+        if (!camera || _pendingShot || screenshotProc.running || !actionPolicy?.context.current()) return
+        _pendingShot = {camera: camera, policy: actionPolicy}
+        const id = camera.captureToFile(TempPaths.path("mirror-shot-" + Date.now() + ".png"))
+        if (id < 0) _onImageCaptureError(camera)
     }
-    function _onImageCaptured(tmpPath) {
-        root._shotPending = false
-        const policy = root._shotPolicy
+    function _takePendingShot(camera) {
+        const shot = _pendingShot
+        if (!shot || shot.camera !== camera) return null
+        _pendingShot = null
+        return shot.policy
+    }
+    function _onImageCaptureError(camera) {
+        const policy = _takePendingShot(camera)
+        if (policy?.context.current()) ToastService.showError(pluginApi?.tr("mirror.screenshotFailed"))
+    }
+    function _onImageCaptured(camera, tmpPath) {
+        const policy = _takePendingShot(camera)
         if (!policy?.context.current()) return false
         var home    = Quickshell.env("HOME")
         var dir     = U.screenshotDir(home, policy.settings.screenshotPath)
@@ -112,6 +122,7 @@ Item {
         var filters = []
         if (root.isFlipped) filters.push("hflip")
         if (root.isSquare)  filters.push("crop=min(iw\\,ih):min(iw\\,ih)")
+        screenshotProc.actionPolicy = policy
         screenshotProc.destPath = dir + "/" + file
         screenshotProc.exec({ command: [
             "bash", scriptsDir + "mirror-screenshot.sh",
@@ -120,9 +131,10 @@ Item {
     }
     ToolProcess {
         id: screenshotProc
+        property var actionPolicy: null
         property string destPath: ""
         onExited: (code) => {
-            if (!root._shotPolicy?.context.current()) return
+            if (!actionPolicy?.context.current()) return
             if (code === 0) {
                 if (root._pinOnShot) {
                     var mi = root.pluginApi?.mainInstance
@@ -240,6 +252,7 @@ Item {
                                 root._recorder   = mediaRec
                             }
                             Component.onDestruction: {
+                                root._takePendingShot(imgCap)
                                 if (root._imgCapture === imgCap)   root._imgCapture = null
                                 if (root._recorder   === mediaRec) root._recorder   = null
                             }
@@ -257,11 +270,8 @@ Item {
                                 videoOutput: videoOut
                                 imageCapture: ImageCapture {
                                     id: imgCap
-                                    onImageSaved:    (id, path) => root._onImageCaptured(path)
-                                    onErrorOccurred: (id, err, msg) => {
-                                        root._shotPending = false
-                                        if (root._shotPolicy?.context.current()) ToastService.showError(root.pluginApi?.tr("mirror.screenshotFailed"))
-                                    }
+                                    onImageSaved:    (id, path) => root._onImageCaptured(imgCap, path)
+                                    onErrorOccurred: (id, err, msg) => root._onImageCaptureError(imgCap)
                                 }
                                 recorder: MediaRecorder {
                                     id: mediaRec

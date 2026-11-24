@@ -1,9 +1,9 @@
 {
 	"id": "mullvad",
 	"name": "Mullvad VPN",
-	"version": "0.1.7",
+	"version": "0.1.8",
 	"minNoctaliaVersion": "4.0.0",
-	"minAtmospheraVersion": "0.10.0",
+	"minAtmospheraVersion": "0.11.0",
 	"author": "OCSPG",
 	"license": "MIT",
 	"repository": "https://github.com/noctalia-dev/noctalia-plugins",

@@ -1,9 +1,9 @@
 {
   "id": "openvpn3",
   "name": "OpenVPN3",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "minNoctaliaVersion": "4.4.1",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "minh",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

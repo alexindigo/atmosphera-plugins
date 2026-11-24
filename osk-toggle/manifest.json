@@ -1,9 +1,9 @@
 {
   "id": "osk-toggle",
   "name": "OSK Toggle",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "minNoctaliaVersion": "4.4.3",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "blackteaextract",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

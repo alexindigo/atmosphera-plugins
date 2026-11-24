@@ -16,17 +16,25 @@ Item {
         var client = clientFactory.createObject(root, {
             settingsContext: context,
             translate: function(key) { return root.pluginApi.tr(key); },
-            requestEvents: function() { root.requestEvents(); },
-            retire: function(retired) { root._settingsConsumers.delete(context); retired.destroy(); }
+            requestEvents: function(client, first, last) { root.requestEvents(client, first, last); },
+            retire: function(retired) {
+                CalendarService["clearEventRange"]?.(retired);
+                root._settingsConsumers.delete(context);
+                retired.destroy();
+            }
         });
         _settingsConsumers.set(context, client);
         return client;
     }
     readonly property var settingsConsumer: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
 
-    // CalendarService remains the one provider/cache owner. Coalesce the union
-    // of active projection ranges, never let one view narrow another's request.
-    function requestEvents() {
+    // The service also applies these leases to periodic and native-card loads.
+    function requestEvents(client, first, last) {
+        if (typeof CalendarService["setEventRange"] === "function") {
+            CalendarService["setEventRange"](client, first, last);
+            return;
+        }
+        // Hosts without event-range leases still use the original one-shot API.
         if (_requestQueued) return;
         _requestQueued = true;
         Qt.callLater(function() {
@@ -35,16 +43,18 @@ Item {
             var start = null, end = null;
             for (var client of root._settingsConsumers.values()) {
                 if (!client.current || !client.hasLoadedOnce) continue;
-                var first = new Date(client.weekStart), last = new Date(client.weekEnd);
-                first.setDate(first.getDate() - 7);
-                last.setDate(last.getDate() + 14);
-                if (!start || first < start) start = first;
-                if (!end || last > end) end = last;
+                var range = client.eventRange();
+                if (!start || range.start < start) start = range.start;
+                if (!end || range.end > end) end = range.end;
             }
             if (!start || !end) return;
             var now = new Date();
             CalendarService.loadEvents(Math.max(0, Math.ceil((end - now) / 86400000)), Math.max(0, Math.ceil((now - start) / 86400000)));
         });
+    }
+    Component.onDestruction: {
+        for (const client of _settingsConsumers.values())
+            CalendarService["clearEventRange"]?.(client);
     }
     Connections {
         target: CalendarService
@@ -53,9 +63,11 @@ Item {
                 if (client.current) client.updateEventsFromService();
         }
         function onAvailableChanged() {
-            if (!CalendarService.available) return;
-            for (var client of root._settingsConsumers.values())
-                if (client.current) client.loadEvents();
+            for (var client of root._settingsConsumers.values()) {
+                if (!client.current) continue;
+                if (CalendarService.available) client.loadEvents();
+                else client.updateEventsFromService();
+            }
         }
     }
 

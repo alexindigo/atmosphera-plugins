@@ -1,9 +1,9 @@
 {
     "id": "thinkpad-fan",
     "name": "ThinkPad - Fan & Thermal Control",
-  "version": "1.1.6",
+  "version": "1.1.7",
     "minNoctaliaVersion": "4.0.0",
-    "minAtmospheraVersion": "0.10.0",
+    "minAtmospheraVersion": "0.11.0",
     "author": "Piero-93",
     "license": "GPLv3",
     "repository": "https://github.com/noctalia-dev/noctalia-plugins",

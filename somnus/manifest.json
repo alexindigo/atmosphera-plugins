@@ -1,9 +1,9 @@
 {
   "id": "somnus",
   "name": "somnus",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "minNoctaliaVersion": "4.7.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "yhordi45",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

@@ -1,9 +1,9 @@
 {
   "id": "update-count",
   "name": "Update Count",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "minNoctaliaVersion": "3.6.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "BukoMoon",
   "license": "GPLv3",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

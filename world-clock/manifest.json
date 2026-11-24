@@ -1,9 +1,9 @@
 {
   "id": "world-clock",
   "name": "World Clock",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "minNoctaliaVersion": "3.6.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "Lokize",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

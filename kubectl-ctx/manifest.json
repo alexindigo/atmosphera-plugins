@@ -1,9 +1,9 @@
 {
   "id": "kubectl-ctx",
   "name": "Kubectl Context",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "minNoctaliaVersion": "4.6.6",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "ultherego",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

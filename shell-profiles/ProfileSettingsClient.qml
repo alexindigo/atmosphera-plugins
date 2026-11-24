@@ -15,7 +15,8 @@ Item {
   required property var validate
   required property bool isBusy
   readonly property bool current: settingsContext.current()
-  readonly property var cfg: settingsContext.settingsView
+  // A listed row can drive destructive actions; it is not a draft preview.
+  readonly property var cfg: settingsContext.appliedSettings
   readonly property string profilesDir: {
     var path = cfg.profilesDir || "";
     if (!path || path.trim() === "") return Settings.configDir + "profiles/";

@@ -1,14 +1,14 @@
 {
   "id": "currency-exchange",
   "name": "Currency Exchange",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Currency conversion utility via launcher and bar widget",
   "tags": [
     "Launcher",
     "Utility"
   ],
   "minNoctaliaVersion": "4.4.1",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "balor",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

@@ -1,7 +1,7 @@
 {
   "id": "obs-control",
   "name": "OBS Control",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "author": "ayagmar",
   "description": "OBS recording, replay, and stream status widget for Noctalia.",
   "tags": [
@@ -20,7 +20,7 @@
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
   "minNoctaliaVersion": "3.6.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "dependencies": {
     "plugins": []
   },

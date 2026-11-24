@@ -1,9 +1,9 @@
 {
 	"id": "noctalia-supergfxctl",
 	"name": "SuperGFX Control",
-	"version": "0.0.10",
+	"version": "0.0.11",
 	"minNoctaliaVersion": "3.8.2",
-	"minAtmospheraVersion": "0.10.0",
+	"minAtmospheraVersion": "0.11.0",
 	"author": "cod3d <cod3ddot@proton.me>",
 	"license": "MIT",
 	"repository": "https://github.com/noctalia-dev/noctalia-plugins",

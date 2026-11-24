@@ -61,8 +61,6 @@ Item {
 
     onCurrentChanged: if (_constructed && !current) {
         clearEventModels()
-        allDayEventsWithLayout = []
-        overlappingEventsData = ({})
         retire(root)
     }
     Component.onCompleted: {
@@ -76,6 +74,13 @@ Item {
 
     function initializePlugin() { loadEvents() }
 
+    function eventRange() {
+        const first = new Date(weekStart), last = new Date(weekEnd)
+        first.setDate(first.getDate() - 7)
+        last.setDate(last.getDate() + 14)
+        return {start: first, end: last}
+    }
+
     // Fetch events
     function loadEvents() {
         if (!current || !CalendarService.available || isLoading) return
@@ -83,17 +88,18 @@ Item {
         isLoading = true
         syncStatus = translate("panel.loading")
         hasLoadedOnce = true
-        requestEvents()
+        const range = eventRange()
+        requestEvents(root, range.start, range.end)
         updateEventsFromService()
     }
 
     function updateEventsFromService() {
         if (!current) return
-        clearEventModels()
-
         if (!CalendarService.available) {
+            clearEventModels()
             syncStatus = translate("panel.no_service")
         } else if (!CalendarService.events?.length) {
+            clearEventModels()
             syncStatus = translate("panel.no_events")
         } else {
             var stats = processCalendarEvents(CalendarService.events)
@@ -144,7 +150,12 @@ Item {
         return {timedCount: timedCount, allDayCount: allDayCount}
     }
 
-    function clearEventModels() { eventsModel.clear(); allDayEventsModel.clear() }
+    function clearEventModels() {
+        eventsModel.clear()
+        allDayEventsModel.clear()
+        calculateAllDayEventLayout()
+        updateOverlappingEvents()
+    }
 
     function processTimedEventIntoArray(eventObj, target) {
         var start = new Date(eventObj.startTime), end = new Date(eventObj.endTime)

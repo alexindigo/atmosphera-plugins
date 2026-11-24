@@ -1,9 +1,9 @@
 {
   "id": "arch-updater",
   "name": "Arch Updater",
-  "version": "2.1.17",
+  "version": "2.1.18",
   "minNoctaliaVersion": "3.6.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "Ast",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

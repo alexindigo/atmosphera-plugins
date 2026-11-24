@@ -1,9 +1,9 @@
 {
   "id": "mpd",
   "name": "MPD",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "minNoctaliaVersion": "3.6.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "Ido Perlmuter",
   "license": "MIT",
   "repository": "https://github.com/ido50/noctalia-mpd",

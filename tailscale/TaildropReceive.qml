@@ -9,15 +9,34 @@ Item {
   required property var completed
   property bool active: true
   property var preScanFiles: []
+  property var pendingStep: null
 
   function current() { return active && request.current(); }
+  function launch(step, command) {
+    pendingStep = step;
+    step.command = command;
+    step.running = true;
+  }
+  function settleStep(step) {
+    if (!current() || pendingStep !== step) return false;
+    pendingStep = null;
+    return true;
+  }
+  function startFailed(step) {
+    // Normal exit settles first; FailedToStart only reports runningChanged.
+    if (!step.running && settleStep(step)) finish({ok: false, output: "", exitCode: -1});
+  }
+  function finish(result) {
+    active = false;
+    completed(root, result);
+  }
   function start() {
     if (!current()) return;
-    preScan.command = ["ls", "-1", request.directory];
-    preScan.running = true;
+    launch(preScan, ["ls", "-1", request.directory]);
   }
   function cancel() {
     active = false;
+    pendingStep = null;
     preScan.running = false;
     receive.running = false;
     postScan.running = false;
@@ -27,33 +46,32 @@ Item {
     id: preScan
     stdout: StdioCollector { id: preOutput }
     stderr: StdioCollector {}
+    onRunningChanged: root.startFailed(preScan)
     onExited: function(code) {
-      if (!root.current()) return;
+      if (!root.settleStep(preScan)) return;
       const text = String(preOutput.text || "").trim();
       root.preScanFiles = code === 0 && text.length > 0 ? text.split("\n") : [];
       Logger.d("Tailscale", "Pre-scan: " + root.preScanFiles.length + " files");
-      receive.command = root.request.mode === "pkexec" ? ["pkexec", "tailscale", "file", "get", root.request.directory] : ["tailscale", "file", "get", root.request.directory];
-      receive.running = true;
+      root.launch(receive, root.request.mode === "pkexec" ? ["pkexec", "tailscale", "file", "get", root.request.directory] : ["tailscale", "file", "get", root.request.directory]);
     }
   }
   Process {
     id: receive
     stdout: StdioCollector { id: receiveOutput }
     stderr: StdioCollector { id: receiveError }
+    onRunningChanged: root.startFailed(receive)
     onStarted: {
       if (!root.current()) return;
       Logger.i("Tailscale", "Taildrop receive started in: " + root.request.directory);
     }
     onExited: function(code) {
-      if (!root.current()) return;
+      if (!root.settleStep(receive)) return;
       if (code === 0) {
-        postScan.command = ["ls", "-1", root.request.directory];
-        postScan.running = true;
+        root.launch(postScan, ["ls", "-1", root.request.directory]);
         Logger.i("Tailscale", "Taildrop receive completed, running post-scan");
       } else {
-        root.active = false;
         const output = (String(receiveError.text || "").trim() + "\n" + String(receiveOutput.text || "").trim()).trim();
-        root.completed(root, {ok: false, output: output, exitCode: code});
+        root.finish({ok: false, output: output, exitCode: code});
       }
     }
   }
@@ -61,15 +79,15 @@ Item {
     id: postScan
     stdout: StdioCollector { id: postOutput }
     stderr: StdioCollector {}
+    onRunningChanged: root.startFailed(postScan)
     onExited: function(code) {
-      if (!root.current()) return;
+      if (!root.settleStep(postScan)) return;
       const text = String(postOutput.text || "").trim();
       const after = code === 0 && text.length > 0 ? text.split("\n") : [];
       const before = {};
       for (const name of root.preScanFiles) before[name] = true;
       const added = after.filter(name => !before[name]);
-      root.active = false;
-      root.completed(root, {ok: true, files: added});
+      root.finish({ok: true, files: added});
     }
   }
 }

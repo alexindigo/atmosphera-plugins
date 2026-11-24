@@ -29,12 +29,7 @@ Item {
     pluginApi?.manifest?.metadata?.defaultSettings?.icon ||
     "bookmark"
 
-  readonly property string profilesDir: {
-    var dir = pluginApi?.pluginSettings?.profilesDir || ""
-    if (!dir || dir.trim() === "")
-      return Settings.configDir + "profiles/"
-    return dir.endsWith("/") ? dir : dir + "/"
-  }
+  readonly property string profilesDir: sharedClient?.profilesDir ?? (Settings.configDir + "profiles/")
 
   readonly property string backupsDir: profilesDir + "_backups/"
 
@@ -61,14 +56,14 @@ Item {
   function _capture(origin) {
     var api = origin === undefined ? pluginApi : origin;
     if (!api || !api.settingsContext || !api.settingsContext.current() || !api.settingsReady) return null;
-    var cfg = api.pluginSettings;
-    var path = cfg.profilesDir || "";
-    if (!path || path.trim() === "") path = Settings.configDir + "profiles/";
-    else if (!path.endsWith("/")) path += "/";
+    var client = settingsConsumerFor(api.settingsContext);
+    if (!client) return null;
+    var cfg = client.cfg;
+    var path = client.profilesDir;
     return {api: api, context: api.settingsContext, directory: path, backups: path + "_backups/",
       backupEnabled: cfg.backupEnabled ?? true, backupCount: Math.max(1, Math.min(20, cfg.backupCount ?? 5)),
       icon: cfg.icon || api.manifest?.metadata?.defaultSettings?.icon || "bookmark", tr: api.tr,
-      lastApplied: settingsConsumerFor(api.settingsContext).lastAppliedProfile};
+      lastApplied: client.lastAppliedProfile};
   }
 
   function _current(request) {

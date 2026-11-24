@@ -1,9 +1,9 @@
 {
   "id": "niri-auto-tile",
   "name": "Auto-Tile",
-  "version": "1.4.9",
+  "version": "1.4.10",
   "minNoctaliaVersion": "4.4.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "pir0c0pter0",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

@@ -1,9 +1,9 @@
 {
   "id": "lyrics-fetch",
   "name": "Lyrics Fetch/Bar Display",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "minNoctaliaVersion": "3.6.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "Pever3ll",
   "license": "GPLv3",
   "description": "Uses MPRIS data to fetch song lyrics from lrclib.net and displays it in the bar.",

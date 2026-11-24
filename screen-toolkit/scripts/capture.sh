@@ -3,8 +3,8 @@ source "$(dirname "${BASH_SOURCE[0]}")/temp-paths.sh"
 # capture.sh <action> [args...]
 #
 # Actions:
-#   annotate-window          — capture the focused Hyprland window with grim
-#                              output: $SCREEN_TOOLKIT_TMPDIR/screen-toolkit-annotate.png
+#   annotate-window <path>   — capture the focused Hyprland window with grim
+#                              output: caller-owned capture path
 #                              stdout: "X,Y WxH" geometry string
 #   pin       <geometry>     — capture a region at 2× scale with grim
 #                              stdout: "/path/to/file.png|WxH"
@@ -32,6 +32,7 @@ _require() {
 case "$ACTION" in
 
   annotate-window)
+    [ -n "${2:-}" ] || exit 1
     _require hyprctl
     _require jq
     _require grim
@@ -41,7 +42,7 @@ case "$ACTION" in
     | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"' 2>/dev/null)
     [ -n "$GEOM" ] \
     || { echo "ERROR: could not parse window geometry" >&2; exit 2; }
-    grim -g "$GEOM" "${SCREEN_TOOLKIT_TMPDIR}/screen-toolkit-annotate.png" 2>/dev/null \
+    grim -g "$GEOM" "$2" 2>/dev/null \
     || { echo "ERROR: grim capture failed" >&2; exit 2; }
     printf '%s\n' "$GEOM"
     ;;

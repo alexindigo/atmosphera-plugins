@@ -367,48 +367,46 @@ function clearPaletteResult() {
     ToolProcess {
         id: annotateProc
         property var actionPolicy: null
+        onRunningChanged: if (!running) root.finishAnnotationCapture(annotateProc, -1, "", null)
         onExited: (code) => {
-            root.isRunning = false
-            const policy = actionPolicy
-            if (!policy?.context.current()) return
-            if (code === 0) {
-                root.activeTool = ""
-                var region = annotateRegionState._pendingRegion
-                var screen = annotateRegionState._pendingScreen
-                annotateRegionState._pendingRegion = ""
-                annotateRegionState._pendingScreen = null
-                policy.api.withCurrentScreen(s => {
-                    if (!policy.context.current()) return
-                    policy.api.closePanel(s)
-                    annotateOverlay.parseAndShow(region, TempPaths.path("screen-toolkit-annotate.png"), screen, policy)
-                })
-            } else {
-                root.activeTool = ""
-                ToastService.showError(pluginApi.tr("messages.capture-failed"))
-            }
+            root.finishAnnotationCapture(annotateProc, code, annotateRegionState._pendingRegion, annotateRegionState._pendingScreen)
         }
     }
     QtObject {
         id: annotateRegionState
         property string _pendingRegion: ""
         property var    _pendingScreen: null
+        property var    worker: null
+    }
+    function startAnnotationCapture(worker, policy, commandForPath) {
+        const path = policy?.context.current() ? annotateOverlay.beginCapture() : ""
+        if (!path) { root.isRunning = false; root.activeTool = ""; return }
+        annotateRegionState.worker = worker
+        worker.actionPolicy = policy
+        worker.exec({command: commandForPath(path)})
+    }
+    function finishAnnotationCapture(worker, code, region, screen) {
+        if (annotateRegionState.worker !== worker) return
+        annotateRegionState.worker = null
+        const policy = worker.actionPolicy
+        annotateOverlay.finishCapture(code === 0 ? region : "", screen, policy)
+        if (code !== 0 && policy?.context.current()) ToastService.showError(pluginApi.tr("messages.capture-failed"))
+        root.activeTool = ""
+        root.isRunning = false
     }
     ToolProcess {
         id: annotateWinProc
         property var actionPolicy: null
         stdout: StdioCollector {}
+        onRunningChanged: if (!running) root.finishAnnotationCapture(annotateWinProc, -1, "", null)
         onExited: (code) => {
-            root.isRunning = false
-            const policy = actionPolicy
-            if (!policy?.context.current()) return
             var geomStr = annotateWinProc.stdout.text.trim()
             if (code !== 0 || geomStr === "") {
-                root.activeTool = ""
-                ToastService.showError(pluginApi.tr("messages.capture-failed"))
+                root.finishAnnotationCapture(annotateWinProc, -1, "", null)
                 return
             }
             var parts = geomStr.split(" ")
-            if (parts.length < 2) { root.activeTool = ""; return }
+            if (parts.length < 2) { root.finishAnnotationCapture(annotateWinProc, -1, "", null); return }
             var xy = parts[0].split(",")
             var wh = parts[1].split("x")
             var gx = parseInt(xy[0]) || 0
@@ -417,12 +415,7 @@ function clearPaletteResult() {
             var gh = parseInt(wh[1]) || 300
             var screen    = root._findScreenForPoint(gx, gy)
             var regionStr = (gx - (screen?.x ?? 0)) + "," + (gy - (screen?.y ?? 0)) + " " + gw + "x" + gh
-            root.activeTool = ""
-            policy.api.withCurrentScreen(s => {
-                if (!policy.context.current()) return
-                policy.api.closePanel(s)
-                annotateOverlay.parseAndShow(regionStr, TempPaths.path("screen-toolkit-annotate.png"), screen, policy)
-            })
+            root.finishAnnotationCapture(annotateWinProc, code, regionStr, screen)
         }
     }
     ToolProcess {
@@ -493,14 +486,10 @@ function clearPaletteResult() {
         property var actionPolicy: null
         interval: 50; repeat: false
         onTriggered: {
-            if (!actionPolicy?.context.current()) { root.isRunning = false; return }
-            annotateProc.actionPolicy = actionPolicy
             var regionStr = root._grimLocalX + "," + root._grimLocalY + " " + root._grimW + "x" + root._grimH
             annotateRegionState._pendingRegion = regionStr
             annotateRegionState._pendingScreen = root._regionScreen
-            annotateProc.exec({ command: ["bash", "-c",
-                "grim -g \"" + root._grimGeometry + "\" " + TempPaths.shellPath("screen-toolkit-annotate.png") + " 2>/dev/null"
-            ]})
+            root.startAnnotationCapture(annotateProc, actionPolicy, path => ["grim", "-g", root._grimGeometry, path])
         }
     }
     Timer {
@@ -508,9 +497,7 @@ function clearPaletteResult() {
         property var actionPolicy: null
         interval: 360; repeat: false
         onTriggered: {
-            if (!actionPolicy?.context.current()) { root.isRunning = false; return }
-            annotateWinProc.actionPolicy = actionPolicy
-            annotateWinProc.exec({ command: [root._scriptsDir + "capture.sh", "annotate-window"] })
+            root.startAnnotationCapture(annotateWinProc, actionPolicy, path => [root._scriptsDir + "capture.sh", "annotate-window", path])
         }
     }
     Timer {
@@ -519,13 +506,8 @@ function clearPaletteResult() {
         interval: 380; repeat: false
         property var targetScreen: null
         onTriggered: {
-            if (!actionPolicy?.context.current()) { root.isRunning = false; return }
-            annotateProc.actionPolicy = actionPolicy
             var name = targetScreen?.name ?? ""
-            annotateProc.exec({ command: name !== ""
-                ? ["grim", "-o", name, TempPaths.path("screen-toolkit-annotate.png")]
-                : ["grim", TempPaths.path("screen-toolkit-annotate.png")]
-            })
+            root.startAnnotationCapture(annotateProc, actionPolicy, path => name !== "" ? ["grim", "-o", name, path] : ["grim", path])
         }
     }
     Timer {
@@ -766,24 +748,6 @@ function clearPaletteResult() {
         detectLangsProc.exec({ command:    ["bash", "-c", "tesseract --list-langs 2>/dev/null | tail -n +2"] })
         detectTransProc.exec({ command:    ["bash", "-c", "which trans 2>/dev/null"] })
         detectRecorderProc.exec({ command: ["bash", "-c", "which wl-screenrec 2>/dev/null || which wf-recorder 2>/dev/null"] })
-    }
-    function annotateScreenshotCmd(overlayTmpFile) {
-        var dir   = U.screenshotDir(root._home, annotateOverlay.actionPolicy?.settings.screenshotPath)
-        var fname = U.buildFilename("annotate", ".png", annotateOverlay.actionPolicy?.settings.filenameFormat)
-        var dest  = dir + "/" + fname
-        return "mkdir -p " + U.shellEscape(dir) + " && " +
-               "magick " + TempPaths.shellPath("screen-toolkit-annotate.png") + " " + U.shellEscape(overlayTmpFile) +
-               " -composite " + U.shellEscape(dest) + " && " +
-               "rm -f " + U.shellEscape(overlayTmpFile) + " && " +
-               "echo " + U.shellEscape(dest)
-    }
-    function annotateScreenshotZoomCmd(imgPath) {
-        var dir   = U.screenshotDir(root._home, annotateOverlay.actionPolicy?.settings.screenshotPath)
-        var fname = U.buildFilename("annotate", ".png", annotateOverlay.actionPolicy?.settings.filenameFormat)
-        var dest  = dir + "/" + fname
-        return "mkdir -p " + U.shellEscape(dir) + " && " +
-               "cp " + U.shellEscape(imgPath) + " " + U.shellEscape(dest) + " && " +
-               "echo " + U.shellEscape(dest)
     }
     IpcHandler {
         target: "plugin:screen-toolkit"

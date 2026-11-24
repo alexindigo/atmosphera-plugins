@@ -18,7 +18,7 @@ Item {
   readonly property string credentialsKey: JSON.stringify([cfg.clientId || "", cfg.clientSecret || "", cfg.callbackPort ?? 8888])
   readonly property string accessToken: cfg.accessToken || ""
   readonly property string playerId: cfg.playerId || ""
-  readonly property bool busy: _authorization !== null || _request !== null || _saving
+  readonly property bool busy: _authorization !== null || callbackServer.running || browser.running || _request !== null || _saving
   readonly property string status: busy ? "pending" : error ? "failed" : accessToken ? "token-available" : "not-authorized"
   property string error: ""
   property string availableDevices: ""
@@ -52,8 +52,9 @@ Item {
     for (var job of jobs) { job.running = false; job.destroy(); }
   }
   function cancel() {
-    ++_generation; _authorization = null; _saving = false;
-    callbackServer.running = false; browser.running = false;
+    ++_generation; _saving = false;
+    clearAuthorization();
+    browser.running = false;
     if (_request) { var request = _request; _request = null; request.onreadystatechange = function() {}; request.abort(); }
     cancelProcesses(); availableDevices = ""; searchResults = []; playlistResults = []; error = "";
   }
@@ -97,11 +98,30 @@ Item {
     _authorization = {input: input, state: state, generation: _generation};
     var redirect = "http://127.0.0.1:" + input.callbackPort + "/callback";
     callbackServer.command = ["python3", api.pluginDir + "/callback_server.py", String(input.callbackPort)];
+    authorizationDeadline.restart();
     callbackServer.running = true;
+    if (!_authorization) return false;
     browser.command = ["xdg-open", "https://accounts.spotify.com/authorize?" + Auth.formEncode({response_type: "code", client_id: input.clientId,
       scope: "user-read-playback-state user-modify-playback-state playlist-read-private", redirect_uri: redirect, state: state})];
+    browser.startedForRequest = false;
     browser.running = true;
     return true;
+  }
+  function clearAuthorization() {
+    _authorization = null;
+    authorizationDeadline.stop();
+    callbackServer.running = false;
+  }
+  function failAuthorization(reason) {
+    if (!_authorization) return;
+    clearAuthorization();
+    browser.running = false;
+    error = reason;
+  }
+  Timer {
+    id: authorizationDeadline
+    interval: 300000
+    onTriggered: root.failAuthorization("callback")
   }
   Process {
     id: callbackServer
@@ -110,18 +130,23 @@ Item {
         var pending = root._authorization;
         if (!pending || pending.generation !== root._generation || !root.accepts(pending.input)) return;
         const [code, state, error] = line.split(":");
-        root._authorization = null; callbackServer.running = false;
+        root.clearAuthorization();
         if (error !== "None" || state !== pending.state || !code || code === "None") { root.error = "callback"; return; }
         root.requestToken(pending.input, {code: code, redirect_uri: "http://127.0.0.1:" + pending.input.callbackPort + "/callback", grant_type: "authorization_code"});
       }
     }
-    onExited: (code, status) => {
-      // SplitParser's final line is delivered before exit. A listener failure
-      // with no accepted callback must end pending UI, not wait forever.
-      if (root._authorization && code !== 0) { root._authorization = null; root.error = "callback"; }
-    }
+    // Quickshell delivers the final stdout line before exited, and only
+    // runningChanged for FailedToStart.
+    onExited: root.failAuthorization("callback")
+    onRunningChanged: if (!running) root.failAuthorization("callback")
   }
-  Process { id: browser; onExited: (code, status) => { if (code !== 0 && root._authorization) { root.cancel(); root.error = "browser"; } } }
+  Process {
+    id: browser
+    property bool startedForRequest: false
+    onStarted: startedForRequest = true
+    onExited: code => { if (code !== 0) root.failAuthorization("browser"); }
+    onRunningChanged: if (!running && !startedForRequest) root.failAuthorization("browser")
+  }
   function requestToken(input, values, after) {
     if (!accepts(input) || _request || _saving) return false;
     var generation = _generation, lifetime = _lifetime;

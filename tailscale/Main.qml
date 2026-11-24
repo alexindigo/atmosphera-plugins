@@ -442,7 +442,9 @@ Item {
   // ─── Taildrop state ──────────────────────────────────────────────────────
 
   // Possible values: "idle", "receiving", "sending", "error"
-  property string taildropState: "idle"
+  readonly property string taildropState: _taildropSendPending ? "sending" : _taildropRequest !== null ? "receiving" : _taildropOutcome
+  property bool _taildropSendPending: false
+  property string _taildropOutcome: "idle"
   property string taildropMessage: ""
 
   readonly property string _homeDir: Quickshell.env("HOME") ?? ""
@@ -477,7 +479,6 @@ Item {
     const operation = _taildropOperation;
     _taildropOperation = null;
     _taildropRequest = null;
-    taildropState = "idle";
     if (operation) { operation.cancel(); operation.destroy(); }
   }
 
@@ -486,13 +487,13 @@ Item {
     _taildropOperation = null;
     _taildropRequest = null;
     if (result.ok) {
-      taildropState = "idle";
+      _taildropOutcome = "idle";
       taildropMessage = "";
       Logger.i("Tailscale", "Taildrop received " + result.files.length + " new file(s)");
       if (result.files.length > 0) ToastService.showNotice(pluginApi?.tr("toast.title"), result.files.join("\n"), "file-download");
       else ToastService.showWarning(pluginApi?.tr("toast.title"), pluginApi?.tr("taildrop.toast.no-files"));
     } else {
-      taildropState = "error";
+      _taildropOutcome = "error";
       const output = result.output;
       const duplicate = output.indexOf("file exists") !== -1 || output.indexOf("refusing to overwrite") !== -1 || /moved 0\/\d+ files/.test(output);
       taildropMessage = duplicate ? pluginApi?.tr("taildrop.error.file-exists") : output || pluginApi?.tr("taildrop.error.unknown");
@@ -508,25 +509,28 @@ Item {
     stderr: StdioCollector {}
 
     onStarted: {
-      root.taildropState = "sending";
-      root.taildropMessage = "";
       Logger.i("Tailscale", "Taildrop send started");
     }
-
+    onRunningChanged: if (!running) root.settleTaildropSend(-1, "")
     onExited: function (exitCode, exitStatus) {
-      var stderr = String(taildropSendProcess.stderr.text || "").trim();
+      root.settleTaildropSend(exitCode, String(stderr.text || "").trim());
+    }
+  }
+
+  function settleTaildropSend(exitCode, diagnostic) {
+      if (!_taildropSendPending) return;
+      _taildropSendPending = false;
       if (exitCode === 0) {
-        root.taildropState = "idle";
+        root._taildropOutcome = "idle";
         root.taildropMessage = "";
         ToastService.showNotice(pluginApi?.tr("toast.title"), pluginApi?.tr("taildrop.toast.sent"), "file-upload");
         Logger.i("Tailscale", "Taildrop send completed successfully");
       } else {
-        root.taildropState = "error";
-        root.taildropMessage = stderr || pluginApi?.tr("taildrop.error.unknown");
+        root._taildropOutcome = "error";
+        root.taildropMessage = diagnostic || pluginApi?.tr("taildrop.error.unknown");
         ToastService.showError(pluginApi?.tr("toast.title"), root.taildropMessage, "file-x");
         Logger.e("Tailscale", "Taildrop send failed (exit " + exitCode + "): " + root.taildropMessage);
       }
-    }
   }
 
   function startTaildropReceive(request) {
@@ -545,12 +549,12 @@ Item {
       Logger.w("Tailscale", "Taildrop is disabled in settings");
       return;
     }
-    if (root._taildropRequest !== null || root.taildropState === "receiving") {
+    if (root._taildropRequest !== null) {
       Logger.w("Tailscale", "Already receiving");
       return;
     }
     root._taildropRequest = captured;
-    root.taildropState = "receiving";
+    root._taildropOutcome = "idle";
     root.taildropMessage = "";
     root._taildropOperation = receiveFactory.createObject(root, {
       request: captured,
@@ -573,7 +577,7 @@ Item {
       Logger.w("Tailscale", "No files to send");
       return;
     }
-    if (root.taildropState === "sending") {
+    if (root._taildropSendPending) {
       Logger.w("Tailscale", "Already sending files");
       return;
     }
@@ -582,6 +586,9 @@ Item {
       cmd.push(files[i]);
     }
     cmd.push(peerTarget);
+    root._taildropSendPending = true;
+    root._taildropOutcome = "idle";
+    root.taildropMessage = "";
     taildropSendProcess.command = cmd;
     taildropSendProcess.running = true;
   }

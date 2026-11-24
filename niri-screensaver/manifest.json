@@ -1,9 +1,9 @@
 {
   "id": "niri-screensaver",
   "name": "Niri Screensaver",
-  "version": "0.8.11",
+  "version": "0.8.12",
   "minNoctaliaVersion": "4.7.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "jfreed-dev",
   "license": "GPL-3.0-only",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

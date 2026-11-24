@@ -24,7 +24,10 @@ echo "=== $(date +%T.%N) invoked pid=$$ args='$*' ==="
 
 LOCKFILE=${SCREENCAST_GIF_LOCKFILE:-/tmp/screencast-gif.lock}
 exec 9>"$LOCKFILE"
-if ! flock -n 9; then
+if [[ ${1:-} == --stop-run ]]; then
+    # Check the expected recording under the same lock as manual toggles.
+    flock 9
+elif ! flock -n 9; then
     echo "  another instance holds lock, exiting"
     exit 0
 fi
@@ -51,8 +54,15 @@ close_extra_fds() {
     done
 }
 
-if [[ -f $PIDFILE ]] && kill -0 "$(awk '{print $1}' "$PIDFILE")" 2>/dev/null; then
-    read -r PID RUNDIR < "$PIDFILE"
+PID= RUNDIR=
+if [[ -f $PIDFILE ]]; then
+    IFS=' ' read -r PID RUNDIR < "$PIDFILE" || true
+fi
+if [[ ${1:-} == --stop-run && ( $PID != "${2:-}" || $RUNDIR != "${3:-}" ) ]]; then
+    exit 0
+fi
+
+if [[ $PID =~ ^[1-9][0-9]*$ && -n $RUNDIR ]] && kill -0 "$PID" 2>/dev/null; then
     echo "  STOP branch, PID=$PID rundir=$RUNDIR"
     rm -f "$PIDFILE"
     flock -u 9
@@ -61,6 +71,14 @@ if [[ -f $PIDFILE ]] && kill -0 "$(awk '{print $1}' "$PIDFILE")" 2>/dev/null; th
     kill -INT "$PID"
     while kill -0 "$PID" 2>/dev/null; do sleep 0.1; done
 
+    # Old in-flight recordings have no policy file. Keep their legacy stop
+    # behavior; every new recording owns its conversion inputs.
+    if [[ -f $RUNDIR/policy ]]; then
+        mapfile -d '' -t policy < "$RUNDIR/policy"
+        (( ${#policy[@]} == 2 )) || exit 1
+        FPS=${policy[0]}
+        OUTDIR=${policy[1]}
+    fi
     notify "Converting to GIF…"
     FRAMES="$RUNDIR/frames"
     mkdir -p "$FRAMES"
@@ -77,6 +95,7 @@ if [[ -f $PIDFILE ]] && kill -0 "$(awk '{print $1}' "$PIDFILE")" 2>/dev/null; th
     ( close_extra_fds; exec wl-copy --type image/gif < "$OUT" )
     notify "GIF in clipboard" "$OUT"
 else
+    [[ ${1:-} != --stop-run ]] || exit 0
     echo "  START branch"
     if [[ -n ${SCREENCAST_GIF_REGION:-} ]]; then
         REGION=$SCREENCAST_GIF_REGION
@@ -99,6 +118,7 @@ else
     RUN_ID=$(date +%s%N)
     RUNDIR="$WORKDIR/$RUN_ID"
     mkdir -p "$RUNDIR" "$OUTDIR"
+    printf '%s\0%s\0' "$FPS" "$OUTDIR" > "$RUNDIR/policy"
 
     # -D / --no-damage: capture every compositor frame, not just damage events.
     # Without this, static regions yield single-frame GIFs because wf-recorder
@@ -110,16 +130,14 @@ else
     ) </dev/null >>"$LOGFILE" 2>&1 &
     PID=$!
     disown
-    echo "$PID $RUNDIR" > "$PIDFILE"
+    printf '%s %s\n' "$PID" "$RUNDIR" > "$PIDFILE"
 
     SELF="$(readlink -f "$0")"
     if (( MAX_SECS > 0 )); then
         (
             close_extra_fds
             sleep "$MAX_SECS"
-            if [[ -f $PIDFILE ]] && [[ "$(awk '{print $1}' "$PIDFILE" 2>/dev/null)" == "$PID" ]] && kill -0 "$PID" 2>/dev/null; then
-                "$SELF"
-            fi
+            exec "$SELF" --stop-run "$PID" "$RUNDIR"
         ) </dev/null >/dev/null 2>&1 &
         disown
     fi

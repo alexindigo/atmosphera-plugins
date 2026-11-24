@@ -1,9 +1,9 @@
 {
   "id": "news",
   "name": "News Bar",
-  "version": "1.2.14",
+  "version": "1.2.15",
   "minNoctaliaVersion": "3.6.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "LazarH",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
