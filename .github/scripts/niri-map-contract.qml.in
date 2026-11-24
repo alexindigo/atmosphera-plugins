@@ -1,0 +1,110 @@
+import QtQuick
+import Quickshell
+import "MapFixture" as Map
+
+ShellRoot {
+  id: root
+  readonly property bool legacy: Quickshell.env("MAP_LEGACY") === "1"
+  readonly property var first: legacy ? 0 : "0"
+  readonly property var second: legacy ? 9007199254740990 : "9007199254740992"
+  readonly property var third: legacy ? 9007199254740991 : "9007199254740993"
+  readonly property var tail: legacy ? 4 : "4"
+  property var calls: []
+  property var checks: []
+
+  function check(name, actual, expected) {
+    checks.push({name, pass: JSON.stringify(actual) === JSON.stringify(expected), actual, expected});
+  }
+  function windows() {
+    const layout = {posInScrollingLayout: [1, 1], tileSize: [320, 240]};
+    return [{id: first, title: "zero", workspaceId: first, layout},
+      {id: second, workspaceId: second, pid: 42, layout},
+      {id: third, workspaceId: second, pid: "43", layout},
+      {id: 9007199254740992, workspaceId: first, layout}];
+  }
+
+  function publish(tailId, occupied, missingSource, missingRow) {
+    const wins = windows().filter(w => !missingSource || w.id !== third);
+    const rows = [{id: first, idx: 1, isFocused: true, activeWindowId: first},
+      {id: second, idx: 2, isFocused: false, activeWindowId: second},
+      {id: tailId, idx: 3, isFocused: false, activeWindowId: legacy ? 0 : null, isOccupied: occupied}];
+    if (missingRow)
+      rows.splice(0, 1);
+    if (legacy) {
+      oldBackend.windows = wins;
+      oldRows.clear();
+      rows.forEach(ws => oldRows.append(ws));
+      oldFacade.workspaceChanged();
+    } else {
+      newFacade.snapshot = {ready: true, windows: wins, workspaces: rows, focusedWindowId: first, focusedWorkspaceId: first};
+    }
+  }
+
+  ListModel { id: oldRows; dynamicRoles: true }
+  QtObject { id: oldBackend; property var windows: [] }
+  QtObject {
+    id: oldFacade
+    property var niriBackend: oldBackend
+    property var workspaces: oldRows
+    property var focusedWindowId: 0
+    signal workspaceChanged
+    signal windowListChanged
+    signal activeWindowChanged
+    function focusWindow(w) { root.calls.push(["focus", w.id]); }
+    function closeWindow(w) { root.calls.push(["close", w.id]); }
+    function switchToWorkspace(w) { root.calls.push(["switch", w.idx]); }
+  }
+  QtObject {
+    id: newFacade
+    property var snapshot: ({ready: false})
+    function focusWindow(w) {root.calls.push(["focus", w.id]);}
+    function closeWindow(w) {root.calls.push(["close", w.id]);}
+    function switchToWorkspace(w) {root.calls.push(["switch", w.id]);}
+    function moveWindowToWorkspace(id, ws, callback, index) {root.calls.push(["move", id, ws, index]);}
+  }
+  Map.MapFacade { id: adapter; facade: root.legacy ? oldFacade : newFacade }
+  Map.MapCanvas {
+    id: canvas
+    mapFacade: adapter
+    width: 500; height: 300
+    browserInfo: ({[String(root.second)]: {host: "first.example"}})
+    terminalInfo: ({[String(root.third)]: {cwd: "~/second"}})
+  }
+  Map.AudioMap { id: audio; windows: adapter.mapState.windows; active: false }
+
+  Component.onCompleted: {
+    if (!legacy)
+      check("not-ready is empty", [adapter.mapState.ready, adapter.mapState.workspaces.length, adapter.mapState.focusedWindowId], [false, 0, null]);
+    publish(tail, false, false, false);
+    check("normalizes zero and preserves distinct ids, rejects unsafe numeric input", adapter.mapState.windows.map(w => w.id), ["0", String(second), String(third)]);
+    check("legacy zero sentinel doesn't mark empty row occupied", adapter.mapState.workspaces.map(w => w.isOccupied), [true, true, false]);
+    check("zero focus and workspace join", [canvas.currentWindowId, canvas.activeWindowId("0")], ["0", "0"]);
+    check("browser/terminal hover joins stay distinct", [canvas.windowInfo[String(second)][0].text, canvas.windowInfo[String(third)][0].text], ["first.example", "~/second"]);
+    check("audio receives the same exact window and PID identities", audio.windows.slice(1).map(w => [w.id, w.pid]), [[String(second), audio._streamPid({properties:{"application.process.id":"42"}})], [String(third), "43"]]);
+    adapter.focusWindow("0"); adapter.closeWindow(String(third)); adapter.switchWorkspace("0");
+    adapter.focusWindow("22"); adapter.closeWindow("22"); adapter.switchWorkspace("22");
+    check("live facade actions use native argument types", calls, [["focus", first], ["close", third], ["switch", legacy ? 1 : "0"]]);
+    check("same row is a no-op", adapter.resolveDrop(String(third), {kind:"row", id:String(second)}), null);
+    const strip = {kind:"trailing"};
+    check("strip initially resolves to the tail", adapter.resolveDrop(String(third), strip).workspace.id, "4");
+    publish(legacy ? 5 : "5", false, false, false);
+    check("stationary strip intent resolves to newly trailing row", adapter.resolveDrop(String(third), strip).workspace.id, "5");
+    publish(tail, true, false, false);
+    check("occupied trailing row cannot accept the drop", adapter.resolveDrop(String(third), strip), null);
+    publish(tail, false, true, false);
+    check("closed source cannot move", adapter.resolveDrop(String(third), strip), null);
+    publish(tail, false, false, true);
+    check("vanished row intent cannot move", adapter.resolveDrop(String(third), {kind:"row", id:"0"}), null);
+    publish(tail, false, false, false);
+    adapter.drop(String(third), {kind:"insert"});
+    if (!legacy) {
+      check("new path uses exact stable IDs and typed insert index", calls[3], ["move", third, tail, 1]);
+      newFacade.snapshot = {ready:true, windows:[], workspaces:[], focusedWindowId:null, focusedWorkspaceId:null};
+      check("empty-ready remains ready", [adapter.mapState.ready, canvas.currentWindowId, canvas.windowInfo], [true, null, {}]);
+    }
+  }
+  Timer {
+    interval: 650; running: true
+    onTriggered: { console.info("MAP_CONTRACT|" + JSON.stringify(root.checks)); Qt.quit(); }
+  }
+}

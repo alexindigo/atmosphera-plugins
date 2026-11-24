@@ -135,20 +135,20 @@ Variants {
       // ── Parallax logic ──
 
       function updateParallax() {
-        var wsId = 1;
+        var position = 1;
         for (var i = 0; i < CompositorService.workspaces.count; i++) {
           var ws = CompositorService.workspaces.get(i);
           if (ws.isActive) {
             if (ws.output === modelData.name || !ws.output) {
-              wsId = ws.id;
+              position = CompositorService.isNiri ? ws.idx : ws.id;
               break;
             }
           }
         }
 
         var factor = root.invertDirection ? 1 : -1;
-        var rawH = (wsId - 1) * root.hParallaxAmount * factor;
-        var rawV = (wsId - 1) * root.vParallaxAmount * factor;
+        var rawH = (position - 1) * root.hParallaxAmount * factor;
+        var rawV = (position - 1) * root.vParallaxAmount * factor;
 
         root.parallaxX = root.enableHorizontal ? rawH : 0;
         root.parallaxY = root.enableVertical ? rawV : 0;

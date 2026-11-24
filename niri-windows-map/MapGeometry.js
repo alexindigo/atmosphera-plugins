@@ -7,17 +7,17 @@ function contains(rect, point) {
 
 function targetAt(point, viewport, phantom, origin, scale, rows, mapWidth) {
   if (contains(phantom, point))
-    return -1;
+    return {kind: "insert"};
   if (!contains(viewport, point) || scale <= 0)
-    return 0;
+    return null;
   var local = {x: (point.x - origin.x) / scale, y: (point.y - origin.y) / scale};
   if (local.x < 0 || local.x >= mapWidth)
-    return 0;
+    return null;
   for (var i = 0; i < rows.length; i++) {
     if (local.y >= rows[i].y && local.y < rows[i].y + rows[i].height)
-      return rows[i].id;
+      return rows[i].trailing ? {kind: "trailing"} : {kind: "row", id: rows[i].id};
   }
-  return 0;
+  return null;
 }
 
 function revealOffset(start, size, viewport, current, extent) {

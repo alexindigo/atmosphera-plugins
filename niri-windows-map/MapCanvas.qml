@@ -1,15 +1,11 @@
-import Niri 1.0
-import Niri 1.0
 import QtQuick
 import "MapGeometry.js" as MapGeometry
 import QtQuick.Effects
 import Quickshell
-import Quickshell.Io
 import qs.Commons
-import qs.Services.Compositor
 import qs.Widgets
 
-// Spatial niri overview map, streaming directly from CompositorService.niriBackend.
+// Spatial niri overview map, rendering the adapter's facade state.
 // Uniform layout model (per NiriWindowsLayout.drawio):
 //  - every workspace row is a monH-tall slot, rows strided contiguously
 //  - row contents (indicator bar + windows) are inset _rowInset px top/bottom,
@@ -38,6 +34,7 @@ Item {
   // Audio attribution: winId -> {node, muted} for sounding windows.
   // Top-left speaker badge + top-right mute/unmute button when present.
   property var audioInfo: ({})
+  required property MapFacade mapFacade
   property bool audioIndicators: true
   // Show the hovered window's identity lines in the reserved info strip
   property bool hoverInfo: true
@@ -78,19 +75,19 @@ Item {
 
   // Emitted when a tile's mute button is clicked (NOT navigation — the
   // panel stays open regardless of hide-on-click)
-  signal muteToggleRequested(int winId)
+  signal muteToggleRequested(string winId)
   // Emitted when a tile's play/pause button is clicked
-  signal playToggleRequested(int winId)
+  signal playToggleRequested(string winId)
 
   // ── Drag-to-move (DragHandler architecture) ──
   // The DragHandler owns the gesture; it takes the point over from the
   // Flickable, so drags and map-panning can't conflict. There is no
   // separate "armed" state: a drag BEGINS at the 300ms hold — at position
   // 0 (ghost at the press point) — and the handler continues it on move.
-  property int _pressWinId: 0  // pressed candidate (also gates the model freeze)
+  property var _pressWinId: null  // pressed candidate (also gates the model freeze)
   property real _pressTime: 0  // press timestamp for the pan-vs-drag decision
   property point _pressStart: Qt.point(0, 0)  // press point in mapContent (ghost's position 0)
-  property int _dragWinId: 0
+  property var _dragWinId: null
   property bool _dragging: false
   on_DraggingChanged: {
     if (!root._dragging)
@@ -104,7 +101,7 @@ Item {
     interval: 300
     repeat: false
     onTriggered: {
-      if (root._pressWinId !== 0) {
+      if (root._pressWinId !== null) {
         root._dragWinId = root._pressWinId;
         root._dragging = true;
       }
@@ -120,10 +117,10 @@ Item {
   property var _activeDragHandler: null
 
   function _cancelDrag() {
-    _pressWinId = 0;
+    _pressWinId = null;
     _activeDragDelegate = null;
     _activeDragHandler = null;
-    _dragWinId = 0;
+    _dragWinId = null;
     _dragging = false;
     pressHoldTimer.stop();
   }
@@ -145,56 +142,20 @@ Item {
   readonly property point _ghostInRoot: Qt.point(_mapOriginInRoot.x + _ghostPos.x * _userScale,
                                                 _mapOriginInRoot.y + _ghostPos.y * _userScale)
   readonly property var _workspaceRows: workspaceOrder().map(function (ws, index) {
-    return {id: ws.id, y: index * (root._monH * root._autoScale + root._rowGap), height: root.workspaceRowHeight(index)};
+    return {id: ws.id, y: index * (root._monH * root._autoScale + root._rowGap), height: root.workspaceRowHeight(index), trailing: index === root._workspaceOrder.length - 1};
   })
 
   // Only visible geometry accepts drops: the fixed phantom or clipped rows.
-  readonly property int _dragTargetWs: {
+  readonly property var _dragTarget: {
     if (!root._dragging)
-      return 0;
+      return null;
     return MapGeometry.targetAt(root._ghostInRoot,
                                 Qt.rect(flick.x, flick.y, flick.width, flick.height),
                                 Qt.rect(0, 0, root.width, root._phantomH),
                                 root._mapOriginInRoot, root._userScale, root._workspaceRows, root.renderedW);
   }
 
-  function _moveWindowToWorkspace(winId, wsId) {
-    var idx = -1;
-    for (var i = 0; i < CompositorService.workspaces.count; i++) {
-      var ws = CompositorService.workspaces.get(i);
-      if (ws.id === wsId) {
-        idx = ws.idx;
-        break;
-      }
-    }
-    if (idx < 0)
-      return;
-    moveWindowProcess.command = ["niri", "msg", "action", "move-window-to-workspace", String(idx), "--window-id", String(winId), "--focus", "false"];
-    moveWindowProcess.running = true;
-  }
-
-  // Emulate "insert workspace above first" (no IPC for it): drop the window
-  // on the trailing empty dynamic workspace, then reorder that workspace to
-  // index 1 — niri's own reorder shifts everything else down. Two focus-free
-  // ops, no window-level cascade (which niri's empty-ws removal breaks).
-  function _insertAboveFirst(winId) {
-    var trail = 1;
-    for (var i = 0; i < CompositorService.workspaces.count; i++) {
-      var ws = CompositorService.workspaces.get(i);
-      if (ws.idx > trail)
-        trail = ws.idx;
-    }
-    insertProcess.command = ["sh", "-c", "niri msg action move-window-to-workspace " + trail + " --window-id " + winId + " --focus false && " + "niri msg action move-workspace-to-index 1 --reference " + trail];
-    insertProcess.running = true;
-  }
-
-  Process {
-    id: insertProcess
-  }
-
-  Process {
-    id: moveWindowProcess
-  }
+  readonly property var _dropMove: mapFacade.resolveDrop(_dragWinId, _dragTarget)
 
   // Emitted only when the user NAVIGATES via the map (tile focus click,
   // workspace-row click, context-menu Focus). Other interactions (context
@@ -202,14 +163,14 @@ Item {
   // the hide-on-click setting keys off this signal.
   signal navigationRequested
   readonly property real _monH: screen ? screen.height : 960
-  // Workspace under the mouse (0 = none) — drives the hover row band.
+  // Workspace under the mouse (null = none) drives the hover row band.
   // _hoverCount tracks how many hover areas currently hold the cursor
   // (tile areas and row areas overlap) so exits can't clear the band while
   // another area still holds it — enter/exit ordering between stacked
   // MouseAreas is not guaranteed.
-  property int hoveredWs: 0
-  // Hovered tile's window id (0 = none) — drives the bottom-row info line
-  property int hoveredWinId: 0
+  property var hoveredWs: null
+  // Hovered tile's window id (null = none) drives the bottom-row info line.
+  property var hoveredWinId: null
   property int _hoverCount: 0
 
   function hoverEnter(wsId) {
@@ -221,7 +182,7 @@ Item {
     _hoverCount--;
     if (_hoverCount <= 0) {
       _hoverCount = 0;
-      hoveredWs = 0;
+      hoveredWs = null;
     }
   }
 
@@ -229,8 +190,9 @@ Item {
   onVisibleChanged: {
     if (!visible) {
       _hoverCount = 0;
-      hoveredWs = 0;
-      hoveredWinId = 0;
+      hoveredWs = null;
+      hoveredWinId = null;
+      _cancelDrag();
     } else {
       Qt.callLater(root._keepCurrentInView);
     }
@@ -281,7 +243,7 @@ Item {
   }
 
   // Hover reads the pre-assembled map — O(1), no hover-time work
-  readonly property var _hoverInfoLines: hoveredWinId !== 0 ? (windowInfo[hoveredWinId] || []) : []
+  readonly property var _hoverInfoLines: hoveredWinId !== null ? (windowInfo[hoveredWinId] || []) : []
 
   // Authoritative "cursor is over the widget" signal — independent of the
   // stacked tile/row MouseAreas (which don't reliably emit every exit, so
@@ -298,7 +260,6 @@ Item {
 
   // Bumped on workspace changes so bindings that read the workspace
   // ListModel imperatively re-evaluate (ListModel reads aren't tracked).
-  property int _wsRev: 0
 
   readonly property real _winGap: Math.max(1, Math.round(_presetRowH / 32)) // stacked tiles
   readonly property real _colGap: Math.max(2, Math.round(_presetRowH / 16)) // columns
@@ -306,27 +267,20 @@ Item {
   readonly property real _barWidth: 4
   readonly property real _leftInset: 12 // 4px bar + 8px gap before the first column
 
-  readonly property var _backend: CompositorService.niriBackend
   // The current window: niri's focused window id (null: none). Window
   // records carry no focus flag; every focus-derived style reads this id.
-  readonly property var currentWindowId: _backend ? _backend.focusedWindowId : null
+  readonly property var currentWindowId: mapFacade.mapState.focusedWindowId
   onCurrentWindowIdChanged: Qt.callLater(root._keepCurrentInView)
   // Pure live view of laid-out windows (never frozen)
   readonly property var _windowsLive: {
-    var all = (_backend && _backend.windows) ? _backend.windows : [];
-    var out = [];
-    for (var i = 0; i < all.length; i++) {
-      var lay = all[i].layout;
-      if (lay && lay.posInScrollingLayout && lay.posInScrollingLayout.length)
-        out.push(all[i]);
-    }
-    return out;
+    const rows = new Set(mapFacade.mapState.workspaces.map(ws => ws.id));
+    return mapFacade.mapState.windows.filter(w => rows.has(w.workspaceId) && w.layout?.posInScrollingLayout?.length > 0);
   }
   // Frozen snapshot while a gesture holds the mouse grab (delegate survival)
   property var _windowsCache: []
   // The map's view: frozen during press/drag, live otherwise. No read+write
   // of the cache inside this binding — that was a binding loop.
-  readonly property var _windows: (root._pressWinId !== 0 || root._dragging) ? _windowsCache : _windowsLive
+  readonly property var _windows: (root._pressWinId !== null || root._dragging) ? _windowsCache : _windowsLive
   readonly property rect _focusedRectangle: {
     for (var i = 0; i < _windows.length; i++) {
       if (_windows[i].id === currentWindowId)
@@ -336,57 +290,12 @@ Item {
   }
   on_FocusedRectangleChanged: Qt.callLater(root._keepCurrentInView)
 
-  // Keep the frozen snapshot current only while idle (no gesture)
-  on_WindowsLiveChanged: {
-    if (root._pressWinId === 0 && !root._dragging)
-      root._windowsCache = _windowsLive;
-  }
-
-  Connections {
-    target: CompositorService
-    function onWorkspaceChanged() {
-      root._wsRev++;
-    }
-  }
-
   // ── Workspaces ──
 
   // All workspaces sorted by niri idx, including empty ones
-  readonly property var _workspaceOrder: _buildWorkspaceOrder()
+  readonly property var _workspaceOrder: mapFacade.mapState.workspaces
   function workspaceOrder() {
     return _workspaceOrder;
-  }
-
-  function _buildWorkspaceOrder() {
-    _wsRev; // imperative-refresh dependency
-    var list = [];
-    for (var i = 0; i < CompositorService.workspaces.count; i++) {
-      var ws = CompositorService.workspaces.get(i);
-      list.push({
-                  id: ws.id,
-                  idx: ws.idx
-                });
-    }
-    // Fallback: workspaces that have windows but aren't in the model
-    for (var j = 0; j < _windows.length; j++) {
-      var wsId = _windows[j].workspaceId;
-      var found = false;
-      for (var k = 0; k < list.length; k++) {
-        if (list[k].id === wsId) {
-          found = true;
-          break;
-        }
-      }
-      if (!found)
-        list.push({
-                    id: wsId,
-                    idx: 9999
-                  });
-    }
-    list.sort(function (a, b) {
-      return a.idx - b.idx;
-    });
-    return list;
   }
 
   // Row index of a workspace within workspaceOrder
@@ -396,18 +305,12 @@ Item {
       if (order[i].id === wsId)
         return i;
     }
-    return 0;
+    return -1;
   }
 
   // Active window of a workspace (niri's Workspace.active_window_id)
   function activeWindowId(wsId) {
-    _wsRev; // imperative-refresh dependency
-    for (var i = 0; i < CompositorService.workspaces.count; i++) {
-      var ws = CompositorService.workspaces.get(i);
-      if (ws.id === wsId)
-        return ws.activeWindowId || 0;
-    }
-    return 0;
+    return _workspaceOrder.find(ws => ws.id === wsId)?.activeWindowId ?? null;
   }
 
   // ── Column geometry (canvas units) ──
@@ -632,8 +535,11 @@ Item {
   // Single shared context menu instance
   MapWindowContextMenu {
     id: contextMenu
-    // Focus from the menu is navigation too; Close is not
-    onNavigationRequested: root.navigationRequested()
+    onFocusRequested: id => {
+      if (root.mapFacade.focusWindow(id))
+        root.navigationRequested();
+    }
+    onCloseRequested: id => root.mapFacade.closeWindow(id)
   }
 
   Flickable {
@@ -693,7 +599,7 @@ Item {
 
           // Drop-target outline while a drag hovers this row
           Rectangle {
-            visible: root._dragging && modelData.id === root._dragTargetWs
+            visible: root._dropMove?.insertAtIndex === null && modelData.id === root._dropMove?.workspace.id
             x: 0
             y: index * (root._monH * root._autoScale + root._rowGap)
             width: mapContent.width
@@ -711,7 +617,7 @@ Item {
             y: index * (root._monH * root._autoScale + root._rowGap)
             width: root._barWidth
             height: root.workspaceRowHeight(index)
-            color: modelData.id === NiriState.focusedWorkspaceId ? AtmoColor.mPrimary : AtmoColor.mOutline
+            color: modelData.id === root.mapFacade.mapState.focusedWorkspaceId ? AtmoColor.mPrimary : AtmoColor.mOutline
             z: 10
           }
 
@@ -728,8 +634,8 @@ Item {
             onEntered: root.hoverEnter(modelData.id)
             onExited: root.hoverExit()
             onClicked: {
-              CompositorService.switchToWorkspace(modelData);
-              root.navigationRequested();
+              if (root.mapFacade.switchWorkspace(modelData.id))
+                root.navigationRequested();
             }
           }
         }
@@ -746,6 +652,7 @@ Item {
           readonly property int _col: _lay.posInScrollingLayout[0]
           readonly property int _row: _lay.posInScrollingLayout[1] || 0
           readonly property int _wsSlot: root.workspaceSlotIndex(modelData.workspaceId)
+          visible: _wsSlot >= 0 || _dragged
           readonly property rect _geometry: root.windowGeometry(modelData)
           // Active window of this workspace (niri's per-workspace
           // active_window_id) — always shown; it's the "current window of
@@ -978,7 +885,7 @@ Item {
             }
             onExited: {
               if (root.hoveredWinId === modelData.id)
-                root.hoveredWinId = 0;
+                root.hoveredWinId = null;
               root.hoverExit();
             }
             onPressed: mouse => {
@@ -987,6 +894,7 @@ Item {
               root._cancelDrag();
               if (mouse.button === Qt.LeftButton) {
                 root._pressTime = Date.now();
+                root._windowsCache = root._windowsLive;
                 root._pressWinId = modelData.id;
                 root._pressStart = mapToItem(mapContent, mouse.x, mouse.y);
                 dragH.enabled = true;
@@ -994,7 +902,7 @@ Item {
               }
             }
             onReleased: {
-              root._pressWinId = 0;
+              root._pressWinId = null;
               pressHoldTimer.stop();
               // Held long enough to start the drag but never moved → the
               // handler never activated: cancel, no drop, no navigation
@@ -1005,12 +913,10 @@ Item {
               // A drag that the DragHandler consumed never reaches here —
               // the handler's takeover cancels the MouseArea's press
               if (mouse.button === Qt.LeftButton) {
-                CompositorService.focusWindow({
-                                                id: modelData.id
-                                              });
-                root.navigationRequested();
+                if (root.mapFacade.focusWindow(modelData.id))
+                  root.navigationRequested();
               } else if (mouse.button === Qt.RightButton) {
-                contextMenu.windowData = modelData;
+                contextMenu.windowId = modelData.id;
                 contextMenu.open();
               }
             }
@@ -1033,7 +939,7 @@ Item {
                   // Too early — this is a map pan, not a tile drag. Hand
                   // the gesture back to the Flickable; next press re-arms.
                   dragH.enabled = false;
-                  root._pressWinId = 0;
+                  root._pressWinId = null;
                   pressHoldTimer.stop();
                   return;
                 }
@@ -1041,19 +947,11 @@ Item {
                 // the handler for centroid tracking
                 root._activeDragDelegate = winRect;
                 root._activeDragHandler = dragH;
-                root._pressWinId = 0;
+                root._pressWinId = null;
               } else {
                 if (root._dragWinId === modelData.id) {
-                  // Phantom strip = insert-above-first; a real row = plain
-                  // move; no target = cancel
-                  if (root._dragTargetWs === -1)
-                    root._insertAboveFirst(modelData.id);
-                  else if (root._dragTargetWs !== 0 && root._dragTargetWs !== modelData.workspaceId)
-                    root._moveWindowToWorkspace(modelData.id, root._dragTargetWs);
-                  root._activeDragDelegate = null;
-                  root._activeDragHandler = null;
-                  root._dragWinId = 0;
-                  root._dragging = false;
+                  root.mapFacade.drop(modelData.id, root._dragTarget);
+                  root._cancelDrag();
                 }
               }
             }
@@ -1106,7 +1004,7 @@ Item {
               }
               onExited: {
                 if (root.hoveredWinId === modelData.id)
-                  root.hoveredWinId = 0;
+                  root.hoveredWinId = null;
                 root.hoverExit();
               }
               onClicked: root.playToggleRequested(modelData.id)
@@ -1168,7 +1066,7 @@ Item {
               }
               onExited: {
                 if (root.hoveredWinId === modelData.id)
-                  root.hoveredWinId = 0;
+                  root.hoveredWinId = null;
                 root.hoverExit();
               }
               onClicked: root.muteToggleRequested(modelData.id)
@@ -1288,7 +1186,7 @@ Item {
     Rectangle {
       anchors.fill: parent
       color: AtmoColor.mPrimary
-      opacity: root._dragTargetWs === -1 ? 0.32 : 0.16
+      opacity: root._dropMove?.insertAtIndex === 1 ? 0.32 : 0.16
       Behavior on opacity {
         NumberAnimation {
           duration: 120
@@ -1302,7 +1200,7 @@ Item {
       width: parent.width
       height: 2
       color: AtmoColor.mPrimary
-      opacity: root._dragTargetWs === -1 ? 1.0 : 0.6
+      opacity: root._dropMove?.insertAtIndex === 1 ? 1.0 : 0.6
     }
     // Left indicator bar (same as real rows)
     Rectangle {
@@ -1311,12 +1209,12 @@ Item {
       width: root._barWidth
       height: parent.height
       color: AtmoColor.mPrimary
-      opacity: root._dragTargetWs === -1 ? 1.0 : 0.6
+      opacity: root._dropMove?.insertAtIndex === 1 ? 1.0 : 0.6
     }
   }
 
   NText {
-    visible: root._windows.length === 0
+    visible: root.mapFacade.mapState.ready && root._windows.length === 0
     anchors.centerIn: parent
     text: "No windows"
     color: AtmoColor.mOnSurfaceVariant

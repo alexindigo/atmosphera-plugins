@@ -424,7 +424,7 @@ def snapshot(sources):
                 icon = icon_path_for(url, blob)
             host = urllib.parse.urlparse(url).hostname
             entries.append({
-                "winId": w["id"],
+                "winId": str(w["id"]),
                 "url": url,
                 "host": host,
                 "icon": icon,

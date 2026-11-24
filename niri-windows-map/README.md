@@ -1,4 +1,4 @@
-# Niri Windows Map 1.0.6
+# Niri Windows Map
 
 Restores the focused-window accent, keeps resize textures stable, and sizes
 Compact/Regular/Large by workspace-row height. Large maps scroll after reaching
@@ -7,13 +7,11 @@ inside visible rows or the insert-above strip.
 
 ## Shell compatibility
 
-The plugin API floor remains Atmosphera 0.9.0. Reliable startup focus, layout and
-drag state also require the stale-seed fix in
-[Atmosphera PR #29](https://github.com/alexindigo/atmosphera/pull/29), commit
-`ae3c0398f` (including its parent `0e590f15a`). Together they reject stale replies
-and retry failed startup requests. Older shell builds can overwrite newer niri events with old startup
-replies and overlap window tiles. The companion shell change fixes that race;
-it must also reach the 0.10.0 integration stack when the release merges main.
+The minimum Atmosphera version is 0.10.0. The map supports the older shell's
+numeric IDs and the current shell's exact string IDs. On the current shell,
+niri IPC requires niriqml 0.3.0 or newer and drops target stable workspace IDs.
+On older shells, drops use the workspace's current position. Older map releases
+do not support the current shell's string IDs; update the map before the shell.
 
 Ctrl+wheel's existing handler is unchanged; its real-input behavior remains
 unverified. No native-host frame-pacing claim is made.

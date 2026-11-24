@@ -276,7 +276,7 @@ def snapshot():
                 continue
             cwd = sh["cwd"]
             entries.append({
-                "winId": w["id"],
+                "winId": str(w["id"]),
                 "pid": pid,
                 "cwd": cwd,
                 "cwdBase": os.path.basename(cwd) if cwd else None,
