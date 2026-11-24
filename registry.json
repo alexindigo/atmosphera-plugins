@@ -1869,7 +1869,7 @@
       "author": "ayagmar",
       "description": "OBS recording, replay, and stream status widget for Noctalia.",
       "license": "MIT",
-      "version": "0.1.8",
+      "version": "0.1.9",
       "tags": [
         "Bar",
         "Panel",

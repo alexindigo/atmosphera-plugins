@@ -185,7 +185,7 @@ ColumnLayout {
           to: 10000
           stepSize: 250
           value: root.valuePollIntervalMs
-          onValueModified: value => root.pollIntervalMsField.set(value)
+          requestValue: value => root.pollIntervalMsField.set(value)
         }
       }
     }
