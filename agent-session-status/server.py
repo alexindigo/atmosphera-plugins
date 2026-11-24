@@ -55,7 +55,6 @@ class SessionStore:
             "updatedAt": now,
         }
         self._sessions[key] = entry
-        return dict(entry)
 
     def snapshot(self):
         return self.snapshot_for_agent()
@@ -132,12 +131,12 @@ def _rpc_error(request_id, code, message):
     }
 
 
-def _text_tool_result(payload):
+def _text_tool_result(text):
     return {
         "content": [
             {
                 "type": "text",
-                "text": json.dumps(payload, separators=(",", ":")),
+                "text": text,
             }
         ],
         "isError": False,
@@ -159,7 +158,12 @@ def _session_tools():
         {
             "name": "report_session",
             "title": "Report agent session status",
-            "description": "Create or update your visible Noctalia session. Call it at task start with running, when blocked with blocked, and at task end with completed. Reuse the same id for the same task. Requires Authorization bearer token and X-Agent headers.",
+            "description": (
+                "Create or update your visible Noctalia session and return the plain text OK on success. "
+                "Call it at task start with running, when blocked with blocked, and at task end with completed. "
+                "Reuse the same id for the same task. Use list_sessions to read your current snapshot. "
+                "Requires Authorization bearer token and X-Agent headers."
+            ),
             "inputSchema": {
                 "type": "object",
                 "properties": {
@@ -260,7 +264,8 @@ def _handle_mcp(store, token, headers, raw_body):
             if not agent:
                 return _rpc_error(request_id, -32602, "X-Agent header is required")
 
-            return _rpc_result(request_id, _text_tool_result(store.snapshot_for_agent(agent)))
+            snapshot = store.snapshot_for_agent(agent)
+            return _rpc_result(request_id, _text_tool_result(json.dumps(snapshot, separators=(",", ":"))))
 
         if name == "report_session":
             if not _authorized(headers, token):
@@ -271,14 +276,11 @@ def _handle_mcp(store, token, headers, raw_body):
                 return _rpc_error(request_id, -32602, "X-Agent header is required")
 
             try:
-                session = store.upsert(agent, arguments)
+                store.upsert(agent, arguments)
             except ValidationError as error:
                 return _rpc_error(request_id, -32602, str(error))
 
-            return _rpc_result(request_id, _text_tool_result({
-                "session": session,
-                "snapshot": store.snapshot_for_agent(agent),
-            }))
+            return _rpc_result(request_id, _text_tool_result("OK"))
 
         return _rpc_error(request_id, -32602, "Unknown tool: " + str(name))
 
