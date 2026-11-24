@@ -3,7 +3,7 @@
     "settings": "Cài đặt tiện ích"
   },
   "settings": {
-    "shared-effect": "Filters and appearance apply to this instance. Device observations and access history are shared. Any configuration can request a common notification; disabling this instance's notifications does not silence others.",
+    "shared-effect": "Bộ lọc và giao diện áp dụng cho phiên bản này. Dữ liệu theo dõi thiết bị và lịch sử truy cập được dùng chung. Bất kỳ cấu hình nào cũng có thể yêu cầu thông báo chung; tắt thông báo cho phiên bản này không tắt thông báo của các phiên bản khác.",
     "activeColor": {
       "desc": "Màu của biểu tượng khi đang hoạt động.",
       "label": "Màu biểu tượng khi hoạt động"

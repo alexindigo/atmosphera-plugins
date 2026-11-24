@@ -1,6 +1,6 @@
 {
   "settings": {
-    "shared-effect": "Filters and appearance apply to this instance. Device observations and access history are shared. Any configuration can request a common notification; disabling this instance's notifications does not silence others.",
+    "shared-effect": "Фильтры и внешний вид применяются к этому экземпляру. Данные об использовании устройств и история доступа общие. Любая конфигурация может запросить общее уведомление; отключение уведомлений этого экземпляра не отключает их для остальных.",
     "hideInactive": {
       "desc": "Скрывать значки микрофона, камеры и экрана, когда они неактивны.",
       "label": "Скрывать неактивные состояния"

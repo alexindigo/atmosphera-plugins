@@ -1,6 +1,6 @@
 {
   "settings": {
-    "shared-effect": "Filters and appearance apply to this instance. Device observations and access history are shared. Any configuration can request a common notification; disabling this instance's notifications does not silence others.",
+    "shared-effect": "Filters en uiterlijk gelden voor deze instantie. Apparaatwaarnemingen en toegangsgeschiedenis worden gedeeld. Elke configuratie kan een gezamenlijke melding aanvragen; als je meldingen voor deze instantie uitschakelt, blijven de meldingen van andere instanties actief.",
     "hideInactive": {
       "desc": "Verberg de pictogrammen voor microfoon, camera en scherm wanneer ze inactief zijn.",
       "label": "Inactieve status verbergen"
