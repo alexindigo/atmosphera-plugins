@@ -54,12 +54,12 @@ class FloorTests(unittest.TestCase):
     def git(cls, *args):
         return subprocess.check_output(["git", "-C", cls.shell, *args], text=True).strip()
 
-    def target(self, floor):
+    def target(self, floor, **kwargs):
         tags = self.git("tag", "--list").splitlines()
         newest = checker.latest_release(self.shell, tags)
         log = io.StringIO()
         with contextlib.redirect_stderr(log):
-            tree = checker.resolve_target(self.shell, tags, newest, self.pin, floor)
+            tree = checker.resolve_target(self.shell, tags, newest, self.pin, floor, **kwargs)
         return tree, log.getvalue()
 
     def findings(self, code, target):
@@ -86,9 +86,39 @@ class FloorTests(unittest.TestCase):
             "missing shell API qs.Services.Cache.newApi",
         })
 
+    def test_object_keys_are_not_type_references(self):
+        target, _ = self.target("0.10.0")
+        header = "import qs.Widgets\n"
+        self.assertEqual(self.findings(header + "Item { property var options: ({ NImage: 1 }) }\n",
+                                       target), set())
+        self.assertEqual(self.findings(header + "NImage {}\n", target), {
+            "missing shell type qs.Widgets.NImage",
+        })
+        self.assertEqual(self.findings(header + "Item { property list<NImage> images }\n", target), {
+            "missing shell type qs.Widgets.NImage",
+        })
+
+    def test_optional_singleton_member(self):
+        target, _ = self.target("0.10.0")
+        header = "import qs.Services as S\n"
+        self.assertEqual(self.findings(header + "Item { property var x: S.Cache?.newApi() }\n",
+                                       target), {"missing shell API qs.Services.Cache.newApi"})
+
+    def test_fallback_checks_singleton_members_on_pin(self):
+        tree, _ = self.target("0.11.0")
+        header = "import qs.Services\n"
+        self.assertEqual(self.findings(header + "Item { property var x: Cache.newApi() }\n", tree), set())
+        self.assertEqual(self.findings(header + "Item { property var x: Cache.newApis() }\n", tree), {
+            "missing shell API qs.Services.Cache.newApis",
+        })
+
     def test_missing_historical_tag_fails_closed(self):
         with self.assertRaisesRegex(ValueError, r"required historical tag v0\.9\.0 is missing"):
             self.target("0.9.0")
+
+    def test_audit_requires_an_exact_release(self):
+        with self.assertRaisesRegex(ValueError, r"audit requires release tag v0\.11\.0"):
+            self.target("0.11.0", exact=True)
 
     def test_unpublished_fallback_then_exact_tag(self):
         tree, message = self.target("0.11.0")
@@ -99,6 +129,7 @@ class FloorTests(unittest.TestCase):
         self.addCleanup(self.git, "update-ref", "-d", "refs/tags/v0.11.0")
         tree, message = self.target("0.11.0")
         self.assertIsNot(tree, self.pin)
+        self.assertEqual(tree.ref, "refs/tags/v0.11.0")
         self.assertIn("checking release tag v0.11.0", message)
         self.assertEqual(self.findings("import qs.Widgets\nNImage {}\n", tree), set())
 

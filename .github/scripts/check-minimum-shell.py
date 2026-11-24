@@ -20,7 +20,9 @@ VERSION = re.compile(r"(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$")
 IMPORT = re.compile(
     r"^[ \t]*(?:\.)?import[ \t]+(qs(?:\.[\w]+)*)(?:[ \t]+[\d.]+)?"
     r"(?:[ \t]+as[ \t]+(\w+))?[ \t]*;?[ \t]*$", re.M)
-MEMBER = re.compile(r"\s*\.\s*([A-Za-z_$][\w$]*)")
+MEMBER = re.compile(r"\s*(?:\?\.|\.)\s*([A-Za-z_$][\w$]*)")
+TYPE_PREFIX = re.compile(r"\b(?:property\s+(?:list\s*<\s*)?|as\s+)$")
+OPEN_OBJECT = re.compile(r"\s*\{")
 DECLARATION = re.compile(
     r"\b(?:(property)\s+(?:list\s*<[^>]+>|[\w.]+)\s+|(function|signal|enum)\s+)"
     r"([A-Za-z_$][\w$]*)")
@@ -50,14 +52,16 @@ def latest_release(shell, tags):
     raise ValueError("cannot identify an Atmosphera release; fetch shell tags")
 
 
-def resolve_target(shell, tags, newest, pin, floor):
+def resolve_target(shell, tags, newest, pin, floor, *, exact=False):
     tag = "v" + floor
     if tag in tags and version(floor) <= version(newest[1:]):
         print(f"minimum shell {floor}: checking release tag {tag}", file=sys.stderr)
         return Tree(shell, f"refs/tags/{tag}", pin.lexer)
     if version(floor) > version(newest[1:]):
+        if exact:
+            raise ValueError(f"audit requires release tag {tag}; latest release is {newest}")
         print(f"minimum shell {floor}: {tag} is unreleased (latest {newest}); "
-              f"using pinned shell {pin.ref} (checked by pinned compatibility lint)", file=sys.stderr)
+              f"using pinned shell {pin.ref}", file=sys.stderr)
         return pin
     raise ValueError(f"minimum shell {floor}: required historical tag {tag} is missing")
 
@@ -106,6 +110,18 @@ def blank(source, spans):
     return "".join(chars)
 
 
+def type_reference(code, start, end, qml):
+    # A matching identifier alone is not a QML type reference: it can be
+    # an object key, a variable, or part of a local declaration.
+    if MEMBER.match(code, end):
+        return True  # static access (e.g. an enum)
+    if not qml:
+        return False
+    line_start = code.rfind("\n", 0, start) + 1
+    return (OPEN_OBJECT.match(code, end) is not None or
+            TYPE_PREFIX.search(code, line_start, start) is not None)
+
+
 def source_findings(path, target, pin, lexer):
     source = path.read_text()
     tokens, spans = lexer.lex(source)
@@ -144,13 +160,17 @@ def source_findings(path, target, pin, lexer):
         if module in missing or name not in pin.exports.get(module, {}):
             continue
         if name not in target.exports.get(module, {}):
-            yield f"missing shell type {module}.{name}"
+            if type_reference(masked, token.start, end, path.suffix == ".qml"):
+                yield f"missing shell type {module}.{name}"
             continue
         match = MEMBER.match(masked, end)
         if not match:
             continue
         singleton, members = pin.api(module, name)
-        if not singleton or match[1] not in members:
+        # A release comparison checks availability of known shell APIs. On the
+        # fallback path the pin is the contract, so an undeclared member is
+        # itself a finding; the ordinary linter only checks select singletons.
+        if not singleton or (target is not pin and match[1] not in members):
             continue
         old_singleton, old_members = target.api(module, name)
         if not old_singleton or match[1] not in old_members:
@@ -183,15 +203,14 @@ def check(root, shell, selected=None, against=None):
         if not isinstance(floor, str) or not VERSION.fullmatch(floor):
             raise ValueError(f"{plugin}: minAtmospheraVersion must be x.y.z")
         if floor not in targets:
-            targets[floor] = resolve_target(shell, tags, newest, pin, floor)
+            targets[floor] = resolve_target(shell, tags, newest, pin, floor, exact=against is not None)
         target = targets[floor]
         findings = {}
-        if target is not pin:
-            for source in sorted(p for p in file.parent.rglob("*") if p.suffix in (".qml", ".js")):
-                if source.is_symlink():
-                    raise ValueError(f"{source}: refusing a symlink source")
-                for finding in sorted(set(source_findings(source, target, pin, lexer))):
-                    findings.setdefault(finding, []).append(source.relative_to(root).as_posix())
+        for source in sorted(p for p in file.parent.rglob("*") if p.suffix in (".qml", ".js")):
+            if source.is_symlink():
+                raise ValueError(f"{source}: refusing a symlink source")
+            for finding in sorted(set(source_findings(source, target, pin, lexer))):
+                findings.setdefault(finding, []).append(source.relative_to(root).as_posix())
         if findings:
             results[plugin] = findings
             problems += len(findings)
@@ -203,7 +222,7 @@ def main():
     parser.add_argument("--plugins", type=Path, required=True)
     parser.add_argument("--shell", type=Path, required=True)
     parser.add_argument("--base-ref", help="check plugin directories changed since this Git commit")
-    parser.add_argument("--against", help="audit all selected plugins at this floor regardless of manifest")
+    parser.add_argument("--against", help="audit selected plugins against this exact release instead of their manifest floors")
     parser.add_argument("--plugin", action="append", help="restrict to these plugin IDs")
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
