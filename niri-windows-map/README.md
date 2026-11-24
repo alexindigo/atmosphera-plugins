@@ -7,11 +7,11 @@ inside visible rows or the insert-above strip.
 
 ## Shell compatibility
 
-The minimum Atmosphera version is 0.10.0. The map supports the older shell's
-numeric IDs and the current shell's exact string IDs. On the current shell,
-niri IPC requires niriqml 0.3.0 or newer and drops target stable workspace IDs.
-On older shells, drops use the workspace's current position. Older map releases
-do not support the current shell's string IDs; update the map before the shell.
+The plugin registry offers this version on Atmosphera 0.11.0 or newer. The map
+retains its numeric-ID fallback for older shells, where drops use the workspace's
+current position. With the current shell and niriqml 0.3.0 or newer, drops target
+exact string workspace IDs. When upgrading to Atmosphera 0.11.0, also update the
+map: older map releases do not support the new IDs.
 
 Ctrl+wheel's existing handler is unchanged; its real-input behavior remains
 unverified. No native-host frame-pacing claim is made.
