@@ -1,14 +1,14 @@
 import QtQuick
 import qs.Commons
-import qs.Services.Compositor
 import qs.Widgets
 
 NPopupContextMenu {
   id: root
-  property var windowData: null
+  property string windowId: ""
 
   // Emitted when a menu action navigates (Focus) — NOT for Close
-  signal navigationRequested
+  signal focusRequested(string windowId)
+  signal closeRequested(string windowId)
 
   model: [
     { id: "focus", text: "Focus", icon: Icon.apps },
@@ -16,14 +16,13 @@ NPopupContextMenu {
   ]
 
   onTriggered: function (actionId, _item) {
-    if (!root.windowData) return
+    if (!root.windowId) return
     switch (actionId) {
     case "focus":
-      CompositorService.focusWindow({ id: root.windowData.id })
-      root.navigationRequested()
+      root.focusRequested(root.windowId)
       break
     case "close":
-      CompositorService.niriBackend.closeWindow({ id: root.windowData.id })
+      root.closeRequested(root.windowId)
       break
     }
   }

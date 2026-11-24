@@ -1,8 +1,8 @@
 import QtQuick
 import Quickshell.Services.Mpris
 import Quickshell.Services.Pipewire
-import qs.Services.Compositor
 import qs.Services.Media
+import "MapState.js" as MapState
 
 // AudioMap — per-window "is producing sound" attribution for the niri
 // windows map. Pure QML over the live PipeWire graph; no helper process.
@@ -26,6 +26,7 @@ Item {
   id: root
 
   property bool active: true
+  required property var windows
 
   // winId -> {node: PwNode, muted: bool} for windows confidently
   // attributed to a live output stream
@@ -36,11 +37,6 @@ Item {
 
   function _normTitle(t) {
     return String(t || "").toLowerCase().replace(/^\(\d+\)\s*/, "").trim();
-  }
-
-  function _windows() {
-    const backend = CompositorService.niriBackend;
-    return backend ? (backend.windows || []) : [];
   }
 
   function _liveStreams() {
@@ -57,7 +53,7 @@ Item {
 
   function _streamPid(node) {
     const props = node.properties || {};
-    return parseInt(props["application.process.id"] || "0", 10) || 0;
+    return MapState.exactId(props["application.process.id"]);
   }
 
   function _update() {
@@ -69,7 +65,7 @@ Item {
     }
 
     const streams = root._liveStreams();
-    const wins = root._windows();
+    const wins = root.windows;
     const streamIds = {};
     const winIds = {};
     for (const s of streams)
@@ -96,7 +92,7 @@ Item {
       // candidate windows: exact pid match, else icon-name == appId
       const spid = root._streamPid(s);
       const sapp = root._streamAppId(s);
-      let cands = wins.filter(w => (spid !== 0 && w.pid === spid) || (sapp !== "" && w.appId === sapp));
+      let cands = wins.filter(w => (spid !== null && spid !== "0" && w.pid === spid) || (sapp !== "" && w.appId === sapp));
       if (cands.length === 0)
         continue;  // stream from an app with no windows here
 
@@ -200,6 +196,7 @@ Item {
   }
 
   onActiveChanged: _update()
+  onWindowsChanged: _update()
 
   Timer {
     interval: 1500

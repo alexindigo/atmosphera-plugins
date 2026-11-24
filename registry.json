@@ -21,9 +21,9 @@
       "id": "niri-windows-map",
       "name": "Niri Windows Map",
       "author": "Atmosphera",
-      "description": "Spatial overview map of niri windows: workspaces, columns and tiles. Click tiles to focus and rows to switch workspace. Reliable startup focus and drag require the stale-seed shell fix in Atmosphera PR #29.",
+      "description": "Spatial overview map of niri windows and workspaces. Click tiles to focus, click rows to switch, or drag a window to move it.",
       "license": "GPL-3.0",
-      "version": "1.0.14",
+      "version": "1.0.18",
       "tags": [
         "Panel",
         "Niri",
@@ -31,7 +31,7 @@
       ],
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
-      "lastUpdated": "2026-11-22",
+      "lastUpdated": "2026-11-24",
       "minAtmospheraVersion": "0.11.0"
     },
     {
@@ -1665,13 +1665,13 @@
       "author": "Kohányi Róbert",
       "description": "Filter, jump to, rename or reset Niri workspaces from the launcher.",
       "license": "MIT",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "tags": [
         "Launcher",
         "Utility",
         "Niri"
       ],
-      "lastUpdated": "2026-04-21T07:58:38+02:00",
+      "lastUpdated": "2026-11-23",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.1"
@@ -1960,12 +1960,12 @@
       "author": "Qholin",
       "description": "A customizable parallax effect for the wallpaper based on the active workspace.",
       "license": "MIT",
-      "version": "1.0.9",
+      "version": "1.0.10",
       "minAtmospheraVersion": "0.11.0",
       "tags": [
         "Desktop"
       ],
-      "lastUpdated": "2026-11-20",
+      "lastUpdated": "2026-11-23",
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.0"

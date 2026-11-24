@@ -22,20 +22,20 @@ Item {
 
   readonly property var mainInstance: pluginApi?.mainInstance
 
-  // Workspace id set by the pencil/eraser buttons. When >= 0, indicates a
+  // Workspace id set by the pencil/eraser buttons. When non-null, indicates a
   // button-initiated edit so onActivate skips the post-apply focus jump.
-  // The keyboard flow (`>ws !name` / `>ws !!`) leaves this at -1 and targets
+  // The keyboard flow (`>ws !name` / `>ws !!`) leaves this null and targets
   // `highlightedWorkspaceId` instead, then focuses the edited workspace.
-  property int editTargetId: -1
+  property var editTargetId: null
 
   // Workspace id the user last highlighted while in filter mode. Captured
   // by the selectedIndexChanged handler below and frozen the moment rename
   // mode kicks in (since the launcher resets selectedIndex to 0 whenever
   // results change).
-  property int highlightedWorkspaceId: -1
+  property var highlightedWorkspaceId: null
 
   // Parallel to the last filter-mode results array: workspace id at each
-  // row index, or -1 for non-workspace rows (e.g. "no matches").
+  // row index, or null for non-workspace rows (e.g. "no matches").
   property var filterResultWorkspaceIds: []
 
   Connections {
@@ -68,7 +68,7 @@ Item {
     var idx = launcher.selectedIndex;
     if (idx < 0 || idx >= filterResultWorkspaceIds.length) return;
     var wsId = filterResultWorkspaceIds[idx];
-    if (wsId !== null && wsId !== undefined && wsId !== -1) {
+    if (wsId !== null && wsId !== undefined) {
       highlightedWorkspaceId = wsId;
     }
   }
@@ -112,7 +112,7 @@ Item {
     }
 
     // Exiting rename mode — clear any pending pencil/eraser target.
-    if (editTargetId !== -1) editTargetId = -1;
+    editTargetId = null;
     return filterModeResults(content.trim());
   }
 
@@ -139,15 +139,13 @@ Item {
         "isImage": false,
         "onActivate": function () {}
       });
-      ids.push(-1);
+      ids.push(null);
     }
 
     filterResultWorkspaceIds = ids;
     // Seed the highlight to the first visible workspace so an immediate
     // transition to rename mode (before the user arrows) still has a target.
-    if (ids.length > 0 && ids[0] !== -1) {
-      highlightedWorkspaceId = ids[0];
-    }
+    highlightedWorkspaceId = ids[0] ?? null;
 
     // When no filter is active, auto-highlight the focused workspace instead
     // of row 0 — matches "which workspace am I editing/jumping from" better
@@ -220,7 +218,7 @@ Item {
         "isTablerIcon": true,
         "isImage": false,
         "onActivate": function () {
-          root.editTargetId = -1;
+          root.editTargetId = null;
           if (launcher) launcher.setSearchText(prefix + " ");
         }
       }];
@@ -249,18 +247,18 @@ Item {
     } else {
       mainInstance.renameWorkspace(ws, newName);
     }
-    root.editTargetId = -1;
+    root.editTargetId = null;
     if (launcher) launcher.setSearchText(prefix + " ");
   }
 
   function resolveRenameTarget() {
     // Pencil/eraser wins — they pinpoint a specific row.
-    if (editTargetId !== -1) {
+    if (editTargetId !== null) {
       var targeted = mainInstance.findWorkspaceById(editTargetId);
       if (targeted) return targeted;
     }
     // Keyboard flow: whichever workspace was highlighted in the list.
-    if (highlightedWorkspaceId !== -1) {
+    if (highlightedWorkspaceId !== null) {
       var highlighted = mainInstance.findWorkspaceById(highlightedWorkspaceId);
       if (highlighted) return highlighted;
     }
@@ -334,7 +332,7 @@ Item {
           root.editTargetId = wsId;
           var ws = mainInstance.findWorkspaceById(wsId);
           if (ws) mainInstance.unsetWorkspaceName(ws);
-          root.editTargetId = -1;
+          root.editTargetId = null;
         }
       });
     }
