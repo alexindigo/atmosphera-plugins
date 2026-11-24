@@ -111,9 +111,9 @@ NScrollView {
                                 text: pluginApi?.tr("welcome.warning.title")
                                 font.weight: Font.Bold; color: AtmoColor.mError; pointSize: Style.fontSizeS
                             }
-                            NText {
+                            NImageText {
                                 text: pluginApi?.tr("welcome.warning.text")
-                                color: AtmoColor.mOnSurfaceVariant; wrapMode: Text.WordWrap; textFormat: Text.RichText; Layout.fillWidth: true; pointSize: Style.fontSizeS
+                                color: AtmoColor.mOnSurfaceVariant; wrapMode: Text.WordWrap; format: "rich"; Layout.fillWidth: true; pointSize: Style.fontSizeS
                             }
                         }
                     }
@@ -137,7 +137,7 @@ NScrollView {
                     delegate: RowLayout {
                         spacing: Style.marginS
                         AtmoIcon { icon: "check"; color: AtmoColor.mPrimary; pointSize: Style.fontSizeM }
-                        NText { text: pluginApi?.tr(modelData); color: AtmoColor.mOnSurfaceVariant; pointSize: Style.fontSizeS; textFormat: Text.RichText }
+                        NImageText { text: pluginApi?.tr(modelData); color: AtmoColor.mOnSurfaceVariant; pointSize: Style.fontSizeS; format: "rich" }
                     }
                 }
             }
@@ -149,8 +149,8 @@ NScrollView {
             description: pluginApi?.tr("welcome.docs.description")
             extraContent: ColumnLayout {
                 spacing: Style.marginL
-                NText {
-                    Layout.fillWidth: true; wrapMode: Text.Wrap; color: AtmoColor.mOnSurfaceVariant; font.pointSize: Style.fontSizeS; textFormat: Text.RichText
+                NImageText {
+                    Layout.fillWidth: true; wrapMode: Text.Wrap; color: AtmoColor.mOnSurfaceVariant; pointSize: Style.fontSizeS; format: "rich"
                     text: pluginApi?.tr("welcome.docs.summary")
                 }
                 RowLayout {
@@ -214,7 +214,7 @@ NScrollView {
                 NText { text: cardRoot.title; font.weight: Font.Bold; pointSize: Style.fontSizeL }
             }
             NDivider { Layout.fillWidth: true; opacity: 0.2 }
-            NText { text: cardRoot.description; color: AtmoColor.mOnSurface; wrapMode: Text.WordWrap; Layout.fillWidth: true; textFormat: Text.RichText }
+            NImageText { text: cardRoot.description; color: AtmoColor.mOnSurface; wrapMode: Text.WordWrap; Layout.fillWidth: true; format: "rich" }
             Loader { active: extraContent !== null; sourceComponent: extraContent; Layout.fillWidth: true }
         }
     }

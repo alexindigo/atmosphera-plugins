@@ -62,6 +62,7 @@ Dialog {
         width: 400 * Style.uiScaleRatio
 
         Text {
+            textFormat: Text.PlainText
             text: "Run " + runImageDialog.imageRepo + ":" + runImageDialog.imageTag
             font.bold: true
             font.pixelSize: 16
@@ -200,6 +201,7 @@ Dialog {
         
         // --- Footer / Error ---
         Text {
+            textFormat: Text.PlainText
             text: runImageDialog.errorMessage
             color: AtmoColor.mError
             visible: text !== ""

@@ -185,7 +185,8 @@ PanelWindow {
             color: "#000000"
         }
 
-        Image {
+        // Through the shared image owner (fallback when Qt cannot decode it).
+        NImage {
             anchors.fill: parent
             fillMode: Image.PreserveAspectCrop
             source: wallpaperPath

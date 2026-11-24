@@ -26,17 +26,15 @@ Item {
     width: cardContent.centerWidth
     x: (cardContent.width - cardContent.centerWidth) / 2
 
-    Image {
+    // The shared owner's validated thumbnail; a failure is labelled.
+    NImageIcon {
       id: img
 
       anchors.fill: parent
-      // asynchronous: true  // TODO: flickering when going backwards
-      cache: true
       fillMode: Image.PreserveAspectCrop
       smooth: true
-      source: cardContent.thumbnailPath ? "file://" + cardContent.thumbnailPath : ""
-      sourceSize.height: parent.height
-      sourceSize.width: cardContent.centerWidth
+      source: cardContent.thumbnailPath
+      sourceSize: Qt.size(Math.max(1, cardContent.centerWidth), Math.max(1, parent.height))
     }
   }
 

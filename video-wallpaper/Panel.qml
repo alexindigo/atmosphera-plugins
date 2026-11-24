@@ -29,7 +29,8 @@ Item {
     readonly property string activeBackend:    pluginApi?.pluginSettings?.activeBackend    ?? pluginApi?.manifest?.metadata?.defaultSettings?.activeBackend ?? ""
     readonly property bool wallpaperEnabled: pluginApi?.pluginSettings?.enabled ?? false
     readonly property bool   monitorSpecific:  pluginApi?.pluginSettings?.monitorSpecific  ?? false
-    readonly property bool thumbCacheReady: pluginApi?.mainInstance?.thumbCacheReady ?? false
+    // Previews can be shown: every video has its thumbnail or a labelled failure.
+    readonly property bool thumbCacheReady: pluginApi?.mainInstance?.thumbnailsSettled ?? false
     readonly property string wallpapersFolder: pluginApi?.pluginSettings?.wallpapersFolder ?? pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
 
 

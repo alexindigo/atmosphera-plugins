@@ -75,8 +75,8 @@ Rectangle {
       color: "black"
       clip: true
 
-      // Background wallpaper
-      Image {
+      // Background wallpaper, through the shared image owner
+      NImage {
         anchors.fill: parent
         source: phoneRoot.backgroundImage
         fillMode: Image.PreserveAspectCrop

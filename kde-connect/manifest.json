@@ -1,9 +1,9 @@
 {
   "id": "kde-connect",
   "name": "KDE Connect",
-  "version": "1.2.6",
+  "version": "1.2.11",
   "minNoctaliaVersion": "4.4.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "WerWolv",
   "official": false,
   "license": "GPLv2",

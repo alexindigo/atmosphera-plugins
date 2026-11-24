@@ -66,8 +66,9 @@ ColumnLayout {
 
         RowLayout {
             Layout.fillWidth: true
-            Label { text: sl.label; font.bold: true; Layout.fillWidth: true }
+            Label { textFormat: Text.PlainText; text: sl.label; font.bold: true; Layout.fillWidth: true }
             Label {
+                textFormat: Text.PlainText
                 text: Math.round(sl.value) + sl.unit
                 font.pixelSize: 12; opacity: 0.7
             }
@@ -80,6 +81,7 @@ ColumnLayout {
             onMoved: sl.valueEdited(Math.round(value))
         }
         Label {
+            textFormat: Text.PlainText
             text: sl.description
             font.pixelSize: 12; opacity: 0.6; wrapMode: Text.WordWrap; Layout.fillWidth: true
         }
@@ -98,7 +100,7 @@ ColumnLayout {
         Layout.fillWidth: true
         spacing: 2
 
-        Label { text: cb.label; font.bold: true }
+        Label { textFormat: Text.PlainText; text: cb.label; font.bold: true }
         ComboBox {
             Layout.fillWidth: true
             model: cb.options
@@ -113,6 +115,7 @@ ColumnLayout {
             onActivated: cb.valueEdited(model[currentIndex].value)
         }
         Label {
+            textFormat: Text.PlainText
             text: cb.description
             font.pixelSize: 12; opacity: 0.6; wrapMode: Text.WordWrap; Layout.fillWidth: true
         }

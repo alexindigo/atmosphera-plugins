@@ -1,9 +1,9 @@
 {
   "id": "hyprland-visual-editor",
   "name": "Hyprland Visual Editor",
-  "version": "1.0.8",
+  "version": "1.0.10",
   "minNoctaliaVersion": "4.4.1",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "XimoCP",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

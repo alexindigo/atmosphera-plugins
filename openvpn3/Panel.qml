@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import Quickshell
 import qs.Commons
 import qs.Widgets
+import qs.Portals
 import qs.Services.UI
 
 Item {
@@ -484,7 +485,7 @@ Item {
         }
     }
 
-    AtmoFilePicker {
+    PortalFilePicker {
         id: filePicker
         title: pluginApi?.tr("import.title")
         selectionMode: "files"

@@ -313,6 +313,7 @@ Item {
 
                             Text {
                                 id: pillText
+                                textFormat: Text.PlainText
                                 anchors.centerIn: parent
                                 text: modelData
                                 color: root.pillColor

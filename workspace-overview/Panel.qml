@@ -182,8 +182,8 @@ Item {
                                     radius: Style.radiusS
                                     clip: true
 
-                                    // Wallpaper
-                                    Image {
+                                    // Wallpaper, through the shared image owner
+                                    NImage {
                                         anchors.fill: parent
                                         source: typeof WallpaperService !== "undefined" ? WallpaperService.getWallpaper(modelData.monitor.name) : ""
                                         fillMode: Image.PreserveAspectCrop

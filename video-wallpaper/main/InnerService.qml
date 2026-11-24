@@ -17,9 +17,6 @@ Item {
     // Required properties
     required property string screenName
 
-    required property var         getThumbPath
-    required property FolderModel thumbFolderModel
-
     // Monitor specific properties
     readonly property string currentWallpaper:  Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.currentWallpaper ?? ""
     readonly property string noctaliaWallpaper: Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.noctaliaWallpaper ?? ""
@@ -27,7 +24,7 @@ Item {
     // Global properties
     readonly property bool wallpaperEnabled: pluginApi?.pluginSettings?.enabled ?? false
     required property bool thumbCacheReady
-    property var thumbnailSource: null
+    required property var thumbnailSource
     property bool _initialized: false
     property string _runtimeWallpaper: ""
     property bool baselineReady: false
@@ -47,12 +44,9 @@ Item {
 
         const noctaliaWallpaper = WallpaperService.getWallpaper(screenName);
 
-        // Check if the wallpaper name is VERY similar to how the thumbnail generation works,
-        // aka if the last characters are ".extension.bmp", in that case just don't do anything, just as a fail safe.
-        const videoExtension = currentWallpaper.split(".").pop();
-        const isSimilarToThumbnailGen = noctaliaWallpaper.slice(-8) === `.${videoExtension}.bmp`;
-
-        if (!(thumbnailSource ? thumbnailSource.ownsPath(noctaliaWallpaper) : thumbFolderModel.indexOf(noctaliaWallpaper) !== -1) && !isSimilarToThumbnailGen) {
+        // A thumbnail shown for color generation (including the retired
+        // ".extension.bmp" ones) is never saved as the user's own wallpaper.
+        if (!thumbnailSource.ownsPath(noctaliaWallpaper)) {
             _runtimeWallpaper = noctaliaWallpaper;
             saveTimer.save("noctaliaWallpaper", noctaliaWallpaper, revision);
             return;
@@ -90,7 +84,7 @@ Item {
         // current wallpaper for this runtime before color generation, without
         // overwriting historical restoration preferences.
         _runtimeWallpaper = WallpaperService.getWallpaper(screenName);
-        if (thumbnailSource && thumbnailSource.ownsPath(_runtimeWallpaper)) _runtimeWallpaper = noctaliaWallpaper;
+        if (thumbnailSource.ownsPath(_runtimeWallpaper)) _runtimeWallpaper = noctaliaWallpaper;
         _initialized = true;
         baselineReady = true;
         Qt.callLater(function () { if (root.baselineReady) root.wallpaperBaselineReady(); });

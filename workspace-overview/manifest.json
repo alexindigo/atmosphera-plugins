@@ -1,9 +1,9 @@
 {
   "id": "workspace-overview",
   "name": "Workspace Overview for Hyprland",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "minNoctaliaVersion": "3.6.0",
-  "minAtmospheraVersion": "0.8.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "doughbran",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

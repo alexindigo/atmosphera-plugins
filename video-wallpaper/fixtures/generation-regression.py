@@ -8,10 +8,31 @@ import json
 import os
 from pathlib import Path
 import shutil
+import struct
 import subprocess
 import sys
+import zlib
 
 CASES = ('failure', 'retry', 'outside', 'replacement', 'disable', 'baseline-retry', 'baseline-obsolete', 'refresh-membership', 'init-retry')
+
+
+def png_text(path):
+    """Validated PNG signature/chunk CRCs and its tEXt values."""
+    data = path.read_bytes()
+    assert data[:8] == b'\x89PNG\r\n\x1a\n', path
+    values, offset = {}, 8
+    while offset < len(data):
+        length, kind = struct.unpack('>I4s', data[offset:offset + 8])
+        body = data[offset + 8:offset + 8 + length]
+        assert struct.unpack('>I', data[offset + 8 + length:offset + 12 + length])[0] == zlib.crc32(kind + body), path
+        if kind == b'tEXt':
+            key, _, value = body.partition(b'\0')
+            values[key.decode('latin-1')] = value.decode('latin-1')
+        offset += 12 + length
+        if kind == b'IEND':
+            break
+    assert offset == len(data), path
+    return values
 
 
 @contextmanager
@@ -35,13 +56,15 @@ def main():
     for name in ('source', 'plugins', 'guest-profile', 'output'):
         parser.add_argument('--' + name, type=Path, required=True)
     parser.add_argument('--case', choices=CASES + ('all',), default='all')
+    # The guest this profile must describe (the profile itself verifies the live guest).
+    parser.add_argument('--expected-guest-uuid', default='12f17a02-25e9-474c-9dae-fea092c2d2be')
     args = parser.parse_args()
     source, plugins, output = (p.resolve() for p in (args.source, args.plugins, args.output))
     sys.path.insert(0, str(source / 'Scripts/dev'))
     from guest_profile import activate_profile
     from probe_files import ProbeFiles
     profile = activate_profile(args.guest_profile.resolve())
-    assert profile.uuid == '12f17a02-25e9-474c-9dae-fea092c2d2be' and not profile.console.records
+    assert profile.uuid == args.expected_guest_uuid and not profile.console.records
     output.mkdir(parents=True, exist_ok=False)
     rows = []
 
@@ -89,7 +112,9 @@ def main():
         user.write_text(initial)
         cache = work / 'cache'
         cache.mkdir()
-        thumbnail_parent = cache / 'images/wallpapers/thumbnails'
+        # The shell's image owner writes video thumbnails to the freedesktop
+        # folder under XDG_CACHE_HOME; isolate it per case.
+        thumbnail_parent = cache / 'thumbnails'
         if case == 'init-retry':
             thumbnail_parent.mkdir(parents=True)
             thumbnail_parent.chmod(0o555)
@@ -104,7 +129,7 @@ def main():
         runtime = profile.child_environment('wpgen-')
         env = dict(os.environ, **runtime, QT_QPA_PLATFORM='wayland', QML_DISABLE_DISK_CACHE='1',
             ATMOSPHERA_CONFIG_DIR=str(config), ATMOSPHERA_SETTINGS_FILE=str(config / 'settings.json'),
-            ATMOSPHERA_CACHE_DIR=str(cache), ATMOSPHERA_STATE_DIR=str(work / 'state'),
+            ATMOSPHERA_CACHE_DIR=str(cache), XDG_CACHE_HOME=str(cache), ATMOSPHERA_STATE_DIR=str(work / 'state'),
             WALLPAPER_REVIEW_MANIFEST=(plugin / 'manifest.json').read_text(), WALLPAPER_REVIEW_CASE=case,
             WALLPAPER_REVIEW_WORK=str(work), WALLPAPER_REVIEW_FIRST=str(first), WALLPAPER_REVIEW_OUTSIDE=str(outside),
             WALLPAPER_REVIEW_ORIGINAL=str(image), I5_THUMB_CONTROL=str(control), PATH=str(binary) + os.pathsep + os.environ['PATH'])
@@ -133,10 +158,12 @@ def main():
                     assert json.loads(user.read_text())['monitors'][name]['noctaliaWallpaper'] == str(image)
                 if passed and case in ('retry', 'outside', 'replacement', 'baseline-retry', 'baseline-obsolete', 'refresh-membership', 'init-retry'):
                     selected = media / 'added.mp4' if case == 'refresh-membership' else outside if case in ('outside', 'replacement', 'baseline-obsolete') else first
-                    # The consumer publishes its actual ImageCacheService path.
+                    # The consumer publishes the image owner's validated thumbnail of
+                    # the selected media.
                     observed = json.loads((work / 'observed.json').read_text())
-                    assert observed['wallpaper'].endswith('/video-wallpaper/' + selected.name + '.bmp')
-                    assert Path(observed['wallpaper']).stat().st_size > 54
+                    published = Path(observed['wallpaper'])
+                    assert published.is_relative_to(thumbnail_parent) and published.stat().st_size > 54, published
+                    assert png_text(published)['Thumb::URI'] == selected.as_uri(), published
                 if not passed:
                     raise SystemExit(2)
         finally:

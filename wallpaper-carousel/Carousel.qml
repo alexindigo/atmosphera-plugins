@@ -4,6 +4,9 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick.Effects
+import qs.Commons
+import qs.Services.UI
+import qs.Widgets
 
 Item {
     id: root
@@ -42,10 +45,9 @@ Item {
     property var _folderCache: ({})
     property bool _initialSyncDone: false
 
-    readonly property var _nameFilters: [
-        "*.jpg", "*.jpeg", "*.png", "*.webp", "*.gif",
-        "*.bmp", "*.jxl", "*.avif", "*.heif", "*.exr"
-    ]
+    // The shell's image classification: recognized, not a promise that Qt
+    // decodes it; the shared image owner falls back when it cannot.
+    readonly property var _nameFilters: ImageCacheService.imageFilters
 
     onWallpaperFolderUrlChanged: {
         modelSyncTimer.stop();
@@ -425,12 +427,11 @@ Item {
                                 maskThresholdMin: 0.5
                             }
 
-                            Image {
+                            NImage {
                                 anchors.fill: parent
                                 source: delegateRoot.fileUrl
                                 sourceSize: (carousel.heldIndex === delegateRoot.index) ? Qt.size(width, height) : Qt.size(carousel.itemWidth, carousel.itemHeight)
                                 fillMode: Image.Stretch
-                                asynchronous: true
                                 visible: innerImage.status === Image.Ready
                             }
 
@@ -442,7 +443,7 @@ Item {
                                 Rectangle { anchors.fill: parent; color: "black" }
                                 clip: true
 
-                                Image {
+                                NImage {
                                     id: innerImage
                                     anchors.centerIn: parent
                                     anchors.horizontalCenterOffset: -50
@@ -451,13 +452,23 @@ Item {
                                     fillMode: Image.PreserveAspectCrop
                                     source: delegateRoot.fileUrl
                                     sourceSize: (carousel.heldIndex === delegateRoot.index) ? Qt.size(width, height) : Qt.size(carousel.itemWidth, carousel.itemHeight)
-                                    asynchronous: true
 
                                     transform: Matrix4x4 {
                                         property real s: -carousel.skewFactor
                                         matrix: Qt.matrix4x4(1, s, 0, 0,  0, 1, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1)
                                     }
                                 }
+                            }
+
+                            // A wallpaper that cannot be displayed is labelled.
+                            AtmoIcon {
+                                anchors.centerIn: parent
+                                visible: innerImage.imageState === "unavailable"
+                                icon: "photo-off"
+                                pointSize: Style.fontSizeXXL
+                                color: AtmoColor.mError
+                                Accessible.name: I18n.tr("widgets.file-picker.preview-unavailable")
+                                Accessible.description: innerImage.errorReason
                             }
                         }
                     }
@@ -581,6 +592,7 @@ Item {
                 font.pixelSize: 24; font.bold: true; color: "white"
             }
             Text {
+                textFormat: Text.PlainText
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "The configured directory '" + (root.cfg.wallpaperDirectory ?? "") + "' does not exist.\nCheck the path in Wallpaper Carousel settings."
                 font.pixelSize: 14; color: "#BBBBBB"; horizontalAlignment: Text.AlignHCenter; lineHeight: 1.4
@@ -599,11 +611,13 @@ Item {
             visible: overlay.visible && folderModel.status === FolderListModel.Ready && folderModel.count === 0
 
             Text {
+                textFormat: Text.PlainText
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.hasWallpaperConfigured ? "No images found in wallpaper folder" : "No wallpaper configured"
                 font.pixelSize: 24; font.bold: true; color: "white"
             }
             Text {
+                textFormat: Text.PlainText
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.hasWallpaperConfigured
                     ? "The folder '" + root.wallpaperFolder + "' is empty.\nAdd images or choose a different wallpaper directory."
@@ -636,9 +650,8 @@ Item {
 
             Repeater {
                 model: stableModel
-                Image {
+                NImage {
                     width: carousel.itemWidth; height: carousel.itemHeight
-                    asynchronous: true
                     source: fileUrl
                     sourceSize: Qt.size(carousel.itemWidth, carousel.itemHeight)
                     fillMode: Image.PreserveAspectCrop
@@ -667,9 +680,8 @@ Item {
                     }
                     Repeater {
                         model: extraFolderModel
-                        Image {
+                        NImage {
                             width: carousel.itemWidth; height: carousel.itemHeight
-                            asynchronous: true
                             source: fileUrl
                             sourceSize: Qt.size(carousel.itemWidth, carousel.itemHeight)
                             fillMode: Image.PreserveAspectCrop

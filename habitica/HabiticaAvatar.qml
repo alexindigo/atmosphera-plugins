@@ -1,5 +1,6 @@
 import QtQuick
 import qs.Commons
+import qs.Widgets
 
 Item {
   id: root
@@ -117,14 +118,17 @@ Item {
       scale: root.scaleRatio
       transformOrigin: Item.TopLeft
 
-      Image {
+      NImage {
+
+        sizeToImage: true
+
+        sourceSize: Qt.size(1024, 1024)
         x: 0
         y: 0
         z: 0
         width: root.sourceWidth
         height: root.sourceHeight
         source: root.spriteSource("background_" + root.pref(["background"], "violet"))
-        asynchronous: true
         cache: true
         smooth: false
       }
@@ -138,12 +142,15 @@ Item {
       width: 90
       height: 90
 
-      Image {
+      NImage {
+
+        sizeToImage: true
+
+        sourceSize: Qt.size(1024, 1024)
         x: 0
         y: root.mountOffsetY
         z: 1
         source: root.spriteSource(root.mountBody())
-        asynchronous: true
         cache: true
         smooth: false
         visible: root.hasCurrentMount
@@ -152,23 +159,29 @@ Item {
       Repeater {
         model: root.layers
 
-        Image {
+        NImage {
+
+          sizeToImage: true
+
+          sourceSize: Qt.size(1024, 1024)
           x: 0
           y: root.avatarLayerOffsetY
           z: 2
           source: root.spriteSource(modelData)
-          asynchronous: true
-          cache: true
+            cache: true
           smooth: false
         }
       }
 
-      Image {
+      NImage {
+
+        sizeToImage: true
+
+        sourceSize: Qt.size(1024, 1024)
         x: 0
         y: root.mountOffsetY
         z: 3
         source: root.spriteSource(root.mountHead())
-        asynchronous: true
         cache: true
         smooth: false
         visible: root.hasCurrentMount
@@ -176,13 +189,16 @@ Item {
 
     }
 
-    Image {
+    NImage {
+
+      sizeToImage: true
+
+      sourceSize: Qt.size(1024, 1024)
       parent: avatarCanvas
       x: 0
       y: root.sourceHeight - implicitHeight
       z: 4
       source: root.spriteSource(root.pet())
-      asynchronous: true
       cache: true
       smooth: false
       visible: root.hasCurrentPet
