@@ -1409,7 +1409,7 @@
       "author": "spiros132",
       "description": "A plugin that allows having video wallpapers using mpvpaper.",
       "license": "MIT",
-      "version": "1.6.14",
+      "version": "1.6.15",
       "tags": [
         "Bar",
         "Panel",
@@ -1960,7 +1960,7 @@
       "author": "Qholin",
       "description": "A customizable parallax effect for the wallpaper based on the active workspace.",
       "license": "MIT",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "minAtmospheraVersion": "0.11.0",
       "tags": [
         "Desktop"
