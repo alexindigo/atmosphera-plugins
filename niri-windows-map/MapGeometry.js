@@ -20,6 +20,37 @@ function targetAt(point, viewport, phantom, origin, scale, rows, mapWidth) {
   return null;
 }
 
+// At the bottom stop, pack whole workspace slots above the compact trailing
+// strip. Put leftover viewport space before the strip, keeping up to one row
+// gap at the top. This changes the scroll range, not the viewport or row pitch.
+function trailingLandingSpace(viewHeight, rowHeight, rowGap, rowCount, stripHeight) {
+  var pitch = rowHeight + rowGap;
+  var available = viewHeight - stripHeight;
+  if (available < pitch || available >= rowCount * pitch)
+    return 0;
+  var leftover = available % pitch;
+  return Math.max(0, leftover - rowGap);
+}
+
+function edgeStrength(position, length) {
+  var band = Math.min(32, length / 2);
+  if (band <= 0)
+    return 0;
+  if (position < band)
+    return -Math.min(1, (band - position) / band);
+  return Math.max(0, Math.min(1, (position - (length - band)) / band));
+}
+
+function dragScroll(point, viewport, bounds, offset, elapsedMs) {
+  var distance = 1200 * elapsedMs / 1000;
+  var y = point.y - viewport.y;
+  // The fixed insert strip above the viewport does not drive vertical scroll.
+  var dx = distance * edgeStrength(point.x - viewport.x, viewport.width);
+  var dy = y < 0 ? 0 : distance * edgeStrength(y, viewport.height);
+  return Qt.point(Math.max(bounds.x, Math.min(offset.x + dx, bounds.x + bounds.width)),
+                  Math.max(bounds.y, Math.min(offset.y + dy, bounds.y + bounds.height)));
+}
+
 function revealOffset(start, size, viewport, current, extent) {
   var end = start + size;
   if (size > viewport) {

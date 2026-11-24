@@ -23,7 +23,7 @@
       "author": "Atmosphera",
       "description": "Spatial overview map of niri windows and workspaces. Click tiles to focus, click rows to switch, or drag a window to move it.",
       "license": "GPL-3.0",
-      "version": "1.0.12",
+      "version": "1.0.15",
       "tags": [
         "Panel",
         "Niri",

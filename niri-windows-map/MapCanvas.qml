@@ -86,7 +86,7 @@ Item {
   // 0 (ghost at the press point) — and the handler continues it on move.
   property var _pressWinId: null  // pressed candidate (also gates the model freeze)
   property real _pressTime: 0  // press timestamp for the pan-vs-drag decision
-  property point _pressStart: Qt.point(0, 0)  // press point in mapContent (ghost's position 0)
+  property point _pressStart: Qt.point(0, 0)  // press point in scene coordinates
   property var _dragWinId: null
   property bool _dragging: false
   on_DraggingChanged: {
@@ -102,6 +102,7 @@ Item {
     repeat: false
     onTriggered: {
       if (root._pressWinId !== null) {
+        flick.cancelFlick();
         root._dragWinId = root._pressWinId;
         root._dragging = true;
       }
@@ -112,50 +113,63 @@ Item {
   readonly property real _phantomH: _monH * _autoScale
   readonly property bool dragActive: root._dragging
   readonly property real phantomHeight: root._phantomH
-  // The delegate + handler of the active drag (for centroid mapping)
-  property var _activeDragDelegate: null
   property var _activeDragHandler: null
 
   function _cancelDrag() {
     _pressWinId = null;
-    _activeDragDelegate = null;
     _activeDragHandler = null;
     _dragWinId = null;
     _dragging = false;
     pressHoldTimer.stop();
   }
 
-  // Ghost center in mapContent coordinates: the handler's centroid while
-  // the drag is moving, else the press point (position 0)
-  readonly property point _ghostPos: {
-    if (root._activeDragDelegate && root._activeDragHandler)
-      return root._activeDragDelegate.mapToItem(mapContent, root._activeDragHandler.centroid.position.x, root._activeDragHandler.centroid.position.y);
-    if (root._dragging)
-      return root._pressStart;
-    return Qt.point(0, 0);
+  // The ghost and drop preview read one pointer, independent of content motion.
+  property int _dragFrame: 0
+  readonly property point _dragPointer: {
+    if (!_dragging)
+      return Qt.point(0, 0);
+    // The panel can translate as it grows for the phantom strip. Qt's scene
+    // mapping isn't reactive to that transform, so refresh it each drag frame.
+    _dragFrame;
+    return root.mapFromItem(null, _activeDragHandler ? _activeDragHandler.centroid.scenePosition : _pressStart);
   }
+  readonly property rect _viewport: Qt.rect(flick.x, flick.y, flick.width, flick.height)
+  readonly property rect _insertStrip: Qt.rect(phantomRow.x, phantomRow.y, phantomRow.width, phantomRow.height)
 
-  // The Flickable's content transform is explicit here so stationary drags
-  // observe viewport/panel movement too. Ghost and hit test share this point.
+  // Explicit content offsets and scale re-evaluate the target even when the
+  // pointer does not move. The ghost stays under the pointer while rows move.
   readonly property point _mapOriginInRoot: Qt.point(flick.x + mapContent.x - flick.contentX,
                                                     flick.y + mapContent.y - flick.contentY)
-  readonly property point _ghostInRoot: Qt.point(_mapOriginInRoot.x + _ghostPos.x * _userScale,
-                                                _mapOriginInRoot.y + _ghostPos.y * _userScale)
   readonly property var _workspaceRows: workspaceOrder().map(function (ws, index) {
-    return {id: ws.id, y: index * (root._monH * root._autoScale + root._rowGap), height: root.workspaceRowHeight(index), trailing: index === root._workspaceOrder.length - 1};
+    return {id: ws.id, y: root.workspaceRowY(index), height: root.workspaceRowHeight(index), trailing: index === root._workspaceOrder.length - 1};
   })
 
-  // Only visible geometry accepts drops: the fixed phantom or clipped rows.
-  readonly property var _dragTarget: {
-    if (!root._dragging)
-      return null;
-    return MapGeometry.targetAt(root._ghostInRoot,
-                                Qt.rect(flick.x, flick.y, flick.width, flick.height),
-                                Qt.rect(0, 0, root.width, root._phantomH),
-                                root._mapOriginInRoot, root._userScale, root._workspaceRows, root.renderedW);
+  function _targetAt(point) {
+    return MapGeometry.targetAt(point, _viewport, _insertStrip, _mapOriginInRoot, _userScale, _workspaceRows, renderedW);
   }
 
+  readonly property var _dragTarget: _dragging ? _targetAt(_dragPointer) : null
   readonly property var _dropMove: mapFacade.resolveDrop(_dragWinId, _dragTarget)
+
+  Timer {
+    interval: 16
+    repeat: true
+    running: root._dragging
+    onTriggered: {
+      root._dragFrame++;
+      if (!root._activeDragHandler)
+        return;
+      const bounds = Qt.rect(flick.originX, flick.originY,
+                             Math.max(0, flick.contentWidth - flick.width),
+                             Math.max(0, flick.contentHeight - flick.height));
+      const next = MapGeometry.dragScroll(root._dragPointer, root._viewport, bounds,
+                                         Qt.point(flick.contentX, flick.contentY), interval);
+      if (next.x !== flick.contentX)
+        flick.contentX = next.x;
+      if (next.y !== flick.contentY)
+        flick.contentY = next.y;
+    }
+  }
 
   // Emitted only when the user NAVIGATES via the map (tile focus click,
   // workspace-row click, context-menu Focus). Other interactions (context
@@ -427,7 +441,7 @@ Item {
     var row = w.layout.posInScrollingLayout[1] || 0;
     var cs = columnScale(w.workspaceId, col);
     return Qt.rect(columnX(w.workspaceId, col) * _autoScale + _leftInset + colCountLeft(w.workspaceId, col) * _colGap,
-                   workspaceSlotIndex(w.workspaceId) * (_monH * _autoScale + _rowGap) + tileY(w.workspaceId, col, row) * _autoScale * cs + tileCountAbove(w.workspaceId, col, row) * _winGap,
+                   workspaceRowY(workspaceSlotIndex(w.workspaceId)) + tileY(w.workspaceId, col, row) * _autoScale * cs + tileCountAbove(w.workspaceId, col, row) * _winGap,
                    Math.max(columnMaxWidth(w.workspaceId, col) * _autoScale, 4),
                    Math.max(((w.layout.tileSize && w.layout.tileSize[1]) || 50) * _autoScale * cs, 2));
   }
@@ -465,6 +479,11 @@ Item {
   // Niri's trailing empty workspace is an info strip, not a monitor-sized
   // row. It still has its indicator and remains a workspace/drop target.
   readonly property real _canvasH: Math.max(0, workspaceOrder().length - 1) * _monH
+  readonly property real _trailingLandingSpace: _dragging ? MapGeometry.trailingLandingSpace(flick.height / _userScale, _monH * _autoScale, _rowGap, Math.max(0, _workspaceOrder.length - 1), _infoStripH) : 0
+
+  function workspaceRowY(slot) {
+    return slot * (_monH * _autoScale + _rowGap) + (slot === _workspaceOrder.length - 1 ? _trailingLandingSpace : 0);
+  }
 
   function workspaceRowHeight(slot) {
     return slot === workspaceOrder().length - 1 ? _infoStripH : _monH * _autoScale;
@@ -551,7 +570,9 @@ Item {
     onHeightChanged: Qt.callLater(root._keepCurrentInView)
     contentWidth: mapContent.width * root._userScale
     contentHeight: mapContent.height * root._userScale
-    interactive: true
+    // Before the hold threshold this is a pan. Once the tile owns the drag,
+    // only the edge-scroll timer drives the viewport; Flickable must not steal it.
+    interactive: !root._dragging
 
     WheelHandler {
       acceptedModifiers: Qt.ControlModifier
@@ -566,7 +587,7 @@ Item {
     Item {
       id: mapContent
       width: root.renderedW
-      height: root.renderedH
+      height: root.renderedH + root._trailingLandingSpace
       // Center within the Flickable viewport so any residual letterbox
       // distributes equally — EXCEPT during a drag, when the panel grows
       // upward for the phantom strip and the content stays bottom-anchored
@@ -589,7 +610,7 @@ Item {
           Rectangle {
             visible: modelData.id === root.hoveredWs
             x: 0
-            y: index * (root._monH * root._autoScale + root._rowGap)
+            y: root.workspaceRowY(index)
             width: mapContent.width
             height: root.workspaceRowHeight(index)
             color: AtmoColor.mPrimary
@@ -601,7 +622,7 @@ Item {
           Rectangle {
             visible: root._dropMove?.insertAtIndex === null && modelData.id === root._dropMove?.workspace.id
             x: 0
-            y: index * (root._monH * root._autoScale + root._rowGap)
+            y: root.workspaceRowY(index)
             width: mapContent.width
             height: root.workspaceRowHeight(index)
             color: AtmoColor.mPrimary
@@ -614,7 +635,7 @@ Item {
           // Row indicator bar
           Rectangle {
             x: 0
-            y: index * (root._monH * root._autoScale + root._rowGap)
+            y: root.workspaceRowY(index)
             width: root._barWidth
             height: root.workspaceRowHeight(index)
             color: modelData.id === root.mapFacade.mapState.focusedWorkspaceId ? AtmoColor.mPrimary : AtmoColor.mOutline
@@ -625,7 +646,7 @@ Item {
           // click switches to that workspace (including empty ones).
           MouseArea {
             x: 0
-            y: index * (root._monH * root._autoScale + root._rowGap)
+            y: root.workspaceRowY(index)
             width: mapContent.width
             height: root.workspaceRowHeight(index)
             hoverEnabled: true
@@ -896,7 +917,7 @@ Item {
                 root._pressTime = Date.now();
                 root._windowsCache = root._windowsLive;
                 root._pressWinId = modelData.id;
-                root._pressStart = mapToItem(mapContent, mouse.x, mouse.y);
+                root._pressStart = hoverArea.mapToItem(null, mouse.x, mouse.y);
                 dragH.enabled = true;
                 pressHoldTimer.restart();
               }
@@ -909,10 +930,20 @@ Item {
               if (root._dragging && !root._activeDragHandler)
                 root._cancelDrag();
             }
+            onCanceled: {
+              // A DragHandler takeover also cancels MouseArea. Give the grab
+              // transition a chance to adopt this press before clearing it.
+              const pressTime = root._pressTime;
+              const windowId = modelData.id;
+              Qt.callLater(() => {
+                if (root._pressTime === pressTime && root._pressWinId === windowId && !root._activeDragHandler)
+                  root._cancelDrag();
+              });
+            }
             onClicked: function (mouse) {
               // A drag that the DragHandler consumed never reaches here —
               // the handler's takeover cancels the MouseArea's press
-              if (mouse.button === Qt.LeftButton) {
+              if (mouse.button === Qt.LeftButton && Date.now() - root._pressTime < pressHoldTimer.interval) {
                 if (root.mapFacade.focusWindow(modelData.id))
                   root.navigationRequested();
               } else if (mouse.button === Qt.RightButton) {
@@ -934,8 +965,7 @@ Item {
             target: null
             onActiveChanged: {
               if (dragH.active) {
-                var heldMs = Date.now() - root._pressTime;
-                if (heldMs < 300) {
+                if (root._pressWinId !== modelData.id || Date.now() - root._pressTime < pressHoldTimer.interval) {
                   // Too early — this is a map pan, not a tile drag. Hand
                   // the gesture back to the Flickable; next press re-arms.
                   dragH.enabled = false;
@@ -943,16 +973,27 @@ Item {
                   pressHoldTimer.stop();
                   return;
                 }
-                // Drag already running (started at the hold timer); claim
-                // the handler for centroid tracking
-                root._activeDragDelegate = winRect;
+                // Adopt the press even if the movement arrived in the same
+                // frame as the hold timeout, before the timer fired.
+                pressHoldTimer.stop();
+                flick.cancelFlick();
+                root._dragWinId = modelData.id;
                 root._activeDragHandler = dragH;
+                root._dragging = true;
                 root._pressWinId = null;
-              } else {
-                if (root._dragWinId === modelData.id) {
-                  root.mapFacade.drop(modelData.id, root._dragTarget);
-                  root._cancelDrag();
-                }
+              }
+            }
+            onGrabChanged: (transition, point) => {
+              if (root._activeDragHandler !== dragH)
+                return;
+              if (transition === PointerDevice.UngrabExclusive) {
+                // The release event owns the final position; the centroid
+                // can already have been reset by the time this signal fires.
+                if (point.state === EventPoint.Released)
+                  root.mapFacade.drop(root._dragWinId, root._targetAt(root.mapFromItem(null, point.scenePosition)));
+                root._cancelDrag();
+              } else if (transition === PointerDevice.CancelGrabExclusive) {
+                root._cancelDrag();
               }
             }
           }
@@ -1092,7 +1133,7 @@ Item {
         }
         width: Math.max(32, 240 * root._autoScale)
         height: width * 0.7
-        readonly property point _position: root._ghostInRoot
+        readonly property point _position: root._dragPointer
         x: _position.x - width * scale / 2
         y: _position.y - height * scale / 2
         scale: root._userScale
@@ -1119,7 +1160,7 @@ Item {
       // target. Its text is presented separately in the visible viewport.
       Item {
         id: trailingStrip
-        y: Math.max(0, root.workspaceOrder().length - 1) * (root._monH * root._autoScale + root._rowGap)
+        y: root.workspaceRowY(Math.max(0, root._workspaceOrder.length - 1))
         width: mapContent.width
         height: root._infoStripH
       }
