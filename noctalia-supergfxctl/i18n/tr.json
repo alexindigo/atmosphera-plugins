@@ -16,7 +16,7 @@
     "Vfio": "VFIO Geçişi"
   },
   "settings": {
-    "shared-effect": "GPU mode and device observations are shared. Polling and requests use this instance's applied policy; mode changes affect every instance. ROG notification control remains unavailable.",
+    "shared-effect": "GPU modu ve aygıt gözlemleri ortaktır. Yoklamalar ve istekler bu örneğin uygulanmış ayarlarını kullanır; mod değişiklikleri tüm örnekleri etkiler. ROG bildirim denetimi hâlâ kullanılamıyor.",
     "debug": {
       "description": "Konsola hata ayıklama bilgilerini yazdır.",
       "label": "Hata ayıklama modu"

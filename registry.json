@@ -1700,7 +1700,7 @@
       "author": "cod3d <cod3ddot@proton.me>",
       "description": "GPU control with supergfxctl for noctalia.",
       "license": "MIT",
-      "version": "0.0.9",
+      "version": "0.0.10",
       "tags": [
         "Bar",
         "Panel",

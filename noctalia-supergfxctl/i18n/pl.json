@@ -16,7 +16,7 @@
     "Vfio": "VFIO Passthrough"
   },
   "settings": {
-    "shared-effect": "GPU mode and device observations are shared. Polling and requests use this instance's applied policy; mode changes affect every instance. ROG notification control remains unavailable.",
+    "shared-effect": "Tryb GPU i obserwacje urządzenia są współdzielone. Odpytywanie i żądania korzystają z zastosowanych ustawień tej instancji; zmiany trybu dotyczą wszystkich instancji. Sterowanie powiadomieniami ROG nadal jest niedostępne.",
     "debug": {
       "description": "Wyświetl informacje debugowania w konsoli.",
       "label": "Tryb debugowania"

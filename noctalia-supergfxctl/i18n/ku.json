@@ -16,7 +16,7 @@
     "Vfio": "VFIO Derbasbûn"
   },
   "settings": {
-    "shared-effect": "GPU mode and device observations are shared. Polling and requests use this instance's applied policy; mode changes affect every instance. ROG notification control remains unavailable.",
+    "shared-effect": "Moda GPU û agahiyên çavdêriya amûrê hevpar in. Kontrol û daxwaz mîhengên sepandî yên vê mînakê bi kar tînin; guhertinên modê bandorê li hemû mînakan dikin. Kontrola agahdariyên ROG hîn ne berdest e.",
     "debug": {
       "description": "Agahiyên çewtiyan li ser konsolê çap bike.",
       "label": "Rewşa çewtiyan rast bike"

@@ -36,10 +36,9 @@ QtObject {
     property var _settingsConsumers: new Map()
     property var _refreshPolicy: null
     property var _pendingRefreshPolicy: null
-    property var _modePolicy: null
-    property int _modeTarget: Main.SGFXMode.None
+    property var _modeOperation: null
     readonly property bool _refreshCurrent: !root._retired && (root._refreshPolicy?.context?.current() ?? false)
-    readonly property bool _modeCurrent: !root._retired && (root._modePolicy?.context?.current() ?? false)
+    readonly property bool _modeCurrent: !root._retired && (root._modeOperation?.policy.context.current() ?? false)
     readonly property string pluginId: pluginApi?.pluginId
     readonly property string pluginVersion: pluginApi?.manifest.version ?? "???"
 
@@ -74,7 +73,8 @@ QtObject {
     readonly property int mode: sgfx.mode
     readonly property int pendingAction: sgfx.pendingAction
     readonly property bool hasPendingAction: sgfx.pendingAction !== Main.SGFXAction.Nothing
-    readonly property int pendingMode: sgfx.pendingMode
+    // An in-flight target is only a presentation hint while its owner is live.
+    readonly property int pendingMode: _modeCurrent && _modeOperation.policy.patchPending ? _modeOperation.targetMode : sgfx.pendingMode
 
     readonly property Component clientFactory: Component { GpuSettingsClient {} }
     function settingsConsumerFor(context) {
@@ -212,9 +212,7 @@ QtObject {
 
     function setMode(mode: int, context): bool {
         const policy = capturePolicy(context);
-        if (!policy || setModeProc.running) return false;
-        _modePolicy = policy;
-        _modeTarget = mode;
+        if (!policy || _modeOperation) return false;
         return sgfx.setMode(mode, policy);
     }
 
@@ -279,25 +277,21 @@ QtObject {
     readonly property Process setModeProc: Process {
         stderr: StdioCollector {
             onStreamFinished: {
-                if (root._modeCurrent && text) root.errorFor(root._modePolicy, text);
+                if (root._modeCurrent && text) root.errorFor(root._modeOperation.policy, text);
             }
         }
         onExited: exitCode => {
-            const policy = root._modePolicy;
-            if (!root._modeCurrent) return;
-            // pending mode has been set manually in sgfx.setMode
-            // if process exited successfully, set pending action
-            // if not, clear pending mode
-            if (policy.patchPending) {
-                if (exitCode === 0) {
-                    const action = root.sgfx.requiredAction(root._modeTarget, root.sgfx.manualRequest.baseMode);
-                    root.sgfx.manualRequest = Object.assign({}, root.sgfx.manualRequest, {action: action});
-                    root.sgfx.pendingAction = action;
-                } else {
-                    root.sgfx.manualRequest = null;
-                    root.sgfx.pendingMode = Main.SGFXMode.None;
-                }
+            const operation = root._modeOperation;
+            const current = root._modeCurrent;
+            if (current && operation.policy.patchPending && exitCode === 0) {
+                const action = sgfx.requiredAction(operation.targetMode, operation.baseMode);
+                sgfx.manualRequest = {baseMode: operation.baseMode, targetMode: operation.targetMode, action: action};
+                sgfx.pendingMode = operation.targetMode;
+                sgfx.pendingAction = action;
             }
+            root._modeOperation = null;
+            if (!current) return;
+            const policy = operation.policy;
 
             // per asusctl/rog-control-center, supergfxctl output after mode switch is unreliable, and requires reboot
             // (see https://gitlab.com/asus-linux/asusctl/-/blob/main/rog-control-center/src/notify.rs?ref_type=heads#L361)
@@ -420,12 +414,7 @@ QtObject {
                 return false;
             }
 
-            // manually set pending mode
-            // pending action will be set on process exit if it was successfull
-            manualRequest = policy.patchPending ? {baseMode: mode, targetMode: modeEnum, action: Main.SGFXAction.Nothing} : null;
-            if (policy.patchPending) {
-                pendingMode = modeEnum;
-            }
+            root._modeOperation = {policy: policy, baseMode: mode, targetMode: modeEnum};
             setModeProc.command = ["supergfxctl", "--mode", modeEnumReversed[modeEnum]];
             setModeProc.running = true;
 
@@ -508,6 +497,7 @@ QtObject {
             supportedModesMask = newSupportedMask;
 
             if (!policy.patchPending) {
+                manualRequest = null;
                 mode = newMode;
                 pendingMode = newPendingMode;
                 pendingAction = newPendingAction;
