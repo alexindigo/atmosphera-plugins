@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import qs.Commons
 import qs.Widgets
+import qs.Portals
 import qs.Services.UI
 
 Item {
@@ -24,20 +25,31 @@ Item {
   // Shared state for context menu
   property var selectedPeer: null
   property var selectedPeerDelegate: null
-  property var sendTargetPeer: null
   property string searchQuery: ""
 
-  AtmoFilePicker {
+  PortalFilePicker {
     id: sendFilePicker
     title: pluginApi?.tr("file-picker.title")
     selectionMode: "files"
+    allowMultiSelection: true
     initialPath: Quickshell.env("HOME") ?? ""
+    property string _target: ""
+
+    function openForPeer(peer) {
+      if (_target || !mainInstance || !peer) return
+      // Resolve Tailscale DNS (not the system HostName) at admission.
+      const address = mainInstance.tailscaleName(peer.DNSName) || peer.TailscaleIPs?.[0]
+      if (!address) return
+      _target = address + ":"
+      openFilePicker()
+    }
+
+    onCancelled: _target = ""
     onAccepted: function(paths) {
-      if (!mainInstance || !root.sendTargetPeer || paths.length === 0) return
-      // Use Tailscale DNS name (not system HostName) to avoid LAN DNS resolution
-      var tsName = mainInstance.tailscaleName(root.sendTargetPeer.DNSName)
-      var target = (tsName || root.sendTargetPeer.TailscaleIPs[0]) + ":"
-      mainInstance.sendFilesViaTaildrop(paths, target)
+      const target = _target
+      _target = ""
+      if (mainInstance && target && paths.length)
+        mainInstance.sendFilesViaTaildrop(paths, target)
     }
   }
 
@@ -253,8 +265,7 @@ Item {
           root.useExitNode(root.selectedPeer)
           break
         case "send-file":
-          root.sendTargetPeer = root.selectedPeer
-          sendFilePicker.openFilePicker()
+          sendFilePicker.openForPeer(root.selectedPeer)
           break
       }
     }

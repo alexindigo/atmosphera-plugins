@@ -30,8 +30,8 @@ Item {
         let wallpapers = {};
         const oldWallpapers = WallpaperService.currentWallpapers;
         for(let screenName in oldWallpapers) {
-            // Only save the old wallpapers if it isn't the current video wallpaper.
-            if(oldWallpapers[screenName] != thumbnails.getThumbPath(root.currentWallpaper)) {
+            // Only save the old wallpapers if it isn't a video wallpaper's thumbnail.
+            if(!thumbnails.isThumbnail(oldWallpapers[screenName])) {
                 wallpapers[screenName] = oldWallpapers[screenName];
                 changed = true;
             }
@@ -53,7 +53,7 @@ Item {
         }
 
         if(!changed) {
-            WallpaperService.changeWallpaper(WallpaperService.noctaliaDefaultWallpaper, undefined);
+            WallpaperService.changeWallpaper(WallpaperService.defaultWallpaper, undefined);
         }
     }
 }

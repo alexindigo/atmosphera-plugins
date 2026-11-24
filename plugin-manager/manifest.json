@@ -1,9 +1,9 @@
 {
   "id": "plugin-manager",
   "name": "Plugin Manager",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "minNoctaliaVersion": "4.6.6",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "blacku",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",

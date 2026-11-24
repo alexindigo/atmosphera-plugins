@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import qs.Commons
 import qs.Services.UI
 import qs.Widgets
+import qs.Portals
 import "./Services"
 import Quickshell
 
@@ -216,18 +217,28 @@ Item {
                 Layout.fillWidth: true
               }
 
-              AtmoFilePicker {
+              PortalFilePicker {
                 id: shareFilePicker
                 title: pluginApi?.tr("panel.send-file-picker")
                 selectionMode: "files"
+                allowMultiSelection: true
                 initialPath: Quickshell.env("HOME")
                 nameFilters: ["*"]
+                property string _targetId: ""
+
+                function openForDevice(deviceId) {
+                  if (_targetId || !deviceId) return
+                  _targetId = deviceId
+                  openFilePicker()
+                }
+
+                onCancelled: _targetId = ""
                 onAccepted: paths => {
-                  if (paths.length > 0) {
-                    for (const path of paths) {
-                      KDEConnect.shareFile(KDEConnect.mainDevice.id, path)
-                    }
-                  }
+                  const targetId = _targetId
+                  _targetId = ""
+                  if (!targetId || !KDEConnect.devices.some(device => device.id === targetId && device.paired && device.reachable)) return
+                  for (const path of paths)
+                    KDEConnect.shareFile(targetId, path)
                 }
               }
 
@@ -243,7 +254,7 @@ Item {
                 icon: "device-mobile-share"
                 tooltipText: pluginApi?.tr("panel.send-file")
                 onClicked: {
-                  shareFilePicker.open()
+                  shareFilePicker.openForDevice(KDEConnect.mainDevice?.id)
                 }
               }
 

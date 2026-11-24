@@ -155,14 +155,15 @@ Item {
                     }
                 }
 
-                Image {
+                // The menu image is downloaded and decoded by the shared
+                // image owner (any format, fallback when Qt cannot).
+                NImage {
                     id: menuImage
                     property bool loaded: false
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectFit
                     source: getMenuUrl(currentMonday)
                     cache: true
-                    asynchronous: true
 
                     onStatusChanged: {
                         if (status === Image.Ready) {

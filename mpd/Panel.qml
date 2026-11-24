@@ -25,6 +25,9 @@ Item {
   property string songAlbum: ""
   property string songFile: ""
   property string coverArtPath: ""
+  // Each song's art is written to the same file: the revision tells the
+  // shared image owner that the bytes changed.
+  property int coverRevision: 0
 
   Component.onCompleted: detailProc.running = true
 
@@ -92,6 +95,7 @@ Item {
         // stdout is empty (binary was redirected to file); this fires when done.
         // Image.cache is false, so a source change always reloads from disk.
         root.coverArtPath = "file:///tmp/noctalia-mpd-cover"
+        root.coverRevision++
       }
     }
   }
@@ -106,6 +110,7 @@ Item {
         // stdout is empty (binary was redirected to file); this fires when done.
         // Image.cache is false, so a source change always reloads from disk.
         root.coverArtPath = "file:///tmp/noctalia-mpd-coverart"
+        root.coverRevision++
       }
     }
   }
@@ -141,12 +146,12 @@ Item {
           color: AtmoColor.mSurfaceVariant
           clip: true
 
-          Image {
+          // Through the shared image owner; a failure is labelled.
+          NImageIcon {
             id: coverImage
             anchors.fill: parent
             fillMode: Image.PreserveAspectCrop
-            asynchronous: true
-            cache: false  // always reload from temp file, never use a cached old song's art
+            sourceRevision: String(root.coverRevision)
             source: root.coverArtPath
           }
 

@@ -862,7 +862,7 @@ Item {
           // icon. Size is the smaller of 60% of the icon box and the
           // favicon's native resolution (clamped via the rendered scale),
           // so cached 32px icons stay crisp on huge tiles.
-          Image {
+          MapFavicon {
             id: favBadge
             anchors.right: parent.right
             anchors.rightMargin: 2
@@ -876,10 +876,8 @@ Item {
             height: width
             visible: !root.hideIcons && !winRect._dragged && winRect._favicon !== "" && iconWrap.visible
             opacity: iconWrap.opacity
-            source: winRect._favicon
-            fillMode: Image.PreserveAspectFit
-            smooth: true
-            asynchronous: true
+            useSharedDecoder: root.mapFacade.currentShell
+            iconSource: winRect._favicon
             sourceSize: Qt.size(winRect._faviconW, winRect._faviconW)
 
             layer.enabled: !(winRect._current || winRect._hovered)

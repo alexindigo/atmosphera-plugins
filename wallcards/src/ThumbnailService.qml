@@ -1,14 +1,16 @@
 import "Utils.js" as Utils
 import QtQuick
+import Quickshell
 import Quickshell.Io
 import Qt.labs.folderlistmodel
+import qs.Commons
+import qs.Services.UI
 
 Item {
   id: service
 
-  property int maxThumbnailJobs: 4
-  property var pendingJobs: []
-  property int activeJobs: 0
+  // Thumbnails come from the shared image owner (validated PNGs, fallback
+  // decoding, video frames); the dominant color is read from those.
   required property string cacheDir
   required property var imageFilter
   required property var videoFilter
@@ -20,6 +22,7 @@ Item {
   property bool loading: true
   property int pendingProcesses: 0
   property int thumbnailRevision: 0
+  property var _entries: []
 
   signal ready
 
@@ -42,171 +45,135 @@ Item {
     }
   }
 
-function createThumbnails() {
-    var proc = processComponent.createObject(null, {
-        command: ["mkdir", "-p", cacheDir]
-    });
-    proc.running = true;
-
-    var items = [];
-    var jobs = [];
-
-    for (var i = 0; i < thumbnailModel.count; i++) {
-        (function (idx) {
-            var filePath = toLocalPath(thumbnailModel.get(idx, "filePath"));
-            var fileName = thumbnailModel.get(idx, "fileName");
-            var isVid = Utils.isVideo(fileName, service.videoFilter);
-            var thumbName = isVid ? fileName + ".jpg" : fileName;
-            var thumbnailPath = cacheDir + "/" + thumbName;
-
-            var thumbnailCmd = isVid ? videoToThumbnailCmd(filePath, thumbnailPath) : imageToThumbnailCmd(filePath, thumbnailPath);
-            var hexCmd = thumbnailHexValueCmd(thumbnailPath);
-
-            const script = `
-                [ -f "${thumbnailPath}"* ] && exit 0
-                ${thumbnailCmd}
-                mv "${thumbnailPath}" "${thumbnailPath}__x$(${hexCmd})"
-            `;
-
-            jobs.push({
-                script: script,
-                thumbnailPath: thumbnailPath
-            });
-
-            items.push({});
-        })(i);
-    }
-
-    pendingJobs = jobs;
-    activeJobs = 0;
-    processNextJob();
-
-    if (thumbnailModel.count === 0) {
-        service.loading = false;
-    }
-
-    files = items;
-}
-function processNextJob() {
-    while (activeJobs < maxThumbnailJobs && pendingJobs.length > 0) {
-        var job = pendingJobs.shift();
-        activeJobs++;
-        service.pendingProcesses++;
-        createSingleThumbnail(job, function() {
-            activeJobs--;
-            processNextJob();
-        });
-    }
-}
-
-function createSingleThumbnail(job, onFinished) {
-    var proc = processComponent.createObject(null, {
-        command: ["bash", "-c", job.script]
-    });
-
-    proc.exited.connect(function () {
-        service.pendingProcesses--;
-        service.thumbnailRevision++;
-
-        if (service.pendingProcesses === 0) {
-            filesModel.running = true;
-        }
-
-        proc.destroy();
-        if (onFinished) onFinished();
-    });
-
-    proc.running = true;
-}
-  function imageToThumbnailCmd(filePath, thumbnailPath) {
-    return `magick "${filePath}" \
-      -resize x500 \
-      -quality 95 \
-      "${thumbnailPath}"
-    `;
-  }
-
-  function videoToThumbnailCmd(filePath, thumbnailPath) {
-    return `ffmpeg -y -i \
-      "${filePath}" \
-      -vf "select=eq(n\\,0),scale=-1:1080" \
-      -frames:v 1 \
-      -q:v 2 \
-      "${thumbnailPath}" </dev/null 2>/dev/null`;
-  }
-
-  function thumbnailHexValueCmd(thumbnailPath) {
-    return `magick "${thumbnailPath}" \
-      -resize "1x1^" \
-      -gravity center \
-      -extent 1x1 \
-      -depth 8 \
-      -format "%[hex:p{0,0}]" info:- 2>/dev/null \
-      | grep -oE '[0-9A-Fa-f]{6}' \
-      | head -n 1`;
-  }
-
-  FolderListModel {
-    id: filesModel
-
-    nameFilters: ["*__x*"]
-    showDirs: false
-    sortField: FolderListModel.Name
-
-    property bool running: false
-
-    onRunningChanged: {
-      if (running)
-        folder = Qt.resolvedUrl("file://" + service.cacheDir);
-    }
-
-    onStatusChanged: {
-      if (status === FolderListModel.Ready && running) {
-        service.buildFileList();
-        running = false;
+  function releaseEntries() {
+    for (const entry of _entries) {
+      entry.alive = false;
+      if (entry.sampler) {
+        entry.sampler.destroy();
+        entry.sampler = null;
       }
+      if (entry.token)
+        ImageCacheService.releaseSource(entry.token);
     }
+    _entries = [];
+  }
+
+  function createThumbnails() {
+    releaseEntries();
+    var entries = [];
+    for (var i = 0; i < thumbnailModel.count; i++) {
+      var fileName = thumbnailModel.get(i, "fileName");
+      entries.push({
+                     fileName: fileName,
+                     filePath: toLocalPath(thumbnailModel.get(i, "filePath")),
+                     isVideo: Utils.isVideo(fileName, service.videoFilter),
+                     url: "",
+                     hex: "",
+                     settled: false,
+                     alive: true,
+                     token: "",
+                      sampler: null
+                   });
+    }
+    _entries = entries;
+    pendingProcesses = entries.length;
+    loading = entries.length > 0;
+    // One placeholder per wallpaper while loading: the progress total.
+    files = entries.map(() => ({}));
+    for (const entry of entries)
+      request(entry);
+    if (entries.length === 0)
+      ready();
+  }
+
+  function request(entry) {
+    entry.token = ImageCacheService.acquireSource({
+                                                    source: entry.filePath,
+                                                    width: entry.isVideo ? 1024 : 1000,
+                                                    height: entry.isVideo ? 1024 : 500,
+                                                    fit: "contain",
+                                                    animationIntent: "still",
+                                                    operation: entry.isVideo ? "video-thumbnail" : "render"
+                                                  }, function (reply) {
+                                                    if (!entry.alive || entry.settled)
+                                                      return;
+                                                    if (!["hit", "generated"].includes(reply.status) || !reply.url) {
+                                                      Logger.w("Wallcards", "Thumbnail unavailable:", entry.fileName, reply.reason || "");
+                                                      settle(entry);
+                                                      return;
+                                                    }
+                                                    entry.url = reply.url;
+                                                    sampleColor(entry, reply.url);
+                                                  });
+  }
+
+  function sampleColor(entry, thumbnailUrl) {
+    // This is a normalized owner artifact, never the original wallpaper.
+    const url = String(thumbnailUrl);
+    if (!url.startsWith("file:///")) {
+      settle(entry);
+      return;
+    }
+    const path = decodeURIComponent(url.slice(7));
+    const cache = ImageCacheService.thumbnailDir;
+    const filename = entry.isVideo ? /^xx-large\/[a-f0-9]{32}\.png$/ : /^atmosphera-representations-v1\/still\/[a-f0-9]{64}\.png$/;
+    if (!cache.startsWith("/") || !path.startsWith(cache) || !filename.test(path.slice(cache.length))) {
+      settle(entry);
+      return;
+    }
+    const sampler = samplerComponent.createObject(service, { thumbnailPath: path });
+    if (!sampler) {
+      settle(entry);
+      return;
+    }
+    entry.sampler = sampler;
+    sampler.completed.connect(function (hex) {
+      if (!entry.alive || entry.settled || entry.sampler !== sampler)
+        return;
+      entry.sampler = null;
+      sampler.destroy();
+      entry.hex = hex;
+      settle(entry);
+    });
+    sampler.running = true;
+  }
+
+  function averageColor(histogram) {
+    let pixels = 0;
+    const sums = [0, 0, 0];
+    // Count the sampled pixels equally, skipping only fully transparent ones.
+    const rows = /^\s*(\d+):[^\n]*?\s#([0-9a-f]{8})(?=\s|$)/gim;
+    let row;
+    while ((row = rows.exec(histogram)) !== null) {
+      if (row[2].slice(6) === "00")
+        continue;
+      const count = Number(row[1]);
+      pixels += count;
+      for (let i = 0; i < 3; i++)
+        sums[i] += count * parseInt(row[2].slice(i * 2, i * 2 + 2), 16);
+    }
+    return pixels ? sums.map(sum => Math.round(sum / pixels).toString(16).padStart(2, "0")).join("") : "";
+  }
+
+  function settle(entry) {
+    entry.settled = true;
+    pendingProcesses = Math.max(0, pendingProcesses - 1);
+    thumbnailRevision++;
+    if (pendingProcesses === 0)
+      buildFileList();
   }
 
   function buildFileList() {
-    // Ground truth needed to avoid showing thumbnails for files
-    // that are no longer in the wallpaper directory.
-    var existingFiles = new Set();
-    for (let j = 0; j < thumbnailModel.count; j++) {
-      existingFiles.add(thumbnailModel.get(j, "fileName"));
-    }
-
-    var items = [];
-
-    for (let i = 0; i < filesModel.count; i++) {
-      const filePath = toLocalPath(filesModel.get(i, "filePath"));
-      const fileName = filesModel.get(i, "fileName");
-
-      const idx = fileName.lastIndexOf("__x");
-      if (idx === -1)
-        continue;
-
-      const thumbBase = fileName.substring(0, idx);
-      const hexColor = fileName.substring(idx + 3);
-
-      // Video thumbnails are named <original>.<vidext>.jpg__x<hex>
-      // Strip trailing .jpg to recover the original video filename.
-      var isVid = thumbBase.toLowerCase().endsWith(".jpg") && Utils.isVideo(thumbBase.substring(0, thumbBase.lastIndexOf(".")), service.videoFilter);
-      var wallpaperName = isVid ? thumbBase.substring(0, thumbBase.lastIndexOf(".")) : thumbBase;
-
-      if (!existingFiles.has(wallpaperName)) {
-        continue;
-      }
-
-      items.push({
-        fileName: wallpaperName,
-        filePath: wallpaperDir + "/" + wallpaperName,
-        thumbnail: filePath,
-        hexCode: hexColor,
-        filterColor: getFilterColor(hexColor),
-        isVideo: isVid
-      });
-    }
+    var items = _entries.map(entry => ({
+                                         fileName: entry.fileName,
+                                         filePath: entry.filePath,
+                                         // A failed thumbnail shows the original through the owner,
+                                         // which labels the failure.
+                                         thumbnail: entry.url || entry.filePath,
+                                         hexCode: entry.hex,
+                                         filterColor: getFilterColor(entry.hex),
+                                         isVideo: entry.isVideo
+                                       }));
 
     items.sort((a, b) => colorOrder.indexOf(a.filterColor) - colorOrder.indexOf(b.filterColor));
 
@@ -268,8 +235,20 @@ function createSingleThumbnail(job, onFinished) {
   }
 
   Component {
-    id: processComponent
+    id: samplerComponent
 
-    Process {}
+    Process {
+      required property string thumbnailPath
+      signal completed(string hex)
+
+      // Only read a histogram on stdout; never decode an original or write an image.
+      command: ["magick", "-limit", "thread", "1", thumbnailPath, "-scale", "32x32>", "-type", "TrueColorAlpha", "-depth", "8", "-format", "%c", "histogram:info:-"]
+      stdout: StdioCollector { id: histogram }
+      onExited: (code, status) => completed(code === 0 && status === 0 ? service.averageColor(histogram.text) : "")
+      // FailedToStart does not deliver exited. A normal exit was already handled.
+      onRunningChanged: if (!running) completed("")
+    }
   }
+
+  Component.onDestruction: releaseEntries()
 }

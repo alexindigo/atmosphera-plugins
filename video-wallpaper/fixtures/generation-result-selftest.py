@@ -10,6 +10,7 @@ import sys
 parser = argparse.ArgumentParser(description=__doc__)
 for name in ('source', 'plugins', 'guest-profile', 'output'):
     parser.add_argument('--' + name, type=Path, required=True)
+parser.add_argument('--expected-guest-uuid', default='12f17a02-25e9-474c-9dae-fea092c2d2be')
 args = parser.parse_args()
 output = args.output.resolve()
 output.mkdir(parents=True, exist_ok=False)
@@ -26,7 +27,7 @@ shutil.copy2(Path(__file__).with_suffix('.qml').with_name('generation-regression
 command = [sys.executable, '-B', str(runner)]
 for name in ('source', 'plugins', 'guest-profile'):
     command += ['--' + name, str(getattr(args, name.replace('-', '_')).resolve())]
-command += ['--output', str(output / 'run')]
+command += ['--expected-guest-uuid', args.expected_guest_uuid, '--output', str(output / 'run')]
 result = subprocess.run(command, capture_output=True, text=True, timeout=150)
 (output / 'injected.log').write_text(result.stdout + result.stderr)
 assert result.returncode != 0 and 'injected later postcondition failure' in result.stderr

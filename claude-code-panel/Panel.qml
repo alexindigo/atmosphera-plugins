@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Effects
 import Quickshell
 import qs.Commons
 import qs.Widgets
@@ -678,8 +677,7 @@ Item {
   }
 
   // ====================================================================
-  // ClaudeLogo — real Anthropic Claude mark, recolored to match the theme.
-  // The SVG ships white (`fill="#ffffff"`); MultiEffect.colorization recolors it in-place.
+  // ClaudeLogo — the shell icon set's asterisk glyph in the theme color.
   // ====================================================================
   component ClaudeLogo: Item {
     id: logoRoot
@@ -688,31 +686,11 @@ Item {
     implicitWidth: 16 * Style.uiScaleRatio
     implicitHeight: 16 * Style.uiScaleRatio
 
-    // Rasterize the SVG once at a high fixed resolution. Qt will downscale that pixmap
-    // to the actual on-screen size with mipmap + smooth filtering. Without this, small
-    // sizes (~14px bubble header) would rasterize the SVG at 14px and look chunky.
-    readonly property int _rasterPx: 256
-
-    Image {
-      id: logoImage
-      anchors.fill: parent
-      source: Qt.resolvedUrl("assets/claude.svg")
-      sourceSize.width: logoRoot._rasterPx
-      sourceSize.height: logoRoot._rasterPx
-      fillMode: Image.PreserveAspectFit
-      smooth: true
-      mipmap: true
-      antialiasing: true
-      // Tint via layer + MultiEffect. Pin the layer texture to the same high resolution
-      // or the effect would re-sample the Image at the item's tiny display size.
-      layer.enabled: true
-      layer.textureSize: Qt.size(logoRoot._rasterPx, logoRoot._rasterPx)
-      layer.smooth: true
-      layer.mipmap: true
-      layer.effect: MultiEffect {
-        colorization: 1.0
-        colorizationColor: logoRoot.tint
-      }
+    AtmoIcon {
+      anchors.centerIn: parent
+      icon: "asterisk"
+      pointSize: Style.fontSizeM
+      color: logoRoot.tint
     }
   }
 
@@ -886,31 +864,27 @@ Item {
 
         Component {
           id: textBlockComp
-          TextEdit {
+          // Markdown that can carry images: through NImageText.
+          NImageText {
             text: blockData.text || ""
-            readOnly: true
             selectByMouse: true
             persistentSelection: true
             wrapMode: TextEdit.WordWrap
             // PlainText while streaming; MarkdownText (or PlainText for tool I/O)
             // once finalized so we don't keep re-parsing partial markdown.
-            textFormat: {
-              if (blockData.kind === "tool") return TextEdit.PlainText;
-              if (entry && entry.streaming === true) return TextEdit.PlainText;
-              return TextEdit.MarkdownText;
+            format: {
+              if (blockData.kind === "tool") return "plain";
+              if (entry && entry.streaming === true) return "plain";
+              return "markdown";
             }
             color: AtmoColor.mOnSurface
-            font.pointSize: Style.fontSizeS * Style.uiScaleRatio
-            font.family: blockData.kind === "tool"
+            pointSize: Style.fontSizeS
+            fontScale: Style.uiScaleRatio
+            family: blockData.kind === "tool"
                            ? "monospace"
                            : (Settings.data.ui.fontDefault || "sans-serif")
             selectionColor: Qt.alpha(AtmoColor.mPrimary, 0.45)
-            selectedTextColor: AtmoColor.mOnPrimary
             onLinkActivated: function (url) { Qt.openUrlExternally(url); }
-            // Render-as-rich URLs; passes Qt's safety check.
-            HoverHandler {
-              cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.IBeamCursor
-            }
           }
         }
 

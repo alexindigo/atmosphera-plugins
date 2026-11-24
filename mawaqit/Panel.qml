@@ -338,6 +338,7 @@ Item {
         NText { text: gregorianDateStr; pointSize: Style.fontSizeS; color: AtmoColor.mSecondary; Layout.alignment: Qt.AlignVCenter }
         Item { Layout.fillWidth: true }
         Text {
+          textFormat: Text.PlainText
           visible: decoFontReady && hijriDateAr !== ""
           text: hijriDateAr; font.family: decoFont.name; font.pointSize: Style.fontSizeXL
           color: isRamadan ? AtmoColor.mPrimary : AtmoColor.mSecondary
@@ -378,6 +379,7 @@ Item {
           }
           Item { Layout.fillWidth: true }
           Text {
+            textFormat: Text.PlainText
             text: upcomingEvent?.name ?? ""
             font.family: decoFontReady ? decoFont.name : ""
             font.pointSize: Style.fontSizeM
@@ -414,6 +416,7 @@ Item {
               id: countdownColumn
               anchors.centerIn: parent; spacing: Style.marginXS
               Text {
+                textFormat: Text.PlainText
                 Layout.alignment: Qt.AlignHCenter
                 visible: prayerNow && decoFontReady
                 text: {
@@ -799,6 +802,7 @@ Item {
 
             // Today's event
             Text {
+              textFormat: Text.PlainText
               readonly property string todayEvAr: calItem.isCurrentMonth ? getEventAr(hijriMonth, hijriDay) : ""
               visible: todayEvAr !== "" && !root.showLast10Nights
               text: "🌙 " + todayEvAr
@@ -818,6 +822,7 @@ Item {
 
               Text {
                 id: last10Text
+                textFormat: Text.PlainText
                 anchors {
                   left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter
                   leftMargin: Style.marginM; rightMargin: Style.marginM
@@ -840,6 +845,7 @@ Item {
               NDivider { Layout.fillWidth: true; opacity: 0.4 }
 
               Text {
+                textFormat: Text.PlainText
                 Layout.fillWidth: true
                 text: root.dailyHadith?.text ?? ""
                 font.family: decoFontReady ? decoFont.name : ""

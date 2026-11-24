@@ -279,14 +279,15 @@ Item {
         }
 
         // Fallback: raw markdown (when markdown-it-py not available)
-        NText {
+        // README images (relative ones against the plugin folder) through
+        // the shared image owner.
+        NImageText {
           visible: root._parseFailed && root._readmeBlocks.length > 0
           width: parent.width
           text: root._readmeBlocks.length > 0 && root._readmeBlocks[0].type === "raw" ? root._readmeBlocks[0].text : ""
-          markdownTextEnabled: true
+          format: "markdown"
           baseUrl: root._readmeBaseUrl
           wrapMode: Text.WordWrap
-          elide: Text.ElideNone
           color: AtmoColor.mOnSurface
           pointSize: Style.fontSizeM
         }
@@ -335,14 +336,13 @@ Item {
 
   Component {
     id: headingComponent
-    NText {
+    NImageText {
       width: parent ? parent.width : 0
       text: root._formatInline(blockData ? blockData.text : "")
-      richTextEnabled: true
+      format: "rich"
       wrapMode: Text.WordWrap
-      elide: Text.ElideNone
       color: AtmoColor.mOnSurface
-      font.weight: Style.fontWeightBold
+      fontWeight: Style.fontWeightBold
       pointSize: {
         if (!blockData) return Style.fontSizeM
         switch (blockData.level) {
@@ -358,12 +358,11 @@ Item {
 
   Component {
     id: paragraphComponent
-    NText {
+    NImageText {
       width: parent ? parent.width : 0
       text: root._formatInline(blockData ? blockData.text : "")
-      richTextEnabled: true
+      format: "rich"
       wrapMode: Text.WordWrap
-      elide: Text.ElideNone
       color: AtmoColor.mOnSurface
       pointSize: Style.fontSizeM
       onLinkActivated: link => root._safeOpenUrl(link)
@@ -415,11 +414,10 @@ Item {
             Layout.preferredWidth: blockData && blockData.ordered ? Math.round(20 * Style.uiScaleRatio) : Math.round(12 * Style.uiScaleRatio)
           }
 
-          NText {
+          NImageText {
             text: root._formatInline(modelData)
-            richTextEnabled: true
+            format: "rich"
             wrapMode: Text.WordWrap
-            elide: Text.ElideNone
             color: AtmoColor.mOnSurface
             pointSize: Style.fontSizeM
             Layout.fillWidth: true
@@ -434,14 +432,20 @@ Item {
     id: imageComponent
     Item {
       width: parent ? parent.width : 0
-      implicitHeight: readmeImage.implicitHeight
+      implicitHeight: readmeImage.height
 
-      Image {
+      // Through the shared image owner (any format, animation kept); an
+      // image that cannot be displayed stays as a labelled placeholder.
+      NImageIcon {
         id: readmeImage
         readonly property real maxWidth: Math.round(parent.width * 0.8)
-        width: Math.min(implicitWidth, maxWidth)
+        readonly property var natural: imageState === "ready" ? imageResult : null
+        readonly property real placeholder: Math.round(Style.fontSizeXXL * 2 * Style.uiScaleRatio)
+        width: natural && natural.width > 0 ? Math.min(natural.width, maxWidth) : failed ? placeholder : 0
+        height: natural && natural.width > 0 ? Math.round(width * natural.height / natural.width) : failed ? placeholder : 0
+        sourceSize: Qt.size(Math.max(1, Math.ceil(maxWidth * Screen.devicePixelRatio)), Math.max(1, Math.ceil(maxWidth * Screen.devicePixelRatio)))
         fillMode: Image.PreserveAspectFit
-        asynchronous: true
+        animationIntent: "preserve"
         source: {
           if (!blockData || !blockData.src) return ""
           var src = blockData.src
@@ -465,11 +469,6 @@ Item {
           if (src.indexOf("http") === 0) return ""
           return root._readmeBaseUrl + src
         }
-        onStatusChanged: {
-          if (status === Image.Error) {
-            visible = false
-          }
-        }
       }
     }
   }
@@ -487,14 +486,12 @@ Item {
         radius: Style.radiusXS
       }
 
-      NText {
-        text: root._formatInline(blockData ? blockData.text : "")
-        richTextEnabled: true
+      NImageText {
+        text: "<i>" + root._formatInline(blockData ? blockData.text : "") + "</i>"
+        format: "rich"
         wrapMode: Text.WordWrap
-        elide: Text.ElideNone
         color: AtmoColor.mOnSurfaceVariant
         pointSize: Style.fontSizeM
-        font.italic: true
         Layout.fillWidth: true
         onLinkActivated: link => root._safeOpenUrl(link)
       }
@@ -503,11 +500,10 @@ Item {
 
   Component {
     id: tableComponent
-    NText {
+    NImageText {
       width: parent ? parent.width : 0
-      richTextEnabled: true
+      format: "rich"
       wrapMode: Text.WordWrap
-      elide: Text.ElideNone
       color: AtmoColor.mOnSurface
       pointSize: Style.fontSizeS
       onLinkActivated: link => root._safeOpenUrl(link)

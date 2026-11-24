@@ -116,6 +116,7 @@ Item {
 
                 // Result text
                 Text {
+                    textFormat: Text.PlainText
                     Layout.alignment: Qt.AlignHCenter
                     text: coinItem.showResult ? coinItem.resultString : ""
                     font.pointSize: Style.fontSizeXL

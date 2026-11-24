@@ -50,6 +50,7 @@ Rectangle {
                     z: 1
 
                     Text {
+                        textFormat: Text.PlainText
                         text: "" + model.name
                         font.bold: true
                         color: AtmoColor.mOnSurface
@@ -58,6 +59,7 @@ Rectangle {
                     }
 
                     Text {
+                        textFormat: Text.PlainText
                         text: "" + model.driver + " (" + model.scope + ")"
                         color: AtmoColor.mOnSurfaceVariant
                         font.pixelSize: 11
@@ -119,6 +121,7 @@ Rectangle {
                         font.bold: true
                     }
                     Text {
+                        textFormat: Text.PlainText
                         text: model.id
                         color: AtmoColor.mOnSurface
                         Layout.fillWidth: true
@@ -132,6 +135,7 @@ Rectangle {
                         font.bold: true
                     }
                     Text {
+                        textFormat: Text.PlainText
                         text: model.driver
                         color: AtmoColor.mOnSurface
                         Layout.fillWidth: true
@@ -143,6 +147,7 @@ Rectangle {
                         font.bold: true
                     }
                     Text {
+                        textFormat: Text.PlainText
                         text: model.scope
                         color: AtmoColor.mOnSurface
                         Layout.fillWidth: true

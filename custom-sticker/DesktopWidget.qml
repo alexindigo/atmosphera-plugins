@@ -28,20 +28,21 @@ DraggableDesktopWidget {
     width:  implicitWidth
     height: implicitHeight
 
-    AnimatedImage {
+    // A user-chosen image through the shared image owner: animation is kept
+    // (native, or an animated GIF fallback); failures are labelled.
+    NImageIcon {
         id: sticker
 
-        asynchronous: true
         opacity: root.widgetOpacity
-        source: Qt.resolvedUrl(root.widgetImage)
+        source: root.widgetImage ? Qt.resolvedUrl(root.widgetImage) : ""
+        animationIntent: "preserve"
         fillMode: Image.PreserveAspectFit
 
         mirror: root.widgetMirror
         mirrorVertically: root.widgetVerticalMirror
 
         // 50 pixels more, a bit better quality for a tiny bit more memory usage.
-        sourceSize.width:  root._stableSize + 50
-        sourceSize.height: root._stableSize + 50
+        sourceSize: Qt.size(root._stableSize + 50, root._stableSize + 50)
 
         width: root._size
         height: root._size

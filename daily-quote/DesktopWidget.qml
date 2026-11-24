@@ -365,16 +365,17 @@ DraggableDesktopWidget {
         anchors.bottomMargin: Math.round(Style.marginM * widgetScale)
         spacing: Math.round(Style.marginS * widgetScale)
 
-    Text {
+    NImageText {
         id: scrambleDisplay
         Layout.fillWidth: true
         Layout.preferredHeight: implicitHeight
-        textFormat: Text.RichText
+        format: "rich"
         wrapMode: Text.WordWrap
         horizontalAlignment: root._effectiveAlign
         color: AtmoColor.mOnSurface
-        font.pointSize: Math.round(Style.fontSizeM * widgetScale)
-        font.family: root.quoteFont || "monospace"
+        pointSize: Math.round(Style.fontSizeM * widgetScale)
+        fontScale: 1
+        family: root.quoteFont || "monospace"
     }
 
     NText {

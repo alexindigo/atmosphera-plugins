@@ -48,6 +48,7 @@ Item {
 
         Text {
             id: label
+            textFormat: Text.PlainText
             anchors.centerIn: parent
             text: root.displayText
             color: mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
