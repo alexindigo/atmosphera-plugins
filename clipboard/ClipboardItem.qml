@@ -289,7 +289,9 @@ Item {
         // no content jump when the thumbnail appears. If we wanted a
         // placeholder icon here later, it would go in an overlay that
         // fades out on Image.status === Image.Ready.
-        Image {
+        // Through the shared image owner: the decoded entry can be any
+        // format (WebP, AVIF...) under its .png name; failures are labelled.
+        NImageIcon {
             id: previewImage
             visible: card.renderAsImage
             Layout.fillWidth: true
@@ -304,8 +306,6 @@ Item {
             // Avoid rastering at the exact Image dimensions — lets
             // PreserveAspectFit scale from the decoded source without
             // a second blurry resample.
-            asynchronous: true
-            cache: true
             smooth: true
             // Both reads matter: imageCache holds the URL; reading
             // imageCacheRevision in the same expression forces a
@@ -543,12 +543,10 @@ Item {
 
         // Inset just enough to clear the card's rounded border so the image
         // never visually overflows the corner radius.
-        Image {
+        NImageIcon {
             anchors.fill: parent
             anchors.margins: Style.marginXS
             fillMode: Image.PreserveAspectCrop
-            asynchronous: true
-            cache: true
             smooth: true
             source: {
                 const _rev = card.pluginApi?.mainInstance?.imageCacheRevision ?? 0;

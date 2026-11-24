@@ -8,6 +8,7 @@ import Quickshell.Io
 import qs.Commons
 import qs.Portals
 import qs.Widgets
+import qs.Portals
 import qs.Services.UI
 
 import "./common"
@@ -160,6 +161,8 @@ Item {
                                 borderColor: AtmoColor.mPrimary;
 
                                 imagePath: root.thumbCacheReady ? pluginApi.mainInstance.getThumbUrl(wallpaper.path) : "";
+                                sourceFailureCode: root.thumbCacheReady ? pluginApi.mainInstance.getThumbFailure(wallpaper.path).code : ""
+                                sourceFailureReason: root.thumbCacheReady ? pluginApi.mainInstance.getThumbFailure(wallpaper.path).reason : ""
                                 fallbackIcon: "alert-circle"
 
                                 MouseArea {

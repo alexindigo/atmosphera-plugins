@@ -201,7 +201,7 @@ ColumnLayout {
           border.color: Qt.alpha(AtmoColor.mOutline, 0.35)
           clip: true
 
-          Image {
+          NImage {
             id: sceneTexturePreview
             anchors.fill: parent
             anchors.margins: Style.marginXS
@@ -209,7 +209,6 @@ ColumnLayout {
               ? root.propertyEditorApi.resolvePropertyImageSource(propertyEditor.imageValue)
               : ""
             fillMode: Image.PreserveAspectFit
-            asynchronous: true
             cache: false
           }
 

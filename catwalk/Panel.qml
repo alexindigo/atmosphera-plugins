@@ -88,6 +88,7 @@ Item {
         // CPU Stats
         Text {
           Layout.alignment: Qt.AlignHCenter
+          textFormat: Text.PlainText
           text: (pluginApi?.tr("panel.cpuLabel") || "CPU: {usage}%").replace("{usage}", Math.round(root.settingsConsumer?.cpuUsage ?? 0))
           font.pointSize: Style.fontSizeXL
           font.weight: Font.Bold

@@ -29,6 +29,7 @@ ColumnLayout {
       onMoved: root.threshold.set(value)
     }
     NText {
+      textFormat: Text.PlainText
       text: (root.pluginApi?.tr("settings.currentThreshold") || "").replace("{value}", thresholdSlider.value)
       color: AtmoColor.mOnSurfaceVariant
       font.pointSize: Style.fontSizeS

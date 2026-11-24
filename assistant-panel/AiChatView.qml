@@ -310,16 +310,15 @@ Item {
           pointSize: Style.fontSizeM
         }
 
-        TextEdit {
+        // Markdown through NImageText (images via the shared owner).
+        NImageText {
           Layout.fillWidth: true
           text: errorMessage
           color: AtmoColor.mError
-          font.pointSize: Math.max(1, Style.fontSizeS * Settings.data.ui.fontDefaultScale * Style.uiScaleRatio)
-          font.family: Settings.data.ui.fontDefault
+          pointSize: Style.fontSizeS
           wrapMode: TextEdit.Wrap
-          readOnly: true
           selectByMouse: true
-          textFormat: Text.MarkdownText
+          format: "markdown"
           onLinkActivated: link => Qt.openUrlExternally(link)
         }
       }

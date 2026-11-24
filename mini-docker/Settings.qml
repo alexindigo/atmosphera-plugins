@@ -83,6 +83,7 @@ ColumnLayout {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: ((pluginApi && pluginApi.tr) ? pluginApi.tr("settings.current_value") : "Selected: {value} ms").replace("{value}", root.valueRefreshInterval)
       color: AtmoColor.mOnSurfaceVariant
       font.pointSize: Style.fontSizeS

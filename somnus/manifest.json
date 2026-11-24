@@ -1,7 +1,7 @@
 {
   "id": "somnus",
   "name": "somnus",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "minNoctaliaVersion": "4.7.0",
   "minAtmospheraVersion": "0.11.0",
   "author": "yhordi45",

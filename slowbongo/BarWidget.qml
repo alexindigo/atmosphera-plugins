@@ -105,6 +105,7 @@ Item {
 
         Text {
             id: catText
+            textFormat: Text.PlainText
             anchors.centerIn: parent
             anchors.horizontalCenterOffset: root.isBarVertical ? 0 : root.pauseSlideOffset
             anchors.verticalCenterOffset: root.capsuleHeight * root.catOffsetY + (root.isBarVertical ? root.pauseSlideOffset : 0)

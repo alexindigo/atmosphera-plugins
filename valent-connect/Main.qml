@@ -124,11 +124,11 @@ Item {
   function unpairDevice(deviceId)       { _activate(deviceId, "unpair"); Qt.callLater(refreshDevices) }
 
   function shareFile(deviceId, filePath) {
-    var uri = filePath.indexOf("file://") === 0 ? filePath : "file://" + filePath
+    const uri = "file://" + filePath.split("/").map(segment => encodeURIComponent(segment)).join("/")
     var proc = _actionProcComp.createObject(root, {
       _path:   getDevicePath(deviceId),
       _action: "share.uri",
-      _param:  "[<'" + uri.replace(/'/g, "'\"'\"'") + "'>]"
+      _param:  "[<" + JSON.stringify(uri) + ">]"
     })
     proc.running = true
   }

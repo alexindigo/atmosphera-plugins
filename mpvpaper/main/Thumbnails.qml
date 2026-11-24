@@ -1,7 +1,6 @@
 import Qt.labs.folderlistmodel
 import QtQuick
 import Quickshell
-import Quickshell.Io
 
 import qs.Commons
 import qs.Services.UI
@@ -20,10 +19,18 @@ Item {
     required property bool thumbCacheReady
     required property FolderListModel folderModel
 
-    readonly property string thumbCacheFolder: ImageCacheService.wpThumbDir + "mpvpaper"
-    property int _thumbGenIndex: 0
+    // Video frames come from the shell's image owner (validated PNG
+    // thumbnails). One interest per video: path -> {token, state, url, path,
+    // code, reason}. Reassigned on every change so bindings follow it.
+    property var _entries: ({})
     property var colorRequest: null
+    property bool colorScheduled: false
+    readonly property string _retryOwner: "mpvpaper:" + Date.now() + ":" + Math.random()
+    property int _retrySequence: 0
 
+    onActiveChanged: if (!active) cancelColorGen()
+    onSettingsContextChanged: cancelColorGen()
+    onCurrentWallpaperChanged: if (!ownsWallpaper(colorRequest)) cancelColorGen()
 
     /***************************
     * FUNCTIONS
@@ -44,141 +51,146 @@ Item {
 
 
     function getThumbPath(videoPath: string): string {
-        const file = videoPath.split('/').pop();
-
-        return `${thumbCacheFolder}/${file}.bmp`
+        const entry = root._entries[videoPath];
+        return entry && entry.state === "ready" ? entry.path : "";
     }
 
-    // Get thumbnail url based on video name
+    // Get thumbnail url of a video ("" until the owner produced it)
     function getThumbUrl(videoPath: string): string {
-        return `file://${getThumbPath(videoPath)}`;
+        const entry = root._entries[videoPath];
+        return entry && entry.state === "ready" ? entry.url : "";
     }
 
-
-    function startColorGen(context, path) {
-        const request = {context: context, path: String(path)};
-        if (!ownsWallpaper(request)) return;
-        colorRequest = request;
-        thumbColorGenTimer.restart();
+    // The owner's failure for a video's thumbnail ({code, reason}, empty when none)
+    function getThumbFailure(videoPath: string): var {
+        const entry = root._entries[videoPath];
+        return entry && entry.state === "unavailable" ? { code: entry.code, reason: entry.reason } : { code: "", reason: "" };
     }
 
-    function cancelColorGen() {
-        colorRequest = null;
-        thumbColorGenTimer.stop();
+    // A thumbnail is the owner's output, never a user's own wallpaper.
+    function isThumbnail(path: string): bool {
+        return ImageCacheService.isGeneratedImage(path);
     }
+
 
     function ownsWallpaper(request) {
         return !!request && root.active && request.path !== "" && request.path === root.currentWallpaper
             && request.context === root.settingsContext && request.context?.current();
     }
 
-    function thumbnailCommand(videoPath) {
-        return ["ffmpeg", "-y", "-i", videoPath, "-frames:v", "1", root.getThumbPath(videoPath)];
+    function startColorGen(context, path) {
+        const request = {context: context, path: String(path)};
+        if (!ownsWallpaper(request)) return;
+        colorRequest = request;
+        colorScheduled = false;
+        root.applyColorGen();
     }
 
-    function thumbGeneration() {
+    function cancelColorGen() {
+        colorRequest = null;
+        colorScheduled = false;
+    }
+
+    function applyColorGen() {
+        const request = root.colorRequest;
+        if (!ownsWallpaper(request) || colorScheduled) return;
+        const wallpaper = request.path;
+        const entry = root._entries[wallpaper];
+        if (!entry) {
+            // The current wallpaper isn't in the wallpapers folder.
+            root._entries = Object.assign({}, root._entries, { [root.currentWallpaper]: root.request(root.currentWallpaper, "") });
+            return;
+        }
+        if (entry.state === "loading") return;
+        if (entry.state !== "ready") {
+            root.cancelColorGen();
+            Logger.w("mpvpaper", "No thumbnail for color generation:", wallpaper, entry.reason);
+            return;
+        }
+        root.colorScheduled = true;
+        root.pluginApi.withCurrentScreen(screen => {
+            if (root.colorRequest !== request || !ownsWallpaper(request) || root._entries[wallpaper] !== entry) return;
+            root.cancelColorGen();
+            Logger.d("mpvpaper", "Generating color scheme based on video wallpaper!");
+            WallpaperService.changeWallpaper(entry.path);
+        });
+    }
+
+    function request(videoPath: string, retryRevision: string): var {
+        const entry = { token: "", state: "loading", url: "", path: "", code: "", reason: "" };
+        entry.token = ImageCacheService.acquireSource({
+            source: videoPath,
+            width: 1024,
+            height: 1024,
+            fit: "contain",
+            animationIntent: "still",
+            operation: "video-thumbnail",
+            retry: retryRevision !== "",
+            revision: retryRevision
+        }, function (reply) {
+            if (root._entries[videoPath] !== entry) return;
+            const ready = (reply.status === "hit" || reply.status === "generated") && reply.url !== "";
+            if (!ready) Logger.w("mpvpaper", "Thumbnail unavailable:", videoPath, reply.reason || "");
+            entry.state = ready ? "ready" : "unavailable";
+            entry.url = ready ? reply.url : "";
+            entry.path = ready ? decodeURIComponent(String(reply.url).replace(/^file:\/\//, "")) : "";
+            entry.code = ready ? "" : (reply.code || "decode-unavailable");
+            entry.reason = ready ? "" : (reply.reason || "");
+            root._entries = Object.assign({}, root._entries);
+            root.settle();
+            root.applyColorGen();
+        });
+        return entry;
+    }
+
+    // Hold interests for exactly these videos; retry asks again for all of them.
+    function acquire(paths, retry) {
+        const previous = root._entries;
+        const entries = {};
+        // A different producer can still hold the last retry's result.
+        // Only refreshes need a private revision; normal requests still share.
+        const revision = retry ? root._retryOwner + ":" + (++root._retrySequence) : "";
+        for (const path of paths)
+            entries[path] = previous[path] && !retry ? previous[path] : root.request(path, revision);
+        root._entries = entries;
+        for (const path in previous)
+            if (entries[path] !== previous[path]) ImageCacheService.releaseSource(previous[path].token);
+    }
+
+    function settle() {
+        for (const path in root._entries)
+            if (root._entries[path].state === "loading") return;
+        // The generation has settled every video; failures stay labelled.
+        root.setThumbCacheReady();
+    }
+
+    function thumbGeneration(retry) {
         if(pluginApi == null) return;
 
         // Reset the state of thumbCacheReady
         clearThumbCacheReady();
 
-        while(root._thumbGenIndex < folderModel.count) {
-            const videoPath = folderModel.get(root._thumbGenIndex, "filePath");
-            const thumbUrl = root.getThumbUrl(videoPath);
-            root._thumbGenIndex++;
-            // Check if file already exists, otherwise create it with ffmpeg
-            if (thumbFolderModel.indexOf(thumbUrl) === -1) {
-                Logger.d("mpvpaper", `Creating thumbnail for video: ${videoPath}`);
-                thumbProc.command = root.thumbnailCommand(videoPath);
-                thumbProc.running = true;
-                return;
-            }
-        }
-
-        // The thumbnail generation has looped over every video and finished the generation.
-        root._thumbGenIndex = 0;
-        setThumbCacheReady();
+        const paths = [];
+        for (let i = 0; i < folderModel.count; i++)
+            paths.push(folderModel.get(i, "filePath"));
+        if (root.currentWallpaper !== "" && paths.indexOf(root.currentWallpaper) === -1)
+            paths.push(root.currentWallpaper);
+        root.acquire(paths, retry === true);
+        root.settle();
     }
 
     function thumbRegenerate() {
-        if(pluginApi == null) return;
-
-        pluginApi.pluginSettings.thumbCacheReady = false;
-        pluginApi.saveSettings();
-
-        thumbProc.command = ["sh", "-c", 'rm -rf -- "$1" && mkdir -p -- "$1"', "mpvpaper-cache", thumbCacheFolder];
-        thumbProc.running = true;
+        // Arm before the new request, without applying the old thumbnail.
+        cancelColorGen();
+        const request = {context: root.settingsContext, path: root.currentWallpaper};
+        if (ownsWallpaper(request))
+            colorRequest = request;
+        root.thumbGeneration(true);
+        root.applyColorGen();
     }
 
-
-    /***************************
-    * COMPONENTS
-    ***************************/
-    Process {
-        id: thumbProc
-        onRunningChanged: {
-            if (thumbProc.running)
-                return;
-
-            // Try to create the thumbnails if they don't exist.
-            root.thumbGeneration();
-        }
-    }
-
-    FolderListModel {
-        id: thumbFolderModel
-        folder: "file://" + root.thumbCacheFolder
-        nameFilters: ["*.bmp"]
-        showDirs: false
-    }
-
-    Timer {
-        id: thumbColorGenTimer
-        interval: 50
-        repeat: false
-        running: false
-        triggeredOnStart: false
-
-        onTriggered: {
-            const request = root.colorRequest;
-            if (!root.ownsWallpaper(request)) return;
-            if(thumbFolderModel.status == FolderListModel.Ready) {
-                root.pluginApi.withCurrentScreen(screen => {
-                    if (root.colorRequest !== request || !root.ownsWallpaper(request)) return;
-                    const thumbPath = root.getThumbPath(request.path);
-                    if(thumbFolderModel.indexOf("file://" + thumbPath) !== -1) {
-                        Logger.d("mpvpaper", "Generating color scheme based on video wallpaper!");
-                        WallpaperService.changeWallpaper(thumbPath);
-                        root.cancelColorGen();
-                    } else if (!thumbColorGenTimerProc.running) {
-                        // Try to create the thumbnail again
-                        // just a fail safe if the current wallpaper isn't included in the wallpapers folder
-                        Logger.d("mpvpaper", "Thumbnail not found:", thumbPath);
-                        thumbColorGenTimerProc.command = root.thumbnailCommand(request.path);
-                        thumbColorGenTimerProc.request = request;
-                        thumbColorGenTimerProc.running = true;
-                    }
-                });
-            } else {
-                thumbColorGenTimer.restart();
-            }
-        }
-    }
-
-    Process {
-        id: thumbColorGenTimerProc
-        property var request: null
-        onExited: exitCode => {
-            if (!root.ownsWallpaper(root.colorRequest)) return;
-            if (request !== root.colorRequest || exitCode === 0) thumbColorGenTimer.restart();
-            else root.cancelColorGen();
-        }
-    }
-
-    // Process to create the thumbnail folder
-    Process {
-        id: thumbInit
-        command: ["mkdir", "-p", "--", root.thumbCacheFolder]
-        running: true
+    Component.onDestruction: {
+        for (const path in root._entries)
+            ImageCacheService.releaseSource(root._entries[path].token);
     }
 }

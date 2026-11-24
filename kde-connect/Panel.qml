@@ -221,17 +221,26 @@ Item {
 
               PortalFilePicker {
                 id: shareFilePicker
-                property string capturedDeviceId: ""
                 title: pluginApi?.tr("panel.send-file-picker")
                 selectionMode: "files"
+                allowMultiSelection: true
                 initialPath: Quickshell.env("HOME")
                 nameFilters: ["*"]
+                property string _targetId: ""
+
+                function openForDevice(deviceId) {
+                  if (_targetId || !deviceId) return
+                  _targetId = deviceId
+                  openFilePicker()
+                }
+
+                onCancelled: _targetId = ""
                 onAccepted: paths => {
-                  if (paths.length > 0) {
-                    for (const path of paths) {
-                      root.settingsConsumer?.shareFile(capturedDeviceId, path)
-                    }
-                  }
+                  const targetId = _targetId
+                  _targetId = ""
+                  if (!targetId) return
+                  for (const path of paths)
+                    root.settingsConsumer?.shareFile(targetId, path)
                 }
               }
 
@@ -247,8 +256,7 @@ Item {
                 icon: "device-mobile-share"
                 tooltipText: pluginApi?.tr("panel.send-file")
                 onClicked: {
-                  shareFilePicker.capturedDeviceId = root.settingsConsumer?.mainDevice?.id || ""
-                  shareFilePicker.open()
+                  shareFilePicker.openForDevice(root.settingsConsumer?.mainDevice?.id)
                 }
               }
 

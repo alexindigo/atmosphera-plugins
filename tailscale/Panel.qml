@@ -25,30 +25,32 @@ Item {
   // Shared state for context menu
   property var selectedPeer: null
   property var selectedPeerDelegate: null
-  property var pendingSendTarget: null
   property string searchQuery: ""
-
-  function pickFilesForPeer(peer) {
-    if (pendingSendTarget !== null || !peer || !mainInstance) return
-    // Capture the endpoint, not the mutable menu selection or peer record.
-    var endpoint = mainInstance.tailscaleName(peer.DNSName) || peer.TailscaleIPs?.[0]
-    if (!endpoint) return
-    pendingSendTarget = endpoint + ":"
-    sendFilePicker.openFilePicker()
-  }
 
   PortalFilePicker {
     id: sendFilePicker
     title: pluginApi?.tr("file-picker.title")
     selectionMode: "files"
+    allowMultiSelection: true
     initialPath: Quickshell.env("HOME") ?? ""
+    property string _target: ""
+
+    function openForPeer(peer) {
+      if (_target || !mainInstance || !peer) return
+      // Resolve Tailscale DNS (not the system HostName) at admission.
+      const address = mainInstance.tailscaleName(peer.DNSName) || peer.TailscaleIPs?.[0]
+      if (!address) return
+      _target = address + ":"
+      openFilePicker()
+    }
+
+    onCancelled: _target = ""
     onAccepted: function(paths) {
-      var target = root.pendingSendTarget
-      root.pendingSendTarget = null
-      if (mainInstance && target && paths.length > 0)
+      const target = _target
+      _target = ""
+      if (mainInstance && target && paths.length)
         mainInstance.sendFilesViaTaildrop(paths, target)
     }
-    onCancelled: root.pendingSendTarget = null
   }
 
   function openPeerContextMenu(peer, delegate, mouseX, mouseY) {
@@ -263,7 +265,7 @@ Item {
           root.useExitNode(root.selectedPeer)
           break
         case "send-file":
-          root.pickFilesForPeer(root.selectedPeer)
+          sendFilePicker.openForPeer(root.selectedPeer)
           break
       }
     }

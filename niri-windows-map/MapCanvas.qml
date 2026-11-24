@@ -934,7 +934,7 @@ Item {
           // icon. Size is the smaller of 60% of the icon box and the
           // favicon's native resolution (clamped via the rendered scale),
           // so cached 32px icons stay crisp on huge tiles.
-          Image {
+          NImageIcon {
             id: favBadge
             anchors.right: parent.right
             anchors.rightMargin: 2
@@ -951,7 +951,6 @@ Item {
             source: winRect._favicon
             fillMode: Image.PreserveAspectFit
             smooth: true
-            asynchronous: true
             sourceSize: Qt.size(winRect._faviconW, winRect._faviconW)
 
             layer.enabled: !(winRect._current || winRect._hovered)

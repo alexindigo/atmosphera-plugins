@@ -171,25 +171,23 @@ Item {
 
         spacing: Style.marginM
 
-        TextEdit {
+        // Replies are Markdown that can carry images (shared owner).
+        NImageText {
           Layout.maximumWidth: bubbleRect.Layout.maximumWidth - (root.bubblePadding * 2)
           Layout.fillWidth: true
           wrapMode: TextEdit.Wrap
 
           visible: !root.isEditing
           text: message.content
-          textFormat: message.role === "assistant" ? Text.MarkdownText : Text.PlainText
-          readOnly: true
+          format: message.role === "assistant" ? "markdown" : "plain"
           selectByMouse: true
 
           color: AtmoColor.mOnSurface
-          font.family: Settings.data.ui.fontDefault
           // Replicate NText font scaling logic for consistency
-          font.pointSize: Math.max(1, Style.fontSizeM * Settings.data.ui.fontDefaultScale * Style.uiScaleRatio)
-          font.weight: Style.fontWeightMedium
+          pointSize: Style.fontSizeM
+          fontWeight: Style.fontWeightMedium
 
           selectionColor: AtmoColor.mPrimary
-          selectedTextColor: AtmoColor.mOnPrimary
 
           onLinkActivated: link => Qt.openUrlExternally(link)
         }

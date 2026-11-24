@@ -81,12 +81,14 @@ RowLayout {
         }
 
         Text {
+            textFormat: Text.PlainText
             anchors.centerIn: parent
             text: root.icon
             font.pixelSize: Style.fontSizeXXL
         }
 
         Text {
+            textFormat: Text.PlainText
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.bottom
             anchors.topMargin: Style.marginXS

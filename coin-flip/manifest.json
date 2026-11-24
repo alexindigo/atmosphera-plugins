@@ -1,7 +1,7 @@
 {
   "id": "coin-flip",
   "name": "Coin Flipper",
-  "version": "1.2.9",
+  "version": "1.2.10",
   "minAtmospheraVersion": "0.11.0",
   "author": "DanisDeveloper",
   "description": "Simple bar widget with notification about result",

@@ -26,7 +26,8 @@ jobs:
           repository: alexindigo/atmosphera
           ref: ${{ steps.pin.outputs.ref }}
           path: .tooling/atmosphera
-          fetch-depth: 1
+          fetch-depth: 0
+          persist-credentials: false
       - name: Resolve plugin lint base
         run: |
           zero=0000000000000000000000000000000000000000
@@ -37,3 +38,7 @@ jobs:
         run: ATMOSPHERA_CONTAINER_ENGINE=docker .tooling/atmosphera/.devcontainer/container-run.sh python3 -B Scripts/dev/plugin-lint-selftest.py
       - name: Changed plugin compatibility, version bumps and registry
         run: ATMOSPHERA_CONTAINER_ENGINE=docker .tooling/atmosphera/Scripts/dev/plugin-lint-repo.sh "$GITHUB_WORKSPACE" "$BASE_REF"
+      - name: Check plugin minimum Atmosphera versions
+        run: |
+          python3 -B .github/scripts/check-minimum-shell-selftest.py .tooling/atmosphera
+          python3 -B .github/scripts/check-minimum-shell.py --plugins . --shell .tooling/atmosphera

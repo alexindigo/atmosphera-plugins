@@ -42,7 +42,10 @@ Item {
         mainDevice.pairRequested = true;
         observation.refreshDevices();
     }
-    function shareFile(id, path) { if (current && id) observation.shareFile(id, path); }
+    function shareFile(id, path) {
+        if (current && id && observation.devices.some(device => device.id === id && device.paired && device.reachable))
+            observation.shareFile(id, path);
+    }
     onCurrentChanged: if (!current && _constructed) retire(client)
     Component.onCompleted: { _constructed = true; update(false); }
 }

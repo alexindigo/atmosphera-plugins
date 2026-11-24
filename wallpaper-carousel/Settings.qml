@@ -61,11 +61,13 @@ ColumnLayout {
     RowLayout {
       Layout.fillWidth: true
       Label {
+        textFormat: Text.PlainText
         text: sl.label
         font.bold: true
         Layout.fillWidth: true
       }
       Label {
+        textFormat: Text.PlainText
         text: Math.round(sl.value) + sl.unit
         font.pixelSize: 12
         opacity: 0.7
@@ -81,6 +83,7 @@ ColumnLayout {
       onMoved: sl.valueEdited(Math.round(value))
     }
     Label {
+      textFormat: Text.PlainText
       text: sl.description
       font.pixelSize: 12
       opacity: 0.6
@@ -103,6 +106,7 @@ ColumnLayout {
     spacing: 2
 
     Label {
+      textFormat: Text.PlainText
       text: cb.label
       font.bold: true
     }
@@ -121,6 +125,7 @@ ColumnLayout {
       onActivated: cb.valueEdited(model[currentIndex].value)
     }
     Label {
+      textFormat: Text.PlainText
       text: cb.description
       font.pixelSize: 12
       opacity: 0.6

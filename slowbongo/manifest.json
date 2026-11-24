@@ -1,7 +1,7 @@
 {
   "id": "slowbongo",
   "name": "Slow Bongo",
-  "version": "0.8.8",
+  "version": "0.8.9",
   "minNoctaliaVersion": "3.6.0",
   "minAtmospheraVersion": "0.11.0",
   "author": "tui",

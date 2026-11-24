@@ -194,7 +194,8 @@ PanelWindow {
       color: "#000000"
     }
 
-    Image {
+    // Use the shared image owner for the current wallpaper.
+    NImage {
       anchors.fill: parent
       fillMode: Image.PreserveAspectCrop
       source: wallpaperPath

@@ -221,6 +221,7 @@ ColumnLayout {
 
   // Requirements Section
   Text {
+    textFormat: Text.PlainText
     text: pluginApi?.tr("settings.requirements")
     color: AtmoColor.mOnSurface
     font.pointSize: Style.fontSizeM
@@ -247,6 +248,7 @@ ColumnLayout {
           pointSize: Style.fontSizeM
         }
         Text {
+          textFormat: Text.PlainText
           text: root.evtestInstalled ? pluginApi?.tr("settings.evtest-installed") : pluginApi?.tr("settings.evtest-not-installed")
           color: root.evtestInstalled ? root.statusSuccessColor : root.statusErrorColor
           font.pointSize: Style.fontSizeM
@@ -261,6 +263,7 @@ ColumnLayout {
           pointSize: Style.fontSizeM
         }
         Text {
+          textFormat: Text.PlainText
           text: root.inInputGroup ? pluginApi?.tr("settings.in-input-group") : pluginApi?.tr("settings.not-in-input-group")
           color: root.inInputGroup ? root.statusSuccessColor : root.statusErrorColor
           font.pointSize: Style.fontSizeM
@@ -368,6 +371,7 @@ ColumnLayout {
 
   // Input Devices Section
   Text {
+    textFormat: Text.PlainText
     text: pluginApi?.tr("settings.input-devices") || "Input Devices"
     color: AtmoColor.mOnSurface
     font.pointSize: Style.fontSizeM
@@ -459,6 +463,7 @@ ColumnLayout {
                 spacing: 2
 
                 Text {
+                  textFormat: Text.PlainText
                   text: deviceDelegate.modelData.name
                   color: AtmoColor.mOnSurface
                   font.pointSize: Style.fontSizeM
@@ -467,6 +472,7 @@ ColumnLayout {
                 }
 
                 Text {
+                  textFormat: Text.PlainText
                   text: deviceDelegate.modelData.eventDev
                   color: AtmoColor.mOnSurfaceVariant
                   font.pointSize: Style.fontSizeS

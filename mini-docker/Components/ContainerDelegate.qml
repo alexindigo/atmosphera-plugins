@@ -57,6 +57,7 @@ Rectangle {
                     spacing: 2
 
                     Text {
+                        textFormat: Text.PlainText
                         text: "" + model.name
                         font.bold: true
                         color: AtmoColor.mOnSurface
@@ -65,6 +66,7 @@ Rectangle {
                     }
 
                     Text {
+                        textFormat: Text.PlainText
                         text: "" + model.image + " (" + model.status + ")"
                         color: AtmoColor.mOnSurfaceVariant
                         font.pixelSize: 11
@@ -143,6 +145,7 @@ Rectangle {
                         font.bold: true
                     }
                     Text {
+                        textFormat: Text.PlainText
                         text: model.id
                         color: AtmoColor.mOnSurface
                         Layout.fillWidth: true
@@ -156,6 +159,7 @@ Rectangle {
                         font.bold: true
                     }
                     Text {
+                        textFormat: Text.PlainText
                         text: model.image
                         color: AtmoColor.mOnSurface
                         Layout.fillWidth: true
@@ -168,6 +172,7 @@ Rectangle {
                         font.bold: true
                     }
                     Text {
+                        textFormat: Text.PlainText
                         text: model.command || "N/A"
                         color: AtmoColor.mOnSurface
                         Layout.fillWidth: true
@@ -181,6 +186,7 @@ Rectangle {
                         font.bold: true
                     }
                     Text {
+                        textFormat: Text.PlainText
                         text: model.state
                         color: AtmoColor.mOnSurface
                         Layout.fillWidth: true

@@ -85,7 +85,7 @@ Item {
           color: mouseArea.containsMouse ? AtmoColor.mOnHover : ((root.updater?.noctaliaUpdate ?? false) ? AtmoColor.mHover : root.iconColor)
           icon: ((root.updater?.noctaliaUpdate ?? false) | mouseArea.containsMouse) ? root.iconName + "-filled" : root.iconName
         }
-        IconImage { // Custom file or distro logo
+        NImageIcon { // Custom file or distro logo, through the shared image owner
           visible: !(root.updater?.refreshing ?? false) && (root.useDistroLogo || root.customIconPath !== "")
           Layout.preferredWidth: root.capsuleHeight * 0.6
           Layout.preferredHeight: root.capsuleHeight * 0.6
@@ -97,7 +97,6 @@ Item {
             return "";
           }
           smooth: true
-          asynchronous: true
           layer.enabled: root.enableColorization && (root.useDistroLogo || root.customIconPath !== "")
           layer.effect: ShaderEffect {
             property color targetColor: mouseArea.containsMouse ? AtmoColor.mOnHover : root.iconColor
@@ -146,7 +145,7 @@ Item {
           color: mouseArea.containsMouse ? AtmoColor.mOnHover : ((root.updater?.noctaliaUpdate ?? false) ? AtmoColor.mHover : root.iconColor)
           icon: ((root.updater?.noctaliaUpdate ?? false) | mouseArea.containsMouse) ? root.iconName + "-filled" : root.iconName
         }
-        IconImage { // Custom file or distro logo
+        NImageIcon { // Custom file or distro logo, through the shared image owner
           visible: !(root.updater?.refreshing ?? false) && (root.useDistroLogo || root.customIconPath !== "")
           Layout.preferredWidth: root.capsuleHeight * 0.6
           Layout.preferredHeight: root.capsuleHeight * 0.6
@@ -158,7 +157,6 @@ Item {
             return "";
           }
           smooth: true
-          asynchronous: true
           layer.enabled: root.enableColorization && (root.useDistroLogo || root.customIconPath !== "")
           layer.effect: ShaderEffect {
             property color targetColor: mouseArea.containsMouse ? AtmoColor.mOnHover : root.iconColor

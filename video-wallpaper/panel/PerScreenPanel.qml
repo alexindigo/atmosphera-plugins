@@ -116,6 +116,8 @@ ColumnLayout {
                             if (root.thumbCacheReady && root.pluginApi.mainInstance != null) return root.pluginApi.mainInstance.getThumbPath(wallpaper.modelData);
                             else return "";
                         }
+                        sourceFailureCode: root.thumbCacheReady && root.pluginApi.mainInstance != null ? root.pluginApi.mainInstance.getThumbFailure(wallpaper.modelData).code : ""
+                        sourceFailureReason: root.thumbCacheReady && root.pluginApi.mainInstance != null ? root.pluginApi.mainInstance.getThumbFailure(wallpaper.modelData).reason : ""
                         fallbackIcon: "alert-circle"
 
                         MouseArea {

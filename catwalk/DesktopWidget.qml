@@ -72,6 +72,7 @@ DraggableDesktopWidget {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: Math.round(root.cpuUsage) + "%"
       color: Settings.data.colorSchemes.darkMode ? "white" : "black"
       font.bold: true

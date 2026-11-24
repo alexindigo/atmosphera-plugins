@@ -69,13 +69,13 @@ ColumnLayout {
     }
   }
 
-  NText {
+  NImageText {
     Layout.fillWidth: true
     text: pluginApi?.tr("settings.githubToken.help")
     pointSize: Style.fontSizeS
     color: AtmoColor.mOnSurfaceVariant
     wrapMode: Text.Wrap
-    textFormat: Text.MarkdownText
+    format: "markdown"
   }
 
   RowLayout {

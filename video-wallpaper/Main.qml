@@ -44,9 +44,9 @@ Item {
     ***************************/
     readonly property string wallpapersFolder: cfg.wallpapersFolder ?? pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
 
-    readonly property string thumbCacheFolderPath: ImageCacheService.wpThumbDir + "video-wallpaper"
     readonly property bool thumbCacheReady: thumbnails.thumbCacheReady
     readonly property bool thumbnailGenerationFailed: thumbnails.generationFailed
+    readonly property bool thumbnailsSettled: thumbnails.settled
     readonly property string requestedWallpaperPaths: JSON.stringify(Quickshell.screens.map(screen => Commands.record(root.cfg.monitors, screen.name)?.currentWallpaper ?? ""))
 
 
@@ -77,10 +77,14 @@ Item {
     /***************************
     * HELPER FUNCTIONALITY
     ***************************/
+    // The shared image owner's thumbnail of a video ("" until it exists).
     function getThumbPath(videoPath: string): string {
-        const file = videoPath.split('/').pop();
+        return thumbnails.thumbnailFor(videoPath);
+    }
 
-        return `${thumbCacheFolderPath}/${file}.bmp`
+    // The owner's failure for a video's thumbnail ({code, reason}).
+    function getThumbFailure(videoPath: string): var {
+        return thumbnails.failureFor(videoPath);
     }
 
     function thumbRegenerate() {
@@ -216,10 +220,6 @@ Item {
                 thumbnailSource: thumbnails
 
                 screenName: screenItem.name
-
-                getThumbPath:     root.getThumbPath
-                thumbFolderModel: rootThumbFolderModel
-
             }
 
             Connections {
@@ -234,11 +234,7 @@ Item {
         pluginApi: root.pluginApi
         settingsContext: root.policyContext
 
-        getThumbPath:         root.getThumbPath
-        thumbCacheFolderPath: root.thumbCacheFolderPath
-
         folderModel:      rootFolderModel
-        thumbFolderModel: rootThumbFolderModel
         requestedPaths: JSON.parse(root.requestedWallpaperPaths)
     }
 
@@ -264,12 +260,6 @@ Item {
         id: rootFolderModel
         folder: root.wallpapersFolder
         filters: ["*.mp4", "*.avi", "*.mov", "*.webm", "*.gif"]
-    }
-
-    FolderModel {
-        id: rootThumbFolderModel
-        folder: root.thumbCacheFolderPath
-        filters: ["*.bmp"]
     }
 
     // IPC Handler

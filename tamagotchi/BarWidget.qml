@@ -82,6 +82,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
 
             Text {
+                textFormat: Text.PlainText
                 text: root._petEmoji
                 font.pixelSize: Style.fontSizeM
                 color: AtmoColor.mOnSurface
@@ -89,6 +90,7 @@ Item {
             }
 
             Text {
+                textFormat: Text.PlainText
                 text: root._statIcon
                 font.pixelSize: Style.fontSizeM
                 visible: root._minStat < 60
@@ -97,6 +99,7 @@ Item {
             }
 
             Text {
+                textFormat: Text.PlainText
                 text: root._minStat + "%"
                 font.pixelSize: Style.fontSizeM
                 color: root._alertColor
