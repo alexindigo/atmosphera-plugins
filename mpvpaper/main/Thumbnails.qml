@@ -22,6 +22,8 @@ Item {
     // code, reason}. Reassigned on every change so bindings follow it.
     property var _entries: ({})
     property bool _colorGenPending: false
+    readonly property string _retryOwner: "mpvpaper:" + Date.now() + ":" + Math.random()
+    property int _retrySequence: 0
 
 
     /***************************
@@ -75,7 +77,7 @@ Item {
         const entry = root._entries[root.currentWallpaper];
         if (!entry) {
             // The current wallpaper isn't in the wallpapers folder.
-            root._entries = Object.assign({}, root._entries, { [root.currentWallpaper]: root.request(root.currentWallpaper, false) });
+            root._entries = Object.assign({}, root._entries, { [root.currentWallpaper]: root.request(root.currentWallpaper, "") });
             return;
         }
         if (entry.state === "loading") return;
@@ -90,7 +92,7 @@ Item {
         });
     }
 
-    function request(videoPath: string, retry: bool): var {
+    function request(videoPath: string, retryRevision: string): var {
         const entry = { token: "", state: "loading", url: "", path: "", code: "", reason: "" };
         entry.token = ImageCacheService.acquireSource({
             source: videoPath,
@@ -99,7 +101,8 @@ Item {
             fit: "contain",
             animationIntent: "still",
             operation: "video-thumbnail",
-            retry: retry
+            retry: retryRevision !== "",
+            revision: retryRevision
         }, function (reply) {
             if (root._entries[videoPath] !== entry) return;
             const ready = (reply.status === "hit" || reply.status === "generated") && reply.url !== "";
@@ -120,8 +123,11 @@ Item {
     function acquire(paths, retry) {
         const previous = root._entries;
         const entries = {};
+        // A different producer can still hold the last retry's result.
+        // Only refreshes need a private revision; normal requests still share.
+        const revision = retry ? root._retryOwner + ":" + (++root._retrySequence) : "";
         for (const path of paths)
-            entries[path] = previous[path] && !retry ? previous[path] : root.request(path, retry);
+            entries[path] = previous[path] && !retry ? previous[path] : root.request(path, revision);
         root._entries = entries;
         for (const path in previous)
             if (entries[path] !== previous[path]) ImageCacheService.releaseSource(previous[path].token);
@@ -150,6 +156,9 @@ Item {
     }
 
     function thumbRegenerate() {
+        // Arm before the new request, without applying the old thumbnail.
+        if (pluginApi?.pluginSettings?.active)
+            root._colorGenPending = true;
         root.thumbGeneration(true);
     }
 

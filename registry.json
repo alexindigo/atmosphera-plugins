@@ -1044,7 +1044,7 @@
       "author": "WerWolv",
       "description": "A Plugin integrating your mobile devices into a panel using KDEConnect",
       "license": "GPLv2",
-      "version": "1.2.8",
+      "version": "1.2.9",
       "tags": [
         "Bar",
         "Panel",
@@ -1409,7 +1409,7 @@
       "author": "spiros132",
       "description": "A plugin that allows having video wallpapers using mpvpaper.",
       "license": "MIT",
-      "version": "1.6.11",
+      "version": "1.6.12",
       "tags": [
         "Bar",
         "Panel",
@@ -2501,7 +2501,7 @@
       "author": "nineluj",
       "description": "Show Tailscale status in the menu bar and send/receive files via Taildrop.",
       "license": "MIT",
-      "version": "1.5.9",
+      "version": "1.5.10",
       "tags": [
         "Bar",
         "Network",
@@ -2676,7 +2676,7 @@
       "author": "Suyash",
       "description": "A plugin integrating your mobile devices into a panel using Valent",
       "license": "GPLv2",
-      "version": "1.2.7",
+      "version": "1.2.8",
       "tags": [
         "Bar",
         "Panel",
@@ -2695,7 +2695,7 @@
       "author": "spiros132",
       "description": "A plugin that uses a backend renderer to play videos as your wallpaper.",
       "license": "MIT",
-      "version": "3.0.10",
+      "version": "3.0.11",
       "tags": [
         "Bar",
         "Panel",
@@ -2748,7 +2748,7 @@
       "author": "tonigineer",
       "description": "A `lively` wallpaper selector.",
       "license": "MIT",
-      "version": "0.1.8",
+      "version": "0.1.9",
       "tags": [
         "Desktop",
         "Theming"

@@ -215,14 +215,24 @@ Item {
                 id: shareFilePicker
                 title: pluginApi?.tr("panel.send-file-picker")
                 selectionMode: "files"
+                allowMultiSelection: true
                 initialPath: Quickshell.env("HOME")
                 nameFilters: ["*"]
+                property string _targetId: ""
+
+                function openForDevice(deviceId) {
+                  if (_targetId || !deviceId) return
+                  _targetId = deviceId
+                  openFilePicker()
+                }
+
+                onCancelled: _targetId = ""
                 onAccepted: paths => {
-                  if (paths.length > 0) {
-                    for (const path of paths) {
-                      main.shareFile(main.mainDevice.id, path)
-                    }
-                  }
+                  const targetId = _targetId
+                  _targetId = ""
+                  if (!targetId || !main?.devices.some(device => device.id === targetId && device.isPaired && device.isReachable)) return
+                  for (const path of paths)
+                    main.shareFile(targetId, path)
                 }
               }
 
@@ -235,7 +245,7 @@ Item {
               AtmoIconButton {
                 icon: "device-mobile-share"
                 tooltipText: pluginApi?.tr("panel.send-file")
-                onClicked: shareFilePicker.open()
+                onClicked: shareFilePicker.openForDevice(main?.mainDevice?.id)
               }
 
               AtmoIconButton {

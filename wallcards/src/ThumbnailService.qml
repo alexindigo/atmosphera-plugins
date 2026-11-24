@@ -100,18 +100,28 @@ Item {
                                                       return;
                                                     }
                                                     entry.url = reply.url;
-                                                    // The average color of the validated thumbnail.
-                                                    entry.quantizer = quantizerComponent.createObject(service, {
-                                                                                                         source: reply.url
-                                                                                                       });
-                                                    entry.quantizer.colorsChanged.connect(function () {
-                                                      if (!entry.alive || entry.settled || !entry.quantizer || !entry.quantizer.colors.length)
-                                                        return;
-                                                      var color = entry.quantizer.colors[0];
-                                                      entry.hex = [color.r, color.g, color.b].map(c => Math.round(c * 255).toString(16).padStart(2, "0")).join("");
-                                                      settle(entry);
-                                                    });
+                                                    quantize(entry);
                                                   });
+  }
+
+  function quantize(entry) {
+    const quantizer = quantizerComponent.createObject(service);
+    if (!quantizer) {
+      settle(entry);
+      return;
+    }
+    entry.quantizer = quantizer;
+    quantizer.colorsChanged.connect(function () {
+      if (!entry.alive || entry.settled || entry.quantizer !== quantizer)
+        return;
+      // The native completion signal also delivers an empty palette.
+      if (quantizer.colors.length) {
+        const color = quantizer.colors[0];
+        entry.hex = [color.r, color.g, color.b].map(c => Math.round(c * 255).toString(16).padStart(2, "0")).join("");
+      }
+      settle(entry);
+    });
+    quantizer.source = entry.url;
   }
 
   function settle(entry) {

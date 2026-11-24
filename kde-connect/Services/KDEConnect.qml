@@ -438,7 +438,7 @@ QtObject {
       id: proc
       property string deviceId: ""
       property string filePath: ""
-      command: busctlCall("/modules/kdeconnect/devices/" + deviceId + "/share", "org.kde.kdeconnect.device.share", "shareUrl", [ "file://" + filePath ])
+      command: busctlCall("/modules/kdeconnect/devices/" + deviceId + "/share", "org.kde.kdeconnect.device.share", "shareUrl", [ "file://" + filePath.split("/").map(segment => encodeURIComponent(segment)).join("/") ])
       stdout: StdioCollector {
         onStreamFinished: {
           proc.destroy()

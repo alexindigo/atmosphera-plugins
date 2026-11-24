@@ -29,6 +29,8 @@ Item {
         property bool settled: false
         property bool pending: true
         property bool retry: false
+        readonly property string retryOwner: "video-wallpaper:" + Date.now() + ":" + Math.random()
+        property int retrySequence: 0
         property int generation: 0
         property var paths: []
         // video path -> {token, state: "loading" | "ready" | "unavailable", path}
@@ -73,7 +75,7 @@ Item {
         return thumbnailFor(videoPath);
     }
 
-    function request(videoPath, retry) {
+    function request(videoPath, retryRevision) {
         const entry = { token: "", state: "loading", path: "", code: "", reason: "" };
         entry.token = ImageCacheService.acquireSource({
             source: videoPath,
@@ -82,7 +84,8 @@ Item {
             fit: "contain",
             animationIntent: "still",
             operation: "video-thumbnail",
-            retry: retry
+            retry: retryRevision !== "",
+            revision: retryRevision
         }, function (reply) {
             if (internal.entries[videoPath] !== entry) return;
             const ready = (reply.status === "hit" || reply.status === "generated") && reply.url !== "";
@@ -110,8 +113,11 @@ Item {
         const paths = Array.from(new Set(Array.from(folderModel.files).concat(requestedPaths).filter(path => path !== "")));
         const previous = internal.entries;
         const entries = {};
+        // A different producer can still hold the last retry's result.
+        // Only refreshes need a private revision; normal requests still share.
+        const revision = retry ? internal.retryOwner + ":" + (++internal.retrySequence) : "";
         for (const path of paths)
-            entries[path] = previous[path] && !retry ? previous[path] : request(path, retry);
+            entries[path] = previous[path] && !retry ? previous[path] : request(path, revision);
         const retired = {};
         for (const path in previous)
             if (entries[path] !== previous[path]) retired[path] = previous[path];
