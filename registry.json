@@ -1044,7 +1044,7 @@
       "author": "WerWolv",
       "description": "A Plugin integrating your mobile devices into a panel using KDEConnect",
       "license": "GPLv2",
-      "version": "1.2.9",
+      "version": "1.2.10",
       "tags": [
         "Bar",
         "Panel",
@@ -1409,7 +1409,7 @@
       "author": "spiros132",
       "description": "A plugin that allows having video wallpapers using mpvpaper.",
       "license": "MIT",
-      "version": "1.6.12",
+      "version": "1.6.13",
       "tags": [
         "Bar",
         "Panel",
@@ -2748,7 +2748,7 @@
       "author": "tonigineer",
       "description": "A `lively` wallpaper selector.",
       "license": "MIT",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "tags": [
         "Desktop",
         "Theming"

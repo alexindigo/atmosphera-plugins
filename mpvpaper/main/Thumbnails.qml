@@ -21,10 +21,18 @@ Item {
     // thumbnails). One interest per video: path -> {token, state, url, path,
     // code, reason}. Reassigned on every change so bindings follow it.
     property var _entries: ({})
+    readonly property bool _colorActive: pluginApi?.pluginSettings?.active === true
     property bool _colorGenPending: false
+    property int _colorActivation: 0
     readonly property string _retryOwner: "mpvpaper:" + Date.now() + ":" + Math.random()
     property int _retrySequence: 0
 
+    on_ColorActiveChanged: {
+        if (!root._colorActive) {
+            root._colorGenPending = false;
+            root._colorActivation++;
+        }
+    }
 
     /***************************
     * FUNCTIONS
@@ -68,13 +76,15 @@ Item {
 
 
     function startColorGen() {
+        if (!root._colorActive) return;
         root._colorGenPending = true;
         root.applyColorGen();
     }
 
     function applyColorGen() {
-        if (!root._colorGenPending || pluginApi == null || root.currentWallpaper === "") return;
-        const entry = root._entries[root.currentWallpaper];
+        if (!root._colorGenPending || !root._colorActive || root.currentWallpaper === "") return;
+        const wallpaper = root.currentWallpaper;
+        const entry = root._entries[wallpaper];
         if (!entry) {
             // The current wallpaper isn't in the wallpapers folder.
             root._entries = Object.assign({}, root._entries, { [root.currentWallpaper]: root.request(root.currentWallpaper, "") });
@@ -86,7 +96,9 @@ Item {
             Logger.w("mpvpaper", "No thumbnail for color generation:", root.currentWallpaper, entry.reason);
             return;
         }
+        const activation = root._colorActivation;
         root.pluginApi.withCurrentScreen(screen => {
+            if (!root._colorActive || root._colorActivation !== activation || root.currentWallpaper !== wallpaper) return;
             Logger.d("mpvpaper", "Generating color scheme based on video wallpaper!");
             WallpaperService.changeWallpaper(entry.path);
         });
@@ -157,7 +169,7 @@ Item {
 
     function thumbRegenerate() {
         // Arm before the new request, without applying the old thumbnail.
-        if (pluginApi?.pluginSettings?.active)
+        if (root._colorActive)
             root._colorGenPending = true;
         root.thumbGeneration(true);
     }

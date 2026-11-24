@@ -21,6 +21,9 @@ https://github.com/user-attachments/assets/9ffbc83d-95e5-4dcd-a834-7bd224211b55
 pacman -S ffmpeg mpvpaper imagemagick
 ```
 
+The shell's image cache owns thumbnail decoding and storage. ImageMagick
+reads those normalized thumbnails only to sample colors for the filter.
+
 ## IPC Commands
 
 Control the plugin from the command line:

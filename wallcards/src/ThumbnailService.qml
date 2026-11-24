@@ -1,6 +1,7 @@
 import "Utils.js" as Utils
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Qt.labs.folderlistmodel
 import qs.Commons
 import qs.Services.UI
@@ -47,10 +48,12 @@ Item {
   function releaseEntries() {
     for (const entry of _entries) {
       entry.alive = false;
+      if (entry.sampler) {
+        entry.sampler.destroy();
+        entry.sampler = null;
+      }
       if (entry.token)
         ImageCacheService.releaseSource(entry.token);
-      if (entry.quantizer)
-        entry.quantizer.destroy();
     }
     _entries = [];
   }
@@ -69,7 +72,7 @@ Item {
                      settled: false,
                      alive: true,
                      token: "",
-                     quantizer: null
+                      sampler: null
                    });
     }
     _entries = entries;
@@ -94,42 +97,66 @@ Item {
                                                   }, function (reply) {
                                                     if (!entry.alive || entry.settled)
                                                       return;
-                                                    if (reply.status === "unavailable" || !reply.url) {
+                                                    if (!["hit", "generated"].includes(reply.status) || !reply.url) {
                                                       Logger.w("Wallcards", "Thumbnail unavailable:", entry.fileName, reply.reason || "");
                                                       settle(entry);
                                                       return;
                                                     }
                                                     entry.url = reply.url;
-                                                    quantize(entry);
+                                                    sampleColor(entry, reply.url);
                                                   });
   }
 
-  function quantize(entry) {
-    const quantizer = quantizerComponent.createObject(service);
-    if (!quantizer) {
+  function sampleColor(entry, thumbnailUrl) {
+    // This is a normalized owner artifact, never the original wallpaper.
+    const url = String(thumbnailUrl);
+    if (!url.startsWith("file:///")) {
       settle(entry);
       return;
     }
-    entry.quantizer = quantizer;
-    quantizer.colorsChanged.connect(function () {
-      if (!entry.alive || entry.settled || entry.quantizer !== quantizer)
+    const path = decodeURIComponent(url.slice(7));
+    const cache = ImageCacheService.thumbnailDir;
+    const filename = entry.isVideo ? /^xx-large\/[a-f0-9]{32}\.png$/ : /^atmosphera-representations-v1\/still\/[a-f0-9]{64}\.png$/;
+    if (!cache.startsWith("/") || !path.startsWith(cache) || !filename.test(path.slice(cache.length))) {
+      settle(entry);
+      return;
+    }
+    const sampler = samplerComponent.createObject(service, { thumbnailPath: path });
+    if (!sampler) {
+      settle(entry);
+      return;
+    }
+    entry.sampler = sampler;
+    sampler.completed.connect(function (hex) {
+      if (!entry.alive || entry.settled || entry.sampler !== sampler)
         return;
-      // The native completion signal also delivers an empty palette.
-      if (quantizer.colors.length) {
-        const color = quantizer.colors[0];
-        entry.hex = [color.r, color.g, color.b].map(c => Math.round(c * 255).toString(16).padStart(2, "0")).join("");
-      }
+      entry.sampler = null;
+      sampler.destroy();
+      entry.hex = hex;
       settle(entry);
     });
-    quantizer.source = entry.url;
+    sampler.running = true;
+  }
+
+  function averageColor(histogram) {
+    let pixels = 0;
+    const sums = [0, 0, 0];
+    // Count the sampled pixels equally, skipping only fully transparent ones.
+    const rows = /^\s*(\d+):[^\n]*?\s#([0-9a-f]{8})(?=\s|$)/gim;
+    let row;
+    while ((row = rows.exec(histogram)) !== null) {
+      if (row[2].slice(6) === "00")
+        continue;
+      const count = Number(row[1]);
+      pixels += count;
+      for (let i = 0; i < 3; i++)
+        sums[i] += count * parseInt(row[2].slice(i * 2, i * 2 + 2), 16);
+    }
+    return pixels ? sums.map(sum => Math.round(sum / pixels).toString(16).padStart(2, "0")).join("") : "";
   }
 
   function settle(entry) {
     entry.settled = true;
-    if (entry.quantizer) {
-      entry.quantizer.destroy();
-      entry.quantizer = null;
-    }
     pendingProcesses = Math.max(0, pendingProcesses - 1);
     thumbnailRevision++;
     if (pendingProcesses === 0)
@@ -208,11 +235,18 @@ Item {
   }
 
   Component {
-    id: quantizerComponent
+    id: samplerComponent
 
-    ColorQuantizer {
-      depth: 0
-      rescaleSize: 32
+    Process {
+      required property string thumbnailPath
+      signal completed(string hex)
+
+      // Only read a histogram on stdout; never decode an original or write an image.
+      command: ["magick", "-limit", "thread", "1", thumbnailPath, "-scale", "32x32>", "-type", "TrueColorAlpha", "-depth", "8", "-format", "%c", "histogram:info:-"]
+      stdout: StdioCollector { id: histogram }
+      onExited: (code, status) => completed(code === 0 && status === 0 ? service.averageColor(histogram.text) : "")
+      // FailedToStart does not deliver exited. A normal exit was already handled.
+      onRunningChanged: if (!running) completed("")
     }
   }
 
