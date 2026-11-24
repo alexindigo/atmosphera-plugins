@@ -23,7 +23,7 @@
       "author": "Atmosphera",
       "description": "Spatial overview map of niri windows: workspaces, columns and tiles. Click tiles to focus and rows to switch workspace. Reliable startup focus and drag require the stale-seed shell fix in Atmosphera PR #29.",
       "license": "GPL-3.0",
-      "version": "1.0.12",
+      "version": "1.0.13",
       "tags": [
         "Panel",
         "Niri",
@@ -32,7 +32,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "lastUpdated": "2026-11-21",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "2-in-1-tools",
@@ -140,7 +140,7 @@
       "author": "Ast",
       "description": "A plugin to manage updates on Arch",
       "license": "MIT",
-      "version": "2.1.15",
+      "version": "2.1.16",
       "tags": [
         "Bar",
         "Desktop",
@@ -153,7 +153,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "assistant-panel",
@@ -161,7 +161,7 @@
       "author": "j-1in",
       "description": "AI Chat and Translation panel",
       "license": "MIT",
-      "version": "2.1.11",
+      "version": "2.1.12",
       "tags": [
         "Bar",
         "Panel",
@@ -173,7 +173,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.1.2",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "asus-um5606-fan-state",
@@ -401,7 +401,7 @@
       "author": "d7om",
       "description": "Claude Code (Anthropic agentic CLI) with full tool access, permission controls, session management, MCP servers, and device integration",
       "license": "MIT",
-      "version": "0.2.5",
+      "version": "0.2.6",
       "tags": [
         "Bar",
         "Panel",
@@ -412,7 +412,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.1.2",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "clipboard",
@@ -420,7 +420,7 @@
       "author": "yanekyuk",
       "description": "Clipboard history panel with search, pinning, and image previews.",
       "license": "MIT",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "tags": [
         "Utility",
         "Bar",
@@ -430,7 +430,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.1.2",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "clipmask",
@@ -595,8 +595,8 @@
       "author": "spiros132",
       "description": "Custom stickers (images) that you can put on the desktop as desktop widgets.",
       "license": "MIT",
-      "version": "1.0.7",
-      "minAtmospheraVersion": "0.10.0",
+      "version": "1.0.8",
+      "minAtmospheraVersion": "0.11.0",
       "tags": [
         "Desktop",
         "Fun"
@@ -612,7 +612,7 @@
       "author": "Vikthor",
       "description": "Desktop widget that displays a daily quote with a scramble decode animation",
       "license": "MIT",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "tags": [
         "Desktop",
         "Fun"
@@ -622,7 +622,7 @@
       "upstreamPR": 826,
       "lastUpdated": "2026-11-03",
       "minNoctaliaVersion": "4.7.0",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "daily-wallpaper",
@@ -684,7 +684,7 @@
       "author": "Ben Hilton",
       "description": "An IPC-driven dmenu replacement that lets external scripts present choices through a Noctalia panel.",
       "license": "MIT",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "tags": [
         "Panel",
         "Productivity",
@@ -696,7 +696,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.9.0",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "dns-switcher",
@@ -848,7 +848,7 @@
       "author": "vasqs",
       "description": "Habitica dashboard and task scorer for Noctalia Shell with official avatar sprite rendering.",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "Bar",
         "Panel",
@@ -859,7 +859,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.7.1",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "hassio",
@@ -901,7 +901,7 @@
       "author": "nomadx, FelipeMayerDev",
       "description": "Native Noctalia status and side-panel interface for Hermes Agent. Supports a client-only mode to drive a Hermes bridge running on a remote server over SSH.",
       "license": "MIT",
-      "version": "1.1.5",
+      "version": "1.1.6",
       "tags": [
         "Bar",
         "Panel",
@@ -913,7 +913,7 @@
       "upstreamPR": 934,
       "lastUpdated": "2026-11-05",
       "minNoctaliaVersion": "4.4.1",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "hermes-ssh-chat",
@@ -955,7 +955,7 @@
       "author": "XimoCP",
       "description": "Elevate your Hyprland experience. A modular plugin to safely inject custom animations, borders, and visual effects on the fly.",
       "license": "MIT",
-      "version": "1.0.9",
+      "version": "1.0.10",
       "tags": [
         "Panel",
         "Bar",
@@ -969,7 +969,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.1",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "ideapad-battery-health",
@@ -1011,7 +1011,7 @@
       "author": "Kainoa Kanter",
       "description": "Get AI answers from Kagi in your launcher",
       "license": "MIT",
-      "version": "1.0.9",
+      "version": "1.0.10",
       "tags": [
         "Launcher",
         "Productivity"
@@ -1020,7 +1020,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.1",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "kaomoji-provider",
@@ -1044,7 +1044,7 @@
       "author": "WerWolv",
       "description": "A Plugin integrating your mobile devices into a panel using KDEConnect",
       "license": "GPLv2",
-      "version": "1.2.10",
+      "version": "1.2.11",
       "tags": [
         "Bar",
         "Panel",
@@ -1055,7 +1055,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.4.0",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "keep-awake-plus",
@@ -1173,7 +1173,7 @@
       "author": "PaloMiku",
       "description": "Control linux-wallpaperengine from Noctalia with per-screen wallpaper selection.",
       "license": "MIT",
-      "version": "1.3.5",
+      "version": "1.3.6",
       "tags": [
         "Bar",
         "Panel",
@@ -1183,7 +1183,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "lyrics-fetch",
@@ -1374,7 +1374,7 @@
       "author": "Ido Perlmuter",
       "description": "MPD plugin for Noctalia",
       "license": "MIT",
-      "version": "1.1.6",
+      "version": "1.1.7",
       "tags": [
         "Bar",
         "Audio",
@@ -1384,7 +1384,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "mpris-lyric",
@@ -1409,7 +1409,7 @@
       "author": "spiros132",
       "description": "A plugin that allows having video wallpapers using mpvpaper.",
       "license": "MIT",
-      "version": "1.6.13",
+      "version": "1.6.14",
       "tags": [
         "Bar",
         "Panel",
@@ -1420,7 +1420,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "mullvad",
@@ -1960,8 +1960,8 @@
       "author": "Qholin",
       "description": "A customizable parallax effect for the wallpaper based on the active workspace.",
       "license": "MIT",
-      "version": "1.0.6",
-      "minAtmospheraVersion": "0.10.0",
+      "version": "1.0.7",
+      "minAtmospheraVersion": "0.11.0",
       "tags": [
         "Desktop"
       ],
@@ -1993,7 +1993,7 @@
       "author": "blacku",
       "description": "A full-featured plugin manager with browsing, installation, and README viewer for Noctalia plugins.",
       "license": "MIT",
-      "version": "1.0.6",
+      "version": "1.0.7",
       "tags": [
         "Bar",
         "Panel",
@@ -2003,7 +2003,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.6",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "polkit-agent",
@@ -2151,7 +2151,7 @@
       "author": "Kermut572",
       "description": "A simple plugin that fetches the current, past, and future weeks menu for UCLouvain's Restaurants Universitaires",
       "license": "MIT",
-      "version": "1.0.3",
+      "version": "1.0.4",
       "tags": [
         "Bar",
         "Panel"
@@ -2160,7 +2160,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "saved-desktop-widgets",
@@ -2222,7 +2222,7 @@
       "author": "ycf-anon",
       "description": "A set of screen tools: color picker, annotate, record, pin, OCR, QR scanner, palette, measure, and webcam mirror (deps: README).",
       "license": "MIT",
-      "version": "1.3.9",
+      "version": "1.3.10",
       "tags": [
         "Panel",
         "Bar",
@@ -2233,7 +2233,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.5.0",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "screencast-gif",
@@ -2352,7 +2352,7 @@
       "author": "yhordi45",
       "description": "A full-screen power menu for Noctalia Shell, inspired by the wlogout design.",
       "license": "MIT",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "tags": [
         "Bar",
         "Panel",
@@ -2364,7 +2364,7 @@
       "upstreamPR": 908,
       "lastUpdated": "2026-11-05",
       "minNoctaliaVersion": "4.7.0",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "special-workspaces",
@@ -2447,7 +2447,7 @@
       "author": "sapjax",
       "description": "A local quick notes plugin with Markdown support.",
       "license": "MIT",
-      "version": "0.0.11",
+      "version": "0.0.12",
       "tags": [
         "Bar",
         "Panel",
@@ -2457,7 +2457,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "syncthing-status",
@@ -2676,7 +2676,7 @@
       "author": "Suyash",
       "description": "A plugin integrating your mobile devices into a panel using Valent",
       "license": "GPLv2",
-      "version": "1.2.8",
+      "version": "1.2.9",
       "tags": [
         "Bar",
         "Panel",
@@ -2687,7 +2687,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.6.7",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "video-wallpaper",
@@ -2695,7 +2695,7 @@
       "author": "spiros132",
       "description": "A plugin that uses a backend renderer to play videos as your wallpaper.",
       "license": "MIT",
-      "version": "3.0.11",
+      "version": "3.0.12",
       "tags": [
         "Bar",
         "Panel",
@@ -2706,7 +2706,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "vinyl-launcher",
@@ -2748,7 +2748,7 @@
       "author": "tonigineer",
       "description": "A `lively` wallpaper selector.",
       "license": "MIT",
-      "version": "0.1.10",
+      "version": "0.1.11",
       "tags": [
         "Desktop",
         "Theming"
@@ -2757,7 +2757,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "4.7.0",
-      "minAtmospheraVersion": "0.10.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "wallpaper-carousel",
@@ -2765,7 +2765,7 @@
       "author": "yngwe",
       "description": "Browse and pick wallpapers with a fullscreen skewed carousel overlay",
       "license": "MIT",
-      "version": "0.8.6",
+      "version": "0.8.7",
       "tags": [
         "Theming",
         "Wallpaper"
@@ -2774,7 +2774,7 @@
       "official": false,
       "upstreamPR": 813,
       "lastUpdated": "2026-10-11",
-      "minAtmospheraVersion": "0.10.0",
+      "minAtmospheraVersion": "0.11.0",
       "minNoctaliaVersion": "3.6.0"
     },
     {
@@ -2853,7 +2853,7 @@
       "author": "doughbran",
       "description": "Workspace overview with live window previews and wallpaper backgrounds for Hyprland.",
       "license": "MIT",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "tags": [
         "Hyprland",
         "Bar",
@@ -2864,7 +2864,7 @@
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
       "minNoctaliaVersion": "3.6.0",
-      "minAtmospheraVersion": "0.8.0"
+      "minAtmospheraVersion": "0.11.0"
     },
     {
       "id": "world-clock",

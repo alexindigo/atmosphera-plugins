@@ -1,9 +1,9 @@
 {
   "id": "clipboard",
   "name": "Clipboard",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "minNoctaliaVersion": "4.1.2",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "yanekyuk",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
   "license": "MIT",
