@@ -2390,7 +2390,7 @@
       "author": "suvi",
       "description": "Control spotify_player from a bar widget.",
       "license": "GPL 3.0",
-      "version": "1.0.12",
+      "version": "1.0.13",
       "tags": [
         "Bar",
         "Panel",

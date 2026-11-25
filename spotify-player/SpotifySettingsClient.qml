@@ -31,6 +31,11 @@ Item {
   property int _generation: 0
   property var _processes: new Set()
   property var _slots: new Map()
+  property var _activePlayback: null
+  property var _queuedPlay: null
+  property var _queuedShuffle: null
+  property var _playbackClose: null
+  property int _playbackRevision: 0
   property bool _constructed: false
   property var _lifetime: ({alive: true})
 
@@ -48,6 +53,8 @@ Item {
     return values.clientId === input.clientId && values.clientSecret === input.clientSecret && (values.callbackPort ?? 8888) === input.rawPort;
   }
   function cancelProcesses() {
+    ++_playbackRevision;
+    _activePlayback = null; _queuedPlay = null; _queuedShuffle = null; _playbackClose = null;
     var jobs = Array.from(_processes); _processes.clear(); _slots.clear();
     for (var job of jobs) { job.running = false; job.destroy(); }
   }
@@ -64,12 +71,16 @@ Item {
       id: job
       required property var completed
       required property string slot
+      property bool startedForRequest: false
       stdout: StdioCollector { id: output }
       stderr: StdioCollector {}
-      onExited: (code, status) => {
+      function finish(code) {
         if (!root._processes.has(job)) return;
         root._processes.delete(job); root._slots.delete(slot); completed(code, output.text); job.destroy();
       }
+      onStarted: startedForRequest = true
+      onExited: (code, status) => finish(code)
+      onRunningChanged: if (!running && !startedForRequest) finish(-1)
     }
   }
   function run(command, input, completed, slot) {
@@ -206,18 +217,22 @@ Item {
       try { completed(JSON.parse(text)); } catch (failure) { root.error = "response"; }
     }, slot);
   }
-  function request(args, input, completed, slot) {
+  function request(args, input, completed, slot, failed) {
     // curl can exit successfully for HTTP rejection. Keep the status out of
     // the body consumed by callers, and admit only successful HTTP responses.
     return run(["curl", "--write-out", "\n%{response_code}", "-H", "Authorization: Bearer " + input.accessToken].concat(args), input, function(code, text) {
       const status = /\n2[0-9]{2}$/.exec(text);
-      if (code !== 0 || !status) { root.error = "request"; return; }
+      if (code !== 0 || !status) { root.error = "request"; if (failed) failed(); return; }
       completed(text.slice(0, status.index));
     }, slot);
   }
   function readShuffle(api) {
     var input = inputFor(api); if (!input?.accessToken) return false;
-    return query("https://api.spotify.com/v1/me/player", input, data => root.shuffleState = data.shuffle_state || false, "read-shuffle");
+    if (_activePlayback !== null) return false;
+    const revision = _playbackRevision;
+    return query("https://api.spotify.com/v1/me/player", input, function(data) {
+      if (revision === root._playbackRevision) root.shuffleState = data.shuffle_state || false;
+    }, "read-shuffle");
   }
   function search(queryText, api) {
     var input = inputFor(api); if (!input || !queryText) return false;
@@ -229,25 +244,57 @@ Item {
     var input = inputFor(api); if (!input) return false;
     return query("https://api.spotify.com/v1/me/playlists", input, data => root.playlistResults = data.items || [], "playlists");
   }
-  function shuffle(input, state, closeAfter) {
-    return request(["-X", "PUT", "https://api.spotify.com/v1/me/player/shuffle?state=" + state.toString() + (input.playerId ? "&device_id=" + input.playerId : "")], input, function() {
-      root.shuffleState = state;
-      if (closeAfter) input.api.closePanel(input.api.panelOpenScreen);
-    }, "shuffle");
-  }
   function shufflePlayback(api) {
     var input = inputFor(api); if (!input) return false;
-    return shuffle(input, !shuffleState, false);
+    const intended = _queuedShuffle?.state ?? _activePlayback?.state ?? shuffleState;
+    ++_playbackRevision;
+    _queuedShuffle = {input: input, state: !intended};
+    advancePlayback();
+    return true;
   }
   function play(data, api) {
     var input = inputFor(api); if (!input) return false;
     var body = data.type === "track" ? {uris: [data.uri]} : {context_uri: data.uri};
     var title = data.type !== "playlist" ? data.artists[0].name + " - " + data.name : data.name;
-    var state = shuffleState;
-    return request(["-X", "PUT", "https://api.spotify.com/v1/me/player/play" + (input.playerId ? "?device_id=" + input.playerId : ""), "--json", JSON.stringify(body)], input, function() {
-      ToastService.showNotice(input.api.tr("panel.notif"), title, "music");
-      root.shuffle(input, state, true);
-    }, "play");
+    ++_playbackRevision;
+    _queuedPlay = {input: input, title: title, body: JSON.stringify(body)};
+    advancePlayback();
+    return true;
+  }
+  function advancePlayback() {
+    if (_activePlayback !== null) return;
+    // One mutation at a time: canceling a curl process cannot undo a write
+    // Spotify has received. Coalesce pending clicks, not in-flight writes.
+    const job = _queuedPlay ?? _queuedShuffle;
+    if (!job) return;
+    const playing = _queuedPlay !== null;
+    if (playing) { _queuedPlay = null; _playbackClose = null; }
+    else _queuedShuffle = null;
+    _activePlayback = job;
+    const device = job.input.playerId;
+    const args = playing
+      ? ["-X", "PUT", "https://api.spotify.com/v1/me/player/play" + (device ? "?device_id=" + device : ""), "--json", job.body]
+      : ["-X", "PUT", "https://api.spotify.com/v1/me/player/shuffle?state=" + job.state + (device ? "&device_id=" + device : "")];
+    if (!request(args, job.input, () => root.finishPlayback(job, playing, true), "playback", () => root.finishPlayback(job, playing, false)))
+      finishPlayback(job, playing, false);
+  }
+  function finishPlayback(job, playing, ok) {
+    if (_activePlayback !== job) return;
+    let closing = null;
+    if (ok && playing) {
+      ToastService.showNotice(job.input.api.tr("panel.notif"), job.title, "music");
+      _playbackClose = job.input.api;
+      if (!_queuedShuffle) _queuedShuffle = {input: job.input, state: shuffleState};
+    } else if (!playing) {
+      if (ok) shuffleState = job.state;
+      if (!_queuedPlay && !_queuedShuffle) {
+        if (ok) closing = _playbackClose;
+        _playbackClose = null;
+      }
+    }
+    _activePlayback = null;
+    advancePlayback();
+    if (closing) closing.closePanel(closing.panelOpenScreen);
   }
   onCredentialsKeyChanged: if (_constructed) cancel()
   onAccessTokenChanged: if (_constructed) { cancelProcesses(); searchResults = []; playlistResults = []; availableDevices = ""; }
