@@ -21,11 +21,17 @@ Item {
   function adoptTokens(client, input, tokens, callback) {
     var runtimeApi = input?.api;
     if (!tokens || !runtimeApi || _settingsConsumers.get(runtimeApi.settingsContext) !== client || !client.accepts(input)) return false;
-    var writer = runtimeApi;
-    writer.pluginSettings.accessToken = tokens.accessToken;
-    writer.pluginSettings.refreshToken = tokens.refreshToken || input.refreshToken;
-    writer.pluginSettings.tokenExpiresAt = tokens.tokenExpiresAt;
-    writer.saveSettings(function(result) {
+    const applied = runtimeApi.pluginSettings;
+    if ((applied.refreshToken || "") !== input.refreshToken || (applied.accessToken || "") !== input.accessToken ||
+        (applied.tokenExpiresAt || 0) !== input.tokenExpiresAt) {
+      callback(null);
+      return true;
+    }
+    applied.accessToken = tokens.accessToken;
+    // Omitting a refresh token means no field edit, not a copied override.
+    if (typeof tokens.refreshToken === "string" && tokens.refreshToken) applied.refreshToken = tokens.refreshToken;
+    applied.tokenExpiresAt = tokens.tokenExpiresAt;
+    runtimeApi.saveSettings(function(result) {
       if (!client || !client.current || !client.accepts(input)) return;
       callback((result.status === "saved" || result.status === "nothing_to_save") &&
         (!result.unresolvedGroups || !result.unresolvedGroups.length));

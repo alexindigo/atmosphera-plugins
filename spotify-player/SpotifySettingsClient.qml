@@ -45,7 +45,8 @@ Item {
     // Applied runtime values, never settingsContext's optional live preview.
     var values = api.pluginSettings;
     return Object.freeze({api: api, clientId: values.clientId || "", clientSecret: values.clientSecret || "", rawPort: values.callbackPort ?? 8888,
-      callbackPort: callbackPort, accessToken: values.accessToken || "", refreshToken: values.refreshToken || "", playerId: values.playerId || ""});
+      callbackPort: callbackPort, accessToken: values.accessToken || "", refreshToken: values.refreshToken || "",
+      tokenExpiresAt: values.tokenExpiresAt || 0, playerId: values.playerId || ""});
   }
   function accepts(input) {
     if (!current || !input || !input.api.settingsContext.current() || input.api.settingsContext !== settingsContext) return false;
@@ -190,6 +191,7 @@ Item {
       if (!observation.adoptTokens(root, input, tokens, function(ok) {
         if (!lifetime.alive || generation !== root._generation || !root.accepts(input)) return;
         root._saving = false;
+        if (ok === null) return; // A newer credential set already superseded this response.
         if (!ok) { root.error = "token-save"; return; }
         root.error = "";
         if (after) after();
@@ -220,7 +222,7 @@ Item {
   function request(args, input, completed, slot, failed) {
     // curl can exit successfully for HTTP rejection. Keep the status out of
     // the body consumed by callers, and admit only successful HTTP responses.
-    return run(["curl", "--write-out", "\n%{response_code}", "-H", "Authorization: Bearer " + input.accessToken].concat(args), input, function(code, text) {
+    return run(["curl", "--max-time", "30", "--write-out", "\n%{response_code}", "-H", "Authorization: Bearer " + input.accessToken].concat(args), input, function(code, text) {
       const status = /\n2[0-9]{2}$/.exec(text);
       if (code !== 0 || !status) { root.error = "request"; if (failed) failed(); return; }
       completed(text.slice(0, status.index));
