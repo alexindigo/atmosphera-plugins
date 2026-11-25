@@ -4,50 +4,61 @@ import qs.Commons
 import qs.Widgets
 
 ColumnLayout {
-    id: root
-    property var pluginApi: null
+  id: root
+  property var pluginApi: null
+  NText {
+    Layout.fillWidth: true
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+    wrapMode: Text.WordWrap
+    color: AtmoColor.mOnSurfaceVariant
+    pointSize: Style.fontSizeS
+  }
+  readonly property var haUrlField: pluginApi?.field("haUrl") ?? null
+  readonly property var haTokenField: pluginApi?.field("haToken") ?? null
 
-    // Local state
-    property string editUrl: displayBaseline.editUrl
-    property string editToken: displayBaseline.editToken
-    property bool _applyEffectPending: false
-    NSettingsBaseline {
-        id: displayBaseline
-        readonly property string editUrl: pluginApi?.pluginSettings?.haUrl ?? ""
-        readonly property string editToken: pluginApi?.pluginSettings?.haToken ?? ""
+  // Local state
+  readonly property string editUrl: root.haUrlField?.value ?? ""
+  readonly property string editToken: root.haTokenField?.value ?? ""
+  property bool _applyEffectPending: false
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current")
+        return;
+      root._applyEffectPending = false;
+      root.pluginApi.mainInstance?.settingsConsumerFor(root.pluginApi.runtimeContext)?.reloadSettings();
     }
-    readonly property bool settingsDirty: displayBaseline.differs({editUrl: root.editUrl, editToken: root.editToken})
-    Connections {
-        target: root.pluginApi
-        function onSettingsCompleted(result) {
-            if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
-            root._applyEffectPending = false;
-            root.pluginApi.mainInstance?.reloadSettings();
-        }
-    }
+  }
 
-    spacing: Style.marginM
+  spacing: Style.marginM
 
+  NPluginSettingsField {
+    field: root.haUrlField
     NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.url_label")
-        placeholderText: pluginApi?.tr("settings.url_placeholder")
-        text: root.editUrl
-        onTextChanged: root.editUrl = text
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.url_label")
+      placeholderText: pluginApi?.tr("settings.url_placeholder")
+      text: root.editUrl
+      onEditCommitted: root.haUrlField.set(text)
     }
+  }
 
+  NPluginSettingsField {
+    field: root.haTokenField
     NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.token_label")
-        placeholderText: pluginApi?.tr("settings.token_placeholder")
-        text: root.editToken
-        onTextChanged: root.editToken = text
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.token_label")
+      placeholderText: pluginApi?.tr("settings.token_placeholder")
+      text: root.editToken
+      onEditCommitted: root.haTokenField.set(text)
     }
+  }
 
-    function saveSettings() {
-        pluginApi.pluginSettings.haUrl = root.editUrl;
-        pluginApi.pluginSettings.haToken = root.editToken;
-        if (pluginApi.saveSettings() !== false)
-            root._applyEffectPending = true;
-    }
+  function saveSettings() {
+    if (pluginApi.saveSettings() !== false)
+      root._applyEffectPending = true;
+  }
 }

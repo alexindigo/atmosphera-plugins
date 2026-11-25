@@ -18,7 +18,7 @@ Item {
 
     readonly property var cfg: pluginApi?.pluginSettings || ({})
     readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-    readonly property var main: pluginApi?.mainInstance ?? ({})
+    readonly property var main: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? ({})
 
     readonly property real connectedCount: root.main.connectedCount ?? 0
     readonly property bool isLoading: root.main.isLoading ?? false

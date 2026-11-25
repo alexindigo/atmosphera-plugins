@@ -5,101 +5,103 @@ import qs.Portals
 import qs.Widgets
 
 ColumnLayout {
-    id: root
+  id: root
 
-    property var pluginApi: null
-    property var cfg:      pluginApi?.pluginSettings                      || ({})
-    property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
+  property var pluginApi: null
+  readonly property var animationsFolderField: pluginApi?.field("animationsFolder") ?? null
+  readonly property var targetFileField: pluginApi?.field("targetFile") ?? null
+  readonly property var iconColorField: pluginApi?.field("iconColor") ?? null
 
-    property string valueAnimationsFolder: displayBaseline.valueAnimationsFolder
-    property string valueTargetFile: displayBaseline.valueTargetFile
-    property string valueIconColor: displayBaseline.valueIconColor
+  readonly property string valueAnimationsFolder: root.animationsFolderField?.value ?? "~/.config/niri/animations"
+  readonly property string valueTargetFile: root.targetFileField?.value ?? "~/.config/niri/animations.kdl"
+  readonly property string valueIconColor: root.iconColorField?.value ?? "none"
 
-    spacing: Style.marginL
+  spacing: Style.marginL
 
+  ColumnLayout {
+    spacing: Style.marginM
+    Layout.fillWidth: true
+
+    // Animations folder — use file picker to select a folder
     ColumnLayout {
-        spacing: Style.marginM
+      Layout.fillWidth: true
+      spacing: Style.marginS
+
+      NLabel {
+        label: pluginApi?.tr("settings.animationsFolder.label")
+        description: pluginApi?.tr("settings.animationsFolder.description")
+      }
+
+      RowLayout {
         Layout.fillWidth: true
+        spacing: Style.marginS
 
-        // Animations folder — use file picker to select a folder
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: Style.marginS
-
-            NLabel {
-                label: pluginApi?.tr("settings.animationsFolder.label")
-                description: pluginApi?.tr("settings.animationsFolder.description")
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Style.marginS
-
-                NText {
-                    text: root.valueAnimationsFolder
-                    color: AtmoColor.mOnSurfaceVariant
-                    pointSize: Style.fontSizeS
-                    elide: Text.ElideLeft
-                    Layout.fillWidth: true
-                }
-
-                NButton {
-                    text: pluginApi?.tr("settings.browse")
-                    onClicked: animFolderPicker.openFilePicker()
-                }
-            }
-
-            PortalFilePicker {
-                id: animFolderPicker
-                title: pluginApi?.tr("settings.animationsFolder.pickerTitle")
-                initialPath: root.valueAnimationsFolder
-                selectionMode: "folders"
-                onAccepted: paths => {
-                    if (paths.length > 0) {
-                        root.valueAnimationsFolder = paths[0]
-                    }
-                }
-            }
+        NText {
+          text: root.valueAnimationsFolder
+          color: AtmoColor.mOnSurfaceVariant
+          pointSize: Style.fontSizeS
+          elide: Text.ElideLeft
+          Layout.fillWidth: true
         }
 
-        // Target KDL file — plain text input since the file may not exist yet
-        NTextInput {
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.targetFile.label")
-            description: pluginApi?.tr("settings.targetFile.description")
-            placeholderText: "~/.config/niri/animations.kdl"
-            text: root.valueTargetFile
-            onTextChanged: root.valueTargetFile = text
+        NPluginSettingsField {
+          field: root.animationsFolderField
+          NButton {
+            text: pluginApi?.tr("settings.browse")
+            onClicked: animFolderPicker.openFilePicker()
+          }
         }
+      }
 
-        // Icon color
-        NColorChoice {
-            label: pluginApi?.tr("settings.iconColor.label")
-            description: pluginApi?.tr("settings.iconColor.description")
-            currentKey: root.valueIconColor
-            onSelected: key => root.valueIconColor = key
+      PortalFilePicker {
+        id: animFolderPicker
+        title: pluginApi?.tr("settings.animationsFolder.pickerTitle")
+        initialPath: root.valueAnimationsFolder
+        selectionMode: "folders"
+        onAccepted: paths => {
+          if (paths.length > 0) {
+            root.animationsFolderField.set(paths[0]);
+          }
         }
+      }
     }
 
-    NSettingsBaseline {
-      id: displayBaseline
-      readonly property string valueAnimationsFolder: cfg.animationsFolder ?? defaults.animationsFolder ?? "~/.config/niri/animations"
-      readonly property string valueTargetFile: cfg.targetFile ?? defaults.targetFile ?? "~/.config/niri/animations.kdl"
-      readonly property string valueIconColor: cfg.iconColor ?? defaults.iconColor ?? "none"
+    // Target KDL file — plain text input since the file may not exist yet
+    NPluginSettingsField {
+      field: root.targetFileField
+      NTextInput {
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.targetFile.label")
+        description: pluginApi?.tr("settings.targetFile.description")
+        placeholderText: "~/.config/niri/animations.kdl"
+        text: root.valueTargetFile
+        onEditCommitted: root.targetFileField.set(text)
+      }
     }
-    readonly property bool settingsDirty: displayBaseline.differs({valueAnimationsFolder: root.valueAnimationsFolder, valueTargetFile: root.valueTargetFile, valueIconColor: root.valueIconColor})
 
-    function saveSettings() {
-        if (!pluginApi) {
-            Logger.e("NiriAnimationPicker", "Cannot save settings: pluginApi is null")
-            return
-        }
-        pluginApi.pluginSettings.animationsFolder = root.valueAnimationsFolder
-        pluginApi.pluginSettings.targetFile       = root.valueTargetFile
-        pluginApi.pluginSettings.iconColor        = root.valueIconColor
-        pluginApi.saveSettings(function (result) {
-            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
-                Logger.d("NiriAnimationPicker", "Settings saved")
-        });
+    // Icon color
+    NPluginSettingsField {
+      field: root.iconColorField
+      NColorChoice {
+        label: pluginApi?.tr("settings.iconColor.label")
+        description: pluginApi?.tr("settings.iconColor.description")
+        currentKey: root.valueIconColor
+        onSelected: key => root.iconColorField.set(key)
+      }
     }
+  }
+
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
+
+  function saveSettings() {
+    if (!pluginApi) {
+      Logger.e("NiriAnimationPicker", "Cannot save settings: pluginApi is null");
+      return;
+    }
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.d("NiriAnimationPicker", "Settings saved");
+    });
+  }
 }

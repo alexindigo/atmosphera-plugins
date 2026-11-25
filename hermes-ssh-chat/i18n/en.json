@@ -26,6 +26,7 @@
     }
   },
   "settings": {
+    "shared-effect": "SSH sessions and remembered targets follow this instance. The global shortcut and IPC open the plugin-level panel; edit that shortcut in Settings -> Plugins.",
     "host": {
       "label": "Default host / IP",
       "desc": "Saved target for the panel. Passwords are never saved.",

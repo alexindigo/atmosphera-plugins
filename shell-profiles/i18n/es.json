@@ -22,6 +22,7 @@
     "delete-confirm-message": "¿Eliminar \"{name}\"? Esta acción no se puede deshacer."
   },
   "settings": {
+    "shared-effect": "This widget selects the profile folder and backup policy. Applying a profile changes the shared shell configuration, colors, plugins and optional wallpapers for every widget.",
     "dir-label": "Directorio de perfiles",
     "dir-description": "D\u00f3nde se almacenan los perfiles en disco",
     "dir-select": "Seleccionar carpeta",

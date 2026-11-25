@@ -7,17 +7,28 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
+  readonly property var iconColorField: pluginApi?.field("iconColor") ?? null
+  readonly property var refreshIntervalField: pluginApi?.field("refreshInterval") ?? null
+  readonly property var successIconField: pluginApi?.field("successIcon") ?? null
+  readonly property var errorIconField: pluginApi?.field("errorIcon") ?? null
+  readonly property var loadingIconField: pluginApi?.field("loadingIcon") ?? null
 
-  property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property string valueIconColor: displayBaseline.valueIconColor
-  property int valueRefreshInterval: displayBaseline.valueRefreshInterval
-  property string valueSuccessIcon: displayBaseline.valueSuccessIcon
-  property string valueErrorIcon: displayBaseline.valueErrorIcon
-  property string valueLoadingIcon: displayBaseline.valueLoadingIcon
+  readonly property string valueIconColor: root.iconColorField?.value ?? defaults.iconColor
+  readonly property int valueRefreshInterval: root.refreshIntervalField?.value ?? 300
+  readonly property string valueSuccessIcon: root.successIconField?.value ?? "hierarchy-2"
+  readonly property string valueErrorIcon: root.errorIconField?.value ?? "alert-circle"
+  readonly property string valueLoadingIcon: root.loadingIconField?.value ?? "loader"
 
   spacing: Style.marginL
+
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.WordWrap
+    text: root.pluginApi?.tr("settings.shared-observation") ?? ""
+  }
 
   Component.onCompleted: {
     Logger.d("IpMonitor", "Settings UI loaded");
@@ -35,12 +46,15 @@ ColumnLayout {
       color: AtmoColor.mOnSurface
     }
 
-    NComboBox {
-      label: pluginApi?.tr("settings.iconColor.label")
-      description: pluginApi?.tr("settings.iconColor.desc")
-      model: AtmoColor.colorKeyModel
-      currentKey: root.valueIconColor
-      onSelected: key => root.valueIconColor = key
+    NPluginSettingsField {
+      field: root.iconColorField
+      NComboBox {
+        label: pluginApi?.tr("settings.iconColor.label")
+        description: pluginApi?.tr("settings.iconColor.desc")
+        model: AtmoColor.colorKeyModel
+        currentKey: root.valueIconColor
+        onSelected: key => root.iconColorField.set(key)
+      }
     }
 
     // State Icons section
@@ -67,9 +81,12 @@ ColumnLayout {
         visible: valueSuccessIcon !== ""
       }
 
-      NButton {
-        text: pluginApi?.tr("settings.browseIcons")
-        onClicked: successIconPicker.open()
+      NPluginSettingsField {
+        field: root.successIconField
+        NButton {
+          text: pluginApi?.tr("settings.browseIcons")
+          onClicked: successIconPicker.open()
+        }
       }
     }
 
@@ -77,8 +94,7 @@ ColumnLayout {
       id: successIconPicker
       initialIcon: valueSuccessIcon
       onIconSelected: iconName => {
-        valueSuccessIcon = iconName;
-        settingsChanged(saveSettings());
+        root.successIconField.set(iconName);
       }
     }
 
@@ -97,9 +113,12 @@ ColumnLayout {
         visible: valueErrorIcon !== ""
       }
 
-      NButton {
-        text: pluginApi?.tr("settings.browseIcons")
-        onClicked: errorIconPicker.open()
+      NPluginSettingsField {
+        field: root.errorIconField
+        NButton {
+          text: pluginApi?.tr("settings.browseIcons")
+          onClicked: errorIconPicker.open()
+        }
       }
     }
 
@@ -107,8 +126,7 @@ ColumnLayout {
       id: errorIconPicker
       initialIcon: valueErrorIcon
       onIconSelected: iconName => {
-        valueErrorIcon = iconName;
-        settingsChanged(saveSettings());
+        root.errorIconField.set(iconName);
       }
     }
 
@@ -127,9 +145,12 @@ ColumnLayout {
         visible: valueLoadingIcon !== ""
       }
 
-      NButton {
-        text: pluginApi?.tr("settings.browseIcons")
-        onClicked: loadingIconPicker.open()
+      NPluginSettingsField {
+        field: root.loadingIconField
+        NButton {
+          text: pluginApi?.tr("settings.browseIcons")
+          onClicked: loadingIconPicker.open()
+        }
       }
     }
 
@@ -137,8 +158,7 @@ ColumnLayout {
       id: loadingIconPicker
       initialIcon: valueLoadingIcon
       onIconSelected: iconName => {
-        valueLoadingIcon = iconName;
-        settingsChanged(saveSettings());
+        root.loadingIconField.set(iconName);
       }
     }
 
@@ -151,22 +171,25 @@ ColumnLayout {
       Layout.topMargin: Style.marginM
     }
 
-    NTextInput {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.refreshInterval.label")
-      description: pluginApi?.tr("settings.refreshInterval.desc")
-      placeholderText: pluginApi?.tr("settings.refreshInterval.placeholder")
-      text: root.valueRefreshInterval.toString()
-      onTextChanged: {
-        var val = parseInt(text);
-        if (!isNaN(val) && val >= 0 && val <= 86400) {
-          root.valueRefreshInterval = val;
+    NPluginSettingsField {
+      field: root.refreshIntervalField
+      NTextInput {
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.refreshInterval.label")
+        description: pluginApi?.tr("settings.refreshInterval.desc")
+        placeholderText: pluginApi?.tr("settings.refreshInterval.placeholder")
+        text: root.valueRefreshInterval.toString()
+        onEditCommitted: {
+          var val = parseInt(text);
+          if (!isNaN(val) && val >= 0 && val <= 86400) {
+            root.refreshIntervalField.set(val);
+          }
         }
       }
     }
 
-		// IPC keybinding
-		NText {
+    // IPC keybinding
+    NText {
       text: pluginApi?.tr("settings.commands.title")
       font.pointSize: Style.fontSizeM * Style.uiScaleRatio
       font.weight: Font.Medium
@@ -174,68 +197,61 @@ ColumnLayout {
       Layout.topMargin: Style.marginM
     }
 
-		Rectangle {
-			Layout.fillWidth: true
-			Layout.preferredHeight: infoCol.implicitHeight + Style.marginM * 2
-			color: AtmoColor.mSurfaceVariant
-			radius: Style.radiusM
+    Rectangle {
+      Layout.fillWidth: true
+      Layout.preferredHeight: infoCol.implicitHeight + Style.marginM * 2
+      color: AtmoColor.mSurfaceVariant
+      radius: Style.radiusM
 
-			ColumnLayout {
-				id: infoCol
-				anchors {
-					fill: parent
-					margins: Style.marginM
-				}
-				spacing: Style.marginS
+      ColumnLayout {
+        id: infoCol
+        anchors {
+          fill: parent
+          margins: Style.marginM
+        }
+        spacing: Style.marginS
 
-				RowLayout {
-					spacing: Style.marginS
+        RowLayout {
+          spacing: Style.marginS
 
-					AtmoIcon {
-						icon: "info-circle"
-						pointSize: Style.fontSizeS
-						color: AtmoColor.mPrimary
-					}
+          AtmoIcon {
+            icon: "info-circle"
+            pointSize: Style.fontSizeS
+            color: AtmoColor.mPrimary
+          }
 
-					NText {
-						text: pluginApi?.tr("settings.ipcCommands.title")
-						pointSize: Style.fontSizeS
-						font.weight: Font.Medium
-						color: AtmoColor.mOnSurface
-					}
-				}
+          NText {
+            text: pluginApi?.tr("settings.ipcCommands.title")
+            pointSize: Style.fontSizeS
+            font.weight: Font.Medium
+            color: AtmoColor.mOnSurface
+          }
+        }
 
-				NText {
-					Layout.fillWidth: true
-					text: pluginApi?.tr("settings.ipcCommands.refreshIp") + ": qs -c noctalia-shell ipc call plugin:ip-monitor refreshIp"
-					pointSize: Style.fontSizeXS
-					font.family: Settings.data.ui.fontFixed
-					color: AtmoColor.mOnSurfaceVariant
-					wrapMode: Text.WrapAnywhere
-				}
+        NText {
+          Layout.fillWidth: true
+          text: pluginApi?.tr("settings.ipcCommands.refreshIp") + ": qs -c noctalia-shell ipc call plugin:ip-monitor refreshIp"
+          pointSize: Style.fontSizeXS
+          font.family: Settings.data.ui.fontFixed
+          color: AtmoColor.mOnSurfaceVariant
+          wrapMode: Text.WrapAnywhere
+        }
 
-				NText {
-					Layout.fillWidth: true
-					text: pluginApi?.tr("settings.ipcCommands.togglePanel") + ": qs -c noctalia-shell ipc call plugin:ip-monitor toggle"
-					pointSize: Style.fontSizeXS
-					font.family: Settings.data.ui.fontFixed
-					color: AtmoColor.mOnSurfaceVariant
-					wrapMode: Text.WrapAnywhere
-				}
-			}
-		}
+        NText {
+          Layout.fillWidth: true
+          text: pluginApi?.tr("settings.ipcCommands.togglePanel") + ": qs -c noctalia-shell ipc call plugin:ip-monitor toggle"
+          pointSize: Style.fontSizeXS
+          font.family: Settings.data.ui.fontFixed
+          color: AtmoColor.mOnSurfaceVariant
+          wrapMode: Text.WrapAnywhere
+        }
+      }
+    }
   }
 
   signal settingsChanged(var settings)
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property string valueIconColor: cfg.iconColor ?? defaults.iconColor
-    readonly property int valueRefreshInterval: cfg.refreshInterval ?? defaults.refreshInterval ?? 300
-    readonly property string valueSuccessIcon: cfg.successIcon ?? defaults.successIcon ?? "hierarchy-2"
-    readonly property string valueErrorIcon: cfg.errorIcon ?? defaults.errorIcon ?? "alert-circle"
-    readonly property string valueLoadingIcon: cfg.loadingIcon ?? defaults.loadingIcon ?? "loader"
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({valueIconColor: root.valueIconColor, valueRefreshInterval: root.valueRefreshInterval, valueSuccessIcon: root.valueSuccessIcon, valueErrorIcon: root.valueErrorIcon, valueLoadingIcon: root.valueLoadingIcon})
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   function saveSettings() {
     if (!pluginApi) {
@@ -243,11 +259,6 @@ ColumnLayout {
       return;
     }
 
-    pluginApi.pluginSettings.iconColor = root.valueIconColor;
-    pluginApi.pluginSettings.refreshInterval = root.valueRefreshInterval;
-    pluginApi.pluginSettings.successIcon = root.valueSuccessIcon;
-    pluginApi.pluginSettings.errorIcon = root.valueErrorIcon;
-    pluginApi.pluginSettings.loadingIcon = root.valueLoadingIcon;
     pluginApi.saveSettings(function (result) {
       if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
         Logger.d("IpMonitor", "Settings saved successfully");

@@ -1,8 +1,8 @@
 {
   "id": "coin-flip",
   "name": "Coin Flipper",
-  "version": "1.2.7",
-  "minAtmospheraVersion": "0.10.0",
+  "version": "1.2.10",
+  "minAtmospheraVersion": "0.11.0",
   "author": "DanisDeveloper",
   "description": "Simple bar widget with notification about result",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -22,9 +22,9 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "delay": {"type": "Real"},
-        "iconColor": {"type": "String"},
-        "lastResult": {"type": "String", "optional": true, "machineLocal": true}
+        "delay": {"editorUsage": "configuration", "type": "Real"},
+        "iconColor": {"editorUsage": "configuration", "type": "String"},
+        "lastResult": {"editorUsage": "operational", "type": "String", "optional": true, "machineLocal": true}
       }
     },
     "defaultSettings": {

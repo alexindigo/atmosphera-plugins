@@ -11,6 +11,7 @@
     "settings": "Configurações do widget"
   },
   "settings": {
+    "shared-effect": "Todas as instâncias controlam o mesmo teclado. Aplicar, Verificar novamente ou uma ação no widget seleciona o motor e o executável para esse teclado partilhado; outra configuração pode substituir essa seleção. A apresentação e a disponibilidade dependem desta instância.",
     "backend": {
       "label": "Backend",
       "desc": "Qual teclado na tela controlar: auto, squeekboard ou wvkbd (auto detecta na inicialização)",

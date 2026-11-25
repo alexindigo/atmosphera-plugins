@@ -11,6 +11,7 @@
     "settings": "Widget-Einstellungen"
   },
   "settings": {
+    "shared-effect": "Alle Instanzen steuern dieselbe Tastatur. Übernehmen, Erneut prüfen oder eine Widget-Aktion wählt das angewendete Backend und Programm für diese Tastatur aus; eine andere Konfiguration kann diese Auswahl ersetzen. Anzeige und Verfügbarkeit richten sich nach dieser Instanz.",
     "backend": {
       "label": "Backend",
       "desc": "Welche Bildschirmtastatur gesteuert werden soll: auto, squeekboard oder wvkbd (auto erkennt beim Start automatisch)",

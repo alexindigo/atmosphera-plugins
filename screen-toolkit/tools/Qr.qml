@@ -7,6 +7,7 @@ import "../utils"
 Item {
     id: root
     property var    pluginApi:  null
+    property var actionPolicy: null
     property string scriptsDir: ""
 
     property string qrResult:      ""
@@ -15,7 +16,9 @@ Item {
     signal done()
     signal failed()
 
-    function run(grimGeometry) {
+    function run(grimGeometry, policy) {
+        if (!policy?.context.current() || qrProc.running) return false
+        actionPolicy = policy
         qrProc.exec({ command: [root.scriptsDir + "capture.sh", "qr", grimGeometry] })
     }
 
@@ -34,6 +37,7 @@ Item {
         id: qrProc
         stdout: StdioCollector {}
         onExited: (code) => {
+            if (!root.actionPolicy?.context.current()) { root.done(); return }
             var result = qrProc.stdout.text.trim()
             if (code !== 0 || result === "") { root.failed(); return }
 

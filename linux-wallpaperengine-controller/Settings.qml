@@ -2,9 +2,9 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
+import "helpers/panel/BadgeHelpers.js" as BadgeHelpers
 
 import "helpers/shared/ColorCacheHelpers.js" as ColorCacheHelpers
-import "helpers/panel/BadgeHelpers.js" as BadgeHelpers
 
 import qs.Commons
 import qs.Widgets
@@ -12,38 +12,22 @@ import qs.Widgets
 ColumnLayout {
   id: root
 
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property string editWallpapersFolder: cfg.wallpapersFolder ?? defaults.wallpapersFolder ?? ""
-    readonly property string editIconColor: cfg.iconColor ?? defaults.iconColor ?? "none"
-    readonly property bool editEnableExtraPropertiesEditor: cfg.enableExtraPropertiesEditor ?? defaults.enableExtraPropertiesEditor ?? true
-    readonly property string editDefaultScaling: cfg.defaultScaling ?? defaults.defaultScaling ?? "fill"
-    readonly property string editDefaultClamp: cfg.defaultClamp ?? defaults.defaultClamp ?? "clamp"
-    readonly property int editDefaultFps: cfg.defaultFps ?? defaults.defaultFps ?? 30
-    readonly property int editDefaultVolume: cfg.defaultVolume ?? defaults.defaultVolume ?? 100
-    readonly property bool editDefaultMuted: cfg.defaultMuted ?? defaults.defaultMuted ?? true
-    readonly property bool editDefaultAudioReactiveEffects: cfg.defaultAudioReactiveEffects ?? defaults.defaultAudioReactiveEffects ?? true
-    readonly property bool editDefaultNoAutomute: cfg.defaultNoAutomute ?? defaults.defaultNoAutomute ?? false
-    readonly property bool editDefaultDisableMouse: cfg.defaultDisableMouse ?? defaults.defaultDisableMouse ?? false
-    readonly property bool editDefaultDisableParallax: cfg.defaultDisableParallax ?? defaults.defaultDisableParallax ?? false
-    readonly property bool editDefaultNoFullscreenPause: cfg.defaultNoFullscreenPause ?? defaults.defaultNoFullscreenPause ?? false
-    readonly property bool editDefaultFullscreenPauseOnlyActive: cfg.defaultFullscreenPauseOnlyActive ?? defaults.defaultFullscreenPauseOnlyActive ?? false
-    readonly property bool editAutoApplyOnStartup: cfg.autoApplyOnStartup ?? defaults.autoApplyOnStartup ?? true
-    readonly property bool editShowSidebarDescription: cfg.showSidebarDescription ?? defaults.showSidebarDescription ?? false
-    readonly property int editWallpaperScanCacheMinutes: cfg.wallpaperScanCacheMinutes ?? defaults.wallpaperScanCacheMinutes ?? 10
-    readonly property var editBadgeOrder: BadgeHelpers.normalizeBadgeOrder(cfg.badgeOrder, defaultBadgeOrder)
-    readonly property var editBadgeEnabled: BadgeHelpers.normalizeBadgeEnabled(cfg.badgeEnabled, defaultBadgeEnabled)
-    ranges: [NSettingsRange { field: "editWallpaperScanCacheMinutes"; from: rangeEditWallpaperScanCacheMinutes.from; to: rangeEditWallpaperScanCacheMinutes.to }, NSettingsRange { field: "editDefaultFps"; from: defaultFpsSpinBox.from; to: defaultFpsSpinBox.to }, NSettingsRange { field: "editDefaultVolume"; from: defaultVolumeSpinBox.from; to: defaultVolumeSpinBox.to }]
-  }
-  readonly property bool settingsDirty: { return displayBaseline.differs({editWallpapersFolder: root.editWallpapersFolder, editIconColor: root.editIconColor, editEnableExtraPropertiesEditor: root.editEnableExtraPropertiesEditor, editDefaultScaling: root.editDefaultScaling, editDefaultClamp: root.editDefaultClamp, editDefaultFps: root.editDefaultFps, editDefaultVolume: root.editDefaultVolume, editDefaultMuted: root.editDefaultMuted, editDefaultAudioReactiveEffects: root.editDefaultAudioReactiveEffects, editDefaultNoAutomute: root.editDefaultNoAutomute, editDefaultDisableMouse: root.editDefaultDisableMouse, editDefaultDisableParallax: root.editDefaultDisableParallax, editDefaultNoFullscreenPause: root.editDefaultNoFullscreenPause, editDefaultFullscreenPauseOnlyActive: root.editDefaultFullscreenPauseOnlyActive, editAutoApplyOnStartup: root.editAutoApplyOnStartup, editShowSidebarDescription: root.editShowSidebarDescription, editWallpaperScanCacheMinutes: root.editWallpaperScanCacheMinutes, editBadgeOrder: root.editBadgeOrder, editBadgeEnabled: root.editBadgeEnabled}); }
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
   property bool _savePending: false
   Connections {
     target: root.pluginApi
     function onSettingsCompleted(result) {
-      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      if (!root._savePending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current")
+        return;
       root._savePending = false;
       var main = root.pluginApi.mainInstance;
-      if (main) { main.refreshWallpaperCache(true, false); if (main.hasAnyConfiguredWallpaper()) main.reload(); }
+      if (main) {
+        main.activatePolicy(root.pluginApi.runtimeContext);
+        main.refreshWallpaperCache(true, false, root.pluginApi.runtimeContext);
+        if (main.hasAnyConfiguredWallpaper())
+          main.reload(false, root.pluginApi.runtimeContext);
+      }
     }
   }
 
@@ -52,42 +36,64 @@ ColumnLayout {
   Layout.fillWidth: true
 
   property var pluginApi: null
+  readonly property var wallpapersFolderField: pluginApi?.field("wallpapersFolder") ?? null
+  readonly property var iconColorField: pluginApi?.field("iconColor") ?? null
+  readonly property var enableExtraPropertiesEditorField: pluginApi?.field("enableExtraPropertiesEditor") ?? null
+  readonly property var defaultScalingField: pluginApi?.field("defaultScaling") ?? null
+  readonly property var defaultClampField: pluginApi?.field("defaultClamp") ?? null
+  readonly property var defaultFpsField: pluginApi?.field("defaultFps") ?? null
+  readonly property var defaultVolumeField: pluginApi?.field("defaultVolume") ?? null
+  readonly property var defaultMutedField: pluginApi?.field("defaultMuted") ?? null
+  readonly property var defaultAudioReactiveEffectsField: pluginApi?.field("defaultAudioReactiveEffects") ?? null
+  readonly property var defaultNoAutomuteField: pluginApi?.field("defaultNoAutomute") ?? null
+  readonly property var defaultDisableMouseField: pluginApi?.field("defaultDisableMouse") ?? null
+  readonly property var defaultDisableParallaxField: pluginApi?.field("defaultDisableParallax") ?? null
+  readonly property var defaultNoFullscreenPauseField: pluginApi?.field("defaultNoFullscreenPause") ?? null
+  readonly property var defaultFullscreenPauseOnlyActiveField: pluginApi?.field("defaultFullscreenPauseOnlyActive") ?? null
+  readonly property var autoApplyOnStartupField: pluginApi?.field("autoApplyOnStartup") ?? null
+  readonly property var showSidebarDescriptionField: pluginApi?.field("showSidebarDescription") ?? null
+  readonly property var wallpaperScanCacheMinutesField: pluginApi?.field("wallpaperScanCacheMinutes") ?? null
+  readonly property var badgeOrderField: pluginApi?.field("badgeOrder") ?? null
+  readonly property var badgeEnabledField: pluginApi?.field("badgeEnabled") ?? null
 
-  readonly property var cfg: pluginApi?.pluginSettings || ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property string editWallpapersFolder: displayBaseline.editWallpapersFolder
-  property string editIconColor: displayBaseline.editIconColor
-  property bool editEnableExtraPropertiesEditor: displayBaseline.editEnableExtraPropertiesEditor
-  property string editDefaultScaling: displayBaseline.editDefaultScaling
-  property string editDefaultClamp: displayBaseline.editDefaultClamp
-  property int editDefaultFps: displayBaseline.project("editDefaultFps")
-  property int editDefaultVolume: displayBaseline.project("editDefaultVolume")
-  property bool editDefaultMuted: displayBaseline.editDefaultMuted
-  property bool editDefaultAudioReactiveEffects: displayBaseline.editDefaultAudioReactiveEffects
-  property bool editDefaultNoAutomute: displayBaseline.editDefaultNoAutomute
-  property bool editDefaultDisableMouse: displayBaseline.editDefaultDisableMouse
-  property bool editDefaultDisableParallax: displayBaseline.editDefaultDisableParallax
-  property bool editDefaultNoFullscreenPause: displayBaseline.editDefaultNoFullscreenPause
-  property bool editDefaultFullscreenPauseOnlyActive: displayBaseline.editDefaultFullscreenPauseOnlyActive
-  property bool editAutoApplyOnStartup: displayBaseline.editAutoApplyOnStartup
-  property bool editShowSidebarDescription: displayBaseline.editShowSidebarDescription
-  property int editWallpaperScanCacheMinutes: displayBaseline.project("editWallpaperScanCacheMinutes")
+  readonly property string editWallpapersFolder: root.wallpapersFolderField?.value ?? ""
+  readonly property string editIconColor: root.iconColorField?.value ?? "none"
+  readonly property bool editEnableExtraPropertiesEditor: root.enableExtraPropertiesEditorField?.value ?? true
+  readonly property string editDefaultScaling: root.defaultScalingField?.value ?? "fill"
+  readonly property string editDefaultClamp: root.defaultClampField?.value ?? "clamp"
+  readonly property int editDefaultFps: root.defaultFpsField?.value ?? 30
+  readonly property int editDefaultVolume: root.defaultVolumeField?.value ?? 100
+  readonly property bool editDefaultMuted: root.defaultMutedField?.value ?? true
+  readonly property bool editDefaultAudioReactiveEffects: root.defaultAudioReactiveEffectsField?.value ?? true
+  readonly property bool editDefaultNoAutomute: root.defaultNoAutomuteField?.value ?? false
+  readonly property bool editDefaultDisableMouse: root.defaultDisableMouseField?.value ?? false
+  readonly property bool editDefaultDisableParallax: root.defaultDisableParallaxField?.value ?? false
+  readonly property bool editDefaultNoFullscreenPause: root.defaultNoFullscreenPauseField?.value ?? false
+  readonly property bool editDefaultFullscreenPauseOnlyActive: root.defaultFullscreenPauseOnlyActiveField?.value ?? false
+  readonly property bool editAutoApplyOnStartup: root.autoApplyOnStartupField?.value ?? true
+  readonly property bool editShowSidebarDescription: root.showSidebarDescriptionField?.value ?? false
+  readonly property int editWallpaperScanCacheMinutes: root.wallpaperScanCacheMinutesField?.value ?? 10
   readonly property var defaultBadgeOrder: BadgeHelpers.normalizedDefaultOrder(defaults.badgeOrder)
   readonly property var defaultBadgeEnabled: BadgeHelpers.normalizedDefaultEnabled(defaults.badgeEnabled)
-  property var editBadgeOrder: displayBaseline.editBadgeOrder
-  property var editBadgeEnabled: displayBaseline.editBadgeEnabled
+  readonly property var editBadgeOrder: BadgeHelpers.normalizeBadgeOrder(root.badgeOrderField?.value, defaultBadgeOrder)
+  readonly property var editBadgeEnabled: BadgeHelpers.normalizeBadgeEnabled(root.badgeEnabledField?.value, defaultBadgeEnabled)
   property bool scanning: false
   property bool refreshingCacheSize: false
   property bool clearingCache: false
   property string cacheSizeLabel: pluginApi?.tr("settings.cache.sizeUnknown")
 
-  readonly property string pluginCacheDir: ColorCacheHelpers.pluginCacheDir(
-    Settings.cacheDir,
-    pluginApi?.manifest?.id || pluginApi?.pluginId || "linux-wallpaperengine-controller"
-  )
+  readonly property string pluginCacheDir: ColorCacheHelpers.pluginCacheDir(Settings.cacheDir, pluginApi?.manifest?.id || pluginApi?.pluginId || "linux-wallpaperengine-controller")
 
   spacing: Style.marginL
+
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+  }
 
   function badgeLabel(key) {
     return BadgeHelpers.settingsBadgeLabel(key, badgeKey => pluginApi?.tr(badgeKey));
@@ -101,7 +107,7 @@ ColumnLayout {
     const normalizedKey = String(key || "").trim();
     const next = Object.assign({}, root.editBadgeEnabled || ({}));
     next[normalizedKey] = enabled;
-    root.editBadgeEnabled = next;
+    root.badgeEnabledField.set(next);
   }
 
   function moveBadge(fromIndex, toIndex) {
@@ -113,7 +119,7 @@ ColumnLayout {
     const moved = next[fromIndex];
     next.splice(fromIndex, 1);
     next.splice(toIndex, 0, moved);
-    editBadgeOrder = next;
+    root.badgeOrderField.set(next);
   }
 
   function refreshCacheSize() {
@@ -130,10 +136,7 @@ ColumnLayout {
   }
 
   function preservedWallpaperColorScreenshots() {
-    return ColorCacheHelpers.preservedEntriesForScreens(
-      pluginApi?.pluginSettings?.wallpaperColorScreenshots,
-      Quickshell.screens
-    );
+    return ColorCacheHelpers.preservedEntriesForScreens(pluginApi?.pluginSettings?.wallpaperColorScreenshots, Quickshell.screens);
   }
 
   function clearCacheCommand() {
@@ -194,28 +197,37 @@ ColumnLayout {
           Layout.fillWidth: true
           spacing: Style.marginM
 
-          NColorChoice {
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.iconColor.label")
-            description: pluginApi?.tr("settings.iconColor.description")
-            currentKey: root.editIconColor
-            onSelected: key => root.editIconColor = key
+          NPluginSettingsField {
+            field: root.iconColorField
+            NColorChoice {
+              Layout.fillWidth: true
+              label: pluginApi?.tr("settings.iconColor.label")
+              description: pluginApi?.tr("settings.iconColor.description")
+              currentKey: root.editIconColor
+              onSelected: key => root.iconColorField.set(key)
+            }
           }
 
-          NToggle {
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.enableExtraPropertiesEditor.label")
-            description: pluginApi?.tr("settings.enableExtraPropertiesEditor.description")
-            checked: root.editEnableExtraPropertiesEditor
-            onToggled: checked => root.editEnableExtraPropertiesEditor = checked
+          NPluginSettingsField {
+            field: root.enableExtraPropertiesEditorField
+            NToggle {
+              Layout.fillWidth: true
+              label: pluginApi?.tr("settings.enableExtraPropertiesEditor.label")
+              description: pluginApi?.tr("settings.enableExtraPropertiesEditor.description")
+              checked: root.editEnableExtraPropertiesEditor
+              onToggled: checked => root.enableExtraPropertiesEditorField.set(checked)
+            }
           }
 
-          NToggle {
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.showSidebarDescription.label")
-            description: pluginApi?.tr("settings.showSidebarDescription.description")
-            checked: root.editShowSidebarDescription
-            onToggled: checked => root.editShowSidebarDescription = checked
+          NPluginSettingsField {
+            field: root.showSidebarDescriptionField
+            NToggle {
+              Layout.fillWidth: true
+              label: pluginApi?.tr("settings.showSidebarDescription.label")
+              description: pluginApi?.tr("settings.showSidebarDescription.description")
+              checked: root.editShowSidebarDescription
+              onToggled: checked => root.showSidebarDescriptionField.set(checked)
+            }
           }
 
           NText {
@@ -232,259 +244,264 @@ ColumnLayout {
             wrapMode: Text.Wrap
           }
 
-          Item {
-            id: badgeEditorContainer
-            Layout.fillWidth: true
-            implicitHeight: badgeEditorColumn.implicitHeight
+          NPluginSettingsField {
+            field: root.badgeOrderField
+            NPluginSettingsField {
+              field: root.badgeEnabledField
+              Item {
+                id: badgeEditorContainer
+                Layout.fillWidth: true
+                implicitHeight: badgeEditorColumn.implicitHeight
 
-            property int draggedIndex: -1
-            property string draggedKey: ""
-            property int dropTargetIndex: -1
-            property bool dragStarted: false
-            property bool potentialDrag: false
-            property point startPos: Qt.point(0, 0)
-            readonly property real dragThreshold: 8
+                property int draggedIndex: -1
+                property string draggedKey: ""
+                property int dropTargetIndex: -1
+                property bool dragStarted: false
+                property bool potentialDrag: false
+                property point startPos: Qt.point(0, 0)
+                readonly property real dragThreshold: 8
 
-            function cardRect(i) {
-              const card = badgeCardRepeater.itemAt(i);
-              if (!card) return Qt.rect(0, 0, 0, 0);
-              const mapped = card.mapToItem(badgeEditorContainer, 0, 0);
-              return Qt.rect(mapped.x, mapped.y, card.width, card.height);
-            }
-
-            function computeDropIndex(mouseY) {
-              let best = draggedIndex;
-              let bestDist = Infinity;
-              const count = root.editBadgeOrder.length;
-
-              for (let i = 0; i < count; ++i) {
-                if (i === draggedIndex) continue;
-                const rect = cardRect(i);
-                if (rect.height <= 0) continue;
-                const centerY = rect.y + rect.height / 2;
-                const dist = Math.abs(mouseY - centerY);
-                if (dist < bestDist) {
-                  bestDist = dist;
-                  best = mouseY < centerY ? i : i + 1;
-                }
-              }
-
-              if (best > draggedIndex) best = best - 1;
-              return Math.max(0, Math.min(count - 1, best));
-            }
-
-            function updateDropIndicator() {
-              const count = root.editBadgeOrder.length;
-              if (!dragStarted || dropTargetIndex < 0 || count <= 0) return;
-              const refIndex = Math.min(dropTargetIndex, count - 1);
-              const refCard = badgeCardRepeater.itemAt(refIndex);
-              if (!refCard) return;
-              const mapped = refCard.mapToItem(badgeEditorContainer, 0, 0);
-              dropIndicator.width = Math.max(0, refCard.width - Style.marginL * 2);
-              dropIndicator.x = mapped.x + Style.marginL;
-              dropIndicator.y = dropTargetIndex <= draggedIndex
-                ? mapped.y - Style.marginXS
-                : mapped.y + refCard.height - dropIndicator.height + Style.marginXS;
-            }
-
-            function resetDrag() {
-              draggedIndex = -1;
-              draggedKey = "";
-              dropTargetIndex = -1;
-              dragStarted = false;
-              potentialDrag = false;
-              dragGhost.visible = false;
-            }
-
-            Rectangle {
-              id: dropIndicator
-              width: 0
-              height: 3
-              radius: Style.radiusXS
-              color: AtmoColor.mPrimary
-              visible: badgeEditorContainer.dragStarted && badgeEditorContainer.dropTargetIndex !== -1
-              z: 10
-            }
-
-            Rectangle {
-              id: dragGhost
-              width: Math.min(badgeEditorContainer.width, ghostRow.implicitWidth + Style.marginL * 2)
-              height: ghostRow.implicitHeight + Style.marginM * 2
-              radius: Style.radiusM
-              color: AtmoColor.mPrimary
-              border.width: Style.borderS
-              border.color: Qt.alpha(AtmoColor.mOnPrimary, 0.18)
-              opacity: 0.9
-              visible: false
-              z: 20
-
-              RowLayout {
-                id: ghostRow
-                anchors.fill: parent
-                anchors.margins: Style.marginM
-                spacing: Style.marginM
-
-                AtmoIcon {
-                  icon: "grip-vertical"
-                  pointSize: Style.fontSizeS
-                  color: Qt.alpha(AtmoColor.mOnPrimary, 0.75)
+                function cardRect(i) {
+                  const card = badgeCardRepeater.itemAt(i);
+                  if (!card)
+                    return Qt.rect(0, 0, 0, 0);
+                  const mapped = card.mapToItem(badgeEditorContainer, 0, 0);
+                  return Qt.rect(mapped.x, mapped.y, card.width, card.height);
                 }
 
-                AtmoIcon {
-                  icon: root.badgeIcon(badgeEditorContainer.draggedKey)
-                  pointSize: Style.fontSizeM
-                  color: AtmoColor.mOnPrimary
+                function computeDropIndex(mouseY) {
+                  let best = draggedIndex;
+                  let bestDist = Infinity;
+                  const count = root.editBadgeOrder.length;
+
+                  for (let i = 0; i < count; ++i) {
+                    if (i === draggedIndex)
+                      continue;
+                    const rect = cardRect(i);
+                    if (rect.height <= 0)
+                      continue;
+                    const centerY = rect.y + rect.height / 2;
+                    const dist = Math.abs(mouseY - centerY);
+                    if (dist < bestDist) {
+                      bestDist = dist;
+                      best = mouseY < centerY ? i : i + 1;
+                    }
+                  }
+
+                  if (best > draggedIndex)
+                    best = best - 1;
+                  return Math.max(0, Math.min(count - 1, best));
                 }
 
-                NText {
-                  id: ghostText
-                  Layout.fillWidth: true
-                  text: ""
-                  color: AtmoColor.mOnPrimary
-                  font.weight: Font.Medium
-                  elide: Text.ElideRight
+                function updateDropIndicator() {
+                  const count = root.editBadgeOrder.length;
+                  if (!dragStarted || dropTargetIndex < 0 || count <= 0)
+                    return;
+                  const refIndex = Math.min(dropTargetIndex, count - 1);
+                  const refCard = badgeCardRepeater.itemAt(refIndex);
+                  if (!refCard)
+                    return;
+                  const mapped = refCard.mapToItem(badgeEditorContainer, 0, 0);
+                  dropIndicator.width = Math.max(0, refCard.width - Style.marginL * 2);
+                  dropIndicator.x = mapped.x + Style.marginL;
+                  dropIndicator.y = dropTargetIndex <= draggedIndex ? mapped.y - Style.marginXS : mapped.y + refCard.height - dropIndicator.height + Style.marginXS;
                 }
-              }
-            }
 
-            ColumnLayout {
-              id: badgeEditorColumn
-              width: parent.width
-              spacing: Style.marginS
-
-              Repeater {
-                id: badgeCardRepeater
-                model: root.editBadgeOrder
+                function resetDrag() {
+                  draggedIndex = -1;
+                  draggedKey = "";
+                  dropTargetIndex = -1;
+                  dragStarted = false;
+                  potentialDrag = false;
+                  dragGhost.visible = false;
+                }
 
                 Rectangle {
-                  required property int index
-                  required property var modelData
-                  Layout.fillWidth: true
-                  width: badgeEditorColumn.width
-                  height: badgeCardRow.implicitHeight + Style.marginS * 2
+                  id: dropIndicator
+                  width: 0
+                  height: 3
+                  radius: Style.radiusXS
+                  color: AtmoColor.mPrimary
+                  visible: badgeEditorContainer.dragStarted && badgeEditorContainer.dropTargetIndex !== -1
+                  z: 10
+                }
+
+                Rectangle {
+                  id: dragGhost
+                  width: Math.min(badgeEditorContainer.width, ghostRow.implicitWidth + Style.marginL * 2)
+                  height: ghostRow.implicitHeight + Style.marginM * 2
                   radius: Style.radiusM
-                  color: Qt.alpha(AtmoColor.mSurfaceVariant, 0.6)
+                  color: AtmoColor.mPrimary
                   border.width: Style.borderS
-                  border.color: badgeDragHandleMouseArea.containsMouse
-                    ? Qt.alpha(AtmoColor.mPrimary, 0.55)
-                    : Qt.alpha(AtmoColor.mOutline, 0.35)
-                  opacity: badgeEditorContainer.draggedIndex === index && badgeEditorContainer.dragStarted ? 0.3 : 1.0
+                  border.color: Qt.alpha(AtmoColor.mOnPrimary, 0.18)
+                  opacity: 0.9
+                  visible: false
+                  z: 20
 
                   RowLayout {
-                    id: badgeCardRow
+                    id: ghostRow
                     anchors.fill: parent
-                    anchors.margins: Style.marginS
-                    spacing: Style.marginS
+                    anchors.margins: Style.marginM
+                    spacing: Style.marginM
 
-                    Item {
-                      Layout.preferredWidth: 24 * Style.uiScaleRatio
-                      Layout.preferredHeight: 34 * Style.uiScaleRatio
-
-                      AtmoIcon {
-                        anchors.centerIn: parent
-                        icon: "grip-vertical"
-                        pointSize: Style.fontSizeS
-                        color: badgeDragHandleMouseArea.containsMouse || badgeEditorContainer.draggedIndex === index
-                          ? AtmoColor.mPrimary
-                          : AtmoColor.mOnSurfaceVariant
-                      }
-
-                      MouseArea {
-                        id: badgeDragHandleMouseArea
-                        anchors.fill: parent
-                        acceptedButtons: Qt.LeftButton
-                        cursorShape: badgeEditorContainer.dragStarted && badgeEditorContainer.draggedIndex === index
-                          ? Qt.ClosedHandCursor
-                          : Qt.OpenHandCursor
-                        hoverEnabled: true
-                        preventStealing: true
-
-                        onPressed: mouse => {
-                          const mapped = badgeDragHandleMouseArea.mapToItem(badgeEditorContainer, mouse.x, mouse.y);
-                          badgeEditorContainer.startPos = Qt.point(mapped.x, mapped.y);
-                          badgeEditorContainer.draggedIndex = index;
-                          badgeEditorContainer.draggedKey = modelData;
-                          badgeEditorContainer.dropTargetIndex = index;
-                          badgeEditorContainer.dragStarted = false;
-                          badgeEditorContainer.potentialDrag = true;
-                          mouse.accepted = true;
-                        }
-
-                        onPositionChanged: mouse => {
-                          if (!badgeEditorContainer.potentialDrag || badgeEditorContainer.draggedIndex !== index) return;
-                          const mapped = badgeDragHandleMouseArea.mapToItem(badgeEditorContainer, mouse.x, mouse.y);
-                          const dx = mapped.x - badgeEditorContainer.startPos.x;
-                          const dy = mapped.y - badgeEditorContainer.startPos.y;
-                          const dist = Math.sqrt(dx * dx + dy * dy);
-                          if (!badgeEditorContainer.dragStarted && dist > badgeEditorContainer.dragThreshold) {
-                            badgeEditorContainer.dragStarted = true;
-                            ghostText.text = root.badgeLabel(modelData);
-                            dragGhost.visible = true;
-                          }
-                          if (badgeEditorContainer.dragStarted) {
-                            dragGhost.x = mapped.x - dragGhost.width / 2;
-                            dragGhost.y = mapped.y - dragGhost.height / 2;
-                            badgeEditorContainer.dropTargetIndex = badgeEditorContainer.computeDropIndex(mapped.y);
-                            badgeEditorContainer.updateDropIndicator();
-                          }
-                        }
-
-                        onReleased: mouse => {
-                          if (badgeEditorContainer.dragStarted) {
-                            const from = badgeEditorContainer.draggedIndex;
-                            const to = badgeEditorContainer.dropTargetIndex;
-                            if (to !== -1 && to !== from) {
-                              root.moveBadge(from, to);
-                            }
-                          }
-                          badgeEditorContainer.resetDrag();
-                          mouse.accepted = true;
-                        }
-
-                        onCanceled: badgeEditorContainer.resetDrag()
-                      }
+                    AtmoIcon {
+                      icon: "grip-vertical"
+                      pointSize: Style.fontSizeS
+                      color: Qt.alpha(AtmoColor.mOnPrimary, 0.75)
                     }
 
-                    Rectangle {
-                      Layout.preferredWidth: 34 * Style.uiScaleRatio
-                      Layout.preferredHeight: 34 * Style.uiScaleRatio
-                      radius: Style.radiusS
-                      color: Qt.alpha(AtmoColor.mPrimary, 0.12)
-
-                      AtmoIcon {
-                        anchors.centerIn: parent
-                        icon: root.badgeIcon(modelData)
-                        pointSize: Style.fontSizeM
-                        color: AtmoColor.mPrimary
-                      }
+                    AtmoIcon {
+                      icon: root.badgeIcon(badgeEditorContainer.draggedKey)
+                      pointSize: Style.fontSizeM
+                      color: AtmoColor.mOnPrimary
                     }
 
                     NText {
+                      id: ghostText
                       Layout.fillWidth: true
-                      text: root.badgeLabel(modelData)
-                      color: AtmoColor.mOnSurface
+                      text: ""
+                      color: AtmoColor.mOnPrimary
                       font.weight: Font.Medium
                       elide: Text.ElideRight
                     }
+                  }
+                }
 
-                    AtmoIconButton {
-                      icon: "chevron-up"
-                      tooltipText: pluginApi?.tr("settings.badges.moveUp")
-                      enabled: index > 0
-                      onClicked: root.moveBadge(index, index - 1)
-                    }
+                ColumnLayout {
+                  id: badgeEditorColumn
+                  width: parent.width
+                  spacing: Style.marginS
 
-                    AtmoIconButton {
-                      icon: "chevron-down"
-                      tooltipText: pluginApi?.tr("settings.badges.moveDown")
-                      enabled: index < root.editBadgeOrder.length - 1
-                      onClicked: root.moveBadge(index, index + 1)
-                    }
+                  Repeater {
+                    id: badgeCardRepeater
+                    model: root.editBadgeOrder
 
-                    NToggle {
-                      Layout.alignment: Qt.AlignVCenter
-                      checked: !!root.editBadgeEnabled[String(modelData || "")]
-                      onToggled: checked => root.setBadgeEnabled(modelData, checked)
+                    Rectangle {
+                      required property int index
+                      required property var modelData
+                      Layout.fillWidth: true
+                      width: badgeEditorColumn.width
+                      height: badgeCardRow.implicitHeight + Style.marginS * 2
+                      radius: Style.radiusM
+                      color: Qt.alpha(AtmoColor.mSurfaceVariant, 0.6)
+                      border.width: Style.borderS
+                      border.color: badgeDragHandleMouseArea.containsMouse ? Qt.alpha(AtmoColor.mPrimary, 0.55) : Qt.alpha(AtmoColor.mOutline, 0.35)
+                      opacity: badgeEditorContainer.draggedIndex === index && badgeEditorContainer.dragStarted ? 0.3 : 1.0
+
+                      RowLayout {
+                        id: badgeCardRow
+                        anchors.fill: parent
+                        anchors.margins: Style.marginS
+                        spacing: Style.marginS
+
+                        Item {
+                          Layout.preferredWidth: 24 * Style.uiScaleRatio
+                          Layout.preferredHeight: 34 * Style.uiScaleRatio
+
+                          AtmoIcon {
+                            anchors.centerIn: parent
+                            icon: "grip-vertical"
+                            pointSize: Style.fontSizeS
+                            color: badgeDragHandleMouseArea.containsMouse || badgeEditorContainer.draggedIndex === index ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
+                          }
+
+                          MouseArea {
+                            id: badgeDragHandleMouseArea
+                            anchors.fill: parent
+                            acceptedButtons: Qt.LeftButton
+                            cursorShape: badgeEditorContainer.dragStarted && badgeEditorContainer.draggedIndex === index ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+                            hoverEnabled: true
+                            preventStealing: true
+
+                            onPressed: mouse => {
+                              const mapped = badgeDragHandleMouseArea.mapToItem(badgeEditorContainer, mouse.x, mouse.y);
+                              badgeEditorContainer.startPos = Qt.point(mapped.x, mapped.y);
+                              badgeEditorContainer.draggedIndex = index;
+                              badgeEditorContainer.draggedKey = modelData;
+                              badgeEditorContainer.dropTargetIndex = index;
+                              badgeEditorContainer.dragStarted = false;
+                              badgeEditorContainer.potentialDrag = true;
+                              mouse.accepted = true;
+                            }
+
+                            onPositionChanged: mouse => {
+                              if (!badgeEditorContainer.potentialDrag || badgeEditorContainer.draggedIndex !== index)
+                                return;
+                              const mapped = badgeDragHandleMouseArea.mapToItem(badgeEditorContainer, mouse.x, mouse.y);
+                              const dx = mapped.x - badgeEditorContainer.startPos.x;
+                              const dy = mapped.y - badgeEditorContainer.startPos.y;
+                              const dist = Math.sqrt(dx * dx + dy * dy);
+                              if (!badgeEditorContainer.dragStarted && dist > badgeEditorContainer.dragThreshold) {
+                                badgeEditorContainer.dragStarted = true;
+                                ghostText.text = root.badgeLabel(modelData);
+                                dragGhost.visible = true;
+                              }
+                              if (badgeEditorContainer.dragStarted) {
+                                dragGhost.x = mapped.x - dragGhost.width / 2;
+                                dragGhost.y = mapped.y - dragGhost.height / 2;
+                                badgeEditorContainer.dropTargetIndex = badgeEditorContainer.computeDropIndex(mapped.y);
+                                badgeEditorContainer.updateDropIndicator();
+                              }
+                            }
+
+                            onReleased: mouse => {
+                              if (badgeEditorContainer.dragStarted) {
+                                const from = badgeEditorContainer.draggedIndex;
+                                const to = badgeEditorContainer.dropTargetIndex;
+                                if (to !== -1 && to !== from) {
+                                  root.moveBadge(from, to);
+                                }
+                              }
+                              badgeEditorContainer.resetDrag();
+                              mouse.accepted = true;
+                            }
+
+                            onCanceled: badgeEditorContainer.resetDrag()
+                          }
+                        }
+
+                        Rectangle {
+                          Layout.preferredWidth: 34 * Style.uiScaleRatio
+                          Layout.preferredHeight: 34 * Style.uiScaleRatio
+                          radius: Style.radiusS
+                          color: Qt.alpha(AtmoColor.mPrimary, 0.12)
+
+                          AtmoIcon {
+                            anchors.centerIn: parent
+                            icon: root.badgeIcon(modelData)
+                            pointSize: Style.fontSizeM
+                            color: AtmoColor.mPrimary
+                          }
+                        }
+
+                        NText {
+                          Layout.fillWidth: true
+                          text: root.badgeLabel(modelData)
+                          color: AtmoColor.mOnSurface
+                          font.weight: Font.Medium
+                          elide: Text.ElideRight
+                        }
+
+                        AtmoIconButton {
+                          icon: "chevron-up"
+                          tooltipText: pluginApi?.tr("settings.badges.moveUp")
+                          enabled: index > 0
+                          onClicked: root.moveBadge(index, index - 1)
+                        }
+
+                        AtmoIconButton {
+                          icon: "chevron-down"
+                          tooltipText: pluginApi?.tr("settings.badges.moveDown")
+                          enabled: index < root.editBadgeOrder.length - 1
+                          onClicked: root.moveBadge(index, index + 1)
+                        }
+
+                        NToggle {
+                          Layout.alignment: Qt.AlignVCenter
+                          checked: !!root.editBadgeEnabled[String(modelData || "")]
+                          onToggled: checked => root.setBadgeEnabled(modelData, checked)
+                        }
+                      }
                     }
                   }
                 }
@@ -528,13 +545,16 @@ ColumnLayout {
           Layout.fillWidth: true
           spacing: Style.marginM
 
-          NTextInput {
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.wallpapersFolder.label")
-            description: pluginApi?.tr("settings.wallpapersFolder.description")
-            placeholderText: pluginApi?.tr("settings.wallpapersFolder.placeholder")
-            text: root.editWallpapersFolder
-            onTextChanged: root.editWallpapersFolder = text
+          NPluginSettingsField {
+            field: root.wallpapersFolderField
+            NTextInput {
+              Layout.fillWidth: true
+              label: pluginApi?.tr("settings.wallpapersFolder.label")
+              description: pluginApi?.tr("settings.wallpapersFolder.description")
+              placeholderText: pluginApi?.tr("settings.wallpapersFolder.placeholder")
+              text: root.editWallpapersFolder
+              onEditCommitted: root.wallpapersFolderField.set(text)
+            }
           }
 
           NButton {
@@ -548,23 +568,31 @@ ColumnLayout {
             }
           }
 
-          NSpinBox {
-            id: rangeEditWallpaperScanCacheMinutes
-            objectName: "settings-range-editWallpaperScanCacheMinutes"
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.wallpaperScanCacheMinutes.label")
-            description: pluginApi?.tr("settings.wallpaperScanCacheMinutes.description")
-            from: 0
-            to: 1440
-            stepSize: 1
-            value: root.editWallpaperScanCacheMinutes
-            suffix: pluginApi?.tr("settings.units.minutes")
-            onValueModified: value => { if (value !== root.editWallpaperScanCacheMinutes) root.editWallpaperScanCacheMinutes = value; }
+          NPluginSettingsField {
+            field: root.wallpaperScanCacheMinutesField
+            NSpinBox {
+              id: rangeEditWallpaperScanCacheMinutes
+              objectName: "settings-range-editWallpaperScanCacheMinutes"
+              Layout.fillWidth: true
+              label: pluginApi?.tr("settings.wallpaperScanCacheMinutes.label")
+              description: pluginApi?.tr("settings.wallpaperScanCacheMinutes.description")
+              from: 0
+              to: 1440
+              stepSize: 1
+              value: root.editWallpaperScanCacheMinutes
+              suffix: pluginApi?.tr("settings.units.minutes")
+              requestValue: value => {
+                if (value !== root.editWallpaperScanCacheMinutes)
+                  root.wallpaperScanCacheMinutesField.set(value);
+              }
+            }
           }
 
           NText {
             Layout.fillWidth: true
-            text: pluginApi?.tr("settings.cache.currentSize", { size: root.cacheSizeLabel })
+            text: pluginApi?.tr("settings.cache.currentSize", {
+                                  size: root.cacheSizeLabel
+                                })
             color: AtmoColor.mOnSurfaceVariant
             wrapMode: Text.Wrap
           }
@@ -637,42 +665,58 @@ ColumnLayout {
             font.weight: Font.Bold
           }
 
-          NSpinBox {
-            id: defaultFpsSpinBox
-            objectName: "settings-range-editDefaultFps"
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.defaultFps.label")
-            description: pluginApi?.tr("settings.defaultFps.description")
-            from: 1
-            to: 240
-            stepSize: 1
-            value: root.editDefaultFps
-            suffix: pluginApi?.tr("settings.units.fps")
-            onValueModified: value => { if (value !== root.editDefaultFps) root.editDefaultFps = value; }
+          NPluginSettingsField {
+            field: root.defaultFpsField
+            NSpinBox {
+              id: defaultFpsSpinBox
+              objectName: "settings-range-editDefaultFps"
+              Layout.fillWidth: true
+              label: pluginApi?.tr("settings.defaultFps.label")
+              description: pluginApi?.tr("settings.defaultFps.description")
+              from: 1
+              to: 240
+              stepSize: 1
+              value: root.editDefaultFps
+              suffix: pluginApi?.tr("settings.units.fps")
+              requestValue: value => {
+                if (value !== root.editDefaultFps)
+                  root.defaultFpsField.set(value);
+              }
+            }
           }
 
-          NToggle {
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.defaultNoFullscreenPause.label")
-            description: pluginApi?.tr("settings.defaultNoFullscreenPause.description")
-            checked: root.editDefaultNoFullscreenPause
-            onToggled: checked => root.editDefaultNoFullscreenPause = checked
+          NPluginSettingsField {
+            field: root.defaultNoFullscreenPauseField
+            NToggle {
+              Layout.fillWidth: true
+              label: pluginApi?.tr("settings.defaultNoFullscreenPause.label")
+              description: pluginApi?.tr("settings.defaultNoFullscreenPause.description")
+              checked: root.editDefaultNoFullscreenPause
+              onToggled: checked => root.defaultNoFullscreenPauseField.set(checked)
+            }
           }
 
-          NToggle {
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.defaultFullscreenPauseOnlyActive.label")
-            description: pluginApi?.tr("settings.defaultFullscreenPauseOnlyActive.description")
-            checked: root.editDefaultFullscreenPauseOnlyActive
-            onToggled: checked => root.editDefaultFullscreenPauseOnlyActive = checked
+          NPluginSettingsField {
+            field: root.defaultFullscreenPauseOnlyActiveField
+            NToggle {
+              Layout.fillWidth: true
+              label: pluginApi?.tr("settings.defaultFullscreenPauseOnlyActive.label")
+              description: pluginApi?.tr("settings.defaultFullscreenPauseOnlyActive.description")
+              checked: root.editDefaultFullscreenPauseOnlyActive
+              onToggled: checked => root.defaultFullscreenPauseOnlyActiveField.set(checked)
+            }
           }
 
-          NToggle {
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.autoApplyOnStartup.label")
-            description: pluginApi?.tr("settings.autoApplyOnStartup.description")
-            checked: root.editAutoApplyOnStartup
-            onToggled: checked => root.editAutoApplyOnStartup = checked
+          NPluginSettingsField {
+            field: root.autoApplyOnStartupField
+            NToggle {
+              enabled: root.pluginApi?.scopeKind !== "instance"
+              Layout.fillWidth: true
+              label: pluginApi?.tr("settings.autoApplyOnStartup.label")
+              description: pluginApi?.tr("settings.autoApplyOnStartup.description")
+              checked: root.editAutoApplyOnStartup
+              onToggled: checked => root.autoApplyOnStartupField.set(checked)
+            }
           }
 
           NDivider {
@@ -686,43 +730,58 @@ ColumnLayout {
             font.weight: Font.Bold
           }
 
-          NToggle {
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.defaultMuted.label")
-            description: pluginApi?.tr("settings.defaultMuted.description")
-            checked: root.editDefaultMuted
-            onToggled: checked => root.editDefaultMuted = checked
+          NPluginSettingsField {
+            field: root.defaultMutedField
+            NToggle {
+              Layout.fillWidth: true
+              label: pluginApi?.tr("settings.defaultMuted.label")
+              description: pluginApi?.tr("settings.defaultMuted.description")
+              checked: root.editDefaultMuted
+              onToggled: checked => root.defaultMutedField.set(checked)
+            }
           }
 
-          NSpinBox {
-            id: defaultVolumeSpinBox
-            objectName: "settings-range-editDefaultVolume"
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.defaultVolume.label")
-            description: pluginApi?.tr("settings.defaultVolume.description")
-            from: 0
-            to: 100
-            stepSize: 1
-            suffix: pluginApi?.tr("settings.units.percent")
-            value: root.editDefaultVolume
-            enabled: !root.editDefaultMuted
-            onValueModified: value => { if (value !== root.editDefaultVolume) root.editDefaultVolume = value; }
+          NPluginSettingsField {
+            field: root.defaultVolumeField
+            NSpinBox {
+              id: defaultVolumeSpinBox
+              objectName: "settings-range-editDefaultVolume"
+              Layout.fillWidth: true
+              label: pluginApi?.tr("settings.defaultVolume.label")
+              description: pluginApi?.tr("settings.defaultVolume.description")
+              from: 0
+              to: 100
+              stepSize: 1
+              suffix: pluginApi?.tr("settings.units.percent")
+              value: root.editDefaultVolume
+              enabled: !root.editDefaultMuted
+              requestValue: value => {
+                if (value !== root.editDefaultVolume)
+                  root.defaultVolumeField.set(value);
+              }
+            }
           }
 
-          NToggle {
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.defaultAudioReactiveEffects.label")
-            description: pluginApi?.tr("settings.defaultAudioReactiveEffects.description")
-            checked: root.editDefaultAudioReactiveEffects
-            onToggled: checked => root.editDefaultAudioReactiveEffects = checked
+          NPluginSettingsField {
+            field: root.defaultAudioReactiveEffectsField
+            NToggle {
+              Layout.fillWidth: true
+              label: pluginApi?.tr("settings.defaultAudioReactiveEffects.label")
+              description: pluginApi?.tr("settings.defaultAudioReactiveEffects.description")
+              checked: root.editDefaultAudioReactiveEffects
+              onToggled: checked => root.defaultAudioReactiveEffectsField.set(checked)
+            }
           }
 
-          NToggle {
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.defaultNoAutomute.label")
-            description: pluginApi?.tr("settings.defaultNoAutomute.description")
-            checked: root.editDefaultNoAutomute
-            onToggled: checked => root.editDefaultNoAutomute = checked
+          NPluginSettingsField {
+            field: root.defaultNoAutomuteField
+            NToggle {
+              Layout.fillWidth: true
+              label: pluginApi?.tr("settings.defaultNoAutomute.label")
+              description: pluginApi?.tr("settings.defaultNoAutomute.description")
+              checked: root.editDefaultNoAutomute
+              onToggled: checked => root.defaultNoAutomuteField.set(checked)
+            }
           }
 
           NDivider {
@@ -736,47 +795,80 @@ ColumnLayout {
             font.weight: Font.Bold
           }
 
-          NComboBox {
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.defaultScaling.label")
-            description: pluginApi?.tr("settings.defaultScaling.description")
-            model: [
-              { "key": "fill", "name": pluginApi?.tr("panel.scalingFill") },
-              { "key": "fit", "name": pluginApi?.tr("panel.scalingFit") },
-              { "key": "stretch", "name": pluginApi?.tr("panel.scalingStretch") },
-              { "key": "default", "name": pluginApi?.tr("panel.scalingDefault") }
-            ]
-            currentKey: root.editDefaultScaling
-            onSelected: key => root.editDefaultScaling = key
+          NPluginSettingsField {
+            field: root.defaultScalingField
+            NComboBox {
+              Layout.fillWidth: true
+              label: pluginApi?.tr("settings.defaultScaling.label")
+              description: pluginApi?.tr("settings.defaultScaling.description")
+              model: [
+                {
+                  "key": "fill",
+                  "name": pluginApi?.tr("panel.scalingFill")
+                },
+                {
+                  "key": "fit",
+                  "name": pluginApi?.tr("panel.scalingFit")
+                },
+                {
+                  "key": "stretch",
+                  "name": pluginApi?.tr("panel.scalingStretch")
+                },
+                {
+                  "key": "default",
+                  "name": pluginApi?.tr("panel.scalingDefault")
+                }
+              ]
+              currentKey: root.editDefaultScaling
+              onSelected: key => root.defaultScalingField.set(key)
+            }
           }
 
-          NComboBox {
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.defaultClamp.label")
-            description: pluginApi?.tr("settings.defaultClamp.description")
-            model: [
-              { "key": "clamp", "name": pluginApi?.tr("panel.clampClamp") },
-              { "key": "border", "name": pluginApi?.tr("panel.clampBorder") },
-              { "key": "repeat", "name": pluginApi?.tr("panel.clampRepeat") }
-            ]
-            currentKey: root.editDefaultClamp
-            onSelected: key => root.editDefaultClamp = key
+          NPluginSettingsField {
+            field: root.defaultClampField
+            NComboBox {
+              Layout.fillWidth: true
+              label: pluginApi?.tr("settings.defaultClamp.label")
+              description: pluginApi?.tr("settings.defaultClamp.description")
+              model: [
+                {
+                  "key": "clamp",
+                  "name": pluginApi?.tr("panel.clampClamp")
+                },
+                {
+                  "key": "border",
+                  "name": pluginApi?.tr("panel.clampBorder")
+                },
+                {
+                  "key": "repeat",
+                  "name": pluginApi?.tr("panel.clampRepeat")
+                }
+              ]
+              currentKey: root.editDefaultClamp
+              onSelected: key => root.defaultClampField.set(key)
+            }
           }
 
-          NToggle {
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.defaultDisableMouse.label")
-            description: pluginApi?.tr("settings.defaultDisableMouse.description")
-            checked: root.editDefaultDisableMouse
-            onToggled: checked => root.editDefaultDisableMouse = checked
+          NPluginSettingsField {
+            field: root.defaultDisableMouseField
+            NToggle {
+              Layout.fillWidth: true
+              label: pluginApi?.tr("settings.defaultDisableMouse.label")
+              description: pluginApi?.tr("settings.defaultDisableMouse.description")
+              checked: root.editDefaultDisableMouse
+              onToggled: checked => root.defaultDisableMouseField.set(checked)
+            }
           }
 
-          NToggle {
-            Layout.fillWidth: true
-            label: pluginApi?.tr("settings.defaultDisableParallax.label")
-            description: pluginApi?.tr("settings.defaultDisableParallax.description")
-            checked: root.editDefaultDisableParallax
-            onToggled: checked => root.editDefaultDisableParallax = checked
+          NPluginSettingsField {
+            field: root.defaultDisableParallaxField
+            NToggle {
+              Layout.fillWidth: true
+              label: pluginApi?.tr("settings.defaultDisableParallax.label")
+              description: pluginApi?.tr("settings.defaultDisableParallax.description")
+              checked: root.editDefaultDisableParallax
+              onToggled: checked => root.defaultDisableParallaxField.set(checked)
+            }
           }
         }
       }
@@ -789,32 +881,8 @@ ColumnLayout {
       return;
     }
 
-    if (pluginApi.pluginSettings.screens === undefined || pluginApi.pluginSettings.screens === null) {
-      pluginApi.pluginSettings.screens = {};
-    }
-
-    pluginApi.pluginSettings.wallpapersFolder = root.editWallpapersFolder;
-    pluginApi.pluginSettings.iconColor = root.editIconColor;
-    pluginApi.pluginSettings.enableExtraPropertiesEditor = root.editEnableExtraPropertiesEditor;
-    pluginApi.pluginSettings.defaultScaling = root.editDefaultScaling;
-    pluginApi.pluginSettings.defaultClamp = root.editDefaultClamp;
-    pluginApi.pluginSettings.defaultFps = defaultFpsSpinBox.value;
-    pluginApi.pluginSettings.defaultVolume = defaultVolumeSpinBox.value;
-    pluginApi.pluginSettings.defaultMuted = root.editDefaultMuted;
-    pluginApi.pluginSettings.defaultAudioReactiveEffects = root.editDefaultAudioReactiveEffects;
-    pluginApi.pluginSettings.defaultNoAutomute = root.editDefaultNoAutomute;
-    pluginApi.pluginSettings.defaultDisableMouse = root.editDefaultDisableMouse;
-    pluginApi.pluginSettings.defaultDisableParallax = root.editDefaultDisableParallax;
-    pluginApi.pluginSettings.defaultNoFullscreenPause = root.editDefaultNoFullscreenPause;
-    pluginApi.pluginSettings.defaultFullscreenPauseOnlyActive = root.editDefaultFullscreenPauseOnlyActive;
-    pluginApi.pluginSettings.autoApplyOnStartup = root.editAutoApplyOnStartup;
-    pluginApi.pluginSettings.showSidebarDescription = root.editShowSidebarDescription;
-    pluginApi.pluginSettings.wallpaperScanCacheMinutes = root.editWallpaperScanCacheMinutes;
-    root.editBadgeOrder = BadgeHelpers.normalizeBadgeOrder(root.editBadgeOrder, root.defaultBadgeOrder);
-    pluginApi.pluginSettings.badgeOrder = root.editBadgeOrder;
-    root.editBadgeEnabled = BadgeHelpers.normalizeBadgeEnabled(root.editBadgeEnabled, root.defaultBadgeEnabled);
-    pluginApi.pluginSettings.badgeEnabled = root.editBadgeEnabled;
-    if (pluginApi.saveSettings() !== false) root._savePending = true;
+    if (pluginApi.saveSettings() !== false)
+      root._savePending = true;
   }
 
   Process {
@@ -831,11 +899,13 @@ ColumnLayout {
       root.scanning = false;
       const detected = String(scanOutput.text || "").trim();
       if (detected.length > 0 && root.editWallpapersFolder.length === 0) {
-        root.editWallpapersFolder = detected;
+        root.wallpapersFolderField.set(detected);
       }
     }
 
-    stdout: StdioCollector { id: scanOutput }
+    stdout: StdioCollector {
+      id: scanOutput
+    }
     stderr: StdioCollector {}
   }
 
@@ -871,8 +941,12 @@ ColumnLayout {
       root.cacheSizeLabel = root.formatBytes(bytes);
     }
 
-    stdout: StdioCollector { id: cacheOutput }
-    stderr: StdioCollector { id: cacheError }
+    stdout: StdioCollector {
+      id: cacheOutput
+    }
+    stderr: StdioCollector {
+      id: cacheError
+    }
   }
 
   Process {
@@ -882,10 +956,7 @@ ColumnLayout {
 
     onExited: function () {
       root.clearingCache = false;
-      if (pluginApi) {
-        pluginApi.pluginSettings.wallpaperColorScreenshots = root.preservedWallpaperColorScreenshots();
-        if (pluginApi.saveSettings() !== false) root._savePending = true;
-      }
+      root.pluginApi?.mainInstance?.retainWallpaperColorScreenshots(root.preservedWallpaperColorScreenshots());
       root.refreshCacheSize();
     }
 

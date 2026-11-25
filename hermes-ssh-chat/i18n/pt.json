@@ -26,6 +26,7 @@
     }
   },
   "settings": {
+    "shared-effect": "As sessões SSH e os destinos guardados pertencem a esta instância. O atalho global e o IPC abrem o painel do plugin. Edite esse atalho em Definições -> Plugins.",
     "host": {
       "label": "Host / IP padrão",
       "desc": "Destino salvo para o painel. Senhas nunca são salvas.",

@@ -26,8 +26,9 @@ Item {
     id: root
 
     // Plugin API (injected by PluginPanelSlot)
-    property QtObject pluginApi: null
-    readonly property QtObject pluginCore: pluginApi?.mainInstance
+    property var pluginApi: null
+    readonly property var pluginCore: pluginApi?.mainInstance
+    readonly property var settingsConsumer: pluginCore?.settingsConsumerFor(pluginApi?.settingsContext)
 
     // Required properties for bar widgets
     property ShellScreen screen
@@ -110,7 +111,7 @@ Item {
 
             switch (action) {
             case "refresh":
-                root.pluginCore?.refresh();
+                root.settingsConsumer?.refresh();
                 break;
             case "widget-settings":
                 // TODO: unsupported for now

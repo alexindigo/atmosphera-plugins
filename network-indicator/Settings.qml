@@ -1,16 +1,34 @@
-import qs.Commons
-import qs.Widgets
-import qs.Services.System
 import QtQuick
 import QtQuick as Quick
 import QtQuick.Layouts
+import qs.Commons
+import qs.Services.System
+import qs.Widgets
 
 ColumnLayout {
   id: root
 
   property var pluginApi: null
+  readonly property var layoutField: pluginApi?.field("layout") ?? null
+  readonly property var slotsField: pluginApi?.field("slots") ?? null
+  readonly property var iconTypeField: pluginApi?.field("iconType") ?? null
+  readonly property var byteThresholdActiveField: pluginApi?.field("byteThresholdActive") ?? null
+  readonly property var fontSizeModifierField: pluginApi?.field("fontSizeModifier") ?? null
+  readonly property var iconSizeModifierField: pluginApi?.field("iconSizeModifier") ?? null
+  readonly property var paddingLeftField: pluginApi?.field("paddingLeft") ?? null
+  readonly property var paddingRightField: pluginApi?.field("paddingRight") ?? null
+  readonly property var columnSpacingField: pluginApi?.field("columnSpacing") ?? null
+  readonly property var rowSpacingField: pluginApi?.field("rowSpacing") ?? null
+  readonly property var useCustomFontField: pluginApi?.field("useCustomFont") ?? null
+  readonly property var customFontFamilyField: pluginApi?.field("customFontFamily") ?? null
+  readonly property var customFontBoldField: pluginApi?.field("customFontBold") ?? null
+  readonly property var customFontItalicField: pluginApi?.field("customFontItalic") ?? null
+  readonly property var useCustomColorsField: pluginApi?.field("useCustomColors") ?? null
+  readonly property var colorTxField: pluginApi?.field("colorTx") ?? null
+  readonly property var colorRxField: pluginApi?.field("colorRx") ?? null
+  readonly property var colorSilentField: pluginApi?.field("colorSilent") ?? null
+  readonly property var colorTextField: pluginApi?.field("colorText") ?? null
 
-  property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   // ── Options ──
@@ -53,50 +71,28 @@ ColumnLayout {
 
   // ── Edit state ──
 
-  property string editLayout: displayBaseline.editLayout
-  property var editSlots: displayBaseline.editSlots
-  property string editIconType: displayBaseline.editIconType
-  property int editByteThresholdActive: displayBaseline.editByteThresholdActive
-  property real editFontSizeModifier: displayBaseline.project("editFontSizeModifier")
-  property real editIconSizeModifier: displayBaseline.project("editIconSizeModifier")
-  property real editPaddingLeft: displayBaseline.editPaddingLeft
-  property real editPaddingRight: displayBaseline.editPaddingRight
-  property real editColumnSpacing: displayBaseline.editColumnSpacing
-  property real editRowSpacing: displayBaseline.editRowSpacing
-  property bool editUseCustomFont: displayBaseline.editUseCustomFont
-  property string editCustomFontFamily: displayBaseline.editCustomFontFamily
-  property bool editCustomFontBold: displayBaseline.editCustomFontBold
-  property bool editCustomFontItalic: displayBaseline.editCustomFontItalic
-  property bool editUseCustomColors: displayBaseline.editUseCustomColors
-  property color editColorTx: displayBaseline.editColorTx
-  property color editColorRx: displayBaseline.editColorRx
-  property color editColorSilent: displayBaseline.editColorSilent
-  property color editColorText: displayBaseline.editColorText
+  readonly property string editLayout: root.layoutField?.value ?? defaults.layout
+  readonly property var editSlots: root.slotsField?.value ?? defaults.slots
+  readonly property string editIconType: root.iconTypeField?.value ?? defaults.iconType
+  readonly property int editByteThresholdActive: root.byteThresholdActiveField?.value ?? defaults.byteThresholdActive
+  readonly property real editFontSizeModifier: root.fontSizeModifierField?.value ?? defaults.fontSizeModifier
+  readonly property real editIconSizeModifier: root.iconSizeModifierField?.value ?? defaults.iconSizeModifier
+  readonly property real editPaddingLeft: root.paddingLeftField?.value ?? defaults.paddingLeft
+  readonly property real editPaddingRight: root.paddingRightField?.value ?? defaults.paddingRight
+  readonly property real editColumnSpacing: root.columnSpacingField?.value ?? defaults.columnSpacing
+  readonly property real editRowSpacing: root.rowSpacingField?.value ?? defaults.rowSpacing
+  readonly property bool editUseCustomFont: root.useCustomFontField?.value ?? defaults.useCustomFont
+  readonly property string editCustomFontFamily: root.customFontFamilyField?.value ?? defaults.customFontFamily
+  readonly property bool editCustomFontBold: root.customFontBoldField?.value ?? defaults.customFontBold
+  readonly property bool editCustomFontItalic: root.customFontItalicField?.value ?? defaults.customFontItalic
+  readonly property bool editUseCustomColors: root.useCustomColorsField?.value ?? defaults.useCustomColors
+  readonly property color editColorTx: root.editUseCustomColors && root.colorTxField?.value || AtmoColor.mSecondary
+  readonly property color editColorRx: root.editUseCustomColors && root.colorRxField?.value || AtmoColor.mPrimary
+  readonly property color editColorSilent: root.editUseCustomColors && root.colorSilentField?.value || AtmoColor.mSurfaceVariant
+  readonly property color editColorText: root.editUseCustomColors && root.colorTextField?.value || AtmoColor.mOnSurfaceVariant
 
-  NSettingsBaseline {
-    ranges: [NSettingsRange { field: "editFontSizeModifier"; from: rangeEditFontSizeModifier.from; to: rangeEditFontSizeModifier.to }, NSettingsRange { field: "editIconSizeModifier"; from: rangeEditIconSizeModifier.from; to: rangeEditIconSizeModifier.to }]
-    id: displayBaseline
-    readonly property string editLayout: cfg.layout ?? defaults.layout
-    readonly property var editSlots: cfg.slots ?? defaults.slots
-    readonly property string editIconType: cfg.iconType ?? defaults.iconType
-    readonly property int editByteThresholdActive: cfg.byteThresholdActive ?? defaults.byteThresholdActive
-    readonly property real editFontSizeModifier: cfg.fontSizeModifier ?? defaults.fontSizeModifier
-    readonly property real editIconSizeModifier: cfg.iconSizeModifier ?? defaults.iconSizeModifier
-    readonly property real editPaddingLeft: cfg.paddingLeft ?? defaults.paddingLeft
-    readonly property real editPaddingRight: cfg.paddingRight ?? defaults.paddingRight
-    readonly property real editColumnSpacing: cfg.columnSpacing ?? defaults.columnSpacing
-    readonly property real editRowSpacing: cfg.rowSpacing ?? defaults.rowSpacing
-    readonly property bool editUseCustomFont: cfg.useCustomFont ?? defaults.useCustomFont
-    readonly property string editCustomFontFamily: cfg.customFontFamily ?? defaults.customFontFamily
-    readonly property bool editCustomFontBold: cfg.customFontBold ?? defaults.customFontBold
-    readonly property bool editCustomFontItalic: cfg.customFontItalic ?? defaults.customFontItalic
-    readonly property bool editUseCustomColors: cfg.useCustomColors ?? defaults.useCustomColors
-    readonly property color editColorTx: root.editUseCustomColors && cfg.colorTx || AtmoColor.mSecondary
-    readonly property color editColorRx: root.editUseCustomColors && cfg.colorRx || AtmoColor.mPrimary
-    readonly property color editColorSilent: root.editUseCustomColors && cfg.colorSilent || AtmoColor.mSurfaceVariant
-    readonly property color editColorText: root.editUseCustomColors && cfg.colorText || AtmoColor.mOnSurfaceVariant
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({editLayout: root.editLayout, editSlots: root.editSlots, editIconType: root.editIconType, editByteThresholdActive: root.editByteThresholdActive, editFontSizeModifier: root.editFontSizeModifier, editIconSizeModifier: root.editIconSizeModifier, editPaddingLeft: root.editPaddingLeft, editPaddingRight: root.editPaddingRight, editColumnSpacing: root.editColumnSpacing, editRowSpacing: root.editRowSpacing, editUseCustomFont: root.editUseCustomFont, editCustomFontFamily: root.editCustomFontFamily, editCustomFontBold: root.editCustomFontBold, editCustomFontItalic: root.editCustomFontItalic, editUseCustomColors: root.editUseCustomColors, editColorTx: root.editColorTx, editColorRx: root.editColorRx, editColorSilent: root.editColorSilent, editColorText: root.editColorText})
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   // ── Helpers ──
 
@@ -112,7 +108,7 @@ ColumnLayout {
   function updateSlot(index, value) {
     let copy = root.editSlots.slice();
     copy[index] = value;
-    root.editSlots = copy;
+    root.slotsField.set(copy);
   }
 
   function toIntOr(defaultValue, text) {
@@ -128,34 +124,6 @@ ColumnLayout {
       return;
     }
 
-    const s = pluginApi.pluginSettings;
-
-    s.layout = root.editLayout;
-    s.slots = root.editSlots;
-    s.iconType = root.editIconType;
-    s.byteThresholdActive = root.editByteThresholdActive;
-
-    s.fontSizeModifier = root.editFontSizeModifier;
-    s.iconSizeModifier = root.editIconSizeModifier;
-
-    s.paddingLeft = root.editPaddingLeft;
-    s.paddingRight = root.editPaddingRight;
-    s.columnSpacing = root.editColumnSpacing;
-    s.rowSpacing = root.editRowSpacing;
-
-    s.useCustomFont = root.editUseCustomFont;
-    s.customFontFamily = root.editCustomFontFamily;
-    s.customFontBold = root.editCustomFontBold;
-    s.customFontItalic = root.editCustomFontItalic;
-
-    s.useCustomColors = root.editUseCustomColors;
-    if (root.editUseCustomColors) {
-      s.colorTx = root.editColorTx.toString();
-      s.colorRx = root.editColorRx.toString();
-      s.colorSilent = root.editColorSilent.toString();
-      s.colorText = root.editColorText.toString();
-    }
-
     pluginApi.saveSettings(function (result) {
       if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
         Logger.i("NetworkIndicator", "Settings saved");
@@ -169,13 +137,16 @@ ColumnLayout {
 
   // ── Layout ──
 
-  NComboBox {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.layout.label")
-    description: pluginApi?.tr("settings.layout.desc")
-    currentKey: root.editLayout
-    model: root.layoutOptions
-    onSelected: key => root.editLayout = key
+  NPluginSettingsField {
+    field: root.layoutField
+    NComboBox {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.layout.label")
+      description: pluginApi?.tr("settings.layout.desc")
+      currentKey: root.editLayout
+      model: root.layoutOptions
+      onSelected: key => root.layoutField.set(key)
+    }
   }
 
   NDivider {
@@ -189,15 +160,18 @@ ColumnLayout {
     description: pluginApi?.tr("settings.slots.desc")
   }
 
-  Repeater {
-    model: 4
+  NPluginSettingsField {
+    field: root.slotsField
+    Repeater {
+      model: 4
 
-    NComboBox {
-      Layout.fillWidth: true
-      label: root.slotLabel(index)
-      currentKey: root.editSlots[index] ?? "none"
-      model: root.slotOptions
-      onSelected: key => root.updateSlot(index, key)
+      NComboBox {
+        Layout.fillWidth: true
+        label: root.slotLabel(index)
+        currentKey: root.editSlots[index] ?? "none"
+        model: root.slotOptions
+        onSelected: key => root.updateSlot(index, key)
+      }
     }
   }
 
@@ -207,26 +181,32 @@ ColumnLayout {
 
   // ── Icon style ──
 
-  NComboBox {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.iconType.label")
-    description: pluginApi?.tr("settings.iconType.desc")
-    currentKey: root.editIconType
-    model: root.iconNames.map(n => ({
-          key: n,
-          name: n
-        }))
-    onSelected: key => root.editIconType = key
+  NPluginSettingsField {
+    field: root.iconTypeField
+    NComboBox {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.iconType.label")
+      description: pluginApi?.tr("settings.iconType.desc")
+      currentKey: root.editIconType
+      model: root.iconNames.map(n => ({
+        key: n,
+        name: n
+      }))
+      onSelected: key => root.iconTypeField.set(key)
+    }
   }
 
   // ── Activity threshold ──
 
-  NTextInput {
-    label: pluginApi?.tr("settings.byteThresholdActive.label")
-    description: pluginApi?.tr("settings.byteThresholdActive.desc")
-    placeholderText: root.editByteThresholdActive + " bytes"
-    text: String(root.editByteThresholdActive)
-    onTextChanged: root.editByteThresholdActive = root.toIntOr(0, text)
+  NPluginSettingsField {
+    field: root.byteThresholdActiveField
+    NTextInput {
+      label: pluginApi?.tr("settings.byteThresholdActive.label")
+      description: pluginApi?.tr("settings.byteThresholdActive.desc")
+      placeholderText: root.editByteThresholdActive + " bytes"
+      text: String(root.editByteThresholdActive)
+      onEditCommitted: root.byteThresholdActiveField.set(root.toIntOr(0, text))
+    }
   }
 
   NDivider {
@@ -244,17 +224,19 @@ ColumnLayout {
       description: pluginApi?.tr("settings.fontSizeModifier.desc")
     }
 
-    NValueSlider {
-      id: rangeEditFontSizeModifier
-      objectName: "settings-range-editFontSizeModifier"
-      onValueChanged: root.editFontSizeModifier = value
-      Layout.fillWidth: true
-      from: 0.5
-      to: 1.5
-      stepSize: 0.05
-      text: root.editFontSizeModifier.toFixed(2)
-      value: root.editFontSizeModifier
-      onMoved: value => root.editFontSizeModifier = value
+    NPluginSettingsField {
+      field: root.fontSizeModifierField
+      NValueSlider {
+        id: rangeEditFontSizeModifier
+        objectName: "settings-range-editFontSizeModifier"
+        Layout.fillWidth: true
+        from: 0.5
+        to: 1.5
+        stepSize: 0.05
+        text: root.editFontSizeModifier.toFixed(2)
+        value: root.editFontSizeModifier
+        onMoved: value => root.fontSizeModifierField.set(value)
+      }
     }
   }
 
@@ -267,17 +249,19 @@ ColumnLayout {
       description: pluginApi?.tr("settings.iconSizeModifier.desc")
     }
 
-    NValueSlider {
-      id: rangeEditIconSizeModifier
-      objectName: "settings-range-editIconSizeModifier"
-      onValueChanged: root.editIconSizeModifier = value
-      Layout.fillWidth: true
-      from: 0.5
-      to: 1.5
-      stepSize: 0.05
-      text: root.editIconSizeModifier.toFixed(2)
-      value: root.editIconSizeModifier
-      onMoved: value => root.editIconSizeModifier = value
+    NPluginSettingsField {
+      field: root.iconSizeModifierField
+      NValueSlider {
+        id: rangeEditIconSizeModifier
+        objectName: "settings-range-editIconSizeModifier"
+        Layout.fillWidth: true
+        from: 0.5
+        to: 1.5
+        stepSize: 0.05
+        text: root.editIconSizeModifier.toFixed(2)
+        value: root.editIconSizeModifier
+        onMoved: value => root.iconSizeModifierField.set(value)
+      }
     }
   }
 
@@ -287,36 +271,48 @@ ColumnLayout {
 
   // ── Content padding ──
 
-  NTextInput {
-    label: pluginApi?.tr("settings.rowSpacing.label")
-    description: pluginApi?.tr("settings.rowSpacing.desc")
-    placeholderText: root.editRowSpacing + " px"
-    text: String(root.editRowSpacing)
-    onTextChanged: root.editRowSpacing = root.toIntOr(0, text)
+  NPluginSettingsField {
+    field: root.rowSpacingField
+    NTextInput {
+      label: pluginApi?.tr("settings.rowSpacing.label")
+      description: pluginApi?.tr("settings.rowSpacing.desc")
+      placeholderText: root.editRowSpacing + " px"
+      text: String(root.editRowSpacing)
+      onEditCommitted: root.rowSpacingField.set(root.toIntOr(0, text))
+    }
   }
 
-  NTextInput {
-    label: pluginApi?.tr("settings.columnSpacing.label")
-    description: pluginApi?.tr("settings.columnSpacing.desc")
-    placeholderText: root.editColumnSpacing + " px"
-    text: String(root.editColumnSpacing)
-    onTextChanged: root.editColumnSpacing = root.toIntOr(0, text)
+  NPluginSettingsField {
+    field: root.columnSpacingField
+    NTextInput {
+      label: pluginApi?.tr("settings.columnSpacing.label")
+      description: pluginApi?.tr("settings.columnSpacing.desc")
+      placeholderText: root.editColumnSpacing + " px"
+      text: String(root.editColumnSpacing)
+      onEditCommitted: root.columnSpacingField.set(root.toIntOr(0, text))
+    }
   }
 
-  NTextInput {
-    label: pluginApi?.tr("settings.paddingLeft.label")
-    description: pluginApi?.tr("settings.paddingLeft.desc")
-    placeholderText: root.editPaddingLeft + " px"
-    text: String(root.editPaddingLeft)
-    onTextChanged: root.editPaddingLeft = root.toIntOr(0, text)
+  NPluginSettingsField {
+    field: root.paddingLeftField
+    NTextInput {
+      label: pluginApi?.tr("settings.paddingLeft.label")
+      description: pluginApi?.tr("settings.paddingLeft.desc")
+      placeholderText: root.editPaddingLeft + " px"
+      text: String(root.editPaddingLeft)
+      onEditCommitted: root.paddingLeftField.set(root.toIntOr(0, text))
+    }
   }
 
-  NTextInput {
-    label: pluginApi?.tr("settings.paddingRight.label")
-    description: pluginApi?.tr("settings.paddingRight.desc")
-    placeholderText: root.editPaddingRight + " px"
-    text: String(root.editPaddingRight)
-    onTextChanged: root.editPaddingRight = root.toIntOr(0, text)
+  NPluginSettingsField {
+    field: root.paddingRightField
+    NTextInput {
+      label: pluginApi?.tr("settings.paddingRight.label")
+      description: pluginApi?.tr("settings.paddingRight.desc")
+      placeholderText: root.editPaddingRight + " px"
+      text: String(root.editPaddingRight)
+      onEditCommitted: root.paddingRightField.set(root.toIntOr(0, text))
+    }
   }
 
   NDivider {
@@ -325,12 +321,15 @@ ColumnLayout {
 
   // ── Custom Font ──
 
-  NToggle {
-    checked: root.editUseCustomFont
-    defaultValue: defaults.useCustomFont ?? false
-    description: pluginApi?.tr("settings.useCustomFont.desc")
-    label: pluginApi?.tr("settings.useCustomFont.label")
-    onToggled: c => root.editUseCustomFont = c
+  NPluginSettingsField {
+    field: root.useCustomFontField
+    NToggle {
+      checked: root.editUseCustomFont
+      defaultValue: defaults.useCustomFont ?? false
+      description: pluginApi?.tr("settings.useCustomFont.desc")
+      label: pluginApi?.tr("settings.useCustomFont.label")
+      onToggled: c => root.useCustomFontField.set(c)
+    }
   }
 
   ColumnLayout {
@@ -338,44 +337,56 @@ ColumnLayout {
     Layout.fillWidth: true
     spacing: Style.marginL
 
-    NSearchableComboBox {
-      label: pluginApi?.tr("settings.customFontFamily.label")
-      description: pluginApi?.tr("settings.customFontFamily.desc")
-      model: FontService.availableFonts
-      currentKey: root.editCustomFontFamily || Quick.Application.font.family
-      placeholder: pluginApi?.tr("settings.customFontFamily.placeholder")
-      searchPlaceholder: pluginApi?.tr("settings.customFontFamily.searchPlaceholder")
-      popupHeight: 420
-      onSelected: key => {
-        root.editCustomFontFamily = (key === Quick.Application.font.family) ? "" : key;
+    NPluginSettingsField {
+      field: root.customFontFamilyField
+      NSearchableComboBox {
+        label: pluginApi?.tr("settings.customFontFamily.label")
+        description: pluginApi?.tr("settings.customFontFamily.desc")
+        model: FontService.availableFonts
+        currentKey: root.editCustomFontFamily || Quick.Application.font.family
+        placeholder: pluginApi?.tr("settings.customFontFamily.placeholder")
+        searchPlaceholder: pluginApi?.tr("settings.customFontFamily.searchPlaceholder")
+        popupHeight: 420
+        onSelected: key => {
+          root.customFontFamilyField.set((key === Quick.Application.font.family) ? "" : key);
+        }
       }
     }
 
-    NToggle {
-      checked: root.editCustomFontBold
-      defaultValue: defaults.customFontBold ?? false
-      description: pluginApi?.tr("settings.customFontBold.desc")
-      label: pluginApi?.tr("settings.customFontBold.label")
-      onToggled: c => root.editCustomFontBold = c
+    NPluginSettingsField {
+      field: root.customFontBoldField
+      NToggle {
+        checked: root.editCustomFontBold
+        defaultValue: defaults.customFontBold ?? false
+        description: pluginApi?.tr("settings.customFontBold.desc")
+        label: pluginApi?.tr("settings.customFontBold.label")
+        onToggled: c => root.customFontBoldField.set(c)
+      }
     }
 
-    NToggle {
-      checked: root.editCustomFontItalic
-      defaultValue: defaults.customFontItalic ?? false
-      description: pluginApi?.tr("settings.customFontItalic.desc")
-      label: pluginApi?.tr("settings.customFontItalic.label")
-      onToggled: c => root.editCustomFontItalic = c
+    NPluginSettingsField {
+      field: root.customFontItalicField
+      NToggle {
+        checked: root.editCustomFontItalic
+        defaultValue: defaults.customFontItalic ?? false
+        description: pluginApi?.tr("settings.customFontItalic.desc")
+        label: pluginApi?.tr("settings.customFontItalic.label")
+        onToggled: c => root.customFontItalicField.set(c)
+      }
     }
   }
 
   // ── Custom Colors ──
 
-  NToggle {
-    checked: root.editUseCustomColors
-    defaultValue: defaults.useCustomColors ?? false
-    description: pluginApi?.tr("settings.useCustomColors.desc")
-    label: pluginApi?.tr("settings.useCustomColors.label")
-    onToggled: c => root.editUseCustomColors = c
+  NPluginSettingsField {
+    field: root.useCustomColorsField
+    NToggle {
+      checked: root.editUseCustomColors
+      defaultValue: defaults.useCustomColors ?? false
+      description: pluginApi?.tr("settings.useCustomColors.desc")
+      label: pluginApi?.tr("settings.useCustomColors.label")
+      onToggled: c => root.useCustomColorsField.set(c)
+    }
   }
 
   ColumnLayout {
@@ -387,9 +398,12 @@ ColumnLayout {
         label: pluginApi?.tr("settings.colorTx.label")
         description: pluginApi?.tr("settings.colorTx.desc")
       }
-      NColorPicker {
-        selectedColor: root.editColorTx
-        onColorSelected: color => root.editColorTx = color
+      NPluginSettingsField {
+        field: root.colorTxField
+        NColorPicker {
+          selectedColor: root.editColorTx
+          onColorSelected: color => root.colorTxField.set(color.toString())
+        }
       }
     }
 
@@ -399,9 +413,12 @@ ColumnLayout {
         label: pluginApi?.tr("settings.colorRx.label")
         description: pluginApi?.tr("settings.colorRx.desc")
       }
-      NColorPicker {
-        selectedColor: root.editColorRx
-        onColorSelected: color => root.editColorRx = color
+      NPluginSettingsField {
+        field: root.colorRxField
+        NColorPicker {
+          selectedColor: root.editColorRx
+          onColorSelected: color => root.colorRxField.set(color.toString())
+        }
       }
     }
 
@@ -411,9 +428,12 @@ ColumnLayout {
         label: pluginApi?.tr("settings.colorSilent.label")
         description: pluginApi?.tr("settings.colorSilent.desc")
       }
-      NColorPicker {
-        selectedColor: root.editColorSilent
-        onColorSelected: color => root.editColorSilent = color
+      NPluginSettingsField {
+        field: root.colorSilentField
+        NColorPicker {
+          selectedColor: root.editColorSilent
+          onColorSelected: color => root.colorSilentField.set(color.toString())
+        }
       }
     }
 
@@ -423,9 +443,12 @@ ColumnLayout {
         label: pluginApi?.tr("settings.colorText.label")
         description: pluginApi?.tr("settings.colorText.desc")
       }
-      NColorPicker {
-        selectedColor: root.editColorText
-        onColorSelected: color => root.editColorText = color
+      NPluginSettingsField {
+        field: root.colorTextField
+        NColorPicker {
+          selectedColor: root.editColorText
+          onColorSelected: color => root.colorTextField.set(color.toString())
+        }
       }
     }
   }

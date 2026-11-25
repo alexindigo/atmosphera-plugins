@@ -1,9 +1,9 @@
 {
   "id": "battery-monitor-plus",
   "name": "Battery Monitor Plus",
-  "version": "1.0.5",
+  "version": "1.0.9",
   "minNoctaliaVersion": "4.6.6",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "krteke",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -22,15 +22,15 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "deviceNativePath": {"type": "String"},
-        "displayMode": {"type": "String"},
-        "hideIfIdle": {"type": "Boolean"},
-        "hideIfNotDetected": {"type": "Boolean"},
-        "refreshIntervalSeconds": {"type": "Real"},
-        "showNoctaliaPerformance": {"type": "Boolean"},
-        "showPowerInBar": {"type": "Boolean"},
-        "showPowerProfiles": {"type": "Boolean"},
-        "showTimeInBar": {"type": "Boolean"}
+        "deviceNativePath": {"editorUsage": "configuration", "type": "String"},
+        "displayMode": {"editorUsage": "configuration", "type": "String"},
+        "hideIfIdle": {"editorUsage": "configuration", "type": "Boolean"},
+        "hideIfNotDetected": {"editorUsage": "configuration", "type": "Boolean"},
+        "refreshIntervalSeconds": {"editorUsage": "configuration", "type": "Real"},
+        "showNoctaliaPerformance": {"editorUsage": "configuration", "type": "Boolean"},
+        "showPowerInBar": {"editorUsage": "configuration", "type": "Boolean"},
+        "showPowerProfiles": {"editorUsage": "configuration", "type": "Boolean"},
+        "showTimeInBar": {"editorUsage": "configuration", "type": "Boolean"}
       }
     },
     "defaultSettings": {

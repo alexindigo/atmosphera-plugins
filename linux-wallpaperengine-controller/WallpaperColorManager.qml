@@ -24,9 +24,10 @@ Item {
   required property var wallpaperIdFromPathFn
   required property var getWallpaperPropertiesFn
   required property var getScreenConfigFn
+  required property var capturePolicyFn
 
   // Public state.
-  property bool applyingWallpaperColors: false
+  readonly property bool applyingWallpaperColors: colorPolicy !== null || pendingWallpaperColorReuseRequest !== null
   readonly property string activeColorMonitor: String(Settings.data.colorSchemes.monitorForColors || Quickshell.screens[0]?.name || "")
   readonly property bool wallpaperColorsEnabled: !!Settings.data.colorSchemes.useWallpaperColors
   readonly property bool wallpaperColorDarkMode: !!Settings.data.colorSchemes.darkMode
@@ -40,6 +41,7 @@ Item {
   property string wallpaperColorRequestPath: ""
   property string wallpaperColorScreenshotPath: ""
   property bool wallpaperColorNotify: false
+  property var colorPolicy: null
 
   // Timer intervals (named constants).
   readonly property int colorStartDelay: 1500
@@ -72,48 +74,50 @@ Item {
     return ColorCacheHelpers.cachedScreenshotEntry(pluginApi?.pluginSettings?.wallpaperColorScreenshots, screenName);
   }
 
-  function canReuseWallpaperColorScreenshot(screenName, wallpaperPath, scaling) {
+  function canReuseWallpaperColorScreenshot(screenName, wallpaperPath, scaling, clamp) {
     return ColorCacheHelpers.canReuseScreenshot(
       pluginApi?.pluginSettings?.wallpaperColorScreenshots,
       screenName,
       wallpaperPath,
       scaling,
+      clamp,
       normalizedPathFn,
       defaultScaling
     );
   }
 
-  function startWallpaperColorCapture(wallpaperPath, targetScreenName, targetScaling, notify = false) {
+  function startWallpaperColorCapture(wallpaperPath, targetScreenName, targetScaling, notify, policy) {
+    if (!policy?.context?.current()) return;
     const screenshotPath = screenshotPathForWallpaper(wallpaperPath, targetScreenName);
     const pluginDir = pluginApi?.pluginDir || "";
     const scriptPath = pluginDir + "/scripts/capture-wallpaper-colors.sh";
-    const wallpaperProperties = getWallpaperPropertiesFn(wallpaperPath);
+    const wallpaperProperties = policy.properties[wallpaperIdFromPathFn(wallpaperPath)] || ({});
     const resolvedScaling = targetScaling.length > 0 ? targetScaling : "fill";
     const command = WallpaperColorHelpers.buildCaptureCommand(
       scriptPath,
       screenshotPath,
       "",
-      defaultFps,
-      defaultClamp,
+      policy.fps,
+      policy.clamp,
       targetScreenName,
       wallpaperPath,
       resolvedScaling,
       wallpaperProperties
     );
 
-    applyingWallpaperColors = true;
     wallpaperColorRequestPath = wallpaperPath;
     wallpaperColorScreenshotPath = screenshotPath;
     wallpaperColorScreenName = targetScreenName;
     wallpaperColorScaling = resolvedScaling;
     wallpaperColorNotify = !!notify;
+    colorPolicy = policy;
     wallpaperColorProcess.command = command;
     wallpaperColorProcess.running = true;
 
     Logger.i("LWEController", "Generating screenshot for wallpaper color extraction", "path=", wallpaperPath, "screen=", targetScreenName, "scaling=", wallpaperColorScaling, "output=", screenshotPath);
   }
 
-  function saveWallpaperColorScreenshot(screenName, screenshotPath, wallpaperPath, scaling) {
+  function saveWallpaperColorScreenshot(screenName, screenshotPath, wallpaperPath, scaling, clamp) {
     if (!pluginApi || screenName.length === 0 || screenshotPath.length === 0) {
       return;
     }
@@ -121,7 +125,8 @@ Item {
     pluginApi.pluginSettings.wallpaperColorScreenshots[screenName] = WallpaperColorHelpers.buildScreenshotCacheEntry(
       screenshotPath,
       wallpaperPath,
-      scaling
+      scaling,
+      clamp
     );
     pluginApi.saveSettings();
 
@@ -148,14 +153,15 @@ Item {
     }
 
     Logger.d("LWEController", "Scheduling wallpaper color sync for current active monitor wallpaper", "screen=", request.screenName, "path=", request.path, "scaling=", request.scaling, "reason=", reason);
-    scheduleWallpaperColorsFromPath(request.path, request);
+    scheduleWallpaperColorsFromPath(request.path, request, capturePolicyFn());
   }
 
-  function applyWallpaperColorsFromPath(path, options = null) {
+  function applyWallpaperColorsFromPath(path, options, policy) {
+    if (!policy?.context?.current()) return;
     const request = WallpaperColorHelpers.normalizeWallpaperColorRequest(
       path,
       options,
-      defaultScaling,
+      policy.scaling,
       Quickshell.screens[0]?.name || "",
       normalizedPathFn
     );
@@ -188,7 +194,7 @@ Item {
       return;
     }
 
-    if (canReuseWallpaperColorScreenshot(targetScreenName, wallpaperPath, targetScaling)) {
+    if (canReuseWallpaperColorScreenshot(targetScreenName, wallpaperPath, targetScaling, policy.clamp)) {
       const entry = wallpaperColorScreenshotEntry(targetScreenName);
       const cachedPath = normalizedPathFn(entry?.path || "");
       const pluginDir = pluginApi?.pluginDir || "";
@@ -200,18 +206,20 @@ Item {
         cachedPath,
         notify
       );
+      pendingWallpaperColorReuseRequest.policy = policy;
       reusedWallpaperColorCheckProcess.command = ["bash", scriptPath, cachedPath];
       reusedWallpaperColorCheckProcess.running = true;
       return;
     }
-    startWallpaperColorCapture(wallpaperPath, targetScreenName, targetScaling, notify);
+    startWallpaperColorCapture(wallpaperPath, targetScreenName, targetScaling, notify, policy);
   }
 
-  function scheduleWallpaperColorsFromPath(path, options = null) {
+  function scheduleWallpaperColorsFromPath(path, options, policy) {
+    if (!policy?.context?.current()) return;
     const request = WallpaperColorHelpers.normalizeWallpaperColorRequest(
       path,
       options,
-      defaultScaling,
+      policy.scaling,
       Quickshell.screens[0]?.name || "",
       normalizedPathFn
     );
@@ -220,6 +228,7 @@ Item {
     }
 
     pendingWallpaperColorRequest = request;
+    request.policy = policy;
     wallpaperColorStartTimer.restart();
     Logger.d("LWEController", "Scheduled wallpaper color extraction", "path=", pendingWallpaperColorRequest.path, "screen=", pendingWallpaperColorRequest.screenName, "scaling=", pendingWallpaperColorRequest.scaling);
   }
@@ -238,14 +247,16 @@ Item {
       const screenName = root.wallpaperColorScreenName;
       const appliedScaling = root.wallpaperColorScaling;
       const notify = root.wallpaperColorNotify;
+      const policy = root.colorPolicy;
       const stderrText = String(stderr.text || "").trim();
 
-      root.applyingWallpaperColors = false;
       root.wallpaperColorRequestPath = "";
       root.wallpaperColorScreenshotPath = "";
       root.wallpaperColorScreenName = "";
       root.wallpaperColorScaling = "fill";
       root.wallpaperColorNotify = false;
+      root.colorPolicy = null;
+      if (!policy?.context?.current()) return;
 
       if (exitCode !== 0) {
         const msg = stderrText.length > 0 ? "Wallpaper screenshot generation failed, stderr=" + stderrText : "Wallpaper screenshot generation failed";
@@ -256,7 +267,7 @@ Item {
         return;
       }
 
-      root.saveWallpaperColorScreenshot(screenName, screenshotPath, requestPath, appliedScaling);
+      root.saveWallpaperColorScreenshot(screenName, screenshotPath, requestPath, appliedScaling, policy.clamp);
 
       if (root.wallpaperColorsEnabled && screenName === root.activeColorMonitor) {
         root.applyWallpaperColorsFromScreenshot(screenshotPath);
@@ -281,7 +292,7 @@ Item {
     onExited: function (exitCode) {
       const request = root.pendingWallpaperColorReuseRequest;
       root.pendingWallpaperColorReuseRequest = null;
-      if (!request) {
+      if (!request?.policy?.context?.current()) {
         return;
       }
 
@@ -300,7 +311,7 @@ Item {
       }
 
       Logger.w("LWEController", "Cached wallpaper color screenshot missing; regenerating", "path=", request.wallpaperPath, "screen=", request.screenName, "scaling=", request.scaling, "screenshot=", request.screenshotPath);
-      root.startWallpaperColorCapture(request.wallpaperPath, request.screenName, request.scaling, !!request.notify);
+      root.startWallpaperColorCapture(request.wallpaperPath, request.screenName, request.scaling, !!request.notify, request.policy);
     }
 
     stdout: StdioCollector {}
@@ -318,7 +329,7 @@ Item {
       if (!request || String(request.path || "").length === 0) {
         return;
       }
-      root.applyWallpaperColorsFromPath(request.path, request);
+      root.applyWallpaperColorsFromPath(request.path, request, request.policy);
     }
   }
 
@@ -344,6 +355,5 @@ Item {
     reusedWallpaperColorCheckProcess.running = false;
     wallpaperColorStartTimer.stop();
     startupWallpaperColorResyncTimer.stop();
-    applyingWallpaperColors = false;
   }
 }

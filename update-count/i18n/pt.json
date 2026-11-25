@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "Esta instância seleciona a verificação periódica e os comandos. Executar uma atualização altera o sistema para todas as instâncias.",
     "changeIcon": {
       "label": "Selecionar ícone"
     },

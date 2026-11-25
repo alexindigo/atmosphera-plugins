@@ -1,4 +1,5 @@
 import QtQuick
+import qs.Services.Plugins as Plugins
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
@@ -129,6 +130,8 @@ Rectangle {
     signal rightClicked
     property bool selected: false
     property bool enableTodoIntegration: false
+    property var todoPolicy: null
+    property string todoText: ""
     property bool isPinned: false
 
     width: 250
@@ -136,7 +139,7 @@ Rectangle {
 
     // Get ToDo pages from plugin
     function getTodoPages() {
-        const todoApi = PluginService.getPluginAPI("todo");
+        const todoApi = Plugins.Service.getPluginAPI("todo");
         if (!todoApi || !todoApi.pluginSettings || !todoApi.pluginSettings.pages) {
             return [
                 {
@@ -181,8 +184,8 @@ Rectangle {
 
             if (action.startsWith("page-")) {
                 const pageId = parseInt(action.replace("page-", ""));
-                if (root.preview) {
-                    root.pluginApi?.mainInstance?.addTodoWithText(root.preview.substring(0, 200), pageId);
+                if (root.todoText) {
+                    root.pluginApi?.mainInstance?.addTodoWithText(root.todoText, pageId, undefined, root.todoPolicy);
                 }
             }
         }
@@ -273,6 +276,9 @@ Rectangle {
                     colorBorder: "transparent"
                     colorBorderHover: "transparent"
                     onClicked: {
+                        root.todoPolicy = root.pluginApi?.mainInstance?.capturePolicy(root.pluginApi.settingsContext);
+                        if (!root.todoPolicy?.enableTodoIntegration) return;
+                        root.todoText = root.preview.substring(0, 200);
                         // Close any previously open menu
                         if (root.panelRoot && root.panelRoot.activeContextMenu) {
                             root.panelRoot.activeContextMenu.visible = false;

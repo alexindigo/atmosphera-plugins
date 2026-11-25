@@ -13,6 +13,10 @@ Item {
 
   property var pluginApi: null
   property var mainInstance: null
+  readonly property var settingsConsumer: pluginApi && mainInstance ? mainInstance.settingsConsumerFor(pluginApi.settingsContext) : null
+  readonly property bool originCurrent: settingsConsumer?.current ?? false
+  onOriginCurrentChanged: if (!originCurrent) translateTimer.stop()
+  onPluginApiChanged: translateTimer.stop()
 
   // State from main instance
   readonly property string translatedText: mainInstance?.translatedText || ""
@@ -110,8 +114,8 @@ Item {
     interval: 500
     repeat: false
     onTriggered: {
-      if (inputText.trim() !== "" && mainInstance) {
-        mainInstance.translate(inputText, targetLanguage, sourceLanguage);
+      if (inputText.trim() !== "" && mainInstance && root.originCurrent) {
+        mainInstance.translate(inputText, targetLanguage, sourceLanguage, pluginApi?.settingsContext);
       }
     }
   }
@@ -178,7 +182,7 @@ Item {
         currentCode: sourceLanguage
         showAuto: true
         onLanguageSelected: function (code) {
-          if (pluginApi) {
+          if (pluginApi && root.originCurrent) {
             sourceLanguage = code;
             pluginApi.pluginSettings.translator.sourceLanguage = code;
             pluginApi.saveSettings();
@@ -197,7 +201,7 @@ Item {
         enabled: sourceLanguage !== "auto"
         opacity: enabled ? 1.0 : 0.5
         onClicked: {
-          if (pluginApi && sourceLanguage !== "auto") {
+          if (pluginApi && root.originCurrent && sourceLanguage !== "auto") {
             var temp = sourceLanguage;
             sourceLanguage = targetLanguage;
             targetLanguage = temp;
@@ -221,7 +225,7 @@ Item {
         currentCode: targetLanguage
         showAuto: false
         onLanguageSelected: function (code) {
-          if (pluginApi) {
+          if (pluginApi && root.originCurrent) {
             targetLanguage = code;
             pluginApi.pluginSettings.translator.targetLanguage = code;
             pluginApi.saveSettings();
@@ -266,7 +270,7 @@ Item {
                 translateTimer.restart();
               } else if (text.trim() === "") {
                 if (mainInstance) {
-                  mainInstance.translatedText = "";
+                  mainInstance.translate("", targetLanguage, sourceLanguage, pluginApi?.settingsContext);
                 }
               }
             }
@@ -318,7 +322,7 @@ Item {
             visible: !realTimeTranslation
             onClicked: {
               if (mainInstance && inputText.trim() !== "") {
-                mainInstance.translate(inputText, targetLanguage, sourceLanguage);
+                mainInstance.translate(inputText, targetLanguage, sourceLanguage, pluginApi?.settingsContext);
               }
             }
           }

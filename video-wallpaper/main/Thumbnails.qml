@@ -7,6 +7,7 @@ import "../common"
 Item {
     id: root
     required property var pluginApi
+    property var settingsContext: pluginApi?.settingsContext
     required property FolderModel folderModel
     // Selected files can live outside the browsed directory. They use this
     // producer too, never a second request owned by a color consumer.
@@ -20,7 +21,7 @@ Item {
     // Every current video has its thumbnail or a labelled failure.
     readonly property bool settled: internal.settled
     readonly property int generation: internal.generation
-    readonly property string wallpapersFolder: pluginApi?.pluginSettings?.wallpapersFolder ?? pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
+    readonly property string wallpapersFolder: settingsContext?.settingsView?.wallpapersFolder ?? pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
 
     QtObject {
         id: internal

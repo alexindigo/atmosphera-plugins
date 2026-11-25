@@ -2,8 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import qs.Commons
-import qs.Widgets
 import qs.Services.UI
+import qs.Widgets
 
 Item {
   id: root
@@ -28,25 +28,8 @@ Item {
   implicitWidth: contentWidth
   implicitHeight: contentHeight
 
-  function buildCmd(value) {
-    var parts = ["nvibrant"]
-    for (var i = 0; i < root.displayIndex; i++)
-      parts.push("0")
-    parts.push(value.toString())
-    return ["bash", "-lc", parts.join(" ")]
-  }
-
-  function applyVibrance(value) {
-    Quickshell.execDetached(buildCmd(value))
-  }
-
   function toggle() {
-    if (pluginApi) {
-      var newEnabled = !vibrantEnabled
-      pluginApi.pluginSettings.enabled = newEnabled
-      pluginApi.saveSettings()
-      applyVibrance(newEnabled ? vibranceValue : 0)
-    }
+    return pluginApi?.mainInstance?.toggle(pluginApi) ?? false;
   }
 
   Rectangle {
@@ -64,9 +47,7 @@ Item {
       anchors.centerIn: parent
       icon: "contrast"
       applyUiScale: false
-      color: root.vibrantEnabled
-        ? AtmoColor.mPrimary
-        : (mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface)
+      color: root.vibrantEnabled ? AtmoColor.mPrimary : (mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface)
     }
   }
 
@@ -74,9 +55,7 @@ Item {
     id: contextMenu
     model: [
       {
-        "label": root.vibrantEnabled
-          ? pluginApi?.tr("panel.disable-vibrance")
-          : pluginApi?.tr("panel.enable-vibrance"),
+        "label": root.vibrantEnabled ? pluginApi?.tr("panel.disable-vibrance") : pluginApi?.tr("panel.enable-vibrance"),
         "action": "toggle",
         "icon": root.vibrantEnabled ? "eye-off" : "eye"
       },
@@ -87,12 +66,12 @@ Item {
       }
     ]
     onTriggered: action => {
-      contextMenu.close()
-      PanelService.closeContextMenu(screen)
+      contextMenu.close();
+      PanelService.closeContextMenu(screen);
       if (action === "toggle") {
-        root.toggle()
+        root.toggle();
       } else if (action === "widget-settings") {
-        BarService.openPluginSettings(screen, pluginApi.manifest)
+        BarService.openPluginSettings(screen, pluginApi.manifest);
       }
     }
   }
@@ -104,11 +83,11 @@ Item {
     cursorShape: Qt.PointingHandCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton
 
-    onClicked: (mouse) => {
+    onClicked: mouse => {
       if (mouse.button === Qt.LeftButton) {
-        root.toggle()
+        root.toggle();
       } else if (mouse.button === Qt.RightButton) {
-        PanelService.showContextMenu(contextMenu, root, screen)
+        PanelService.showContextMenu(contextMenu, root, screen);
       }
     }
   }

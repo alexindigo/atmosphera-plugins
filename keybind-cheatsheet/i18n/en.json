@@ -13,6 +13,8 @@
   "panel": {
     "loading": "Loading...",
     "loading-timeout": "Loading timed out. Click Refresh to retry.",
+    "refresh-failed": "Could not load keybinds. Click Refresh to retry.",
+    "no-binds": "No keybinds found.",
     "title": "Keymap",
     "title-hyprland": "Hyprland Keymap",
     "title-niri": "Niri Keymap",

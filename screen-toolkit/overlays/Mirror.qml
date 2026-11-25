@@ -11,8 +11,13 @@ import "../utils"
 Item {
     id: root
     property var  pluginApi: null
+    property var actionPolicy: null
+    property var _pendingShot: null
+    property var _recordPolicy: null
     property bool isVisible: false
-    function show(screen) {
+    function show(screen, policy) {
+        if (!policy?.context.current()) return false
+        actionPolicy = policy
         if (screen) {
             var changed = screen !== _primaryScreen
             _primaryScreen = screen
@@ -25,14 +30,15 @@ Item {
     }
     function hide() {
         isVisible      = false
+        _pendingShot   = null
         _cameraActive  = false
         _primaryScreen = null
         _cancelCountdown()
         if (_isRecording) _doStopRecord()
         pluginApi?.withCurrentScreen(screen => pluginApi?.closePanel(screen))
     }
-    function toggle(screen) {
-        if (!isVisible) show(screen)
+    function toggle(screen, policy) {
+        if (!isVisible) show(screen, policy)
         else            hide()
     }
     property bool   isSquare:      true
@@ -91,16 +97,32 @@ Item {
         }
     }
     function _doScreenshot() {
-        if (!root._imgCapture) return
-        root._imgCapture.captureToFile(TempPaths.path("mirror-shot-" + Date.now() + ".png"))
+        const camera = _imgCapture
+        if (!camera || _pendingShot || screenshotProc.running || !actionPolicy?.context.current()) return
+        _pendingShot = {camera: camera, policy: actionPolicy}
+        const id = camera.captureToFile(TempPaths.path("mirror-shot-" + Date.now() + ".png"))
+        if (id < 0) _onImageCaptureError(camera)
     }
-    function _onImageCaptured(tmpPath) {
+    function _takePendingShot(camera) {
+        const shot = _pendingShot
+        if (!shot || shot.camera !== camera) return null
+        _pendingShot = null
+        return shot.policy
+    }
+    function _onImageCaptureError(camera) {
+        const policy = _takePendingShot(camera)
+        if (policy?.context.current()) ToastService.showError(pluginApi?.tr("mirror.screenshotFailed"))
+    }
+    function _onImageCaptured(camera, tmpPath) {
+        const policy = _takePendingShot(camera)
+        if (!policy?.context.current()) return false
         var home    = Quickshell.env("HOME")
-        var dir     = U.screenshotDir(home, pluginApi?.pluginSettings?.screenshotPath)
-        var file    = U.buildFilename("mirror", ".png", pluginApi?.pluginSettings?.filenameFormat)
+        var dir     = U.screenshotDir(home, policy.settings.screenshotPath)
+        var file    = U.buildFilename("mirror", ".png", policy.settings.filenameFormat)
         var filters = []
         if (root.isFlipped) filters.push("hflip")
         if (root.isSquare)  filters.push("crop=min(iw\\,ih):min(iw\\,ih)")
+        screenshotProc.actionPolicy = policy
         screenshotProc.destPath = dir + "/" + file
         screenshotProc.exec({ command: [
             "bash", scriptsDir + "mirror-screenshot.sh",
@@ -109,8 +131,10 @@ Item {
     }
     ToolProcess {
         id: screenshotProc
+        property var actionPolicy: null
         property string destPath: ""
         onExited: (code) => {
+            if (!actionPolicy?.context.current()) return
             if (code === 0) {
                 if (root._pinOnShot) {
                     var mi = root.pluginApi?.mainInstance
@@ -126,7 +150,8 @@ Item {
         }
     }
     function _doStartRecord() {
-        if (!root._recorder) return
+        if (!root._recorder || root._isSaving || recSaveProc.running || !actionPolicy?.context.current()) return
+        root._recordPolicy = actionPolicy
         var tmpPath = TempPaths.path("mirror-record-" + Date.now() + ".mp4")
         root._recTmpPath  = tmpPath
         root._recorder.outputLocation = "file://" + tmpPath
@@ -144,9 +169,11 @@ Item {
         if (root._recorder) root._recorder.stop()
     }
     function _doSaveRecord() {
+        const policy = root._recordPolicy
+        if (!policy?.context.current()) { root._isSaving = false; return false }
         var home    = Quickshell.env("HOME")
-        var dir     = U.videoDir(home, pluginApi?.pluginSettings?.videoPath)
-        var file    = U.buildFilename("mirror", ".mp4", pluginApi?.pluginSettings?.filenameFormat)
+        var dir     = U.videoDir(home, policy.settings.videoPath)
+        var file    = U.buildFilename("mirror", ".mp4", policy.settings.filenameFormat)
         var filters = []
         if (root.isFlipped) filters.push("hflip")
         if (root.isSquare)  filters.push("crop=min(iw\\,ih):min(iw\\,ih)")
@@ -164,6 +191,7 @@ Item {
             root._isSaving   = false
             root._recElapsed = 0
             root._recTmpPath = ""
+            if (!root._recordPolicy?.context.current()) return
             if (code === 0)
                 ToastService.showNotice(
                     root.pluginApi?.tr("mirror.recordSaved"),
@@ -224,6 +252,7 @@ Item {
                                 root._recorder   = mediaRec
                             }
                             Component.onDestruction: {
+                                root._takePendingShot(imgCap)
                                 if (root._imgCapture === imgCap)   root._imgCapture = null
                                 if (root._recorder   === mediaRec) root._recorder   = null
                             }
@@ -241,9 +270,8 @@ Item {
                                 videoOutput: videoOut
                                 imageCapture: ImageCapture {
                                     id: imgCap
-                                    onImageSaved:    (id, path) => root._onImageCaptured(path)
-                                    onErrorOccurred: (id, err, msg) =>
-                                        ToastService.showError(root.pluginApi?.tr("mirror.screenshotFailed"))
+                                    onImageSaved:    (id, path) => root._onImageCaptured(imgCap, path)
+                                    onErrorOccurred: (id, err, msg) => root._onImageCaptureError(imgCap)
                                 }
                                 recorder: MediaRecorder {
                                     id: mediaRec

@@ -33,54 +33,22 @@ Item {
   property string currentSortBy: "date"
   property string downloadDirectory: Quickshell.env("HOME") + "/Music/Noctalia"
   property int downloadCacheMaxMb: 0
-  readonly property string previewMetadataMode: pluginApi?.pluginSettings?.previewMetadataMode
-      ?? root.defaults.previewMetadataMode
-      ?? "always"
-  readonly property bool showUploaderMetadata: pluginApi?.pluginSettings?.showUploaderMetadata
-      ?? root.defaults.showUploaderMetadata
-      ?? true
-  readonly property bool showAlbumMetadata: pluginApi?.pluginSettings?.showAlbumMetadata
-      ?? root.defaults.showAlbumMetadata
-      ?? true
-  readonly property bool showDurationMetadata: pluginApi?.pluginSettings?.showDurationMetadata
-      ?? root.defaults.showDurationMetadata
-      ?? true
-  readonly property bool showRatingMetadata: pluginApi?.pluginSettings?.showRatingMetadata
-      ?? root.defaults.showRatingMetadata
-      ?? true
-  readonly property bool showTagMetadata: pluginApi?.pluginSettings?.showTagMetadata
-      ?? root.defaults.showTagMetadata
-      ?? true
-  readonly property bool showPlayStatsMetadata: pluginApi?.pluginSettings?.showPlayStatsMetadata
-      ?? root.defaults.showPlayStatsMetadata
-      ?? true
-  readonly property bool showStatusMetadata: pluginApi?.pluginSettings?.showStatusMetadata
-      ?? root.defaults.showStatusMetadata
-      ?? true
-  readonly property bool showPreviewChips: pluginApi?.pluginSettings?.showPreviewChips
-      ?? root.defaults.showPreviewChips
-      ?? true
-  readonly property string previewThumbnailSize: pluginApi?.pluginSettings?.previewThumbnailSize
-      ?? root.defaults.previewThumbnailSize
-      ?? "comfortable"
-  readonly property bool showHomeRecent: pluginApi?.pluginSettings?.showHomeRecent
-      ?? root.defaults.showHomeRecent
-      ?? true
-  readonly property bool showHomeTop: pluginApi?.pluginSettings?.showHomeTop
-      ?? root.defaults.showHomeTop
-      ?? true
-  readonly property bool showHomeTags: pluginApi?.pluginSettings?.showHomeTags
-      ?? root.defaults.showHomeTags
-      ?? true
-  readonly property bool showHomeArtists: pluginApi?.pluginSettings?.showHomeArtists
-      ?? root.defaults.showHomeArtists
-      ?? true
-  readonly property bool showHomePlaylists: pluginApi?.pluginSettings?.showHomePlaylists
-      ?? root.defaults.showHomePlaylists
-      ?? true
-  readonly property bool autoSaveMp3AfterPlayback: pluginApi?.pluginSettings?.autoSaveMp3AfterPlayback
-      ?? root.defaults.autoSaveMp3AfterPlayback
-      ?? false
+  readonly property string previewMetadataMode: pluginApi?.pluginSettings?.previewMetadataMode ?? root.defaults.previewMetadataMode ?? "always"
+  readonly property bool showUploaderMetadata: pluginApi?.pluginSettings?.showUploaderMetadata ?? root.defaults.showUploaderMetadata ?? true
+  readonly property bool showAlbumMetadata: pluginApi?.pluginSettings?.showAlbumMetadata ?? root.defaults.showAlbumMetadata ?? true
+  readonly property bool showDurationMetadata: pluginApi?.pluginSettings?.showDurationMetadata ?? root.defaults.showDurationMetadata ?? true
+  readonly property bool showRatingMetadata: pluginApi?.pluginSettings?.showRatingMetadata ?? root.defaults.showRatingMetadata ?? true
+  readonly property bool showTagMetadata: pluginApi?.pluginSettings?.showTagMetadata ?? root.defaults.showTagMetadata ?? true
+  readonly property bool showPlayStatsMetadata: pluginApi?.pluginSettings?.showPlayStatsMetadata ?? root.defaults.showPlayStatsMetadata ?? true
+  readonly property bool showStatusMetadata: pluginApi?.pluginSettings?.showStatusMetadata ?? root.defaults.showStatusMetadata ?? true
+  readonly property bool showPreviewChips: pluginApi?.pluginSettings?.showPreviewChips ?? root.defaults.showPreviewChips ?? true
+  readonly property string previewThumbnailSize: pluginApi?.pluginSettings?.previewThumbnailSize ?? root.defaults.previewThumbnailSize ?? "comfortable"
+  readonly property bool showHomeRecent: pluginApi?.pluginSettings?.showHomeRecent ?? root.defaults.showHomeRecent ?? true
+  readonly property bool showHomeTop: pluginApi?.pluginSettings?.showHomeTop ?? root.defaults.showHomeTop ?? true
+  readonly property bool showHomeTags: pluginApi?.pluginSettings?.showHomeTags ?? root.defaults.showHomeTags ?? true
+  readonly property bool showHomeArtists: pluginApi?.pluginSettings?.showHomeArtists ?? root.defaults.showHomeArtists ?? true
+  readonly property bool showHomePlaylists: pluginApi?.pluginSettings?.showHomePlaylists ?? root.defaults.showHomePlaylists ?? true
+  readonly property bool autoSaveMp3AfterPlayback: pluginApi?.pluginSettings?.autoSaveMp3AfterPlayback ?? root.defaults.autoSaveMp3AfterPlayback ?? false
   property string ytPlayerClient: "android"
 
   property var libraryEntries: []
@@ -103,6 +71,12 @@ Item {
   property string queueControlAction: ""
   property string queueCommandAction: ""
   property bool queueLaunchBusy: false
+  // The helper's queue/playback is shared; only the admitted follow-up policy
+  // belongs to the caller. Never replace Main's API with a placement API.
+  property var playbackPolicy: null
+  property var queuePolicy: null
+  property var queueBatchPolicy: null
+  property var autoplayPolicy: null
 
   property bool playbackBusy: false
   property string playbackCommandAction: ""
@@ -120,13 +94,16 @@ Item {
   property bool speedBusy: false
   property bool providerBusy: false
   property string providerSuccessNotice: ""
+  // Folder/limit helper actions are not preference drafts. The existing helper
+  // process owns admission and completion, including rejected newer input.
+  property var downloadSettingsResult: null
+  property var _pendingDownloadSettingsAction: null
   property bool playlistsBusy: false
   property bool importBusy: false
   property real pendingSeekPosition: -1
 
   readonly property string helperPath: Qt.resolvedUrl("musicctl.sh").toString().replace("file://", "")
-  readonly property string cacheDir: Quickshell.env("MUSIC_CACHE_DIR")
-      || ((Quickshell.env("XDG_CACHE_HOME") || (Quickshell.env("HOME") + "/.cache")) + "/noctalia/plugins/music-search")
+  readonly property string cacheDir: Quickshell.env("MUSIC_CACHE_DIR") || ((Quickshell.env("XDG_CACHE_HOME") || (Quickshell.env("HOME") + "/.cache")) + "/noctalia/plugins/music-search")
   readonly property string statePath: root.cacheDir + "/state.json"
   readonly property string libraryPath: root.cacheDir + "/library.json"
   readonly property string settingsPath: root.cacheDir + "/settings.json"
@@ -203,6 +180,8 @@ Item {
 
     onExited: function (exitCode) {
       var commandAction = root.playbackCommandAction || "";
+      var policy = root.playbackPolicy;
+      root.playbackPolicy = null;
       root.playbackCommandAction = "";
       root.playbackBusy = false;
       root.playbackStarting = false;
@@ -218,8 +197,8 @@ Item {
         root.lastError = stderrText;
       }
 
-      if (commandAction === "play" && exitCode === 0 && root.autoSaveMp3AfterPlayback) {
-        root.maybeAutoDownloadCurrentTrack();
+      if (commandAction === "play" && exitCode === 0 && policy?.context?.current() && policy.autoSaveMp3AfterPlayback) {
+        root.maybeAutoDownloadCurrentTrack(policy);
       }
 
       if (commandAction === "play" && exitCode !== 0) {
@@ -295,7 +274,9 @@ Item {
 
       if (exitCode === 0) {
         root.lastError = "";
-        root.lastNotice = output.length > 0 ? (root.pluginApi?.tr("notices.savedMp3To", {"path": output})) : (root.pluginApi?.tr("notices.savedMp3"));
+        root.lastNotice = output.length > 0 ? (root.pluginApi?.tr("notices.savedMp3To", {
+                                                                    "path": output
+                                                                  })) : (root.pluginApi?.tr("notices.savedMp3"));
       } else {
         root.lastNotice = "";
         root.lastError = exitCode === 3 ? root.pluginApi?.tr("errors.downloadLimitReached") : (stderrText.length > 0 ? stderrText : (root.pluginApi?.tr("errors.mp3SaveFailed")));
@@ -335,7 +316,7 @@ Item {
             root.pendingAutoplaySaved = false;
             root.pendingAutoplaySavedShuffle = false;
             if (root.queueEntries.length > 0) {
-              root.startQueue();
+              root.startQueue(undefined, root.autoplayPolicy);
               if (!root.isPlaying) {
                 root.lastNotice = shouldShuffle ? root.pluginApi?.tr("queue.playingShuffledSaved") : root.pluginApi?.tr("queue.playingSaved");
               }
@@ -396,7 +377,9 @@ Item {
       }
 
       if (exitCode !== 0) {
-        root.finishQueueBatch(stderrText.length > 0 ? stderrText : (root.pluginApi?.tr("errors.queueActionFailed", {"action": action})), "");
+        root.finishQueueBatch(stderrText.length > 0 ? stderrText : (root.pluginApi?.tr("errors.queueActionFailed", {
+                                                                                         "action": action
+                                                                                       })), "");
         return;
       }
 
@@ -528,12 +511,17 @@ Item {
       root.providerBusy = false;
 
       var output = String(providerProcess.stdout.text || "").trim();
+      if (root._pendingDownloadSettingsAction) {
+        root._completeDownloadSettingsAction(exitCode, output, String(providerProcess.stderr.text || "").trim());
+        root.providerSuccessNotice = "";
+        return;
+      }
       if (exitCode === 0 && output.length > 0) {
         root.applySettings(output);
         root.lastError = "";
-        root.lastNotice = root.providerSuccessNotice.length > 0
-            ? root.providerSuccessNotice
-            : (root.pluginApi?.tr("notices.switchedTo", {"provider": root.providerLabel(root.currentProvider)}));
+        root.lastNotice = root.providerSuccessNotice.length > 0 ? root.providerSuccessNotice : (root.pluginApi?.tr("notices.switchedTo", {
+                                                                                                                     "provider": root.providerLabel(root.currentProvider)
+                                                                                                                   }));
       } else {
         var stderrText = String(providerProcess.stderr.text || "").trim();
         if (stderrText.length > 0) {
@@ -775,16 +763,22 @@ Item {
 
   function isPlaceholderEntryTitle(title) {
     var normalized = trimmedText(title).toLowerCase();
-    return normalized.length === 0
-        || normalized === root.customUrlLabel.toLowerCase()
-        || normalized === root.queuedUrlLabel.toLowerCase()
-        || normalized === root.downloadedTrackLabel.toLowerCase();
+    return normalized.length === 0 || normalized === root.customUrlLabel.toLowerCase() || normalized === root.queuedUrlLabel.toLowerCase() || normalized === root.downloadedTrackLabel.toLowerCase();
   }
 
-  function playEntry(entry) {
-    if (!entry || !entry.url) {
+  function capturePolicy(context) {
+    context = context || pluginApi?.settingsContext;
+    if (!context?.current()) return null;
+    return {context: context, autoSaveMp3AfterPlayback: context.settingsView.autoSaveMp3AfterPlayback ?? false};
+  }
+
+  function playEntry(entry, context, retainedPolicy) {
+    const policy = retainedPolicy || capturePolicy(context);
+    if (!entry || !entry.url || !policy?.context?.current() || root.playbackBusy) {
       return;
     }
+    // Copy scalar targets before asynchronous helper completion or queue edits.
+    root.playbackPolicy = {context: policy.context, autoSaveMp3AfterPlayback: policy.autoSaveMp3AfterPlayback, entry: copyEntry(entry)};
 
     root.lastError = "";
     root.lastNotice = "";
@@ -806,18 +800,11 @@ Item {
     root.currentEndReason = "";
     root.playbackCommandAction = "play";
     playbackProcess.exec({
-                           "command": buildCommand([
-                                                    "play",
-                                                    entry.id || "",
-                                                    entry.title || root.untitledLabel,
-                                                    entry.url || "",
-                                                    entry.uploader || "",
-                                                    String(entry.duration || 0)
-                                                  ])
+                           "command": buildCommand(["play", entry.id || "", entry.title || root.untitledLabel, entry.url || "", entry.uploader || "", String(entry.duration || 0)])
                          });
   }
 
-  function playUrl(url, label) {
+  function playUrl(url, label, context) {
     var cleanedUrl = normalizeUrl(url);
     if (cleanedUrl.length === 0) {
       return;
@@ -830,10 +817,11 @@ Item {
       "uploader": "",
       "duration": 0
     };
-    playEntry(customEntry);
+    playEntry(customEntry, context);
   }
 
   function stopPlayback() {
+    root.playbackPolicy = null;
     root.lastError = "";
     root.lastNotice = "";
     root.playbackBusy = true;
@@ -953,7 +941,9 @@ Item {
     root.lastError = "";
     root.lastNotice = "";
     root.providerBusy = true;
-    root.providerSuccessNotice = root.pluginApi?.tr("notices.switchedTo", {"provider": root.providerLabel(target)});
+    root.providerSuccessNotice = root.pluginApi?.tr("notices.switchedTo", {
+                                                      "provider": root.providerLabel(target)
+                                                    });
     providerProcess.exec({
                            "command": buildCommand(["set-provider", target])
                          });
@@ -968,9 +958,12 @@ Item {
 
   function providerLabel(provider) {
     var p = provider || root.currentProvider;
-    if (p === "youtube") return root.pluginApi?.tr("providers.youtube");
-    if (p === "soundcloud") return root.pluginApi?.tr("providers.soundcloud");
-    if (p === "local") return root.pluginApi?.tr("providers.local");
+    if (p === "youtube")
+      return root.pluginApi?.tr("providers.youtube");
+    if (p === "soundcloud")
+      return root.pluginApi?.tr("providers.soundcloud");
+    if (p === "local")
+      return root.pluginApi?.tr("providers.local");
     return p;
   }
 
@@ -1011,8 +1004,10 @@ Item {
     }
 
     var r = Number(rating || 0);
-    if (r < 0) r = 0;
-    if (r > 5) r = 5;
+    if (r < 0)
+      r = 0;
+    if (r > 5)
+      r = 5;
 
     root.lastError = "";
     root.lastNotice = "";
@@ -1044,7 +1039,9 @@ Item {
     root.lastError = "";
     root.lastNotice = "";
     root.providerBusy = true;
-    root.providerSuccessNotice = root.pluginApi?.tr("notices.sortSet", {"sort": root.sortLabel(target)});
+    root.providerSuccessNotice = root.pluginApi?.tr("notices.sortSet", {
+                                                      "sort": root.sortLabel(target)
+                                                    });
     providerProcess.exec({
                            "command": buildCommand(["set-sort", target])
                          });
@@ -1052,32 +1049,74 @@ Item {
 
   function setDownloadDirectory(directory) {
     var target = String(directory || "").trim();
-    if (target.length === 0 || root.providerBusy) {
-      return;
-    }
-
-    root.lastError = "";
-    root.lastNotice = "";
-    root.providerBusy = true;
-    root.providerSuccessNotice = root.pluginApi?.tr("notices.downloadFolderUpdated");
-    providerProcess.exec({
-                           "command": buildCommand(["set-download-dir", target])
-                         });
+    return root._startDownloadSettingsAction("directory", target, target.length > 0);
   }
 
   function setDownloadCacheMaxMb(value) {
-    var target = Math.max(0, Math.floor(Number(value || 0)));
-    if (!isFinite(target) || root.providerBusy) {
-      return;
-    }
+    var numeric = Number(value);
+    var target = Math.max(0, Math.floor(numeric));
+    return root._startDownloadSettingsAction("limit", target, isFinite(numeric));
+  }
 
+  function _startDownloadSettingsAction(kind, value, valid) {
+    var action = {
+      kind: kind,
+      requestedValue: value,
+      destination: root.downloadDirectory
+    };
+    if (!valid || root.providerBusy || root.downloadBusy) {
+      root.downloadSettingsResult = Object.assign({}, action, {
+                                                    status: "rejected",
+                                                    errorCode: valid ? "busy" : "invalid_value"
+                                                  });
+      return false;
+    }
+    root._pendingDownloadSettingsAction = action;
+    root.downloadSettingsResult = Object.assign({}, action, {
+                                                  status: "pending",
+                                                  errorCode: ""
+                                                });
     root.lastError = "";
     root.lastNotice = "";
     root.providerBusy = true;
-    root.providerSuccessNotice = root.pluginApi?.tr("notices.cacheLimitUpdated");
+    root.providerSuccessNotice = "";
     providerProcess.exec({
-                           "command": buildCommand(["set-cache-size", String(target)])
+                           "command": buildCommand([kind === "directory" ? "set-download-dir" : "set-cache-size", String(value)])
                          });
+    return true;
+  }
+
+  function _completeDownloadSettingsAction(exitCode, output, stderrText) {
+    var action = root._pendingDownloadSettingsAction;
+    root._pendingDownloadSettingsAction = null;
+    var settings = null;
+    try {
+      settings = JSON.parse(output);
+    } catch (error) {}
+    var applied = action.kind === "directory" ? settings?.downloadDirectory : settings?.downloadCacheMaxMb;
+    var valid = settings !== null && applied === action.requestedValue;
+    var helperFailed = exitCode !== 0 || stderrText.length > 0;
+    if (helperFailed || !valid) {
+      root.downloadSettingsResult = Object.assign({}, action, {
+                                                    status: "failed",
+                                                    errorCode: helperFailed ? "helper_failed" : "invalid_result"
+                                                  });
+      root.lastNotice = "";
+      root.lastError = root.pluginApi?.tr("settings.downloads.actionFailed") ?? "";
+      return;
+    }
+    root.applySettings(output);
+    root.downloadSettingsResult = Object.assign({}, action, {
+                                                  status: "saved",
+                                                  appliedValue: applied,
+                                                  errorCode: ""
+                                                });
+    root.lastError = "";
+    root.lastNotice = action.kind === "directory" ? root.pluginApi?.tr("notices.downloadFolderApplied", {
+                                                                         path: applied
+                                                                       }) ?? "" : root.pluginApi?.tr("notices.downloadLimitApplied", {
+                                                                                                       limit: applied
+                                                                                                     }) ?? "";
   }
 
   function setYtPlayerClient(client) {
@@ -1089,7 +1128,9 @@ Item {
     root.lastError = "";
     root.lastNotice = "";
     root.providerBusy = true;
-    root.providerSuccessNotice = root.pluginApi?.tr("notices.ytClientSet", {"client": target});
+    root.providerSuccessNotice = root.pluginApi?.tr("notices.ytClientSet", {
+                                                      "client": target
+                                                    });
     providerProcess.exec({
                            "command": buildCommand(["set-yt-player-client", target])
                          });
@@ -1104,10 +1145,14 @@ Item {
 
   function sortLabel(sortBy) {
     var s = sortBy || root.currentSortBy;
-    if (s === "date") return root.pluginApi?.tr("sort.date");
-    if (s === "title") return root.pluginApi?.tr("sort.title");
-    if (s === "duration") return root.pluginApi?.tr("sort.duration");
-    if (s === "rating") return root.pluginApi?.tr("sort.rating");
+    if (s === "date")
+      return root.pluginApi?.tr("sort.date");
+    if (s === "title")
+      return root.pluginApi?.tr("sort.title");
+    if (s === "duration")
+      return root.pluginApi?.tr("sort.duration");
+    if (s === "rating")
+      return root.pluginApi?.tr("sort.rating");
     return s;
   }
 
@@ -1284,12 +1329,14 @@ Item {
   }
 
   function finishQueueBatch(errorText, noticeText) {
+    if (errorText && root.queueBatchIndex > 0) root.queueActive = false;
     root.queueBatchBusy = false;
     root.queueBusy = false;
     root.queueBatchEntries = [];
     root.queueBatchIndex = 0;
     root.queueBatchFinalAction = "";
     root.queueBatchDoneNotice = "";
+    root.queueBatchPolicy = null;
     root.queueControlAction = "";
     root.queueCommandAction = "";
 
@@ -1309,27 +1356,29 @@ Item {
     if (!root.queueBatchBusy) {
       return;
     }
+    if (!root.queueBatchPolicy?.context?.current()) {
+      if (root.queueBatchIndex > 0) root.queueActive = false;
+      root.finishQueueBatch("", "");
+      return;
+    }
 
     if (root.queueBatchIndex < root.queueBatchEntries.length) {
       var entry = root.queueBatchEntries[root.queueBatchIndex];
       queueBatchProcess.exec({
-                               "command": buildQueueCommand("enqueue", [
-                                                               entry.id || "",
-                                                               entry.title || root.untitledLabel,
-                                                               entry.url || "",
-                                                               entry.uploader || "",
-                                                               String(entry.duration || 0),
-                                                               root.entrySavedState(entry)
-                                                             ])
+                               "command": buildQueueCommand("enqueue", [entry.id || "", entry.title || root.untitledLabel, entry.url || "", entry.uploader || "", String(entry.duration || 0), root.entrySavedState(entry)])
                              });
       return;
     }
 
+    // Admit one policy for the shared queue only once the batch is complete.
+    // Append keeps an armed queue armed, but future launches use this origin.
+    root.queuePolicy = root.queueBatchPolicy;
     if (root.queueBatchFinalAction.length > 0) {
+      root.lastHandledQueueUpdate = root.currentUpdatedAt;
       if (root.queueBatchFinalAction === "skip") {
-        root.skipQueue();
+        root.skipQueue(undefined, root.queueBatchPolicy);
       } else if (root.queueBatchFinalAction === "start") {
-        root.startQueue();
+        root.startQueue(undefined, root.queueBatchPolicy);
       } else if (root.queueBatchFinalAction === "stop") {
         root.stopQueue();
       }
@@ -1338,10 +1387,12 @@ Item {
     }
 
     root.finishQueueBatch("", root.queueBatchDoneNotice);
+    root.advanceQueueAfterPlayback();
   }
 
-  function startQueueBatch(entries, options) {
-    if (root.queueBusy || root.queueBatchBusy) {
+  function startQueueBatch(entries, options, context) {
+    const policy = context ? capturePolicy(context) : null;
+    if (!policy || root.queueBusy || root.queueBatchBusy || root.queueLaunchBusy) {
       return;
     }
 
@@ -1369,11 +1420,14 @@ Item {
     root.queueBusy = true;
     root.queueBatchBusy = true;
     root.queueBatchEntries = filteredEntries;
+    root.queueBatchPolicy = policy;
     root.queueBatchIndex = 0;
     root.queueBatchFinalAction = finalAction;
     root.queueBatchDoneNotice = doneNotice;
 
     if (clearFirst) {
+      root.queueActive = false;
+      root.queuePolicy = null;
       root.queueControlAction = "clear";
       queueControlProcess.exec({
                                  "command": buildQueueCommand("clear", [])
@@ -1384,20 +1438,22 @@ Item {
     root.runNextQueueBatchStep();
   }
 
-  function queuePlaylist(playlistId, shuffle) {
+  function queuePlaylist(playlistId, shuffle, context) {
     var playlist = findPlaylistById(playlistId);
     var entries = playlistTracks(playlistId, shuffle);
     var playlistName = playlist?.name || root.pluginApi?.tr("playlists.untitled");
     startQueueBatch(entries, {
                       "clearFirst": false,
-                      "doneNotice": shuffle === true
-                          ? (root.pluginApi?.tr("notices.addedShuffledPlaylistToQueue", {"name": playlistName}))
-                          : (root.pluginApi?.tr("notices.addedPlaylistToQueue", {"name": playlistName})),
+                      "doneNotice": shuffle === true ? (root.pluginApi?.tr("notices.addedShuffledPlaylistToQueue", {
+                                                                             "name": playlistName
+                                                                           })) : (root.pluginApi?.tr("notices.addedPlaylistToQueue", {
+                                                                                                       "name": playlistName
+                                                                                                        })),
                       "emptyNotice": root.pluginApi?.tr("notices.playlistEmpty")
-                    });
+                    }, context);
   }
 
-  function playPlaylist(playlistId, shuffle) {
+  function playPlaylist(playlistId, shuffle, context) {
     var playlist = findPlaylistById(playlistId);
     var entries = playlistTracks(playlistId, shuffle);
     if (entries.length === 0) {
@@ -1410,11 +1466,13 @@ Item {
     startQueueBatch(entries, {
                       "clearFirst": true,
                       "finalAction": "skip",
-                      "doneNotice": shuffle === true
-                          ? (root.pluginApi?.tr("notices.playingShuffledPlaylist", {"name": playlistName}))
-                          : (root.pluginApi?.tr("notices.playingPlaylist", {"name": playlistName})),
+                      "doneNotice": shuffle === true ? (root.pluginApi?.tr("notices.playingShuffledPlaylist", {
+                                                                             "name": playlistName
+                                                                           })) : (root.pluginApi?.tr("notices.playingPlaylist", {
+                                                                                                       "name": playlistName
+                                                                                                     })),
                       "emptyNotice": root.pluginApi?.tr("notices.playlistEmpty")
-                    });
+                    }, context);
   }
 
   function applyQueue(rawText) {
@@ -1489,28 +1547,32 @@ Item {
                       });
   }
 
-  function launchQueueEntry(entry) {
+  function launchQueueEntry(entry, context, retainedPolicy) {
+    const policy = retainedPolicy || capturePolicy(context);
     var normalized = copyEntry(entry);
-    if (!normalized.url || root.queueLaunchBusy || root.playbackBusy) {
+    if (!policy?.context?.current() || !normalized.url || root.queueLaunchBusy || root.playbackBusy) {
       return;
     }
 
     root.queueActive = true;
+    root.queuePolicy = policy;
     root.pendingQueueLaunchEntry = normalized;
     root.pendingQueueLaunchEntryId = normalized.id;
     root.queueLaunchBusy = true;
-    playEntry(normalized);
+    playEntry(normalized, undefined, policy);
   }
 
-  function playQueueEntryNow(entry) {
+  function playQueueEntryNow(entry, context) {
     if (!entry || !entry.url) {
       return;
     }
 
-    launchQueueEntry(entry);
+    launchQueueEntry(entry, context);
   }
 
-  function startQueue() {
+  function startQueue(context, retainedPolicy) {
+    const policy = retainedPolicy || capturePolicy(context);
+    if (!policy?.context?.current()) return;
     if (root.queueEntries.length === 0) {
       root.queueActive = false;
       root.lastError = "";
@@ -1519,8 +1581,9 @@ Item {
     }
 
     root.queueActive = true;
+    root.queuePolicy = policy;
     if (!root.isPlaying && !root.playbackBusy) {
-      root.launchQueueEntry(root.queueEntries[0]);
+      root.launchQueueEntry(root.queueEntries[0], undefined, policy);
     } else {
       root.lastError = "";
       root.lastNotice = root.pluginApi?.tr("queue.armed");
@@ -1535,7 +1598,9 @@ Item {
     root.lastNotice = root.pluginApi?.tr("queue.stopped");
   }
 
-  function skipQueue() {
+  function skipQueue(context, retainedPolicy) {
+    const policy = retainedPolicy || capturePolicy(context);
+    if (!policy?.context?.current()) return;
     if (root.queueEntries.length === 0) {
       root.queueActive = false;
       root.lastError = "";
@@ -1543,17 +1608,19 @@ Item {
       return;
     }
 
-    root.launchQueueEntry(root.queueEntries[0]);
+    root.launchQueueEntry(root.queueEntries[0], undefined, policy);
   }
 
-  function autoplaySavedTracks(shuffle) {
-    if (root.queueBusy || root.queueBatchBusy) {
+  function autoplaySavedTracks(shuffle, context) {
+    const policy = capturePolicy(context);
+    if (!policy || root.queueBusy || root.queueBatchBusy) {
       return;
     }
 
     root.queueActive = false;
     root.pendingAutoplaySaved = shuffle !== true;
     root.pendingAutoplaySavedShuffle = shuffle === true;
+    root.autoplayPolicy = policy;
     root.lastError = "";
     root.lastNotice = shuffle === true ? root.pluginApi?.tr("queue.loadingShuffledSaved") : root.pluginApi?.tr("queue.loadingSaved");
     root.queueBusy = true;
@@ -1603,14 +1670,7 @@ Item {
     root.lastNotice = "";
     root.libraryBusy = true;
     libraryProcess.exec({
-                          "command": buildCommand([
-                                                   "save",
-                                                   entry.id || "",
-                                                   effectiveTitle || root.untitledLabel,
-                                                   entryUrl,
-                                                   effectiveUploader,
-                                                   String(isFinite(effectiveDuration) ? effectiveDuration : 0)
-                                                 ])
+                          "command": buildCommand(["save", entry.id || "", effectiveTitle || root.untitledLabel, entryUrl, effectiveUploader, String(isFinite(effectiveDuration) ? effectiveDuration : 0)])
                         });
   }
 
@@ -1702,11 +1762,7 @@ Item {
     root.lastNotice = "";
     root.downloadBusy = true;
     downloadProcess.exec({
-                           "command": buildCommand([
-                                                    "download-mp3",
-                                                    entry.title || root.downloadedTrackLabel,
-                                                    entry.url || ""
-                                                  ])
+                           "command": buildCommand(["download-mp3", entry.title || root.downloadedTrackLabel, entry.url || ""])
                          });
   }
 
@@ -1719,8 +1775,9 @@ Item {
     downloadEntry(entry);
   }
 
-  function maybeAutoDownloadCurrentTrack() {
-    var entry = currentTrackEntry();
+  function maybeAutoDownloadCurrentTrack(policy) {
+    if (!policy?.context?.current()) return;
+    var entry = policy.entry;
     if (!entry.url || root.downloadBusy || isLocalEntry(entry)) {
       return;
     }
@@ -1751,14 +1808,7 @@ Item {
     root.queueBusy = true;
     root.queueCommandAction = "enqueue";
     queueProcess.exec({
-                         "command": buildQueueCommand("enqueue", [
-                                                       entry.id || "",
-                                                       entry.title || entry.name || root.untitledLabel,
-                                                       entry.url || "",
-                                                       entry.uploader || "",
-                                                       String(entry.duration || 0),
-                                                       root.entrySavedState(entry)
-                                                     ])
+                        "command": buildQueueCommand("enqueue", [entry.id || "", entry.title || entry.name || root.untitledLabel, entry.url || "", entry.uploader || "", String(entry.duration || 0), root.entrySavedState(entry)])
                       });
   }
 
@@ -1939,40 +1989,42 @@ Item {
         root.currentPosition = 0;
       }
 
-      if (root.pendingQueueLaunchEntry
-          && root.isPlaying
-          && ((root.pendingQueueLaunchEntry.id && root.currentEntryId === root.pendingQueueLaunchEntry.id)
-              || (root.pendingQueueLaunchEntry.url && root.currentUrl === root.pendingQueueLaunchEntry.url))) {
+      if (root.pendingQueueLaunchEntry && root.isPlaying && ((root.pendingQueueLaunchEntry.id && root.currentEntryId === root.pendingQueueLaunchEntry.id) || (root.pendingQueueLaunchEntry.url && root.currentUrl === root.pendingQueueLaunchEntry.url))) {
         root.queueLaunchBusy = false;
         root.removeQueueEntry(root.pendingQueueLaunchEntry.id, false);
         root.lastError = "";
-        root.lastNotice = root.pluginApi?.tr("queue.nowPlaying", {"title": root.pendingQueueLaunchEntry.title || root.pluginApi?.tr("common.untitled")});
+        root.lastNotice = root.pluginApi?.tr("queue.nowPlaying", {
+                                               "title": root.pendingQueueLaunchEntry.title || root.pluginApi?.tr("common.untitled")
+                                             });
         root.pendingQueueLaunchEntry = null;
         root.pendingQueueLaunchEntryId = "";
       }
 
-      if (root.queueActive
-          && !root.isPlaying
-          && root.currentUpdatedAt.length > 0
-          && root.currentUpdatedAt !== root.lastHandledQueueUpdate
-          && (root.currentEndReason === "finished" || root.currentEndReason === "error")) {
-        root.lastHandledQueueUpdate = root.currentUpdatedAt;
-        root.queueLaunchBusy = false;
-        if (root.queueEntries.length > 0) {
-          root.launchQueueEntry(root.queueEntries[0]);
-        } else {
-          root.queueActive = false;
-          if (root.currentEndReason === "error") {
-            root.lastNotice = "";
-            root.lastError = root.pluginApi?.tr("queue.errorExhausted");
-          } else {
-            root.lastError = "";
-            root.lastNotice = root.pluginApi?.tr("queue.finished");
-          }
-        }
-      }
+      root.advanceQueueAfterPlayback();
     } catch (error) {
       Logger.w("MusicSearch", "Failed to parse music state:", error);
+    }
+  }
+
+  function advanceQueueAfterPlayback() {
+    if (root.queueBatchBusy || !root.queueActive || root.isPlaying || !root.currentUpdatedAt.length
+        || root.currentUpdatedAt === root.lastHandledQueueUpdate || !["finished", "error"].includes(root.currentEndReason)) return;
+    root.lastHandledQueueUpdate = root.currentUpdatedAt;
+    root.queueLaunchBusy = false;
+    if (root.queueEntries.length > 0) {
+      if (root.queuePolicy?.context?.current())
+        root.launchQueueEntry(root.queueEntries[0], undefined, root.queuePolicy);
+      else
+        root.queueActive = false;
+    } else {
+      root.queueActive = false;
+      if (root.currentEndReason === "error") {
+        root.lastNotice = "";
+        root.lastError = root.pluginApi?.tr("queue.errorExhausted");
+      } else {
+        root.lastError = "";
+        root.lastNotice = root.pluginApi?.tr("queue.finished");
+      }
     }
   }
 

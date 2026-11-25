@@ -5,60 +5,60 @@ import qs.Portals
 import qs.Widgets
 
 ColumnLayout {
-    id: root
+  id: root
 
-    property var pluginApi: null
+  property var pluginApi: null
+  readonly property var obsidianConfigPathField: pluginApi?.field("obsidianConfigPath") ?? null
+  readonly property var includeInSearchField: pluginApi?.field("includeInSearch") ?? null
 
-    property var cfg: pluginApi?.pluginSettings || ({})
-    property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
+  readonly property string editConfigPath: root.obsidianConfigPathField?.value ?? ""
+  readonly property bool editIncludeInSearch: root.includeInSearchField?.value ?? true
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
-    property string editConfigPath: displayBaseline.editConfigPath
-    property bool editIncludeInSearch: displayBaseline.editIncludeInSearch
-    NSettingsBaseline {
-        id: displayBaseline
-        readonly property string editConfigPath: cfg.obsidianConfigPath ?? defaults.obsidianConfigPath ?? ""
-        readonly property bool editIncludeInSearch: cfg.includeInSearch ?? defaults.includeInSearch ?? true
-    }
-    readonly property bool settingsDirty: displayBaseline.differs({editConfigPath: root.editConfigPath, editIncludeInSearch: root.editIncludeInSearch})
+  spacing: Style.marginL
 
-    spacing: Style.marginL
-
+  NPluginSettingsField {
+    field: root.obsidianConfigPathField
     NTextInputButton {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.configPath.label")
-        description: pluginApi?.tr("settings.configPath.desc")
-        placeholderText: pluginApi?.tr("settings.configPath.placeholder")
-        text: root.editConfigPath
-        buttonIcon: "file"
-        buttonTooltip: pluginApi?.tr("settings.configPath.buttonTooltip")
-        onInputEditingFinished: root.editConfigPath = text
-        onButtonClicked: filePicker.openFilePicker()
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.configPath.label")
+      description: pluginApi?.tr("settings.configPath.desc")
+      placeholderText: pluginApi?.tr("settings.configPath.placeholder")
+      text: root.editConfigPath
+      buttonIcon: "file"
+      buttonTooltip: pluginApi?.tr("settings.configPath.buttonTooltip")
+      onInputEditCommitted: root.obsidianConfigPathField.set(text)
+      onButtonClicked: filePicker.openFilePicker()
     }
+  }
 
+  NPluginSettingsField {
+    field: root.includeInSearchField
     NCheckbox {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.includeInSearch.label")
-        description: pluginApi?.tr("settings.includeInSearch.desc")
-        checked: root.editIncludeInSearch
-        onToggled: (checked) => root.editIncludeInSearch = checked
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.includeInSearch.label")
+      description: pluginApi?.tr("settings.includeInSearch.desc")
+      checked: root.editIncludeInSearch
+      onToggled: checked => root.includeInSearchField.set(checked)
     }
+  }
 
-    PortalFilePicker {
-        id: filePicker
-        selectionMode: "files"
-        title: pluginApi?.tr("settings.configPath.pickerTitle")
-        initialPath: root.editConfigPath
-        onAccepted: paths => {
-            if (paths.length > 0) {
-                root.editConfigPath = paths[0];
-            }
-        }
+  PortalFilePicker {
+    id: filePicker
+    selectionMode: "files"
+    title: pluginApi?.tr("settings.configPath.pickerTitle")
+    initialPath: root.editConfigPath
+    onAccepted: paths => {
+      if (paths.length > 0) {
+        root.obsidianConfigPathField.set(paths[0]);
+      }
     }
+  }
 
-    function saveSettings() {
-        if (!pluginApi) return;
-        pluginApi.pluginSettings.obsidianConfigPath = root.editConfigPath;
-        pluginApi.pluginSettings.includeInSearch = root.editIncludeInSearch;
-        pluginApi.saveSettings();
-    }
+  function saveSettings() {
+    if (!pluginApi)
+      return;
+    pluginApi.saveSettings();
+  }
 }

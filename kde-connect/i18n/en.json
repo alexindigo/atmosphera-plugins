@@ -47,6 +47,7 @@
     }
   },
   "settings": {
+    "shared-effect": "The selected device and appearance apply to this instance. Device discovery, pairing and file transfers use the shared KDE Connect service and affect the actual device.",
     "no-device-connected-hide": {
       "label": "Hide if unavailable",
       "description": "Hide the bar button entirely if no device is connected"

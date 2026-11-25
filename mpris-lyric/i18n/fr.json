@@ -6,6 +6,7 @@
     "next": "Suivant"
   },
   "settings": {
+    "shared-effect": "Cette instance choisit un lecteur et la fréquence de mise à jour des paroles. Les boutons de lecture commandent ce lecteur partagé pour toutes les applications.",
     "player-name": "Nom du lecteur",
     "player-name-desc": "Nom du lecteur MPRIS (ex: musicfox, spotify, firefox)",
     "hide-when-inactive": "Masquer si inactif",

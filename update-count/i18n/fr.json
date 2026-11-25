@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "Cette instance choisit la fréquence de vérification et les commandes. Une mise à jour modifie le système pour toutes les instances.",
     "changeIcon": {
       "label": "Choisir l’icône"
     },

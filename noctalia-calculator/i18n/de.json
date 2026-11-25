@@ -16,6 +16,7 @@
     "copied": "Kopiert: {value}"
   },
   "settings": {
+    "shared-effect": "Die Genauigkeit und die Wertanzeige in der Leiste gelten nur für diese Instanz. Alle Ansichten teilen die aktuelle Berechnung. Eingeben, Löschen oder Auswerten ändert diese gemeinsame Berechnung.",
     "about": "Über",
     "show-bar": "Wert in der Leiste anzeigen",
     "show-bar-desc": "Zeigt den aktuellen Wert neben dem Rechner-Symbol an",

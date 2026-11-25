@@ -64,6 +64,7 @@
     "vi": "Vietnamese"
   },
   "settings": {
+    "sharedContent": "Provider and translation choices follow this widget. Conversation, input, translation results and history are shared; clear and stop affect everyone.",
     "aiSection": "AI Chat Settings",
     "provider": "AI Provider",
     "providerDesc": "Select your preferred AI provider",

@@ -17,7 +17,7 @@ Item {
     property int sectionWidgetIndex: -1
     property int sectionWidgetsCount: 0
 
-    property var backend: pluginApi?.mainInstance
+    readonly property var backend: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
     property string lyricText: backend?.currentLyric || ""
     property int lyricInterval: backend?.lyricInterval
 

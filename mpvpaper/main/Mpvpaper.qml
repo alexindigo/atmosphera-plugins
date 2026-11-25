@@ -9,6 +9,22 @@ import qs.Services.UI
 Item {
     id: root
     required property var pluginApi
+    required property var settingsContext
+    property var runtimeWriter: null
+    property var admittedContext: null
+    property int policyGeneration: 0
+
+    function replacePolicy() {
+        const generation = ++policyGeneration;
+        admittedContext = null;
+        deactivateMpvpaper();
+        Qt.callLater(function () {
+            if (generation !== root.policyGeneration || !root.settingsContext?.current()) return;
+            if (root.active && root.currentWallpaper !== "") root.activateMpvpaper();
+        });
+    }
+    onSettingsContextChanged: replacePolicy()
+    onMpvSocketChanged: replacePolicy()
 
     /***************************
     * PROPERTIES
@@ -35,6 +51,7 @@ Item {
             `input-ipc-server='${root.mpvSocket}'`,
             `profile='${root.profile}'`,
             `panscan=${root.fillMode === "fit" ? 0 : 1}`,
+            `pause=${root.isPlaying ? "no" : "yes"}`,
             "loop"
         ];
 
@@ -46,13 +63,12 @@ Item {
             options.push("no-audio");
         }
 
-        const optionsString = options.join(" ");
-        const command = `mpvpaper -o "${optionsString}" ALL "${root.currentWallpaper}"`;
-
-        return ["sh", "-c", command];
+        return ["mpvpaper", "-o", options.join(" "), "ALL", root.currentWallpaper];
     }
 
     function activateMpvpaper() {
+        if (!settingsContext?.current() || !active || currentWallpaper === "") return;
+        admittedContext = settingsContext;
         Logger.d("mpvpaper", "Activating mpvpaper...");
 
         // Save the old wallpapers of the user.
@@ -60,13 +76,15 @@ Item {
 
         mpvProc.command = buildMpvCommand();
         mpvProc.running = true;
+        thumbnails.startColorGen(settingsContext, currentWallpaper);
 
-        pluginApi.pluginSettings.isPlaying = true;
-        pluginApi.saveSettings();
+        // Loading/replacing a physical backend is not a preference action.
+        // Main's explicit originating wallpaper action owns the playing intent.
     }
 
     function deactivateMpvpaper() {
         Logger.d("mpvpaper", "Deactivating mpvpaper...");
+        thumbnails?.cancelColorGen();
 
         // Apply the old wallpapers back
         innerService.applyOldWallpapers();
@@ -76,6 +94,7 @@ Item {
     }
 
     function sendCommandToMPV(command: string) {
+        if (!settingsContext?.current() || admittedContext !== settingsContext) return;
         socket.connected = true;
         socket.path = mpvSocket;
         socket.write(`${command}\n`);
@@ -91,8 +110,6 @@ Item {
             Logger.d("mpvpaper", "Turning mpvpaper on.");
 
             activateMpvpaper();
-
-            thumbnails.startColorGen();
         } else if(!root.active) {
             Logger.d("mpvpaper", "Turning mpvpaper off.");
 
@@ -112,13 +129,13 @@ Item {
             if(mpvProc.running) {
                 // If mpvpaper is already running
                 sendCommandToMPV(`loadfile "${root.currentWallpaper}"`);
+                thumbnails.startColorGen(settingsContext, currentWallpaper);
             } else {
                 // Start mpvpaper
                 activateMpvpaper();
             }
 
-            thumbnails.startColorGen();
-        } else if(mpvProc.running) {
+        } else {
             Logger.d("mpvpaper", "Current wallpaper is empty, turning mpvpaper off.");
 
             deactivateMpvpaper();
@@ -206,8 +223,11 @@ Item {
 
         // Clamp the volume
         if(v != volume) {
-            pluginApi.pluginSettings.volume = v;
-            pluginApi.saveSettings();
+            const writer = runtimeWriter;
+            if (writer?.settingsContext === settingsContext && settingsContext.current()) {
+                writer.pluginSettings.volume = v;
+                writer.saveSettings();
+            }
         }
     }
 

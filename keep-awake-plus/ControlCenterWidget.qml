@@ -6,7 +6,7 @@ AtmoIconButtonHot {
   property ShellScreen screen
   property var pluginApi: null
 
-  readonly property var main: pluginApi?.mainInstance ?? null
+  readonly property var main: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
   readonly property bool active: main?.active ?? false
   readonly property string scope: main?.scope ?? ""
   readonly property string remainingText: main ? main.formatRemaining() : ""

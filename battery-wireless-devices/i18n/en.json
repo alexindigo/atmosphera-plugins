@@ -4,6 +4,7 @@
     "refresh": "Refresh now"
   },
   "settings": {
+    "shared-observation": "This instance has its own polling interval and device display choices. Battery observations are shared; a scan from any instance updates all instances.",
     "header": {
       "label": "Battery for Wireless Devices",
       "desc": "Select which devices appear in the bar and how each looks."

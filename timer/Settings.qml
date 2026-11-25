@@ -2,62 +2,65 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import qs.Commons
-import qs.Widgets
 import qs.Services.UI
+import qs.Widgets
 
 ColumnLayout {
-    id: root
-    spacing: Style.marginL
+  id: root
+  spacing: Style.marginL
 
-    property var pluginApi: null
+  property var pluginApi: null
+  readonly property var compactModeField: pluginApi?.field("compactMode") ?? null
+  readonly property var iconColorField: pluginApi?.field("iconColor") ?? null
+  readonly property var textColorField: pluginApi?.field("textColor") ?? null
 
-    property bool editCompactMode: displayBaseline.editCompactMode
-    property string editIconColor: displayBaseline.editIconColor
-    property string editTextColor: displayBaseline.editTextColor
-    NSettingsBaseline {
-      id: displayBaseline
-      readonly property bool editCompactMode: pluginApi?.pluginSettings?.compactMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ?? false
-      readonly property string editIconColor: pluginApi?.pluginSettings?.iconColor ?? pluginApi?.manifest?.metadata?.defaultSettings?.iconColor ?? "none"
-      readonly property string editTextColor: pluginApi?.pluginSettings?.textColor ?? pluginApi?.manifest?.metadata?.defaultSettings?.textColor ?? "none"
-    }
-    readonly property bool settingsDirty: displayBaseline.differs({editCompactMode: root.editCompactMode, editIconColor: root.editIconColor, editTextColor: root.editTextColor})
+  readonly property bool editCompactMode: root.compactModeField?.value ?? false
+  readonly property string editIconColor: root.iconColorField?.value ?? "none"
+  readonly property string editTextColor: root.textColorField?.value ?? "none"
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
-    function saveSettings() {
-        if (!pluginApi) {
-            Logger.e("Timer", "Cannot save: pluginApi is null")
-            return
-        }
-
-        pluginApi.pluginSettings.compactMode = root.editCompactMode
-        pluginApi.pluginSettings.iconColor = root.editIconColor
-        pluginApi.pluginSettings.textColor = root.editTextColor
-
-        pluginApi.saveSettings(function (result) {
-            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
-                Logger.i("Timer", "Settings saved successfully")
-        })
+  function saveSettings() {
+    if (!pluginApi) {
+      Logger.e("Timer", "Cannot save: pluginApi is null");
+      return;
     }
 
-    // Icon Color
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("Timer", "Settings saved successfully");
+    });
+  }
+
+  // Icon Color
+  NPluginSettingsField {
+    field: root.iconColorField
     NColorChoice {
-        label: I18n.tr("common.select-icon-color")
-        description: I18n.tr("common.select-color-description")
-        currentKey: root.editIconColor
-        onSelected: key => root.editIconColor = key
+      label: I18n.tr("common.select-icon-color")
+      description: I18n.tr("common.select-color-description")
+      currentKey: root.editIconColor
+      onSelected: key => root.iconColorField.set(key)
     }
+  }
 
-    // Text Color
+  // Text Color
+  NPluginSettingsField {
+    field: root.textColorField
     NColorChoice {
-        currentKey: root.editTextColor
-        onSelected: key => root.editTextColor = key
+      currentKey: root.editTextColor
+      onSelected: key => root.textColorField.set(key)
     }
+  }
 
-    // Compact Mode
+  // Compact Mode
+  NPluginSettingsField {
+    field: root.compactModeField
     NToggle {
-        label: pluginApi?.tr("settings.compact-mode") || "Compact Mode"
-        description: pluginApi?.tr("settings.compact-mode-desc") || "Hide the circular progress bar for a cleaner look"
-        checked: root.editCompactMode
-        onToggled: checked => root.editCompactMode = checked
-        defaultValue: pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ?? false
+      label: pluginApi?.tr("settings.compact-mode") || "Compact Mode"
+      description: pluginApi?.tr("settings.compact-mode-desc") || "Hide the circular progress bar for a cleaner look"
+      checked: root.editCompactMode
+      onToggled: checked => root.compactModeField.set(checked)
+      defaultValue: pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ?? false
     }
+  }
 }

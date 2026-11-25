@@ -32,6 +32,7 @@
     "loading": "Chargement..."
   },
   "settings": {
+    "shared-effect": "Le bouton Appliquer ou une action en cours d'utilisation sélectionne les réglages de cette instance pour le lecteur de fonds d'écran et le minuteur d'automatisation partagés. La lecture, la restauration du fond d'écran et les changements de couleurs affectent toutes les instances.",
     "toggle": {
       "label": "Activer mpvpaper",
       "description": "Activer l'intégration de mpvpaper"

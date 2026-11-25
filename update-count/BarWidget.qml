@@ -27,7 +27,8 @@ Item {
 
   property string currentIconName: pluginApi?.pluginSettings?.currentIconName || pluginApi?.manifest?.metadata?.defaultSettings?.currentIconName
   property bool hideOnZero: pluginApi?.pluginSettings.hideOnZero || pluginApi?.manifest?.metadata.defaultSettings?.hideOnZero
-  readonly property bool isVisible: (root.pluginApi?.mainInstance?.updateCount > 0) || !root.hideOnZero
+  readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+  readonly property bool isVisible: (settingsConsumer?.updateCount > 0) || !root.hideOnZero
   visible: root.isVisible
   // also set opacity to zero when invisible as we use opacity to hide the barWidgetLoader
   opacity: root.isVisible ? 1.0 : 0.0
@@ -73,7 +74,7 @@ Item {
 
         NText {
           Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-          text: root.pluginApi?.mainInstance?.updateCount.toString()
+          text: root.settingsConsumer?.updateCount.toString()
           color: root.hovered ? AtmoColor.mOnHover : AtmoColor.mOnSurface
           pointSize: root.barFontSize
         }
@@ -85,7 +86,7 @@ Item {
     anchors.fill: parent
     hoverEnabled: true
     acceptedButtons: Qt.LeftButton | Qt.RightButton
-    cursorShape: root.pluginApi?.mainInstance?.updateCount > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
+    cursorShape: root.settingsConsumer?.updateCount > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
 
     onEntered: {
       root.hovered = true;
@@ -100,8 +101,8 @@ Item {
     onPressed: mouse => {
       TooltipService.hide();
 
-      if (mouse.button == Qt.LeftButton && root.pluginApi?.mainInstance?.updateCount > 0)
-        root.pluginApi?.mainInstance?.startDoSystemUpdate();
+      if (mouse.button == Qt.LeftButton && root.settingsConsumer?.updateCount > 0)
+        root.settingsConsumer?.startDoSystemUpdate();
       else if (mouse.button == Qt.RightButton)
         PanelService.showContextMenu(contextMenu, root, screen);
     }
@@ -114,7 +115,7 @@ Item {
           "label": "Update",
           "action": "run-update-cmd",
           "icon": "arrow-up-from-arc",
-          "enabled": root.pluginApi?.mainInstance?.updateCount > 0
+          "enabled": root.settingsConsumer?.updateCount > 0
         },
         {
           "label": I18n.tr("actions.widget-settings"),
@@ -128,7 +129,7 @@ Item {
         PanelService.closeContextMenu(screen);
 
         if (action === "run-update-cmd")
-          root.pluginApi?.mainInstance?.startDoSystemUpdate();
+          root.settingsConsumer?.startDoSystemUpdate();
         else if (action === "widget-settings") {
           BarService.openPluginSettings(screen, pluginApi.manifest);
         }
@@ -137,7 +138,7 @@ Item {
   }
 
   function buildTooltip() {
-    const updateCount = root.pluginApi?.mainInstance?.updateCount
+    const updateCount = root.settingsConsumer?.updateCount
 
     if (updateCount === 0) {
       TooltipService.show(root, pluginApi?.tr("tooltip.noUpdatesAvailable"), BarService.getTooltipDirection(root.screenName));

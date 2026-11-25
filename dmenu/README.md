@@ -155,3 +155,21 @@ Settings → Plugins → Dmenu Provider → Configure.
 ## License
 
 MIT
+
+## Scope and session policy
+
+Dmenu has no placed Bar, Desktop or Control Center entry. Its menu starters are
+explicitly plugin-level IPC; the generic Settings page still uses the shell's
+selected native editor, explicit field intents, Apply, Discard and Reset.
+
+Each admitted menu captures the applied result path, display limit, custom-input
+prefix and toast policy. A later preference edit does not retarget that menu's
+selection, result or callback. `customInputPrefix` and `showToastOnSelect` may
+also be supplied as request options. Panel position, footer and match-count
+presentation remain live plugin-level choices.
+
+For file menus, explicit request options win over file configuration, then the
+defaults captured when IPC admitted the request. A replaced, cleared or retired
+request cannot reopen a panel or publish a late file load. `closeOnSelect: false`
+keeps the presentation open after completing the selection; Main alone owns close
+policy. Callbacks remain immediate application actions, not preference receipts.

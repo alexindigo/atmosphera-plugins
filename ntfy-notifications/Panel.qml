@@ -16,7 +16,8 @@ Item {
 
     anchors.fill: parent
 
-    readonly property var main: pluginApi?.mainInstance
+    readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+    readonly property var main: settingsConsumer
     readonly property var messages: main ? main.messages : []
     readonly property string errorMessage: main ? main.errorMessage : ""
     readonly property bool isLoading: main ? main.isLoading : false

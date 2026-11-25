@@ -4,190 +4,240 @@ import qs.Commons
 import qs.Widgets
 
 ColumnLayout {
-    id: root
-    spacing: Style.marginL
+  id: root
+  spacing: Style.marginL
 
-    property var pluginApi: null
+  property var pluginApi: null
+  readonly property var autoMountField: pluginApi?.field("autoMount") ?? null
+  readonly property var fileBrowserField: pluginApi?.field("fileBrowser") ?? null
+  readonly property var terminalCommandField: pluginApi?.field("terminalCommand") ?? null
+  readonly property var showNotificationsField: pluginApi?.field("showNotifications") ?? null
+  readonly property var hideWhenEmptyField: pluginApi?.field("hideWhenEmpty") ?? null
+  readonly property var showBadgeField: pluginApi?.field("showBadge") ?? null
+  readonly property var iconColorField: pluginApi?.field("iconColor") ?? null
 
-    // ===== EDIT STATE =====
+  // ===== EDIT STATE =====
 
-    property bool editAutoMount:
-        displayBaseline.editAutoMount
+  readonly property bool editAutoMount: root.autoMountField?.value ?? false
 
-    property string editFileBrowser:
-        displayBaseline.editFileBrowser
+  readonly property string editFileBrowser: root.fileBrowserField?.value || "yazi"
 
-    property string editTerminalCommand:
-        displayBaseline.editTerminalCommand
+  readonly property string editTerminalCommand: root.terminalCommandField?.value || "kitty"
 
-    property bool editShowNotifications:
-        displayBaseline.editShowNotifications
+  readonly property bool editShowNotifications: root.showNotificationsField?.value ?? true
 
-    property bool editHideWhenEmpty:
-        displayBaseline.editHideWhenEmpty
+  readonly property bool editHideWhenEmpty: root.hideWhenEmptyField?.value ?? false
 
-    property bool editShowBadge:
-        displayBaseline.editShowBadge
+  readonly property bool editShowBadge: root.showBadgeField?.value ?? true
 
-    property string iconColor:
-        displayBaseline.iconColor
+  readonly property string iconColor: root.iconColorField?.value ?? "none"
 
-    // ===== SAVE =====
+  // ===== SAVE =====
 
-    NSettingsBaseline {
-      id: displayBaseline
-      readonly property bool editAutoMount: pluginApi?.pluginSettings?.autoMount ?? pluginApi?.manifest?.metadata?.defaultSettings?.autoMount ?? false
-      readonly property string editFileBrowser: pluginApi?.pluginSettings?.fileBrowser || pluginApi?.manifest?.metadata?.defaultSettings?.fileBrowser || "yazi"
-      readonly property string editTerminalCommand: pluginApi?.pluginSettings?.terminalCommand || pluginApi?.manifest?.metadata?.defaultSettings?.terminalCommand || "kitty"
-      readonly property bool editShowNotifications: pluginApi?.pluginSettings?.showNotifications ?? pluginApi?.manifest?.metadata?.defaultSettings?.showNotifications ?? true
-      readonly property bool editHideWhenEmpty: pluginApi?.pluginSettings?.hideWhenEmpty ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideWhenEmpty ?? false
-      readonly property bool editShowBadge: pluginApi?.pluginSettings?.showBadge ?? pluginApi?.manifest?.metadata?.defaultSettings?.showBadge ?? true
-      readonly property string iconColor: pluginApi?.pluginSettings?.iconColor ?? pluginApi?.manifest?.metadata?.defaultSettings?.iconColor ?? "none"
-    }
-    readonly property bool settingsDirty: displayBaseline.differs({editAutoMount: root.editAutoMount, editFileBrowser: root.editFileBrowser, editTerminalCommand: root.editTerminalCommand, editShowNotifications: root.editShowNotifications, editHideWhenEmpty: root.editHideWhenEmpty, editShowBadge: root.editShowBadge, iconColor: root.iconColor})
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
-    function saveSettings() {
-        if (!pluginApi) return
+  function saveSettings() {
+    if (!pluginApi)
+      return;
+    pluginApi.saveSettings(result => {
+      if ((result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        pluginApi.mainInstance?.activatePolicy(pluginApi.runtimeContext);
+    });
+  }
 
-        pluginApi.pluginSettings.autoMount          = root.editAutoMount
-        pluginApi.pluginSettings.fileBrowser        = root.editFileBrowser
-        pluginApi.pluginSettings.terminalCommand    = root.editTerminalCommand
-        pluginApi.pluginSettings.showNotifications  = root.editShowNotifications
-        pluginApi.pluginSettings.hideWhenEmpty      = root.editHideWhenEmpty
-        pluginApi.pluginSettings.showBadge          = root.editShowBadge
-        pluginApi.pluginSettings.iconColor          = root.iconColor
+  // ===== UI =====
 
-        pluginApi.saveSettings()
-    }
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+  }
 
-    // ===== UI =====
+  // ── Section: Bar Widget ───────────────────────────────────────────────────
+  NText {
+    text: pluginApi?.tr("settings.section-bar")
+    pointSize: Style.fontSizeM
+    font.weight: Font.Bold
+    color: AtmoColor.mOnSurface
+  }
 
-    // ── Section: Bar Widget ───────────────────────────────────────────────────
-    NText {
-        text: pluginApi?.tr("settings.section-bar")
-        pointSize: Style.fontSizeM
-        font.weight: Font.Bold
-        color: AtmoColor.mOnSurface
-    }
-
+  NPluginSettingsField {
+    field: root.hideWhenEmptyField
     NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.hide-when-empty")
-        description: pluginApi?.tr("settings.hide-when-empty-desc")
-        checked: root.editHideWhenEmpty
-        onToggled: checked => {
-            root.editHideWhenEmpty = checked
-            root.saveSettings()
-        }
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.hide-when-empty")
+      description: pluginApi?.tr("settings.hide-when-empty-desc")
+      checked: root.editHideWhenEmpty
+      onToggled: checked => {
+        root.hideWhenEmptyField.set(checked);
+      }
     }
+  }
 
+  NPluginSettingsField {
+    field: root.showBadgeField
     NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.show-badge")
-        description: pluginApi?.tr("settings.show-badge-desc")
-        checked: root.editShowBadge
-        onToggled: checked => {
-            root.editShowBadge = checked
-            root.saveSettings()
-        }
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.show-badge")
+      description: pluginApi?.tr("settings.show-badge-desc")
+      checked: root.editShowBadge
+      onToggled: checked => {
+        root.showBadgeField.set(checked);
+      }
     }
+  }
 
-    NDivider { Layout.fillWidth: true }
+  NDivider {
+    Layout.fillWidth: true
+  }
 
-    // ── Section: Behavior ─────────────────────────────────────────────────────
-    NText {
-        text: pluginApi?.tr("settings.section-behavior")
-        pointSize: Style.fontSizeM
-        font.weight: Font.Bold
-        color: AtmoColor.mOnSurface
-    }
+  // ── Section: Behavior ─────────────────────────────────────────────────────
+  NText {
+    text: pluginApi?.tr("settings.section-behavior")
+    pointSize: Style.fontSizeM
+    font.weight: Font.Bold
+    color: AtmoColor.mOnSurface
+  }
 
+  NPluginSettingsField {
+    field: root.autoMountField
     NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.auto-mount")
-        description: pluginApi?.tr("settings.auto-mount-desc")
-        checked: root.editAutoMount
-        onToggled: checked => {
-            root.editAutoMount = checked
-            root.saveSettings()
-        }
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.auto-mount")
+      description: pluginApi?.tr("settings.auto-mount-desc")
+      checked: root.editAutoMount
+      onToggled: checked => {
+        root.autoMountField.set(checked);
+      }
     }
+  }
 
+  NPluginSettingsField {
+    field: root.showNotificationsField
     NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.notifications")
-        description: pluginApi?.tr("settings.notifications-desc")
-        checked: root.editShowNotifications
-        onToggled: checked => {
-            root.editShowNotifications = checked
-            root.saveSettings()
-        }
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.notifications")
+      description: pluginApi?.tr("settings.notifications-desc")
+      checked: root.editShowNotifications
+      onToggled: checked => {
+        root.showNotificationsField.set(checked);
+      }
     }
+  }
 
-    NDivider { Layout.fillWidth: true }
+  NDivider {
+    Layout.fillWidth: true
+  }
 
-    // ── Section: File Browser ─────────────────────────────────────────────────
-    NText {
-        text: pluginApi?.tr("settings.section-browser")
-        pointSize: Style.fontSizeM
-        font.weight: Font.Bold
-        color: AtmoColor.mOnSurface
-    }
+  // ── Section: File Browser ─────────────────────────────────────────────────
+  NText {
+    text: pluginApi?.tr("settings.section-browser")
+    pointSize: Style.fontSizeM
+    font.weight: Font.Bold
+    color: AtmoColor.mOnSurface
+  }
 
+  NPluginSettingsField {
+    field: root.fileBrowserField
     NComboBox {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.file-browser")
-        description: pluginApi?.tr("settings.file-browser-desc")
-        model: [
-            { key: "yazi",     name: "yazi" },
-            { key: "ranger",   name: "ranger" },
-            { key: "xdg-open", name: "xdg-open" },
-            { key: "dolphin",  name: "dolphin" },
-            { key: "thunar",   name: "thunar" },
-            { key: "nautilus", name: "nautilus" }
-        ]
-        currentKey: root.editFileBrowser
-        onSelected: key => {
-            root.editFileBrowser = key
-            root.saveSettings()
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.file-browser")
+      description: pluginApi?.tr("settings.file-browser-desc")
+      model: [
+        {
+          key: "yazi",
+          name: "yazi"
+        },
+        {
+          key: "ranger",
+          name: "ranger"
+        },
+        {
+          key: "xdg-open",
+          name: "xdg-open"
+        },
+        {
+          key: "dolphin",
+          name: "dolphin"
+        },
+        {
+          key: "thunar",
+          name: "thunar"
+        },
+        {
+          key: "nautilus",
+          name: "nautilus"
         }
+      ]
+      currentKey: root.editFileBrowser
+      onSelected: key => {
+        root.fileBrowserField.set(key);
+      }
     }
+  }
 
+  NPluginSettingsField {
+    field: root.terminalCommandField
     NComboBox {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.terminal")
-        description: pluginApi?.tr("settings.terminal-desc")
-        model: [
-            { key: "kitty",      name: "kitty" },
-            { key: "foot",       name: "foot" },
-            { key: "alacritty",  name: "alacritty" },
-            { key: "wezterm",    name: "wezterm" },
-            { key: "ghostty",    name: "ghostty" },
-            { key: "ptyxis",     name: "ptyxis" }
-        ]
-        currentKey: root.editTerminalCommand
-        onSelected: key => {
-            root.editTerminalCommand = key
-            root.saveSettings()
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.terminal")
+      description: pluginApi?.tr("settings.terminal-desc")
+      model: [
+        {
+          key: "kitty",
+          name: "kitty"
+        },
+        {
+          key: "foot",
+          name: "foot"
+        },
+        {
+          key: "alacritty",
+          name: "alacritty"
+        },
+        {
+          key: "wezterm",
+          name: "wezterm"
+        },
+        {
+          key: "ghostty",
+          name: "ghostty"
+        },
+        {
+          key: "ptyxis",
+          name: "ptyxis"
         }
+      ]
+      currentKey: root.editTerminalCommand
+      onSelected: key => {
+        root.terminalCommandField.set(key);
+      }
     }
-    NDivider {
-        Layout.fillWidth: true
-    }
+  }
+  NDivider {
+    Layout.fillWidth: true
+  }
 
-    // Section: Colors
-    NText {
-        text: pluginApi?.tr("settings.icon-color")
-        pointSize: Style.fontSizeM
-        font.weight: Font.Bold
-        color: AtmoColor.mOnSurface
-    }
+  // Section: Colors
+  NText {
+    text: pluginApi?.tr("settings.icon-color")
+    pointSize: Style.fontSizeM
+    font.weight: Font.Bold
+    color: AtmoColor.mOnSurface
+  }
+  NPluginSettingsField {
+    field: root.iconColorField
     NColorChoice {
-        currentKey: root.iconColor
-        description: pluginApi?.tr("settings.icon-color-desc")
-        label: pluginApi?.tr("settings.icon-color")
-        onSelected: key => root.iconColor = key
+      currentKey: root.iconColor
+      description: pluginApi?.tr("settings.icon-color-desc")
+      label: pluginApi?.tr("settings.icon-color")
+      onSelected: key => root.iconColorField.set(key)
     }
+  }
 
-    Item { Layout.fillHeight: true }
+  Item {
+    Layout.fillHeight: true
+  }
 }

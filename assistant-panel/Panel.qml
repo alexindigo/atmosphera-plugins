@@ -37,7 +37,7 @@ Item {
     // Sync to Main instance and save to cache
     if (mainInstance) {
       mainInstance.activeTab = activeTab;
-      mainInstance.saveState();
+      mainInstance.saveState(pluginApi?.settingsContext);
     }
   }
 
@@ -166,7 +166,7 @@ Item {
               anchors.centerIn: parent
               spacing: Style.marginS
 
-              TabButton {
+              AssistantTabButton {
                 icon: "sparkles"
                 label: pluginApi?.tr("tabs.ai")
                 isActive: root.activeTab === "ai"
@@ -174,12 +174,12 @@ Item {
                   root.activeTab = "ai";
                   if (mainInstance) {
                     mainInstance.activeTab = "ai";
-                    mainInstance.saveState();
+                    mainInstance.saveState(pluginApi?.settingsContext);
                   }
                 }
               }
 
-              TabButton {
+              AssistantTabButton {
                 icon: "language"
                 label: pluginApi?.tr("tabs.translator")
                 isActive: root.activeTab === "translator"
@@ -187,7 +187,7 @@ Item {
                   root.activeTab = "translator";
                   if (mainInstance) {
                     mainInstance.activeTab = "translator";
-                    mainInstance.saveState();
+                    mainInstance.saveState(pluginApi?.settingsContext);
                   }
                 }
               }
@@ -252,7 +252,7 @@ Item {
   }
 
   // Tab Button Component
-  component TabButton: Rectangle {
+  component AssistantTabButton: Rectangle {
     id: tabButton
 
     property string icon: ""

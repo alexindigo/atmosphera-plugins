@@ -1,275 +1,99 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import qs.Commons
 
 Item {
   id: root
-
   property var pluginApi: null
+  property var _settingsConsumers: new Map()
+  property var _observations: new Map()
+  Component { id: observationFactory; GpuObservation {} }
+  Component { id: clientFactory; GpuSettingsClient {} }
 
-  readonly property int pollIntervalMs: 1000
-  readonly property int historyLength: 300
-
-  property bool available: false
-  property string lastError: ""
-  property string productName: ""
-  property string cardKey: "card0"
-
-  property real tempEdge: 0
-  property real tempJunction: 0
-  property real tempMemory: 0
-  property real fanSpeed: 0
-  property real gpuUse: 0
-  property real vramPercent: 0
-  property real vramActivity: 0
-  property real vramUsedGb: 0
-  property real vramTotalGb: 0
-  property real powerWatts: 0
-  property real sclkMhz: 0
-  property real mclkMhz: 0
-  property real fclkMhz: 0
-  property real socclkMhz: 0
-  property real dcefclkMhz: 0
-
-  property var gpuUseHistory: new Array(historyLength).fill(0)
-  property var tempEdgeHistory: new Array(historyLength).fill(40)
-  property var tempJunctionHistory: new Array(historyLength).fill(40)
-  property var tempMemoryHistory: new Array(historyLength).fill(40)
-  property var fanSpeedHistory: new Array(historyLength).fill(0)
-  property var vramHistory: new Array(historyLength).fill(0)
-  property var powerHistory: new Array(historyLength).fill(0)
-  property var vramActivityHistory: new Array(historyLength).fill(0)
-  property var sclkHistory: new Array(historyLength).fill(0)
-  property var mclkHistory: new Array(historyLength).fill(0)
-  property var fclkHistory: new Array(historyLength).fill(0)
-  property var socclkHistory: new Array(historyLength).fill(0)
-  property var dcefclkHistory: new Array(historyLength).fill(0)
-
-  readonly property var settings: pluginApi?.pluginSettings ?? pluginApi?.manifest?.metadata?.defaultSettings ?? ({})
-
-  readonly property int deviceIndex: intOrDefault(settings.deviceIndex, 0)
-
-  readonly property int gpuWarningThreshold: Settings.data.systemMonitor.gpuWarningThreshold
-  readonly property int gpuCriticalThreshold: Settings.data.systemMonitor.gpuCriticalThreshold
-  readonly property bool gpuWarning: available && tempJunction >= gpuWarningThreshold
-  readonly property bool gpuCritical: available && tempJunction >= gpuCriticalThreshold
-
-  readonly property real powerGraphMax: {
-    let max = 0;
-    for (let i = 0; i < powerHistory.length; i++)
-      max = Math.max(max, powerHistory[i]);
-    return Math.max(50, max * 1.2);
+  function acquireObservation(index, client) {
+    if (!_observations.has(index)) {
+      var observer = observationFactory.createObject(root, {deviceIndex: index});
+      _observations.set(index, {observer: observer, clients: new Set()});
+    }
+    var entry = _observations.get(index);
+    entry.clients.add(client);
+    return entry.observer;
   }
-
-  function refreshNow() {
-    if (!rocmProcess.running)
-      rocmProcess.running = true;
-  }
-
-  function registerPoller(consumerId) {
-    if (!_consumers[consumerId]) {
-      _consumers[consumerId] = true;
-      _consumers = Object.assign({}, _consumers);
+  function releaseObservation(index, client) {
+    var entry = _observations.get(index);
+    if (!entry) return;
+    entry.clients.delete(client);
+    if (entry.clients.size === 0) {
+      _observations.delete(index);
+      entry.observer.destroy();
     }
   }
-
-  function unregisterPoller(consumerId) {
-    delete _consumers[consumerId];
-    _consumers = Object.assign({}, _consumers);
-  }
-
-  property var _consumers: ({})
-
-  readonly property bool shouldPoll: Object.keys(_consumers).length > 0
-
-  function intOrDefault(value, fallback) {
-    return (typeof value === "number") ? Math.floor(value) : fallback;
-  }
-
-  function parseNumber(value) {
-    if (value === undefined || value === null)
-      return 0;
-    const n = parseFloat(String(value).replace(/[^0-9.-]/g, ""));
-    return isNaN(n) ? 0 : n;
-  }
-
-  function parseMhz(value) {
-    if (!value)
-      return 0;
-    const m = String(value).match(/(\d+(?:\.\d+)?)\s*Mhz/i);
-    return m ? parseFloat(m[1]) : 0;
-  }
-
-  function readMhz(card, key, current) {
-    if (!card || card[key] === undefined || card[key] === null)
-      return current;
-    const text = String(card[key]).trim();
-    if (text === "" || text === "N/A")
-      return current;
-    const mhz = parseMhz(text);
-    if (mhz <= 0 && !/Mhz/i.test(text))
-      return current;
-    return mhz;
-  }
-
-  function bytesToGb(bytes) {
-    return bytes / (1024 * 1024 * 1024);
-  }
-
-  function pushHistory(array, value, length) {
-    const h = array.slice();
-    h.push(value);
-    while (h.length > length)
-      h.shift();
-    return h;
-  }
-
-  function historyMax(values, floorValue) {
-    let max = floorValue || 0;
-    for (let i = 0; i < values.length; i++)
-      max = Math.max(max, values[i]);
-    return Math.max(floorValue || 1, max * 1.1);
-  }
-
-  function updateHistories() {
-    gpuUseHistory = pushHistory(gpuUseHistory, gpuUse, historyLength);
-    tempEdgeHistory = pushHistory(tempEdgeHistory, tempEdge, historyLength);
-    tempJunctionHistory = pushHistory(tempJunctionHistory, tempJunction, historyLength);
-    tempMemoryHistory = pushHistory(tempMemoryHistory, tempMemory, historyLength);
-    fanSpeedHistory = pushHistory(fanSpeedHistory, fanSpeed, historyLength);
-    vramHistory = pushHistory(vramHistory, vramPercent, historyLength);
-    powerHistory = pushHistory(powerHistory, powerWatts, historyLength);
-    vramActivityHistory = pushHistory(vramActivityHistory, vramActivity, historyLength);
-    sclkHistory = pushHistory(sclkHistory, sclkMhz, historyLength);
-    mclkHistory = pushHistory(mclkHistory, mclkMhz, historyLength);
-    fclkHistory = pushHistory(fclkHistory, fclkMhz, historyLength);
-    socclkHistory = pushHistory(socclkHistory, socclkMhz, historyLength);
-    dcefclkHistory = pushHistory(dcefclkHistory, dcefclkMhz, historyLength);
-  }
-
-  function applyCardData(card) {
-    if (!card)
-      return;
-
-    tempEdge = parseNumber(card["Temperature (Sensor edge) (C)"]);
-    tempJunction = parseNumber(card["Temperature (Sensor junction) (C)"]);
-    tempMemory = parseNumber(card["Temperature (Sensor memory) (C)"]);
-    fanSpeed = parseNumber(card["Fan speed (%)"]);
-    gpuUse = parseNumber(card["GPU use (%)"]);
-    vramPercent = parseNumber(card["GPU Memory Allocated (VRAM%)"]);
-    vramActivity = parseNumber(card["GPU Memory Read/Write Activity (%)"]);
-    powerWatts = parseNumber(card["Average Graphics Package Power (W)"]);
-
-    const vramTotalB = parseNumber(card["VRAM Total Memory (B)"]);
-    const vramUsedB = parseNumber(card["VRAM Total Used Memory (B)"]);
-    if (vramTotalB > 0) {
-      vramTotalGb = bytesToGb(vramTotalB);
-      vramUsedGb = bytesToGb(vramUsedB);
-      if (!vramPercent)
-        vramPercent = (vramUsedB / vramTotalB) * 100;
-    }
-
-    sclkMhz = readMhz(card, "sclk clock speed:", sclkMhz);
-    mclkMhz = readMhz(card, "mclk clock speed:", mclkMhz);
-    fclkMhz = readMhz(card, "fclk clock speed:", fclkMhz);
-    socclkMhz = readMhz(card, "socclk clock speed:", socclkMhz);
-    dcefclkMhz = readMhz(card, "dcefclk clock speed:", dcefclkMhz);
-
-    const series = card["Card Series"];
-    if (series)
-      productName = series;
-
-    available = true;
-    lastError = "";
-    updateHistories();
-  }
-
-  function parseRocmOutput(data) {
-    const text = String(data || "").trim();
-    if (!text) {
-      lastError = "empty output";
-      available = false;
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(text);
-      const keys = Object.keys(parsed);
-      if (keys.length === 0) {
-        lastError = "no GPU data";
-        available = false;
-        return;
+  function settingsConsumerFor(context) {
+    if (!context || !context.current()) return null;
+    if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+    var client = clientFactory.createObject(root, {
+      settingsContext: context,
+      acquireObservation: function(index, consumer) { return root.acquireObservation(index, consumer); },
+      releaseObservation: function(index, consumer) { root.releaseObservation(index, consumer); },
+      retire: function(retired) {
+        root._settingsConsumers.delete(context);
+        retired.destroy();
       }
-      cardKey = keys[0];
-      applyCardData(parsed[cardKey]);
-    } catch (e) {
-      lastError = String(e);
-      available = false;
-      Logger.e("AmdGpuMonitor", "Failed to parse rocm-smi JSON:", e, text.substring(0, 200));
-    }
+    });
+    _settingsConsumers.set(context, client);
+    return client;
   }
-
-  readonly property var rocmCommand: [
-    "rocm-smi",
-    "--json",
-    "-d",
-    String(deviceIndex),
-    "--showuse",
-    "--showtemp",
-    "--showfan",
-    "--showmemuse",
-    "--showpower",
-    "--showclocks",
-    "--showmeminfo",
-    "vram",
-    "--showproductname"
-  ]
-
-  Process {
-    id: rocmProcess
-    running: false
-    command: root.rocmCommand
-
-    stdout: StdioCollector {
-      onStreamFinished: root.parseRocmOutput(text)
-    }
-
-    onExited: function (exitCode) {
-      rocmProcess.running = false;
-      if (exitCode !== 0 && !root.available)
-        root.lastError = "rocm-smi exited with code " + exitCode;
-    }
-  }
-
-  Timer {
-    id: pollTimer
-    interval: root.pollIntervalMs
-    repeat: true
-    running: root.shouldPoll && !rocmProcess.running
-    triggeredOnStart: true
-    onTriggered: rocmProcess.running = true
-  }
-
-  Component.onCompleted: {
-    if (pluginApi)
-      Logger.i("AmdGpuMonitor", "Main instance loaded, device index:", deviceIndex);
-  }
-
+  readonly property var settingsConsumer: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
+  readonly property var observation: settingsConsumer?.observation
+  readonly property int deviceIndex: settingsConsumer?.deviceIndex ?? 0
+  readonly property int pollIntervalMs: observation?.pollIntervalMs ?? 1000
+  readonly property int historyLength: observation?.historyLength ?? 300
+  readonly property bool available: observation?.available ?? false
+  readonly property string lastError: observation?.lastError ?? ""
+  readonly property string productName: observation?.productName ?? ""
+  readonly property string cardKey: observation?.cardKey ?? "card0"
+  readonly property real tempEdge: observation?.tempEdge ?? 0
+  readonly property real tempJunction: observation?.tempJunction ?? 0
+  readonly property real tempMemory: observation?.tempMemory ?? 0
+  readonly property real fanSpeed: observation?.fanSpeed ?? 0
+  readonly property real gpuUse: observation?.gpuUse ?? 0
+  readonly property real vramPercent: observation?.vramPercent ?? 0
+  readonly property real vramActivity: observation?.vramActivity ?? 0
+  readonly property real vramUsedGb: observation?.vramUsedGb ?? 0
+  readonly property real vramTotalGb: observation?.vramTotalGb ?? 0
+  readonly property real powerWatts: observation?.powerWatts ?? 0
+  readonly property real sclkMhz: observation?.sclkMhz ?? 0
+  readonly property real mclkMhz: observation?.mclkMhz ?? 0
+  readonly property real fclkMhz: observation?.fclkMhz ?? 0
+  readonly property real socclkMhz: observation?.socclkMhz ?? 0
+  readonly property real dcefclkMhz: observation?.dcefclkMhz ?? 0
+  readonly property var gpuUseHistory: observation?.gpuUseHistory ?? []
+  readonly property var tempEdgeHistory: observation?.tempEdgeHistory ?? []
+  readonly property var tempJunctionHistory: observation?.tempJunctionHistory ?? []
+  readonly property var tempMemoryHistory: observation?.tempMemoryHistory ?? []
+  readonly property var fanSpeedHistory: observation?.fanSpeedHistory ?? []
+  readonly property var vramHistory: observation?.vramHistory ?? []
+  readonly property var powerHistory: observation?.powerHistory ?? []
+  readonly property var vramActivityHistory: observation?.vramActivityHistory ?? []
+  readonly property var sclkHistory: observation?.sclkHistory ?? []
+  readonly property var mclkHistory: observation?.mclkHistory ?? []
+  readonly property var fclkHistory: observation?.fclkHistory ?? []
+  readonly property var socclkHistory: observation?.socclkHistory ?? []
+  readonly property var dcefclkHistory: observation?.dcefclkHistory ?? []
+  readonly property int gpuWarningThreshold: observation?.gpuWarningThreshold ?? 0
+  readonly property int gpuCriticalThreshold: observation?.gpuCriticalThreshold ?? 0
+  readonly property bool gpuWarning: observation?.gpuWarning ?? false
+  readonly property bool gpuCritical: observation?.gpuCritical ?? false
+  readonly property real powerGraphMax: observation?.powerGraphMax ?? 50
+  function refreshNow() { settingsConsumer?.refreshNow(); }
+  function registerPoller(token) { settingsConsumer?.registerPoller(token); }
+  function unregisterPoller(token) { settingsConsumer?.unregisterPoller(token); }
+  function historyMax(values, floor) { return observation?.historyMax(values, floor) ?? (floor || 1); }
   IpcHandler {
     target: "plugin:amd-gpu-monitor"
-
     function togglePanel() {
-      if (!pluginApi)
-        return;
-      pluginApi.withCurrentScreen(screen => {
-        pluginApi.togglePanel(screen);
-      });
+      root.pluginApi?.withCurrentScreen(screen => root.pluginApi.togglePanel(screen));
     }
-
-    function refresh() {
-      if (!rocmProcess.running)
-        rocmProcess.running = true;
-    }
+    function refresh() { root.refreshNow(); }
   }
 }

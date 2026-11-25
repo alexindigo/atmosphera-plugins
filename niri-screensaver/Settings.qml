@@ -1,9 +1,7 @@
 // Settings.qml - niri-screensaver plugin settings tab
 //
-// Edit-copy pattern: form fields write to local `edit*` properties; the shell
-// calls saveSettings() when the user clicks Apply, at which point we copy the
-// edit values back into pluginApi.pluginSettings and call saveSettings() on
-// the plugin API. This matches the noctalia-plugins AGENTS.md convention.
+// Explicit field intents stage through the selected editor. Only accepted
+// Apply selects the common config/idle owner's applied runtime context.
 //
 // SPDX-License-Identifier: GPL-3.0-only
 import Qt.labs.folderlistmodel
@@ -13,91 +11,86 @@ import Quickshell
 import Quickshell.Io
 import qs.Commons
 import qs.Portals
-import qs.Widgets
 import qs.Services.UI
+import qs.Widgets
 
 ColumnLayout {
   id: root
   property var pluginApi: null
+  readonly property var enabledField: pluginApi?.field("enabled") ?? null
+  readonly property var idleSecondsField: pluginApi?.field("idleSeconds") ?? null
+  readonly property var batteryMinPercentField: pluginApi?.field("batteryMinPercent") ?? null
+  readonly property var includeEffectsField: pluginApi?.field("includeEffects") ?? null
+  readonly property var excludeEffectsField: pluginApi?.field("excludeEffects") ?? null
+  readonly property var fadeInEffectField: pluginApi?.field("fadeInEffect") ?? null
+  readonly property var fadeOutEffectField: pluginApi?.field("fadeOutEffect") ?? null
+  readonly property var randomLogoField: pluginApi?.field("randomLogo") ?? null
+  readonly property var logoDirField: pluginApi?.field("logoDir") ?? null
+  readonly property var multiMonitorModeField: pluginApi?.field("multiMonitorMode") ?? null
+  readonly property var logoPathField: pluginApi?.field("logoPath") ?? null
+  readonly property var showClockField: pluginApi?.field("showClock") ?? null
+  readonly property var clockFormatField: pluginApi?.field("clockFormat") ?? null
+  readonly property var showNowPlayingField: pluginApi?.field("showNowPlaying") ?? null
+  readonly property var nowPlayingDurationField: pluginApi?.field("nowPlayingDuration") ?? null
   spacing: Style.marginL
+
+  NText {
+    Layout.fillWidth: true
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+    wrapMode: Text.WordWrap
+  }
 
   // ----- Settings access (cfg → defaults → hardcoded) -----
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   // ----- Edit-copy properties -----
-  property bool editEnabled: displayBaseline.editEnabled
-  property int editIdleSeconds: displayBaseline.editIdleSeconds
-  property int editBatteryMinPercent: displayBaseline.editBatteryMinPercent
-  property string editIncludeEffects: displayBaseline.editIncludeEffects
-  property string editExcludeEffects: displayBaseline.editExcludeEffects
-  property string editFadeInEffect: displayBaseline.editFadeInEffect
-  property string editFadeOutEffect: displayBaseline.editFadeOutEffect
-  property bool editRandomLogo: displayBaseline.editRandomLogo
-  property string editLogoDir: displayBaseline.editLogoDir
-  property string editMultiMonitorMode: displayBaseline.editMultiMonitorMode
-  property string editLogoPath: displayBaseline.editLogoPath
+  readonly property bool editEnabled: root.enabledField?.value ?? true
+  readonly property int editIdleSeconds: parseInt(root.idleSecondsField?.value ?? 300)
+  readonly property int editBatteryMinPercent: parseInt(root.batteryMinPercentField?.value ?? 0)
+  readonly property string editIncludeEffects: root.includeEffectsField?.value ?? ""
+  readonly property string editExcludeEffects: root.excludeEffectsField?.value ?? "dev_worm"
+  readonly property string editFadeInEffect: root.fadeInEffectField?.value ?? ""
+  readonly property string editFadeOutEffect: root.fadeOutEffectField?.value ?? ""
+  readonly property bool editRandomLogo: root.randomLogoField?.value ?? false
+  readonly property string editLogoDir: root.logoDirField?.value ?? ""
+  readonly property string editMultiMonitorMode: root.multiMonitorModeField?.value ?? "independent"
+  readonly property string editLogoPath: root.logoPathField?.value ?? ""
 
   // Effective logo directory for the file dropdown: user override wins, otherwise
   // whichever bash DEFAULT_LOGO_CANDIDATES dir actually exists. Filled by the
   // detection Process below; empty until that returns.
   property string detectedSystemLogoDir: ""
-  readonly property string effectiveLogoDir: (editLogoDir && editLogoDir !== "")
-    ? editLogoDir
-    : detectedSystemLogoDir
-  property bool editShowClock: displayBaseline.editShowClock
-  property string editClockFormat: displayBaseline.editClockFormat
-  property bool editShowNowPlaying: displayBaseline.editShowNowPlaying
-  property int editNowPlayingDuration: displayBaseline.editNowPlayingDuration
+  readonly property string effectiveLogoDir: (editLogoDir && editLogoDir !== "") ? editLogoDir : detectedSystemLogoDir
+  readonly property bool editShowClock: root.showClockField?.value ?? false
+  readonly property string editClockFormat: root.clockFormatField?.value ?? "%H:%M"
+  readonly property bool editShowNowPlaying: root.showNowPlayingField?.value ?? false
+  readonly property int editNowPlayingDuration: parseInt(root.nowPlayingDurationField?.value ?? 3)
 
   // ----- CLI-missing banner (Main.qml runs detection on startup) -----
   readonly property var mainInstance: pluginApi?.mainInstance || null
   readonly property bool cliMissing: mainInstance && mainInstance.cliAvailable === false
 
   // ----- Save handler (called by the shell on Apply) -----
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property bool editEnabled: cfg.enabled ?? defaults.enabled ?? true
-    readonly property int editIdleSeconds: parseInt(cfg.idleSeconds ?? defaults.idleSeconds ?? 300)
-    readonly property int editBatteryMinPercent: parseInt(cfg.batteryMinPercent ?? defaults.batteryMinPercent ?? 0)
-    readonly property string editIncludeEffects: cfg.includeEffects ?? defaults.includeEffects ?? ""
-    readonly property string editExcludeEffects: cfg.excludeEffects ?? defaults.excludeEffects ?? "dev_worm"
-    readonly property string editFadeInEffect: cfg.fadeInEffect ?? defaults.fadeInEffect ?? ""
-    readonly property string editFadeOutEffect: cfg.fadeOutEffect ?? defaults.fadeOutEffect ?? ""
-    readonly property bool editRandomLogo: cfg.randomLogo ?? defaults.randomLogo ?? false
-    readonly property string editLogoDir: cfg.logoDir ?? defaults.logoDir ?? ""
-    readonly property string editMultiMonitorMode: cfg.multiMonitorMode ?? defaults.multiMonitorMode ?? "independent"
-    readonly property string editLogoPath: cfg.logoPath ?? defaults.logoPath ?? ""
-    readonly property bool editShowClock: cfg.showClock ?? defaults.showClock ?? false
-    readonly property string editClockFormat: cfg.clockFormat ?? defaults.clockFormat ?? "%H:%M"
-    readonly property bool editShowNowPlaying: cfg.showNowPlaying ?? defaults.showNowPlaying ?? false
-    readonly property int editNowPlayingDuration: parseInt(cfg.nowPlayingDuration ?? defaults.nowPlayingDuration ?? 3)
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
+  Connections {
+    target: root.pluginApi
+    function onSettingsCompleted(result) {
+      if (!result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      root.mainInstance?.applySettings(root.pluginApi.runtimeContext);
+    }
   }
-  readonly property bool settingsDirty: displayBaseline.differs({editEnabled: root.editEnabled, editIdleSeconds: root.editIdleSeconds, editBatteryMinPercent: root.editBatteryMinPercent, editIncludeEffects: root.editIncludeEffects, editExcludeEffects: root.editExcludeEffects, editFadeInEffect: root.editFadeInEffect, editFadeOutEffect: root.editFadeOutEffect, editRandomLogo: root.editRandomLogo, editLogoDir: root.editLogoDir, editMultiMonitorMode: root.editMultiMonitorMode, editLogoPath: root.editLogoPath, editShowClock: root.editShowClock, editClockFormat: root.editClockFormat, editShowNowPlaying: root.editShowNowPlaying, editNowPlayingDuration: root.editNowPlayingDuration})
 
   function saveSettings() {
     if (!pluginApi) {
-      Logger.e("NiriScreensaver", "saveSettings: pluginApi is null")
-      return
+      Logger.e("NiriScreensaver", "saveSettings: pluginApi is null");
+      return;
     }
-    pluginApi.pluginSettings.enabled        = root.editEnabled
-    pluginApi.pluginSettings.idleSeconds    = root.editIdleSeconds
-    pluginApi.pluginSettings.batteryMinPercent = root.editBatteryMinPercent
-    pluginApi.pluginSettings.includeEffects = root.editIncludeEffects
-    pluginApi.pluginSettings.excludeEffects = root.editExcludeEffects
-    pluginApi.pluginSettings.fadeInEffect   = root.editFadeInEffect
-    pluginApi.pluginSettings.fadeOutEffect  = root.editFadeOutEffect
-    pluginApi.pluginSettings.randomLogo     = root.editRandomLogo
-    pluginApi.pluginSettings.logoDir        = root.editLogoDir
-    pluginApi.pluginSettings.multiMonitorMode = root.editMultiMonitorMode
-    pluginApi.pluginSettings.logoPath       = root.editLogoPath
-    pluginApi.pluginSettings.showClock      = root.editShowClock
-    pluginApi.pluginSettings.clockFormat    = root.editClockFormat
-    pluginApi.pluginSettings.showNowPlaying = root.editShowNowPlaying
-    pluginApi.pluginSettings.nowPlayingDuration = root.editNowPlayingDuration
     pluginApi.saveSettings(function (result) {
       if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
-        Logger.i("NiriScreensaver", "settings saved")
+        Logger.i("NiriScreensaver", "settings saved");
     });
   }
 
@@ -163,25 +156,31 @@ ColumnLayout {
         color: AtmoColor.mOnSurface
       }
 
-      NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.enabled")
-        description: pluginApi?.tr("settings.enabled-desc")
-        checked: root.editEnabled
-        defaultValue: root.defaults.enabled
-        onToggled: checked => root.editEnabled = checked
+      NPluginSettingsField {
+        field: root.enabledField
+        NToggle {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.enabled")
+          description: pluginApi?.tr("settings.enabled-desc")
+          checked: root.editEnabled
+          defaultValue: root.defaults.enabled
+          onToggled: checked => root.enabledField.set(checked)
+        }
       }
 
-      NSpinBox {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.idle-seconds")
-        description: pluginApi?.tr("settings.idle-seconds-desc")
-        from: 30
-        to: 7200
-        stepSize: 30
-        value: root.editIdleSeconds
-        defaultValue: root.defaults.idleSeconds
-        onValueChanged: root.editIdleSeconds = value
+      NPluginSettingsField {
+        field: root.idleSecondsField
+        NSpinBox {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.idle-seconds")
+          description: pluginApi?.tr("settings.idle-seconds-desc")
+          from: 30
+          to: 7200
+          stepSize: 30
+          value: root.editIdleSeconds
+          defaultValue: root.defaults.idleSeconds
+          requestValue: value => root.idleSecondsField.set(value)
+        }
       }
     }
   }
@@ -205,16 +204,19 @@ ColumnLayout {
         color: AtmoColor.mOnSurface
       }
 
-      NSpinBox {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.battery-min-percent")
-        description: pluginApi?.tr("settings.battery-min-percent-desc")
-        from: 0
-        to: 100
-        stepSize: 5
-        value: root.editBatteryMinPercent
-        defaultValue: root.defaults.batteryMinPercent
-        onValueChanged: root.editBatteryMinPercent = value
+      NPluginSettingsField {
+        field: root.batteryMinPercentField
+        NSpinBox {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.battery-min-percent")
+          description: pluginApi?.tr("settings.battery-min-percent-desc")
+          from: 0
+          to: 100
+          stepSize: 5
+          value: root.editBatteryMinPercent
+          defaultValue: root.defaults.batteryMinPercent
+          requestValue: value => root.batteryMinPercentField.set(value)
+        }
       }
     }
   }
@@ -238,37 +240,46 @@ ColumnLayout {
         color: AtmoColor.mOnSurface
       }
 
-      NComboBox {
-        Layout.fillWidth: true
-        minimumWidth: 320
-        label: pluginApi?.tr("settings.logo-path")
-        description: pluginApi?.tr("settings.logo-path-desc")
-        model: logoOptions
-        currentKey: root.editLogoPath
-        defaultValue: root.defaults.logoPath
-        enabled: !root.editRandomLogo
-        onSelected: key => root.editLogoPath = key
+      NPluginSettingsField {
+        field: root.logoPathField
+        NComboBox {
+          Layout.fillWidth: true
+          minimumWidth: 320
+          label: pluginApi?.tr("settings.logo-path")
+          description: pluginApi?.tr("settings.logo-path-desc")
+          model: logoOptions
+          currentKey: root.editLogoPath
+          defaultValue: root.defaults.logoPath
+          enabled: !root.editRandomLogo
+          onSelected: key => root.logoPathField.set(key)
+        }
       }
 
-      NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.random-logo")
-        description: pluginApi?.tr("settings.random-logo-desc")
-        checked: root.editRandomLogo
-        defaultValue: root.defaults.randomLogo
-        onToggled: checked => root.editRandomLogo = checked
+      NPluginSettingsField {
+        field: root.randomLogoField
+        NToggle {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.random-logo")
+          description: pluginApi?.tr("settings.random-logo-desc")
+          checked: root.editRandomLogo
+          defaultValue: root.defaults.randomLogo
+          onToggled: checked => root.randomLogoField.set(checked)
+        }
       }
 
-      NTextInputButton {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.logo-dir")
-        description: pluginApi?.tr("settings.logo-dir-desc")
-        placeholderText: pluginApi?.tr("settings.placeholder.logo-dir")
-        text: root.editLogoDir
-        buttonIcon: "filepicker-folder"
-        buttonTooltip: pluginApi?.tr("settings.logo-dir-browse")
-        onInputEditingFinished: root.editLogoDir = text
-        onButtonClicked: logoDirPicker.openFilePicker()
+      NPluginSettingsField {
+        field: root.logoDirField
+        NTextInputButton {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.logo-dir")
+          description: pluginApi?.tr("settings.logo-dir-desc")
+          placeholderText: pluginApi?.tr("settings.placeholder.logo-dir")
+          text: root.editLogoDir
+          buttonIcon: "filepicker-folder"
+          buttonTooltip: pluginApi?.tr("settings.logo-dir-browse")
+          onInputEditCommitted: root.logoDirField.set(text)
+          onButtonClicked: logoDirPicker.openFilePicker()
+        }
       }
     }
   }
@@ -292,57 +303,72 @@ ColumnLayout {
         color: AtmoColor.mOnSurface
       }
 
-      NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.include-effects")
-        description: pluginApi?.tr("settings.include-effects-desc")
-        placeholderText: pluginApi?.tr("settings.placeholder.include-effects")
-        text: root.editIncludeEffects
-        defaultValue: root.defaults.includeEffects
-        onTextEdited: root.editIncludeEffects = text
+      NPluginSettingsField {
+        field: root.includeEffectsField
+        NTextInput {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.include-effects")
+          description: pluginApi?.tr("settings.include-effects-desc")
+          placeholderText: pluginApi?.tr("settings.placeholder.include-effects")
+          text: root.editIncludeEffects
+          defaultValue: root.defaults.includeEffects
+          onEditCommitted: root.includeEffectsField.set(text)
+        }
       }
 
-      NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.exclude-effects")
-        description: pluginApi?.tr("settings.exclude-effects-desc")
-        placeholderText: pluginApi?.tr("settings.placeholder.exclude-effects")
-        text: root.editExcludeEffects
-        defaultValue: root.defaults.excludeEffects
-        onTextEdited: root.editExcludeEffects = text
+      NPluginSettingsField {
+        field: root.excludeEffectsField
+        NTextInput {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.exclude-effects")
+          description: pluginApi?.tr("settings.exclude-effects-desc")
+          placeholderText: pluginApi?.tr("settings.placeholder.exclude-effects")
+          text: root.editExcludeEffects
+          defaultValue: root.defaults.excludeEffects
+          onEditCommitted: root.excludeEffectsField.set(text)
+        }
       }
 
-      NComboBox {
-        Layout.fillWidth: true
-        minimumWidth: 280
-        label: pluginApi?.tr("settings.fade-in")
-        description: pluginApi?.tr("settings.fade-in-desc")
-        model: effectOptions
-        currentKey: root.editFadeInEffect
-        defaultValue: root.defaults.fadeInEffect
-        onSelected: key => root.editFadeInEffect = key
+      NPluginSettingsField {
+        field: root.fadeInEffectField
+        NComboBox {
+          Layout.fillWidth: true
+          minimumWidth: 280
+          label: pluginApi?.tr("settings.fade-in")
+          description: pluginApi?.tr("settings.fade-in-desc")
+          model: effectOptions
+          currentKey: root.editFadeInEffect
+          defaultValue: root.defaults.fadeInEffect
+          onSelected: key => root.fadeInEffectField.set(key)
+        }
       }
 
-      NComboBox {
-        Layout.fillWidth: true
-        minimumWidth: 280
-        label: pluginApi?.tr("settings.fade-out")
-        description: pluginApi?.tr("settings.fade-out-desc")
-        model: effectOptions
-        currentKey: root.editFadeOutEffect
-        defaultValue: root.defaults.fadeOutEffect
-        onSelected: key => root.editFadeOutEffect = key
+      NPluginSettingsField {
+        field: root.fadeOutEffectField
+        NComboBox {
+          Layout.fillWidth: true
+          minimumWidth: 280
+          label: pluginApi?.tr("settings.fade-out")
+          description: pluginApi?.tr("settings.fade-out-desc")
+          model: effectOptions
+          currentKey: root.editFadeOutEffect
+          defaultValue: root.defaults.fadeOutEffect
+          onSelected: key => root.fadeOutEffectField.set(key)
+        }
       }
 
-      NComboBox {
-        Layout.fillWidth: true
-        minimumWidth: 280
-        label: pluginApi?.tr("settings.multi-monitor")
-        description: pluginApi?.tr("settings.multi-monitor-desc")
-        model: multiMonitorOptions
-        currentKey: root.editMultiMonitorMode
-        defaultValue: root.defaults.multiMonitorMode
-        onSelected: key => root.editMultiMonitorMode = key
+      NPluginSettingsField {
+        field: root.multiMonitorModeField
+        NComboBox {
+          Layout.fillWidth: true
+          minimumWidth: 280
+          label: pluginApi?.tr("settings.multi-monitor")
+          description: pluginApi?.tr("settings.multi-monitor-desc")
+          model: multiMonitorOptions
+          currentKey: root.editMultiMonitorMode
+          defaultValue: root.defaults.multiMonitorMode
+          onSelected: key => root.multiMonitorModeField.set(key)
+        }
       }
     }
   }
@@ -366,22 +392,28 @@ ColumnLayout {
         color: AtmoColor.mOnSurface
       }
 
-      NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.show-clock")
-        description: pluginApi?.tr("settings.show-clock-desc")
-        checked: root.editShowClock
-        defaultValue: root.defaults.showClock
-        onToggled: checked => root.editShowClock = checked
+      NPluginSettingsField {
+        field: root.showClockField
+        NToggle {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.show-clock")
+          description: pluginApi?.tr("settings.show-clock-desc")
+          checked: root.editShowClock
+          defaultValue: root.defaults.showClock
+          onToggled: checked => root.showClockField.set(checked)
+        }
       }
 
-      NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.clock-format")
-        description: pluginApi?.tr("settings.clock-format-desc")
-        text: root.editClockFormat
-        defaultValue: root.defaults.clockFormat
-        onTextEdited: root.editClockFormat = text
+      NPluginSettingsField {
+        field: root.clockFormatField
+        NTextInput {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.clock-format")
+          description: pluginApi?.tr("settings.clock-format-desc")
+          text: root.editClockFormat
+          defaultValue: root.defaults.clockFormat
+          onEditCommitted: root.clockFormatField.set(text)
+        }
       }
     }
   }
@@ -405,25 +437,31 @@ ColumnLayout {
         color: AtmoColor.mOnSurface
       }
 
-      NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.show-now-playing")
-        description: pluginApi?.tr("settings.show-now-playing-desc")
-        checked: root.editShowNowPlaying
-        defaultValue: root.defaults.showNowPlaying
-        onToggled: checked => root.editShowNowPlaying = checked
+      NPluginSettingsField {
+        field: root.showNowPlayingField
+        NToggle {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.show-now-playing")
+          description: pluginApi?.tr("settings.show-now-playing-desc")
+          checked: root.editShowNowPlaying
+          defaultValue: root.defaults.showNowPlaying
+          onToggled: checked => root.showNowPlayingField.set(checked)
+        }
       }
 
-      NSpinBox {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.now-playing-duration")
-        description: pluginApi?.tr("settings.now-playing-duration-desc")
-        from: 1
-        to: 30
-        stepSize: 1
-        value: root.editNowPlayingDuration
-        defaultValue: root.defaults.nowPlayingDuration
-        onValueChanged: root.editNowPlayingDuration = value
+      NPluginSettingsField {
+        field: root.nowPlayingDurationField
+        NSpinBox {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.now-playing-duration")
+          description: pluginApi?.tr("settings.now-playing-duration-desc")
+          from: 1
+          to: 30
+          stepSize: 1
+          value: root.editNowPlayingDuration
+          defaultValue: root.defaults.nowPlayingDuration
+          requestValue: value => root.nowPlayingDurationField.set(value)
+        }
       }
     }
   }
@@ -437,10 +475,9 @@ ColumnLayout {
       text: pluginApi?.tr("settings.trigger-now")
       icon: "player-play"
       onClicked: {
-        var argv = root.mainInstance ? root.mainInstance._launcherArgv()
-                                     : ["niri-screensaver-launch", "launch"]
-        triggerNowProcess.command = argv
-        triggerNowProcess.running = true
+        var argv = root.mainInstance ? root.mainInstance._launcherArgv(root.pluginApi.runtimeContext) : [];
+        triggerNowProcess.command = argv;
+        triggerNowProcess.running = argv.length > 0;
       }
     }
     NButton {
@@ -448,10 +485,9 @@ ColumnLayout {
       icon: "stop"
       outlined: true
       onClicked: {
-        var argv = root.mainInstance ? root.mainInstance._killArgv()
-                                     : ["niri-screensaver-launch", "kill"]
-        stopNowProcess.command = argv
-        stopNowProcess.running = true
+        var argv = root.mainInstance ? root.mainInstance._killArgv(root.pluginApi.runtimeContext) : [];
+        stopNowProcess.command = argv;
+        stopNowProcess.running = argv.length > 0;
       }
     }
   }
@@ -459,13 +495,15 @@ ColumnLayout {
   Process {
     id: triggerNowProcess
     onExited: function (code) {
-      if (code !== 0) Logger.w("NiriScreensaver", "trigger (Settings) exited with code", code)
+      if (code !== 0)
+        Logger.w("NiriScreensaver", "trigger (Settings) exited with code", code);
     }
   }
   Process {
     id: stopNowProcess
     onExited: function (code) {
-      if (code !== 0) Logger.w("NiriScreensaver", "stop (Settings) exited with code", code)
+      if (code !== 0)
+        Logger.w("NiriScreensaver", "stop (Settings) exited with code", code);
     }
   }
 
@@ -474,11 +512,10 @@ ColumnLayout {
     id: logoDirPicker
     title: pluginApi?.tr("settings.logo-dir-picker-title")
     selectionMode: "folders"
-    initialPath: (root.editLogoDir && root.editLogoDir !== "")
-      ? root.editLogoDir
-      : (root.detectedSystemLogoDir || (Quickshell.env("HOME") + "/.local/share/niri-screensaver/logos"))
+    initialPath: (root.editLogoDir && root.editLogoDir !== "") ? root.editLogoDir : (root.detectedSystemLogoDir || (Quickshell.env("HOME") + "/.local/share/niri-screensaver/logos"))
     onAccepted: paths => {
-      if (paths && paths.length > 0) root.editLogoDir = paths[0]
+      if (paths && paths.length > 0)
+        root.logoDirField.set(paths[0]);
     }
   }
 
@@ -489,35 +526,49 @@ ColumnLayout {
   // comboboxes; an empty key ("(none)") maps to no fade.
   Process {
     id: effectsDetectProcess
-    stdout: StdioCollector { id: effectsOutput }
+    stdout: StdioCollector {
+      id: effectsOutput
+    }
     onExited: function (code) {
       if (code !== 0) {
-        Logger.w("NiriScreensaver", "effects detection exited with code", code)
-        return
+        Logger.w("NiriScreensaver", "effects detection exited with code", code);
+        return;
       }
-      var text = String(effectsOutput.text).trim()
-      if (!text) return
-      var seen = {}
+      var text = String(effectsOutput.text).trim();
+      if (!text)
+        return;
+      var seen = {};
       var names = text.split(/\s+/).filter(function (s) {
-        if (!s || seen[s]) return false
-        seen[s] = true
-        return true
-      })
-      names.sort()
-      effectOptions.clear()
-      effectOptions.append({key: "", name: pluginApi?.tr("settings.effect-none")})
+        if (!s || seen[s])
+          return false;
+        seen[s] = true;
+        return true;
+      });
+      names.sort();
+      effectOptions.clear();
+      effectOptions.append({
+                             key: "",
+                             name: pluginApi?.tr("settings.effect-none")
+                           });
       for (var i = 0; i < names.length; i++) {
-        effectOptions.append({key: names[i], name: names[i]})
+        effectOptions.append({
+                               key: names[i],
+                               name: names[i]
+                             });
       }
     }
   }
 
-  ListModel { id: effectOptions }
+  ListModel {
+    id: effectOptions
+  }
 
   // Fixed two-option model for the multi-monitor mode dropdown. Populated in
   // Component.onCompleted so the names can come from i18n (ListElement can't
   // call tr() at declaration time).
-  ListModel { id: multiMonitorOptions }
+  ListModel {
+    id: multiMonitorOptions
+  }
 
   // ---- Logo file dropdown plumbing ----
   //
@@ -528,14 +579,17 @@ ColumnLayout {
   // out-of-dir editLogoPath the user may already have set.
   Process {
     id: logoDirDetectProcess
-    stdout: StdioCollector { id: logoDirectoryOutput }
+    stdout: StdioCollector {
+      id: logoDirectoryOutput
+    }
     onExited: function (code) {
       if (code !== 0) {
-        Logger.w("NiriScreensaver", "logo dir detection exited with code", code)
-        return
+        Logger.w("NiriScreensaver", "logo dir detection exited with code", code);
+        return;
       }
-      var p = String(logoDirectoryOutput.text).trim()
-      if (p !== "") root.detectedSystemLogoDir = p
+      var p = String(logoDirectoryOutput.text).trim();
+      if (p !== "")
+        root.detectedSystemLogoDir = p;
     }
   }
 
@@ -548,45 +602,66 @@ ColumnLayout {
     sortField: FolderListModel.Name
     onCountChanged: root._rebuildLogoOptions()
     onStatusChanged: {
-      if (status === FolderListModel.Ready) root._rebuildLogoOptions()
+      if (status === FolderListModel.Ready)
+        root._rebuildLogoOptions();
     }
   }
 
-  ListModel { id: logoOptions }
+  ListModel {
+    id: logoOptions
+  }
 
   function _rebuildLogoOptions() {
-    logoOptions.clear()
-    logoOptions.append({key: "", name: pluginApi?.tr("settings.logo-path-default")})
-    var seen = {"": true}
+    logoOptions.clear();
+    logoOptions.append({
+                         key: "",
+                         name: pluginApi?.tr("settings.logo-path-default")
+                       });
+    var seen = {
+      "": true
+    };
     for (var i = 0; i < logoFolderModel.count; i++) {
-      var fileName = String(logoFolderModel.get(i, "fileName"))
-      var filePath = String(logoFolderModel.get(i, "filePath"))
-      var displayName = fileName.replace(/\.txt$/i, "")
-      logoOptions.append({key: filePath, name: displayName})
-      seen[filePath] = true
+      var fileName = String(logoFolderModel.get(i, "fileName"));
+      var filePath = String(logoFolderModel.get(i, "filePath"));
+      var displayName = fileName.replace(/\.txt$/i, "");
+      logoOptions.append({
+                           key: filePath,
+                           name: displayName
+                         });
+      seen[filePath] = true;
     }
     if (root.editLogoPath && !seen[root.editLogoPath]) {
-      var orphanName = root.editLogoPath.split("/").pop().replace(/\.txt$/i, "")
-      logoOptions.append({key: root.editLogoPath, name: orphanName})
+      var orphanName = root.editLogoPath.split("/").pop().replace(/\.txt$/i, "");
+      logoOptions.append({
+                           key: root.editLogoPath,
+                           name: orphanName
+                         });
     }
   }
 
   onEditLogoPathChanged: _rebuildLogoOptions()
 
   Component.onCompleted: {
-    logoDirDetectProcess.command = ["sh", "-c",
-      'for d in "$HOME/.local/share/niri-screensaver/logos" "/usr/share/niri-screensaver/logos"; do [ -d "$d" ] && echo "$d" && exit 0; done']
-    logoDirDetectProcess.running = true
-    _rebuildLogoOptions()
+    logoDirDetectProcess.command = ["sh", "-c", 'for d in "$HOME/.local/share/niri-screensaver/logos" "/usr/share/niri-screensaver/logos"; do [ -d "$d" ] && echo "$d" && exit 0; done'];
+    logoDirDetectProcess.running = true;
+    _rebuildLogoOptions();
 
-    multiMonitorOptions.append({key: "independent", name: pluginApi?.tr("settings.multi-monitor-independent")})
-    multiMonitorOptions.append({key: "mirror", name: pluginApi?.tr("settings.multi-monitor-mirror")})
+    multiMonitorOptions.append({
+                                 key: "independent",
+                                 name: pluginApi?.tr("settings.multi-monitor-independent")
+                               });
+    multiMonitorOptions.append({
+                                 key: "mirror",
+                                 name: pluginApi?.tr("settings.multi-monitor-mirror")
+                               });
 
     // Seed the "(none)" entry so the comboboxes have something to show
     // before the effects-detection Process returns.
-    effectOptions.append({key: "", name: pluginApi?.tr("settings.effect-none")})
-    effectsDetectProcess.command = ["sh", "-c",
-      "niri-screensaver-ctl effects 2>/dev/null | tail -n +3 | tr -s ' \\t' '\\n' | grep -v '^$'"]
-    effectsDetectProcess.running = true
+    effectOptions.append({
+                           key: "",
+                           name: pluginApi?.tr("settings.effect-none")
+                         });
+    effectsDetectProcess.command = ["sh", "-c", "niri-screensaver-ctl effects 2>/dev/null | tail -n +3 | tr -s ' \\t' '\\n' | grep -v '^$'"];
+    effectsDetectProcess.running = true;
   }
 }

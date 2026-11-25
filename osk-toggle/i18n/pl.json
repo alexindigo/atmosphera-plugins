@@ -11,6 +11,7 @@
     "settings": "Ustawienia widżetu"
   },
   "settings": {
+    "shared-effect": "Wszystkie instancje sterują tą samą klawiaturą. Zastosowanie, ponowne sprawdzenie lub działanie widżetu wybiera zaplecze i plik wykonywalny dla wspólnej klawiatury; inna konfiguracja może je zastąpić. Wyświetlanie i dostępność zależą od tej instancji.",
     "backend": {
       "label": "Backend",
       "desc": "Którą klawiaturę ekranową obsługiwać: auto, squeekboard lub wvkbd (auto wykrywa przy uruchomieniu)",

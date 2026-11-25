@@ -1,6 +1,7 @@
 {
   "description": "Eine Bongo-Katze, die in deiner Bar sitzt und klopft, wenn du tippst",
   "settings": {
+    "shared-effect": "Input and audio observations are shared. This widget selects its own devices and animation settings; pausing affects all SlowBongo widgets.",
     "requirements": "Voraussetzungen",
     "input-devices": "Eingabegeräte",
     "colours": "Farben",

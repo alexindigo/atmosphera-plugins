@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "I filtri e l'aspetto si applicano a questa istanza. Le osservazioni dei dispositivi e la cronologia degli accessi sono condivise. Qualsiasi configurazione può richiedere una notifica comune; disattivare le notifiche di questa istanza non disattiva quelle delle altre.",
     "hideInactive": {
       "desc": "Nascondi le icone di microfono, fotocamera e schermo quando sono inattive.",
       "label": "Nascondi stati inattivi"

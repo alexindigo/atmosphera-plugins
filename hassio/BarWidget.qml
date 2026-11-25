@@ -14,7 +14,7 @@ AtmoIconButton {
     property int sectionWidgetIndex: -1
     property int sectionWidgetsCount: 0
 
-    property var main: pluginApi?.mainInstance ?? null
+    readonly property var main: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
     // "Connected"     - authenticated and live
     // "Connecting"    - socket opening or authenticating (first attempt or after settings change)

@@ -12,6 +12,7 @@
     "ipc_received": "Отримано перемикання IPC"
   },
   "settings": {
+    "shared-effect": "Вікна Steam і накладка спільні. Якщо відкрити накладку з цього віджета, протягом сеансу діятиме компонування, застосоване у віджеті. Наступні зміни налаштувань набудуть чинності під час наступного відкриття.",
     "custom-layout-label": "Use custom Hyprland layout (Lua)",
     "custom-layout-description": "Let a Hyprland custom Lua layout tile the windows instead of floating+positioning them. Requires Hyprland 0.55+ Lua config and steam-layout.lua (see README). When enabled, the width sliders below are handled by the Lua layout."
   }

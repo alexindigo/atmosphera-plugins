@@ -1,7 +1,7 @@
 {
   "id": "wallpaper-carousel",
   "name": "Wallpaper Carousel",
-  "version": "0.8.7",
+  "version": "0.8.8",
   "minAtmospheraVersion": "0.11.0",
   "minNoctaliaVersion": "3.6.0",
   "author": "yngwe",
@@ -23,19 +23,19 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "borderWidth": {"type": "Real"},
-        "carouselMode": {"type": "String"},
-        "cornerRadius": {"type": "Real"},
-        "enableHoldExpand": {"type": "String"},
-        "expandMultiplier": {"type": "Real"},
-        "expandSelected": {"type": "String"},
-        "holdDelay": {"type": "Real"},
-        "holdExpandRatio": {"type": "Real"},
-        "itemHeight": {"type": "Real"},
-        "itemWidth": {"type": "Real"},
-        "overlayOpacity": {"type": "Real"},
-        "selectedScale": {"type": "Real"},
-        "wallpaperDirectory": {"type": "String"}
+        "borderWidth": {"editorUsage": "configuration", "type": "Real"},
+        "carouselMode": {"editorUsage": "configuration", "type": "String"},
+        "cornerRadius": {"editorUsage": "configuration", "type": "Real"},
+        "enableHoldExpand": {"editorUsage": "configuration", "type": "String"},
+        "expandMultiplier": {"editorUsage": "configuration", "type": "Real"},
+        "expandSelected": {"editorUsage": "configuration", "type": "String"},
+        "holdDelay": {"editorUsage": "configuration", "type": "Real"},
+        "holdExpandRatio": {"editorUsage": "configuration", "type": "Real"},
+        "itemHeight": {"editorUsage": "configuration", "type": "Real"},
+        "itemWidth": {"editorUsage": "configuration", "type": "Real"},
+        "overlayOpacity": {"editorUsage": "configuration", "type": "Real"},
+        "selectedScale": {"editorUsage": "configuration", "type": "Real"},
+        "wallpaperDirectory": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

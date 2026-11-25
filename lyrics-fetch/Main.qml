@@ -7,6 +7,37 @@ Item {
     id: root
 
     property var pluginApi: null
+    property var _settingsConsumers: new Map()
+    Component {
+        id: clientFactory
+        Item {
+            id: client
+            required property var settingsContext
+            required property var retire
+            readonly property bool current: settingsContext.current()
+            readonly property var cfg: settingsContext.settingsView
+            readonly property bool hideWhenPaused: cfg.hideWhenPaused ?? false
+            readonly property bool hideWhenEmpty: cfg.hideWhenEmpty ?? true
+            readonly property string currentLyric: root.lyricFor(hideWhenPaused, hideWhenEmpty)
+            readonly property int lyricInterval: root.lyricInterval
+            property bool _constructed: false
+            onCurrentChanged: if (!current && _constructed) retire(client)
+            Component.onCompleted: _constructed = true
+        }
+    }
+    function settingsConsumerFor(context) {
+        if (!context || !context.current()) return null;
+        if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+        var client = clientFactory.createObject(root, {
+            settingsContext: context,
+            retire: function(retired) {
+                root._settingsConsumers.delete(context);
+                retired.destroy();
+            }
+        });
+        _settingsConsumers.set(context, client);
+        return client;
+    }
     property string currentTitle: ""
     property string currentPlayer: ""
     property string currentArtist: ""
@@ -28,14 +59,15 @@ Item {
     property bool hideWhenPaused: pluginApi?.pluginSettings?.hideWhenPaused ?? false
     property bool hideWhenEmpty: pluginApi?.pluginSettings?.hideWhenEmpty ?? true
 
-    property string currentLyric: {
+    readonly property string currentLyric: lyricFor(hideWhenPaused, hideWhenEmpty)
+    function lyricFor(hidePaused, hideEmpty) {
         if (currentStatus === "Stopped" || currentStatus === "")
-            if (hideWhenEmpty)
+            if (hideEmpty)
                 return ""
             else
                 return pluginApi?.tr("lyrics.stopped")
         if (currentStatus === "Paused") {
-            if (hideWhenPaused)
+            if (hidePaused)
                 return ""
             else
                 return pluginApi?.tr("lyrics.paused")

@@ -1,4 +1,5 @@
 {
+  "shared-window-effect": "Layout and saved choices belong to this instance. Applying a wallpaper changes the shared desktop; thumbnails and wallpaper files are shared.",
   "buttons": {
     "all": "All",
     "images": "Images",

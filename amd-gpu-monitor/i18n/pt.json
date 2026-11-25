@@ -31,6 +31,7 @@
     "activity": "Atividade"
   },
   "settings": {
+    "shared-effect": "O dispositivo e a visualiza\u00e7\u00e3o s\u00e3o desta inst\u00e2ncia. As vistas da mesma GPU partilham dados e hist\u00f3rico.",
     "bar_section": "Widget da barra",
     "compact_mode_label": "Modo compacto",
     "compact_mode_description": "Mini medidores verticais em vez de texto percentual.",

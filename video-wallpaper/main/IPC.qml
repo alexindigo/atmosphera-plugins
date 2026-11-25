@@ -7,9 +7,8 @@ import "../common/MonitorCommands.js" as Commands
 Item {
     id: root
     required property var pluginApi
-    readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
-        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
-        function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
+    required property var admitRuntime
+    required property var writeMonitorCommand
 
 
     /***************************
@@ -19,7 +18,7 @@ Item {
 
     required property var random
     required property var clear
-    required property var setWallpaper
+    required property var selectWallpaper
 
 
     /***************************
@@ -38,11 +37,7 @@ Item {
     }
 
     function submitMonitorCommand(op, key, value, screen) {
-        if (!pluginApi) return;
-        var names = screen === "" ? Array.from(Quickshell.screens).map(screen => screen.name) : [screen];
-        if (!names.length) return;
-        monitorCommand.submit(names.map(name => ({op: op, screen: name, field: key, value: value})));
-        pluginApi.saveSettings();
+        return writeMonitorCommand(pluginApi, op, key, value, screen);
     }
 
     function getMonitorProperty(key: string, screen: string): string {
@@ -85,7 +80,8 @@ Item {
 
         // Current wallpaper
         function setWallpaper(path: string, screen: string) {
-            root.saveMonitorProperty("currentWallpaper", path, screen);
+            const names = screen === "" ? Array.from(Quickshell.screens, output => output.name) : [screen];
+            root.selectWallpaper(path, names, root.pluginApi);
         }
 
         function getWallpaper(screen: string): string {
@@ -95,6 +91,7 @@ Item {
         // Enabled
         function setEnabled(enabled: bool) {
             if (root.pluginApi == null) return;
+            if (!root.admitRuntime(root.pluginApi)) return;
 
             root.pluginApi.pluginSettings.enabled = enabled;
             root.pluginApi.saveSettings();

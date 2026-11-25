@@ -1,9 +1,9 @@
 {
   "id": "pomodoro",
   "name": "Pomodoro",
-  "version": "1.2.3",
+  "version": "1.2.8",
   "minNoctaliaVersion": "4.0.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "notprayasmitra",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -25,14 +25,14 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "autoStartBreaks": {"type": "Boolean"},
-        "autoStartWork": {"type": "Boolean"},
-        "compactMode": {"type": "Boolean", "optional": true},
-        "longBreakDuration": {"type": "Real"},
-        "playSound": {"type": "Boolean", "optional": true},
-        "sessionsBeforeLongBreak": {"type": "Real"},
-        "shortBreakDuration": {"type": "Real"},
-        "workDuration": {"type": "Real"}
+        "autoStartBreaks": {"type": "Boolean", "editorUsage": "configuration"},
+        "autoStartWork": {"type": "Boolean", "editorUsage": "configuration"},
+        "compactMode": {"type": "Boolean", "editorUsage": "configuration", "optional": true},
+        "longBreakDuration": {"type": "Real", "editorUsage": "configuration"},
+        "playSound": {"type": "Boolean", "editorUsage": "configuration", "optional": true},
+        "sessionsBeforeLongBreak": {"type": "Real", "editorUsage": "configuration"},
+        "shortBreakDuration": {"type": "Real", "editorUsage": "configuration"},
+        "workDuration": {"type": "Real", "editorUsage": "configuration"}
       }
     },
     "defaultSettings": {

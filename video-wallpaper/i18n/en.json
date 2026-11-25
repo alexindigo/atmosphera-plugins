@@ -66,6 +66,7 @@
     }
   },
   "settings": {
+    "shared-effect": "Apply or a runtime action selects this instance's policy for the shared per-screen wallpaper players and automation. Playback, wallpaper restoration and color changes affect every instance.",
     "toggle": {
       "label": "Enable video wallpapers",
       "description": "Choose your preferred backend to render the videos with, in the box below."

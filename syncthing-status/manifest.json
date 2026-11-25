@@ -1,9 +1,9 @@
 {
   "id": "syncthing-status",
   "name": "Syncthing Status",
-  "version": "1.0.4",
+  "version": "1.0.8",
   "minNoctaliaVersion": "4.4.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "Pir0c0pter0",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -22,13 +22,13 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "apiKey": {"type": "String", "sensitive": true, "machineLocal": true},
-        "apiUrl": {"type": "String"},
-        "configPath": {"type": "String"},
-        "enabled": {"type": "Boolean"},
-        "folderIds": {"type": "List", "element": {"type": "String"}},
-        "pollIntervalMs": {"type": "Real"},
-        "verifyTls": {"type": "Boolean"}
+        "apiKey": {"editorUsage": "configuration", "type": "String", "sensitive": true, "machineLocal": true},
+        "apiUrl": {"editorUsage": "configuration", "type": "String"},
+        "configPath": {"editorUsage": "configuration", "type": "String"},
+        "enabled": {"editorUsage": "configuration", "type": "Boolean"},
+        "folderIds": {"editorUsage": "configuration", "type": "List", "element": {"type": "String"}},
+        "pollIntervalMs": {"editorUsage": "configuration", "type": "Real"},
+        "verifyTls": {"editorUsage": "configuration", "type": "Boolean"}
       }
     },
     "defaultSettings": {

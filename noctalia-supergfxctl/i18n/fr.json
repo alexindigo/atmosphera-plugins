@@ -16,6 +16,7 @@
     "Vfio": "Transfert direct VFIO"
   },
   "settings": {
+    "shared-effect": "Le mode du GPU et les observations du périphérique sont partagés. Les interrogations et les requêtes utilisent les paramètres appliqués à cette instance ; les changements de mode affectent toutes les instances. Le contrôle des notifications ROG reste indisponible.",
     "debug": {
       "description": "Afficher des informations de débogage dans la console.",
       "label": "Mode débogage"

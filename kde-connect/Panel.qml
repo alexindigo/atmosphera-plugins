@@ -14,6 +14,8 @@ Item {
 
   // Plugin API (injected by PluginPanelSlot)
   property var pluginApi: null
+  readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+  readonly property var mainDevice: settingsConsumer?.mainDevice ?? null
 
   // SmartPanel
   readonly property var geometryPlaceholder: panelContainer
@@ -177,9 +179,9 @@ Item {
         sourceComponent:  (KDEConnect.busctlCmd === null || KDEConnect.busctlCmd === "")       ? busctlNotFoundCard               :
                           (!KDEConnect.daemonAvailable)                                        ? kdeConnectDaemonNotRunningCard   :
                           (deviceSwitcherOpen)                                                 ? deviceSwitcherCard               :
-                          (KDEConnect.mainDevice !== null && !KDEConnect.mainDevice.reachable) ? deviceNotReachableCard           :
-                          (KDEConnect.mainDevice !== null &&  KDEConnect.mainDevice.paired)    ? deviceConnectedCard              :
-                          (KDEConnect.mainDevice !== null && !KDEConnect.mainDevice.paired)    ? noDevicePairedCard               :
+                          (root.mainDevice !== null && !root.mainDevice.reachable) ? deviceNotReachableCard           :
+                          (root.mainDevice !== null &&  root.mainDevice.paired)    ? deviceConnectedCard              :
+                          (root.mainDevice !== null && !root.mainDevice.paired)    ? noDevicePairedCard               :
                           (KDEConnect.devices.length === 0)                                    ? noDevicesAvailableCard           :
                           null
       }
@@ -210,7 +212,7 @@ Item {
 
             RowLayout {
               NText {
-                text: KDEConnect.mainDevice.name
+                text: root.mainDevice.name
                 pointSize: Style.fontSizeXXL
                 font.weight: Style.fontWeightBold
                 color: AtmoColor.mOnSurface
@@ -236,9 +238,9 @@ Item {
                 onAccepted: paths => {
                   const targetId = _targetId
                   _targetId = ""
-                  if (!targetId || !KDEConnect.devices.some(device => device.id === targetId && device.paired && device.reachable)) return
+                  if (!targetId) return
                   for (const path of paths)
-                    KDEConnect.shareFile(targetId, path)
+                    root.settingsConsumer?.shareFile(targetId, path)
                 }
               }
 
@@ -246,7 +248,7 @@ Item {
                 icon: "device-mobile-search"
                 tooltipText: pluginApi?.tr("panel.browse-device")
                 onClicked: {
-                  KDEConnect.browseFiles(KDEConnect.mainDevice.id)
+                  root.settingsConsumer?.browseFiles()
                 }
               }
 
@@ -254,7 +256,7 @@ Item {
                 icon: "device-mobile-share"
                 tooltipText: pluginApi?.tr("panel.send-file")
                 onClicked: {
-                  shareFilePicker.openForDevice(KDEConnect.mainDevice?.id)
+                  shareFilePicker.openForDevice(root.settingsConsumer?.mainDevice?.id)
                 }
               }
 
@@ -262,7 +264,7 @@ Item {
                 icon: "radar"
                 tooltipText: pluginApi?.tr("panel.find-device")
                 onClicked: {
-                  KDEConnect.triggerFindMyPhone(KDEConnect.mainDevice.id)
+                  root.settingsConsumer?.triggerFindMyPhone()
                 }
               }
             }
@@ -271,7 +273,7 @@ Item {
             Loader {
               Layout.fillWidth: true
               Layout.fillHeight: true
-              active: KDEConnect.mainDevice !== null
+              active: root.mainDevice !== null
               sourceComponent: deviceStatsWithPhone
             }
 
@@ -293,7 +295,7 @@ Item {
                   Layout.alignment: Qt.AlignCenter
                   backgroundImage: ""
 
-                  onClicked: KDEConnect.wakeUpDevice(KDEConnect.mainDevice.id)
+                  onClicked: root.settingsConsumer?.wakeUpDevice()
                 }
               }
 
@@ -313,7 +315,7 @@ Item {
                   spacing: Style.marginM
 
                   AtmoIcon {
-                    icon: deviceData.getBatteryIcon(KDEConnect.mainDevice.battery, KDEConnect.mainDevice.charging)
+                    icon: deviceData.getBatteryIcon(root.mainDevice.battery, root.mainDevice.charging)
                     pointSize: Style.fontSizeXXXL
                     applyUiScale: true
                     color: AtmoColor.mOnSurface
@@ -329,7 +331,7 @@ Item {
                     }
 
                     NText {
-                      text: KDEConnect.mainDevice.battery < 0 ? pluginApi?.tr("panel.unknown") : (KDEConnect.mainDevice.battery + "%")
+                      text: root.mainDevice.battery < 0 ? pluginApi?.tr("panel.unknown") : (root.mainDevice.battery + "%")
                       pointSize: Style.fontSizeL
                       font.weight: Style.fontWeightMedium
                       color: AtmoColor.mOnSurface
@@ -342,7 +344,7 @@ Item {
                   spacing: Style.marginM
 
                   AtmoIcon {
-                    icon: deviceData.getCellularTypeIcon(KDEConnect.mainDevice.cellularNetworkType)
+                    icon: deviceData.getCellularTypeIcon(root.mainDevice.cellularNetworkType)
                     pointSize: Style.fontSizeXXXL
                     applyUiScale: true
                     color: AtmoColor.mOnSurface
@@ -358,7 +360,7 @@ Item {
                     }
 
                     NText {
-                      text: KDEConnect.mainDevice.cellularNetworkType || pluginApi?.tr("panel.unknown")
+                      text: root.mainDevice.cellularNetworkType || pluginApi?.tr("panel.unknown")
                       pointSize: Style.fontSizeL
                       font.weight: Style.fontWeightMedium
                       color: AtmoColor.mOnSurface
@@ -371,7 +373,7 @@ Item {
                   spacing: Style.marginM
 
                   AtmoIcon {
-                    icon: deviceData.getCellularStrengthIcon(KDEConnect.mainDevice.cellularNetworkStrength)
+                    icon: deviceData.getCellularStrengthIcon(root.mainDevice.cellularNetworkStrength)
                     pointSize: Style.fontSizeXXXL
                     applyUiScale: true
                     color: AtmoColor.mOnSurface
@@ -387,7 +389,7 @@ Item {
                     }
 
                     NText {
-                      text: deviceData.getSignalStrengthText(KDEConnect.mainDevice.cellularNetworkStrength)
+                      text: deviceData.getSignalStrengthText(root.mainDevice.cellularNetworkStrength)
                       pointSize: Style.fontSizeL
                       font.weight: Style.fontWeightMedium
                       color: AtmoColor.mOnSurface
@@ -416,7 +418,7 @@ Item {
                     }
 
                     NText {
-                      text: KDEConnect.mainDevice.notificationIds.length
+                      text: root.mainDevice.notificationIds.length
                       pointSize: Style.fontSizeL
                       font.weight: Style.fontWeightMedium
                       color: AtmoColor.mOnSurface
@@ -448,7 +450,7 @@ Item {
 
             RowLayout {
               NText {
-                text: KDEConnect.mainDevice.name
+                text: root.mainDevice.name
                 pointSize: Style.fontSizeXXL
                 font.weight: Style.fontWeightBold
                 color: AtmoColor.mOnSurface
@@ -469,11 +471,9 @@ Item {
                 NButton {
                   text: pluginApi?.tr("panel.pair")
                   Layout.alignment: Qt.AlignHCenter
-                  enabled: !KDEConnect.mainDevice.pairRequested
+                  enabled: !root.mainDevice.pairRequested
                   onClicked: {
-                    KDEConnect.requestPairing(KDEConnect.mainDevice.id)
-                    KDEConnect.mainDevice.pairRequested = true
-                    KDEConnect.refreshDevices()
+                    root.settingsConsumer?.requestPairing()
                   }
                 }
 
@@ -486,24 +486,24 @@ Item {
                     pointSize: Style.fontSizeXL
                     color: AtmoColor.mOnSurface
                     Layout.alignment: Qt.AlignHCenter
-                    opacity: KDEConnect.mainDevice.pairRequested ? 1.0 : 0.0
+                    opacity: root.mainDevice.pairRequested ? 1.0 : 0.0
                   }
 
                   NText {
-                    text: KDEConnect.mainDevice.verificationKey
+                    text: root.mainDevice.verificationKey
                     Layout.alignment: Qt.AlignHCenter
                     pointSize: Style.fontSizeL
                     font.weight: Style.fontWeightBold
                     color: AtmoColor.mOnSurface
-                    opacity: KDEConnect.mainDevice.pairRequested ? 1.0 : 0.0
+                    opacity: root.mainDevice.pairRequested ? 1.0 : 0.0
                   }
                 }
 
                 NBusyIndicator {
                   Layout.alignment: Qt.AlignHCenter
-                  opacity: KDEConnect.mainDevice.pairRequested ? 1.0 : 0.0
+                  opacity: root.mainDevice.pairRequested ? 1.0 : 0.0
                   size: Style.baseWidgetSize * 0.5
-                  running: KDEConnect.mainDevice.pairRequested
+                  running: root.mainDevice.pairRequested
                 }
               }
             }
@@ -602,7 +602,7 @@ Item {
               text: pluginApi?.tr("panel.unpair")
               Layout.alignment: Qt.AlignHCenter
               onClicked: {
-                KDEConnect.unpairDevice(KDEConnect.mainDevice.id)
+                root.settingsConsumer?.unpairDevice()
               }
             }
 
@@ -754,14 +754,12 @@ Item {
                   required property var modelData
                   text: modelData.name
                   Layout.fillWidth: true
-                  backgroundColor: modelData.id === KDEConnect.mainDevice.id ? AtmoColor.mSecondary : AtmoColor.mPrimary
+                  backgroundColor: modelData.id === root.mainDevice?.id ? AtmoColor.mSecondary : AtmoColor.mPrimary
 
                   onClicked: {
-                    KDEConnect.setMainDevice(modelData.id);
+                    root.settingsConsumer?.selectDevice(modelData.id, root.pluginApi);
                     deviceSwitcherOpen = false;
 
-                    pluginApi.pluginSettings.mainDeviceId = modelData.id;
-                    pluginApi.saveSettings();
                   }
                 }
               }

@@ -103,6 +103,7 @@
     "wallpaperVolume": "音量"
   },
   "settings": {
+    "shared-effect": "桌布播放、螢幕選擇、復原與色彩效果由各執行個體共用。套用設定或執行階段的操作會選用此執行個體的播放原則；啟動開關由外掛程式設定控制。",
     "autoApplyOnStartup": {
       "description": "若至少一個螢幕已設定壁紙，啟動時自動執行引擎",
       "label": "啟動時自動套用"

@@ -35,6 +35,7 @@
     "hint-esc-save": "ESC zum Speichern"
   },
   "settings": {
+    "sharedEffect": "All widgets use the same shared notes and GitHub Gist. Configure synchronization in Settings > Plugins. Sync now updates that shared Gist after Apply; it does not use instance credentials.",
     "saved": "Sticky Notes Einstellungen gespeichert",
     "syncNow": "Jetzt synchronisieren",
     "syncEnabled": {
@@ -55,6 +56,7 @@
       "updated": "Notizen mit GitHub Gist synchronisiert."
     },
     "errors": {
+      "configuration-changed": "Sync stopped because its credentials or Gist changed. Sync again to use the applied settings.",
       "missing-token": "Vor der Synchronisierung ist ein GitHub-Token erforderlich."
     }
   }

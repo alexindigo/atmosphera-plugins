@@ -16,7 +16,7 @@ Item {
 
   property int maxResults: 50
 
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
   function init() {}
 

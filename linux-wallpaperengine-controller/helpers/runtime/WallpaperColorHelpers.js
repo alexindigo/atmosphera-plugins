@@ -30,11 +30,12 @@ function buildActiveMonitorSyncRequest(screenName, screenConfig, defaultScaling,
   };
 }
 
-function buildScreenshotCacheEntry(screenshotPath, wallpaperPath, scaling) {
+function buildScreenshotCacheEntry(screenshotPath, wallpaperPath, scaling, clamp) {
   return {
     path: String(screenshotPath || "").trim(),
     wallpaperPath: String(wallpaperPath || "").trim(),
     scaling: String(scaling || "fill").trim(),
+    clamp: clamp,
     updatedAt: Date.now()
   };
 }

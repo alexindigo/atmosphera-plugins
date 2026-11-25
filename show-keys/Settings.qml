@@ -5,429 +5,453 @@ import qs.Commons
 import qs.Widgets
 
 ColumnLayout {
-    id: root
+  id: root
 
-    property var pluginApi: null
+  property var pluginApi: null
+  readonly property var captureEnabledField: pluginApi?.field("captureEnabled") ?? null
+  readonly property var evtestDeviceField: pluginApi?.field("evtestDevice") ?? null
+  readonly property var useCustomColorsField: pluginApi?.field("useCustomColors") ?? null
+  readonly property var pillColorField: pluginApi?.field("pillColor") ?? null
+  readonly property var pillBgField: pluginApi?.field("pillBg") ?? null
+  readonly property var positionField: pluginApi?.field("position") ?? null
+  readonly property var marginPxField: pluginApi?.field("marginPx") ?? null
+  readonly property var hideDelaySecField: pluginApi?.field("hideDelaySec") ?? null
+  readonly property var disabledScreensField: pluginApi?.field("disabledScreens") ?? null
 
-    property var cfg: pluginApi?.pluginSettings || ({})
-    property var def: pluginApi?.manifest?.metadata?.defaultSettings || ({})
+  property var def: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    // ── Local edit state ─────────────────────────────────
-    property bool editCapture: displayBaseline.editCapture
-    property string editDevice: displayBaseline.editDevice
-    property bool editUseCustomColors: displayBaseline.editUseCustomColors
-    property string editPillColor: displayBaseline.editPillColor
-    property string editPillBg: displayBaseline.editPillBg
-    property string editPosition: displayBaseline.editPosition
-    property int editMargin: displayBaseline.project("editMargin")
-    property int editDelay: displayBaseline.project("editDelay")
-    property var editDisabledScreens: displayBaseline.editDisabledScreens
+  // ── Local edit state ─────────────────────────────────
+  readonly property bool editCapture: root.captureEnabledField?.value ?? true
+  readonly property string editDevice: root.evtestDeviceField?.value || "/dev/input/event3"
+  readonly property bool editUseCustomColors: root.useCustomColorsField?.value ?? false
+  readonly property string editPillColor: root.pillColorField?.value ? root.pillColorField?.value : (def.pillColor ? def.pillColor : AtmoColor.mPrimary.toString())
+  readonly property string editPillBg: root.pillBgField?.value ? root.pillBgField?.value : (def.pillBg ? def.pillBg : AtmoColor.mSurface.toString())
+  readonly property string editPosition: root.positionField?.value || "bottom"
+  readonly property int editMargin: root.marginPxField?.value ?? 60
+  readonly property int editDelay: root.hideDelaySecField?.value ?? 2
+  readonly property var editDisabledScreens: root.disabledScreensField?.value ? root.disabledScreensField?.value.slice() : (def.disabledScreens ? def.disabledScreens.slice() : [])
 
-    NSettingsBaseline {
-        ranges: [NSettingsRange { field: "editMargin"; from: rangeEditMargin.from; to: rangeEditMargin.to }, NSettingsRange { field: "editDelay"; from: rangeEditDelay.from; to: rangeEditDelay.to }]
-        id: displayBaseline
-        readonly property bool editCapture: cfg.captureEnabled ?? def.captureEnabled ?? true
-        readonly property string editDevice: cfg.evtestDevice || def.evtestDevice || "/dev/input/event3"
-        readonly property bool editUseCustomColors: cfg.useCustomColors ?? def.useCustomColors ?? false
-        readonly property string editPillColor: cfg.pillColor ? cfg.pillColor : (def.pillColor ? def.pillColor : AtmoColor.mPrimary.toString())
-        readonly property string editPillBg: cfg.pillBg ? cfg.pillBg : (def.pillBg ? def.pillBg : AtmoColor.mSurface.toString())
-        readonly property string editPosition: cfg.position || def.position || "bottom"
-        readonly property int editMargin: cfg.marginPx ?? def.marginPx ?? 60
-        readonly property int editDelay: cfg.hideDelaySec ?? def.hideDelaySec ?? 2
-        readonly property var editDisabledScreens: cfg.disabledScreens ? cfg.disabledScreens.slice() : (def.disabledScreens ? def.disabledScreens.slice() : [])
-    }
-    readonly property bool settingsDirty: displayBaseline.differs({editCapture: root.editCapture, editDevice: root.editDevice, editUseCustomColors: root.editUseCustomColors, editPillColor: root.editPillColor, editPillBg: root.editPillBg, editPosition: root.editPosition, editMargin: root.editMargin, editDelay: root.editDelay, editDisabledScreens: root.editDisabledScreens})
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
-    spacing: Style.marginL
+  spacing: Style.marginL
 
-    // ── Capture Toggle ───────────────────────────────────
+  // ── Capture Toggle ───────────────────────────────────
+  NPluginSettingsField {
+    field: root.captureEnabledField
     NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.capture.label")
-        description: pluginApi?.tr("settings.capture.description")
-        checked: root.editCapture
-        onToggled: checked => root.editCapture = checked
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.capture.label")
+      description: pluginApi?.tr("settings.capture.description")
+      checked: root.editCapture
+      onToggled: checked => root.captureEnabledField.set(checked)
     }
+  }
 
-    // ── IPC Information ──────────────────────────────────
-    Rectangle {
-        Layout.fillWidth: true
-        Layout.preferredHeight: infoCol.implicitHeight + Style.marginM * 2
-        color: AtmoColor.mSurfaceVariant
-        radius: Style.radiusM
+  // ── IPC Information ──────────────────────────────────
+  Rectangle {
+    Layout.fillWidth: true
+    Layout.preferredHeight: infoCol.implicitHeight + Style.marginM * 2
+    color: AtmoColor.mSurfaceVariant
+    radius: Style.radiusM
 
-        ColumnLayout {
-            id: infoCol
-            anchors {
-                fill: parent
-                margins: Style.marginM
-            }
-            spacing: Style.marginS
+    ColumnLayout {
+      id: infoCol
+      anchors {
+        fill: parent
+        margins: Style.marginM
+      }
+      spacing: Style.marginS
 
-            RowLayout {
-                spacing: Style.marginS
+      RowLayout {
+        spacing: Style.marginS
 
-                AtmoIcon {
-                    icon: "info-circle"
-                    pointSize: Style.fontSizeS
-                    color: AtmoColor.mPrimary
-                }
-
-                NText {
-                    text: pluginApi?.tr("settings.ipc.title")
-                    pointSize: Style.fontSizeS
-                    font.weight: Font.Medium
-                    color: AtmoColor.mOnSurface
-                }
-            }
-
-            NText {
-                Layout.fillWidth: true
-                text: pluginApi?.tr("settings.ipc.toggleCommand")
-                pointSize: Style.fontSizeXS
-                font.family: Settings.data.ui.fontFixed
-                color: AtmoColor.mOnSurfaceVariant
-                wrapMode: Text.WrapAnywhere
-            }
+        AtmoIcon {
+          icon: "info-circle"
+          pointSize: Style.fontSizeS
+          color: AtmoColor.mPrimary
         }
-    }
 
-    // ── Security Notice ─────────────────────────────────
-    Rectangle {
-        Layout.fillWidth: true
-        Layout.preferredHeight: securityCol.implicitHeight + Style.marginM * 2
-        color: Qt.alpha(AtmoColor.mError, 0.12)
-        border.color: Qt.alpha(AtmoColor.mError, 0.32)
-        border.width: 1
-        radius: Style.radiusM
-
-        ColumnLayout {
-            id: securityCol
-            anchors {
-                fill: parent
-                margins: Style.marginM
-            }
-            spacing: Style.marginS
-
-            RowLayout {
-                spacing: Style.marginS
-
-                AtmoIcon {
-                    icon: "exclamation-circle"
-                    pointSize: Style.fontSizeS
-                    color: AtmoColor.mError
-                }
-
-                NText {
-                    text: pluginApi?.tr("settings.security.title")
-                    pointSize: Style.fontSizeS
-                    font.weight: Font.Medium
-                    color: AtmoColor.mError
-                }
-            }
-
-            NText {
-                Layout.fillWidth: true
-                text: pluginApi?.tr("settings.security.message")
-                pointSize: Style.fontSizeXS
-                color: AtmoColor.mOnSurfaceVariant
-                wrapMode: Text.Wrap
-                lineHeight: 1.2
-            }
-
-            NText {
-                Layout.fillWidth: true
-                text: pluginApi?.tr("settings.security.disclaimer")
-                pointSize: Style.fontSizeXS
-                font.weight: Font.Medium
-                color: AtmoColor.mError
-                wrapMode: Text.Wrap
-                lineHeight: 1.2
-            }
+        NText {
+          text: pluginApi?.tr("settings.ipc.title")
+          pointSize: Style.fontSizeS
+          font.weight: Font.Medium
+          color: AtmoColor.mOnSurface
         }
-    }
+      }
 
-    NDivider {
+      NText {
         Layout.fillWidth: true
-        Layout.topMargin: Style.marginS
-        Layout.bottomMargin: Style.marginS
+        text: pluginApi?.tr("settings.ipc.toggleCommand")
+        pointSize: Style.fontSizeXS
+        font.family: Settings.data.ui.fontFixed
+        color: AtmoColor.mOnSurfaceVariant
+        wrapMode: Text.WrapAnywhere
+      }
     }
+  }
 
+  // ── Security Notice ─────────────────────────────────
+  Rectangle {
+    Layout.fillWidth: true
+    Layout.preferredHeight: securityCol.implicitHeight + Style.marginM * 2
+    color: Qt.alpha(AtmoColor.mError, 0.12)
+    border.color: Qt.alpha(AtmoColor.mError, 0.32)
+    border.width: 1
+    radius: Style.radiusM
 
+    ColumnLayout {
+      id: securityCol
+      anchors {
+        fill: parent
+        margins: Style.marginM
+      }
+      spacing: Style.marginS
 
-    // ── Device Path Input  ──────────────────
+      RowLayout {
+        spacing: Style.marginS
+
+        AtmoIcon {
+          icon: "exclamation-circle"
+          pointSize: Style.fontSizeS
+          color: AtmoColor.mError
+        }
+
+        NText {
+          text: pluginApi?.tr("settings.security.title")
+          pointSize: Style.fontSizeS
+          font.weight: Font.Medium
+          color: AtmoColor.mError
+        }
+      }
+
+      NText {
+        Layout.fillWidth: true
+        text: pluginApi?.tr("settings.security.message")
+        pointSize: Style.fontSizeXS
+        color: AtmoColor.mOnSurfaceVariant
+        wrapMode: Text.Wrap
+        lineHeight: 1.2
+      }
+
+      NText {
+        Layout.fillWidth: true
+        text: pluginApi?.tr("settings.security.disclaimer")
+        pointSize: Style.fontSizeXS
+        font.weight: Font.Medium
+        color: AtmoColor.mError
+        wrapMode: Text.Wrap
+        lineHeight: 1.2
+      }
+    }
+  }
+
+  NDivider {
+    Layout.fillWidth: true
+    Layout.topMargin: Style.marginS
+    Layout.bottomMargin: Style.marginS
+  }
+
+  // ── Device Path Input  ──────────────────
+  NPluginSettingsField {
+    field: root.evtestDeviceField
     NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.device.label")
-        description: pluginApi?.tr("settings.device.description")
-        placeholderText: pluginApi?.tr("settings.device.placeholder")
-        text: root.editDevice
-        onTextChanged: root.editDevice = text
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.device.label")
+      description: pluginApi?.tr("settings.device.description")
+      placeholderText: pluginApi?.tr("settings.device.placeholder")
+      text: root.editDevice
+      onEditCommitted: root.evtestDeviceField.set(text)
     }
+  }
 
-    // ── Setup Guide  ───────────────────────
-    Rectangle {
-        Layout.fillWidth: true
-        Layout.preferredHeight: guideCol.implicitHeight + Style.marginM * 2
-        color: AtmoColor.mSurfaceVariant
-        radius: Style.radiusM
-
-        ColumnLayout {
-            id: guideCol
-            anchors {
-                fill: parent
-                margins: Style.marginM
-            }
-            spacing: Style.marginS
-
-            RowLayout {
-                spacing: Style.marginS
-
-                AtmoIcon {
-                    icon: "terminal"
-                    pointSize: Style.fontSizeS
-                    color: AtmoColor.mPrimary
-                }
-
-                NText {
-                    text: pluginApi?.tr("settings.guide.title")
-                    pointSize: Style.fontSizeS
-                    font.weight: Font.Medium
-                    color: AtmoColor.mOnSurface
-                }
-            }
-
-            NText {
-                Layout.fillWidth: true
-                text: pluginApi?.tr("settings.guide.steps")
-                pointSize: Style.fontSizeXS
-                font.family: Settings.data.ui.fontFixed
-                color: AtmoColor.mOnSurfaceVariant
-                wrapMode: Text.WrapAnywhere
-                lineHeight: 1.2
-            }
-        }
-    }
-
-    // ── Monitors ─────────────────────────────────────────
-    ColumnLayout {
-        Layout.fillWidth: true
-        spacing: Style.marginS
-
-        NLabel {
-            label: pluginApi?.tr("settings.monitors.label")
-            description: pluginApi?.tr("settings.monitors.description")
-        }
-
-        Repeater {
-            model: Quickshell.screens
-            
-            NToggle {
-                Layout.fillWidth: true
-                label: modelData.name
-                
-                // Checked if NOT in the disabled array
-                checked: root.editDisabledScreens.indexOf(modelData.name) === -1
-                
-                onToggled: function(isChecked) {
-                    var arr = root.editDisabledScreens.slice();
-                    var idx = arr.indexOf(modelData.name);
-                    
-                    if (isChecked) {
-                        // Remove from disabled list
-                        if (idx !== -1) arr.splice(idx, 1);
-                    } else {
-                        // Add to disabled list
-                        if (idx === -1) arr.push(modelData.name);
-                    }
-                    root.editDisabledScreens = arr;
-                }
-            }
-        }
-    }
-
-    NDivider {
-        Layout.fillWidth: true
-        Layout.topMargin: Style.marginS
-        Layout.bottomMargin: Style.marginS
-    }
-
-    // ── Position ─────────────────────────────────────────
-    ColumnLayout {
-        Layout.fillWidth: true
-        spacing: Style.marginS
-
-        NLabel {
-            label: pluginApi?.tr("settings.position.label")
-            description: pluginApi?.tr("settings.position.description")
-        }
-
-        NComboBox {
-            Layout.fillWidth: true
-            model: [
-                { key: "bottom", name: pluginApi?.tr("settings.position.bottom") },
-                { key: "top",    name: pluginApi?.tr("settings.position.top")    }
-            ]
-            currentKey: root.editPosition
-            onSelected: key => root.editPosition = key
-        }
-    }
-
-    // ── Margin ───────────────────────────────────────────
-    ColumnLayout {
-        Layout.fillWidth: true
-        spacing: Style.marginS
-
-        NLabel {
-            label: pluginApi?.tr("settings.margin.label")
-            description: pluginApi?.tr("settings.margin.description", { value: root.editMargin })
-        }
-
-        NSlider {
-            id: rangeEditMargin
-            objectName: "settings-range-editMargin"
-            Layout.fillWidth: true
-            from: 20
-            to: 300
-            stepSize: 10
-            value: root.editMargin
-            onValueChanged: root.editMargin = value
-        }
-    }
-
-    // ── Auto-hide Delay ──────────────────────────────────
-    ColumnLayout {
-        Layout.fillWidth: true
-        spacing: Style.marginS
-
-        NLabel {
-            label: pluginApi?.tr("settings.delay.label")
-            description: pluginApi?.tr("settings.delay.description", { value: root.editDelay })
-        }
-
-        NSlider {
-            id: rangeEditDelay
-            objectName: "settings-range-editDelay"
-            Layout.fillWidth: true
-            from: 1
-            to: 10
-            stepSize: 1
-            value: root.editDelay
-            onValueChanged: root.editDelay = value
-        }
-    }
-
-    NDivider {
-        Layout.fillWidth: true
-        Layout.topMargin: Style.marginS
-        Layout.bottomMargin: Style.marginS
-    }
-
-    // ── Colors ───────────────────────────────────────────
-    NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.useCustomColors.label")
-        description: pluginApi?.tr("settings.useCustomColors.description")
-        checked: root.editUseCustomColors
-        onToggled: checked => root.editUseCustomColors = checked
-    }
+  // ── Setup Guide  ───────────────────────
+  Rectangle {
+    Layout.fillWidth: true
+    Layout.preferredHeight: guideCol.implicitHeight + Style.marginM * 2
+    color: AtmoColor.mSurfaceVariant
+    radius: Style.radiusM
 
     ColumnLayout {
-        Layout.fillWidth: true
+      id: guideCol
+      anchors {
+        fill: parent
+        margins: Style.marginM
+      }
+      spacing: Style.marginS
+
+      RowLayout {
         spacing: Style.marginS
-        visible: root.editUseCustomColors
 
-        NLabel {
-            label: pluginApi?.tr("settings.pillColor.label")
-            description: pluginApi?.tr("settings.pillColor.description")
+        AtmoIcon {
+          icon: "terminal"
+          pointSize: Style.fontSizeS
+          color: AtmoColor.mPrimary
         }
 
-        NColorPicker {
-            Layout.preferredWidth: Style.sliderWidth
-            Layout.preferredHeight: Style.baseWidgetSize
-            selectedColor: root.editPillColor
-            onColorSelected: function(color) { root.editPillColor = color }
+        NText {
+          text: pluginApi?.tr("settings.guide.title")
+          pointSize: Style.fontSizeS
+          font.weight: Font.Medium
+          color: AtmoColor.mOnSurface
         }
-    }
+      }
 
-    ColumnLayout {
+      NText {
         Layout.fillWidth: true
-        spacing: Style.marginS
-        visible: root.editUseCustomColors
-
-        NLabel {
-            label: pluginApi?.tr("settings.pillBg.label")
-            description: pluginApi?.tr("settings.pillBg.description")
-        }
-
-        NColorPicker {
-            Layout.preferredWidth: Style.sliderWidth
-            Layout.preferredHeight: Style.baseWidgetSize
-            selectedColor: root.editPillBg
-            onColorSelected: function(color) { root.editPillBg = color }
-        }
+        text: pluginApi?.tr("settings.guide.steps")
+        pointSize: Style.fontSizeXS
+        font.family: Settings.data.ui.fontFixed
+        color: AtmoColor.mOnSurfaceVariant
+        wrapMode: Text.WrapAnywhere
+        lineHeight: 1.2
+      }
     }
+  }
 
-    NDivider {
-        Layout.fillWidth: true
-        Layout.topMargin: Style.marginS
-        Layout.bottomMargin: Style.marginS
-    }
+  // ── Monitors ─────────────────────────────────────────
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginS
 
-    // ── Preview ──────────────────────────────────────────
     NLabel {
-        label: pluginApi?.tr("settings.preview.label")
+      label: pluginApi?.tr("settings.monitors.label")
+      description: pluginApi?.tr("settings.monitors.description")
     }
 
-    Row {
-        Layout.alignment: Qt.AlignHCenter
-        spacing: 6
+    NPluginSettingsField {
+      field: root.disabledScreensField
+      Repeater {
+        model: Quickshell.screens
+        NToggle {
+          Layout.fillWidth: true
+          label: modelData.name
 
-        Repeater {
-            model: ["󰴈 +a", "CTRL+c", "H", "e", "l", "l", "o"]
+          // Checked if NOT in the disabled array
+          checked: root.editDisabledScreens.indexOf(modelData.name) === -1
 
-            Rectangle {
-                width: previewText.implicitWidth + 20
-                height: 36
-                radius: 8
-                readonly property color previewBg: root.editUseCustomColors ? root.editPillBg : AtmoColor.mSurface
-                readonly property color previewFg: root.editUseCustomColors ? root.editPillColor : AtmoColor.mPrimary
-                
-                color: Qt.alpha(previewBg, 0.8)
-                border.color: Qt.alpha(previewFg, 0.27)
-                border.width: 1
+          onToggled: function (isChecked) {
+            var arr = root.editDisabledScreens.slice();
+            var idx = arr.indexOf(modelData.name);
 
-                Text {
-                    id: previewText
-                    textFormat: Text.PlainText
-                    anchors.centerIn: parent
-                    text: modelData
-                    color: parent.previewFg
-                    font.pixelSize: 16
-                    font.family: "monospace"
-                    font.bold: true
-                }
+            if (isChecked) {
+              // Remove from disabled list
+              if (idx !== -1)
+                arr.splice(idx, 1);
+            } else {
+              // Add to disabled list
+              if (idx === -1)
+                arr.push(modelData.name);
             }
+            root.disabledScreensField.set(arr);
+          }
         }
+      }
+    }
+  }
+
+  NDivider {
+    Layout.fillWidth: true
+    Layout.topMargin: Style.marginS
+    Layout.bottomMargin: Style.marginS
+  }
+
+  // ── Position ─────────────────────────────────────────
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginS
+
+    NLabel {
+      label: pluginApi?.tr("settings.position.label")
+      description: pluginApi?.tr("settings.position.description")
     }
 
-    // ── Save ─────────────────────────────────────────────
-    function saveSettings() {
-        if (!pluginApi) return;
-
-        pluginApi.pluginSettings.captureEnabled = root.editCapture;
-        pluginApi.pluginSettings.evtestDevice   = root.editDevice;
-        pluginApi.pluginSettings.useCustomColors= root.editUseCustomColors;
-        if (root.editUseCustomColors) {
-            pluginApi.pluginSettings.pillColor  = root.editPillColor.toString();
-            pluginApi.pluginSettings.pillBg     = root.editPillBg.toString();
-        }
-        pluginApi.pluginSettings.position       = root.editPosition;
-
-        pluginApi.pluginSettings.marginPx       = root.editMargin;
-        pluginApi.pluginSettings.hideDelaySec   = root.editDelay;
-        pluginApi.pluginSettings.disabledScreens= root.editDisabledScreens;
-
-        pluginApi.saveSettings();
+    NPluginSettingsField {
+      field: root.positionField
+      NComboBox {
+        Layout.fillWidth: true
+        model: [
+          {
+            key: "bottom",
+            name: pluginApi?.tr("settings.position.bottom")
+          },
+          {
+            key: "top",
+            name: pluginApi?.tr("settings.position.top")
+          }
+        ]
+        currentKey: root.editPosition
+        onSelected: key => root.positionField.set(key)
+      }
     }
+  }
+
+  // ── Margin ───────────────────────────────────────────
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginS
+
+    NLabel {
+      label: pluginApi?.tr("settings.margin.label")
+      description: pluginApi?.tr("settings.margin.description", {
+                                   value: root.editMargin
+                                 })
+    }
+
+    NPluginSettingsField {
+      field: root.marginPxField
+      NSlider {
+        id: rangeEditMargin
+        objectName: "settings-range-editMargin"
+        Layout.fillWidth: true
+        from: 20
+        to: 300
+        stepSize: 10
+        value: root.editMargin
+        onMoved: root.marginPxField.set(value)
+      }
+    }
+  }
+
+  // ── Auto-hide Delay ──────────────────────────────────
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginS
+
+    NLabel {
+      label: pluginApi?.tr("settings.delay.label")
+      description: pluginApi?.tr("settings.delay.description", {
+                                   value: root.editDelay
+                                 })
+    }
+
+    NPluginSettingsField {
+      field: root.hideDelaySecField
+      NSlider {
+        id: rangeEditDelay
+        objectName: "settings-range-editDelay"
+        Layout.fillWidth: true
+        from: 1
+        to: 10
+        stepSize: 1
+        value: root.editDelay
+        onMoved: root.hideDelaySecField.set(value)
+      }
+    }
+  }
+
+  NDivider {
+    Layout.fillWidth: true
+    Layout.topMargin: Style.marginS
+    Layout.bottomMargin: Style.marginS
+  }
+
+  // ── Colors ───────────────────────────────────────────
+  NPluginSettingsField {
+    field: root.useCustomColorsField
+    NToggle {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.useCustomColors.label")
+      description: pluginApi?.tr("settings.useCustomColors.description")
+      checked: root.editUseCustomColors
+      onToggled: checked => root.useCustomColorsField.set(checked)
+    }
+  }
+
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginS
+    visible: root.editUseCustomColors
+
+    NLabel {
+      label: pluginApi?.tr("settings.pillColor.label")
+      description: pluginApi?.tr("settings.pillColor.description")
+    }
+
+    NPluginSettingsField {
+      field: root.pillColorField
+      NColorPicker {
+        Layout.preferredWidth: Style.sliderWidth
+        Layout.preferredHeight: Style.baseWidgetSize
+        selectedColor: root.editPillColor
+        onColorSelected: function (color) {
+          root.pillColorField.set(color.toString());
+        }
+      }
+    }
+  }
+
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginS
+    visible: root.editUseCustomColors
+
+    NLabel {
+      label: pluginApi?.tr("settings.pillBg.label")
+      description: pluginApi?.tr("settings.pillBg.description")
+    }
+
+    NPluginSettingsField {
+      field: root.pillBgField
+      NColorPicker {
+        Layout.preferredWidth: Style.sliderWidth
+        Layout.preferredHeight: Style.baseWidgetSize
+        selectedColor: root.editPillBg
+        onColorSelected: function (color) {
+          root.pillBgField.set(color.toString());
+        }
+      }
+    }
+  }
+
+  NDivider {
+    Layout.fillWidth: true
+    Layout.topMargin: Style.marginS
+    Layout.bottomMargin: Style.marginS
+  }
+
+  // ── Preview ──────────────────────────────────────────
+  NLabel {
+    label: pluginApi?.tr("settings.preview.label")
+  }
+
+  Row {
+    Layout.alignment: Qt.AlignHCenter
+    spacing: 6
+
+    Repeater {
+      model: ["󰴈 +a", "CTRL+c", "H", "e", "l", "l", "o"]
+
+      Rectangle {
+        width: previewText.implicitWidth + 20
+        height: 36
+        radius: 8
+        readonly property color previewBg: root.editUseCustomColors ? root.editPillBg : AtmoColor.mSurface
+        readonly property color previewFg: root.editUseCustomColors ? root.editPillColor : AtmoColor.mPrimary
+
+        color: Qt.alpha(previewBg, 0.8)
+        border.color: Qt.alpha(previewFg, 0.27)
+        border.width: 1
+
+        Text {
+          id: previewText
+          anchors.centerIn: parent
+          textFormat: Text.PlainText
+          text: modelData
+          color: parent.previewFg
+          font.pixelSize: 16
+          font.family: "monospace"
+          font.bold: true
+        }
+      }
+    }
+  }
+
+  // ── Save ─────────────────────────────────────────────
+  function saveSettings() {
+    if (!pluginApi)
+      return;
+
+    pluginApi.saveSettings();
+  }
 }

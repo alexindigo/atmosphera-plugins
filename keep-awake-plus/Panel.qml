@@ -10,7 +10,7 @@ Item {
   readonly property var geometryPlaceholder: panelContainer
   property real contentPreferredWidth: 320 * Style.uiScaleRatio
   property real contentPreferredHeight: contentCol.implicitHeight + Style.marginM * 2
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
   readonly property bool allowAttach: true
   readonly property bool active: mainInstance ? mainInstance.active : false
 

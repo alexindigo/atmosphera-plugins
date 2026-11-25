@@ -63,6 +63,7 @@
     }
   },
   "settings": {
+    "shared-effect": "OBS, seine Verbindung, der Ausgabestatus und verwaltete Starts werden gemeinsam genutzt. Anzeige, Abfrageintervall und Aktionsregeln gelten für diese Instanz; ihre Aktionen wirken sich auf denselben OBS-Prozess aus.",
     "header": {
       "label": "OBS Steuerung",
       "description": "Lege fest, wie OBS in der Bar, im Kontrollzentrum und in den Schnellaktionen erscheint."

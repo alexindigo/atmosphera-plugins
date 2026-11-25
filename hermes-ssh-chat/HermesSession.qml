@@ -1,13 +1,22 @@
-pragma Singleton
-
 import QtQuick
-import Quickshell
-import Quickshell.Io
 
-Singleton {
+// Main-owned session identity. Views activate it but never replace its context.
+Item {
   id: root
-
-  property var pluginApi: null
+  required property var settingsContext
+  required property var retire
+  required property var newConnection
+  readonly property bool current: settingsContext.current()
+  readonly property var cfg: settingsContext.settingsView
+  readonly property string autoSource: JSON.stringify([cfg.host, cfg.port, cfg.user, cfg.autoConnectOnStartup, cfg.terminalRows, cfg.terminalCols])
+  property int _sourceGeneration: 0
+  property bool _constructed: false
+  property bool _active: false
+  property bool _autoConnectAttempted: false
+  property var _connection: null
+  property var _pendingResize: null
+  property var _tr: null
+  property var _lifetime: ({alive: true})
   property string host: ""
   property int port: 22
   property string user: ""
@@ -16,225 +25,108 @@ Singleton {
   property string statusText: ""
   property string lastError: ""
   property string terminalBuffer: ""
-
   readonly property bool connecting: status === "connecting"
   readonly property bool connected: status === "connected"
   readonly property bool sessionActive: connecting || connected
   readonly property string targetLabel: user && host ? user + "@" + host : "Hermes"
-
-  property var _pendingConnect: null
-  property var _pendingResize: null
-  property bool _autoConnectAttempted: false
-
   signal terminalOutput(string text)
   signal terminalReset()
 
-  function tr(key, args) {
-    return root.pluginApi ? root.pluginApi.tr(key, args || ({})) : key;
+  function tr(key, args) { return _tr ? _tr(key, args || ({})) : key; }
+  function setting(key, fallback) { var value = cfg[key]; return value === undefined ? fallback : value; }
+  function resetTerminal() { terminalBuffer = ""; terminalReset(); }
+  function accepts(api) { return current && api && api.settingsContext === settingsContext; }
+  function activate(api) {
+    if (!accepts(api)) return;
+    _tr = api.tr;
+    if (!_active) {
+      _active = true;
+      host = setting("host", ""); port = setting("port", 22) || 22; user = setting("user", "");
+      statusText = tr("status.disconnected");
+    }
+    maybeAutoConnect(api);
   }
-
-  function resetTerminal() {
-    root.terminalBuffer = "";
-    root.terminalReset();
-  }
-
-  function setPluginApi(api) {
-    if (!api) return;
-    root.pluginApi = api;
-    root.host = api.pluginSettings.host || "";
-    root.port = api.pluginSettings.port || 22;
-    root.user = api.pluginSettings.user || "";
-    if (root.status === "idle" && root.statusText.length === 0)
-      root.statusText = tr("status.disconnected");
-    root.maybeAutoConnect();
-  }
-
-  function setting(key, fallback) {
-    if (!root.pluginApi || !root.pluginApi.pluginSettings) return fallback;
-    var value = root.pluginApi.pluginSettings[key];
-    return value === undefined ? fallback : value;
-  }
-
-  function helperPath() {
-    var url = String(Qt.resolvedUrl("helpers/hermes_ssh_bridge.py"));
-    return decodeURIComponent(url.replace(/^file:\/\//, ""));
-  }
-
-  function maybeAutoConnect() {
-    if (root._autoConnectAttempted || !setting("autoConnectOnStartup", false))
-      return;
-
-    root._autoConnectAttempted = true;
-
-    if (!root.host || !root.user || root.sessionActive)
-      return;
-
+  function maybeAutoConnect(api) {
+    if (_autoConnectAttempted || !setting("autoConnectOnStartup", false)) return;
+    _autoConnectAttempted = true;
+    if (!setting("host", "") || !setting("user", "") || sessionActive) return;
+    var generation = _sourceGeneration;
+    var lifetime = _lifetime;
+    var request = {host: setting("host", ""), port: setting("port", 22), user: setting("user", ""), rows: setting("terminalRows", 32), cols: setting("terminalCols", 180)};
     Qt.callLater(function() {
-      if (!root.sessionActive)
-        root.connect(root.host, root.port, root.user, "", setting("terminalRows", 32), setting("terminalCols", 180));
+      if (lifetime.alive && root.accepts(api) && generation === root._sourceGeneration && !root.sessionActive && !root._connection)
+        root.connect(api, request.host, request.port, request.user, "", request.rows, request.cols);
     });
   }
-
-  function connect(targetHost, targetPort, targetUser, targetPassword, rows, cols) {
-    root.host = String(targetHost || "").trim();
-    root.port = Math.max(1, Math.min(65535, Number(targetPort || 22)));
-    root.user = String(targetUser || "").trim();
-    root.password = String(targetPassword || "");
-    root.lastError = "";
-
-    if (!root.host || !root.user) {
-      root.status = "idle";
-      root.statusText = tr("status.missingTarget");
-      root.lastError = root.statusText;
-      return;
-    }
-
-    if (root.pluginApi && setting("rememberLastTarget", true)) {
-      root.pluginApi.pluginSettings.host = root.host;
-      root.pluginApi.pluginSettings.port = root.port;
-      root.pluginApi.pluginSettings.user = root.user;
-      root.pluginApi.saveSettings();
-    }
-
-    root.resetTerminal();
-    root.status = "connecting";
-    root.statusText = tr("status.connecting", { "target": root.targetLabel });
-
-    root._pendingConnect = JSON.stringify({
-      "type": "connect",
-      "host": root.host,
-      "port": root.port,
-      "user": root.user,
-      "password": root.password,
-      "rows": Math.max(1, Number(rows || setting("terminalRows", 32))),
-      "cols": Math.max(1, Number(cols || setting("terminalCols", 180)))
-    }) + "\n";
-
-    bridge.command = ["python3", root.helperPath()];
-    if (bridge.running) {
-      bridge.running = false;
-      return;
-    }
-    bridge.running = true;
+  function stopConnection() {
+    var previous = _connection;
+    _connection = null; // Fence callbacks before termination can emit anything.
+    if (previous) previous.retire();
   }
-
+  function connect(api, targetHost, targetPort, targetUser, targetPassword, rows, cols) {
+    if (!accepts(api)) return false;
+    ++_sourceGeneration; // A queued automatic attempt cannot replace manual intent.
+    host = String(targetHost || "").trim();
+    port = Math.max(1, Math.min(65535, Number(targetPort || 22)));
+    user = String(targetUser || "").trim(); password = String(targetPassword || ""); lastError = "";
+    if (!host || !user) {
+      statusText = tr("status.missingTarget"); lastError = statusText;
+      return false;
+    }
+    if (setting("rememberLastTarget", true)) {
+      api.pluginSettings.host = host; api.pluginSettings.port = port; api.pluginSettings.user = user;
+      api.saveSettings();
+    }
+    stopConnection(); resetTerminal(); status = "connecting";
+    statusText = tr("status.connecting", {target: targetLabel});
+    _connection = newConnection(root, JSON.stringify({type: "connect", host: host, port: port, user: user, password: password,
+      rows: Math.max(1, Number(rows || setting("terminalRows", 32))), cols: Math.max(1, Number(cols || setting("terminalCols", 180)))}) + "\n");
+    _connection.start();
+    return true;
+  }
+  function acceptsConnection(connection) { return current && _connection === connection; }
   function send(text) {
-    if (!bridge.running || !root.sessionActive) return;
-    bridge.write(JSON.stringify({"type": "input", "text": String(text || "")}) + "\n");
+    if (current && _connection && sessionActive)
+      _connection.write(JSON.stringify({type: "input", text: String(text || "")}) + "\n");
   }
-
   function resize(rows, cols) {
-    var payload = JSON.stringify({
-      "type": "resize",
-      "rows": Math.max(1, Number(rows || setting("terminalRows", 32))),
-      "cols": Math.max(1, Number(cols || setting("terminalCols", 180)))
-    }) + "\n";
-
-    if (bridge.running && root.sessionActive) {
-      bridge.write(payload);
-    } else {
-      root._pendingResize = payload;
-    }
+    var payload = JSON.stringify({type: "resize", rows: Math.max(1, Number(rows || setting("terminalRows", 32))), cols: Math.max(1, Number(cols || setting("terminalCols", 180)))}) + "\n";
+    if (current && _connection && sessionActive) _connection.write(payload);
+    else if (current) _pendingResize = payload;
   }
-
+  function started(connection) {
+    if (!acceptsConnection(connection)) return;
+    connection.write(connection.request);
+    if (_pendingResize) { connection.write(_pendingResize); _pendingResize = null; }
+  }
   function disconnect() {
-    root._pendingConnect = null;
-    root._pendingResize = null;
-    if (bridge.running) {
-      bridge.write(JSON.stringify({"type": "disconnect"}) + "\n");
-    }
-    root.status = "idle";
-    root.statusText = tr("status.disconnected");
-    root.lastError = "";
-    root.password = "";
-    root.resetTerminal();
+    ++_sourceGeneration; _pendingResize = null; stopConnection();
+    status = "idle"; statusText = tr("status.disconnected"); lastError = ""; password = ""; resetTerminal();
   }
-
-  function handleMessage(line) {
-    var trimmed = String(line || "").trim();
-    if (!trimmed) return;
-
-    var msg = null;
-    try {
-      msg = JSON.parse(trimmed);
-    } catch (e) {
-      return;
-    }
-
+  function handleMessage(connection, line) {
+    if (!acceptsConnection(connection)) return;
+    var msg;
+    try { msg = JSON.parse(String(line || "").trim()); } catch (error) { return; }
     if (msg.type === "output") {
-      var text = String(msg.text || "");
-      root.terminalBuffer += text;
-      root.terminalOutput(text);
-      return;
-    }
-
-    if (msg.type === "status") {
-      if (msg.status === "idle" && root.status === "connecting")
-        return;
-      root.status = String(msg.status || root.status);
-      root.statusText = String(msg.message || root.statusText);
-      return;
-    }
-
-    if (msg.type === "error") {
-      root.lastError = String(msg.message || tr("status.error"));
-      root.statusText = root.lastError;
-      return;
-    }
-
-    if (msg.type === "exit") {
-      root.status = "idle";
-      root.statusText = tr("status.disconnected");
-      root.password = "";
-      root.resetTerminal();
-    }
+      var text = String(msg.text || ""); terminalBuffer += text; terminalOutput(text);
+    } else if (msg.type === "status") {
+      if (msg.status === "idle" && connecting) return;
+      status = String(msg.status || status); statusText = String(msg.message || statusText);
+    } else if (msg.type === "error") {
+      lastError = String(msg.message || tr("status.error")); statusText = lastError;
+    } else if (msg.type === "exit") disconnect();
   }
-
-  function flushPending() {
-    if (root._pendingConnect) {
-      bridge.write(root._pendingConnect);
-      root._pendingConnect = null;
-    }
-    if (root._pendingResize) {
-      bridge.write(root._pendingResize);
-      root._pendingResize = null;
-    }
+  function bridgeError(connection, text) {
+    if (!acceptsConnection(connection) || !text.trim()) return;
+    lastError = text.trim(); statusText = lastError;
   }
-
-  Process {
-    id: bridge
-    running: false
-    stdinEnabled: true
-
-    stdout: SplitParser {
-      splitMarker: "\n"
-      onRead: function(data) { root.handleMessage(data); }
-    }
-
-    stderr: SplitParser {
-      splitMarker: "\n"
-      onRead: function(data) {
-        var text = String(data || "").trim();
-        if (text.length > 0) {
-          root.lastError = text;
-          root.statusText = text;
-        }
-      }
-    }
-
-    onStarted: root.flushPending()
-
-    onExited: function(exitCode, exitStatus) {
-      if (root._pendingConnect) {
-        bridge.running = true;
-        return;
-      }
-      if (root.sessionActive) {
-        root.status = "idle";
-        root.statusText = tr("status.bridgeExited");
-        root.password = "";
-        root.resetTerminal();
-      }
-    }
+  function exited(connection) {
+    if (!acceptsConnection(connection)) return;
+    stopConnection();
+    if (sessionActive) { status = "idle"; statusText = tr("status.bridgeExited"); password = ""; resetTerminal(); }
   }
+  onAutoSourceChanged: ++_sourceGeneration
+  onCurrentChanged: if (_constructed && !current) { disconnect(); retire(root); }
+  Component.onCompleted: _constructed = true
+  Component.onDestruction: { _lifetime.alive = false; stopConnection(); }
 }

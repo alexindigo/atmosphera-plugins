@@ -25,6 +25,7 @@
     "filter-files-count": "Pliki ({count})"
   },
   "settings": {
+    "shared-effect": "History, pins and clipboard actions are shared. This instance selects its history limit, image previews and density.",
     "tab-general": "Ogolne",
     "max-history-size": "Maksymalny rozmiar historii",
     "max-history-size-description": "Liczba wpisow schowka przechowywanych w historii. Zacznie obowiazywac przy nastepnym odswiezeniu.",

@@ -2,8 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import qs.Commons
-import qs.Widgets
 import qs.Services.UI
+import qs.Widgets
 
 Item {
   id: root
@@ -13,6 +13,7 @@ Item {
   readonly property bool allowAttach: true
 
   readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var settingsConsumer: mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
   property real contentPreferredWidth: 280 * Style.uiScaleRatio
   property real contentPreferredHeight: contentColumn.implicitHeight + Style.marginM * 2
@@ -64,13 +65,9 @@ Item {
           }
 
           NText {
-            text: (mainInstance?.activeProfile ?? "") !== ""
-              ? mainInstance?.activeProfile
-              : pluginApi?.tr("panel.no-profile")
+            text: (mainInstance?.activeProfile ?? "") !== "" ? mainInstance?.activeProfile : pluginApi?.tr("panel.no-profile")
             pointSize: Style.fontSizeS
-            color: (mainInstance?.activeProfile ?? "") !== ""
-              ? AtmoColor.mPrimary
-              : AtmoColor.mOnSurfaceVariant
+            color: (mainInstance?.activeProfile ?? "") !== "" ? AtmoColor.mPrimary : AtmoColor.mOnSurfaceVariant
           }
         }
       }
@@ -131,17 +128,13 @@ Item {
               Layout.fillWidth: true
               text: modelData
               icon: modelData === (mainInstance?.activeProfile ?? "") ? "check" : "device-desktop"
-              backgroundColor: modelData === (mainInstance?.activeProfile ?? "")
-                ? Qt.alpha(AtmoColor.mPrimary, 0.15)
-                : "transparent"
-              textColor: modelData === (mainInstance?.activeProfile ?? "")
-                ? AtmoColor.mPrimary
-                : AtmoColor.mOnSurface
+              backgroundColor: modelData === (mainInstance?.activeProfile ?? "") ? Qt.alpha(AtmoColor.mPrimary, 0.15) : "transparent"
+              textColor: modelData === (mainInstance?.activeProfile ?? "") ? AtmoColor.mPrimary : AtmoColor.mOnSurface
               enabled: mainInstance?.moniqueInstalled ?? false
 
               onClicked: {
-                mainInstance?.switchProfile(modelData)
-                pluginApi?.closePanel(pluginApi?.panelOpenScreen)
+                mainInstance?.switchProfile(modelData);
+                pluginApi?.closePanel(pluginApi?.panelOpenScreen);
               }
             }
           }

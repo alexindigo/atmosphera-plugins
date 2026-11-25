@@ -10,6 +10,7 @@ Item {
     id: root
 
     property var pluginApi: null
+    readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
     readonly property var geometryPlaceholder: panelContainer
     readonly property bool allowAttach: true
@@ -19,108 +20,25 @@ Item {
 
     property bool playlistViewActive: false 
 
-    property bool shuffleState: false
+    readonly property bool shuffleState: settingsConsumer?.shuffleState ?? false
 
     anchors.fill: parent
 
     property string playlistSelectionId: ""
 
-    property var searchResults: []
-
-    property var playlistResults: []
-
-    property bool closeAfterShuffle: false
-
-    property string nowPlaying: ""
-
-    Process {
-        id: readShuffleState
-        command: ["curl", "https://api.spotify.com/v1/me/player", "-H", "Authorization: Bearer " + pluginApi?.pluginSettings?.accessToken]
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                shuffleState = JSON.parse(text).shuffle_state
-            }
-        }
-    }
+    readonly property var searchResults: settingsConsumer?.searchResults ?? []
+    readonly property var playlistResults: settingsConsumer?.playlistResults ?? []
 
     Component.onCompleted: {
-        readShuffleState.running = true
-    }
-
-    Process {
-        id: shuffle
-        command: ["curl", "-X", "PUT", "https://api.spotify.com/v1/me/player/shuffle?state=" + shuffleState.toString() 
-            + ((pluginApi?.pluginSettings?.playerId !== "") ? "&device_id=" + pluginApi?.pluginSettings?.playerId : ""),
-            "-H", "Authorization: Bearer " + pluginApi?.pluginSettings?.accessToken]
-
-        onExited: (code, status) => {
-            if (closeAfterShuffle) {
-                closeAfterShuffle = false
-                pluginApi?.closePanel(pluginApi?.panelOpenScreen)
-            }
-        }
+        settingsConsumer?.readShuffle(pluginApi)
     }
 
     function shufflePlayback() {
-        shuffleState = !shuffleState
-        shuffle.command = ["curl", "-X", "PUT", "https://api.spotify.com/v1/me/player/shuffle?state=" + shuffleState.toString() 
-            + ((pluginApi?.pluginSettings?.playerId !== "") ? "&device_id=" + pluginApi?.pluginSettings?.playerId : ""),
-            "-H", "Authorization: Bearer " + pluginApi?.pluginSettings?.accessToken]
-        shuffle.running = true
-    }
-
-    Process {
-        id: playRequestProcess
-        command: ["curl"]
-
-        onStarted: closeAfterShuffle = true
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                Logger.i("spotify-player", text)
-            }
-        }
-
-        onExited: (code, status) => {
-            ToastService.showNotice(pluginApi?.tr("panel.notif"), nowPlaying, "music")
-            shuffle.running = true
-        }
+        settingsConsumer?.shufflePlayback(pluginApi)
     }
 
     function sendPlayRequest(data) {
-        const requestBody = (data.type === "track")
-            ? JSON.stringify({
-                uris: [data.uri]
-            })
-            : JSON.stringify({
-                context_uri: data.uri
-            })
-        nowPlaying = (data.type !== "playlist") ? data.artists[0].name + " - " + data.name : data.name
-        
-        playRequestProcess.command = ["curl", "-X", "PUT", "https://api.spotify.com/v1/me/player/play" 
-            + ((pluginApi?.pluginSettings?.playerId !== "") ? "?device_id=" + pluginApi?.pluginSettings?.playerId : ""), 
-            "-H", "Authorization: Bearer " + pluginApi?.pluginSettings?.accessToken,
-            "--json", requestBody]
-        playRequestProcess.running = true
-    }
-
-    Process {
-        id: searchProcess
-        command: ["curl"]
-
-        onStarted: Logger.i("spotify-player", "starting search...")
-        
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const result = JSON.parse(text)
-                searchResults = [...result.tracks.items, ...result.albums.items, ...result.playlists.items.filter(Boolean)]
-            }
-        }
-        
-        onExited: (code, status) => {
-            Logger.i("spotify-player", "finished search")
-        }
+        settingsConsumer?.play(data, pluginApi)
     }
 
     Timer {
@@ -132,33 +50,17 @@ Item {
 
 
     function searchForQuery(query) {
-        if (query !== "") {
-            searchProcess.command = ["curl", "-H", "Authorization: Bearer " + pluginApi?.pluginSettings?.accessToken, "https://api.spotify.com/v1/search?q=" + encodeURIComponent(query) + "&type=album%2Cplaylist%2Ctrack"]
-            searchProcess.running = true
-        }
-    }
-
-    Process {
-        id: fetchPlaylistsProcess
-        command: ["curl", "https://api.spotify.com/v1/me/playlists", "-H", "Authorization: Bearer " + pluginApi?.pluginSettings?.accessToken]
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                playlistResults = JSON.parse(text).items
-            }
-        }
+        settingsConsumer?.search(query, pluginApi)
     }
 
     onPlaylistViewActiveChanged: {
         if (playlistViewActive) {
-            fetchPlaylistsProcess.running = true
+            settingsConsumer?.playlists(pluginApi)
         }
     }
 
-    onPlaylistSelectionIdChanged: {
-        playPlaylistProcess.command = ["sh", "-c", "spotify_player playback start context --shuffle --id " + playlistSelectionId + " playlist"]
-        playPlaylistProcess.running = true
-    }
+    // Legacy playlistSelectionId has no UI producer; its old handler referenced
+    // an undeclared process. Actual playlist rows use sendPlayRequest below.
 
     Rectangle {
         id: panelContainer
@@ -171,18 +73,50 @@ Item {
                 margins: Style.marginL
             }
             spacing: Style.marginL
- 
+
+            NText {
+                text: root.pluginApi?.tr("panel.title") || ""
+                pointSize: Style.fontSizeL
+                font.weight: Font.Bold
+                color: AtmoColor.mOnSurface
+            }
+            ColumnLayout {
+                Layout.fillWidth: true
+                AuthorizationStatus {
+                    Layout.fillWidth: true
+                    status: root.settingsConsumer?.status ?? "not-authorized"
+                    translate: key => root.pluginApi?.tr(key) || ""
+                }
+                NText {
+                    Layout.fillWidth: true
+                    text: root.pluginApi?.tr("authorization.runtime-guidance") || ""
+                    wrapMode: Text.WordWrap
+                }
+                RowLayout {
+                    NButton {
+                        objectName: "spotify-authorize"
+                        text: root.pluginApi?.tr("authorization.authorize") || ""
+                        enabled: root.settingsConsumer !== null && !root.settingsConsumer.busy
+                        onClicked: root.settingsConsumer?.authorize(root.pluginApi)
+                    }
+                    NButton {
+                        objectName: "spotify-devices"
+                        text: root.pluginApi?.tr("settings.devicelist_btn") || ""
+                        enabled: root.settingsConsumer !== null && !root.settingsConsumer.busy
+                        onClicked: root.settingsConsumer?.devices(root.pluginApi)
+                    }
+                }
+                NText {
+                    Layout.fillWidth: true
+                    text: root.settingsConsumer?.availableDevices || ""
+                    visible: text !== ""
+                    wrapMode: Text.WordWrap
+                }
+            }
             // Header
             RowLayout {
                     spacing: Style.marginL
                     
-                    NText {
-                        text: pluginApi?.tr("panel.title")
-                        pointSize: Style.fontSizeL
-                        font.weight: Font.Bold
-                        color: AtmoColor.mOnSurface
-                }
-
                 Rectangle {
                 width: 90
                     height: 30

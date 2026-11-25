@@ -7,18 +7,15 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
+  readonly property var messageField: pluginApi?.field("message") ?? null
+  readonly property var iconColorField: pluginApi?.field("iconColor") ?? null
 
-  property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property string valueMessage: displayBaseline.valueMessage
-  property string valueIconColor: displayBaseline.valueIconColor
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property string valueMessage: cfg.message ?? defaults.message
-    readonly property string valueIconColor: cfg.iconColor ?? defaults.iconColor
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({valueMessage: root.valueMessage, valueIconColor: root.valueIconColor})
+  readonly property string valueMessage: root.messageField?.value ?? defaults.message
+  readonly property string valueIconColor: root.iconColorField?.value ?? defaults.iconColor
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   spacing: Style.marginL
 
@@ -30,21 +27,27 @@ ColumnLayout {
     spacing: Style.marginM
     Layout.fillWidth: true
 
-    NComboBox {
-      label: pluginApi?.tr("settings.iconColor.label")
-      description: pluginApi?.tr("settings.iconColor.desc")
-      model: AtmoColor.colorKeyModel
-      currentKey: root.valueIconColor
-      onSelected: key => root.valueIconColor = key
+    NPluginSettingsField {
+      field: root.iconColorField
+      NComboBox {
+        label: pluginApi?.tr("settings.iconColor.label")
+        description: pluginApi?.tr("settings.iconColor.desc")
+        model: AtmoColor.colorKeyModel
+        currentKey: root.valueIconColor
+        onSelected: key => root.iconColorField.set(key)
+      }
     }
 
-    NTextInput {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.message.label")
-      description: pluginApi?.tr("settings.message.desc")
-      placeholderText: pluginApi?.tr("settings.message.placeholder")
-      text: root.valueMessage
-      onTextChanged: root.valueMessage = text
+    NPluginSettingsField {
+      field: root.messageField
+      NTextInput {
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.message.label")
+        description: pluginApi?.tr("settings.message.desc")
+        placeholderText: pluginApi?.tr("settings.message.placeholder")
+        text: root.valueMessage
+        onEditCommitted: root.messageField.set(text)
+      }
     }
   }
 
@@ -54,8 +57,6 @@ ColumnLayout {
       return;
     }
 
-    pluginApi.pluginSettings.message = root.valueMessage;
-    pluginApi.pluginSettings.iconColor = root.valueIconColor;
     pluginApi.saveSettings(function (result) {
       if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
         Logger.d("HelloWorld", "Settings saved successfully");

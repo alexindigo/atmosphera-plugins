@@ -8,7 +8,8 @@ Item {
     id: root
 
     property var pluginApi: null
-    property var mainInstance: pluginApi?.mainInstance
+    readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+    readonly property var mainInstance: settingsConsumer
     readonly property color sectionBackgroundColor: AtmoColor.mSurfaceVariant
     readonly property color usageWarnColor: Qt.alpha(AtmoColor.mError, 0.72)
 

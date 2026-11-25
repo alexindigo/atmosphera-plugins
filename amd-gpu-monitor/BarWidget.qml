@@ -21,7 +21,9 @@ Item {
   readonly property real capsuleHeight: Style.getCapsuleHeightForScreen(screenName)
   readonly property real barFontSize: Style.getBarFontSizeForScreen(screenName)
 
-  readonly property var mon: pluginApi?.mainInstance
+  readonly property var settingsClient: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext)
+  readonly property var mon: settingsClient?.observation ?? emptyReadings
+  GpuReadings { id: emptyReadings }
   readonly property var cfg: pluginApi?.pluginSettings ?? pluginApi?.manifest?.metadata?.defaultSettings ?? ({})
 
   readonly property bool compactMode: cfg.compactMode !== undefined ? cfg.compactMode : true
@@ -254,15 +256,17 @@ Item {
   implicitWidth: contentWidth
   implicitHeight: contentHeight
 
-  Component.onCompleted: {
-    if (mon)
-      mon.registerPoller("bar:" + (screenName || "unknown"));
+  property var _registeredClient: null
+  property bool _constructed: false
+  function syncPoller() {
+    if (!_constructed || _registeredClient === settingsClient) return;
+    _registeredClient?.unregisterPoller(root);
+    _registeredClient = settingsClient;
+    _registeredClient?.registerPoller(root);
   }
-
-  Component.onDestruction: {
-    if (mon)
-      mon.unregisterPoller("bar:" + (screenName || "unknown"));
-  }
+  onSettingsClientChanged: syncPoller()
+  Component.onCompleted: { _constructed = true; syncPoller(); }
+  Component.onDestruction: _registeredClient?.unregisterPoller(root)
 
   Rectangle {
     id: visualCapsule

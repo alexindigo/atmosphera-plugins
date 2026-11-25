@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "L'interrogation, l'affichage, le serveur de connexion et le transfert sont propres \u00e0 cette instance. VPN, comptes et transferts Taildrop affectent le service syst\u00e8me et les fichiers partag\u00e9s.",
     "title": "Paramètres Tailscale",
     "description": "Configurer l'affichage et le comportement du statut Tailscale",
     "refresh-interval": "Intervalle de rafraîchissement",

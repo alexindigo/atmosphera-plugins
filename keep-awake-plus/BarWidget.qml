@@ -14,7 +14,7 @@ Item {
   property int sectionWidgetIndex: -1
   property int sectionWidgetsCount: 0
 
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
   readonly property bool active: mainInstance ? mainInstance.active : false
   readonly property string scope: mainInstance ? mainInstance.scope : ""
   readonly property string remainingText: mainInstance ? mainInstance.formatRemaining() : ""

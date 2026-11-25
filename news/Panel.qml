@@ -16,7 +16,8 @@ Item {
   anchors.fill: parent
   
   // Shorthand for accessing Main singleton
-  readonly property var main: pluginApi?.mainInstance
+  readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+  readonly property var main: settingsConsumer
 
   Rectangle {
     id: panelContainer

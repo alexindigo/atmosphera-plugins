@@ -3,6 +3,7 @@
     "settings": "Paramètres du widget"
   },
   "settings": {
+    "shared-effect": "Les filtres et l'apparence s'appliquent à cette instance. Les observations des appareils et l'historique des accès sont partagés. Toute configuration peut demander une notification commune ; désactiver les notifications de cette instance ne désactive pas celles des autres.",
     "activeColor": {
       "desc": "Couleur des icônes lorsqu'elles sont actives.",
       "label": "Couleur d'icône active"

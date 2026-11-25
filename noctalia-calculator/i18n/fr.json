@@ -12,6 +12,7 @@
     "subtitle": "Calcul rapide dans la barre"
   },
   "settings": {
+    "shared-effect": "La précision et l'affichage de la valeur dans la barre s'appliquent à cette instance. Toutes les vues partagent le calcul en cours ; saisir, effacer ou évaluer une expression modifie ce calcul partagé.",
     "about": "À propos",
     "show-bar": "Afficher la valeur dans la barre",
     "show-bar-desc": "Affiche la valeur actuelle à côté de l'icone de la calculatrice",

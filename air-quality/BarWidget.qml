@@ -28,7 +28,7 @@ Item {
   readonly property real barFontSize: Style.getBarFontSizeForScreen(screenName)
 
   // Main instance reference
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
   // Settings
   readonly property bool boldText: cfg.boldText ?? defaults.boldText ?? true
@@ -44,16 +44,25 @@ Item {
   NPopupContextMenu {
     id: contextMenu
     model: [
-      { "label": pluginApi?.tr("context.refresh"), "action": "refresh", "icon": "refresh" },
-      { "label": pluginApi?.tr("context.settings"), "action": "settings", "icon": "settings" }
+      {
+        "label": pluginApi?.tr("context.refresh"),
+        "action": "refresh",
+        "icon": "refresh"
+      },
+      {
+        "label": pluginApi?.tr("context.settings"),
+        "action": "settings",
+        "icon": "settings"
+      }
     ]
     onTriggered: action => {
-      contextMenu.close()
-      PanelService.closeContextMenu(screen)
+      contextMenu.close();
+      PanelService.closeContextMenu(screen);
       if (action === "refresh") {
-        root.mainInstance?.refresh()
+        root.mainInstance?.refresh();
       } else if (action === "settings") {
-        if (pluginApi) BarService.openPluginSettings(screen, pluginApi.manifest)
+        if (pluginApi)
+          BarService.openPluginSettings(screen, pluginApi.manifest);
       }
     }
   }
@@ -95,9 +104,11 @@ Item {
         visible: !(root.mainInstance?.loading ?? false)
         text: root.mainInstance?.hasData ? root.mainInstance.getAqi().toString() : "--"
         color: {
-          if (mouseArea.containsMouse) return AtmoColor.mOnHover
-          if (root.mainInstance?.hasData) return root.mainInstance.getAqiColor(root.mainInstance.getAqi())
-          return AtmoColor.mOnSurface
+          if (mouseArea.containsMouse)
+            return AtmoColor.mOnHover;
+          if (root.mainInstance?.hasData)
+            return root.mainInstance.getAqiColor(root.mainInstance.getAqi());
+          return AtmoColor.mOnSurface;
         }
         pointSize: root.barFontSize
         applyUiScale: false
@@ -114,39 +125,54 @@ Item {
 
     onClicked: mouse => {
       if (mouse.button === Qt.LeftButton) {
-        if (pluginApi) pluginApi.togglePanel(root.screen, root)
+        if (pluginApi)
+          pluginApi.togglePanel(root.screen, root);
       } else if (mouse.button === Qt.RightButton) {
-        PanelService.showContextMenu(contextMenu, root, screen)
+        PanelService.showContextMenu(contextMenu, root, screen);
       } else if (mouse.button === Qt.MiddleButton) {
-        root.mainInstance?.refresh()
+        root.mainInstance?.refresh();
       }
     }
 
     onEntered: {
       if (!root.mainInstance?.hasData) {
-        TooltipService.show(root, pluginApi?.tr("widget.tooltip"), BarService.getTooltipDirection())
-        return
+        TooltipService.show(root, pluginApi?.tr("widget.tooltip"), BarService.getTooltipDirection());
+        return;
       }
-      var m = root.mainInstance
-      var aqi = m.getAqi()
-      var level = pluginApi?.tr(m.getAqiLevel(aqi))
-      var city = m.getLocationName()
-      var scaleLabel = pluginApi?.tr(m.aqiScale === "eu" ? "scale.eu" : "scale.us")
-      var tip = scaleLabel + ": " + aqi + " — " + level
-      if (city) tip += "\n" + city
-      tip += "\n───────────────"
-      tip += "\n" + pluginApi?.tr("pollutants.pm25Value", { value: m.pm25 })
-      tip += "\n" + pluginApi?.tr("pollutants.pm10Value", { value: m.pm10 })
-      tip += "\n" + pluginApi?.tr("pollutants.ozoneValue", { value: m.ozone })
-      tip += "\n" + pluginApi?.tr("pollutants.no2Value", { value: m.no2 })
-      tip += "\n" + pluginApi?.tr("pollutants.coValue", { value: m.co })
-      tip += "\n" + pluginApi?.tr("pollutants.so2Value", { value: m.so2 })
-      if (m.lastUpdate) tip += "\n───────────────\n" + pluginApi?.tr("panel.lastUpdate") + ": " + m.lastUpdate
-      TooltipService.show(root, tip, BarService.getTooltipDirection())
+      var m = root.mainInstance;
+      var aqi = m.getAqi();
+      var level = pluginApi?.tr(m.getAqiLevel(aqi));
+      var city = m.getLocationName();
+      var scaleLabel = pluginApi?.tr(m.aqiScale === "eu" ? "scale.eu" : "scale.us");
+      var tip = scaleLabel + ": " + aqi + " — " + level;
+      if (city)
+        tip += "\n" + city;
+      tip += "\n───────────────";
+      tip += "\n" + pluginApi?.tr("pollutants.pm25Value", {
+                                    value: m.pm25
+                                  });
+      tip += "\n" + pluginApi?.tr("pollutants.pm10Value", {
+                                    value: m.pm10
+                                  });
+      tip += "\n" + pluginApi?.tr("pollutants.ozoneValue", {
+                                    value: m.ozone
+                                  });
+      tip += "\n" + pluginApi?.tr("pollutants.no2Value", {
+                                    value: m.no2
+                                  });
+      tip += "\n" + pluginApi?.tr("pollutants.coValue", {
+                                    value: m.co
+                                  });
+      tip += "\n" + pluginApi?.tr("pollutants.so2Value", {
+                                    value: m.so2
+                                  });
+      if (m.lastUpdate)
+        tip += "\n───────────────\n" + pluginApi?.tr("panel.lastUpdate") + ": " + m.lastUpdate;
+      TooltipService.show(root, tip, BarService.getTooltipDirection());
     }
 
     onExited: {
-      TooltipService.hide()
+      TooltipService.hide();
     }
   }
 }

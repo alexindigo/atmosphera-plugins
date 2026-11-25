@@ -8,20 +8,24 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
+  readonly property var refreshIntervalField: pluginApi?.field("refreshInterval") ?? null
+  readonly property var connectedColorField: pluginApi?.field("connectedColor") ?? null
+  readonly property var disconnectedColorField: pluginApi?.field("disconnectedColor") ?? null
 
-  property int editRefreshInterval: displayBaseline.project("editRefreshInterval")
-  property string editConnectedColor: displayBaseline.editConnectedColor
-  property string editDisconnectedColor: displayBaseline.editDisconnectedColor
-  NSettingsBaseline {
-    ranges: [NSettingsRange { field: "editRefreshInterval"; from: rangeEditRefreshInterval.from; to: rangeEditRefreshInterval.to }]
-    id: displayBaseline
-    readonly property int editRefreshInterval: pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 5000
-    readonly property string editConnectedColor: pluginApi?.pluginSettings?.connectedColor || pluginApi?.manifest?.metadata?.defaultSettings?.connectedColor || "primary"
-    readonly property string editDisconnectedColor: pluginApi?.pluginSettings?.disconnectedColor || pluginApi?.manifest?.metadata?.defaultSettings?.disconnectedColor || "none"
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({editRefreshInterval: root.editRefreshInterval, editConnectedColor: root.editConnectedColor, editDisconnectedColor: root.editDisconnectedColor})
+  readonly property int editRefreshInterval: root.refreshIntervalField?.value || 5000
+  readonly property string editConnectedColor: root.connectedColorField?.value || "primary"
+  readonly property string editDisconnectedColor: root.disconnectedColorField?.value || "none"
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   spacing: Style.marginM
+
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.WordWrap
+    text: root.pluginApi?.tr("settings.shared-observation") ?? ""
+  }
 
   NText {
     text: pluginApi?.tr("settings.title")
@@ -42,18 +46,24 @@ ColumnLayout {
     Layout.bottomMargin: Style.marginM
   }
 
-  NColorChoice {
-    label: pluginApi?.tr("settings.connected-color")
-    description: pluginApi?.tr("settings.connected-color-desc")
-    currentKey: root.editConnectedColor
-    onSelected: key => root.editConnectedColor = key
+  NPluginSettingsField {
+    field: root.connectedColorField
+    NColorChoice {
+      label: pluginApi?.tr("settings.connected-color")
+      description: pluginApi?.tr("settings.connected-color-desc")
+      currentKey: root.editConnectedColor
+      onSelected: key => root.connectedColorField.set(key)
+    }
   }
 
-  NColorChoice {
-    label: pluginApi?.tr("settings.disconnected-color")
-    description: pluginApi?.tr("settings.disconnected-color-desc")
-    currentKey: root.editDisconnectedColor
-    onSelected: key => root.editDisconnectedColor = key
+  NPluginSettingsField {
+    field: root.disconnectedColorField
+    NColorChoice {
+      label: pluginApi?.tr("settings.disconnected-color")
+      description: pluginApi?.tr("settings.disconnected-color-desc")
+      currentKey: root.editDisconnectedColor
+      onSelected: key => root.disconnectedColorField.set(key)
+    }
   }
 
   NDivider {
@@ -67,27 +77,27 @@ ColumnLayout {
     description: pluginApi?.tr("settings.refresh-interval-desc") + " (" + root.editRefreshInterval + " ms)"
   }
 
-  NSlider {
-    id: rangeEditRefreshInterval
-    objectName: "settings-range-editRefreshInterval"
-    Layout.fillWidth: true
-    from: 1000
-    to: 60000
-    stepSize: 1000
-    value: root.editRefreshInterval
-    onValueChanged: root.editRefreshInterval = value
+  NPluginSettingsField {
+    field: root.refreshIntervalField
+    NSlider {
+      id: rangeEditRefreshInterval
+      objectName: "settings-range-editRefreshInterval"
+      Layout.fillWidth: true
+      from: 1000
+      to: 60000
+      stepSize: 1000
+      value: root.editRefreshInterval
+      onMoved: root.refreshIntervalField.set(value)
+    }
   }
 
   function saveSettings() {
-    if (!pluginApi) return
-
-    pluginApi.pluginSettings.refreshInterval = root.editRefreshInterval
-    pluginApi.pluginSettings.connectedColor = root.editConnectedColor
-    pluginApi.pluginSettings.disconnectedColor = root.editDisconnectedColor
+    if (!pluginApi)
+      return;
 
     pluginApi.saveSettings(function (result) {
       if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
-        Logger.i("CloudflareWarp", "Settings saved")
-    })
+        Logger.i("CloudflareWarp", "Settings saved");
+    });
   }
 }

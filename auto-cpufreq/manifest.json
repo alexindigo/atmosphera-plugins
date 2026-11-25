@@ -1,9 +1,9 @@
 {
   "id": "auto-cpufreq",
   "name": "auto-cpufreq",
-  "version": "2.6.5",
+  "version": "2.6.9",
   "minNoctaliaVersion": "4.4.1",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "4rmcyt",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -15,6 +15,7 @@
     "Utility"
   ],
   "entryPoints": {
+    "main": "Main.qml",
     "barWidget": "BarWidget.qml",
     "panel": "Panel.qml",
     "settings": "Settings.qml"
@@ -26,10 +27,10 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "compactMode": {"type": "Boolean"},
-        "refreshInterval": {"type": "Real"},
-        "showGovernor": {"type": "Boolean"},
-        "showTurbo": {"type": "Boolean"}
+        "compactMode": {"editorUsage": "configuration", "type": "Boolean"},
+        "refreshInterval": {"editorUsage": "configuration", "type": "Real"},
+        "showGovernor": {"editorUsage": "configuration", "type": "Boolean"},
+        "showTurbo": {"editorUsage": "configuration", "type": "Boolean"}
       }
     },
     "defaultSettings": {

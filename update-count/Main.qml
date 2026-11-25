@@ -11,16 +11,27 @@ Item {
   readonly property url updaterJson: Qt.resolvedUrl("file://" + Settings.configDir + "/plugins/update-count/updaterConfigs.json")
   readonly property int minutesToMillis: 60_000
 
-  readonly property int updateIntervalMinutes: pluginApi?.pluginSettings.updateIntervalMinutes || pluginApi?.manifest?.metadata.defaultSettings?.updateIntervalMinutes || 30
-  readonly property string updateTerminalCommand: pluginApi?.pluginSettings.updateTerminalCommand || pluginApi?.manifest?.metadata.defaultSettings?.updateTerminalCommand || ""
-
-  property int updateCount: 0
   property var updater: null
-  property var customUpdater: ({
-    name: "custom",
-    cmdGetNumUpdates:  pluginApi?.pluginSettings.customCmdGetNumUpdates || "",
-    cmdDoSystemUpdate: pluginApi?.pluginSettings.customCmdDoSystemUpdate || ""
-  })
+  property var _settingsConsumers: new Map()
+  Component { id: clientFactory; UpdateSettingsClient {} }
+  function settingsConsumerFor(context) {
+    if (!context || !context.current()) return null;
+    if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+    var client = clientFactory.createObject(root, {
+      pluginApi: pluginApi, settingsContext: context, domain: root,
+      retire: function(retired) {
+        root._settingsConsumers.delete(context);
+        retired.destroy();
+      }
+    });
+    _settingsConsumers.set(context, client);
+    return client;
+  }
+  readonly property var settingsConsumer: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
+  readonly property int updateCount: settingsConsumer?.updateCount ?? 0
+  readonly property int updateIntervalMinutes: settingsConsumer?.updateIntervalMinutes ?? 30
+  readonly property string updateTerminalCommand: settingsConsumer?.updateTerminalCommand ?? ""
+  readonly property var customUpdater: settingsConsumer?.customUpdater ?? ({})
 
   //
   // ------ Initialization ------
@@ -80,46 +91,24 @@ Item {
   //
   // ------ Get number of updates ------
   //
-  Timer {
-    id: timerGetNumUpdates
-
-    interval: root.updateIntervalMinutes * root.minutesToMillis
-    running: true
-    repeat: true
-    onTriggered: root.startGetNumUpdates()
-  }
-
   function startGetNumUpdates() {
-    const cmd = root.customUpdater.cmdGetNumUpdates || root.updater.cmdGetNumUpdates || "exit 1"
-    getNumUpdates.command = ["sh", "-c", cmd]
-    getNumUpdates.running = true;
-  }
-
-  Process {
-    id: getNumUpdates
-
-    stdout: StdioCollector {
-      onStreamFinished: {
-        var count = parseInt(text.trim());
-        root.updateCount = isNaN(count) ? -1 : count;
-        if (root.updateCount >= 0) {
-          Logger.i("UpdateCount", `Updates available: ${root.updateCount}`);
-        } else {
-          Logger.e("UpdateCount", `getNumUpdates return '${text.trim()}' cannot be parsed into int`);
-        }
-      }
-    }
+    settingsConsumer?.startGetNumUpdates();
   }
 
   //
   // ------ Start update ------
   //
   function startDoSystemUpdate() {
-    const updateCmd = root.customUpdater.cmdDoSystemUpdate || root.updater.cmdDoSystemUpdate || "echo 'No update cmd found.'"
+    settingsConsumer?.startDoSystemUpdate();
+  }
+
+  // One action process remains at the domain owner. Capture originating policy
+  // before launch; later context/source retirement cannot retarget that action.
+  function performSystemUpdate(updateCmd, terminalCommand) {
     const ipcCmd = "qs -c noctalia-shell ipc call plugin:update-count check"
     const combinedCmd = updateCmd + " && " + ipcCmd
 
-    const term = root.updateTerminalCommand.trim();
+    const term = terminalCommand.trim();
     const fullCmd = (term.indexOf("{}") !== -1) ? term.replace("{}", combinedCmd) : term + " " + combinedCmd;
 
     doSystemUpdate.command = ["sh", "-c", fullCmd]

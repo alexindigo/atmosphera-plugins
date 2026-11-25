@@ -16,6 +16,7 @@
     "no_events": "Nincs esemény"
   },
   "settings": {
+    "shared-effect": "A naptáresemények és a szinkronizálás közösek. A hét kezdőnapja, a navigáció és a megjelenítés ennél a példánynál külön állítható.",
     "weekStart": "A hét első napja",
     "weekStart_description": "Válassza ki, melyik nap kezdje a hetet a naptárban.",
     "monday": "Hétfő",

@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "Ta instancja wybiera odpytywanie i polecenia. Uruchomienie aktualizacji zmienia system dla wszystkich instancji.",
     "changeIcon": {
       "label": "Wybierz ikonę"
     },

@@ -37,6 +37,11 @@ Get your free API key from [NewsAPI.org](https://newsapi.org/register). The free
 
 ## Usage
 
+On Atmosphera, scoped instance settings select that instance's news query. Its
+Bar and Panel share one Main-owned producer, including across multiple views of
+the same instance. Another instance cannot replace its results. Settings ->
+Plugins edits the shared values inherited by instances without overrides.
+
 - The widget displays scrolling news headlines with smooth animation
 - **Left-click** the widget to open the news panel with full headlines
 - **Right-click** the widget to open settings

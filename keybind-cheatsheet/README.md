@@ -222,8 +222,15 @@ Every key category has independently themeable **background** and **text** color
 - **Two-pill rows** per category: left pill = background, right pill = label text on that background. Click a pill to open the color picker.
 - **Theme-aware defaults**: `Super` / `Ctrl` / `Shift` use an empty sentinel meaning "use the Material theme accent" (`mPrimary` / `mSecondary` / `mTertiary`), so themed setups stay untouched unless you deliberately override.
 - **Clipboard quick-paste**: copy a `#RRGGBB` / `#RRGGBBAA` hex and a paste icon appears in each pill — one click applies it (clipboard polled via `wl-paste`).
-- **Live preview + revert**: changes preview immediately; closing Settings without Save restores the snapshot taken when the panel opened.
-- **Per-row reset** and a **"Reset all colors"** action restore theme defaults.
+- **Live preview**: changes preview immediately; Discard releases only that preview and reveals the current underlying settings, not an opening snapshot.
+- **Per-row reset** and **"Reset all colors"** stage removal of the selected overrides. Apply publishes the removal; instances inherit plugin settings and plugin settings reveal their native lower level.
+
+Main owns one parser/result client per runtime context, shared by its views.
+Config paths and parser policy select that client; older process generations
+cannot publish into a replacement source. Only the plugin-level client updates
+the existing common cache. Instance results are transient, not preference copies.
+Runtime description/hide actions save through their originating native API.
+Refresh uses applied selected paths, never uncommitted path input in Settings.
 
 ## Settings
 

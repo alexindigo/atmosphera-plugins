@@ -8,11 +8,14 @@ Supports per-workspace max-visible settings via --workspace-config.
 """
 
 import argparse
+import ctypes
 import json
 import logging
 import os
+import queue
 import signal
 import subprocess
+import sys
 import threading
 import time
 
@@ -41,8 +44,11 @@ _prev_col_counts: dict[int, int] = {}  # workspace_id -> column count
 _known_window_ids: set[int] = set()    # track known windows to detect new ones
 _debounce_timer: threading.Timer | None = None
 _lock = threading.Lock()
+_focus_lock = threading.RLock()
 _event_count = 0
 _event_window_start = 0.0
+_config_generation = 0
+_stopping = False
 
 
 # ─── Validation ───
@@ -63,11 +69,33 @@ def get_max_visible(ws_id: int) -> int:
 
 
 # ─── Niri IPC ───
+def _owned_niri_command(*args: str) -> list[str]:
+    """Every IPC subprocess has the same owner, including threaded actions."""
+    return [sys.executable, "-B", os.path.realpath(__file__),
+            "--owned-niri-child", str(os.getpid()), *args]
+
+
+def _exec_owned_niri(parent_pid: int, args: list[str]) -> None:
+    """Bind in a fresh interpreter, not a preexec_fn after a threaded fork."""
+    libc = ctypes.CDLL(None, use_errno=True)
+    prctl = libc.prctl
+    prctl.argtypes = [ctypes.c_int, ctypes.c_ulong, ctypes.c_ulong,
+                      ctypes.c_ulong, ctypes.c_ulong]
+    prctl.restype = ctypes.c_int
+    # Linux PR_SET_PDEATHSIG. SIGKILL also handles a blocked/unresponsive client.
+    if prctl(1, signal.SIGKILL, 0, 0, 0) != 0:
+        raise OSError(ctypes.get_errno(), "cannot bind niri child lifetime")
+    # If the owner died before binding, no parent-death signal would arrive.
+    if parent_pid <= 1 or os.getppid() != parent_pid:
+        raise SystemExit("niri child owner already retired")
+    os.execvp("niri", ["niri", "msg", *args])
+
+
 def niri_cmd(*args) -> str:
     """Run a niri msg command and return stdout."""
     try:
         result = subprocess.run(
-            ["niri", "msg", *args],
+            _owned_niri_command(*args),
             capture_output=True, text=True, timeout=NIRI_TIMEOUT,
         )
         if result.returncode != 0:
@@ -84,11 +112,13 @@ def niri_cmd(*args) -> str:
         return ""
 
 
-def niri_action(*args) -> None:
+def niri_action(*args, generation: int | None = None) -> None:
     """Run a niri msg action."""
+    if _stopping or (generation is not None and generation != _config_generation):
+        return
     try:
         result = subprocess.run(
-            ["niri", "msg", "action", *args],
+            _owned_niri_command("action", *args),
             capture_output=True, timeout=NIRI_TIMEOUT,
         )
         if result.returncode != 0:
@@ -193,12 +223,15 @@ def get_active_workspaces() -> set[int]:
     return ws_ids
 
 
-def _redistribute_workspace(ws_id: int, focused_id: int | None) -> None:
+def _redistribute_workspace(ws_id: int, focused_id: int | None,
+                            generation: int | None = None) -> None:
     """Redistribute columns on a single workspace.
 
     Only redistributes when col_count >= max_visible. Below that threshold,
     niri's default layout is preserved.
     """
+    if generation is None:
+        generation = _config_generation
     col_count = count_columns(ws_id)
     if col_count == 0:
         return
@@ -213,6 +246,8 @@ def _redistribute_workspace(ws_id: int, focused_id: int | None) -> None:
     # Thread-safe check: skip if state unchanged for this workspace
     cache_key = (col_count, max_vis)
     with _lock:
+        if generation != _config_generation:
+            return
         if _prev_col_counts.get(ws_id) == cache_key:
             return
         _prev_col_counts[ws_id] = cache_key
@@ -238,40 +273,47 @@ def _redistribute_workspace(ws_id: int, focused_id: int | None) -> None:
                 break
 
     if ws_window_id is not None:
-        niri_action("focus-window", "--id", str(ws_window_id))
+        niri_action("focus-window", "--id", str(ws_window_id), generation=generation)
 
     # Walk columns and set widths
-    niri_action("focus-column-first")
+    niri_action("focus-column-first", generation=generation)
     for i in range(col_count):
         pct = f"{base_pct + remainder}%" if i == col_count - 1 and remainder > 0 else f"{base_pct}%"
-        niri_action("set-column-width", pct)
+        niri_action("set-column-width", pct, generation=generation)
         if i < col_count - 1:
-            niri_action("focus-column-right")
+            niri_action("focus-column-right", generation=generation)
 
     # Center all visible columns on screen
-    niri_action("focus-column-first")
-    niri_action("center-visible-columns")
+    niri_action("focus-column-first", generation=generation)
+    niri_action("center-visible-columns", generation=generation)
 
 
 def redistribute() -> None:
     """Redistribute all active workspaces, restoring original focus afterwards."""
+    with _focus_lock:
+        if not _stopping:
+            _redistribute_focused()
+
+
+def _redistribute_focused() -> None:
+    generation = _config_generation
     original_ws, original_focused = get_focused_workspace()
 
     for active_ws in get_active_workspaces():
-        _redistribute_workspace(active_ws, None)
+        _redistribute_workspace(active_ws, None, generation)
 
     # Restore focus to the original window/workspace
     if original_focused is not None:
-        niri_action("focus-window", "--id", str(original_focused))
-        niri_action("center-visible-columns")
+        niri_action("focus-window", "--id", str(original_focused), generation=generation)
+        niri_action("center-visible-columns", generation=generation)
     elif original_ws is not None:
         # No focused window (e.g. panel open) — focus any window on original workspace
         for w in _get_windows():
             if w.get("workspace_id") == original_ws and not w.get("is_floating", False):
                 win_id = _valid_id(w.get("id"))
                 if win_id is not None:
-                    niri_action("focus-window", "--id", str(win_id))
-                    niri_action("center-visible-columns")
+                    niri_action("focus-window", "--id", str(win_id), generation=generation)
+                    niri_action("center-visible-columns", generation=generation)
                     break
 
 
@@ -282,6 +324,8 @@ def debounced_redistribute() -> None:
     now = time.monotonic()
 
     with _lock:
+        if _stopping:
+            return
         # Rate limiter: sliding window
         if now - _event_window_start > 1.0:
             _event_window_start = now
@@ -370,7 +414,7 @@ def run_event_loop() -> None:
     redistribute()
 
     proc = subprocess.Popen(
-        ["niri", "msg", "-j", "event-stream"],
+        _owned_niri_command("-j", "event-stream"),
         stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True,
     )
 
@@ -416,7 +460,7 @@ def parse_args() -> argparse.Namespace:
         help=f"max events per second (default: {MAX_EVENTS_PER_SECOND})",
     )
     parser.add_argument(
-        "--only-at-max", action="store_true",
+        "--only-at-max", action=argparse.BooleanOptionalAction, default=None,
         help="only redistribute when column count reaches max-visible",
     )
     parser.add_argument(
@@ -441,7 +485,13 @@ def parse_args() -> argparse.Namespace:
 # ─── Hot Reload ───
 def reload_config() -> None:
     """Reload configuration from CONFIG_FILE and trigger redistribution."""
-    global MAX_VISIBLE, PER_WORKSPACE, WORKSPACE_MAX_VISIBLE, ONLY_AT_MAX
+    with _focus_lock:
+        if not _stopping:
+            _reload_config_focused()
+
+
+def _reload_config_focused() -> None:
+    global MAX_VISIBLE, PER_WORKSPACE, WORKSPACE_MAX_VISIBLE, ONLY_AT_MAX, _config_generation
 
     if not CONFIG_FILE or not os.path.isfile(CONFIG_FILE):
         log.warning("no config file to reload")
@@ -456,6 +506,9 @@ def reload_config() -> None:
 
     if not isinstance(cfg, dict):
         return
+
+    # Admit the new policy only after any old pass has restored its focus.
+    _config_generation += 1
 
     old_max = MAX_VISIBLE
     if "maxVisible" in cfg:
@@ -481,6 +534,25 @@ def reload_config() -> None:
     redistribute()
 
 
+def _stop_work() -> None:
+    global _stopping, _config_generation
+    _stopping = True
+    _config_generation += 1
+    # Signal handler must not wait on a lock held by the interrupted thread.
+    if _debounce_timer is not None:
+        _debounce_timer.cancel()
+
+
+def _reload_worker(requests: queue.SimpleQueue) -> None:
+    while requests.get():
+        if _stopping:
+            return
+        try:
+            reload_config()
+        except (ValueError, TypeError):
+            log.exception("invalid config values")
+
+
 # ─── Main ───
 def main() -> None:
     """Main entry point with reconnection loop."""
@@ -496,8 +568,8 @@ def main() -> None:
         DEBOUNCE_SECONDS = max(0.05, args.debounce)
     if args.max_events is not None:
         MAX_EVENTS_PER_SECOND = max(1, args.max_events)
-    if args.only_at_max:
-        ONLY_AT_MAX = True
+    if args.only_at_max is not None:
+        ONLY_AT_MAX = args.only_at_max
     if args.per_workspace:
         PER_WORKSPACE = True
     if args.workspace_config:
@@ -516,18 +588,19 @@ def main() -> None:
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    # Handle SIGTERM for graceful shutdown
+    # Signals only publish intents. The reload worker can wait for focus
+    # ownership without blocking a signal-interrupted main-thread pass.
+    requests = queue.SimpleQueue()
+    threading.Thread(target=_reload_worker, args=(requests,), daemon=True).start()
     def _shutdown(signum, frame):
-        # Timer.cancel() is thread-safe; avoid _lock here to prevent deadlock
-        t = _debounce_timer
-        if t is not None:
-            t.cancel()
+        _stop_work()
+        requests.put(False)
         raise KeyboardInterrupt
     signal.signal(signal.SIGTERM, _shutdown)
 
     # Handle SIGUSR1 for hot config reload (no restart needed)
     def _reload(signum, frame):
-        reload_config()
+        requests.put(True)
     signal.signal(signal.SIGUSR1, _reload)
 
     mode = "per-workspace" if PER_WORKSPACE else "global"
@@ -548,4 +621,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) >= 4 and sys.argv[1] == "--owned-niri-child":
+        _exec_owned_niri(int(sys.argv[2]), sys.argv[3:])
+    else:
+        main()

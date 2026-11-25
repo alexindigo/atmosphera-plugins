@@ -2,10 +2,10 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
+import "." as Local
 import qs.Commons
 import qs.Services.UI
 import qs.Widgets
-import "." as Local
 
 // Panel Component
 Item {
@@ -14,6 +14,7 @@ Item {
   // Plugin API (injected by PluginPanelSlot)
   property var pluginApi: null
   property var ipMonitorService: pluginApi?.mainInstance?.ipMonitorService || null
+  readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
   // SmartPanel
   readonly property var geometryPlaceholder: panelContainer

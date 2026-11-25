@@ -36,7 +36,8 @@ Item {
     ?? (pluginApi?.manifest?.metadata?.defaultSettings?.widgetIcon)
     ?? "building-mosque"
 
-  readonly property var    mainInstance:     pluginApi?.mainInstance
+  readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+  readonly property var mainInstance: settingsConsumer
   readonly property var    prayerTimings:    mainInstance?.prayerTimings    ?? null
   readonly property bool   isRamadan:        mainInstance?.isRamadan        ?? false
   readonly property bool   isLoading:        mainInstance?.isLoading        ?? false

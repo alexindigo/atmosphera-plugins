@@ -14,6 +14,7 @@ Item {
 
   property var pluginApi: null
   property var mainInstance: null
+  readonly property var settingsConsumer: pluginApi && mainInstance ? mainInstance.settingsConsumerFor(pluginApi.settingsContext) : null
 
   // State from main instance
   readonly property var messages: mainInstance?.messages || []
@@ -24,8 +25,8 @@ Item {
   property int initialCursorPosition: mainInstance?.chatInputCursorPosition || 0
 
   // Provider info - use mainInstance for computed model (has per-provider logic)
-  readonly property string provider: mainInstance?.provider || Constants.Providers.GOOGLE
-  readonly property string model: mainInstance?.model || ""
+  readonly property string provider: settingsConsumer?.provider || Constants.Providers.GOOGLE
+  readonly property string model: settingsConsumer?.model || ""
 
   ColumnLayout {
     anchors.fill: parent
@@ -92,7 +93,7 @@ Item {
           onExited: clearHistoryText.hovered = false
           onClicked: {
             if (mainInstance)
-              mainInstance.clearMessages();
+              mainInstance.clearMessages(pluginApi?.settingsContext);
           }
         }
       }
@@ -219,12 +220,12 @@ Item {
 
               onRegenerateRequested: {
                 if (mainInstance && !isGenerating) {
-                  mainInstance.regenerateLastResponse();
+                  mainInstance.regenerateLastResponse(pluginApi?.settingsContext);
                 }
               }
               onEditRequested: function (id, newText) {
                 if (mainInstance && !isGenerating) {
-                  mainInstance.editMessage(id, newText);
+                  mainInstance.editMessage(id, newText, pluginApi?.settingsContext);
                 }
               }
               onCopyRequested: function (text) {
@@ -357,7 +358,7 @@ Item {
                 if (mainInstance.chatInputCursorPosition !== cursorPosition) {
                   mainInstance.chatInputCursorPosition = cursorPosition;
                   // Debounce handled in Main.qml saveState
-                  mainInstance.saveState();
+                  mainInstance.saveState(pluginApi?.settingsContext);
                 }
               }
             }
@@ -367,7 +368,7 @@ Item {
                 // Only update if changed to avoid loop
                 if (mainInstance.chatInputText !== text) {
                   mainInstance.chatInputText = text;
-                  mainInstance.saveState();
+                  mainInstance.saveState(pluginApi?.settingsContext);
                 }
               }
             }
@@ -417,11 +418,12 @@ Item {
     var text = inputField.text.trim();
     if (text === "" || !mainInstance)
       return;
-    mainInstance.sendMessage(text);
+    if (!mainInstance.sendMessage(text, pluginApi?.settingsContext))
+      return;
     inputField.text = "";
     mainInstance.chatInputText = "";
     mainInstance.chatInputCursorPosition = 0;
-    mainInstance.saveState();
+    mainInstance.saveState(pluginApi?.settingsContext);
     inputField.forceActiveFocus();
   }
 

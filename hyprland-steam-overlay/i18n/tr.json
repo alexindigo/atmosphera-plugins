@@ -12,6 +12,7 @@
     "ipc_received": "IPC değiştirme alındı"
   },
   "settings": {
+    "shared-effect": "Steam pencereleri ve arayüz katmanı ortaktır. Katmanı bu araçtan açtığınızda, o oturum için aracın uygulanmış yerleşimi kullanılır. Sonraki ayar değişiklikleri katman bir daha açıldığında geçerli olur.",
     "custom-layout-label": "Use custom Hyprland layout (Lua)",
     "custom-layout-description": "Let a Hyprland custom Lua layout tile the windows instead of floating+positioning them. Requires Hyprland 0.55+ Lua config and steam-layout.lua (see README). When enabled, the width sliders below are handled by the Lua layout."
   }

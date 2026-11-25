@@ -16,6 +16,7 @@
     "Vfio": "VFIO Passthrough"
   },
   "settings": {
+    "shared-effect": "A GPU módja és az eszköz megfigyelései közösek. A lekérdezések és kérések ennek a példánynak az alkalmazott beállításait használják; a módváltás minden példányt érint. A ROG-értesítések vezérlése továbbra sem érhető el.",
     "debug": {
       "description": "Hibainformációk kiírása a konzolra.",
       "label": "Hibamód"

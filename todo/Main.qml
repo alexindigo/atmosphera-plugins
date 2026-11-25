@@ -11,6 +11,8 @@ Item {
   property var rawTodos: []
   property var rawPages: []
   property string currentExportPath: ""
+  property var _exportRequest: null
+  readonly property bool exportBusy: _exportRequest !== null || exportProcess.running
   Connections {
     target: root.pluginApi ? root.pluginApi.pluginSettings : null
     function onTodosChanged() {root.rawTodos = Pages.clone(root.pluginApi.pluginSettings.todos || []);}
@@ -21,13 +23,11 @@ Item {
   Process {
     id: exportProcess
     running: false
-    onExited: function (code) {
-      if (code === 0) {
-        var displayPath = currentExportPath.replace(Quickshell.env("HOME"), "~");
-        ToastService.showNotice(pluginApi.tr("main.exported_todos") + displayPath);
-      } else {
-        ToastService.showError(pluginApi.tr("main.export_failed"));
-      }
+    onExited: code => root.settleExport(code)
+    onRunningChanged: {
+      // FailedToStart has no exited signal. Normal exits settle before this.
+      if (!running)
+        root.settleExport(-1);
     }
   }
 
@@ -574,35 +574,55 @@ Item {
     return rawTodos.filter(t => t.completed).length;
   }
 
-  // Export todos to markdown file
-  function doExportTodos() {
-    if (!pluginApi) {
+  function settleExport(code) {
+    var request = _exportRequest;
+    _exportRequest = null;
+    if (!request || !request.context.current())
       return;
+    if (code === 0) {
+      var displayPath = request.filePath.replace(Quickshell.env("HOME"), "~");
+      ToastService.showNotice(pluginApi.tr("main.exported_todos") + displayPath);
+    } else {
+      ToastService.showError(pluginApi.tr("main.export_failed"));
     }
-    var format = pluginApi.pluginSettings.exportFormat;
+  }
+
+  // Export todos to markdown file
+  function doExportTodos(context) {
+    context = context || pluginApi?.settingsContext;
+    if (!context || !context.current())
+      return false;
+    if (exportBusy) {
+      ToastService.showError(pluginApi.tr("main.export_busy"));
+      return false;
+    }
+    var cfg = context.settingsView;
+    var request = {context: context, exportPath: cfg.exportPath, exportFormat: cfg.exportFormat,
+      exportEmptySections: cfg.exportEmptySections, todos: Pages.clone(rawTodos), pages: Pages.clone(rawPages)};
+    var format = request.exportFormat;
     var content;
     var fileExtension;
 
     if (format === "json") {
-      content = JSON.stringify(rawTodos, null, 2);
+      content = JSON.stringify(request.todos, null, 2);
       fileExtension = ".json";
     } else {
-      content = generateExportMarkdown();
+      content = generateExportMarkdown(request);
       fileExtension = ".md";
     }
 
-    exportTodosToFile(content, fileExtension);
+    return exportTodosToFile(content, fileExtension, request);
   }
 
   // Export todos to file
-  function exportTodosToFile(content, fileExtension) {
+  function exportTodosToFile(content, fileExtension, request) {
     try {
       var timestamp = new Date().toISOString().split("T")[0];
       var timeSuffix = new Date().toISOString().replace(/[:.]/g, "-").split("T")[1];
       var fileName = "todo_" + timestamp + "_" + timeSuffix + fileExtension;
 
       // Get export path from settings, default to ~/Documents
-      var exportPath = pluginApi.pluginSettings.exportPath;
+      var exportPath = request.exportPath;
       exportPath = exportPath.replace("~", Quickshell.env("HOME"));
 
       // Ensure path ends without slash
@@ -614,27 +634,34 @@ Item {
 
       // Write file using printf for better handling of long content
       var base64 = Qt.btoa(content);
+      request.filePath = filePath;
+      _exportRequest = request;
       currentExportPath = filePath;
       exportProcess.command = ["sh", "-c", `printf '%s' "${base64}" | base64 -d > "${filePath}"`];
       exportProcess.running = true;
+      return true;
     } catch (e) {
+      _exportRequest = null;
       Logger.e("Todo", "Export error: " + e);
       ToastService.showError(pluginApi.tr("main.export_failed"));
+      return false;
     }
   }
 
   // Generate markdown content from todos
-  function generateExportMarkdown() {
+  function generateExportMarkdown(request) {
     var lines = [];
     var INDENT = "  ";
     var ITEM_PREFIX = "- ";
     var SUB_ITEM_PREFIX = INDENT + "- ";
     var DETAIL_PREFIX = INDENT + INDENT + "- ";
-    var showEmptySections = pluginApi.pluginSettings.exportEmptySections;
+    var showEmptySections = request.exportEmptySections;
+    var todos = request.todos;
+    var pages = request.pages;
 
     // Calculate statistics
-    var totalCount = rawTodos.length;
-    var activeCount = rawTodos.filter(function (t) {
+    var totalCount = todos.length;
+    var activeCount = todos.filter(function (t) {
       return !t.completed;
     }).length;
     var completedCount = totalCount - activeCount;
@@ -652,13 +679,13 @@ Item {
     lines.push("");
 
     // Process each page
-    for (var p = 0; p < rawPages.length; p++) {
-      var page = rawPages[p];
+    for (var p = 0; p < pages.length; p++) {
+      var page = pages[p];
       var pageId = page.id;
       var pageName = page.name;
 
       // Get todos for this page
-      var pageTodos = rawTodos.filter(function (t) {
+      var pageTodos = todos.filter(function (t) {
         return t.pageId === pageId;
       });
       var activeTodos = pageTodos.filter(function (t) {

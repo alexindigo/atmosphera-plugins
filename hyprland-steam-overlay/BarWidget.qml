@@ -56,7 +56,7 @@ AtmoIconButton {
 
       if (action === "toggle-overlay") {
         if (pluginApi?.mainInstance) {
-          pluginApi.mainInstance.toggleOverlay();
+          pluginApi.mainInstance.toggleOverlay(pluginApi.settingsContext);
         }
       } else if (action === "plugin-settings") {
         if (pluginApi) {
@@ -94,7 +94,7 @@ AtmoIconButton {
   onClicked: {
     if (pluginApi?.mainInstance) {
       Logger.i("SteamOverlay.BarWidget", "Calling Steam overlay toggle");
-      pluginApi.mainInstance.toggleOverlay();
+      pluginApi.mainInstance.toggleOverlay(pluginApi.settingsContext);
     }
   }
 

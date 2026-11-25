@@ -6,6 +6,7 @@
     "next": "Next"
   },
   "settings": {
+    "shared-effect": "This instance selects a player and lyric updates. Playback buttons control that shared player for every app.",
     "player-name": "Player Name",
     "player-name-desc": "MPRIS player name (e.g., musicfox, spotify, firefox)",
     "hide-when-inactive": "Hide When Inactive",

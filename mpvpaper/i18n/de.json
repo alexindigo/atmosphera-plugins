@@ -32,6 +32,7 @@
     "loading": "Lade..."
   },
   "settings": {
+    "shared-effect": "Durch Anwenden oder eine Aktion im laufenden Betrieb werden die Einstellungen dieser Instanz für den gemeinsamen Hintergrundplayer und den Automatisierungstimer ausgewählt. Wiedergabe, Wiederherstellung des Hintergrundbildes und Farbänderungen betreffen alle Instanzen.",
     "toggle": {
       "label": "mpvpaper aktivieren",
       "description": "Aktiviere die mpvpaper-Integration"

@@ -1,9 +1,9 @@
 {
   "id": "port-monitor",
   "name": "Port Monitor",
-  "version": "1.0.5",
+  "version": "1.0.9",
   "minNoctaliaVersion": "3.6.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "adriamartin91",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -22,9 +22,9 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "hideSystemPorts": {"type": "Boolean"},
-        "hideWhenEmpty": {"type": "Boolean"},
-        "refreshInterval": {"type": "Real"}
+        "hideSystemPorts": {"editorUsage": "configuration", "type": "Boolean"},
+        "hideWhenEmpty": {"editorUsage": "configuration", "type": "Boolean"},
+        "refreshInterval": {"editorUsage": "configuration", "type": "Real"}
       }
     },
     "defaultSettings": {

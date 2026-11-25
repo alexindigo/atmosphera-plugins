@@ -6,6 +6,7 @@ import "./Services"
 AtmoIconButtonHot {
     property ShellScreen screen
     property var pluginApi: null
+    readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
     function getTooltip(device) {
         const batteryLabel = pluginApi?.tr("panel.card.battery") || "Battery";
@@ -20,8 +21,8 @@ AtmoIconButtonHot {
         return batteryLine + stateLine;
     }
 
-    icon: KDEConnectUtils.getConnectionStateIcon(KDEConnect.mainDevice, KDEConnect.daemonAvailable)
-    tooltipText: getTooltip(KDEConnect.mainDevice)
+    icon: KDEConnectUtils.getConnectionStateIcon(settingsConsumer?.mainDevice ?? null, KDEConnect.daemonAvailable)
+    tooltipText: getTooltip(settingsConsumer?.mainDevice ?? null)
 
     onClicked: pluginApi?.togglePanel(screen, this)
 }

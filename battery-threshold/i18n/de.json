@@ -2,7 +2,8 @@
   "settings": {
     "battery-device": "Akku-Gerät",
     "battery-device-desc": "Akku für Schwellenwertkonfiguration",
-    "no-battery-device": "Für dieses System sind keine konfigurierbaren Akkus verfügbar"
+    "no-battery-device": "Für dieses System sind keine konfigurierbaren Akkus verfügbar",
+    "shared-device": "Die Akkuauswahl gilt f\u00fcr diese Konfiguration. Die physische Ladegrenze wird gemeinsam genutzt; andere Konfigurationen k\u00f6nnen sie \u00e4ndern. Die gespeicherte Grenze wird einmal bei der Aktivierung oder nach dem Anwenden der Einstellungen wiederhergestellt."
   },
   "actions": {
     "widget-settings": "Widget-Einstellungen"
@@ -11,6 +12,7 @@
     "title": "Ladegrenze",
     "not-available": "Auf diesem System nicht verfügbar",
     "adjust-limit": "Zieh den Schieberegler, um den Grenzwert anzupassen",
-    "read-only": "Nur-Lese-Zugriff: udev-Regel für Schreibzugriff installieren"
+    "read-only": "Nur-Lese-Zugriff: udev-Regel für Schreibzugriff installieren",
+    "action-failed": "Die Ladegrenze konnte nicht angewendet oder gespeichert werden. Schreibzugriff pr\u00fcfen und erneut versuchen."
   }
 }

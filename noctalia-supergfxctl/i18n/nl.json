@@ -16,6 +16,7 @@
     "Vfio": "VFIO Passthrough"
   },
   "settings": {
+    "shared-effect": "De GPU-modus en apparaatwaarnemingen worden gedeeld. Peilingen en verzoeken gebruiken de toegepaste instellingen van deze instantie; moduswijzigingen gelden voor alle instanties. Het beheer van ROG-meldingen blijft niet beschikbaar.",
     "debug": {
       "description": "Print debug-informatie naar de console.",
       "label": "Debugmodus"

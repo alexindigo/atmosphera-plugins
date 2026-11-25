@@ -16,6 +16,7 @@
     "no_events": "Sem eventos"
   },
   "settings": {
+    "shared-effect": "Os eventos do calendário e a sincronização são partilhados. Esta instância tem as suas próprias definições para o início da semana, a navegação e a apresentação.",
     "weekStart": "Primeiro dia da semana",
     "weekStart_description": "Escolha qual dia comença a semana no calendário.",
     "monday": "Segunda-feira",

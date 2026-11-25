@@ -14,7 +14,7 @@ Item {
   property real contentPreferredWidth: 380 * Style.uiScaleRatio
   property real contentPreferredHeight: 400 * Style.uiScaleRatio
 
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext)
   readonly property int portCount: mainInstance?.portCount ?? 0
 
   // Kill confirmation state

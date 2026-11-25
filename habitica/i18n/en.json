@@ -6,6 +6,8 @@
     "openHabitica": "Open Habitica"
   },
   "settings": {
+    "shared-effect-label": "Shared Habitica account actions",
+    "shared-effect": "This instance selects its own account and task filters. Scoring changes that account for every client. The plugin-level account alone uses the saved offline cache.",
     "account": {
       "label": "Habitica Account",
       "description": "Create or copy credentials from Habitica Settings > API."

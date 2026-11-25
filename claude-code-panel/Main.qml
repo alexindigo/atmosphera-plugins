@@ -70,7 +70,25 @@ Item {
   readonly property string stateCachePath: cacheDir + "state.json"
 
   // ----- Settings accessors -----
-  readonly property var claudeSettings: pluginApi?.pluginSettings?.claude || ({})
+  property var _settingsConsumers: new Map()
+  property var acpProcess: null
+  property var _lifetime: ({alive: true})
+  property real _saveHistoryLength: 200
+  Component { id: clientFactory; ClaudeSettingsClient {} }
+  Component { id: processFactory; ClaudeProcess {} }
+  function settingsConsumerFor(context) {
+    if (!context || !context.current()) return null;
+    if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+    var client = clientFactory.createObject(root, {settingsContext: context, owner: root,
+      retire: function(retired) {
+        root.retireRequests(retired); root._settingsConsumers.delete(context); retired.destroy();
+      }});
+    _settingsConsumers.set(context, client);
+    return client;
+  }
+  function _consumer(context) { return settingsConsumerFor(context === undefined ? pluginApi?.settingsContext : context); }
+  readonly property var settingsConsumer: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
+  readonly property var claudeSettings: settingsConsumer?.claudeSettings || ({})
   readonly property string binaryPath: claudeSettings.binary || "claude-code-acp"
   readonly property string workingDir: claudeSettings.workingDir || ""
   readonly property string permissionMode: claudeSettings.permissionMode || "default"
@@ -80,6 +98,15 @@ Item {
     Logger.i("ClaudeCode", "Plugin initialized (ACP mode)");
     ensureCacheDir();
     checkBinary();
+  }
+  Component.onDestruction: _lifetime.alive = false
+  function retireRequests(client) {
+    _pendingPrompts = _pendingPrompts.filter(request => request.policy.context !== client.settingsContext);
+    if (acpProcess?.policy.context === client.settingsContext) {
+      stopAcpProcess();
+      errorMessage = "The originating Claude configuration is no longer current.";
+    }
+    _flushPendingPrompts();
   }
 
   function ensureCacheDir() {
@@ -149,9 +176,15 @@ Item {
   }
   property bool saveStateQueued: false
 
-  function saveState() {
+  function saveState(context) {
+    if (context !== undefined) {
+      var client = _consumer(context);
+      if (!client) return false;
+      _saveHistoryLength = client.maxHistoryLength;
+    }
     saveStateQueued = true;
     saveStateTimer.restart();
+    return true;
   }
 
   function performSaveState() {
@@ -159,7 +192,7 @@ Item {
     saveStateQueued = false;
     try {
       ensureCacheDir();
-      var maxHistory = pluginApi?.pluginSettings?.maxHistoryLength || 200;
+      var maxHistory = _saveHistoryLength;
       var data = Logic.prepareStateForSave({
         messages: root.messages,
         sessionId: root.sessionId,
@@ -185,13 +218,16 @@ Item {
     return withMeta;
   }
 
-  function clearMessages() {
+  function clearMessages(context) {
+    var client = _consumer(context);
+    if (!client) return false;
     root.messages = [];
     root.streamingMessageId = "";
     root.streamingThinkingId = "";
     root._toolUseByCallId = ({});
     root._pendingPermissions = ({});
-    saveState();
+    saveState(client.settingsContext);
+    return true;
   }
 
   function _indexOfMessage(id) {
@@ -245,74 +281,66 @@ Item {
     saveState();
   }
 
-  function newSession() {
+  function newSession(context) {
+    var policy = _consumer(context)?.capture();
+    if (!policy) return false;
     stopAcpProcess();
+    root._pendingPrompts = [];
     root.sessionId = "";
     root.messages = [];
     root.streamingMessageId = "";
     root._toolUseByCallId = ({});
     root._pendingPermissions = ({});
     root.errorMessage = "";
-    saveState();
+    saveState(policy.context);
     ToastService.showNotice(pluginApi?.tr("toast.sessionCleared"));
-    if (root.binaryAvailable) { startAcpProcess(); }
+    if (root.binaryAvailable) { startAcpProcess(policy); }
+    return true;
   }
 
   // ==========================================================================
   // ACP process + JSON-RPC plumbing
   // ==========================================================================
-  Process {
-    id: acpProcess
-    stdinEnabled: true
-    running: false
-
-    property string stderrBuffer: ""
-    property string stdoutBuffer: ""   // accumulates bytes until newline for NDJSON framing
-
-    stdout: SplitParser {
-      onRead: function (line) { root._onAcpLine(line); }
-    }
-
-    stderr: StdioCollector {
-      onStreamFinished: {
-        if (text && text.trim() !== "") {
-          Logger.w("ClaudeCode", "acp stderr: " + text);
-          acpProcess.stderrBuffer = text;
-        }
-      }
-    }
-
-    onStarted: {
-      Logger.i("ClaudeCode", "claude-code-acp started (pid=" + acpProcess.processId + ")");
-      root._sendInitialize();
-    }
-
-    onExited: function (exitCode, exitStatus) {
-      Logger.i("ClaudeCode", "acp exited code=" + exitCode + " status=" + exitStatus);
-      root._onAcpExited(exitCode);
-    }
+  function _policyCurrent(policy) {
+    return policy && policy.context.current() && _consumer(policy.context)?.identity === policy.identity;
   }
-
-  function startAcpProcess() {
-    if (acpProcess.running) { return; }
+  function _acpCurrent(worker) { return worker && acpProcess === worker && !worker.cancelled && _policyCurrent(worker.policy); }
+  function startAcpProcess(policy) {
+    if (acpProcess?.running) return;
+    policy = policy || _consumer(undefined)?.capture();
+    if (!_policyCurrent(policy)) return false;
     if (!root.binaryAvailable) {
       root.errorMessage = "claude-code-acp not found. Install with: npm i -g @zed-industries/claude-code-acp";
-      return;
+      return false;
     }
     root.acpPhase = "spawning";
     var home = Quickshell.env("HOME") || "";
-    var cwd = root.workingDir ? Logic.expandHome(root.workingDir, home) : (home || "/tmp");
-    acpProcess.workingDirectory = cwd;
-    acpProcess.command = [root.resolvedBinaryPath];
-    acpProcess.stderrBuffer = "";
-    acpProcess.stdoutBuffer = "";
-    acpProcess.running = true;
+    var cwd = policy.workingDir ? Logic.expandHome(policy.workingDir, home) : home;
+    var life = _lifetime;
+    var worker = processFactory.createObject(root, {policy: policy, workingDirectory: cwd, command: [root.resolvedBinaryPath],
+      becameStarted: function(source) { if (life.alive && root._acpCurrent(source)) root._sendInitialize(); },
+      delivered: function(source, line) { if (life.alive && root._acpCurrent(source)) root._onAcpLine(line); },
+      settled: function(source, code) { if (life.alive && root._acpCurrent(source)) root._onAcpExited(code); }});
+    root.acpProcess = worker;
+    root.sessionId = "";
+    _saveHistoryLength = policy.maxHistoryLength;
+    worker.running = true;
+    return true;
   }
 
   function stopAcpProcess() {
-    if (acpProcess.running) {
-      acpProcess.running = false;
+    var worker = acpProcess;
+    acpProcess = null;
+    if (worker) { worker.cancel(); worker.destroy(); }
+    // A permission belongs to exactly this process/session, never its successor.
+    for (var id of Object.keys(_pendingPermissions)) {
+      var index = _indexOfMessage(id);
+      if (index !== -1) {
+        var entry = messages[index];
+        _replaceMessageAt(index, Object.assign({}, entry, {meta: Object.assign({}, entry.meta, {permissionPending: false, approval: "cancelled", status: "cancelled"})}));
+      }
     }
+    _pendingPermissions = ({});
     root.acpPhase = "idle";
     root._currentPromptId = -1;
     root.isGenerating = false;
@@ -322,19 +350,36 @@ Item {
 
   function _onAcpExited(code) {
     var wasReady = root.acpPhase === "ready";
+    var errors = acpProcess?.stderrBuffer || "";
+    if (!wasReady && !root.isManuallyStopped) {
+      _settleAcpFailure("Failed to start claude-code-acp (code " + code + ")" + (errors ? ": " + errors.trim() : ""));
+      return;
+    }
+    stopAcpProcess();
     root.acpPhase = "idle";
     root.isGenerating = false;
     finalizeStreaming();
-    if (!root.isManuallyStopped && code !== 0 && wasReady) {
-      root.errorMessage = "claude-code-acp exited unexpectedly (code " + code + ")" +
-        (acpProcess.stderrBuffer ? ": " + acpProcess.stderrBuffer.trim() : "");
+    if (!root.isManuallyStopped && code !== 0) {
+      root.errorMessage = (wasReady ? "claude-code-acp exited unexpectedly (code " : "Failed to start claude-code-acp (code ") + code + ")" +
+        (errors ? ": " + errors.trim() : "");
     }
     root.isManuallyStopped = false;
   }
 
+  function _settleAcpFailure(message) {
+    const policy = acpProcess?.policy;
+    if (policy) {
+      root._pendingPrompts = root._pendingPrompts.filter(request =>
+        request.policy.context !== policy.context || request.policy.identity !== policy.identity);
+    }
+    stopAcpProcess();
+    root.errorMessage = message;
+    Qt.callLater(root._flushPendingPrompts);
+  }
+
   // Write a JSON-RPC frame (already newline-terminated) to the agent's stdin.
   function _acpWrite(frame) {
-    if (!acpProcess.running) {
+    if (!acpProcess || !_acpCurrent(acpProcess) || !acpProcess.running) {
       Logger.w("ClaudeCode", "acp write while not running: " + frame.slice(0, 120));
       return;
     }
@@ -369,7 +414,7 @@ Item {
   function _sendSessionNew() {
     root.acpPhase = "session_new";
     var home = Quickshell.env("HOME") || "";
-    var cwd = root.workingDir ? Logic.expandHome(root.workingDir, home) : (home || "/tmp");
+    var cwd = acpProcess.policy.workingDir ? Logic.expandHome(acpProcess.policy.workingDir, home) : home;
     // ACP's NewSessionRequest spec only accepts { cwd, mcpServers }. Any systemPrompt
     // field is silently dropped by claude-code-acp. We instead inject the Noctalia
     // context as a hidden prefix on the first user turn (see _dispatchPrompt).
@@ -427,11 +472,7 @@ Item {
           hint = "\nFix: edit ~/.claude/settings.json — `permissions.defaultMode` must be one of " +
                  "default | acceptEdits | plan | bypassPermissions.";
         }
-        root.errorMessage = (msg.id === 1 ? "Failed to initialize agent: " : "Failed to start session: ") + humanMsg + hint;
-        root.acpPhase = "idle";
-        root.isGenerating = false;
-        root._pendingPrompts = [];
-        finalizeStreaming();
+        _settleAcpFailure((msg.id === 1 ? "Failed to initialize agent: " : "Failed to start session: ") + humanMsg + hint);
         return;
       }
 
@@ -461,8 +502,7 @@ Item {
         Logger.i("ClaudeCode", "session ready: " + sr.sessionId);
         _flushPendingPrompts();
       } else {
-        root.errorMessage = "session/new returned no sessionId";
-        Logger.e("ClaudeCode", root.errorMessage);
+        _settleAcpFailure("session/new returned no sessionId");
       }
       return;
     }
@@ -493,6 +533,7 @@ Item {
   function _handleAcpNotification(msg) {
     if (msg.method !== "session/update") { return; }
     var params = msg.params || {};
+    if (params.sessionId !== root.sessionId) return;
     var update = params.update;
     var ev = Logic.normalizeAcpUpdate(update);
     if (!ev) { return; }
@@ -617,6 +658,7 @@ Item {
 
   // ---------- Permission presentation ----------
   function _presentPermission(rpcId, params) {
+    if (!acpProcess || !_acpCurrent(acpProcess) || params.sessionId !== sessionId) return false;
     finalizeStreaming();
     var tc = params.toolCall || {};
     var toolName = tc.toolName || tc.title || "tool";
@@ -639,7 +681,7 @@ Item {
     });
 
     var map = Object.assign({}, root._pendingPermissions);
-    map[entry.id] = { rpcId: rpcId, options: options };
+    map[entry.id] = { rpcId: rpcId, options: options, worker: acpProcess, sessionId: sessionId };
     root._pendingPermissions = map;
 
     if (tc.toolUseId || tc.toolCallId) {
@@ -656,9 +698,9 @@ Item {
   // so we remain correct even if the agent renames labels.
   function respondToPermission(messageId, decision) {
     var pending = root._pendingPermissions[messageId];
-    if (!pending) {
+    if (!pending || pending.worker !== acpProcess || !_acpCurrent(pending.worker) || pending.sessionId !== sessionId) {
       Logger.w("ClaudeCode", "respondToPermission: no pending entry for " + messageId);
-      return;
+      return false;
     }
     var optionId = decision;
     if (decision !== "cancelled") {
@@ -706,6 +748,7 @@ Item {
     var nm = Object.assign({}, root._pendingPermissions);
     delete nm[messageId];
     root._pendingPermissions = nm;
+    return true;
   }
 
   // Back-compat shims for Panel.qml — they call the older names.
@@ -714,49 +757,53 @@ Item {
   function denyToolUse(messageId)                      { respondToPermission(messageId, "reject_once"); }
 
   // ---------- Sending ----------
-  function sendMessage(userText) {
-    if (!userText || userText.trim() === "") { return; }
+  function sendMessage(userText, context) {
+    if (!userText || userText.trim() === "") return false;
+    var policy = _consumer(context)?.capture();
+    if (!policy) return false;
     Logger.i("ClaudeCode", "sendMessage: phase=" + root.acpPhase +
              " session=" + (root.sessionId || "(none)") +
-             " running=" + acpProcess.running +
+              " running=" + !!acpProcess?.running +
              " generating=" + root.isGenerating);
     if (!binaryAvailable) {
       root.errorMessage = "claude-code-acp not available";
       ToastService.showError(root.errorMessage);
-      return;
+      return false;
     }
 
     var text = userText.trim();
+    _saveHistoryLength = policy.maxHistoryLength;
     pushMessage({ role: "user", kind: "text", text: text });
-
-    if (root.acpPhase !== "ready") {
-      // Queue until handshake finishes. startAcpProcess runs during onStarted.
-      Logger.i("ClaudeCode", "phase not ready; queued. pending=" + (root._pendingPrompts.length + 1));
-      root._pendingPrompts = root._pendingPrompts.concat([text]);
-      if (!acpProcess.running && root.binaryAvailable) { startAcpProcess(); }
-      return;
-    }
-
-    _dispatchPrompt(text);
+    root._pendingPrompts = root._pendingPrompts.concat([Object.freeze({text: text, policy: policy})]);
+    _flushPendingPrompts();
+    return true;
   }
 
   function _flushPendingPrompts() {
-    if (root.acpPhase !== "ready") { return; }
-    var pending = root._pendingPrompts.slice();
-    root._pendingPrompts = [];
-    for (var i = 0; i < pending.length; i++) {
-      _dispatchPrompt(pending[i]);
+    if (isGenerating || _pendingPrompts.length === 0) return;
+    var request = _pendingPrompts[0];
+    if (!_policyCurrent(request.policy)) {
+      _pendingPrompts = _pendingPrompts.slice(1);
+      errorMessage = "The queued Claude origin is no longer current.";
+      _flushPendingPrompts(); return;
     }
+    if (acpProcess && (acpProcess.policy.context !== request.policy.context || acpProcess.policy.identity !== request.policy.identity)) stopAcpProcess();
+    if (!acpProcess) { startAcpProcess(request.policy); return; }
+    if (acpPhase !== "ready") return;
+    _pendingPrompts = _pendingPrompts.slice(1);
+    _dispatchPrompt(request);
   }
 
-  function _dispatchPrompt(text) {
+  function _dispatchPrompt(request) {
+    if (!_policyCurrent(request.policy) || !_acpCurrent(acpProcess)) return false;
+    var text = request.text;
     if (!root.sessionId) {
       Logger.w("ClaudeCode", "_dispatchPrompt: no sessionId, dropping");
       return;
     }
     if (root.isGenerating) {
       Logger.i("ClaudeCode", "_dispatchPrompt: already generating, queued");
-      root._pendingPrompts = root._pendingPrompts.concat([text]);
+      root._pendingPrompts = root._pendingPrompts.concat([request]);
       return;
     }
     Logger.i("ClaudeCode", "_dispatchPrompt: sending prompt to session " + root.sessionId);
@@ -765,6 +812,7 @@ Item {
     root.errorMessage = "";
     root.streamingMessageId = "";
     root.sawPartialThisTurn = false;
+    _saveHistoryLength = request.policy.maxHistoryLength;
 
     var promptId = Logic.nextAcpId();
     root._currentPromptId = promptId;
@@ -773,7 +821,7 @@ Item {
     // Wrapped in <system>…</system> so the model treats it as instructions.
     var effectiveText = text;
     if (root._systemPromptPending) {
-      var prefix = Logic.firstTurnPrefix(root.claudeSettings);
+      var prefix = Logic.firstTurnPrefix(request.policy.claude);
       if (prefix) { effectiveText = prefix + text; }
       root._systemPromptPending = false;
     }
@@ -786,7 +834,7 @@ Item {
   }
 
   function stopGeneration() {
-    if (!acpProcess.running) {
+    if (!acpProcess?.running) {
       root.isGenerating = false;
       finalizeStreaming();
       return;
@@ -813,7 +861,11 @@ Item {
   }
 
   // ---------- Slash commands ----------
-  function handleSlashCommand(raw) {
+  function handleSlashCommand(raw, originApi) {
+    originApi = originApi === undefined ? pluginApi : originApi;
+    var client = _consumer(originApi?.settingsContext);
+    if (!client) return false;
+    var selectedClaude = client.claudeSettings;
     if (!raw || raw[0] !== "/") { return false; }
     var parts = raw.trim().split(/\s+/);
     var cmd = parts[0].toLowerCase();
@@ -841,12 +893,12 @@ Item {
         return true;
 
       case "/clear":
-        clearMessages();
+        clearMessages(client.settingsContext);
         ToastService.showNotice(pluginApi?.tr("toast.historyCleared"));
         return true;
 
       case "/new":
-        newSession();
+        newSession(client.settingsContext);
         return true;
 
       case "/stop":
@@ -855,22 +907,22 @@ Item {
 
       case "/model":
         if (!rest) {
-          pushMessage({ role: "assistant", kind: "text", text: (pluginApi?.tr("cmd.modelCurrent")) + (lastModel || claudeSettings.model || pluginApi?.tr("cmd.modelDefault")) + "`" });
+          pushMessage({ role: "assistant", kind: "text", text: (pluginApi?.tr("cmd.modelCurrent")) + (lastModel || selectedClaude.model || pluginApi?.tr("cmd.modelDefault")) + "`" });
           return true;
         }
-        setClaudeField("model", rest);
+        setClaudeField("model", rest, originApi);
         pushMessage({ role: "assistant", kind: "text", text: pluginApi?.tr("cmd.modelSet") + rest + "`" });
-        newSession();
+        newSession(client.settingsContext);
         return true;
 
       case "/cwd":
         if (!rest) {
-          pushMessage({ role: "assistant", kind: "text", text: pluginApi?.tr("cmd.cwdCurrent") + "`" + (claudeSettings.workingDir || pluginApi?.tr("cmd.cwdDefault")) + "`" });
+          pushMessage({ role: "assistant", kind: "text", text: pluginApi?.tr("cmd.cwdCurrent") + "`" + (selectedClaude.workingDir || pluginApi?.tr("cmd.cwdDefault")) + "`" });
           return true;
         }
-        setClaudeField("workingDir", rest);
+        setClaudeField("workingDir", rest, originApi);
         pushMessage({ role: "assistant", kind: "text", text: pluginApi?.tr("cmd.cwdSet") + rest + "`." });
-        newSession();
+        newSession(client.settingsContext);
         return true;
 
       case "/session":
@@ -893,11 +945,14 @@ Item {
     }
   }
 
-  function setClaudeField(key, value) {
-    if (!pluginApi) { return; }
-    if (!pluginApi.pluginSettings.claude) { pluginApi.pluginSettings.claude = {}; }
-    pluginApi.pluginSettings.claude[key] = value;
-    pluginApi.saveSettings();
+  function setClaudeField(key, value, originApi) {
+    originApi = originApi === undefined ? pluginApi : originApi;
+    if (!originApi?.settingsContext?.current() || !originApi.saveSettings) return false;
+    var next = Object.assign({}, originApi.pluginSettings.claude || {});
+    next[key] = value;
+    originApi.pluginSettings.claude = next;
+    originApi.saveSettings();
+    return true;
   }
 
   // ---------- IPC ----------

@@ -8,43 +8,47 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    text: root.pluginApi?.tr("settings.shared-effect") || ""
+    wrapMode: Text.WordWrap
+    color: AtmoColor.mOnSurfaceVariant
+  }
+  readonly property var refreshIntervalField: pluginApi?.field("refreshInterval") ?? null
+  readonly property var compactModeField: pluginApi?.field("compactMode") ?? null
+  readonly property var showIpAddressField: pluginApi?.field("showIpAddress") ?? null
+  readonly property var showPeerCountField: pluginApi?.field("showPeerCount") ?? null
+  readonly property var hideDisconnectedField: pluginApi?.field("hideDisconnected") ?? null
+  readonly property var hideMullvadExitNodesField: pluginApi?.field("hideMullvadExitNodes") ?? null
+  readonly property var showSearchBarField: pluginApi?.field("showSearchBar") ?? null
+  readonly property var terminalCommandField: pluginApi?.field("terminalCommand") ?? null
+  readonly property var sshUsernameField: pluginApi?.field("sshUsername") ?? null
+  readonly property var pingCountField: pluginApi?.field("pingCount") ?? null
+  readonly property var defaultPeerActionField: pluginApi?.field("defaultPeerAction") ?? null
+  readonly property var taildropEnabledField: pluginApi?.field("taildropEnabled") ?? null
+  readonly property var taildropDownloadDirField: pluginApi?.field("taildropDownloadDir") ?? null
+  readonly property var taildropReceiveModeField: pluginApi?.field("taildropReceiveMode") ?? null
+  readonly property var loginServerField: pluginApi?.field("loginServer") ?? null
 
   // Local state - initialized from saved settings or defaults
-  property int editRefreshInterval: displayBaseline.project("editRefreshInterval")
-  property bool editCompactMode: displayBaseline.editCompactMode
-  property bool editShowIpAddress: displayBaseline.editShowIpAddress
-  property bool editShowPeerCount: displayBaseline.editShowPeerCount
-  property bool editHideDisconnected: displayBaseline.editHideDisconnected
-  property bool editHideMullvadExitNodes: displayBaseline.editHideMullvadExitNodes
-  property bool editShowSearchBar: displayBaseline.editShowSearchBar
-  property string editTerminalCommand: displayBaseline.editTerminalCommand
-  property string editSshUsername: displayBaseline.editSshUsername
-  property int editPingCount: displayBaseline.project("editPingCount")
-  property string editDefaultPeerAction: displayBaseline.editDefaultPeerAction
-  property bool editTaildropEnabled: displayBaseline.editTaildropEnabled
-  property string editTaildropDownloadDir: displayBaseline.editTaildropDownloadDir
-  property string editTaildropReceiveMode: displayBaseline.editTaildropReceiveMode
-  property string editLoginServer: displayBaseline.editLoginServer
-  NSettingsBaseline {
-    ranges: [NSettingsRange { field: "editRefreshInterval"; from: rangeEditRefreshInterval.from; to: rangeEditRefreshInterval.to }, NSettingsRange { field: "editPingCount"; from: rangeEditPingCount.from; to: rangeEditPingCount.to }]
-    id: displayBaseline
-    readonly property int editRefreshInterval: pluginApi?.pluginSettings?.refreshInterval || pluginApi?.manifest?.metadata?.defaultSettings?.refreshInterval || 5000
-    readonly property bool editCompactMode: pluginApi?.pluginSettings?.compactMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.compactMode ?? false
-    readonly property bool editShowIpAddress: pluginApi?.pluginSettings?.showIpAddress ?? pluginApi?.manifest?.metadata?.defaultSettings?.showIpAddress ?? true
-    readonly property bool editShowPeerCount: pluginApi?.pluginSettings?.showPeerCount ?? pluginApi?.manifest?.metadata?.defaultSettings?.showPeerCount ?? true
-    readonly property bool editHideDisconnected: pluginApi?.pluginSettings?.hideDisconnected ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideDisconnected ?? false
-    readonly property bool editHideMullvadExitNodes: pluginApi?.pluginSettings?.hideMullvadExitNodes ?? pluginApi?.manifest?.metadata?.defaultSettings?.hideMullvadExitNodes ?? true
-    readonly property bool editShowSearchBar: pluginApi?.pluginSettings?.showSearchBar ?? pluginApi?.manifest?.metadata?.defaultSettings?.showSearchBar ?? false
-    readonly property string editTerminalCommand: pluginApi?.pluginSettings?.terminalCommand || pluginApi?.manifest?.metadata?.defaultSettings?.terminalCommand || ""
-    readonly property string editSshUsername: pluginApi?.pluginSettings?.sshUsername || pluginApi?.manifest?.metadata?.defaultSettings?.sshUsername || ""
-    readonly property int editPingCount: pluginApi?.pluginSettings?.pingCount || pluginApi?.manifest?.metadata?.defaultSettings?.pingCount || 5
-    readonly property string editDefaultPeerAction: pluginApi?.pluginSettings?.defaultPeerAction || pluginApi?.manifest?.metadata?.defaultSettings?.defaultPeerAction || "copy-ip"
-    readonly property bool editTaildropEnabled: pluginApi?.pluginSettings?.taildropEnabled ?? pluginApi?.manifest?.metadata?.defaultSettings?.taildropEnabled ?? true
-    readonly property string editTaildropDownloadDir: pluginApi?.pluginSettings?.taildropDownloadDir || pluginApi?.manifest?.metadata?.defaultSettings?.taildropDownloadDir || "~/Downloads"
-    readonly property string editTaildropReceiveMode: pluginApi?.pluginSettings?.taildropReceiveMode || pluginApi?.manifest?.metadata?.defaultSettings?.taildropReceiveMode || "operator"
-    readonly property string editLoginServer: pluginApi?.pluginSettings?.loginServer || pluginApi?.manifest?.metadata?.defaultSettings?.loginServer || ""
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({editRefreshInterval: root.editRefreshInterval, editCompactMode: root.editCompactMode, editShowIpAddress: root.editShowIpAddress, editShowPeerCount: root.editShowPeerCount, editHideDisconnected: root.editHideDisconnected, editHideMullvadExitNodes: root.editHideMullvadExitNodes, editShowSearchBar: root.editShowSearchBar, editTerminalCommand: root.editTerminalCommand, editSshUsername: root.editSshUsername, editPingCount: root.editPingCount, editDefaultPeerAction: root.editDefaultPeerAction, editTaildropEnabled: root.editTaildropEnabled, editTaildropDownloadDir: root.editTaildropDownloadDir, editTaildropReceiveMode: root.editTaildropReceiveMode, editLoginServer: root.editLoginServer})
+  readonly property int editRefreshInterval: root.refreshIntervalField?.value || 5000
+  readonly property bool editCompactMode: root.compactModeField?.value ?? false
+  readonly property bool editShowIpAddress: root.showIpAddressField?.value ?? true
+  readonly property bool editShowPeerCount: root.showPeerCountField?.value ?? true
+  readonly property bool editHideDisconnected: root.hideDisconnectedField?.value ?? false
+  readonly property bool editHideMullvadExitNodes: root.hideMullvadExitNodesField?.value ?? true
+  readonly property bool editShowSearchBar: root.showSearchBarField?.value ?? false
+  readonly property string editTerminalCommand: root.terminalCommandField?.value || ""
+  readonly property string editSshUsername: root.sshUsernameField?.value || ""
+  readonly property int editPingCount: root.pingCountField?.value || 5
+  readonly property string editDefaultPeerAction: root.defaultPeerActionField?.value || "copy-ip"
+  readonly property bool editTaildropEnabled: root.taildropEnabledField?.value ?? true
+  readonly property string editTaildropDownloadDir: root.taildropDownloadDirField?.value || "~/Downloads"
+  readonly property string editTaildropReceiveMode: root.taildropReceiveModeField?.value || "operator"
+  readonly property string editLoginServer: root.loginServerField?.value || ""
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   spacing: Style.marginM
 
@@ -74,15 +78,18 @@ ColumnLayout {
     description: pluginApi?.tr("settings.refresh-interval-desc") + " (" + root.editRefreshInterval + " ms)"
   }
 
-  NSlider {
-    id: rangeEditRefreshInterval
-    objectName: "settings-range-editRefreshInterval"
-    Layout.fillWidth: true
-    from: 1000
-    to: 60000
-    stepSize: 1000
-    value: root.editRefreshInterval
-    onValueChanged: root.editRefreshInterval = value
+  NPluginSettingsField {
+    field: root.refreshIntervalField
+    NSlider {
+      id: rangeEditRefreshInterval
+      objectName: "settings-range-editRefreshInterval"
+      Layout.fillWidth: true
+      from: 1000
+      to: 60000
+      stepSize: 1000
+      value: root.editRefreshInterval
+      onMoved: root.refreshIntervalField.set(value)
+    }
   }
 
   // Display options section
@@ -96,75 +103,92 @@ ColumnLayout {
     label: pluginApi?.tr("settings.display-options")
   }
 
-  NToggle {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.compact-mode")
-    description: pluginApi?.tr("settings.compact-mode-desc")
-    checked: root.editCompactMode
-    onToggled: checked => {
-      root.editCompactMode = checked
-      if (checked) {
-        root.editShowIpAddress = false
-        root.editShowPeerCount = false
+  NPluginSettingsField {
+    field: root.compactModeField
+    NToggle {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.compact-mode")
+      description: pluginApi?.tr("settings.compact-mode-desc")
+      checked: root.editCompactMode
+      onToggled: checked => {
+        root.compactModeField.set(checked);
+        if (checked) {
+          root.showIpAddressField.set(false);
+          root.showPeerCountField.set(false);
+        }
       }
     }
   }
 
-  NToggle {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.show-ip")
-    description: pluginApi?.tr("settings.show-ip-desc")
-    checked: root.editShowIpAddress
-    enabled: !root.editCompactMode
-    onToggled: checked => {
-      root.editShowIpAddress = checked
-      if (checked) {
-        root.editCompactMode = false
-      } else if (!checked && !root.editShowPeerCount) {
-        root.editCompactMode = true
+  NPluginSettingsField {
+    field: root.showIpAddressField
+    NToggle {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.show-ip")
+      description: pluginApi?.tr("settings.show-ip-desc")
+      checked: root.editShowIpAddress
+      enabled: !root.editCompactMode
+      onToggled: checked => {
+        root.showIpAddressField.set(checked);
+        if (checked) {
+          root.compactModeField.set(false);
+        } else if (!checked && !root.editShowPeerCount) {
+          root.compactModeField.set(true);
+        }
       }
     }
   }
 
-  NToggle {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.show-peers")
-    description: pluginApi?.tr("settings.show-peers-desc")
-    checked: root.editShowPeerCount
-    enabled: !root.editCompactMode
-    onToggled: checked => {
-      root.editShowPeerCount = checked
-      if (checked) {
-        root.editCompactMode = false
-      } else if (!checked && !root.editShowIpAddress) {
-        root.editCompactMode = true
+  NPluginSettingsField {
+    field: root.showPeerCountField
+    NToggle {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.show-peers")
+      description: pluginApi?.tr("settings.show-peers-desc")
+      checked: root.editShowPeerCount
+      enabled: !root.editCompactMode
+      onToggled: checked => {
+        root.showPeerCountField.set(checked);
+        if (checked) {
+          root.compactModeField.set(false);
+        } else if (!checked && !root.editShowIpAddress) {
+          root.compactModeField.set(true);
+        }
       }
     }
   }
 
-  NToggle {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.show-search-bar")
-    description: pluginApi?.tr("settings.show-search-bar-desc")
-    checked: root.editShowSearchBar
-    onToggled: checked => root.editShowSearchBar = checked
+  NPluginSettingsField {
+    field: root.showSearchBarField
+    NToggle {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.show-search-bar")
+      description: pluginApi?.tr("settings.show-search-bar-desc")
+      checked: root.editShowSearchBar
+      onToggled: checked => root.showSearchBarField.set(checked)
+    }
   }
 
-
-  NToggle {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.hide-disconnected")
-    description: pluginApi?.tr("settings.hide-disconnected-desc")
-    checked: root.editHideDisconnected
-    onToggled: checked => root.editHideDisconnected = checked
+  NPluginSettingsField {
+    field: root.hideDisconnectedField
+    NToggle {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.hide-disconnected")
+      description: pluginApi?.tr("settings.hide-disconnected-desc")
+      checked: root.editHideDisconnected
+      onToggled: checked => root.hideDisconnectedField.set(checked)
+    }
   }
 
-  NToggle {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.hide-mullvad-exit-nodes")
-    description: pluginApi?.tr("settings.hide-mullvad-exit-nodes-desc")
-    checked: root.editHideMullvadExitNodes
-    onToggled: checked => root.editHideMullvadExitNodes = checked
+  NPluginSettingsField {
+    field: root.hideMullvadExitNodesField
+    NToggle {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.hide-mullvad-exit-nodes")
+      description: pluginApi?.tr("settings.hide-mullvad-exit-nodes-desc")
+      checked: root.editHideMullvadExitNodes
+      onToggled: checked => root.hideMullvadExitNodesField.set(checked)
+    }
   }
 
   // Authentication section
@@ -178,13 +202,16 @@ ColumnLayout {
     label: pluginApi?.tr("settings.authentication")
   }
 
-  NTextInput {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.login-server")
-    description: pluginApi?.tr("settings.login-server-desc")
-    placeholderText: "https://login.tailscale.com"
-    text: root.editLoginServer
-    onTextChanged: root.editLoginServer = text
+  NPluginSettingsField {
+    field: root.loginServerField
+    NTextInput {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.login-server")
+      description: pluginApi?.tr("settings.login-server-desc")
+      placeholderText: "https://login.tailscale.com"
+      text: root.editLoginServer
+      onEditCommitted: root.loginServerField.set(text)
+    }
   }
 
   // Terminal section
@@ -198,22 +225,28 @@ ColumnLayout {
     label: pluginApi?.tr("settings.terminal")
   }
 
-  NTextInput {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.terminal-command")
-    description: pluginApi?.tr("settings.terminal-command-desc")
-    placeholderText: "ghostty"
-    text: root.editTerminalCommand
-    onTextChanged: root.editTerminalCommand = text
+  NPluginSettingsField {
+    field: root.terminalCommandField
+    NTextInput {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.terminal-command")
+      description: pluginApi?.tr("settings.terminal-command-desc")
+      placeholderText: "ghostty"
+      text: root.editTerminalCommand
+      onEditCommitted: root.terminalCommandField.set(text)
+    }
   }
 
-  NTextInput {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.ssh-username")
-    description: pluginApi?.tr("settings.ssh-username-desc")
-    placeholderText: pluginApi?.tr("settings.ssh-username-placeholder")
-    text: root.editSshUsername
-    onTextChanged: root.editSshUsername = text
+  NPluginSettingsField {
+    field: root.sshUsernameField
+    NTextInput {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.ssh-username")
+      description: pluginApi?.tr("settings.ssh-username-desc")
+      placeholderText: pluginApi?.tr("settings.ssh-username-placeholder")
+      text: root.editSshUsername
+      onEditCommitted: root.sshUsernameField.set(text)
+    }
   }
 
   NLabel {
@@ -221,15 +254,18 @@ ColumnLayout {
     description: pluginApi?.tr("settings.ping-count-desc") + " (" + root.editPingCount + ")"
   }
 
-  NSlider {
-    id: rangeEditPingCount
-    objectName: "settings-range-editPingCount"
-    Layout.fillWidth: true
-    from: 1
-    to: 20
-    stepSize: 1
-    value: root.editPingCount
-    onValueChanged: root.editPingCount = value
+  NPluginSettingsField {
+    field: root.pingCountField
+    NSlider {
+      id: rangeEditPingCount
+      objectName: "settings-range-editPingCount"
+      Layout.fillWidth: true
+      from: 1
+      to: 20
+      stepSize: 1
+      value: root.editPingCount
+      onMoved: root.pingCountField.set(value)
+    }
   }
 
   // Peer action section
@@ -243,19 +279,31 @@ ColumnLayout {
     label: pluginApi?.tr("settings.peer-action")
   }
 
-  NComboBox {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.default-peer-action")
-    description: pluginApi?.tr("settings.default-peer-action-desc")
+  NPluginSettingsField {
+    field: root.defaultPeerActionField
+    NComboBox {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.default-peer-action")
+      description: pluginApi?.tr("settings.default-peer-action-desc")
 
-    model: [
-      { key: "copy-ip", name: pluginApi?.tr("context.copy-ip") },
-      { key: "ssh", name: pluginApi?.tr("context.ssh") },
-      { key: "ping", name: pluginApi?.tr("context.ping") }
-    ]
+      model: [
+        {
+          key: "copy-ip",
+          name: pluginApi?.tr("context.copy-ip")
+        },
+        {
+          key: "ssh",
+          name: pluginApi?.tr("context.ssh")
+        },
+        {
+          key: "ping",
+          name: pluginApi?.tr("context.ping")
+        }
+      ]
 
-    currentKey: root.editDefaultPeerAction
-    onSelected: key => root.editDefaultPeerAction = key
+      currentKey: root.editDefaultPeerAction
+      onSelected: key => root.defaultPeerActionField.set(key)
+    }
   }
 
   // Taildrop section
@@ -269,63 +317,62 @@ ColumnLayout {
     label: pluginApi?.tr("settings.taildrop")
   }
 
-  NToggle {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.taildrop-enabled")
-    description: pluginApi?.tr("settings.taildrop-enabled-desc")
-    checked: root.editTaildropEnabled
-    onToggled: checked => root.editTaildropEnabled = checked
+  NPluginSettingsField {
+    field: root.taildropEnabledField
+    NToggle {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.taildrop-enabled")
+      description: pluginApi?.tr("settings.taildrop-enabled-desc")
+      checked: root.editTaildropEnabled
+      onToggled: checked => root.taildropEnabledField.set(checked)
+    }
   }
 
-  NTextInput {
-    Layout.fillWidth: true
-    enabled: root.editTaildropEnabled
-    label: pluginApi?.tr("settings.taildrop-download-dir")
-    description: pluginApi?.tr("settings.taildrop-download-dir-desc")
-    placeholderText: "~/Downloads"
-    text: root.editTaildropDownloadDir
-    onTextChanged: root.editTaildropDownloadDir = text
+  NPluginSettingsField {
+    field: root.taildropDownloadDirField
+    NTextInput {
+      Layout.fillWidth: true
+      enabled: root.editTaildropEnabled
+      label: pluginApi?.tr("settings.taildrop-download-dir")
+      description: pluginApi?.tr("settings.taildrop-download-dir-desc")
+      placeholderText: "~/Downloads"
+      text: root.editTaildropDownloadDir
+      onEditCommitted: root.taildropDownloadDirField.set(text)
+    }
   }
 
-  NComboBox {
-    Layout.fillWidth: true
-    enabled: root.editTaildropEnabled
-    label: pluginApi?.tr("settings.taildrop-receive-mode")
-    description: pluginApi?.tr("settings.taildrop-receive-mode-desc")
-    model: [
-      { key: "operator", name: pluginApi?.tr("settings.taildrop-receive-mode-operator") },
-      { key: "pkexec",   name: pluginApi?.tr("settings.taildrop-receive-mode-pkexec") }
-    ]
-    currentKey: root.editTaildropReceiveMode
-    onSelected: key => root.editTaildropReceiveMode = key
+  NPluginSettingsField {
+    field: root.taildropReceiveModeField
+    NComboBox {
+      Layout.fillWidth: true
+      enabled: root.editTaildropEnabled
+      label: pluginApi?.tr("settings.taildrop-receive-mode")
+      description: pluginApi?.tr("settings.taildrop-receive-mode-desc")
+      model: [
+        {
+          key: "operator",
+          name: pluginApi?.tr("settings.taildrop-receive-mode-operator")
+        },
+        {
+          key: "pkexec",
+          name: pluginApi?.tr("settings.taildrop-receive-mode-pkexec")
+        }
+      ]
+      currentKey: root.editTaildropReceiveMode
+      onSelected: key => root.taildropReceiveModeField.set(key)
+    }
   }
 
   // Save function - called by the dialog
   function saveSettings() {
     if (!pluginApi) {
-      Logger.e("Tailscale", "Cannot save: pluginApi is null")
-      return
+      Logger.e("Tailscale", "Cannot save: pluginApi is null");
+      return;
     }
-
-    pluginApi.pluginSettings.refreshInterval = root.editRefreshInterval
-    pluginApi.pluginSettings.compactMode = root.editCompactMode
-    pluginApi.pluginSettings.showIpAddress = root.editShowIpAddress
-    pluginApi.pluginSettings.showPeerCount = root.editShowPeerCount
-    pluginApi.pluginSettings.hideDisconnected = root.editHideDisconnected
-    pluginApi.pluginSettings.hideMullvadExitNodes = root.editHideMullvadExitNodes
-    pluginApi.pluginSettings.showSearchBar = root.editShowSearchBar
-    pluginApi.pluginSettings.terminalCommand = root.editTerminalCommand
-    pluginApi.pluginSettings.sshUsername = root.editSshUsername
-    pluginApi.pluginSettings.pingCount = root.editPingCount
-    pluginApi.pluginSettings.defaultPeerAction = root.editDefaultPeerAction
-    pluginApi.pluginSettings.taildropEnabled = root.editTaildropEnabled
-    pluginApi.pluginSettings.taildropDownloadDir = root.editTaildropDownloadDir
-    pluginApi.pluginSettings.taildropReceiveMode = root.editTaildropReceiveMode
-    pluginApi.pluginSettings.loginServer = root.editLoginServer
 
     pluginApi.saveSettings(function (result) {
       if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
-        Logger.i("Tailscale", "Settings saved successfully")
-    })
+        Logger.i("Tailscale", "Settings saved successfully");
+    });
   }
 }

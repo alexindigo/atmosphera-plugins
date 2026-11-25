@@ -1,9 +1,9 @@
 {
   "id": "noctalia-calculator",
   "name": "Calculator",
-  "version": "1.1.7",
+  "version": "1.1.12",
   "minNoctaliaVersion": "4.4.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "pir0c0pter0",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -25,8 +25,8 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "precision": {"type": "Real"},
-        "showBarValue": {"type": "Boolean"}
+        "precision": {"editorUsage": "configuration", "type": "Real"},
+        "showBarValue": {"editorUsage": "configuration", "type": "Boolean"}
       }
     },
     "defaultSettings": {

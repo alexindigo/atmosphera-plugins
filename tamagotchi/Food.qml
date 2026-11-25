@@ -5,6 +5,7 @@ Rectangle {
     id: root
 
     property var pluginApi: null
+    property var game: null
     property bool _dragging: false
     property bool wasDropped: false
     property real _restX: x
@@ -55,18 +56,18 @@ Rectangle {
             root._dragging = true;
             root._restX = root.x;
             root._restY = root.y;
-            if (pluginApi && pluginApi.mainInstance) {
-                if (pluginApi.mainInstance.petState === "sleeping")
+            if (root.game) {
+                if (root.game.petState === "sleeping")
                     return;
 
-                pluginApi.mainInstance.eating = true;
+                root.game.eating = true;
             }
         }
         onReleased: {
             root._dragging = false;
-            root.Drag.drop();
-            if (pluginApi && pluginApi.mainInstance)
-                pluginApi.mainInstance.eating = false;
+            root.wasDropped = root.Drag.drop() !== Qt.IgnoreAction;
+            if (root.game)
+                root.game.eating = false;
 
             if (root.wasDropped) {
                 disappearAnim.start();

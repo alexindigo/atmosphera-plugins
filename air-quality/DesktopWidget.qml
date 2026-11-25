@@ -1,9 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.Commons
+import qs.Modules.DesktopWidgets
 import qs.Services.UI
 import qs.Widgets
-import qs.Modules.DesktopWidgets
 
 DraggableDesktopWidget {
   id: root
@@ -14,7 +14,7 @@ DraggableDesktopWidget {
   width: implicitWidth
   height: implicitHeight
 
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
   readonly property bool hasData: mainInstance?.hasData ?? false
   readonly property int aqi: hasData ? mainInstance.getAqi() : 0
   readonly property string aqiColor: hasData ? mainInstance.getAqiColor(aqi) : AtmoColor.mOnSurfaceVariant
@@ -59,13 +59,17 @@ DraggableDesktopWidget {
       spacing: Style.marginL * root.widgetScale
 
       NText {
-        text: pluginApi?.tr("pollutants.pm25Short", { value: root.hasData ? Math.round(root.mainInstance.pm25 * 10) / 10 : "--" })
+        text: pluginApi?.tr("pollutants.pm25Short", {
+                              value: root.hasData ? Math.round(root.mainInstance.pm25 * 10) / 10 : "--"
+                            })
         pointSize: Style.fontSizeS
         color: AtmoColor.mOnSurfaceVariant
       }
 
       NText {
-        text: pluginApi?.tr("pollutants.pm10Short", { value: root.hasData ? Math.round(root.mainInstance.pm10 * 10) / 10 : "--" })
+        text: pluginApi?.tr("pollutants.pm10Short", {
+                              value: root.hasData ? Math.round(root.mainInstance.pm10 * 10) / 10 : "--"
+                            })
         pointSize: Style.fontSizeS
         color: AtmoColor.mOnSurfaceVariant
       }
@@ -104,8 +108,8 @@ DraggableDesktopWidget {
     interval: 1500
     repeat: false
     onTriggered: {
-      hoverTip.visible = true
-      hoverTip.opacity = 0.85
+      hoverTip.visible = true;
+      hoverTip.opacity = 0.85;
     }
   }
 
@@ -116,22 +120,23 @@ DraggableDesktopWidget {
 
     onClicked: mouse => {
       if (mouse.button === Qt.LeftButton) {
-        if (pluginApi) pluginApi.togglePanel(null, root)
+        if (pluginApi)
+          pluginApi.togglePanel(null, root);
       } else if (mouse.button === Qt.MiddleButton) {
-        root.mainInstance?.refresh()
+        root.mainInstance?.refresh();
       } else if (mouse.button === Qt.RightButton) {
-        BarService.openPluginSettings(null, pluginApi.manifest)
+        BarService.openPluginSettings(null, pluginApi.manifest);
       }
     }
 
     onEntered: {
-      hoverTimer.restart()
+      hoverTimer.restart();
     }
 
     onExited: {
-      hoverTimer.stop()
-      hoverTip.opacity = 0
-      hoverTip.visible = false
+      hoverTimer.stop();
+      hoverTip.opacity = 0;
+      hoverTip.visible = false;
     }
   }
 }

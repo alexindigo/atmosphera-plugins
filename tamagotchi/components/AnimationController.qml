@@ -3,7 +3,7 @@ import QtQuick
 Item {
     id: root
 
-    property var pluginApi: null
+    property var game: null
     property int frameH: 64
     property int frameW: 64
     property int spriteH: 40
@@ -24,7 +24,7 @@ Item {
     Image {
         id: sprite
 
-        property string currentState: pluginApi.mainInstance.petState
+        property string currentState: root.game?.petState ?? "idle"
 
         anchors.centerIn: parent
         width: root.frameW
@@ -33,7 +33,8 @@ Item {
         fillMode: Image.PreserveAspectFit
         smooth: false
         sourceClipRect: {
-            const state = pluginApi.mainInstance;
+            const state = root.game;
+            if (!state) return Qt.rect(0, 0, root.spriteW, root.spriteH);
             const DIRTY_SPRITE_COORDS = root.spriteW * 2;
             const DIRTY_EATING_SPRITE_COORDS = root.spriteW * 3;
             if (state.isDirty && root._spriteStates.includes(currentState)) {
@@ -56,7 +57,7 @@ Item {
         source: "../assets/flies.png"
         fillMode: Image.PreserveAspectFit
         smooth: false
-        visible: pluginApi.mainInstance.isDirty && pluginApi.mainInstance.petState != "angry" && root._spriteStates.includes(pluginApi.mainInstance.petState)
+        visible: root.game && root.game.isDirty && root.game.petState != "angry" && root._spriteStates.includes(root.game.petState)
         z: 1
     }
 }

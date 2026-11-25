@@ -10,6 +10,7 @@ import "../utils"
 Item {
     id: root
     property var pluginApi: null
+    property var actionPolicy: null
     property string region:  ""
     property string mp4Path: ""
     property string gifPath: ""
@@ -27,7 +28,7 @@ Item {
     property bool   audioInput:    false
     property bool   includeCursor: false
     property string _recorderBin:  "wl-screenrec"
-    readonly property int gifMaxSeconds: pluginApi?.pluginSettings?.gifMaxSeconds ?? 30
+    readonly property int gifMaxSeconds: actionPolicy?.settings.gifMaxSeconds ?? 30
     readonly property string _scriptPath: {
         var url = Qt.resolvedUrl("../scripts/record.sh").toString()
         return url.startsWith("file://") ? url.slice(7) : url
@@ -37,8 +38,10 @@ Item {
     readonly property bool isConverting: recordState === "converting"
     readonly property bool isDone:       recordState === "done"
     signal dismissed()
-    function startRecording(regionStr, fmt, audOut, audIn, cursor, uiOffsetX, uiOffsetY, screen) {
-        if (root.isRecording || root.isConverting) return
+    function startRecording(regionStr, fmt, audOut, audIn, cursor, uiOffsetX, uiOffsetY, screen, policy) {
+        if (root.isRecording || root.isConverting || wfRecorderProc.running || gifConvertProc.running || saveProc.running) return
+        if (!policy?.context.current()) return false
+        actionPolicy = policy
         root.format        = (fmt === "mp4") ? "mp4" : "gif"
         root.audioOutput   = audOut  === true
         root.audioInput    = audIn   === true
@@ -93,7 +96,7 @@ Item {
     }
     function dismiss() {
         if (root.isRecording) root.stopRecording()
-        var toClipboard = root.pluginApi?.pluginSettings?.recordCopyToClipboard ?? false
+        var toClipboard = actionPolicy?.settings.recordCopyToClipboard ?? false
         if (root.gifPath !== "" && !toClipboard)
             stopProc.exec({ command: ["bash", "-c", "rm -f " + U.shellEscape(root.gifPath)] })
         root.recordState    = ""
@@ -102,8 +105,9 @@ Item {
         root.dismissed()
     }
     function _handleDone() {
-        var skipConfirm = root.pluginApi?.pluginSettings?.recordSkipConfirmation ?? false
-        var toClipboard = root.pluginApi?.pluginSettings?.recordCopyToClipboard  ?? false
+        if (!actionPolicy?.context.current()) { root.dismiss(); return }
+        var skipConfirm = actionPolicy.settings.recordSkipConfirmation ?? false
+        var toClipboard = actionPolicy.settings.recordCopyToClipboard ?? false
         if (skipConfirm) {
             _saveToFile()
         } else if (toClipboard) {
@@ -120,11 +124,13 @@ Item {
         clipProc.exec({ command: ["bash", "-c", cmd] })
     }
     function _saveToFile() {
+        if (!actionPolicy?.context.current()) return false
         var ext  = root.format === "mp4" ? ".mp4" : ".gif"
         var home = Quickshell.env("HOME")
-        var dir  = U.videoDir(home, pluginApi?.pluginSettings?.videoPath)
-        var dest = dir + "/" + U.buildFilename("record", ext, pluginApi?.pluginSettings?.filenameFormat)
+        var dir  = U.videoDir(home, actionPolicy.settings.videoPath)
+        var dest = dir + "/" + U.buildFilename("record", ext, actionPolicy.settings.filenameFormat)
         saveProc.savedPath = dest
+        saveProc.actionPolicy = actionPolicy
         saveProc.exec({ command: ["bash", "-c",
             "mkdir -p " + U.shellEscape(dir) + " && " +
             "cp " + U.shellEscape(root.gifPath) + " " + U.shellEscape(dest)
@@ -139,6 +145,13 @@ Item {
         id: wfRecorderProc
         onExited: (code) => {
             elapsedTimer.stop()
+            if (!root.actionPolicy?.context.current()) {
+                // The recorder has already exited. Retiring its presentation
+                // must not start dismiss()'s stop/signalling subprocess.
+                root.recordState = ""
+                root.dismiss()
+                return
+            }
             var isCleanExit = (code === 0 || code === 130 || code === 2) ||
                               (root._recorderBin === "wf-recorder" && code === 1)
             if (isCleanExit) {
@@ -184,9 +197,11 @@ Item {
     ToolProcess {
         id: saveProc
         property string savedPath: ""
+        property var actionPolicy: null
         onExited: (code) => {
+            if (!actionPolicy?.context.current()) { root.dismiss(); return }
             if (code === 0) {
-                var toClipboard = root.pluginApi?.pluginSettings?.recordCopyToClipboard ?? false
+                var toClipboard = actionPolicy.settings.recordCopyToClipboard ?? false
                 if (toClipboard) _copyPathToClipboard(saveProc.savedPath)
                 var msg = toClipboard
                     ? root.pluginApi?.tr("record.savedAndCopied")
@@ -197,10 +212,10 @@ Item {
                     ? root.pluginApi?.tr("record.saveMp4Failed")
                     : root.pluginApi?.tr("record.saveGifFailed"))
             }
-            if (root.pluginApi) {
+            if (actionPolicy.api) {
                 var screen = root._primaryScreen
-                if (screen) root.pluginApi.closePanel(screen)
-                else root.pluginApi.withCurrentScreen(sc => root.pluginApi.closePanel(sc))
+                if (screen) actionPolicy.api.closePanel(screen)
+                else actionPolicy.api.withCurrentScreen(sc => { if (actionPolicy.context.current()) actionPolicy.api.closePanel(sc) })
             }
             root.dismiss()
         }

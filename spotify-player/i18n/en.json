@@ -1,4 +1,13 @@
 {
+    "authorization": {
+        "token-available": "Authorization token available",
+        "not-authorized": "Not authorized",
+        "pending": "Authorization in progress",
+        "failed": "Authorization or request failed. Check the applied credentials and try again.",
+        "settings-guidance": "Apply your credentials first, then open the Spotify panel and choose Authorize. Authorization uses this scope's applied credentials, not unsaved settings.",
+        "runtime-guidance": "Authorize with the credentials applied in Settings for this widget. Playback changes your Spotify account and device, not a separate player for each widget.",
+        "authorize": "Authorize"
+    },
     "panel": {
         "title": "Spotify Player",
         "search": "Search",

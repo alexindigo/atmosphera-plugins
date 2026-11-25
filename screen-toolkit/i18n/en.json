@@ -160,6 +160,7 @@
     "share-unknown-error":    "Upload failed with unknown error"
   },
   "settings": {
+    "shared-effect": "New tools use this instance's settings. Open capture overlays retain their originating settings; results, history, recording and camera resources are shared across instances.",
     "ocrLanguages": "OCR Languages",
     "deps": "System Dependencies",
     "screenshotPath": "Screenshot Path",
@@ -299,7 +300,6 @@
     "remove": "Remove"
   }
 }
-
 
 
 

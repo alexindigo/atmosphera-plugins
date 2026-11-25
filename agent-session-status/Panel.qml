@@ -12,6 +12,7 @@ Item {
   readonly property var geometryPlaceholder: panelContainer
   readonly property bool allowAttach: true
   readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var settingsConsumer: mainInstance?.settingsConsumerFor(pluginApi.settingsContext)
 
   property real contentPreferredWidth: 420 * Style.uiScaleRatio
   property real contentPreferredHeight: 520 * Style.uiScaleRatio
@@ -83,7 +84,7 @@ Item {
           AtmoIconButton {
             icon: "reload"
             tooltipText: pluginApi?.tr("panel.restart")
-            onClicked: root.mainInstance?.restartService()
+            onClicked: root.mainInstance?.restartService(pluginApi.settingsContext)
           }
         }
       }
@@ -236,7 +237,7 @@ Item {
           Layout.fillWidth: true
           text: pluginApi?.tr("panel.refresh")
           icon: "refresh"
-          onClicked: root.mainInstance?.refreshAndPrune()
+          onClicked: root.mainInstance?.refreshAndPrune(pluginApi.settingsContext)
         }
 
         AtmoIconButton {

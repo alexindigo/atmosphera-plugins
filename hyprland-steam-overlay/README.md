@@ -80,6 +80,14 @@ qs -c noctalia-shell ipc call plugin:hyprland-steam-overlay toggle
 
 ## Configuration
 
+The physical Steam overlay is shared. Bar actions capture that widget's effective
+layout for the complete opening and continuing-window session. Later settings
+changes apply on the next opening; plugin IPC uses plugin-level configuration.
+The optional Panel guide reads its own injected pixel-width preferences, separately
+from Main's percentage geometry. The stored auto-launch and chat-notification
+fields retain their pre-existing feature gaps; this settings correction does not
+implement either feature or restore deprecated compositor support.
+
 Default settings in `settings.json`:
 ```json
 {

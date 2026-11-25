@@ -25,6 +25,7 @@
     "filter-files-count": "檔案 ({count})"
   },
   "settings": {
+    "shared-effect": "History, pins and clipboard actions are shared. This instance selects its history limit, image previews and density.",
     "tab-general": "一般",
     "max-history-size": "最大歷史記錄數",
     "max-history-size-description": "歷史記錄中保留的剪貼簿項目數。下次重新整理時生效。",

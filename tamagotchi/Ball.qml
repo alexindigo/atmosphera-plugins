@@ -3,6 +3,7 @@ import qs.Commons
 
 Rectangle {
     id: root
+    property var game: null
     width: 40
     height: 40
     radius: Style.radiusM
@@ -30,7 +31,7 @@ Rectangle {
 
         fillMode: Image.PreserveAspectFit
         smooth: false
-        opacity: pluginApi?.mainInstance?.petState === "sleeping" ? 0 : 1
+        opacity: root.game?.petState === "sleeping" ? 0 : 1
         rotation: root.rotationAngle
     }
 
@@ -60,8 +61,8 @@ Rectangle {
 
             if (speed > root.speedThreshold && root.canTriggerPlay) {
                 root.canTriggerPlay = false;
-                if (pluginApi?.mainInstance?.petState !== "sleeping") {
-                    pluginApi?.mainInstance?.play(18);
+                if (root.game?.petState !== "sleeping") {
+                    root.game?.play(18);
                 }
                 playCooldown.start();
             }

@@ -16,6 +16,7 @@
     "no_events": "Geen evenementen"
   },
   "settings": {
+    "shared-effect": "Agenda-afspraken en synchronisatie worden gedeeld. Deze instantie heeft eigen instellingen voor het begin van de week, navigatie en weergave.",
     "weekStart": "Eerste dag van de week",
     "weekStart_description": "Kies welke dag de week in de kalender begint.",
     "monday": "Maandag",

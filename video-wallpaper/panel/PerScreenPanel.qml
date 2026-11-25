@@ -14,9 +14,8 @@ import "../common/MonitorCommands.js" as Commands
 ColumnLayout {
     id: root
     required property var pluginApi
-    readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
-        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
-        function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
+    required property var selectWallpaper
+    required property var writeMonitorSetting
     anchors.fill: parent
 
 
@@ -34,16 +33,6 @@ ColumnLayout {
     /***************************
     * FUNCTIONS
     ***************************/
-    function saveMonitorProperty(key: string, value: var): void {
-        if(pluginApi == null) {
-            Logger.e("video-wallpaper", "PluginAPI is null.");
-            return;
-        }
-
-        var names = monitorSpecific ? [screenName] : Array.from(Quickshell.screens).map(screen => screen.name);
-        if (names.length) monitorCommand.submit(names.map(name => ({op: "set", screen: name, field: key, value: value})));
-    }
-
 
     /***************************
     * COMPONENTS
@@ -128,13 +117,8 @@ ColumnLayout {
                             hoverEnabled: true;
 
                             onClicked: {
-                                if(root.pluginApi.mainInstance == null) {
-                                    Logger.e("video-wallpaper", "Can't change background because pluginApi or main instance doesn't exist!");
-                                    return;
-                                }
-
-                                root.saveMonitorProperty("currentWallpaper", wallpaper.modelData);
-                                root.pluginApi.saveSettings();
+                                const names = root.monitorSpecific ? [root.screenName] : Array.from(Quickshell.screens, output => output.name);
+                                root.selectWallpaper(wallpaper.modelData, names, root.pluginApi);
                             }
 
                             onEntered: TooltipService.show(wallpaperImage, wallpaper.modelData, "auto", 100);
@@ -150,5 +134,8 @@ ColumnLayout {
     ToolRow {
         pluginApi:       root.pluginApi
         screenName:      root.screenName
+        randomAction: () => root.pluginApi.mainInstance.random(root.screenName, root.pluginApi)
+        clearAction: () => root.pluginApi.mainInstance.clear(root.screenName, root.pluginApi)
+        settingWriter: (key, value) => root.writeMonitorSetting(key, value, root.monitorSpecific ? root.screenName : "", root.pluginApi)
     }
 }

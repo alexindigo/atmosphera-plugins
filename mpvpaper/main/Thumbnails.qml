@@ -13,6 +13,8 @@ Item {
     /***************************
     * PROPERTIES
     ***************************/
+    required property bool active
+    required property var settingsContext
     required property string currentWallpaper 
     required property bool thumbCacheReady
     required property FolderListModel folderModel
@@ -21,18 +23,14 @@ Item {
     // thumbnails). One interest per video: path -> {token, state, url, path,
     // code, reason}. Reassigned on every change so bindings follow it.
     property var _entries: ({})
-    readonly property bool _colorActive: pluginApi?.pluginSettings?.active === true
-    property bool _colorGenPending: false
-    property int _colorActivation: 0
+    property var colorRequest: null
+    property bool colorScheduled: false
     readonly property string _retryOwner: "mpvpaper:" + Date.now() + ":" + Math.random()
     property int _retrySequence: 0
 
-    on_ColorActiveChanged: {
-        if (!root._colorActive) {
-            root._colorGenPending = false;
-            root._colorActivation++;
-        }
-    }
+    onActiveChanged: if (!active) cancelColorGen()
+    onSettingsContextChanged: cancelColorGen()
+    onCurrentWallpaperChanged: if (!ownsWallpaper(colorRequest)) cancelColorGen()
 
     /***************************
     * FUNCTIONS
@@ -75,15 +73,28 @@ Item {
     }
 
 
-    function startColorGen() {
-        if (!root._colorActive) return;
-        root._colorGenPending = true;
+    function ownsWallpaper(request) {
+        return !!request && root.active && request.path !== "" && request.path === root.currentWallpaper
+            && request.context === root.settingsContext && request.context?.current();
+    }
+
+    function startColorGen(context, path) {
+        const request = {context: context, path: String(path)};
+        if (!ownsWallpaper(request)) return;
+        colorRequest = request;
+        colorScheduled = false;
         root.applyColorGen();
     }
 
+    function cancelColorGen() {
+        colorRequest = null;
+        colorScheduled = false;
+    }
+
     function applyColorGen() {
-        if (!root._colorGenPending || !root._colorActive || root.currentWallpaper === "") return;
-        const wallpaper = root.currentWallpaper;
+        const request = root.colorRequest;
+        if (!ownsWallpaper(request) || colorScheduled) return;
+        const wallpaper = request.path;
         const entry = root._entries[wallpaper];
         if (!entry) {
             // The current wallpaper isn't in the wallpapers folder.
@@ -91,14 +102,15 @@ Item {
             return;
         }
         if (entry.state === "loading") return;
-        root._colorGenPending = false;
         if (entry.state !== "ready") {
-            Logger.w("mpvpaper", "No thumbnail for color generation:", root.currentWallpaper, entry.reason);
+            root.cancelColorGen();
+            Logger.w("mpvpaper", "No thumbnail for color generation:", wallpaper, entry.reason);
             return;
         }
-        const activation = root._colorActivation;
+        root.colorScheduled = true;
         root.pluginApi.withCurrentScreen(screen => {
-            if (!root._colorActive || root._colorActivation !== activation || root.currentWallpaper !== wallpaper) return;
+            if (root.colorRequest !== request || !ownsWallpaper(request) || root._entries[wallpaper] !== entry) return;
+            root.cancelColorGen();
             Logger.d("mpvpaper", "Generating color scheme based on video wallpaper!");
             WallpaperService.changeWallpaper(entry.path);
         });
@@ -169,9 +181,12 @@ Item {
 
     function thumbRegenerate() {
         // Arm before the new request, without applying the old thumbnail.
-        if (root._colorActive)
-            root._colorGenPending = true;
+        cancelColorGen();
+        const request = {context: root.settingsContext, path: root.currentWallpaper};
+        if (ownsWallpaper(request))
+            colorRequest = request;
         root.thumbGeneration(true);
+        root.applyColorGen();
     }
 
     Component.onDestruction: {

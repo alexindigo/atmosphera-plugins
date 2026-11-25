@@ -11,7 +11,7 @@ Item {
 	property var pluginApi: null
 	property ShellScreen screen
 
-	readonly property var main: pluginApi?.mainInstance
+	readonly property var main: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext)
 	readonly property string vpnState: main?.state ?? "disconnected"
 	readonly property bool locked: main?.locked ?? false
 	readonly property bool installed: main?.installed ?? false

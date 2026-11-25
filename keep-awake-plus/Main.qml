@@ -9,6 +9,53 @@ Item {
   id: root
   property var pluginApi: null
 
+  property var _settingsConsumers: new Map()
+  Component {
+    id: clientFactory
+    Item {
+      id: client
+      required property var settingsContext
+      required property var retire
+      readonly property bool current: settingsContext.current()
+      readonly property var cfg: settingsContext.settingsView
+      readonly property string defaultScope: cfg.defaultScope ?? "partial"
+      readonly property var durations: cfg.durations ?? []
+      readonly property bool includeUnlimited: cfg.includeUnlimited ?? true
+      readonly property bool showRemainingText: cfg.showRemainingText ?? true
+      readonly property bool activateOnLeftClick: cfg.activateOnLeftClick ?? false
+      readonly property int quickExtendMinutes: cfg.quickExtendMinutes ?? 30
+      readonly property bool active: root.active
+      readonly property string scope: root.scope
+      readonly property string durationLabel: root.durationLabel
+      readonly property var endEpoch: root.endEpoch
+      readonly property bool thermalGuardActive: root.thermalGuardActive
+      readonly property int remainingSeconds: root.remainingSeconds
+      function formatLabel(seconds) { return root.formatLabel(seconds); }
+      function formatRemaining() { return root.formatRemaining(); }
+      function start(seconds, scope) { if (current) root.start(seconds, scope); }
+      function off() { if (current) root.off(); }
+      function extend(seconds) { if (current) root.extend(seconds); }
+      function toggleLast() { if (current) root.toggleLast(); }
+      function pollGuard() { if (current) root.pollGuard(); }
+      property bool _constructed: false
+      onCurrentChanged: if (!current && _constructed) retire(client)
+      Component.onCompleted: _constructed = true
+    }
+  }
+  function settingsConsumerFor(context) {
+    if (!context || !context.current()) return null;
+    if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+    var client = clientFactory.createObject(root, {
+      settingsContext: context,
+      retire: function(retired) {
+        root._settingsConsumers.delete(context);
+        retired.destroy();
+      }
+    });
+    _settingsConsumers.set(context, client);
+    return client;
+  }
+
   // --- Live state mirrored from `system-awake status --json` ---
   property bool active: false
   property string scope: "partial"

@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "Display and provider choices apply to this instance. Matching providers share local account observations and requests; this does not create another account session.",
     "providers": {
       "gemini": {
         "name": "Gemini",

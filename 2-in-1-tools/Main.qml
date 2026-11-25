@@ -8,6 +8,21 @@ Item {
     id: root
 
     property var pluginApi: null
+    // One physical lifecycle; accepting a policy does not replace its content writer.
+    property var selectedContext: null
+    readonly property var policyContext: selectedContext || pluginApi?.settingsContext
+    readonly property bool policyCurrent: policyContext?.current() ?? false
+    property bool _constructed: false
+    property bool _destroying: false
+    property var _queryPolicy: null
+    property var _tabletModePolicy: null
+    property bool _tabletModeRefreshPending: false
+    property var _applyPolicy: null
+    property var _hyprTouchQueuedPolicy: null
+    property var _hyprTouchActivePolicy: null
+    property var _autoRotateSessionPolicy: null
+    property var _autoRotateRestorePolicy: null
+    property bool _restartStateWatcher: false
     property var transformsByOutput: ({})
     property var hyprMonitorStateByOutput: ({})
     property var busyByOutput: ({})
@@ -18,7 +33,8 @@ Item {
     property bool _applyShouldShowSuccessToast: false
     property bool _applyShouldShowErrorToast: true
     readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings ?? ({})
-    readonly property var cfg: pluginApi?.pluginSettings ?? ({})
+    readonly property var cfg: policyCurrent ? policyContext.settingsView : ({})
+    readonly property var sharedCfg: pluginApi?.pluginSettings ?? ({})
     readonly property bool showSuccessToast: cfg.showSuccessToast ?? defaults.showSuccessToast ?? true
     readonly property bool autoTabletBarDensity: cfg.autoTabletBarDensity ?? defaults.autoTabletBarDensity ?? false
     readonly property bool exclusiveDockInTabletMode: cfg.exclusiveDockInTabletMode ?? defaults.exclusiveDockInTabletMode ?? false
@@ -29,9 +45,9 @@ Item {
     readonly property string buttonBehavior: cfg.buttonBehavior ?? defaults.buttonBehavior ?? "toggle-auto-rotate-lock"
     readonly property string tabletBarDensity: cfg.tabletBarDensity ?? defaults.tabletBarDensity ?? "default"
     readonly property string tabletModeStateFile: cfg.tabletModeStateFile ?? defaults.tabletModeStateFile ?? "/tmp/noctalia-tablet-mode"
-    readonly property string lastNonTabletBarDensity: cfg.lastNonTabletBarDensity ?? defaults.lastNonTabletBarDensity ?? ""
-    readonly property string lastNonTabletDockType: cfg.lastNonTabletDockType ?? defaults.lastNonTabletDockType ?? ""
-    readonly property bool lastNonTabletDockEnabled: cfg.lastNonTabletDockEnabled ?? defaults.lastNonTabletDockEnabled ?? true
+    readonly property string lastNonTabletBarDensity: sharedCfg.lastNonTabletBarDensity ?? defaults.lastNonTabletBarDensity ?? ""
+    readonly property string lastNonTabletDockType: sharedCfg.lastNonTabletDockType ?? defaults.lastNonTabletDockType ?? ""
+    readonly property bool lastNonTabletDockEnabled: sharedCfg.lastNonTabletDockEnabled ?? defaults.lastNonTabletDockEnabled ?? true
     property bool _tabletDensityManaged: false
     property bool _tabletDockManaged: false
     property bool _tabletModeDetected: false
@@ -55,12 +71,37 @@ Item {
     property var _hyprTouchFailedNames: []
     property var _logQueue: []
 
+    function capturePolicy(context) {
+        context = context || pluginApi?.settingsContext;
+        if (!context?.current() || _destroying) return null;
+        const values = context.settingsView;
+        return {context: context, backend: compositorBackend,
+            stateFile: values.tabletModeStateFile ?? defaults.tabletModeStateFile ?? "/tmp/noctalia-tablet-mode",
+            showSuccessToast: values.showSuccessToast ?? defaults.showSuccessToast ?? true,
+            buttonBehavior: values.buttonBehavior ?? defaults.buttonBehavior ?? "toggle-auto-rotate-lock",
+            autoRotateInTabletMode: values.autoRotateInTabletMode ?? defaults.autoRotateInTabletMode ?? false,
+            autoRotateOutsideTabletMode: values.autoRotateOutsideTabletMode ?? defaults.autoRotateOutsideTabletMode ?? false,
+            flipVerticalSensorOrientation: values.flipVerticalSensorOrientation ?? defaults.flipVerticalSensorOrientation ?? false,
+            syncHyprTouchTransform: values.syncHyprTouchTransform ?? defaults.syncHyprTouchTransform ?? true};
+    }
+
+    function activatePolicy(context) {
+        context = context || pluginApi?.settingsContext;
+        if (!context?.current() || _destroying) return false;
+        if (policyContext !== context) _endAutoRotateSession();
+        selectedContext = context;
+        _syncTabletModeState(_tabletModeDetected);
+        refreshTabletModeState();
+        return true;
+    }
+
 
     function _copyMap(map) {
         return Object.assign({}, map || {})
     }
 
     function _log(message) {
+        if (_destroying) return;
         var next = root._logQueue.slice()
         next.push(new Date().toISOString() + " " + message)
         root._logQueue = next
@@ -68,7 +109,7 @@ Item {
     }
 
     function _syncLogQueue() {
-        if (debugLogProc.running || !root._logQueue.length)
+        if (root._destroying || debugLogProc.running || !root._logQueue.length)
             return
 
         var next = root._logQueue.slice()
@@ -140,7 +181,7 @@ Item {
     }
 
     function _savePluginSetting(key, value) {
-        if (!pluginApi) return
+        if (!pluginApi || !root.policyCurrent || root._destroying) return
         pluginApi.pluginSettings[key] = value
         pluginApi.saveSettings()
     }
@@ -204,6 +245,7 @@ Item {
     }
 
     function _syncTabletModeState(active) {
+        if (!root.policyCurrent || root._destroying) return;
         root._log("tablet mode state: " + (active ? "on" : "off"))
         root._tabletModeDetected = active
 
@@ -232,9 +274,10 @@ Item {
     }
 
     function refreshTabletModeState() {
-        if (tabletModeProc.running)
+        if (!root.policyCurrent || root._destroying || tabletModeProc.running)
             return
 
+        root._tabletModePolicy = root.capturePolicy(root.policyContext);
         if (root.compositorBackend === "hyprland") {
             tabletModeProc.command = [
                 "sh",
@@ -335,7 +378,7 @@ Item {
     }
 
     function _syncHyprEventListener() {
-        if (root.compositorBackend !== "hyprland") {
+        if (!root.policyCurrent || root._destroying || root.compositorBackend !== "hyprland") {
             hyprEventProc.running = false
             root._hyprEventBuffer = ""
             return
@@ -355,7 +398,7 @@ Item {
     }
 
     function _syncNiriStateFileWatcher() {
-        if (!root._isBackendSupported()) {
+        if (!root.policyCurrent || root._destroying || !root._isBackendSupported()) {
             niriStateWatchProc.running = false
             return
         }
@@ -550,18 +593,20 @@ Item {
         return unique
     }
 
-    function _requestHyprTouchTransformSync(outputName, target) {
-        if (root.compositorBackend !== "hyprland" || !root.syncHyprTouchTransform)
+    function _requestHyprTouchTransformSync(outputName, target, policy) {
+        if (!policy?.context?.current() || policy.backend !== "hyprland" || !policy.syncHyprTouchTransform || root._destroying)
             return
         if (!outputName)
             return
 
         root._hyprTouchQueuedOutputName = outputName
         root._hyprTouchQueuedTarget = root._normalizeTransform(target)
+        root._hyprTouchQueuedPolicy = policy
         root._syncHyprTouchTransformQueue()
     }
 
     function _syncHyprTouchTransformQueue() {
+        if (root._destroying || !root._hyprTouchQueuedPolicy?.context?.current()) return;
         if (hyprTouchQueryProc.running || hyprTouchApplyProc.running)
             return
         if (!root._hyprTouchQueuedOutputName)
@@ -569,6 +614,7 @@ Item {
 
         root._hyprTouchActiveOutputName = root._hyprTouchQueuedOutputName
         root._hyprTouchActiveTarget = root._hyprTouchQueuedTarget || "Normal"
+        root._hyprTouchActivePolicy = root._hyprTouchQueuedPolicy
         root._hyprTouchQueuedOutputName = ""
         root._hyprTouchQueuedTarget = ""
 
@@ -577,6 +623,7 @@ Item {
     }
 
     function _startNextHyprTouchApply() {
+        if (root._destroying || !root._hyprTouchActivePolicy?.context?.current()) return false;
         if (root._hyprTouchApplyIndex >= root._hyprTouchApplyNames.length)
             return false
 
@@ -587,8 +634,8 @@ Item {
         return true
     }
 
-    function _buildQueryCommand() {
-        switch (root.compositorBackend) {
+    function _buildQueryCommand(policy) {
+        switch (policy.backend) {
         case "hyprland":
             return ["hyprctl", "-j", "monitors"]
         case "niri":
@@ -614,8 +661,8 @@ Item {
         return state.name + "," + mode + "," + position + "," + scale + ",transform," + transformId
     }
 
-    function _buildApplyCommand(outputName, target) {
-        switch (root.compositorBackend) {
+    function _buildApplyCommand(outputName, target, policy) {
+        switch (policy.backend) {
         case "hyprland": {
             var state = root.hyprMonitorStateByOutput[outputName]
             var rule = root._hyprMonitorRule(state, root._hyprTransformId(target))
@@ -647,12 +694,14 @@ Item {
         return names.length === 1 ? names[0] : ""
     }
 
-    function _orientationToTransform(orientation) {
+    function _orientationToTransform(orientation, policy) {
+        policy = policy || root.capturePolicy(root.policyContext);
+        if (!policy?.context?.current()) return "";
         switch ((orientation || "").trim().toLowerCase()) {
         case "normal": return "Normal"
         case "bottom-up": return "180"
-        case "left-up": return root.flipVerticalSensorOrientation ? "270" : "90"
-        case "right-up": return root.flipVerticalSensorOrientation ? "90" : "270"
+        case "left-up": return policy.flipVerticalSensorOrientation ? "270" : "90"
+        case "right-up": return policy.flipVerticalSensorOrientation ? "90" : "270"
         default: return ""
         }
     }
@@ -662,8 +711,9 @@ Item {
         return match ? match[1] : ""
     }
 
-    function _requestOutputs(reason, outputName) {
-        if (queryProc.running)
+    function _requestOutputs(reason, outputName, context) {
+        const policy = root.capturePolicy(context || root.policyContext);
+        if (!policy || queryProc.running)
             return false
 
         if (!root._isBackendSupported()) {
@@ -676,7 +726,8 @@ Item {
 
         root._queryReason = reason || ""
         root._queryOutputName = outputName || ""
-        queryProc.command = root._buildQueryCommand()
+        root._queryPolicy = policy
+        queryProc.command = root._buildQueryCommand(policy)
         if (!queryProc.command.length)
             return false
         queryProc.running = true
@@ -697,7 +748,7 @@ Item {
     }
 
     function _startOrientationMonitor() {
-        if (orientationProc.running)
+        if (!root.policyCurrent || root._destroying || orientationProc.running)
             return
 
         root._log("starting monitor-sensor for auto-rotate")
@@ -724,8 +775,8 @@ Item {
             orientationProc.running = false
     }
 
-    function _beginAutoRotateSession(outputName) {
-        if (!outputName)
+    function _beginAutoRotateSession(outputName, policy) {
+        if (!outputName || !policy?.context?.current() || policy.context !== root.policyContext || root._destroying)
             return
 
         root._autoRotateOutputName = outputName
@@ -733,13 +784,15 @@ Item {
         root._autoRotateLastAppliedTransform = root._autoRotateSavedTransform
         root._autoRotatePendingTransform = ""
         root._autoRotateSessionActive = true
+        root._autoRotateSessionPolicy = policy
         root._log("auto-rotate session started; output=" + outputName + "; locked=" + root._rotationLocked + "; saved=" + root._autoRotateSavedTransform)
         if (!root._rotationLocked)
             root._startOrientationMonitor()
     }
 
-    function _applyTransform(outputName, target, shouldShowSuccessToast, shouldShowErrorToast) {
-        if (!outputName || applyProc.running)
+    function _applyTransform(outputName, target, shouldShowSuccessToast, shouldShowErrorToast, policy) {
+        policy = policy || root.capturePolicy(root.policyContext);
+        if (!policy?.context?.current() || root._destroying || !outputName || applyProc.running)
             return false
 
         if (!root._isBackendSupported()) {
@@ -752,10 +805,11 @@ Item {
 
         root._applyOutputName = outputName
         root._applyTarget = root._normalizeTransform(target)
+        root._applyPolicy = policy
         root._applyShouldShowSuccessToast = !!shouldShowSuccessToast
         root._applyShouldShowErrorToast = shouldShowErrorToast !== false
         root._setBusy(outputName, true)
-        applyProc.command = root._buildApplyCommand(outputName, root._applyTarget)
+        applyProc.command = root._buildApplyCommand(outputName, root._applyTarget, policy)
         if (!applyProc.command.length) {
             root._setBusy(outputName, false)
             if (root._applyShouldShowErrorToast)
@@ -778,7 +832,9 @@ Item {
         }
 
         var outputName = root._autoRotateOutputName
-        var restoreTransform = root.autoRotateOutsideTabletMode ? (root._autoRotateSavedTransform || "Normal") : "Normal"
+        var restoreTransform = root._autoRotateSessionPolicy?.autoRotateOutsideTabletMode ? (root._autoRotateSavedTransform || "Normal") : "Normal"
+        root._autoRotateRestorePolicy = root._autoRotateSessionPolicy
+        root._autoRotateSessionPolicy = null
         root._log("auto-rotate session ended; output=" + outputName + "; restore=" + restoreTransform)
 
         root._autoRotateSessionActive = false
@@ -792,26 +848,38 @@ Item {
     }
 
     function _shouldAutoRotate() {
-        return root.autoRotateInTabletMode && (root._tabletModeDetected || root.autoRotateOutsideTabletMode)
+        return root.policyCurrent && !root._destroying && root.autoRotateInTabletMode && (root._tabletModeDetected || root.autoRotateOutsideTabletMode)
     }
 
     function _syncAutoRotateLifecycle() {
+        if (root._destroying) return;
+        // Restore the previous session before starting a newly admitted policy.
+        if (root._autoRotateRestoreOutputName && !applyProc.running) {
+            const output = root._autoRotateRestoreOutputName;
+            const transform = root._autoRotateRestoreTransform || "Normal";
+            const policy = root._autoRotateRestorePolicy;
+            root._autoRotateRestoreOutputName = "";
+            root._autoRotateRestoreTransform = "";
+            root._autoRotateRestorePolicy = null;
+            if (policy?.context?.current()) {
+                if (!root._applyTransform(output, transform, false, false, policy)) {
+                    root._autoRotateRestoreOutputName = output;
+                    root._autoRotateRestoreTransform = transform;
+                    root._autoRotateRestorePolicy = policy;
+                }
+                return;
+            }
+        }
+        if (!root.policyCurrent) {
+            root._stopOrientationMonitor();
+            return;
+        }
         var shouldAutoRotate = root._shouldAutoRotate()
 
         if (!shouldAutoRotate) {
-            if (root._autoRotateRestoreOutputName && !applyProc.running) {
-                var restoreOutputName = root._autoRotateRestoreOutputName
-                var restoreTransform = root._autoRotateRestoreTransform || "Normal"
-                root._autoRotateRestoreOutputName = ""
-                root._autoRotateRestoreTransform = ""
-                if (!root._applyTransform(restoreOutputName, restoreTransform, false, false)) {
-                    root._autoRotateRestoreOutputName = restoreOutputName
-                    root._autoRotateRestoreTransform = restoreTransform
-                }
-                return
-            }
-
+            const wasActive = root._autoRotateSessionActive;
             root._endAutoRotateSession()
+            if (wasActive) root._syncAutoRotateLifecycle();
             return
         }
 
@@ -841,13 +909,15 @@ Item {
             root._autoRotatePendingTransform = pending
     }
 
-    function refreshTransform(outputName) {
+    function refreshTransform(outputName, context) {
         if (!outputName)
             return
-        root._requestOutputs("refresh-output", outputName)
+        root._requestOutputs("refresh-output", outputName, context)
     }
 
-    function cycleTransform(outputName) {
+    function cycleTransform(outputName, context) {
+        const policy = root.capturePolicy(context);
+        if (!policy || !root.activatePolicy(policy.context)) return;
         if (!outputName) {
             ToastService.showError("No output selected for rotation")
             return
@@ -857,30 +927,31 @@ Item {
         var current = root.transformForOutput(outputName)
         var target = root._nextTransform(current)
 
-        root._applyTransform(outputName, target, root.showSuccessToast, true)
+        root._applyTransform(outputName, target, policy.showSuccessToast, true, policy)
     }
 
-    function buttonUsesManualRotate() {
-        return root.buttonBehavior === "manual-rotate"
+    function buttonUsesManualRotate(context) {
+        return root.capturePolicy(context)?.buttonBehavior === "manual-rotate"
     }
 
-    function buttonIconName() {
-        if (root.buttonUsesManualRotate())
+    function buttonIconName(context) {
+        if (root.buttonUsesManualRotate(context))
             return "rotate-cw"
         return root._rotationLocked ? "lock-square" : "rotate-clockwise"
     }
 
-    function buttonTooltip(outputName) {
-        if (root.buttonUsesManualRotate()) {
+    function buttonTooltip(outputName, context) {
+        const policy = root.capturePolicy(context);
+        if (root.buttonUsesManualRotate(context)) {
             var transform = outputName ? root.transformForOutput(outputName) : "Normal"
             return "Rotate display · Current: " + root.transformLabel(transform)
         }
 
-        if (!root.autoRotateInTabletMode)
+        if (!policy?.autoRotateInTabletMode)
             return root._rotationLocked
                 ? "Rotation locked"
                 : "Rotation unlocked"
-        if (!root._tabletModeDetected && !root.autoRotateOutsideTabletMode)
+        if (!root._tabletModeDetected && !policy?.autoRotateOutsideTabletMode)
             return root._rotationLocked
                 ? "Rotation locked"
                 : "Rotation unlocked"
@@ -889,23 +960,27 @@ Item {
         return root._rotationLocked ? "Rotation locked" : "Auto-rotate enabled"
     }
 
-    function buttonEnabled(outputName) {
-        if (root.buttonUsesManualRotate())
+    function buttonEnabled(outputName, context) {
+        if (root.buttonUsesManualRotate(context))
             return root._isBackendSupported() && !!outputName && !root.isBusy(outputName)
-        return root.buttonVisible(outputName)
+        return root.buttonVisible(outputName, context)
     }
 
-    function buttonVisible(outputName) {
-        if (root.buttonUsesManualRotate())
+    function buttonVisible(outputName, context) {
+        const policy = root.capturePolicy(context);
+        if (!policy) return false;
+        if (root.buttonUsesManualRotate(context))
             return true
         return root._isBackendSupported()
-            && root.autoRotateInTabletMode
-            && (root._tabletModeDetected || root.autoRotateOutsideTabletMode)
+            && policy.autoRotateInTabletMode
+            && (root._tabletModeDetected || policy.autoRotateOutsideTabletMode)
     }
 
-    function activatePrimaryButton(outputName) {
-        if (root.buttonUsesManualRotate()) {
-            root.cycleTransform(outputName)
+    function activatePrimaryButton(outputName, context) {
+        const policy = root.capturePolicy(context);
+        if (!policy || !root.activatePolicy(policy.context)) return;
+        if (policy.buttonBehavior === "manual-rotate") {
+            root.cycleTransform(outputName, policy.context)
             return
         }
 
@@ -931,7 +1006,7 @@ Item {
         command: ["sh", "-c", "if [ -n \"$HYPRLAND_INSTANCE_SIGNATURE\" ]; then printf hyprland; elif [ -n \"$NIRI_SOCKET\" ]; then printf niri; elif [ -n \"$XDG_CURRENT_DESKTOP\" ] && printf '%s' \"$XDG_CURRENT_DESKTOP\" | grep -qi hypr; then printf hyprland; elif [ -n \"$XDG_CURRENT_DESKTOP\" ] && printf '%s' \"$XDG_CURRENT_DESKTOP\" | grep -qi niri; then printf niri; else printf unknown; fi"]
 
         onExited: (exitCode, exitStatus) => {
-            if (exitCode !== 0)
+            if (root._destroying || exitCode !== 0)
                 return
 
             var detected = backendDetectProc.stdout.text.trim().toLowerCase()
@@ -952,6 +1027,12 @@ Item {
         stdout: StdioCollector {}
 
         onExited: (exitCode, exitStatus) => {
+            const policy = root._queryPolicy;
+            if (root._destroying || !policy?.context?.current()) {
+                root._queryReason = "";
+                root._queryOutputName = "";
+                return;
+            }
             if (exitCode !== 0) {
                 root._queryReason = ""
                 root._queryOutputName = ""
@@ -964,7 +1045,7 @@ Item {
                 var outputs = ({})
                 var hyprState = ({})
 
-                if (root.compositorBackend === "hyprland" && Array.isArray(parsed)) {
+                if (policy.backend === "hyprland" && Array.isArray(parsed)) {
                     for (var i = 0; i < parsed.length; ++i) {
                         var monitor = parsed[i]
                         if (!monitor || !monitor.name)
@@ -988,7 +1069,7 @@ Item {
                         }
                     }
                     root.hyprMonitorStateByOutput = hyprState
-                } else if (root.compositorBackend === "niri" && parsed && typeof parsed === "object")
+                } else if (policy.backend === "niri" && parsed && typeof parsed === "object")
                     outputs = parsed
 
                 var names = Object.keys(outputs)
@@ -1000,7 +1081,7 @@ Item {
                 }
 
                 if (root._queryReason === "auto-rotate-start")
-                    root._beginAutoRotateSession(root._internalDisplayFromOutputs(outputs))
+                    root._beginAutoRotateSession(root._internalDisplayFromOutputs(outputs), policy)
             } catch (error) {
                 console.warn("2-in-1-tools: failed to parse outputs JSON:", error)
             } finally {
@@ -1018,13 +1099,15 @@ Item {
         onExited: (exitCode, exitStatus) => {
             var outputName = root._applyOutputName
             root._setBusy(outputName, false)
+            const policy = root._applyPolicy;
+            if (root._destroying || !policy?.context?.current()) return;
 
             if (exitCode === 0) {
                 root._setTransform(outputName, root._applyTarget)
-                root._requestHyprTouchTransformSync(outputName, root._applyTarget)
+                root._requestHyprTouchTransformSync(outputName, root._applyTarget, policy)
                 if (root._applyShouldShowSuccessToast)
-                    ToastService.showSuccess("Display rotated to " + root.transformLabel(root._applyTarget))
-                root.refreshTransform(outputName)
+                    ToastService.showNotice("Display rotated to " + root.transformLabel(root._applyTarget))
+                root.refreshTransform(outputName, policy.context)
                 if (outputName === root._autoRotateOutputName)
                     root._autoRotateLastAppliedTransform = root._applyTarget
                 root._syncAutoRotateLifecycle()
@@ -1038,7 +1121,7 @@ Item {
                     message += ": " + detail
                 ToastService.showError(message)
             }
-            root.refreshTransform(outputName)
+            root.refreshTransform(outputName, policy.context)
             root._syncAutoRotateLifecycle()
         }
     }
@@ -1048,6 +1131,10 @@ Item {
         stdout: StdioCollector {}
 
         onExited: (exitCode, exitStatus) => {
+            if (root._destroying || !root._hyprTouchActivePolicy?.context?.current()) {
+                root._syncHyprTouchTransformQueue();
+                return;
+            }
             if (exitCode !== 0) {
                 root._hyprTouchActiveOutputName = ""
                 root._hyprTouchActiveTarget = ""
@@ -1084,6 +1171,10 @@ Item {
         stderr: StdioCollector {}
 
         onExited: (exitCode, exitStatus) => {
+            if (root._destroying || !root._hyprTouchActivePolicy?.context?.current()) {
+                root._syncHyprTouchTransformQueue();
+                return;
+            }
             var name = root._hyprTouchApplyNames[root._hyprTouchApplyIndex]
             if (exitCode !== 0 && name)
                 root._hyprTouchFailedNames = root._hyprTouchFailedNames.concat([name])
@@ -1113,7 +1204,13 @@ Item {
         stdout: StdioCollector {}
 
         onExited: (exitCode, exitStatus) => {
-            if (exitCode !== 0)
+            const policy = root._tabletModePolicy;
+            if (root._tabletModeRefreshPending) {
+                root._tabletModeRefreshPending = false;
+                root.refreshTabletModeState();
+                return;
+            }
+            if (root._destroying || !policy?.context?.current() || policy.context !== root.policyContext || policy.stateFile !== root.tabletModeStateFile || exitCode !== 0)
                 return
 
             var raw = tabletModeProc.stdout.text.trim()
@@ -1145,7 +1242,7 @@ Item {
 
         onExited: (exitCode, exitStatus) => {
             root._log("Hyprland event listener exited; code=" + exitCode)
-            if (root.compositorBackend === "hyprland")
+            if (!root._destroying && root.policyCurrent && root.compositorBackend === "hyprland")
                 hyprEventRestartTimer.restart()
         }
     }
@@ -1160,7 +1257,10 @@ Item {
 
         onExited: (exitCode, exitStatus) => {
             root._log("tablet mode state file watcher exited; code=" + exitCode)
-            if (root._isBackendSupported())
+            if (root._restartStateWatcher && !root._destroying && root.policyCurrent) {
+                root._restartStateWatcher = false;
+                root._syncNiriStateFileWatcher();
+            } else if (!root._destroying && root.policyCurrent && root._isBackendSupported())
                 niriStateWatchRestartTimer.restart()
         }
     }
@@ -1240,8 +1340,19 @@ Item {
     onAutoRotateInTabletModeChanged: root._syncAutoRotateLifecycle()
     onAutoRotateOutsideTabletModeChanged: root._syncAutoRotateLifecycle()
     onTabletModeStateFileChanged: {
-        root._syncNiriStateFileWatcher()
-        root.refreshTabletModeState()
+        if (root._constructed && !root._destroying) {
+            root._restartStateWatcher = true;
+            if (niriStateWatchProc.running) niriStateWatchProc.running = false;
+            else {
+                root._restartStateWatcher = false;
+                root._syncNiriStateFileWatcher();
+            }
+            root.refreshTabletModeState();
+            if (tabletModeProc.running && root._tabletModePolicy?.stateFile !== root.tabletModeStateFile) {
+                root._tabletModeRefreshPending = true;
+                tabletModeProc.running = false;
+            }
+        }
     }
     onCompositorBackendChanged: {
         root._syncTabletModeWatchers()
@@ -1250,13 +1361,14 @@ Item {
 
     Timer {
         interval: root.compositorBackend === "unknown" ? 2000 : root.compositorBackend === "hyprland" ? 2000 : 10000
-        running: true
+        running: root.policyCurrent && !root._destroying
         repeat: true
         triggeredOnStart: true
         onTriggered: root.refreshTabletModeState()
     }
 
     Component.onDestruction: {
+        root._destroying = true;
         backendDetectProc.running = false
         tabletModeProc.running = false
         queryProc.running = false
@@ -1274,8 +1386,23 @@ Item {
     }
 
     Component.onCompleted: {
+        root._constructed = true;
         root._log("main component completed; initial backend=" + root.compositorBackend)
         backendDetectProc.running = true
         root._syncTabletModeWatchers()
+    }
+
+    onPolicyCurrentChanged: {
+        if (!root.policyCurrent && root._constructed) {
+            tabletModeProc.running = false;
+            queryProc.running = false;
+            orientationProc.running = false;
+            orientationPollProc.running = false;
+            hyprEventProc.running = false;
+            niriStateWatchProc.running = false;
+            hyprEventRestartTimer.stop();
+            niriStateWatchRestartTimer.stop();
+            niriStateWatchDebounceTimer.stop();
+        }
     }
 }

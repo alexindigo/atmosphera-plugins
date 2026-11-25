@@ -26,6 +26,7 @@
     "loading": "Carregando entidades..."
   },
   "settings": {
+    "shared-effect": "Esta instância seleciona a sua ligação e entidades fixadas. As ações dos serviços alteram os dispositivos reais do Home Assistant, com efeitos visíveis para outros clientes.",
     "url_label": "URL do Home Assistant",
     "url_placeholder": "http://homeassistant.local:8123",
     "token_label": "Token de Acesso de Longa Duração",

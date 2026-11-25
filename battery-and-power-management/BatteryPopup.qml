@@ -9,7 +9,7 @@ Item {
     property var pluginApi: null
     property var screen: null
     
-    readonly property var mainWidget: pluginApi?.mainInstance || null
+    readonly property var mainWidget: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
     property real contentPreferredWidth: (panelContent.implicitWidth + Style.marginM * 10) * Style.uiScaleRatio
     property real contentPreferredHeight: (mainLayout.implicitHeight + Style.marginM * 4) * Style.uiScaleRatio

@@ -78,6 +78,7 @@
 		"start-hint": "Start it with: systemctl start mullvad-daemon"
 	},
 	"settings": {
+        "shared-effect": "Polling, display and action choices apply to this instance. VPN connection, relay and daemon changes affect every instance and the whole system.",
 		"title": "Mullvad VPN Settings",
 		"refresh-interval": "Refresh interval (ms)",
 		"show-flag": "Show country flag in bar",

@@ -31,6 +31,7 @@
     "activity": "Etkinlik"
   },
   "settings": {
+    "shared-effect": "Ayg\u0131t ve g\u00f6r\u00fcn\u00fcm se\u00e7imi bu \u00f6rne\u011fe aittir. Ayn\u0131 GPU'nun g\u00f6r\u00fcn\u00fcmleri \u00f6l\u00e7\u00fcmleri ve ge\u00e7mi\u015fi payla\u015f\u0131r.",
     "bar_section": "Çubuk widget'ı",
     "compact_mode_label": "Kompakt mod",
     "compact_mode_description": "Yüzde metni yerine dikey mini göstergeler.",

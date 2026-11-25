@@ -1,9 +1,9 @@
 {
   "id": "tailscale",
   "name": "Tailscale",
-  "version": "1.5.10",
+  "version": "1.5.13",
   "minNoctaliaVersion": "4.0.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "nineluj",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -26,21 +26,21 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "compactMode": {"type": "Boolean"},
-        "defaultPeerAction": {"type": "String"},
-        "hideDisconnected": {"type": "Boolean"},
-        "hideMullvadExitNodes": {"type": "Boolean"},
-        "loginServer": {"type": "String"},
-        "pingCount": {"type": "Real"},
-        "refreshInterval": {"type": "Real"},
-        "showIpAddress": {"type": "Boolean"},
-        "showPeerCount": {"type": "Boolean"},
-        "showSearchBar": {"type": "Boolean"},
-        "sshUsername": {"type": "String"},
-        "taildropDownloadDir": {"type": "String"},
-        "taildropEnabled": {"type": "Boolean"},
-        "taildropReceiveMode": {"type": "String"},
-        "terminalCommand": {"type": "String"}
+        "compactMode": {"editorUsage": "configuration", "type": "Boolean"},
+        "defaultPeerAction": {"editorUsage": "configuration", "type": "String"},
+        "hideDisconnected": {"editorUsage": "configuration", "type": "Boolean"},
+        "hideMullvadExitNodes": {"editorUsage": "configuration", "type": "Boolean"},
+        "loginServer": {"editorUsage": "configuration", "type": "String"},
+        "pingCount": {"editorUsage": "configuration", "type": "Real"},
+        "refreshInterval": {"editorUsage": "configuration", "type": "Real"},
+        "showIpAddress": {"editorUsage": "configuration", "type": "Boolean"},
+        "showPeerCount": {"editorUsage": "configuration", "type": "Boolean"},
+        "showSearchBar": {"editorUsage": "configuration", "type": "Boolean"},
+        "sshUsername": {"editorUsage": "configuration", "type": "String"},
+        "taildropDownloadDir": {"editorUsage": "configuration", "type": "String"},
+        "taildropEnabled": {"editorUsage": "configuration", "type": "Boolean"},
+        "taildropReceiveMode": {"editorUsage": "configuration", "type": "String"},
+        "terminalCommand": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

@@ -14,8 +14,9 @@ AtmoIconButton {
     property int sectionWidgetsCount: 0
 
     readonly property var mainInstance: pluginApi?.mainInstance
+    readonly property var settingsConsumer: mainInstance?.settingsConsumerFor(pluginApi?.settingsContext)
     property bool keyboardActive: mainInstance?.keyboardActive ?? false
-    property bool available: mainInstance?.available ?? false
+    property bool available: settingsConsumer?.available ?? false
 
     readonly property var pluginDefaults: pluginApi?.manifest?.metadata?.defaultSettings ?? ({})
     readonly property bool hideWhenUnavailable: pluginApi?.pluginSettings?.hideWhenUnavailable ?? pluginDefaults.hideWhenUnavailable ?? false
@@ -34,7 +35,7 @@ AtmoIconButton {
                 : (flipHoverIcons ? "keyboard-hide" : "keyboard-show"))
             : (keyboardActive ? "keyboard" : "keyboard-off"))
     tooltipText: !available
-        ? pluginApi?.tr(mainInstance?.unavailableTooltipKey ?? "tooltip.detecting")
+        ? pluginApi?.tr(settingsConsumer?.unavailableTooltipKey ?? "tooltip.detecting")
         : (keyboardActive ? pluginApi?.tr("tooltip.active") : pluginApi?.tr("tooltip.hidden"))
     tooltipDirection: BarService.getTooltipDirection(screen?.name)
     baseSize: Style.getCapsuleHeightForScreen(screen?.name)
@@ -45,7 +46,7 @@ AtmoIconButton {
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
 
-    onClicked: { if (available) mainInstance?.toggleKeyboard() }
+    onClicked: { if (available) settingsConsumer?.toggleKeyboard() }
 
     onRightClicked: {
         PanelService.showContextMenu(contextMenu, root, screen)

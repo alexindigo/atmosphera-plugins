@@ -2,7 +2,8 @@
   "settings": {
     "battery-device": "Appareil de batterie",
     "battery-device-desc": "Batterie pour laquelle configurer le seuil",
-    "no-battery-device": "Aucune batterie configurable n'est disponible sur ce système"
+    "no-battery-device": "Aucune batterie configurable n'est disponible sur ce système",
+    "shared-device": "La batterie choisie concerne cette configuration. Sa limite physique est partag\u00e9e : une autre configuration peut la modifier. La limite enregistr\u00e9e est restaur\u00e9e une fois \u00e0 l'activation ou apr\u00e8s l'application des param\u00e8tres."
   },
   "actions": {
     "widget-settings": "Paramètres du widget"
@@ -11,6 +12,7 @@
     "title": "Seuil de batterie",
     "not-available": "Non disponible sur ce système",
     "adjust-limit": "Faites glisser pour ajuster la limite",
-    "read-only": "Lecture seule : installez la règle udev pour l'accès en écriture"
+    "read-only": "Lecture seule : installez la règle udev pour l'accès en écriture",
+    "action-failed": "La limite n'a pas pu \u00eatre appliqu\u00e9e ou enregistr\u00e9e. V\u00e9rifiez l'acc\u00e8s en \u00e9criture, puis r\u00e9essayez."
   }
 }

@@ -25,6 +25,7 @@
     "unknown": "unknown"
   },
   "settings": {
+    "shared-effect": "Device, polling and display choices apply to this instance. Battery readings and system power-profile actions are shared.",
     "refreshInterval": {
       "desc": "How often the bar and panel refresh battery power and time text.",
       "label": "Refresh interval"

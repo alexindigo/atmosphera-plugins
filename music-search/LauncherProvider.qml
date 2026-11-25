@@ -19,6 +19,7 @@ Item {
   property url previewComponentPath: Qt.resolvedUrl("MusicPreview.qml")
 
   readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var cfg: pluginApi?.settingsView ?? ({})
   readonly property string helperPath: mainInstance?.helperPath || Qt.resolvedUrl("musicctl.sh").toString().replace("file://", "")
   readonly property string commandName: ">" + (pluginApi?.manifest?.metadata?.commandPrefix || "music-search")
 
@@ -251,22 +252,22 @@ Item {
     if (prefix) {
       parts.push(prefix);
     }
-    if (mainInstance?.showUploaderMetadata !== false && entry.uploader) {
+    if (cfg.showUploaderMetadata !== false && entry.uploader) {
       parts.push(entry.uploader);
     }
-    if (mainInstance?.showAlbumMetadata !== false && entry.album) {
+    if (cfg.showAlbumMetadata !== false && entry.album) {
       parts.push(entry.album);
     }
     var durationLabel = MusicUtils.formatDuration(entry.duration);
-    if (mainInstance?.showDurationMetadata !== false && durationLabel) {
+    if (cfg.showDurationMetadata !== false && durationLabel) {
       parts.push(durationLabel);
     }
     var ratingLabel = formatRating(entry.rating);
-    if (mainInstance?.showRatingMetadata !== false && ratingLabel) {
+    if (cfg.showRatingMetadata !== false && ratingLabel) {
       parts.push(ratingLabel);
     }
     var tags = entry.tags || [];
-    if (mainInstance?.showTagMetadata !== false && tags.length > 0) {
+    if (cfg.showTagMetadata !== false && tags.length > 0) {
       parts.push(tags.map(function(t) { return "#" + t; }).join(" "));
     }
     return parts.join(" • ");
@@ -320,7 +321,7 @@ Item {
         if (launcher) {
           launcher.close();
         }
-        mainInstance?.playEntry(entry);
+        mainInstance?.playEntry(entry, root.pluginApi.settingsContext);
       }
     };
   }
@@ -971,7 +972,7 @@ Item {
         if (launcher) {
           launcher.close();
         }
-        mainInstance?.playQueueEntryNow(entry);
+        mainInstance?.playQueueEntryNow(entry, root.pluginApi.settingsContext);
       }
     };
   }
@@ -990,7 +991,7 @@ Item {
 
     if (queryText === "start") {
       items.push(buildQueueActionItem(pluginApi?.tr("queue.start"), pluginApi?.tr("queue.startNow"), "player-play", 20, function () {
-                                        mainInstance?.startQueue();
+                                        mainInstance?.startQueue(root.pluginApi.settingsContext);
                                         if (launcher) {
                                           launcher.close();
                                         }
@@ -1007,7 +1008,7 @@ Item {
 
     if (queryText === "skip") {
       items.push(buildQueueActionItem(pluginApi?.tr("queue.skip"), pluginApi?.tr("queue.skipNow"), "player-skip-forward", 18, function () {
-                                        mainInstance?.skipQueue();
+                                        mainInstance?.skipQueue(root.pluginApi.settingsContext);
                                       }));
       return items;
     }
@@ -1021,7 +1022,7 @@ Item {
 
     if (queryText === "saved" || queryText === "library" || queryText === "autoplay") {
       items.push(buildQueueActionItem(pluginApi?.tr("queue.autoplaySaved"), pluginApi?.tr("queue.autoplaySavedDesc"), "bookmark", 17, function () {
-                                        mainInstance?.autoplaySavedTracks(false);
+                                        mainInstance?.autoplaySavedTracks(false, root.pluginApi.settingsContext);
                                         if (launcher) {
                                           launcher.close();
                                         }
@@ -1031,7 +1032,7 @@ Item {
 
     if (queryText === "saved shuffle" || queryText === "library shuffle" || queryText === "autoplay shuffle" || queryText === "shuffle saved") {
       items.push(buildQueueActionItem(pluginApi?.tr("queue.autoplaySavedShuffle"), pluginApi?.tr("queue.autoplaySavedShuffleDesc"), "arrows-shuffle", 16, function () {
-                                        mainInstance?.autoplaySavedTracks(true);
+                                        mainInstance?.autoplaySavedTracks(true, root.pluginApi.settingsContext);
                                         if (launcher) {
                                           launcher.close();
                                         }
@@ -1040,19 +1041,19 @@ Item {
     }
 
     items.push(buildQueueActionItem(pluginApi?.tr("queue.start"), pluginApi?.tr("queue.startArm"), "player-play", 8, function () {
-                                      mainInstance?.startQueue();
+                                      mainInstance?.startQueue(root.pluginApi.settingsContext);
                                     }));
     items.push(buildQueueActionItem(pluginApi?.tr("queue.stop"), pluginApi?.tr("queue.stopKeep"), "player-pause", 7, function () {
                                       mainInstance?.stopQueue();
                                     }));
     items.push(buildQueueActionItem(pluginApi?.tr("queue.skip"), pluginApi?.tr("queue.skipJump"), "player-skip-forward", 7, function () {
-                                      mainInstance?.skipQueue();
+                                      mainInstance?.skipQueue(root.pluginApi.settingsContext);
                                     }));
     items.push(buildQueueActionItem(pluginApi?.tr("queue.autoplaySaved"), pluginApi?.tr("queue.autoplaySavedActiveDesc"), "bookmark", 6, function () {
-                                      mainInstance?.autoplaySavedTracks(false);
+                                      mainInstance?.autoplaySavedTracks(false, root.pluginApi.settingsContext);
                                     }));
     items.push(buildQueueActionItem(pluginApi?.tr("queue.autoplaySavedShuffle"), pluginApi?.tr("queue.autoplaySavedShuffleActiveDesc"), "arrows-shuffle", 5, function () {
-                                      mainInstance?.autoplaySavedTracks(true);
+                                      mainInstance?.autoplaySavedTracks(true, root.pluginApi.settingsContext);
                                     }));
     items.push(buildQueueActionItem(pluginApi?.tr("queue.clear"), pluginApi?.tr("queue.clearEmpty"), "trash", 6, function () {
                                       mainInstance?.clearQueue();
@@ -1096,12 +1097,12 @@ Item {
       items.push(mprisSearchItem);
     }
 
-    if (mainInstance?.showHomeRecent !== false && recentEntries.length > 0) {
+    if (cfg.showHomeRecent !== false && recentEntries.length > 0) {
       items.push(buildSectionItem(pluginApi?.tr("home.recentlyPlayed"), pluginApi?.tr("home.recentlyPlayedDesc"), "history"));
       for (var i = 0; i < recentEntries.length; i++) {
         var relativeTime = MusicUtils.formatRelativeTime(recentEntries[i].lastPlayedAt);
         items.push(buildLibraryResultItem(recentEntries[i], {
-                                            "prefix": mainInstance?.showPlayStatsMetadata !== false && relativeTime
+                                            "prefix": cfg.showPlayStatsMetadata !== false && relativeTime
                                                 ? (pluginApi?.tr("home.recentWithTime", {"time": relativeTime}))
                                                 : (pluginApi?.tr("home.recent")),
                                             "icon": recentEntries[i].id === mainInstance?.currentEntryId && mainInstance?.isPlaying ? "disc" : "history"
@@ -1109,11 +1110,11 @@ Item {
       }
     }
 
-    if (mainInstance?.showHomeTop !== false && topEntries.length > 0) {
+    if (cfg.showHomeTop !== false && topEntries.length > 0) {
       items.push(buildSectionItem(pluginApi?.tr("home.mostPlayed"), pluginApi?.tr("home.mostPlayedDesc"), "chart-bar"));
       for (var j = 0; j < topEntries.length; j++) {
         items.push(buildLibraryResultItem(topEntries[j], {
-                                            "prefix": mainInstance?.showPlayStatsMetadata !== false
+                                            "prefix": cfg.showPlayStatsMetadata !== false
                                                 ? (pluginApi?.tr("home.topWithPlays", {"plays": formatPlayCount(topEntries[j].playCount || 0)}))
                                                 : (pluginApi?.tr("home.top")),
                                             "icon": topEntries[j].id === mainInstance?.currentEntryId && mainInstance?.isPlaying ? "disc" : "chart-bar"
@@ -1121,21 +1122,21 @@ Item {
       }
     }
 
-    if (mainInstance?.showHomeTags !== false && tagStats.length > 0) {
+    if (cfg.showHomeTags !== false && tagStats.length > 0) {
       items.push(buildSectionItem(pluginApi?.tr("home.tags"), pluginApi?.tr("home.tagsDesc"), "tag"));
       for (var k = 0; k < tagStats.length; k++) {
         items.push(buildTagBrowseItem(tagStats[k]));
       }
     }
 
-    if (mainInstance?.showHomeArtists !== false && artistStats.length > 0) {
+    if (cfg.showHomeArtists !== false && artistStats.length > 0) {
       items.push(buildSectionItem(pluginApi?.tr("home.artists"), pluginApi?.tr("home.artistsDesc"), "microphone-2"));
       for (var m = 0; m < artistStats.length; m++) {
         items.push(buildArtistBrowseItem(artistStats[m]));
       }
     }
 
-    if (mainInstance?.showHomePlaylists !== false && playlists.length > 0) {
+    if (cfg.showHomePlaylists !== false && playlists.length > 0) {
       items.push(buildSectionItem(pluginApi?.tr("home.playlists"), pluginApi?.tr("home.playlistsDesc"), "playlist"));
       for (var n = 0; n < playlists.length; n++) {
         items.push(buildPlaylistHeaderItem(playlists[n]));
@@ -1201,13 +1202,13 @@ Item {
 
     var items = [
           buildSectionItem(targetArtist.name,
-                           mainInstance?.showPlayStatsMetadata !== false
+                           cfg.showPlayStatsMetadata !== false
                                ? (formatPlayCount(targetArtist.playCount || 0) || (targetArtist.count + " saved tracks"))
                                : (targetArtist.count + " saved tracks"),
                            "microphone-2")
         ];
     for (var i = 0; i < artistEntries.length; i++) {
-      var artistPrefix = mainInstance?.showPlayStatsMetadata !== false && (artistEntries[i].lastPlayedAt || "").length > 0
+      var artistPrefix = cfg.showPlayStatsMetadata !== false && (artistEntries[i].lastPlayedAt || "").length > 0
           ? (pluginApi?.tr("home.artistWithTime", {"time": MusicUtils.formatRelativeTime(artistEntries[i].lastPlayedAt)}))
           : (pluginApi?.tr("home.artist"));
       items.push(buildLibraryResultItem(artistEntries[i], {
@@ -1255,7 +1256,7 @@ Item {
     previewItem.lastError = mainInstance?.lastError || "";
     previewItem.helperPath = helperPath;
     previewItem.previewDelayMs = 500;
-    previewItem.previewMetadataMode = mainInstance?.previewMetadataMode || pluginApi?.pluginSettings?.previewMetadataMode || pluginApi?.manifest?.metadata?.defaultSettings?.previewMetadataMode || "always";
+    previewItem.previewMetadataMode = cfg.previewMetadataMode ?? "always";
     previewItem.sourceLabel = item.kind === "library"
         ? (pluginApi?.tr("library.label"))
         : (item.kind === "queue-entry"
@@ -1749,7 +1750,7 @@ Item {
         if (launcher) {
           launcher.close();
         }
-        mainInstance?.playUrl(urlText, pluginApi?.tr("common.customUrl"));
+        mainInstance?.playUrl(urlText, pluginApi?.tr("common.customUrl"), root.pluginApi.settingsContext);
       }
     };
   }
@@ -2498,7 +2499,7 @@ Item {
         if (launcher) {
           launcher.close();
         }
-        mainInstance?.playEntry(entry);
+        mainInstance?.playEntry(entry, root.pluginApi.settingsContext);
       }
     };
   }
@@ -2521,7 +2522,7 @@ Item {
               "icon": "player-play",
               "tooltip": pluginApi?.tr("tooltip.playNow"),
               "action": function () {
-                mainInstance?.playQueueEntryNow(item);
+                mainInstance?.playQueueEntryNow(item, root.pluginApi.settingsContext);
                 if (launcher) {
                   launcher.close();
                 }
@@ -2816,7 +2817,7 @@ Item {
                 if (launcher) {
                   launcher.close();
                 }
-                mainInstance?.playPlaylist(item.id, false);
+                mainInstance?.playPlaylist(item.id, false, root.pluginApi.settingsContext);
               }
             },
             {
@@ -2826,14 +2827,14 @@ Item {
                 if (launcher) {
                   launcher.close();
                 }
-                mainInstance?.playPlaylist(item.id, true);
+                mainInstance?.playPlaylist(item.id, true, root.pluginApi.settingsContext);
               }
             },
             {
               "icon": "playlist-add",
               "tooltip": pluginApi?.tr("tooltip.queuePlaylist"),
               "action": function () {
-                mainInstance?.queuePlaylist(item.id, false);
+                mainInstance?.queuePlaylist(item.id, false, root.pluginApi.settingsContext);
               }
             },
             {

@@ -1,5 +1,6 @@
 {
-	"settings": {
+  "settings": {
+    "shared-effect": "Polling, display and peer-action choices apply to this instance. Status and ping observations are shared; connection actions affect the system NetBird daemon.",
 		"title": "NetBird Settings",
 		"description": "Configure NetBird VPN status display and behavior",
 		"refresh-interval": "Refresh Interval",

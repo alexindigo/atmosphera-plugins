@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "Abfrage, Anzeige, Anmeldeserver und Transfer gelten f\u00fcr diese Instanz. VPN, Kontowechsel und Taildrop betreffen den gemeinsamen Systemdienst und Dateien.",
     "title": "Tailscale Einstellungen",
     "description": "Konfiguriere Tailscale Statusanzeige und Verhalten",
     "refresh-interval": "Aktualisierungsintervall",

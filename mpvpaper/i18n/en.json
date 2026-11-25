@@ -32,6 +32,7 @@
     "loading": "Loading..."
   },
   "settings": {
+    "shared-effect": "Apply or a runtime action selects this instance's policy for the one shared wallpaper player and automation timer. Playback, wallpaper restoration and color changes affect every instance.",
     "toggle": {
       "label": "Enable mpvpaper",
       "description": "Enable the mpvpaper integration"

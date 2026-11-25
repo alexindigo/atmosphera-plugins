@@ -10,32 +10,28 @@ ColumnLayout {
   spacing: 0
 
   property var pluginApi: null
+  readonly property var enableTodoIntegrationField: pluginApi?.field("enableTodoIntegration") ?? null
+  readonly property var pincardsEnabledField: pluginApi?.field("pincardsEnabled") ?? null
+  readonly property var notecardsEnabledField: pluginApi?.field("notecardsEnabled") ?? null
+  readonly property var showCloseButtonField: pluginApi?.field("showCloseButton") ?? null
+  readonly property var fullscreenModeField: pluginApi?.field("fullscreenMode") ?? null
+  readonly property var hidePanelBackgroundField: pluginApi?.field("hidePanelBackground") ?? null
+  readonly property var autoPasteField: pluginApi?.field("autoPaste") ?? null
+  readonly property var autoPasteOnRightClickField: pluginApi?.field("autoPasteOnRightClick") ?? null
+  readonly property var autoPasteDelayField: pluginApi?.field("autoPasteDelay") ?? null
+  readonly property var panelWidthField: pluginApi?.field("panelWidth") ?? null
+  readonly property var panelHeightField: pluginApi?.field("panelHeight") ?? null
+  readonly property var cardColorsField: pluginApi?.field("cardColors") ?? null
+  readonly property var customColorsField: pluginApi?.field("customColors") ?? null
 
   // Preview belongs to the selected editor, never the persistent preferences.
   readonly property var initial: pluginApi?.initialSettings || ({})
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property bool valueTodoIntegration: root.initial.enableTodoIntegration ?? false
-    readonly property bool valuePincardsEnabled: root.initial.pincardsEnabled ?? true
-    readonly property bool valueNotecardsEnabled: root.initial.notecardsEnabled ?? true
-    readonly property bool valueShowCloseButton: root.initial.showCloseButton ?? false
-    readonly property bool valueFullscreenMode: root.initial.fullscreenMode ?? false
-    readonly property bool valueHidePanelBackground: root.initial.hidePanelBackground ?? false
-    readonly property bool valueAutoPaste: root.initial.autoPaste ?? false
-    readonly property bool valueAutoPasteOnRightClick: root.initial.autoPasteOnRightClick ?? false
-    readonly property int valueAutoPasteDelay: root.initial.autoPasteDelay ?? 300
-    readonly property int valuePanelWidth: root.initial.panelWidth ?? 1450
-    readonly property int valuePanelHeight: root.initial.panelHeight ?? 0
-    readonly property var pendingCardColors: root.initial.cardColors || root.defaultCardColors
-    readonly property var pendingCustomColors: root.initial.customColors || root.defaultCustomColors
-    readonly property var cardColors: pendingCardColors
-    readonly property var customColors: pendingCustomColors
-    ranges: [NSettingsRange { field: "valuePanelWidth"; from: panelWidthInput.from; to: panelWidthInput.to }, NSettingsRange { field: "valuePanelHeight"; from: panelHeightInput.from; to: panelHeightInput.to }, NSettingsRange { field: "valueAutoPasteDelay"; from: autoPasteDelayInput.from; to: autoPasteDelayInput.to }]
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({valueTodoIntegration: valueTodoIntegration, valuePincardsEnabled: valuePincardsEnabled, valueNotecardsEnabled: valueNotecardsEnabled, valueShowCloseButton: valueShowCloseButton, valueFullscreenMode: valueFullscreenMode, valueHidePanelBackground: valueHidePanelBackground, valueAutoPaste: valueAutoPaste, valueAutoPasteOnRightClick: valueAutoPasteOnRightClick, valueAutoPasteDelay: valueAutoPasteDelay, valuePanelWidth: valuePanelWidth, valuePanelHeight: valuePanelHeight, pendingCardColors: pendingCardColors, pendingCustomColors: pendingCustomColors, cardColors: cardColors, customColors: customColors})
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   function _applyPreview(key, value) {
-    if (!pluginApi) return;
+    if (!pluginApi)
+      return;
     var patch = {};
     patch[key] = value;
     return pluginApi.previewSettings(patch);
@@ -45,28 +41,23 @@ ColumnLayout {
     var next = Object.assign({}, custom ? pendingCustomColors : pendingCardColors);
     next[cardType] = Object.assign({}, next[cardType]);
     next[cardType][part] = value;
-    if (custom) {
-      pendingCustomColors = next;
-      customColors = JSON.parse(JSON.stringify(next));
-    } else {
-      pendingCardColors = next;
-      cardColors = JSON.parse(JSON.stringify(next));
-    }
+    // Atomic map leaves: the intent is the whole map with this part changed.
+    return (custom ? customColorsField : cardColorsField).set(next);
   }
 
-  property bool valueTodoIntegration: displayBaseline.valueTodoIntegration
-  property bool valuePincardsEnabled: displayBaseline.valuePincardsEnabled
-  property bool valueNotecardsEnabled: displayBaseline.valueNotecardsEnabled
-  property bool valueShowCloseButton: displayBaseline.valueShowCloseButton
-  property bool valueFullscreenMode: displayBaseline.valueFullscreenMode
-  property bool valueHidePanelBackground: displayBaseline.valueHidePanelBackground
-  property bool valueAutoPaste: displayBaseline.valueAutoPaste
-  property bool valueAutoPasteOnRightClick: displayBaseline.valueAutoPasteOnRightClick
-  property int valueAutoPasteDelay: displayBaseline.project("valueAutoPasteDelay")
-  property int valuePanelWidth: displayBaseline.project("valuePanelWidth")
-  property int valuePanelHeight: displayBaseline.project("valuePanelHeight")
-  property var pendingCardColors: JSON.parse(JSON.stringify(displayBaseline.pendingCardColors))
-  property var pendingCustomColors: JSON.parse(JSON.stringify(displayBaseline.pendingCustomColors))
+  readonly property bool valueTodoIntegration: root.enableTodoIntegrationField?.value ?? false
+  readonly property bool valuePincardsEnabled: root.pincardsEnabledField?.value ?? true
+  readonly property bool valueNotecardsEnabled: root.notecardsEnabledField?.value ?? true
+  readonly property bool valueShowCloseButton: root.showCloseButtonField?.value ?? false
+  readonly property bool valueFullscreenMode: root.fullscreenModeField?.value ?? false
+  readonly property bool valueHidePanelBackground: root.hidePanelBackgroundField?.value ?? false
+  readonly property bool valueAutoPaste: root.autoPasteField?.value ?? false
+  readonly property bool valueAutoPasteOnRightClick: root.autoPasteOnRightClickField?.value ?? false
+  readonly property int valueAutoPasteDelay: root.autoPasteDelayField?.value ?? 300
+  readonly property int valuePanelWidth: root.panelWidthField?.value ?? 1450
+  readonly property int valuePanelHeight: root.panelHeightField?.value ?? 0
+  readonly property var pendingCardColors: cardColorsField?.value || defaultCardColors
+  readonly property var pendingCustomColors: customColorsField?.value || defaultCustomColors
   readonly property var defaultCustomColors: {
     "Text": {
       bg: "#555555",
@@ -251,10 +242,10 @@ ColumnLayout {
   }
 
   // Current card colors (loaded from settings or defaults)
-  property var cardColors: JSON.parse(JSON.stringify(displayBaseline.cardColors))
+  readonly property var cardColors: pendingCardColors
 
   // Custom color values (when "custom" is selected)
-  property var customColors: JSON.parse(JSON.stringify(displayBaseline.customColors))
+  readonly property var customColors: pendingCustomColors
 
   // Home directory for path resolution
   readonly property string homeDir: Quickshell.env("HOME") || ""
@@ -300,6 +291,13 @@ ColumnLayout {
     return getColorValue(cardColors[selectedCardType]?.fg || "mOnSurface", selectedCardType, "fg");
   }
 
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    wrapMode: Text.Wrap
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+  }
+
   // Tab bar
   NTabBar {
     id: tabBar
@@ -342,16 +340,19 @@ ColumnLayout {
       }
 
       // ToDo Integration Toggle
-      NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.todo-integration")
-        description: root.todoPluginAvailable ? pluginApi?.tr("settings.todo-description") : pluginApi?.tr("settings.todo-disabled")
-        enabled: root.todoPluginAvailable
-        checked: root.valueTodoIntegration
-        onToggled: checked => {
-                     root.valueTodoIntegration = checked;
-                     root._applyPreview("enableTodoIntegration", checked);
-                   }
+      NPluginSettingsField {
+        field: root.enableTodoIntegrationField
+        NToggle {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.todo-integration")
+          description: root.todoPluginAvailable ? pluginApi?.tr("settings.todo-description") : pluginApi?.tr("settings.todo-disabled")
+          enabled: root.todoPluginAvailable
+          checked: root.valueTodoIntegration
+          onToggled: checked => {
+            root.enableTodoIntegrationField.set(checked);
+            root._applyPreview("enableTodoIntegration", checked);
+          }
+        }
       }
 
       NDivider {
@@ -366,67 +367,79 @@ ColumnLayout {
       }
 
       // Fullscreen Mode Toggle
-      NToggle {
+      NPluginSettingsField {
+        field: root.fullscreenModeField
+        NToggle {
           Layout.fillWidth: true
           label: pluginApi?.tr("settings.fullscreen-mode")
           description: pluginApi?.tr("settings.fullscreen-mode-desc")
           checked: root.valueFullscreenMode
           onToggled: checked => {
-              root.valueFullscreenMode = checked;
-              root._applyPreview("fullscreenMode", checked);
+            root.fullscreenModeField.set(checked);
+            root._applyPreview("fullscreenMode", checked);
           }
+        }
       }
 
       // Panel Width (hidden when fullscreen)
-      NSpinBox {
+      NPluginSettingsField {
+        field: root.panelWidthField
+        visible: !root.valueFullscreenMode
+        NSpinBox {
           id: panelWidthInput
           objectName: "settings-range-valuePanelWidth"
           Layout.fillWidth: true
-          visible: !root.valueFullscreenMode
           label: pluginApi?.tr("settings.panel-width")
           description: pluginApi?.tr("settings.panel-width-desc")
           value: root.valuePanelWidth
           from: 400
           to: 3840
           stepSize: 50
-          onValueModified: value => {
-              root.valuePanelWidth = value;
-              root._applyPreview("panelWidth", value);
+          requestValue: value => {
+            root.panelWidthField.set(value);
+            root._applyPreview("panelWidth", value);
           }
+        }
       }
 
       // Panel Height (hidden when fullscreen)
-      NSpinBox {
+      NPluginSettingsField {
+        field: root.panelHeightField
+        visible: !root.valueFullscreenMode
+        NSpinBox {
           id: panelHeightInput
           objectName: "settings-range-valuePanelHeight"
           Layout.fillWidth: true
-          visible: !root.valueFullscreenMode
           label: pluginApi?.tr("settings.panel-height")
           description: pluginApi?.tr("settings.panel-height-desc")
           value: root.valuePanelHeight
           from: 0
           to: 2160
           stepSize: 50
-          onValueModified: value => {
-              root.valuePanelHeight = value;
-              root._applyPreview("panelHeight", value);
+          requestValue: value => {
+            root.panelHeightField.set(value);
+            root._applyPreview("panelHeight", value);
           }
+        }
       }
 
       NDivider {
-          Layout.fillWidth: true
+        Layout.fillWidth: true
       }
 
       // PinCards Enable Toggle
-      NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.pincards-enabled")
-        description: pluginApi?.tr("settings.pincards-desc")
-        checked: root.valuePincardsEnabled
-        onToggled: checked => {
-                     root.valuePincardsEnabled = checked;
-                     root._applyPreview("pincardsEnabled", checked);
-                   }
+      NPluginSettingsField {
+        field: root.pincardsEnabledField
+        NToggle {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.pincards-enabled")
+          description: pluginApi?.tr("settings.pincards-desc")
+          checked: root.valuePincardsEnabled
+          onToggled: checked => {
+            root.pincardsEnabledField.set(checked);
+            root._applyPreview("pincardsEnabled", checked);
+          }
+        }
       }
 
       // Pinned items count display
@@ -477,15 +490,18 @@ ColumnLayout {
       }
 
       // NoteCards Enable Toggle
-      NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.notecards-enabled")
-        description: pluginApi?.tr("settings.notecards-desc")
-        checked: root.valueNotecardsEnabled
-        onToggled: checked => {
-                     root.valueNotecardsEnabled = checked;
-                     root._applyPreview("notecardsEnabled", checked);
-                   }
+      NPluginSettingsField {
+        field: root.notecardsEnabledField
+        NToggle {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.notecards-enabled")
+          description: pluginApi?.tr("settings.notecards-desc")
+          checked: root.valueNotecardsEnabled
+          onToggled: checked => {
+            root.notecardsEnabledField.set(checked);
+            root._applyPreview("notecardsEnabled", checked);
+          }
+        }
       }
 
       // Notes count display
@@ -536,15 +552,18 @@ ColumnLayout {
       }
 
       // Hide Panel Background Toggle (hidden when Notecards enabled — no effect with notecards)
-      NToggle {
-        Layout.fillWidth: true
+      NPluginSettingsField {
+        field: root.hidePanelBackgroundField
         visible: !root.valueNotecardsEnabled
-        label: pluginApi?.tr("settings.hide-panel-background")
-        description: pluginApi?.tr("settings.hide-panel-background-desc")
-        checked: root.valueHidePanelBackground
-        onToggled: checked => {
-            root.valueHidePanelBackground = checked;
+        NToggle {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.hide-panel-background")
+          description: pluginApi?.tr("settings.hide-panel-background-desc")
+          checked: root.valueHidePanelBackground
+          onToggled: checked => {
+            root.hidePanelBackgroundField.set(checked);
             root._applyPreview("hidePanelBackground", checked);
+          }
         }
       }
 
@@ -561,14 +580,17 @@ ColumnLayout {
       }
 
       // Auto-Paste Toggle
-      NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.auto-paste")
-        description: pluginApi?.tr("settings.auto-paste-desc")
-        checked: root.valueAutoPaste
-        onToggled: checked => {
-          root.valueAutoPaste = checked;
-          root._applyPreview("autoPaste", checked);
+      NPluginSettingsField {
+        field: root.autoPasteField
+        NToggle {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.auto-paste")
+          description: pluginApi?.tr("settings.auto-paste-desc")
+          checked: root.valueAutoPaste
+          onToggled: checked => {
+            root.autoPasteField.set(checked);
+            root._applyPreview("autoPaste", checked);
+          }
         }
       }
 
@@ -594,15 +616,18 @@ ColumnLayout {
       }
 
       // RMB Only Toggle (visible only when autoPaste=true)
-      NToggle {
+      NPluginSettingsField {
+        field: root.autoPasteOnRightClickField
         visible: root.valueAutoPaste
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.auto-paste-rmb")
-        description: pluginApi?.tr("settings.auto-paste-rmb-desc")
-        checked: root.valueAutoPasteOnRightClick
-        onToggled: checked => {
-          root.valueAutoPasteOnRightClick = checked;
-          root._applyPreview("autoPasteOnRightClick", checked);
+        NToggle {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.auto-paste-rmb")
+          description: pluginApi?.tr("settings.auto-paste-rmb-desc")
+          checked: root.valueAutoPasteOnRightClick
+          onToggled: checked => {
+            root.autoPasteOnRightClickField.set(checked);
+            root._applyPreview("autoPasteOnRightClick", checked);
+          }
         }
       }
 
@@ -612,20 +637,23 @@ ColumnLayout {
         Layout.fillWidth: true
         spacing: Style.marginS
 
-        NValueSlider {
-          id: autoPasteDelayInput
-          objectName: "settings-range-valueAutoPasteDelay"
-          Layout.fillWidth: true
-          label: pluginApi?.tr("settings.auto-paste-delay")
-          description: pluginApi?.tr("settings.auto-paste-delay-desc")
-          from: 100
-          to: 1000
-          stepSize: 50
-          value: root.valueAutoPasteDelay
-          text: root.valueAutoPasteDelay + " ms"
-          onMoved: value => {
-            root.valueAutoPasteDelay = Math.round(value);
-            root._applyPreview("autoPasteDelay", Math.round(value));
+        NPluginSettingsField {
+          field: root.autoPasteDelayField
+          NValueSlider {
+            id: autoPasteDelayInput
+            objectName: "settings-range-valueAutoPasteDelay"
+            Layout.fillWidth: true
+            label: pluginApi?.tr("settings.auto-paste-delay")
+            description: pluginApi?.tr("settings.auto-paste-delay-desc")
+            from: 100
+            to: 1000
+            stepSize: 50
+            value: root.valueAutoPasteDelay
+            text: root.valueAutoPasteDelay + " ms"
+            onMoved: value => {
+              root.autoPasteDelayField.set(Math.round(value));
+              root._applyPreview("autoPasteDelay", Math.round(value));
+            }
           }
         }
       }
@@ -635,15 +663,18 @@ ColumnLayout {
       }
 
       // Show close button toggle
-      NToggle {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.show-close-button")
-        description: pluginApi?.tr("settings.show-close-button-desc")
-        checked: root.valueShowCloseButton
-        onToggled: checked => {
-                     root.valueShowCloseButton = checked;
-                     root._applyPreview("showCloseButton", checked);
-                   }
+      NPluginSettingsField {
+        field: root.showCloseButtonField
+        NToggle {
+          Layout.fillWidth: true
+          label: pluginApi?.tr("settings.show-close-button")
+          description: pluginApi?.tr("settings.show-close-button-desc")
+          checked: root.valueShowCloseButton
+          onToggled: checked => {
+            root.showCloseButtonField.set(checked);
+            root._applyPreview("showCloseButton", checked);
+          }
+        }
       }
     }  // End General Tab
 
@@ -773,117 +804,81 @@ ColumnLayout {
       }
 
       // Color settings
-      NComboBox {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.bg-color")
-        description: pluginApi?.tr("settings.bg-color-desc")
-        model: root.colorOptions
-        currentKey: root.cardColors[root.selectedCardType]?.bg || "mOutline"
-        onSelected: key => {
-                      root.setCardColor(root.selectedCardType, "bg", key, false);
-                    }
-      }
-
-      NColorPicker {
-        visible: root.cardColors[root.selectedCardType]?.bg === "custom"
-        Layout.preferredWidth: Style.sliderWidth
-        Layout.preferredHeight: Style.baseWidgetSize
-        selectedColor: root.customColors[root.selectedCardType]?.bg || "#888888"
-        onColorSelected: color => {
-                           root.setCardColor(root.selectedCardType, "bg", color.toString(), true);
-                         }
-      }
-
-      NComboBox {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.separator-color")
-        description: pluginApi?.tr("settings.separator-color-desc")
-        model: root.colorOptions
-        currentKey: root.cardColors[root.selectedCardType]?.separator || "mSurface"
-        onSelected: key => {
-                      root.setCardColor(root.selectedCardType, "separator", key, false);
-                    }
-      }
-
-      NColorPicker {
-        visible: root.cardColors[root.selectedCardType]?.separator === "custom"
-        Layout.preferredWidth: Style.sliderWidth
-        Layout.preferredHeight: Style.baseWidgetSize
-        selectedColor: root.customColors[root.selectedCardType]?.separator || "#000000"
-        onColorSelected: color => {
-                           root.setCardColor(root.selectedCardType, "separator", color.toString(), true);
-                         }
-      }
-
-      NComboBox {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.fg-color")
-        description: pluginApi?.tr("settings.fg-color-desc")
-        model: root.colorOptions
-        currentKey: root.cardColors[root.selectedCardType]?.fg || "mOnSurface"
-        onSelected: key => {
-                      root.setCardColor(root.selectedCardType, "fg", key, false);
-                    }
-      }
-
-      NColorPicker {
-        visible: root.cardColors[root.selectedCardType]?.fg === "custom"
-        Layout.preferredWidth: Style.sliderWidth
-        Layout.preferredHeight: Style.baseWidgetSize
-        selectedColor: root.customColors[root.selectedCardType]?.fg || "#e9e4f0"
-        onColorSelected: color => {
-                           root.setCardColor(root.selectedCardType, "fg", color.toString(), true);
-                         }
-      }
-
-      // Reset button
-      NButton {
-        Layout.alignment: Qt.AlignRight
-        text: pluginApi?.tr("settings.reset-defaults")
-        icon: "refresh"
-        onClicked: {
-          const defaults = JSON.parse(JSON.stringify(root.defaultCardColors));
-          const defaultCustom = {
-            "Text": {
-              bg: "#555555",
-              separator: "#000000",
-              fg: "#e9e4f0"
-            },
-            "Image": {
-              bg: "#e0b7c9",
-              separator: "#000000",
-              fg: "#20161f"
-            },
-            "Link": {
-              bg: "#c7a1d8",
-              separator: "#000000",
-              fg: "#1a151f"
-            },
-            "Code": {
-              bg: "#a984c4",
-              separator: "#000000",
-              fg: "#f3edf7"
-            },
-            "Color": {
-              bg: "#a984c4",
-              separator: "#000000",
-              fg: "#f3edf7"
-            },
-            "Emoji": {
-              bg: "#e0b7c9",
-              separator: "#000000",
-              fg: "#20161f"
-            },
-            "File": {
-              bg: "#e9899d",
-              separator: "#000000",
-              fg: "#1e1418"
+      NPluginSettingsField {
+        field: root.cardColorsField
+        NPluginSettingsField {
+          field: root.customColorsField
+          NComboBox {
+            Layout.fillWidth: true
+            label: pluginApi?.tr("settings.bg-color")
+            description: pluginApi?.tr("settings.bg-color-desc")
+            model: root.colorOptions
+            currentKey: root.cardColors[root.selectedCardType]?.bg || "mOutline"
+            onSelected: key => {
+              root.setCardColor(root.selectedCardType, "bg", key, false);
             }
-          };
-          root.pendingCardColors = defaults;
-          root.pendingCustomColors = defaultCustom;
-          root.cardColors = JSON.parse(JSON.stringify(defaults));
-          root.customColors = JSON.parse(JSON.stringify(defaultCustom));
+          }
+
+          NColorPicker {
+            visible: root.cardColors[root.selectedCardType]?.bg === "custom"
+            Layout.preferredWidth: Style.sliderWidth
+            Layout.preferredHeight: Style.baseWidgetSize
+            selectedColor: root.customColors[root.selectedCardType]?.bg || "#888888"
+            onColorSelected: color => {
+              root.setCardColor(root.selectedCardType, "bg", color.toString(), true);
+            }
+          }
+
+          NComboBox {
+            Layout.fillWidth: true
+            label: pluginApi?.tr("settings.separator-color")
+            description: pluginApi?.tr("settings.separator-color-desc")
+            model: root.colorOptions
+            currentKey: root.cardColors[root.selectedCardType]?.separator || "mSurface"
+            onSelected: key => {
+              root.setCardColor(root.selectedCardType, "separator", key, false);
+            }
+          }
+
+          NColorPicker {
+            visible: root.cardColors[root.selectedCardType]?.separator === "custom"
+            Layout.preferredWidth: Style.sliderWidth
+            Layout.preferredHeight: Style.baseWidgetSize
+            selectedColor: root.customColors[root.selectedCardType]?.separator || "#000000"
+            onColorSelected: color => {
+              root.setCardColor(root.selectedCardType, "separator", color.toString(), true);
+            }
+          }
+
+          NComboBox {
+            Layout.fillWidth: true
+            label: pluginApi?.tr("settings.fg-color")
+            description: pluginApi?.tr("settings.fg-color-desc")
+            model: root.colorOptions
+            currentKey: root.cardColors[root.selectedCardType]?.fg || "mOnSurface"
+            onSelected: key => {
+              root.setCardColor(root.selectedCardType, "fg", key, false);
+            }
+          }
+
+          NColorPicker {
+            visible: root.cardColors[root.selectedCardType]?.fg === "custom"
+            Layout.preferredWidth: Style.sliderWidth
+            Layout.preferredHeight: Style.baseWidgetSize
+            selectedColor: root.customColors[root.selectedCardType]?.fg || "#e9e4f0"
+            onColorSelected: color => {
+              root.setCardColor(root.selectedCardType, "fg", color.toString(), true);
+            }
+          }
+
+          // Reset button
+          NButton {
+            Layout.alignment: Qt.AlignRight
+            text: pluginApi?.tr("settings.reset-defaults")
+            icon: "refresh"
+            // One multi-field Reset: both color maps reveal their inherited value.
+            onClicked: pluginApi.resetFields(["cardColors", "customColors"])
+          }
         }
       }
     }  // End Appearance Tab
@@ -895,19 +890,6 @@ ColumnLayout {
       return;
 
     // Gather local controls; the popup alone applies to the persistent owner.
-    pluginApi.pluginSettings.enableTodoIntegration = root.valueTodoIntegration;
-    pluginApi.pluginSettings.pincardsEnabled = root.valuePincardsEnabled;
-    pluginApi.pluginSettings.notecardsEnabled = root.valueNotecardsEnabled;
-    pluginApi.pluginSettings.showCloseButton = root.valueShowCloseButton;
-    pluginApi.pluginSettings.fullscreenMode = root.valueFullscreenMode;
-    pluginApi.pluginSettings.hidePanelBackground = root.valueHidePanelBackground;
-    pluginApi.pluginSettings.autoPaste = root.valueAutoPaste;
-    pluginApi.pluginSettings.autoPasteOnRightClick = root.valueAutoPasteOnRightClick;
-    pluginApi.pluginSettings.autoPasteDelay = root.valueAutoPasteDelay;
-    pluginApi.pluginSettings.panelWidth = root.valuePanelWidth;
-    pluginApi.pluginSettings.panelHeight = root.valuePanelHeight;
-    pluginApi.pluginSettings.cardColors = JSON.parse(JSON.stringify(root.pendingCardColors));
-    pluginApi.pluginSettings.customColors = JSON.parse(JSON.stringify(root.pendingCustomColors));
 
     pluginApi.saveSettings();
   }

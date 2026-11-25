@@ -72,7 +72,7 @@ Item {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: mainInstance?.runColorPicker()
+                onClicked: mainInstance?.runColorPicker(pluginApi)
             }
         }
         Column {

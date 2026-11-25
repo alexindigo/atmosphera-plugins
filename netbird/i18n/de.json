@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "Abfrage, Anzeige und Peer-Aktionen gelten f\u00fcr diese Instanz. Status und Ping sind gemeinsam; Verbindungsaktionen betreffen den NetBird-Systemdienst.",
     "title": "NetBird Einstellungen",
     "description": "Konfiguriere die Statusanzeige und das Verhalten von NetBird VPN",
     "refresh-interval": "Aktualisierungsintervall",

@@ -8,7 +8,7 @@ import "components"
 PanelWindow {
   id: root
 
-  property ShellScreen screen: null
+  screen: null
   property var pluginApi: null
   property string noteId: ""
   property string content: ""

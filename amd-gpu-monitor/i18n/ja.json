@@ -31,6 +31,7 @@
     "activity": "アクティビティ"
   },
   "settings": {
+    "shared-effect": "\u30c7\u30d0\u30a4\u30b9\u3068\u8868\u793a\u306f\u3053\u306e\u30a4\u30f3\u30b9\u30bf\u30f3\u30b9\u306b\u9069\u7528\u3055\u308c\u307e\u3059\u3002\u540c\u3058GPU\u306e\u30d3\u30e5\u30fc\u306f\u6e2c\u5b9a\u5024\u3068\u5c65\u6b74\u3092\u5171\u6709\u3057\u307e\u3059\u3002",
     "bar_section": "バーウィジェット",
     "compact_mode_label": "コンパクトモード",
     "compact_mode_description": "パーセント表示の代わりに縦型ミニゲージを表示します。",

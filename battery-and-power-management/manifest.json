@@ -1,9 +1,9 @@
 {
   "id": "battery-and-power-management",
   "name": "Battery & Power Management Plugin",
-  "version": "1.1.4",
+  "version": "1.1.8",
   "minNoctaliaVersion": "4.0.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "Piero-93",
   "license": "GPLv3",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -15,6 +15,7 @@
     "Utility"
   ],
   "entryPoints": {
+    "main": "Main.qml",
     "barWidget": "BarWidget.qml",
     "panel": "BatteryPopup.qml",
     "settings": "SettingsView.qml"
@@ -26,12 +27,12 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "batteryDevice": {"type": "String","optional": true},
-        "colorPerformance": {"type": "String","nullable": true},
-        "colorPowerSaver": {"type": "String","nullable": true},
-        "colorizeByProfile": {"type": "Boolean"},
-        "showBalancedIcon": {"type": "Boolean"},
-        "showProfile": {"type": "Boolean"}
+        "batteryDevice": {"editorUsage": "configuration", "type": "String","optional": true},
+        "colorPerformance": {"editorUsage": "configuration", "type": "String","nullable": true},
+        "colorPowerSaver": {"editorUsage": "configuration", "type": "String","nullable": true},
+        "colorizeByProfile": {"editorUsage": "configuration", "type": "Boolean"},
+        "showBalancedIcon": {"editorUsage": "configuration", "type": "Boolean"},
+        "showProfile": {"editorUsage": "configuration", "type": "Boolean"}
       }
     },
     "defaultSettings": {

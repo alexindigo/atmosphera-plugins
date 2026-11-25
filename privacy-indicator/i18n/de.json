@@ -3,6 +3,7 @@
     "settings": "Widget Einstellungen"
   },
   "settings": {
+    "shared-effect": "Filter und Darstellung gelten für diese Instanz. Gerätebeobachtungen und der Zugriffsverlauf werden gemeinsam genutzt. Jede Konfiguration kann eine gemeinsame Benachrichtigung anfordern. Wenn Sie Benachrichtigungen für diese Instanz deaktivieren, bleiben die anderen aktiv.",
     "activeColor": {
       "desc": "Farbe der Symbole, wenn sie aktiv sind.",
       "label": "Aktive Farbsymbol"

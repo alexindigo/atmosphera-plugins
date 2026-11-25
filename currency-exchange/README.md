@@ -33,6 +33,18 @@ To display the exchange rate on the bar widget:
 
 > **Note:** Rate display is only available on horizontal bars.
 
+Settings -> Plugins edits plugin-level values. Settings opened for a placed
+widget edits that instance's sparse overrides; Reset restores inheritance.
+Its converter, bar and refresh timer use the same Main-owned selected client.
+Views of one runtime API share that client's rates cache and request process.
+Separate instances do not share a timer just because their current values match.
+The standard launcher and explicit Main/IPC routes remain plugin-level.
+
+Rates still use the public USD-based endpoint and a five-minute cache. Changing
+the selected interval does not force a request or invalidate fresh rates. A
+forced retry bypasses the failed-attempt delay, not the fresh-rate cache. Settings
+Discard does not publish; Apply and staged Reset use the selected native owner.
+
 ## Supported Currencies
 
 30 currencies supported via frankfurter.app:

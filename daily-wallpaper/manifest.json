@@ -1,8 +1,8 @@
 {
   "id": "daily-wallpaper",
   "name": "Daily Wallpaper",
-  "version": "1.0.5",
-  "minAtmospheraVersion": "0.10.0",
+  "version": "1.0.8",
+  "minAtmospheraVersion": "0.11.0",
   "minNoctaliaVersion": "4.6.6",
   "author": "DigitallyRefined",
   "license": "MIT",
@@ -24,8 +24,8 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "locale": {"type": "String"},
-        "source": {"type": "String"}
+        "locale": {"editorUsage": "configuration", "type": "String"},
+        "source": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

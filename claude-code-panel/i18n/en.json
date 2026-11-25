@@ -117,6 +117,7 @@
     "modeBadgePlan": "Read-only",
     "modeBadgeBypass": "Unrestricted",
     "restartHint": "Some changes (model, working dir, system prompt) only apply to new sessions. Use /new in chat.",
+    "sharedContent": "Conversation, draft input and history are shared. New session, Stop and Clear affect everyone. Requests use the originating widget's applied configuration; tool permissions still require manual approval.",
     "dangerHeading": "Irreversible / unsafe",
     "dangerSubheading": "These settings can let Claude run arbitrary commands without asking. Use only inside a throwaway sandbox.",
     "resetDefaults": "Reset to defaults",

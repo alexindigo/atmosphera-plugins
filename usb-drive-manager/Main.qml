@@ -10,6 +10,31 @@ Item {
     property var pluginApi: null
     property var devices: []
     property bool loading: false
+    property bool _retired: false
+    property var selectedContext: null
+    readonly property var policyContext: selectedContext || pluginApi?.settingsContext
+    property var _debouncePolicy: null
+
+    function capturePolicy(context) {
+        context = context || pluginApi?.settingsContext;
+        if (_retired || !context?.current()) return null;
+        const values = context.settingsView;
+        return {context: context, autoMount: values.autoMount ?? false,
+            fileBrowser: values.fileBrowser || "yazi", terminalCommand: values.terminalCommand || "kitty",
+            showNotifications: values.showNotifications ?? true};
+    }
+
+    function activatePolicy(context) {
+        if (!context?.current() || _retired) return false;
+        selectedContext = context;
+        return true;
+    }
+
+    function scheduleRefresh(policy) {
+        if (_retired) return;
+        _debouncePolicy = policy;
+        refreshDebounce.restart();
+    }
 
     readonly property int mountedCount: {
         let c = 0
@@ -21,7 +46,7 @@ Item {
 
     // ===== SETTINGS SHORTCUTS =====
 
-    readonly property bool autoMount:          pluginApi?.pluginSettings?.autoMount          ?? false
+    readonly property bool autoMount:          policyContext?.current() ? (policyContext.settingsView.autoMount ?? false) : false
     readonly property string fileBrowser:      pluginApi?.pluginSettings?.fileBrowser        || "yazi"
     readonly property string terminalCommand:  pluginApi?.pluginSettings?.terminalCommand    || "kitty"
     readonly property bool showNotifications:  pluginApi?.pluginSettings?.showNotifications  ?? true
@@ -53,20 +78,20 @@ Item {
     Process {
         id: deviceWatcher
         command: ["udevadm", "monitor", "--subsystem-match=block", "--property"]
-        running: true
+        running: !root._retired
 
         stdout: SplitParser {
             onRead: line => {
                 // Trigger refresh on USB add/remove events
                 if (line.startsWith("ACTION=add") || line.startsWith("ACTION=remove")) {
-                    refreshDebounce.restart()
+                    root.scheduleRefresh(root.capturePolicy(root.policyContext))
                 }
             }
         }
 
         onExited: exitCode => {
             // Restart watcher if it dies unexpectedly
-            if (exitCode !== 0) {
+            if (!root._retired && exitCode !== 0) {
                 restartWatcherTimer.start()
             }
         }
@@ -76,7 +101,7 @@ Item {
         id: restartWatcherTimer
         interval: 3000
         repeat: false
-        onTriggered: deviceWatcher.running = true
+        onTriggered: { if (!root._retired) deviceWatcher.running = true; }
     }
 
     // Debounce rapid udev events (e.g. partition table re-read)
@@ -85,9 +110,14 @@ Item {
         interval: 800
         repeat: false
         onTriggered: {
+            const policy = root._debouncePolicy;
+            root._debouncePolicy = null;
+            if (root._retired) return;
+            // Physical observation survives the selected automatic policy's
+            // retirement. Only the policy-dependent mount action is fenced.
             refreshDevices()
-            if (root.autoMount) {
-                autoMountNewDevices()
+            if (policy?.context?.current() && policy.autoMount) {
+                autoMountNewDevices(policy.context, policy)
             }
         }
     }
@@ -103,14 +133,15 @@ Item {
         ]
         running: false
 
-        stdout: StdioCollector {}
+        stdout: StdioCollector { id: deviceQueryOutput }
         stderr: StdioCollector {}
 
         onExited: exitCode => {
+            if (root._retired) return;
             root.loading = false
             if (exitCode === 0) {
                 try {
-                    const data = JSON.parse(String(stdout.text))
+                    const data = JSON.parse(String(deviceQueryOutput.text))
                     root.devices = internal.parseDevices(data.blockdevices || [])
                     root.devicesChanged()
                 } catch (e) {
@@ -128,11 +159,12 @@ Item {
         command: ["df", "--output=target,pcent,used,avail", "-h"]
         running: false
 
-        stdout: StdioCollector {}
+        stdout: StdioCollector { id: dfOutput }
 
         onExited: exitCode => {
+            if (root._retired) return;
             if (exitCode === 0) {
-                internal.parseDfOutput(String(stdout.text))
+                internal.parseDfOutput(String(dfOutput.text))
             }
         }
     }
@@ -143,26 +175,31 @@ Item {
         id: mountProc
         property string devicePath: ""
         property string deviceLabel: ""
+        property var policy: null
+        readonly property bool requestCurrent: !root._retired && (policy?.context?.current() ?? false)
+        onRequestCurrentChanged: { if (!requestCurrent) running = false; }
         running: false
         stdout: StdioCollector {}
-        stderr: StdioCollector {}
+        stderr: StdioCollector { id: mountError }
 
         onExited: exitCode => {
+            const admitted = mountProc.policy;
+            if (root._retired || !admitted?.context?.current()) return;
             if (exitCode === 0) {
-                if (root.showNotifications) {
+                if (admitted.showNotifications) {
                     ToastService.showNotice(
                         pluginApi?.tr("notifications.mounted"),
                         mountProc.deviceLabel || mountProc.devicePath
                     )
                 }
             } else {
-                const errMsg = String(stderr.text).trim()
+                const errMsg = String(mountError.text).trim()
                 ToastService.showError(
                     pluginApi?.tr("notifications.mount-failed"),
                     errMsg || mountProc.devicePath
                 )
             }
-            refreshDebounce.restart()
+            root.scheduleRefresh(admitted)
         }
     }
 
@@ -170,26 +207,31 @@ Item {
         id: unmountProc
         property string devicePath: ""
         property string deviceLabel: ""
+        property var policy: null
+        readonly property bool requestCurrent: !root._retired && (policy?.context?.current() ?? false)
+        onRequestCurrentChanged: { if (!requestCurrent) running = false; }
         running: false
         stdout: StdioCollector {}
-        stderr: StdioCollector {}
+        stderr: StdioCollector { id: unmountError }
 
         onExited: exitCode => {
+            const admitted = unmountProc.policy;
+            if (root._retired || !admitted?.context?.current()) return;
             if (exitCode === 0) {
-                if (root.showNotifications) {
+                if (admitted.showNotifications) {
                     ToastService.showNotice(
                         pluginApi?.tr("notifications.unmounted"),
                         unmountProc.deviceLabel || unmountProc.devicePath
                     )
                 }
             } else {
-                const errMsg = String(stderr.text).trim()
+                const errMsg = String(unmountError.text).trim()
                 ToastService.showError(
                     pluginApi?.tr("notifications.unmount-failed"),
                     errMsg || unmountProc.devicePath
                 )
             }
-            refreshDebounce.restart()
+            root.scheduleRefresh(admitted)
         }
     }
 
@@ -197,26 +239,31 @@ Item {
         id: ejectProc
         property string devicePath: ""
         property string deviceLabel: ""
+        property var policy: null
+        readonly property bool requestCurrent: !root._retired && (policy?.context?.current() ?? false)
+        onRequestCurrentChanged: { if (!requestCurrent) running = false; }
         running: false
         stdout: StdioCollector {}
-        stderr: StdioCollector {}
+        stderr: StdioCollector { id: ejectError }
 
         onExited: exitCode => {
+            const admitted = ejectProc.policy;
+            if (root._retired || !admitted?.context?.current()) return;
             if (exitCode === 0) {
-                if (root.showNotifications) {
+                if (admitted.showNotifications) {
                     ToastService.showNotice(
                         pluginApi?.tr("notifications.ejected"),
                         ejectProc.deviceLabel || ejectProc.devicePath
                     )
                 }
             } else {
-                const errMsg = String(stderr.text).trim()
+                const errMsg = String(ejectError.text).trim()
                 ToastService.showError(
                     pluginApi?.tr("notifications.eject-failed"),
                     errMsg || ejectProc.devicePath
                 )
             }
-            refreshDebounce.restart()
+            root.scheduleRefresh(admitted)
         }
     }
 
@@ -308,6 +355,7 @@ Item {
     // ===== PUBLIC API =====
 
     function refreshDevices() {
+        if (root._retired) return;
         root.loading = true
         deviceQuery.running = false
         deviceQuery.running = true
@@ -320,31 +368,39 @@ Item {
         interval: 1200
         repeat: false
         onTriggered: {
+            if (root._retired) return;
             dfQuery.running = false
             dfQuery.running = true
         }
     }
 
-    function mountDevice(devicePath, deviceLabel) {
-        if (mountProc.running) return
+    function mountDevice(devicePath, deviceLabel, context, admittedPolicy) {
+        const policy = admittedPolicy || root.capturePolicy(context);
+        if (!policy?.context?.current() || root._retired || mountProc.running) return
+        mountProc.policy = policy
         mountProc.devicePath = devicePath
         mountProc.deviceLabel = deviceLabel
         mountProc.command = ["udisksctl", "mount", "-b", devicePath]
         mountProc.running = true
     }
 
-    function unmountDevice(devicePath, deviceLabel) {
-        if (unmountProc.running) return
+    function unmountDevice(devicePath, deviceLabel, context) {
+        const policy = root.capturePolicy(context);
+        if (!policy || unmountProc.running) return
+        unmountProc.policy = policy
         unmountProc.devicePath = devicePath
         unmountProc.deviceLabel = deviceLabel
         unmountProc.command = ["udisksctl", "unmount", "-b", devicePath]
         unmountProc.running = true
     }
 
-    function ejectDevice(devicePath, parentPath, deviceLabel) {
+    function ejectDevice(devicePath, parentPath, deviceLabel, context) {
+        const policy = root.capturePolicy(context);
+        if (!policy) return;
         // First unmount the partition, then power off the parent disk
         const target = parentPath || devicePath
         if (ejectProc.running) return
+        ejectProc.policy = policy
         ejectProc.devicePath = target
         ejectProc.deviceLabel = deviceLabel
         ejectProc.command = [
@@ -354,11 +410,13 @@ Item {
         ejectProc.running = true
     }
 
-    function openInFileBrowser(mountpoint) {
-        const browser = root.fileBrowser || "yazi"
+    function openInFileBrowser(mountpoint, context) {
+        const policy = root.capturePolicy(context);
+        if (!policy) return;
+        const browser = policy.fileBrowser
         if (browser === "yazi" || browser === "ranger" || browser === "lf" || browser === "nnn") {
             // Terminal file managers need a terminal emulator
-            const term = root.terminalCommand || "kitty"
+            const term = policy.terminalCommand
             const termLower = term.toLowerCase()
             // Ptyxis, GNOME Terminal, and WezTerm prefer `--` instead of `-e`
             const flag = (termLower.indexOf("ptyxis") !== -1
@@ -370,22 +428,26 @@ Item {
         }
     }
 
-    function unmountAll() {
+    function unmountAll(context) {
+        const policy = root.capturePolicy(context);
+        if (!policy) return;
         for (let i = 0; i < devices.length; i++) {
             const dev = devices[i]
             if (dev.isMounted) {
                 Quickshell.execDetached(["udisksctl", "unmount", "-b", dev.path])
             }
         }
-        if (root.showNotifications) {
+        if (policy.showNotifications) {
             ToastService.showNotice(
                 pluginApi?.tr("notifications.unmount-all")
             )
         }
-        refreshDebounce.restart()
+        root.scheduleRefresh(policy)
     }
 
-    function ejectAll() {
+    function ejectAll(context) {
+        const policy = root.capturePolicy(context);
+        if (!policy) return;
         const ejected = []
         for (let i = 0; i < devices.length; i++) {
             const dev = devices[i]
@@ -398,19 +460,21 @@ Item {
                 ])
             }
         }
-        if (root.showNotifications) {
+        if (policy.showNotifications) {
             ToastService.showNotice(
                 pluginApi?.tr("notifications.eject-all")
             )
         }
-        refreshDebounce.restart()
+        root.scheduleRefresh(policy)
     }
 
-    function autoMountNewDevices() {
+    function autoMountNewDevices(context, admittedPolicy) {
+        const policy = admittedPolicy || root.capturePolicy(context);
+        if (!policy?.context?.current() || root._retired) return;
         for (let i = 0; i < devices.length; i++) {
             const dev = devices[i]
             if (!dev.isMounted && dev.fstype) {
-                mountDevice(dev.path, dev.label)
+                mountDevice(dev.path, dev.label, policy.context, policy)
             }
         }
     }
@@ -420,5 +484,12 @@ Item {
             return pluginApi?.tr("bar.tooltip-empty")
         }
         return pluginApi?.tr("bar.tooltip-count")?.replace("%1", mountedCount)
+    }
+
+    Component.onDestruction: {
+        _retired = true;
+        restartWatcherTimer.stop(); refreshDebounce.stop(); dfTimer.stop();
+        deviceWatcher.running = false; deviceQuery.running = false; dfQuery.running = false;
+        mountProc.running = false; unmountProc.running = false; ejectProc.running = false;
     }
 }

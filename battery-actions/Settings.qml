@@ -1,72 +1,74 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Io
 import qs.Commons
 import qs.Widgets
-import Quickshell.Io
 
 ColumnLayout {
-    id: root
+  id: root
 
-    property var pluginApi: null
+  property var pluginApi: null
+  readonly property var pluggedInScriptField: pluginApi?.field("pluggedInScript") ?? null
+  readonly property var onBatteryScriptField: pluginApi?.field("onBatteryScript") ?? null
 
-    property string editPluggedInScript: displayBaseline.editPluggedInScript
-    property string editOnBatteryScript: displayBaseline.editOnBatteryScript
-    NSettingsBaseline {
-        id: displayBaseline
-        readonly property string editPluggedInScript: pluginApi?.pluginSettings?.pluggedInScript || ""
-        readonly property string editOnBatteryScript: pluginApi?.pluginSettings?.onBatteryScript || ""
-    }
-    readonly property bool settingsDirty: displayBaseline.differs({editPluggedInScript: root.editPluggedInScript, editOnBatteryScript: root.editOnBatteryScript})
+  readonly property string editPluggedInScript: root.pluggedInScriptField?.value || ""
+  readonly property string editOnBatteryScript: root.onBatteryScriptField?.value || ""
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
-    spacing: Style.marginL
+  spacing: Style.marginL
 
+  NPluginSettingsField {
+    field: root.pluggedInScriptField
     NTextInput {
-        Layout.fillWidth: true
-        fontFamily: Settings.data.ui.fontFixed
-        label: tr("settings.plugged_in_label")
-        description: tr("settings.plugged_in_desc")
-        placeholderText: "command1; command2; /path/to/script; ..."
-        text: root.editPluggedInScript
-        onTextChanged: root.editPluggedInScript = text
+      Layout.fillWidth: true
+      fontFamily: Settings.data.ui.fontFixed
+      label: tr("settings.plugged_in_label")
+      description: tr("settings.plugged_in_desc")
+      placeholderText: "command1; command2; /path/to/script; ..."
+      text: root.editPluggedInScript
+      onEditCommitted: root.pluggedInScriptField.set(text)
     }
+  }
+  NPluginSettingsField {
+    field: root.onBatteryScriptField
     NTextInput {
-        Layout.fillWidth: true
-        fontFamily: Settings.data.ui.fontFixed
-        label: tr("settings.on_battery_label")
-        description: tr("settings.on_battery_desc")
-        placeholderText: "command1; command2; /path/to/script; ..."
-        text: root.editOnBatteryScript
-        onTextChanged: root.editOnBatteryScript = text
+      Layout.fillWidth: true
+      fontFamily: Settings.data.ui.fontFixed
+      label: tr("settings.on_battery_label")
+      description: tr("settings.on_battery_desc")
+      placeholderText: "command1; command2; /path/to/script; ..."
+      text: root.editOnBatteryScript
+      onEditCommitted: root.onBatteryScriptField.set(text)
+    }
+  }
+
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginS
+    NLabel {
+      label: tr("settings.env_vars_title")
     }
 
-    ColumnLayout {
-        Layout.fillWidth: true
-        spacing: Style.marginS
-        NLabel {
-            label: tr("settings.env_vars_title")
-        }
-
-        NLabel {
-            description: `$BAT_PERCENTAGE: ${tr("settings.env_vars_percentage")}`
-        }
-        NLabel {
-            description: `$BAT_STATE: ${tr("settings.env_vars_state")}`
-        }
-        NLabel {
-            description: `$BAT_RATE: ${tr("settings.env_vars_rate")}`
-        }
-        NLabel {
-            description: `$BAT_PATH: ${tr("settings.env_vars_path")}`
-        }
+    NLabel {
+      description: `$BAT_PERCENTAGE: ${tr("settings.env_vars_percentage")}`
     }
-
-    function tr(key) {
-        return pluginApi?.tr(key);
+    NLabel {
+      description: `$BAT_STATE: ${tr("settings.env_vars_state")}`
     }
-
-    function saveSettings() {
-        pluginApi.pluginSettings.pluggedInScript = root.editPluggedInScript;
-        pluginApi.pluginSettings.onBatteryScript = root.editOnBatteryScript;
-        pluginApi.saveSettings();
+    NLabel {
+      description: `$BAT_RATE: ${tr("settings.env_vars_rate")}`
     }
+    NLabel {
+      description: `$BAT_PATH: ${tr("settings.env_vars_path")}`
+    }
+  }
+
+  function tr(key) {
+    return pluginApi?.tr(key);
+  }
+
+  function saveSettings() {
+    pluginApi.saveSettings();
+  }
 }

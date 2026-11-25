@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "Os filtros e a aparência aplicam-se a esta instância. As observações dos dispositivos e o histórico de acesso são partilhados. Qualquer configuração pode pedir uma notificação comum; desativar as notificações desta instância não silencia as restantes.",
     "hideInactive": {
       "desc": "Oculta os ícones de microfone, câmera e tela quando estiverem inativos.",
       "label": "Ocultar estados inativos"

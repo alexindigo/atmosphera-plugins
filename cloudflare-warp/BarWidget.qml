@@ -17,6 +17,7 @@ Item {
 
   readonly property bool pillDirection: BarService.getPillDirection(root)
   readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var settingsConsumer: mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
   readonly property string connectedColorKey: pluginApi?.pluginSettings?.connectedColor ?? pluginApi?.manifest?.metadata?.defaultSettings?.connectedColor ?? "primary"
 
@@ -113,13 +114,13 @@ Item {
     ]
 
     onTriggered: action => {
-      contextMenu.close()
-      PanelService.closeContextMenu(screen)
+      contextMenu.close();
+      PanelService.closeContextMenu(screen);
 
       if (action === "widget-settings") {
-        BarService.openPluginSettings(screen, pluginApi.manifest)
+        BarService.openPluginSettings(screen, pluginApi.manifest);
       } else if (action === "toggle-warp") {
-        mainInstance?.toggleWarp()
+        mainInstance?.toggleWarp();
       }
     }
   }
@@ -133,9 +134,9 @@ Item {
 
     onClicked: mouse => {
       if (mouse.button === Qt.LeftButton) {
-        pluginApi?.openPanel(root.screen, root)
+        pluginApi?.openPanel(root.screen, root);
       } else if (mouse.button === Qt.RightButton) {
-        PanelService.showContextMenu(contextMenu, root, screen)
+        PanelService.showContextMenu(contextMenu, root, screen);
       }
     }
   }

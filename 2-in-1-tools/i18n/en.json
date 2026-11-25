@@ -1,5 +1,6 @@
 {
-    "settings": {
+  "settings": {
+    "shared-effect": "Rotation, tablet mode, bar and dock effects are shared. Apply or a widget action selects this configuration's active policy; another configuration can change the same session. Restore state remains shared.",
         "autoRotateDependency": {
             "description": "Install iio-sensor-proxy so monitor-sensor and the sensor service are available for tablet-mode rotation.",
             "label": "Auto-rotate requires iio-sensor-proxy"

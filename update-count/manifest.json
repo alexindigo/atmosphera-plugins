@@ -1,9 +1,9 @@
 {
   "id": "update-count",
   "name": "Update Count",
-  "version": "1.0.17",
+  "version": "1.0.21",
   "minNoctaliaVersion": "3.6.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "BukoMoon",
   "license": "GPLv3",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -24,12 +24,12 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "currentIconName": {"type": "String"},
-        "customCmdDoSystemUpdate": {"type": "String", "optional": true},
-        "customCmdGetNumUpdates": {"type": "String", "optional": true},
-        "hideOnZero": {"type": "Boolean"},
-        "updateIntervalMinutes": {"type": "Real"},
-        "updateTerminalCommand": {"type": "String"}
+        "currentIconName": {"editorUsage": "configuration", "type": "String"},
+        "customCmdDoSystemUpdate": {"editorUsage": "configuration", "type": "String", "optional": true},
+        "customCmdGetNumUpdates": {"editorUsage": "configuration", "type": "String", "optional": true},
+        "hideOnZero": {"editorUsage": "configuration", "type": "Boolean"},
+        "updateIntervalMinutes": {"editorUsage": "configuration", "type": "Real"},
+        "updateTerminalCommand": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

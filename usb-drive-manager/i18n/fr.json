@@ -42,6 +42,7 @@
     "path-copied": "Chemin copié"
   },
   "settings": {
+    "shared-effect": "Device observations and mount actions are shared. Actions use this instance's applied choices. Applying these settings selects the shared automatic policy until another policy is applied.",
     "section-bar": "Barre",
     "hide-when-empty": "Masquer si vide",
     "hide-when-empty-desc": "Masque l'icône de la barre lorsqu'aucun périphérique USB n'est connecté",

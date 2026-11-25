@@ -4,12 +4,13 @@ import QtQuick.Layouts
 import qs.Commons
 import qs.Services.UI
 import qs.Widgets
-import "." as Local
 
 Item {
   id: root
 
   property var pluginApi: null
+  readonly property var mainInstance: pluginApi?.mainInstance ?? null
+  readonly property var settingsConsumer: pluginApi?.settingsContext?.current() ? mainInstance?.settingsConsumerFor(pluginApi.settingsContext) : null
   readonly property var geometryPlaceholder: panelContainer
   readonly property bool allowAttach: true
   property real contentPreferredWidth: Math.round(Math.max(720, Math.min(1800, Number(cfg.panelWidth ?? defaults.panelWidth ?? 1200))) * Style.uiScaleRatio)
@@ -26,7 +27,8 @@ Item {
   property int terminalFontSize: cfg.terminalFontSize ?? defaults.terminalFontSize ?? 11
 
   function doConnect() {
-    Local.HermesSession.connect(
+    root.settingsConsumer?.connect(
+      root.pluginApi,
       root.valueHost,
       root.valuePort,
       root.valueUser,
@@ -38,7 +40,8 @@ Item {
     passwordInput.text = "";
   }
 
-  Component.onCompleted: Local.HermesSession.setPluginApi(pluginApi)
+  onSettingsConsumerChanged: settingsConsumer?.activate(pluginApi)
+  Component.onCompleted: settingsConsumer?.activate(pluginApi)
 
   Connections {
     target: pluginApi ? pluginApi.pluginSettings : null
@@ -50,7 +53,6 @@ Item {
       root.terminalCols = cfg.terminalCols ?? defaults.terminalCols ?? 180;
       root.terminalRows = cfg.terminalRows ?? defaults.terminalRows ?? 32;
       root.terminalFontSize = cfg.terminalFontSize ?? defaults.terminalFontSize ?? 11;
-      Local.HermesSession.setPluginApi(pluginApi);
     }
     function onHostChanged() {refresh();}
     function onPortChanged() {refresh();}
@@ -87,7 +89,7 @@ Item {
           fillMode: Image.PreserveAspectFit
           smooth: true
           mipmap: true
-          opacity: Local.HermesSession.sessionActive ? 1.0 : 0.72
+          opacity: root.settingsConsumer?.sessionActive ? 1.0 : 0.72
         }
 
         ColumnLayout {
@@ -104,20 +106,20 @@ Item {
 
           NText {
             Layout.fillWidth: true
-            text: Local.HermesSession.statusText
+            text: root.settingsConsumer?.statusText ?? ""
             pointSize: Style.fontSizeS
-            color: Local.HermesSession.lastError ? AtmoColor.mError : AtmoColor.mOnSurfaceVariant
+            color: root.settingsConsumer?.lastError ? AtmoColor.mError : AtmoColor.mOnSurfaceVariant
             elide: Text.ElideRight
           }
         }
 
         AtmoIconButton {
-          visible: Local.HermesSession.sessionActive
+          visible: root.settingsConsumer?.sessionActive ?? false
           baseSize: Style.baseWidgetSize * 0.8
           icon: "power"
           tooltipText: pluginApi?.tr("panel.disconnect")
           colorFg: AtmoColor.mError
-          onClicked: Local.HermesSession.disconnect()
+          onClicked: root.settingsConsumer?.disconnect()
         }
 
         AtmoIconButton {
@@ -142,7 +144,7 @@ Item {
 
     NBox {
       Layout.fillWidth: true
-      visible: !Local.HermesSession.sessionActive
+      visible: !root.settingsConsumer?.sessionActive
       implicitHeight: connectColumn.implicitHeight + Style.margin2M
 
       ColumnLayout {
@@ -160,7 +162,7 @@ Item {
             label: pluginApi?.tr("panel.host.label")
             placeholderText: pluginApi?.tr("panel.host.placeholder")
             text: root.valueHost
-            enabled: !Local.HermesSession.sessionActive
+            enabled: !root.settingsConsumer?.sessionActive
             onTextChanged: root.valueHost = text
             onAccepted: root.doConnect()
           }
@@ -170,7 +172,7 @@ Item {
             label: pluginApi?.tr("panel.port.label")
             placeholderText: pluginApi?.tr("panel.port.placeholder")
             text: String(root.valuePort)
-            enabled: !Local.HermesSession.sessionActive
+            enabled: !root.settingsConsumer?.sessionActive
             inputMethodHints: Qt.ImhDigitsOnly
             onTextChanged: root.valuePort = Math.max(1, Math.min(65535, Number(text || 22)))
             onAccepted: root.doConnect()
@@ -186,7 +188,7 @@ Item {
             label: pluginApi?.tr("panel.user.label")
             placeholderText: pluginApi?.tr("panel.user.placeholder")
             text: root.valueUser
-            enabled: !Local.HermesSession.sessionActive
+            enabled: !root.settingsConsumer?.sessionActive
             onTextChanged: root.valueUser = text
             onAccepted: root.doConnect()
           }
@@ -196,7 +198,7 @@ Item {
             Layout.fillWidth: true
             label: pluginApi?.tr("panel.password.label")
             placeholderText: pluginApi?.tr("panel.password.placeholder")
-            enabled: !Local.HermesSession.sessionActive
+            enabled: !root.settingsConsumer?.sessionActive
             inputItem.echoMode: TextInput.Password
             onTextChanged: root.valuePassword = text
             onAccepted: root.doConnect()
@@ -216,7 +218,7 @@ Item {
     NBox {
       Layout.fillWidth: true
       Layout.fillHeight: true
-      visible: Local.HermesSession.sessionActive
+      visible: root.settingsConsumer?.sessionActive ?? false
 
       TerminalView {
         id: terminalView
@@ -225,15 +227,16 @@ Item {
         cols: root.terminalCols
         rows: root.terminalRows
         fontSize: root.terminalFontSize
-        rawText: Local.HermesSession.terminalBuffer
-        sessionActive: Local.HermesSession.sessionActive
-        onInput: function(text) { Local.HermesSession.send(text); }
+        session: root.settingsConsumer
+        rawText: root.settingsConsumer?.terminalBuffer ?? ""
+        sessionActive: root.settingsConsumer?.sessionActive ?? false
+        onInput: function(text) { root.settingsConsumer?.send(text); }
       }
     }
   }
 
   onVisibleChanged: {
-    if (visible && Local.HermesSession.sessionActive)
+    if (visible && root.settingsConsumer?.sessionActive)
       Qt.callLater(function() { terminalView.focusTerminal(); });
   }
 }

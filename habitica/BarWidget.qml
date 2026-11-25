@@ -15,7 +15,8 @@ AtmoIconButton {
   property int sectionWidgetIndex: -1
   property int sectionWidgetsCount: 0
 
-  readonly property var main: pluginApi?.mainInstance
+  readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+  readonly property var main: settingsConsumer
   readonly property bool configured: main?.isConfigured ?? false
   readonly property bool hasError: main?.hasError ?? false
   readonly property bool showNotificationBadge: pluginApi?.pluginSettings?.showNotificationBadge ?? true

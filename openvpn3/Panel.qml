@@ -16,7 +16,24 @@ Item {
     readonly property bool allowAttach: true
     readonly property var cfg: pluginApi?.pluginSettings || ({})
     readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-    readonly property var main: pluginApi?.mainInstance ?? null
+    readonly property var main: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+    property var _panelClient: null
+    readonly property var _panelToken: ({})
+    property bool _constructed: false
+    property bool _logsRequested: true
+    function syncPanelDemand() {
+        if (!_constructed) return;
+        if (_panelClient && (_panelClient !== main || !visible)) {
+            _panelClient.unregisterPanel(_panelToken);
+            _panelClient = null;
+        }
+        if (main && visible) {
+            main.registerPanel(_panelToken, _logsRequested);
+            _panelClient = main;
+        }
+    }
+    onMainChanged: syncPanelDemand()
+    onVisibleChanged: syncPanelDemand()
     readonly property var configList: main?.configList ?? []
     readonly property var sessionList: main?.sessionList ?? []
     property real contentPreferredWidth: Math.round(400 * Style.uiScaleRatio)
@@ -29,14 +46,15 @@ Item {
     property bool importPersistent: cfg.defaultPersistent ?? defaults.defaultPersistent ?? true
 
     Component.onCompleted: {
+        _constructed = true
+        syncPanelDemand()
         if (main) {
-            main.logStreamActive = true
             main.refreshFull()
         }
     }
 
     Component.onDestruction: {
-        if (main) main.logStreamActive = false
+        if (_panelClient) _panelClient.unregisterPanel(_panelToken)
     }
 
     Rectangle {
@@ -95,7 +113,8 @@ Item {
                             colorBg: root.showLogs ? Qt.alpha(AtmoColor.mPrimary, 0.2) : "transparent"
                             onClicked: {
                                 root.showLogs = !root.showLogs
-                                if (main) main.logStreamActive = root.showLogs
+                                root._logsRequested = root.showLogs
+                                root.syncPanelDemand()
                             }
                         }
 

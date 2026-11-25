@@ -1,9 +1,9 @@
 {
   "id": "notes-scratchpad",
   "name": "Notes Scratchpad",
-  "version": "1.1.12",
+  "version": "1.1.15",
   "minNoctaliaVersion": "3.7.1",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "apt-get",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -27,15 +27,15 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "scratchpadContent": {"type": "String", "machineLocal": true},
-        "cursorPosition": {"type": "Real", "machineLocal": true},
-        "scrollPositionX": {"type": "Real", "machineLocal": true},
-        "scrollPositionY": {"type": "Real", "machineLocal": true},
-        "filePath": {"type": "String"},
-        "fontSize": {"type": "Real"},
-        "panelHeight": {"type": "Real"},
-        "panelWidth": {"type": "Real"},
-        "useMonospace": {"type": "Boolean", "optional": true}
+        "scratchpadContent": {"type": "String", "editorUsage": "content", "machineLocal": true},
+        "cursorPosition": {"type": "Real", "editorUsage": "operational", "machineLocal": true},
+        "scrollPositionX": {"type": "Real", "editorUsage": "operational", "machineLocal": true},
+        "scrollPositionY": {"type": "Real", "editorUsage": "operational", "machineLocal": true},
+        "filePath": {"type": "String", "editorUsage": "configuration"},
+        "fontSize": {"type": "Real", "editorUsage": "configuration"},
+        "panelHeight": {"type": "Real", "editorUsage": "configuration"},
+        "panelWidth": {"type": "Real", "editorUsage": "configuration"},
+        "useMonospace": {"type": "Boolean", "editorUsage": "configuration", "optional": true}
       }
     },
     "defaultSettings": {

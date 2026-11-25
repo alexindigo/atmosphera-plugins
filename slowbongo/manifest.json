@@ -1,9 +1,9 @@
 {
   "id": "slowbongo",
   "name": "Slow Bongo",
-  "version": "0.8.5",
+  "version": "0.8.9",
   "minNoctaliaVersion": "3.6.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "tui",
   "description": "A bongo cat that sits in your bar and slaps when you type.",
   "license": "MIT",
@@ -24,17 +24,17 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "catColor": {"type": "String"},
-        "catOffsetY": {"type": "Real"},
-        "catSize": {"type": "Real"},
-        "idleTimeout": {"type": "Real"},
-        "inputDevice": {"type": "String", "optional": true},
-        "inputDevices": {"type": "List", "optional": true, "element": {"type": "String"}},
-        "raveMode": {"type": "Boolean"},
-        "tappyMode": {"type": "Boolean"},
-        "useMprisFilter": {"type": "Boolean"},
-        "waitingTimeout": {"type": "Real"},
-        "widthPadding": {"type": "Real", "optional": true}
+        "catColor": {"editorUsage": "configuration", "type": "String"},
+        "catOffsetY": {"editorUsage": "configuration", "type": "Real"},
+        "catSize": {"editorUsage": "configuration", "type": "Real"},
+        "idleTimeout": {"editorUsage": "configuration", "type": "Real"},
+        "inputDevice": {"editorUsage": "configuration", "type": "String", "optional": true},
+        "inputDevices": {"editorUsage": "configuration", "type": "List", "optional": true, "element": {"type": "String"}},
+        "raveMode": {"editorUsage": "configuration", "type": "Boolean"},
+        "tappyMode": {"editorUsage": "configuration", "type": "Boolean"},
+        "useMprisFilter": {"editorUsage": "configuration", "type": "Boolean"},
+        "waitingTimeout": {"editorUsage": "configuration", "type": "Real"},
+        "widthPadding": {"editorUsage": "configuration", "type": "Real", "optional": true}
       }
     },
     "defaultSettings": {

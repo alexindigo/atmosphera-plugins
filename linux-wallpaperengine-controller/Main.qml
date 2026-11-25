@@ -24,15 +24,50 @@ Item {
   property string lastRuntimeErrorKey: ""
   readonly property bool engineRunning: engineProcess.running || isApplying || pendingCommand.length > 0
   property string lastScreenSetSignature: ""
-  property bool scanningWallpapers: false
-  property bool wallpapersFolderAccessible: true
-  property var cachedWallpaperItems: []
-  property double lastWallpaperScanAt: 0
+  property var catalogClients: new Map()
+  readonly property var sharedCatalog: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
+  readonly property bool scanningWallpapers: sharedCatalog?.scanningWallpapers ?? false
+  readonly property bool wallpapersFolderAccessible: sharedCatalog?.wallpapersFolderAccessible ?? true
+  readonly property var cachedWallpaperItems: sharedCatalog?.cachedWallpaperItems ?? []
 
   property var pendingCommand: []
 
-  readonly property var cfg: pluginApi?.pluginSettings || ({})
+  property var activeContext: null
+  readonly property var policyContext: activeContext || pluginApi?.settingsContext
+  readonly property bool policyCurrent: policyContext?.current() ?? false
+  readonly property var cfg: policyContext?.settingsView || ({})
+  property var enginePolicy: null
+  property var pendingPolicy: null
+  readonly property bool enginePolicyCurrent: enginePolicy?.context?.current() ?? false
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
+
+  function activatePolicy(context) {
+    context = context || pluginApi?.settingsContext;
+    if (!context?.current()) return false;
+    activeContext = context;
+    return true;
+  }
+
+  function settingsConsumerFor(context) {
+    context = context || pluginApi?.settingsContext;
+    if (!context?.current()) return null;
+    if (catalogClients.has(context)) return catalogClients.get(context);
+    const client = catalogComponent.createObject(root, {pluginApi: pluginApi, settingsContext: context,
+      retire: function (retired) { root.catalogClients.delete(context); retired.destroy(); }});
+    catalogClients.set(context, client);
+    return client;
+  }
+  Component { id: catalogComponent; WallpaperCatalog {} }
+
+  onPolicyCurrentChanged: {
+    if (!policyCurrent && enginePolicy) stopAll();
+  }
+  onEnginePolicyCurrentChanged: {
+    if (enginePolicy && !enginePolicyCurrent) {
+      stableRunTimer.stop();
+      if (!pendingPolicy?.context?.current()) stopAll();
+    }
+  }
 
   // Named timer intervals.
   readonly property int stableRunDelay: 2500
@@ -42,12 +77,24 @@ Item {
   readonly property bool applyingWallpaperColors: colorManager.applyingWallpaperColors
 
   // Pass-through for Panel.qml to reach the color manager.
-  function scheduleWallpaperColorsFromPath(path, options) {
-    colorManager.scheduleWallpaperColorsFromPath(path, options);
+  property int colorAdmissionFps: 30
+  function captureColorPolicy(context) {
+    context = context || policyContext;
+    if (!context?.current()) return null;
+    const selected = context.settingsView;
+    colorAdmissionFps = selected.defaultFps ?? defaults.defaultFps ?? 30;
+    return {context: context, fps: colorAdmissionFps,
+      clamp: String(selected.defaultClamp ?? defaults.defaultClamp ?? "clamp"),
+      scaling: String(selected.defaultScaling ?? defaults.defaultScaling ?? "fill"),
+      properties: cloneValue(pluginApi?.pluginSettings.wallpaperProperties)};
   }
 
-  function applyWallpaperColorsFromPath(path, options) {
-    colorManager.applyWallpaperColorsFromPath(path, options);
+  function scheduleWallpaperColorsFromPath(path, options, context) {
+    colorManager.scheduleWallpaperColorsFromPath(path, options, captureColorPolicy(context));
+  }
+
+  function applyWallpaperColorsFromPath(path, options, context) {
+    colorManager.applyWallpaperColorsFromPath(path, options, captureColorPolicy(context));
   }
 
   // Wallpaper color extraction subsystem.
@@ -64,6 +111,7 @@ Item {
     wallpaperIdFromPathFn: root.wallpaperIdFromPath
     getWallpaperPropertiesFn: root.getWallpaperProperties
     getScreenConfigFn: root.getScreenConfig
+    capturePolicyFn: root.captureColorPolicy
   }
 
   // Initialization.
@@ -105,6 +153,22 @@ Item {
     }
   }
 
+  // Explicit cache-clear action from Settings: the runtime owner records which
+  // color screenshots survived. Operational state, never a preference draft.
+  function retainWallpaperColorScreenshots(entries) {
+    if (!pluginApi)
+      return false;
+    pluginApi.pluginSettings.wallpaperColorScreenshots = cloneValue(entries || ({}));
+    return pluginApi.saveSettings() !== false;
+  }
+
+  readonly property string rememberedPanelPath: pluginApi?.pluginSettings.panelLastSelectedPath ?? ""
+  function rememberPanelPath(path, flushToDisk = false) {
+    if (!pluginApi?.settingsContext?.current()) return false;
+    pluginApi.pluginSettings.panelLastSelectedPath = String(path);
+    return !flushToDisk || pluginApi.saveSettings() !== false;
+  }
+
   function cloneValue(value) {
     return JSON.parse(JSON.stringify(value || ({})));
   }
@@ -143,11 +207,12 @@ Item {
   }
 
   function saveCurrentLayoutAsLastKnownGood(reason) {
-    if (!pluginApi) {
+    const policy = enginePolicy;
+    if (!pluginApi || !policy || !policy.context.current()) {
       return false;
     }
 
-    const currentScreens = cloneValue(pluginApi.pluginSettings.screens || ({}));
+    const currentScreens = cloneValue(policy.screens);
     if (!hasAnyScreenPathFrom(currentScreens)) {
       Logger.d("LWEController", "Skip last-known-good snapshot: no configured paths", "reason=", reason);
       return false;
@@ -181,7 +246,8 @@ Item {
   }
 
   function tryAutoRecoverFromRuntimeError(reason) {
-    if (!pluginApi || recoveryInProgress) {
+    const policy = enginePolicy;
+    if (!pluginApi || recoveryInProgress || !policy?.context?.current()) {
       return false;
     }
 
@@ -193,7 +259,7 @@ Item {
     markErrorAsRecovered();
     recoveryInProgress = true;
     if (engineAvailable && hasAnyConfiguredWallpaper()) {
-      restartEngine();
+      restartEngine(null, policy.context, policy);
     }
 
     return true;
@@ -239,8 +305,8 @@ Item {
   readonly property bool defaultDisableParallax: cfg.defaultDisableParallax ?? defaults.defaultDisableParallax ?? false
   readonly property bool defaultNoFullscreenPause: cfg.defaultNoFullscreenPause ?? defaults.defaultNoFullscreenPause ?? false
   readonly property bool defaultFullscreenPauseOnlyActive: cfg.defaultFullscreenPauseOnlyActive ?? defaults.defaultFullscreenPauseOnlyActive ?? false
-  readonly property bool defaultAutoApply: cfg.autoApplyOnStartup ?? defaults.autoApplyOnStartup ?? true
-  
+  readonly property bool defaultAutoApply: pluginApi?.pluginSettings.autoApplyOnStartup ?? defaults.autoApplyOnStartup ?? true
+
   readonly property int wallpaperScanCacheMinutes: {
     const value = Number(cfg.wallpaperScanCacheMinutes ?? defaults.wallpaperScanCacheMinutes ?? 10);
     if (isNaN(value)) {
@@ -249,34 +315,13 @@ Item {
     return Math.max(0, Math.floor(value));
   }
 
-
   // Screen topology, path normalization, and persisted wallpaper accessors.
   function normalizedPath(path) {
     return Settings.preprocessPath(String(path || ""));
   }
 
   function currentScreenSetSignature() {
-    return Quickshell.screens
-      .map(screen => String(screen.name || ""))
-      .sort()
-      .join("|");
-  }
-
-  function wallpaperScanCacheValid() {
-    if (wallpaperScanCacheMinutes <= 0) {
-      return false;
-    }
-
-    if (!cachedWallpaperItems || cachedWallpaperItems.length === 0) {
-      return false;
-    }
-
-    if (lastWallpaperScanAt <= 0) {
-      return false;
-    }
-
-    const ageMs = Date.now() - lastWallpaperScanAt;
-    return ageMs < wallpaperScanCacheMinutes * 60 * 1000;
+    return Quickshell.screens.map(screen => String(screen.name || "")).sort().join("|");
   }
 
   function handleScreenTopologyChanged() {
@@ -292,14 +337,15 @@ Item {
     screenTopologyRestartDebounce.restart();
   }
 
-  function getScreenConfig(screenName) {
-    const screenConfigs = cfg.screens || ({});
+  function getScreenConfig(screenName, context) {
+    const selected = (context || policyContext)?.settingsView || ({});
+    const screenConfigs = pluginApi?.pluginSettings.screens || ({});
     const raw = screenConfigs[screenName] || ({});
 
     return {
       path: raw.path ?? "",
-      scaling: raw.scaling ?? defaultScaling,
-      clamp: raw.clamp ?? defaultClamp
+      scaling: raw.scaling ?? selected.defaultScaling ?? defaults.defaultScaling ?? "fill",
+      clamp: raw.clamp ?? selected.defaultClamp ?? defaults.defaultClamp ?? "clamp"
     };
   }
 
@@ -355,12 +401,12 @@ Item {
       return {};
     }
 
-    const raw = cfg.wallpaperProperties || ({});
+    const raw = pluginApi?.pluginSettings.wallpaperProperties || ({});
     return cloneWallpaperProperties(raw[wallpaperId] || ({}));
   }
 
-  function setScreenWallpaper(screenName, path) {
-    setScreenWallpaperWithOptions(screenName, path, ({}));
+  function setScreenWallpaper(screenName, path, runtimeApi) {
+    setScreenWallpaperWithOptions(screenName, path, ({}), runtimeApi);
   }
 
   function clearLegacyScreenRuntimeOptions(screenName) {
@@ -385,52 +431,14 @@ Item {
   }
 
   // Wallpaper source scanning and cache refresh.
-  function refreshWallpaperCache(force = false, showToast = false) {
-    const folderPath = Settings.preprocessPath(String(cfg.wallpapersFolder ?? defaults.wallpapersFolder ?? "")).trim();
-
-    if (scanningWallpapers && !wallpaperScanProcess.running) {
-      Logger.w("LWEController", "Reset stale wallpaper scanning state before refresh");
-      scanningWallpapers = false;
-    }
-
-    if (folderPath.length === 0) {
-      cachedWallpaperItems = [];
-      wallpapersFolderAccessible = false;
-      scanningWallpapers = false;
-      lastWallpaperScanAt = 0;
-      if (showToast) {
-        ToastService.showWarning(pluginApi?.tr("panel.title"), pluginApi?.tr("toast.refreshSkippedNoFolder"), "alert-circle");
-      }
-      Logger.w("LWEController", "Wallpaper refresh skipped: wallpapers folder is empty");
-      return;
-    }
-
-    if (wallpaperScanProcess.running) {
-      Logger.d("LWEController", "Wallpaper scan already in progress");
-      return;
-    }
-
-    if (!force && wallpaperScanCacheValid()) {
-      scanningWallpapers = false;
-      wallpaperScanShowToast = false;
-      Logger.d("LWEController", "Wallpaper cache reused", "count=", cachedWallpaperItems.length, "ageMs=", Date.now() - lastWallpaperScanAt);
-      return;
-    }
-
-    const pluginDir = pluginApi?.pluginDir || "";
-    const scriptPath = pluginDir + "/scripts/scan-wallpapers.sh";
-
-    Logger.i("LWEController", force ? "Refreshing wallpaper cache" : "Scanning wallpapers for cache", folderPath);
-    scanningWallpapers = true;
-    wallpaperScanShowToast = showToast;
-    // Mode is no longer passed as argument since we eliminated multi-mode.
-    wallpaperScanProcess.command = ["bash", scriptPath, folderPath];
-    wallpaperScanProcess.running = true;
+  function refreshWallpaperCache(force = false, showToast = false, context) {
+    return settingsConsumerFor(context)?.refresh(force, showToast) ?? false;
   }
 
   // Wallpaper application and persisted runtime option updates.
-  function setScreenWallpaperWithOptions(screenName, path, options) {
-    if (!pluginApi) {
+  function setScreenWallpaperWithOptions(screenName, path, options, runtimeApi) {
+    const writer = runtimeApi || pluginApi;
+    if (!pluginApi || !activatePolicy(writer?.settingsContext)) {
       return;
     }
 
@@ -454,28 +462,28 @@ Item {
     if (options?.volume !== undefined) {
       const rawVolume = Number(options.volume);
       if (!isNaN(rawVolume)) {
-        pluginApi.pluginSettings.defaultVolume = Math.max(0, Math.min(100, Math.floor(rawVolume)));
+        writer.pluginSettings.defaultVolume = Math.max(0, Math.min(100, Math.floor(rawVolume)));
       }
     }
 
     if (options?.muted !== undefined) {
-      pluginApi.pluginSettings.defaultMuted = !!options.muted;
+      writer.pluginSettings.defaultMuted = !!options.muted;
     }
 
     if (options?.audioReactiveEffects !== undefined) {
-      pluginApi.pluginSettings.defaultAudioReactiveEffects = !!options.audioReactiveEffects;
+      writer.pluginSettings.defaultAudioReactiveEffects = !!options.audioReactiveEffects;
     }
 
     if (options?.noAutomute !== undefined) {
-      pluginApi.pluginSettings.defaultNoAutomute = !!options.noAutomute;
+      writer.pluginSettings.defaultNoAutomute = !!options.noAutomute;
     }
 
     if (options?.disableMouse !== undefined) {
-      pluginApi.pluginSettings.defaultDisableMouse = !!options.disableMouse;
+      writer.pluginSettings.defaultDisableMouse = !!options.disableMouse;
     }
 
     if (options?.disableParallax !== undefined) {
-      pluginApi.pluginSettings.defaultDisableParallax = !!options.disableParallax;
+      writer.pluginSettings.defaultDisableParallax = !!options.disableParallax;
     }
 
     clearLegacyScreenRuntimeOptions(screenName);
@@ -486,11 +494,12 @@ Item {
 
     pluginApi.saveSettings();
 
-    restartEngine(resolveRuntimeOverrides(options));
+    if (writer !== pluginApi) writer.saveSettings();
+    restartEngine(resolveRuntimeOverrides(options), writer.settingsContext);
   }
 
-  function clearScreenWallpaper(screenName) {
-    if (!pluginApi) {
+  function clearScreenWallpaper(screenName, context) {
+    if (!pluginApi || !activatePolicy(context)) {
       return;
     }
 
@@ -503,15 +512,16 @@ Item {
     pluginApi.pluginSettings.screens[screenName].path = "";
     pluginApi.saveSettings();
 
-    restartEngine();
+    restartEngine(null, policyContext);
   }
 
-  function setAllScreensWallpaper(path) {
-    setAllScreensWallpaperWithOptions(path, ({}));
+  function setAllScreensWallpaper(path, runtimeApi) {
+    setAllScreensWallpaperWithOptions(path, ({}), runtimeApi);
   }
 
-  function setAllScreensWallpaperWithOptions(path, options) {
-    if (!pluginApi || !path || path.length === 0) {
+  function setAllScreensWallpaperWithOptions(path, options, runtimeApi) {
+    const writer = runtimeApi || pluginApi;
+    if (!pluginApi || !path || path.length === 0 || !activatePolicy(writer?.settingsContext)) {
       return;
     }
 
@@ -546,37 +556,38 @@ Item {
     }
 
     if (hasResolvedVolume) {
-      pluginApi.pluginSettings.defaultVolume = resolvedVolume;
+      writer.pluginSettings.defaultVolume = resolvedVolume;
     }
     if (hasMuted) {
-      pluginApi.pluginSettings.defaultMuted = !!options.muted;
+      writer.pluginSettings.defaultMuted = !!options.muted;
     }
     if (hasAudioReactive) {
-      pluginApi.pluginSettings.defaultAudioReactiveEffects = !!options.audioReactiveEffects;
+      writer.pluginSettings.defaultAudioReactiveEffects = !!options.audioReactiveEffects;
     }
     if (hasNoAutomute) {
-      pluginApi.pluginSettings.defaultNoAutomute = !!options.noAutomute;
+      writer.pluginSettings.defaultNoAutomute = !!options.noAutomute;
     }
     if (hasDisableMouse) {
-      pluginApi.pluginSettings.defaultDisableMouse = !!options.disableMouse;
+      writer.pluginSettings.defaultDisableMouse = !!options.disableMouse;
     }
     if (hasDisableParallax) {
-      pluginApi.pluginSettings.defaultDisableParallax = !!options.disableParallax;
+      writer.pluginSettings.defaultDisableParallax = !!options.disableParallax;
     }
 
     clearLegacyRuntimeOptionsForAllScreens();
 
     pluginApi.saveSettings();
-    restartEngine(resolveRuntimeOverrides(options));
+    if (writer !== pluginApi) writer.saveSettings();
+    restartEngine(resolveRuntimeOverrides(options), writer.settingsContext);
   }
 
   // Runtime error capture and recovery hints.
   function extractRuntimeError(stderrText) {
     return EngineHelpers.extractRuntimeError(stderrText, {
-      assetsMissing: pluginApi?.tr("main.error.assetsMissing"),
-      noBackground: pluginApi?.tr("main.error.noBackground"),
-      opengl: pluginApi?.tr("main.error.opengl")
-    });
+                                               assetsMissing: pluginApi?.tr("main.error.assetsMissing"),
+                                               noBackground: pluginApi?.tr("main.error.noBackground"),
+                                               opengl: pluginApi?.tr("main.error.opengl")
+                                             });
   }
 
   function setRuntimeErrorFromStderr(stderrText) {
@@ -614,14 +625,7 @@ Item {
     }
 
     lastRuntimeErrorKey = logKey;
-    Logger.e(
-      "LWEController",
-      "runtime-error",
-      "stage=", stage,
-      "exitCode=", exitCode === null ? "-" : exitCode,
-      "exitStatus=", exitStatus === null ? "-" : exitStatus,
-      "summary=", summary
-    );
+    Logger.e("LWEController", "runtime-error", "stage=", stage, "exitCode=", exitCode === null ? "-" : exitCode, "exitStatus=", exitStatus === null ? "-" : exitStatus, "summary=", summary);
     return true;
   }
 
@@ -645,26 +649,43 @@ Item {
   }
 
   // Engine command construction and lifecycle orchestration.
-  function buildCommand(runtimeOverrides = null) {
+  function captureEnginePolicy(context, runtimeOverrides = null) {
+    if (!activatePolicy(context)) return null;
     const overrides = runtimeOverrides || ({});
-    return EngineHelpers.buildEngineCommand({
-      defaultFps: defaultFps,
-      defaultClamp: overrides.defaultClamp ?? defaultClamp,
-      defaultVolume: overrides.defaultVolume ?? defaultVolume,
-      defaultMuted: overrides.defaultMuted ?? defaultMuted,
-      defaultAudioReactiveEffects: overrides.defaultAudioReactiveEffects ?? defaultAudioReactiveEffects,
-      defaultNoAutomute: overrides.defaultNoAutomute ?? defaultNoAutomute,
-      defaultDisableMouse: overrides.defaultDisableMouse ?? defaultDisableMouse,
-      defaultDisableParallax: overrides.defaultDisableParallax ?? defaultDisableParallax,
-      defaultNoFullscreenPause: defaultNoFullscreenPause,
-      defaultFullscreenPauseOnlyActive: defaultFullscreenPauseOnlyActive,
-      defaultScaling: defaultScaling,
+    return {
+      context: policyContext,
+      screens: cloneValue(pluginApi.pluginSettings.screens),
+      properties: cloneValue(pluginApi.pluginSettings.wallpaperProperties),
+      options: {
+                                               defaultFps: defaultFps,
+                                              defaultClamp: overrides.defaultClamp ?? defaultClamp,
+                                              defaultVolume: overrides.defaultVolume ?? defaultVolume,
+                                              defaultMuted: overrides.defaultMuted ?? defaultMuted,
+                                              defaultAudioReactiveEffects: overrides.defaultAudioReactiveEffects ?? defaultAudioReactiveEffects,
+                                              defaultNoAutomute: overrides.defaultNoAutomute ?? defaultNoAutomute,
+                                              defaultDisableMouse: overrides.defaultDisableMouse ?? defaultDisableMouse,
+                                              defaultDisableParallax: overrides.defaultDisableParallax ?? defaultDisableParallax,
+                                              defaultNoFullscreenPause: defaultNoFullscreenPause,
+                                              defaultFullscreenPauseOnlyActive: defaultFullscreenPauseOnlyActive,
+                                               defaultScaling: defaultScaling
+      }
+    };
+  }
+
+  function buildCommand(runtimeOverrides = null, policy = null) {
+    policy = policy || captureEnginePolicy(policyContext, runtimeOverrides);
+    if (!policy?.context?.current()) return [];
+    const options = Object.assign({}, policy.options, {
       screens: Quickshell.screens,
-      getScreenConfig: getScreenConfig,
+      getScreenConfig: name => {
+        const raw = policy.screens[name] || ({});
+        return {path: raw.path ?? "", scaling: raw.scaling ?? policy.options.defaultScaling, clamp: raw.clamp ?? policy.options.defaultClamp};
+      },
       normalizePath: normalizedPath,
       wallpaperIdFromPath: wallpaperIdFromPath,
-      getWallpaperProperties: getWallpaperProperties
+      getWallpaperProperties: path => cloneWallpaperProperties(policy.properties[wallpaperIdFromPath(path)] || ({}))
     });
+    return EngineHelpers.buildEngineCommand(options);
   }
 
   function resolveRuntimeOverrides(options = null) {
@@ -684,6 +705,7 @@ Item {
   function stopAll(showToast = false) {
     Logger.i("LWEController", "Stopping engine process");
     pendingCommand = [];
+    pendingPolicy = null;
 
     if (engineProcess.running) {
       stopRequested = true;
@@ -703,8 +725,8 @@ Item {
     }
   }
 
-  function startEngineWithCommand(command) {
-    if (!engineAvailable) {
+  function startEngineWithCommand(command, policy) {
+    if (!engineAvailable || !policy?.context?.current()) {
       Logger.d("LWEController", "Skip start: engine unavailable");
       return;
     }
@@ -723,11 +745,14 @@ Item {
     isApplying = true;
 
     engineProcess.command = command;
+    enginePolicy = policy;
     engineProcess.running = true;
     stableRunTimer.restart();
   }
 
-  function restartEngine(runtimeOverrides = null) {
+  function restartEngine(runtimeOverrides = null, context, retainedPolicy = null) {
+    context = context || pluginApi?.settingsContext;
+    if (!activatePolicy(context)) return false;
     if (!engineAvailable) {
       Logger.d("LWEController", "Skip restart: engine unavailable");
       return;
@@ -739,7 +764,11 @@ Item {
       return;
     }
 
-    const command = buildCommand(runtimeOverrides);
+    const policy = retainedPolicy ? {
+      context: retainedPolicy.context, options: retainedPolicy.options,
+      screens: cloneValue(pluginApi.pluginSettings.screens), properties: retainedPolicy.properties
+    } : captureEnginePolicy(context, runtimeOverrides);
+    const command = buildCommand(runtimeOverrides, policy);
     if (!command || command.length <= 1) {
       Logger.d("LWEController", "Restart resolved to empty command; stopping engine");
       stopAll();
@@ -749,6 +778,7 @@ Item {
     if (engineProcess.running) {
       Logger.d("LWEController", "Engine already running; queue restart command");
       pendingCommand = command;
+      pendingPolicy = policy;
       stopRequested = true;
       engineProcess.running = false;
 
@@ -759,10 +789,11 @@ Item {
       return;
     }
 
-    startEngineWithCommand(command);
+    startEngineWithCommand(command, policy);
   }
 
-  function reload(showToast = false) {
+  function reload(showToast = false, context) {
+    if (!activatePolicy(context)) return false;
     if (!hasAnyConfiguredWallpaper()) {
       clearRuntimeErrorState();
       Logger.d("LWEController", "Reload skipped: no configured wallpaper paths");
@@ -772,92 +803,13 @@ Item {
       return;
     }
 
-    restartEngine();
+    restartEngine(null, policyContext);
     if (showToast) {
       ToastService.showNotice(pluginApi?.tr("panel.title"), pluginApi?.tr("toast.reloaded"), "refresh");
     }
   }
 
   // External processes.
-  Process {
-    id: wallpaperScanProcess
-
-    onExited: function (exitCode) {
-      const parsed = [];
-      const lines = String(stdout.text || "").split("\n");
-      const stderrText = String(stderr.text || "").trim();
-
-      root.wallpapersFolderAccessible = (exitCode === 0);
-
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (line.length === 0) {
-          continue;
-        }
-
-        const parts = line.split("\t");
-        const path = parts.length > 0 ? parts[0] : "";
-        const name = parts.length > 1 && parts[1].length > 0 ? parts[1] : String(path || "").split("/").pop();
-        const thumb = parts.length > 2 ? parts[2] : "";
-        const motionPreview = parts.length > 3 ? parts[3] : "";
-        const dynamic = parts.length > 4 ? parts[4] === "1" : false;
-        const id = parts.length > 5 ? parts[5] : String(path || "").split("/").pop();
-        const type = parts.length > 6 ? parts[6] : "unknown";
-        const resolution = parts.length > 7 ? parts[7] : "unknown";
-        const hasEmbeddedAudio = parts.length > 8 ? parts[8] === "1" : false;
-        const hasAudioReactive = parts.length > 9 ? parts[9] === "1" : false;
-        const sizeMtime = parts.length > 10 ? parts[10] : "0:0";
-        const sizeParts = String(sizeMtime).split(":");
-        const bytes = sizeParts.length > 0 ? Number(sizeParts[0]) : 0;
-        const mtime = sizeParts.length > 1 ? Number(sizeParts[1]) : 0;
-        const approved = parts.length > 11 ? parts[11] === "1" : false;
-        const description = parts.length > 12 ? String(parts[12] || "") : "";
-
-        if (path.length > 0) {
-          parsed.push({
-            path: path,
-            name: name,
-            thumb: thumb,
-            motionPreview: motionPreview,
-            dynamic: dynamic,
-            hasEmbeddedAudio: hasEmbeddedAudio,
-            hasAudioReactive: hasAudioReactive,
-            id: id,
-            type: type,
-            resolution: resolution,
-            bytes: bytes,
-            mtime: mtime,
-            approved: approved,
-            description: description
-          });
-        }
-      }
-
-      root.cachedWallpaperItems = parsed;
-      root.scanningWallpapers = false;
-      root.lastWallpaperScanAt = exitCode === 0 ? Date.now() : 0;
-
-      if (root.wallpaperScanShowToast && exitCode === 0) {
-        ToastService.showNotice(
-          pluginApi?.tr("panel.title"),
-          pluginApi?.tr("toast.refreshedWallpapers", { count: parsed.length }),
-          "refresh"
-        );
-      }
-      root.wallpaperScanShowToast = false;
-
-      if (!root.wallpapersFolderAccessible) {
-        const msg = stderrText.length > 0 ? "Wallpaper scan failed, stderr=" + stderrText : "Wallpaper scan failed";
-        Logger.e("LWEController", msg, "exitCode=", exitCode);
-      }
-
-      Logger.i("LWEController", "Wallpaper cache updated", "count=", parsed.length, "exitCode=", exitCode);
-    }
-
-    stdout: StdioCollector {}
-    stderr: StdioCollector {}
-  }
-
   Process {
     id: engineCheck
     running: true
@@ -906,9 +858,11 @@ Item {
 
         if (root.pendingCommand.length > 0) {
           const nextCommand = root.pendingCommand;
+          const nextPolicy = root.pendingPolicy;
           root.pendingCommand = [];
+          root.pendingPolicy = null;
           Logger.d("LWEController", "Applying pending command after stop");
-          root.startEngineWithCommand(nextCommand);
+          root.startEngineWithCommand(nextCommand, nextPolicy);
           return;
         }
 
@@ -1069,7 +1023,7 @@ Item {
       }
 
       Logger.i("LWEController", "Reapplying wallpapers after screen topology change");
-      root.restartEngine();
+      root.restartEngine(null, root.policyContext);
     }
   }
 
@@ -1083,8 +1037,7 @@ Item {
     if (engineProcess.running)
       engineProcess.running = false;
 
-    if (wallpaperScanProcess.running)
-      wallpaperScanProcess.running = false;
+    for (const client of catalogClients.values()) client.destroy();
 
     if (!forceStopProcess.running)
       forceStopProcess.running = true;
@@ -1093,7 +1046,6 @@ Item {
     screenTopologyRestartDebounce.stop();
 
     isApplying = false;
-    scanningWallpapers = false;
 
     Logger.i("LWEController", "Cleanup complete");
   }

@@ -6,23 +6,37 @@ import qs.Widgets
 ColumnLayout {
   id: root
   property var pluginApi: null
+  readonly property var autoLaunchSteamField: pluginApi?.field("autoLaunchSteam") ?? null
+  readonly property var useCustomLayoutField: pluginApi?.field("useCustomLayout") ?? null
+  readonly property var enableChatNotificationsField: pluginApi?.field("enableChatNotifications") ?? null
+  readonly property var friendsWidthPercentField: pluginApi?.field("friendsWidthPercent") ?? null
+  readonly property var mainWidthPercentField: pluginApi?.field("mainWidthPercent") ?? null
+  readonly property var chatWidthPercentField: pluginApi?.field("chatWidthPercent") ?? null
+  readonly property var gapSizeField: pluginApi?.field("gapSize") ?? null
+  readonly property var topMarginPercentField: pluginApi?.field("topMarginPercent") ?? null
+  readonly property var windowHeightPercentField: pluginApi?.field("windowHeightPercent") ?? null
 
   // Shortcut to settings and defaults
-  property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   // Local state - track changes before saving
-  property bool valueAutoLaunchSteam: displayBaseline.valueAutoLaunchSteam
-  property bool valueUseCustomLayout: displayBaseline.valueUseCustomLayout
-  property bool valueEnableChatNotifications: displayBaseline.valueEnableChatNotifications
-  property int valueFriendsWidth: displayBaseline.project("valueFriendsWidth")
-  property int valueMainWidth: displayBaseline.project("valueMainWidth")
-  property int valueChatWidth: displayBaseline.project("valueChatWidth")
-  property int valueGapSize: displayBaseline.project("valueGapSize")
-  property real valueTopMargin: displayBaseline.project("valueTopMargin")
-  property real valueWindowHeight: displayBaseline.project("valueWindowHeight")
+  readonly property bool valueAutoLaunchSteam: root.autoLaunchSteamField?.value ?? true
+  readonly property bool valueUseCustomLayout: root.useCustomLayoutField?.value ?? false
+  readonly property bool valueEnableChatNotifications: root.enableChatNotificationsField?.value ?? true
+  readonly property int valueFriendsWidth: root.friendsWidthPercentField?.value ?? 10
+  readonly property int valueMainWidth: root.mainWidthPercentField?.value ?? 60
+  readonly property int valueChatWidth: root.chatWidthPercentField?.value ?? 25
+  readonly property int valueGapSize: root.gapSizeField?.value ?? 10
+  readonly property real valueTopMargin: root.topMarginPercentField?.value ?? 2.5
+  readonly property real valueWindowHeight: root.windowHeightPercentField?.value ?? 95
 
   spacing: Style.marginM
+
+  NLabel {
+    visible: root.pluginApi?.scopeKind === "instance"
+    Layout.fillWidth: true
+    description: root.pluginApi?.tr("settings.shared-effect")
+  }
 
   Component.onCompleted: {
     Logger.i("SteamOverlay", "Settings UI loaded");
@@ -34,30 +48,39 @@ ColumnLayout {
   }
 
   // Auto-launch Steam toggle
-  NCheckbox {
-    Layout.fillWidth: true
-    label: "Auto-launch Steam"
-    description: "Automatically launch Steam when toggling overlay if it's not running"
-    checked: root.valueAutoLaunchSteam
-    onToggled: root.valueAutoLaunchSteam = checked
+  NPluginSettingsField {
+    field: root.autoLaunchSteamField
+    NCheckbox {
+      Layout.fillWidth: true
+      label: "Auto-launch Steam"
+      description: "Automatically launch Steam when toggling overlay if it's not running"
+      checked: root.valueAutoLaunchSteam
+      onToggled: checked => root.autoLaunchSteamField.set(checked)
+    }
   }
 
   // Chat notifications toggle
-  NCheckbox {
-    Layout.fillWidth: true
-    label: "Chat Notifications"
-    description: "Show notification indicator on bar icon when new Steam chat messages arrive"
-    checked: root.valueEnableChatNotifications
-    onToggled: root.valueEnableChatNotifications = checked
+  NPluginSettingsField {
+    field: root.enableChatNotificationsField
+    NCheckbox {
+      Layout.fillWidth: true
+      label: "Chat Notifications"
+      description: "Show notification indicator on bar icon when new Steam chat messages arrive"
+      checked: root.valueEnableChatNotifications
+      onToggled: checked => root.enableChatNotificationsField.set(checked)
+    }
   }
 
   // Custom Hyprland layout toggle
-  NCheckbox {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.custom-layout-label")
-    description: pluginApi?.tr("settings.custom-layout-description")
-    checked: root.valueUseCustomLayout
-    onToggled: root.valueUseCustomLayout = checked
+  NPluginSettingsField {
+    field: root.useCustomLayoutField
+    NCheckbox {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.custom-layout-label")
+      description: pluginApi?.tr("settings.custom-layout-description")
+      checked: root.valueUseCustomLayout
+      onToggled: checked => root.useCustomLayoutField.set(checked)
+    }
   }
 
   NDivider {
@@ -81,15 +104,18 @@ ColumnLayout {
       description: "Width of the Friends List window"
     }
 
-    NSlider {
-      id: rangeValueFriendsWidth
-      objectName: "settings-range-valueFriendsWidth"
-      Layout.fillWidth: true
-      from: 5
-      to: 30
-      value: root.valueFriendsWidth
-      stepSize: 1
-      onValueChanged: root.valueFriendsWidth = value
+    NPluginSettingsField {
+      field: root.friendsWidthPercentField
+      NSlider {
+        id: rangeValueFriendsWidth
+        objectName: "settings-range-valueFriendsWidth"
+        Layout.fillWidth: true
+        from: 5
+        to: 30
+        value: root.valueFriendsWidth
+        stepSize: 1
+        onMoved: root.friendsWidthPercentField.set(value)
+      }
     }
   }
 
@@ -102,15 +128,18 @@ ColumnLayout {
       description: "Width of the main Steam window"
     }
 
-    NSlider {
-      id: rangeValueMainWidth
-      objectName: "settings-range-valueMainWidth"
-      Layout.fillWidth: true
-      from: 40
-      to: 80
-      value: root.valueMainWidth
-      stepSize: 1
-      onValueChanged: root.valueMainWidth = value
+    NPluginSettingsField {
+      field: root.mainWidthPercentField
+      NSlider {
+        id: rangeValueMainWidth
+        objectName: "settings-range-valueMainWidth"
+        Layout.fillWidth: true
+        from: 40
+        to: 80
+        value: root.valueMainWidth
+        stepSize: 1
+        onMoved: root.mainWidthPercentField.set(value)
+      }
     }
   }
 
@@ -123,15 +152,18 @@ ColumnLayout {
       description: "Width of the chat window"
     }
 
-    NSlider {
-      id: rangeValueChatWidth
-      objectName: "settings-range-valueChatWidth"
-      Layout.fillWidth: true
-      from: 10
-      to: 40
-      value: root.valueChatWidth
-      stepSize: 1
-      onValueChanged: root.valueChatWidth = value
+    NPluginSettingsField {
+      field: root.chatWidthPercentField
+      NSlider {
+        id: rangeValueChatWidth
+        objectName: "settings-range-valueChatWidth"
+        Layout.fillWidth: true
+        from: 10
+        to: 40
+        value: root.valueChatWidth
+        stepSize: 1
+        onMoved: root.chatWidthPercentField.set(value)
+      }
     }
   }
 
@@ -156,15 +188,18 @@ ColumnLayout {
       description: "Space between windows in pixels"
     }
 
-    NSlider {
-      id: rangeValueGapSize
-      objectName: "settings-range-valueGapSize"
-      Layout.fillWidth: true
-      from: 0
-      to: 50
-      value: root.valueGapSize
-      stepSize: 5
-      onValueChanged: root.valueGapSize = value
+    NPluginSettingsField {
+      field: root.gapSizeField
+      NSlider {
+        id: rangeValueGapSize
+        objectName: "settings-range-valueGapSize"
+        Layout.fillWidth: true
+        from: 0
+        to: 50
+        value: root.valueGapSize
+        stepSize: 5
+        onMoved: root.gapSizeField.set(value)
+      }
     }
   }
 
@@ -177,15 +212,18 @@ ColumnLayout {
       description: "Distance from top of screen"
     }
 
-    NSlider {
-      id: rangeValueTopMargin
-      objectName: "settings-range-valueTopMargin"
-      Layout.fillWidth: true
-      from: 0
-      to: 10
-      value: root.valueTopMargin
-      stepSize: 0.5
-      onValueChanged: root.valueTopMargin = value
+    NPluginSettingsField {
+      field: root.topMarginPercentField
+      NSlider {
+        id: rangeValueTopMargin
+        objectName: "settings-range-valueTopMargin"
+        Layout.fillWidth: true
+        from: 0
+        to: 10
+        value: root.valueTopMargin
+        stepSize: 0.5
+        onMoved: root.topMarginPercentField.set(value)
+      }
     }
   }
 
@@ -198,15 +236,18 @@ ColumnLayout {
       description: "Height of overlay windows"
     }
 
-    NSlider {
-      id: rangeValueWindowHeight
-      objectName: "settings-range-valueWindowHeight"
-      Layout.fillWidth: true
-      from: 70
-      to: 100
-      value: root.valueWindowHeight
-      stepSize: 1
-      onValueChanged: root.valueWindowHeight = value
+    NPluginSettingsField {
+      field: root.windowHeightPercentField
+      NSlider {
+        id: rangeValueWindowHeight
+        objectName: "settings-range-valueWindowHeight"
+        Layout.fillWidth: true
+        from: 70
+        to: 100
+        value: root.valueWindowHeight
+        stepSize: 1
+        onMoved: root.windowHeightPercentField.set(value)
+      }
     }
   }
 
@@ -227,27 +268,8 @@ ColumnLayout {
   }
 
   // This function is called by the dialog to save settings
-  NSettingsBaseline {
-    ranges: [
-      NSettingsRange { field: "valueFriendsWidth"; from: rangeValueFriendsWidth.from; to: rangeValueFriendsWidth.to },
-      NSettingsRange { field: "valueMainWidth"; from: rangeValueMainWidth.from; to: rangeValueMainWidth.to },
-      NSettingsRange { field: "valueChatWidth"; from: rangeValueChatWidth.from; to: rangeValueChatWidth.to },
-      NSettingsRange { field: "valueGapSize"; from: rangeValueGapSize.from; to: rangeValueGapSize.to },
-      NSettingsRange { field: "valueTopMargin"; from: rangeValueTopMargin.from; to: rangeValueTopMargin.to },
-      NSettingsRange { field: "valueWindowHeight"; from: rangeValueWindowHeight.from; to: rangeValueWindowHeight.to }
-    ]
-    id: displayBaseline
-    readonly property bool valueAutoLaunchSteam: cfg.autoLaunchSteam ?? defaults.autoLaunchSteam ?? true
-    readonly property bool valueUseCustomLayout: cfg.useCustomLayout ?? defaults.useCustomLayout ?? false
-    readonly property bool valueEnableChatNotifications: cfg.enableChatNotifications ?? defaults.enableChatNotifications ?? true
-    readonly property int valueFriendsWidth: cfg.friendsWidthPercent ?? defaults.friendsWidthPercent ?? 10
-    readonly property int valueMainWidth: cfg.mainWidthPercent ?? defaults.mainWidthPercent ?? 60
-    readonly property int valueChatWidth: cfg.chatWidthPercent ?? defaults.chatWidthPercent ?? 25
-    readonly property int valueGapSize: cfg.gapSize ?? defaults.gapSize ?? 10
-    readonly property real valueTopMargin: cfg.topMarginPercent ?? defaults.topMarginPercent ?? 2.5
-    readonly property real valueWindowHeight: cfg.windowHeightPercent ?? defaults.windowHeightPercent ?? 95
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({valueAutoLaunchSteam: root.valueAutoLaunchSteam, valueUseCustomLayout: root.valueUseCustomLayout, valueEnableChatNotifications: root.valueEnableChatNotifications, valueFriendsWidth: root.valueFriendsWidth, valueMainWidth: root.valueMainWidth, valueChatWidth: root.valueChatWidth, valueGapSize: root.valueGapSize, valueTopMargin: root.valueTopMargin, valueWindowHeight: root.valueWindowHeight})
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   function saveSettings() {
     if (!pluginApi) {
@@ -256,15 +278,6 @@ ColumnLayout {
     }
 
     // Update the plugin settings object
-    pluginApi.pluginSettings.autoLaunchSteam = root.valueAutoLaunchSteam;
-    pluginApi.pluginSettings.useCustomLayout = root.valueUseCustomLayout;
-    pluginApi.pluginSettings.enableChatNotifications = root.valueEnableChatNotifications;
-    pluginApi.pluginSettings.friendsWidthPercent = root.valueFriendsWidth;
-    pluginApi.pluginSettings.mainWidthPercent = root.valueMainWidth;
-    pluginApi.pluginSettings.chatWidthPercent = root.valueChatWidth;
-    pluginApi.pluginSettings.gapSize = root.valueGapSize;
-    pluginApi.pluginSettings.topMarginPercent = root.valueTopMargin;
-    pluginApi.pluginSettings.windowHeightPercent = root.valueWindowHeight;
 
     // Save to disk
     pluginApi.saveSettings(function (result) {

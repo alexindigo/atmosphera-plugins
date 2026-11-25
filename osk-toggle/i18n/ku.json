@@ -11,6 +11,7 @@
     "settings": "Mîhengên widgetê"
   },
   "settings": {
+    "shared-effect": "Hemû mînak heman klavyeyê kontrol dikin. Sepandin, Dîsa kontrol bike an çalakiyek widgetê pergala paşîn û bernameya cîbicîkirinê ji bo vê klavyeya hevpar hilbijêre; mîhengek din dikare vê hilbijartinê biguherîne. Nîşandan û berdestbûn li gorî vê mînakê ne.",
     "backend": {
       "label": "Backend",
       "desc": "Kîjan klavyeya ekranê kontrol bike: auto, squeekboard, an jî wvkbd (auto di destpêkê de xweser tespît dike)",

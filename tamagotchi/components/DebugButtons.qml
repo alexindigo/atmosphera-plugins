@@ -7,6 +7,7 @@ Row {
     spacing: Style.marginXS
 
     property var pluginApi: null
+    property var game: null
     visible: pluginApi?.pluginSettings?.showDebug ?? false
 
     component ActionBtn: Rectangle {
@@ -14,7 +15,6 @@ Row {
         property string icon: "●"
         property string label: pluginApi?.tr("debug.action")
         property var action
-        property bool enabled: true
 
         width: 60
         height: 56
@@ -92,8 +92,8 @@ Row {
         icon: "🍗"
         label: pluginApi?.tr("debug.feed")
         action: function () {
-            if (pluginApi.mainInstance)
-                pluginApi.mainInstance.feed(-10);
+            if (root.game)
+                root.game.feed(-10);
         }
     }
 
@@ -101,8 +101,8 @@ Row {
         icon: "🎮"
         label: pluginApi?.tr("debug.play")
         action: function () {
-            if (pluginApi.mainInstance)
-                pluginApi.mainInstance.happiness += -10;
+            if (root.game && root.game.current)
+                root.game.happiness += -10;
         }
     }
 
@@ -110,17 +110,17 @@ Row {
         icon: "🧼"
         label: pluginApi?.tr("debug.clean")
         action: function () {
-            if (pluginApi.mainInstance)
-                pluginApi.mainInstance.clean(-10);
+            if (root.game)
+                root.game.clean(-10);
         }
     }
 
     ActionBtn {
-        icon: pluginApi?.mainInstance?.petState === "sleeping" ? "☀️" : "💤"
+        icon: root.game?.petState === "sleeping" ? "☀️" : "💤"
         label: pluginApi?.tr("debug.sleep")
         action: function () {
-            if (pluginApi.mainInstance)
-                pluginApi.mainInstance.energy += -10;
+            if (root.game && root.game.current)
+                root.game.energy += -10;
         }
     }
 }

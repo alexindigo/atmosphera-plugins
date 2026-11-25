@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "Bu örnek yoklama aralığını ve komutları seçer. Güncelleme çalıştırmak sistemi tüm örnekler için değiştirir.",
     "changeIcon": {
       "label": "Simge seç"
     },

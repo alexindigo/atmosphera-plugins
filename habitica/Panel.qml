@@ -17,7 +17,8 @@ Item {
 
   anchors.fill: parent
 
-  readonly property var main: pluginApi?.mainInstance
+  readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+  readonly property var main: settingsConsumer
   readonly property bool configured: main?.isConfigured ?? false
   readonly property bool showHabits: pluginApi?.pluginSettings?.showHabits ?? false
   readonly property bool showChecklistItems: pluginApi?.pluginSettings?.showChecklistItems ?? false

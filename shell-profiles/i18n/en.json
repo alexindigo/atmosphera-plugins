@@ -22,6 +22,7 @@
     "delete-confirm-message": "Delete \"{name}\"? This cannot be undone."
   },
   "settings": {
+    "shared-effect": "This widget selects the profile folder and backup policy. Applying a profile changes the shared shell configuration, colors, plugins and optional wallpapers for every widget.",
     "dir-label": "Profiles directory",
     "dir-description": "Where profiles are stored on disk",
     "dir-select": "Select folder",

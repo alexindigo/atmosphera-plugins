@@ -82,16 +82,16 @@ Item {
   }
 
   function _runLaunch() {
-    var argv = root.mainInstance ? root.mainInstance._launcherArgv()
-                                 : ["niri-screensaver-launch", "launch"]
+    statusProbe.policy = null
+    var argv = root.mainInstance ? root.mainInstance._launcherArgv(root.pluginApi.settingsContext) : []
     launchProc.command = argv
-    launchProc.running = true
+    launchProc.running = argv.length > 0
   }
   function _runKill() {
-    var argv = root.mainInstance ? root.mainInstance._killArgv()
-                                 : ["niri-screensaver-launch", "kill"]
+    statusProbe.policy = null
+    var argv = root.mainInstance ? root.mainInstance._killArgv(root.pluginApi.settingsContext) : []
     killProc.command = argv
-    killProc.running = true
+    killProc.running = argv.length > 0
   }
 
   // Smart left-click: probe running state, then stop if running else launch.
@@ -100,12 +100,19 @@ Item {
   // click useful even if the status command is somehow unavailable.
   Process {
     id: statusProbe
+    property var policy: null
     onExited: function (code) {
-      if (code === 0) root._runKill()
-      else root._runLaunch()
+      const admitted = policy
+      policy = null
+      if (!admitted?.context?.current()) return
+      if (code === 0) { killProc.command = admitted.kill; killProc.running = admitted.kill.length > 0 }
+      else { launchProc.command = admitted.launch; launchProc.running = admitted.launch.length > 0 }
     }
   }
   function _smartToggle() {
+    const context = root.pluginApi?.settingsContext
+    if (!context?.current() || statusProbe.running || !root.mainInstance) return
+    statusProbe.policy = {context: context, launch: root.mainInstance._launcherArgv(context), kill: root.mainInstance._killArgv(context)}
     var argv = root.mainInstance ? root.mainInstance._statusArgv()
                                  : ["niri-screensaver-launch", "is-running"]
     statusProbe.command = argv
@@ -119,6 +126,7 @@ Item {
     if (root.pluginApi) {
       root.pluginApi.pluginSettings.enabled = false
       root.pluginApi.saveSettings()
+      root.mainInstance?.applySettings(root.pluginApi.settingsContext)
     }
   }
 
@@ -133,9 +141,11 @@ Item {
     }
   }
   function _runReload() {
+    statusProbe.policy = null
     if (root.pluginApi) {
       root.pluginApi.pluginSettings.enabled = true
       root.pluginApi.saveSettings()
+      root.mainInstance?.applySettings(root.pluginApi.settingsContext)
     }
     reloadProc.command = ["sh", "-c",
       "setsid sh -c 'niri-screensaver-launch kill; "
@@ -172,6 +182,7 @@ Item {
           var en = root.pluginApi.pluginSettings.enabled === true
           root.pluginApi.pluginSettings.enabled = !en
           root.pluginApi.saveSettings()
+          root.mainInstance?.applySettings(root.pluginApi.settingsContext)
         }
       } else if (action === "settings") {
         if (root.pluginApi) {

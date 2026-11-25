@@ -23,6 +23,7 @@ Item {
   property var pluginApi: null
 
   readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var catalog: mainInstance?.settingsConsumerFor(pluginApi?.settingsContext) ?? null
   readonly property var cfg: pluginApi?.pluginSettings || ({})
   readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
@@ -49,10 +50,10 @@ Item {
   property bool selectedDisableParallax: false
   property bool applyWallpaperColorsOnApply: cfg.applyWallpaperColorsOnApply ?? defaults.applyWallpaperColorsOnApply ?? false
   readonly property bool applyingWallpaperColors: mainInstance?.applyingWallpaperColors ?? false
-  readonly property bool scanningWallpapers: mainInstance?.scanningWallpapers ?? false
+  readonly property bool scanningWallpapers: catalog?.scanningWallpapers ?? false
   property bool loadingWallpaperProperties: false
   property bool scanningCompatibility: false
-  readonly property bool folderAccessible: mainInstance?.wallpapersFolderAccessible ?? true
+  readonly property bool folderAccessible: catalog?.wallpapersFolderAccessible ?? true
 
   property string searchText: ""
   property string selectedType: "all"
@@ -85,7 +86,7 @@ Item {
 
   // Data models and derived UI state.
   property var screenModel: []
-  readonly property var wallpaperItems: mainInstance?.cachedWallpaperItems || []
+  readonly property var wallpaperItems: catalog?.cachedWallpaperItems || []
   property var visibleWallpapers: []
   property var pagedWallpapers: []
   property var wallpaperPropertyLoadFailedByPath: ({})
@@ -427,7 +428,7 @@ Item {
       return;
     }
 
-    const remembered = String(pluginApi?.pluginSettings?.panelLastSelectedPath || "").trim();
+    const remembered = String(mainInstance?.rememberedPanelPath || "").trim();
     root.lastPersistedPath = remembered;
     if (remembered.length > 0) {
       pendingPath = remembered;
@@ -436,15 +437,11 @@ Item {
 
   function persistPanelMemory(flushToDisk = false) {
     const next = String(pendingPath || "");
-    if (root.lastPersistedPath === next) {
+    if (!flushToDisk && root.lastPersistedPath === next) {
       return;
     }
-    root.lastPersistedPath = next;
-    if (pluginApi) {
-      pluginApi.pluginSettings.panelLastSelectedPath = next;
-      if (flushToDisk) {
-        pluginApi.saveSettings();
-      }
+    if (mainInstance?.rememberPanelPath(next, flushToDisk)) {
+      root.lastPersistedPath = next;
     }
   }
 
@@ -468,7 +465,7 @@ Item {
       selectedScreenName = fallbackScreenName;
     }
 
-    const screenCfg = mainInstance?.getScreenConfig(fallbackScreenName);
+    const screenCfg = mainInstance?.getScreenConfig(fallbackScreenName, pluginApi?.settingsContext);
     if (!screenCfg) {
       selectedScaling = String(defaults.defaultScaling || "fill");
       return;
@@ -519,9 +516,9 @@ Item {
 
     if (applyAllDisplays) {
       Logger.i("LWEController", "Confirm apply to all displays", path, JSON.stringify(options));
-      mainInstance?.setAllScreensWallpaperWithOptions(path, options);
+      mainInstance?.setAllScreensWallpaperWithOptions(path, options, pluginApi);
       if (applyWallpaperColorsOnApply) {
-        mainInstance?.scheduleWallpaperColorsFromPath(path, colorApplyOptions);
+        mainInstance?.scheduleWallpaperColorsFromPath(path, colorApplyOptions, pluginApi?.settingsContext);
       }
       pendingPath = "";
       return;
@@ -534,9 +531,9 @@ Item {
 
     const targetScreen = root.singleScreenMode ? (Quickshell.screens[0]?.name || "") : selectedScreenName;
     Logger.i("LWEController", "Confirm apply to screen", targetScreen, path, JSON.stringify(options));
-    mainInstance?.setScreenWallpaperWithOptions(targetScreen, path, options);
+    mainInstance?.setScreenWallpaperWithOptions(targetScreen, path, options, pluginApi);
     if (applyWallpaperColorsOnApply) {
-      mainInstance?.scheduleWallpaperColorsFromPath(path, colorApplyOptions);
+      mainInstance?.scheduleWallpaperColorsFromPath(path, colorApplyOptions, pluginApi?.settingsContext);
     }
     pendingPath = "";
   }
@@ -606,7 +603,7 @@ Item {
   }
 
   function refreshWallpaperList(force = false) {
-    mainInstance?.refreshWallpaperCache(force, true);
+    mainInstance?.refreshWallpaperCache(force, true, pluginApi?.settingsContext);
   }
 
   function rebuildScreenModel() {
@@ -667,7 +664,7 @@ Item {
     if (!root.pluginApi || !root.panelInitialized) {
       return;
     }
-    mainInstance?.refreshWallpaperCache(true, false);
+    mainInstance?.refreshWallpaperCache(true, false, pluginApi?.settingsContext);
   }
 
   Component.onCompleted: {
@@ -675,7 +672,7 @@ Item {
     rebuildScreenModel();
     loadPanelMemory();
     resetSelectionOptionsFromCurrentConfig();
-    mainInstance?.refreshWallpaperCache(false, false);
+    mainInstance?.refreshWallpaperCache(false, false, pluginApi?.settingsContext);
     panelInitialized = true;
     propertiesLoadTimer.restart();
   }
@@ -739,7 +736,7 @@ Item {
           if (mainInstance?.engineRunning) {
             mainInstance?.stopAll(true);
           } else {
-            mainInstance?.reload(true);
+            mainInstance?.reload(true, pluginApi?.settingsContext);
           }
         }
         onSettingsRequested: {

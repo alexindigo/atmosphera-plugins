@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "此实例选择检查频率和命令。运行更新会更改所有实例共用的系统。",
     "changeIcon": {
       "label": "选择图标"
     },

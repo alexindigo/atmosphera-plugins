@@ -1,9 +1,9 @@
 {
   "id": "timer",
   "name": "Timer",
-  "version": "1.1.8",
+  "version": "1.1.11",
   "minNoctaliaVersion": "4.4.4",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "Noctalia Team",
   "official": true,
   "license": "MIT",
@@ -27,10 +27,10 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "compactMode": {"type": "Boolean"},
-        "defaultDuration": {"type": "Real"},
-        "iconColor": {"type": "String"},
-        "textColor": {"type": "String"}
+        "compactMode": {"editorUsage": "configuration", "type": "Boolean"},
+        "defaultDuration": {"editorUsage": "configuration", "type": "Real"},
+        "iconColor": {"editorUsage": "configuration", "type": "String"},
+        "textColor": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

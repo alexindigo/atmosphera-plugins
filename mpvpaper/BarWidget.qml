@@ -10,6 +10,8 @@ Item {
     id: root
 
     property var pluginApi: null
+    onPluginApiChanged: pluginApi?.mainInstance?.registerRuntime(pluginApi)
+    Component.onCompleted: pluginApi?.mainInstance?.registerRuntime(pluginApi)
     property ShellScreen screen
     property string widgetId: ""
     property string section: ""
@@ -75,24 +77,19 @@ Item {
                     root.pluginApi?.openPanel(root.screen, root);
                     break;
                 case "toggle":
-                    root.pluginApi.pluginSettings.active = !root.active;
-                    root.pluginApi.saveSettings();
+                    root.pluginApi.mainInstance.setPreference("active", !root.active, root.pluginApi);
                     break;
                 case "play":
-                    root.pluginApi.pluginSettings.isPlaying = true;
-                    root.pluginApi.saveSettings();
+                    root.pluginApi.mainInstance.setPreference("isPlaying", true, root.pluginApi);
                     break;
                 case "pause":
-                    root.pluginApi.pluginSettings.isPlaying = false;
-                    root.pluginApi.saveSettings();
+                    root.pluginApi.mainInstance.setPreference("isPlaying", false, root.pluginApi);
                     break;
                 case "mute":
-                    root.pluginApi.pluginSettings.isMuted = true;
-                    root.pluginApi.saveSettings();
+                    root.pluginApi.mainInstance.setPreference("isMuted", true, root.pluginApi);
                     break;
                 case "unmute":
-                    root.pluginApi.pluginSettings.isMuted = false;
-                    root.pluginApi.saveSettings();
+                    root.pluginApi.mainInstance.setPreference("isMuted", false, root.pluginApi);
                     break;
                 case "widget-settings":
                     BarService.openPluginSettings(root.screen, pluginApi.manifest);

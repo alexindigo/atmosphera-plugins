@@ -1,15 +1,16 @@
 {
     "id": "thinkpad-fan",
     "name": "ThinkPad - Fan & Thermal Control",
-    "version": "1.1.3",
+  "version": "1.1.7",
     "minNoctaliaVersion": "4.0.0",
-    "minAtmospheraVersion": "0.10.0",
+    "minAtmospheraVersion": "0.11.0",
     "author": "Piero-93",
     "license": "GPLv3",
     "repository": "https://github.com/noctalia-dev/noctalia-plugins",
     "description": "Monitors system temperatures and provides manual overrides for fan speed profiles via sysfs.",
     "tags": ["Bar", "Indicator", "System", "Utility"],
     "entryPoints": {
+        "main": "Main.qml",
         "barWidget": "BarWidget.qml",
         "panel": "FanPopup.qml",
         "settings": "SettingsView.qml"
@@ -18,11 +19,11 @@
         "settingsSchema": {
             "version": 1,
             "fields": {
-                "allowPopupOpening": {"type": "Boolean"},
-                "colorActive": {"type": "String", "nullable": true},
-                "colorAuto": {"type": "String", "nullable": true},
-                "colorLevel0": {"type": "String", "nullable": true},
-                "colorizeByStatus": {"type": "Boolean"}
+                "allowPopupOpening": {"editorUsage": "configuration", "type": "Boolean"},
+                "colorActive": {"editorUsage": "configuration", "type": "String", "nullable": true},
+                "colorAuto": {"editorUsage": "configuration", "type": "String", "nullable": true},
+                "colorLevel0": {"editorUsage": "configuration", "type": "String", "nullable": true},
+                "colorizeByStatus": {"editorUsage": "configuration", "type": "Boolean"}
             }
         },
         "defaultSettings": {

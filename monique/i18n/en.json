@@ -10,6 +10,7 @@
     "widget-settings": "Widget settings"
   },
   "settings": {
+    "shared-observation": "This instance has its own polling interval. The active monitor profile is shared; switching it affects all instances and displays.",
     "title": "Monique",
     "description": "Switch monitor profiles from the bar and customize how it looks.",
     "show-profile-label": "Show profile name",

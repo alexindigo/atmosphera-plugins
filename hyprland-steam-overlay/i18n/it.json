@@ -12,6 +12,7 @@
     "ipc_received": "Alternanza IPC ricevuta"
   },
   "settings": {
+    "shared-effect": "Le finestre di Steam e l'overlay sono condivisi. Aprendo l'overlay da questo widget, si usa il layout applicato al widget per tutta la sessione. Le modifiche successive avranno effetto alla prossima apertura.",
     "custom-layout-label": "Use custom Hyprland layout (Lua)",
     "custom-layout-description": "Let a Hyprland custom Lua layout tile the windows instead of floating+positioning them. Requires Hyprland 0.55+ Lua config and steam-layout.lua (see README). When enabled, the width sliders below are handled by the Lua layout."
   }

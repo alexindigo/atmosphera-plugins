@@ -4,40 +4,41 @@ var GIST_DESCRIPTION = "noctalia-sticky-notes";
 var EMPTY_FILE_NAME = ".empty";
 var API_BASE_URL = "https://api.github.com";
 
-function syncNotes(pluginApi, notes, callback) {
-    var token = ((pluginApi && pluginApi.pluginSettings && pluginApi.pluginSettings.githubToken) || "").trim();
+function syncNotes(operation, notes, callback) {
+    if (!operation.current()) return;
+    var token = operation.token;
     if (!token) {
-        callback(false, pluginApi?.tr("sync.errors.missing-token"));
+        callback(false, operation.tr("sync.errors.missing-token"));
         return;
     }
 
-    var gistId = ((pluginApi && pluginApi.pluginSettings && pluginApi.pluginSettings.githubGistId) || "").trim();
+    var gistId = operation.gistId;
     var normalizedNotes = Array.isArray(notes) ? notes : [];
 
     if (gistId) {
-        getGistById(token, gistId, function(success, gist, errorMessage) {
+        getGistById(operation, token, gistId, function(success, gist, errorMessage) {
             if (success) {
-                upsertGist(pluginApi, token, gist, normalizedNotes, callback);
+                upsertGist(operation, token, gist, normalizedNotes, callback);
                 return;
             }
 
-            createOrFindGist(pluginApi, token, normalizedNotes, callback);
+            createOrFindGist(operation, token, normalizedNotes, callback);
         });
         return;
     }
 
-    createOrFindGist(pluginApi, token, normalizedNotes, callback);
+    createOrFindGist(operation, token, normalizedNotes, callback);
 }
 
-function createOrFindGist(pluginApi, token, notes, callback) {
-    findManagedGist(token, function(found, gist, errorMessage) {
+function createOrFindGist(operation, token, notes, callback) {
+    findManagedGist(operation, token, function(found, gist, errorMessage) {
         if (!found && errorMessage) {
             callback(false, errorMessage);
             return;
         }
 
         if (gist) {
-            upsertGist(pluginApi, token, gist, notes, callback);
+            upsertGist(operation, token, gist, notes, callback);
             return;
         }
 
@@ -47,37 +48,37 @@ function createOrFindGist(pluginApi, token, notes, callback) {
             files: buildFilesPayload(notes, {})
         };
 
-        requestJson("POST", API_BASE_URL + "/gists", token, payload, function(success, response, errorMessage) {
+        requestJson(operation, "POST", API_BASE_URL + "/gists", token, payload, function(success, response, errorMessage) {
             if (!success) {
                 callback(false, errorMessage);
                 return;
             }
 
-            persistGistId(pluginApi, response.id);
-            callback(true, pluginApi?.tr("sync.success.created"));
+            if (operation.publishGistId(response.id))
+                callback(true, operation.tr("sync.success.created"));
         });
     });
 }
 
-function upsertGist(pluginApi, token, gist, notes, callback) {
+function upsertGist(operation, token, gist, notes, callback) {
     var payload = {
         description: GIST_DESCRIPTION,
         files: buildFilesPayload(notes, gist.files || {})
     };
 
-    requestJson("PATCH", API_BASE_URL + "/gists/" + gist.id, token, payload, function(success, response, errorMessage) {
+    requestJson(operation, "PATCH", API_BASE_URL + "/gists/" + gist.id, token, payload, function(success, response, errorMessage) {
         if (!success) {
             callback(false, errorMessage);
             return;
         }
 
-        persistGistId(pluginApi, response.id || gist.id);
-        callback(true, pluginApi?.tr("sync.success.updated"));
+        if (operation.publishGistId(response.id || gist.id))
+            callback(true, operation.tr("sync.success.updated"));
     });
 }
 
-function findManagedGist(token, callback) {
-    requestJson("GET", API_BASE_URL + "/gists?per_page=100", token, null, function(success, response, errorMessage) {
+function findManagedGist(operation, token, callback) {
+    requestJson(operation, "GET", API_BASE_URL + "/gists?per_page=100", token, null, function(success, response, errorMessage) {
         if (!success) {
             callback(false, null, errorMessage);
             return;
@@ -95,8 +96,8 @@ function findManagedGist(token, callback) {
     });
 }
 
-function getGistById(token, gistId, callback) {
-    requestJson("GET", API_BASE_URL + "/gists/" + gistId, token, null, function(success, response, errorMessage, status) {
+function getGistById(operation, token, gistId, callback) {
+    requestJson(operation, "GET", API_BASE_URL + "/gists/" + gistId, token, null, function(success, response, errorMessage, status) {
         if (!success) {
             callback(false, null, errorMessage);
             return;
@@ -145,19 +146,10 @@ function buildFilesPayload(notes, existingFiles) {
     return files;
 }
 
-function persistGistId(pluginApi, gistId) {
-    if (!pluginApi || !gistId)
-        return;
-
-    if (pluginApi.pluginSettings.githubGistId === gistId)
-        return;
-
-    pluginApi.pluginSettings.githubGistId = gistId;
-    pluginApi.saveSettings();
-}
-
-function requestJson(method, url, token, body, callback) {
+function requestJson(operation, method, url, token, body, callback) {
+    if (!operation.current()) return;
     var xhr = new XMLHttpRequest();
+    operation.requests.push(xhr);
     xhr.open(method, url);
     xhr.setRequestHeader("Accept", "application/vnd.github+json");
     xhr.setRequestHeader("Authorization", "Bearer " + token);
@@ -170,6 +162,8 @@ function requestJson(method, url, token, body, callback) {
     xhr.onreadystatechange = function() {
         if (xhr.readyState !== XMLHttpRequest.DONE)
             return;
+        operation.requests = operation.requests.filter(function(request) { return request !== xhr; });
+        if (!operation.current()) return;
 
         var parsed = null;
         if (xhr.responseText && xhr.responseText.length > 0) {
@@ -203,4 +197,3 @@ function formatError(response, status) {
 
     return "GitHub API request failed (" + status + ")";
 }
-

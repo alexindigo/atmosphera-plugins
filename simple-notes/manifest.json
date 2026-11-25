@@ -1,9 +1,9 @@
 {
   "id": "simple-notes",
   "name": "Simple Notes",
-  "version": "1.0.8",
+  "version": "1.0.11",
   "minNoctaliaVersion": "3.7.1",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "fusuyfusuy",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -26,9 +26,9 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "count": {"type": "Real", "optional": true, "machineLocal": true},
-        "notes": {"type": "List", "machineLocal": true, "element": {"type": "Record", "fields": {"id": {"type": "String", "optional": true}, "title": {"type": "String", "optional": true}, "content": {"type": "String", "optional": true}, "modifiedAt": {"type": "String", "optional": true}}}},
-        "showCountInBar": {"type": "Boolean"}
+        "count": {"type": "Real", "editorUsage": "operational", "optional": true, "machineLocal": true},
+        "notes": {"type": "List", "editorUsage": "content", "machineLocal": true, "element": {"type": "Record", "fields": {"id": {"type": "String", "optional": true}, "title": {"type": "String", "optional": true}, "content": {"type": "String", "optional": true}, "modifiedAt": {"type": "String", "optional": true}}}},
+        "showCountInBar": {"type": "Boolean", "editorUsage": "configuration"}
       }
     },
     "defaultSettings": {

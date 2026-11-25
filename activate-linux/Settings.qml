@@ -7,63 +7,64 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
+  readonly property var customizeTextField: pluginApi?.field("customizeText") ?? null
+  readonly property var firstLineField: pluginApi?.field("firstLine") ?? null
+  readonly property var secondLineField: pluginApi?.field("secondLine") ?? null
 
-  property bool editCustomizeText: displayBaseline.editCustomizeText
-  property string editFirstLine: displayBaseline.editFirstLine
-  property string editSecondLine: displayBaseline.editSecondLine
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property bool editCustomizeText: pluginApi?.pluginSettings?.customizeText ?? pluginApi?.manifest?.metadata?.defaultSettings?.customizeText ?? false
-    readonly property string editFirstLine: pluginApi?.pluginSettings?.firstLine ?? pluginApi?.manifest?.metadata?.defaultSettings?.firstLine ?? "Activate Linux"
-    readonly property string editSecondLine: pluginApi?.pluginSettings?.secondLine ?? pluginApi?.manifest?.metadata?.defaultSettings?.secondLine ?? "Go to Settings to activate Linux."
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({editCustomizeText: root.editCustomizeText, editFirstLine: root.editFirstLine, editSecondLine: root.editSecondLine})
+  readonly property bool editCustomizeText: root.customizeTextField?.value ?? false
+  readonly property string editFirstLine: root.firstLineField?.value ?? "Activate Linux"
+  readonly property string editSecondLine: root.secondLineField?.value ?? "Go to Settings to activate Linux."
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   spacing: Style.marginM
 
-  NToggle {
-    Layout.fillWidth: true
-    label: "Customize Text"
-    description: "Write some custom text to display"
-    checked: root.editCustomizeText
-    onToggled: checked => {
-      root.editCustomizeText = checked;
-      root.saveSettings();
+  NPluginSettingsField {
+    field: root.customizeTextField
+    NToggle {
+      Layout.fillWidth: true
+      label: "Customize Text"
+      description: "Write some custom text to display"
+      checked: root.editCustomizeText
+      onToggled: checked => {
+        root.customizeTextField.set(checked);
+      }
     }
   }
 
-  NTextInput {
+  NPluginSettingsField {
+    field: root.firstLineField
     visible: root.editCustomizeText
-    Layout.fillWidth: true
-    label: "First line"
-    placeholderText: "Activate Linux, Windows, BSD, ..."
-    text: root.editFirstLine
-    onTextChanged: {
-      root.editFirstLine = text;
+    NTextInput {
+      Layout.fillWidth: true
+      label: "First line"
+      placeholderText: "Activate Linux, Windows, BSD, ..."
+      text: root.editFirstLine
+      onEditCommitted: {
+        root.firstLineField.set(text);
+      }
     }
-    onTextEdited: root.saveSettings()
   }
 
-  NTextInput {
+  NPluginSettingsField {
+    field: root.secondLineField
     visible: root.editCustomizeText
-    Layout.fillWidth: true
-    label: "Second line"
-    placeholderText: "Go to Settings..."
-    text: root.editSecondLine
-    onTextChanged: {
-      root.editSecondLine = text;
+    NTextInput {
+      Layout.fillWidth: true
+      label: "Second line"
+      placeholderText: "Go to Settings..."
+      text: root.editSecondLine
+      onEditCommitted: {
+        root.secondLineField.set(text);
+      }
     }
-    onTextEdited: root.saveSettings()
   }
 
   function saveSettings() {
     if (!pluginApi) {
-      Logger.e("ActivateLinux", "Cannot save: pluginApi is null")
-      return
+      Logger.e("ActivateLinux", "Cannot save: pluginApi is null");
+      return;
     }
-    pluginApi.pluginSettings.customizeText = root.editCustomizeText
-    pluginApi.pluginSettings.firstLine = root.editFirstLine
-    pluginApi.pluginSettings.secondLine = root.editSecondLine
-    pluginApi.saveSettings()
+    pluginApi.saveSettings();
   }
 }

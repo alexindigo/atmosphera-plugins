@@ -1,9 +1,9 @@
 {
   "id": "osk-toggle",
   "name": "OSK Toggle",
-  "version": "1.0.6",
+  "version": "1.0.11",
   "minNoctaliaVersion": "4.4.3",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "blackteaextract",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -25,10 +25,10 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "backend": {"type": "String"},
-        "disableHoverIcon": {"type": "Boolean"},
-        "hideWhenUnavailable": {"type": "Boolean"},
-        "wvkbdBin": {"type": "String"}
+        "backend": {"editorUsage": "configuration", "type": "String"},
+        "disableHoverIcon": {"editorUsage": "configuration", "type": "Boolean"},
+        "hideWhenUnavailable": {"editorUsage": "configuration", "type": "Boolean"},
+        "wvkbdBin": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

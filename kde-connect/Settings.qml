@@ -7,31 +7,36 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
+  readonly property var hideIfNoDeviceConnectedField: pluginApi?.field("hideIfNoDeviceConnected") ?? null
 
-  property var cfg: pluginApi?.pluginSettings || ({})
-  property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-
-  property bool hideIfNoDeviceConnected: displayBaseline.hideIfNoDeviceConnected
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property bool hideIfNoDeviceConnected: cfg.hideIfNoDeviceConnected ?? defaults.hideIfNoDeviceConnected ?? false
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({hideIfNoDeviceConnected: root.hideIfNoDeviceConnected})
+  readonly property bool hideIfNoDeviceConnected: root.hideIfNoDeviceConnectedField?.value ?? false
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   spacing: Style.marginL
+
+  NText {
+    Layout.fillWidth: true
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+    wrapMode: Text.WordWrap
+  }
 
   ColumnLayout {
     spacing: Style.marginM
     Layout.fillWidth: true
 
-    NToggle {
+    NPluginSettingsField {
+      field: root.hideIfNoDeviceConnectedField
+      NToggle {
         label: pluginApi?.tr("settings.no-device-connected-hide.label")
         description: pluginApi?.tr("settings.no-device-connected-hide.description")
 
         checked: root.hideIfNoDeviceConnected
-        onToggled: function(checked) {
-            root.hideIfNoDeviceConnected = checked
+        onToggled: function (checked) {
+          root.hideIfNoDeviceConnectedField.set(checked);
         }
+      }
     }
   }
 
@@ -41,7 +46,6 @@ ColumnLayout {
       return;
     }
 
-    pluginApi.pluginSettings.hideIfNoDeviceConnected = root.hideIfNoDeviceConnected;
     pluginApi.saveSettings(function (result) {
       if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
         Logger.d("KDEConnect", "Settings saved successfully");

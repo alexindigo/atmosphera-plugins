@@ -22,3 +22,7 @@ Toggle Cloudflare WARP on/off from the Noctalia bar. Shows real-time connection 
 | Connected color | Icon color when WARP is connected | primary |
 | Disconnected color | Icon color when WARP is disconnected | none (neutral) |
 | Refresh interval | How often to poll `warp-cli` for status | 5000 ms |
+
+Each runtime settings context has one polling schedule shared across its views.
+WARP observations and connection actions remain system-wide. A refresh by any
+instance updates common status; separate instances do not create separate VPNs.

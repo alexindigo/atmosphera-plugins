@@ -26,6 +26,7 @@
     "loading": "Loading entities..."
   },
   "settings": {
+    "shared-effect": "This instance selects its connection and pinned entities. Service actions change the actual Home Assistant devices, visible to other clients.",
     "url_label": "Home Assistant URL",
     "url_placeholder": "http://homeassistant.local:8123",
     "token_label": "Long-Lived Access Token",

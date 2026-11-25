@@ -164,12 +164,12 @@ Item {
         if (t === "mirror" && root.mirrorActive) return
         if (t === "record") { if (root.isRecording) root.mainInstance?.runRecordStop(); return }
         if (t === "ocr" || t === "pin" || t === "annotate") return
-        if      (t === "colorpicker") root.mainInstance?.runColorPicker()
-        else if (t === "qr")          root.mainInstance?.runQr()
-        else if (t === "lens")        root.mainInstance?.runLens()
-        else if (t === "measure")     root.mainInstance?.runMeasure()
-        else if (t === "palette")     root.mainInstance?.runPalette()
-        else if (t === "mirror")      root.mainInstance?.runMirror()
+        if      (t === "colorpicker") root.mainInstance?.runColorPicker(pluginApi)
+        else if (t === "qr")          root.mainInstance?.runQr(pluginApi)
+        else if (t === "lens")        root.mainInstance?.runLens(pluginApi)
+        else if (t === "measure")     root.mainInstance?.runMeasure(pluginApi)
+        else if (t === "palette")     root.mainInstance?.runPalette(pluginApi)
+        else if (t === "mirror")      root.mainInstance?.runMirror(pluginApi)
     }
     onActiveFocusChanged: if (activeFocus) toolBar.forceActiveFocus()
     Component.onCompleted: {
@@ -379,7 +379,7 @@ Item {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: root.mainInstance?.runAnnotate()
+                        onClicked: root.mainInstance?.runAnnotate(pluginApi)
                         onEntered: TooltipService.show(annotRegionBtn, pluginApi?.tr("annotate.regionTooltip"))
                         onExited: TooltipService.hide()
                     }
@@ -406,7 +406,7 @@ Item {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: parent.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                        onClicked: if (parent.enabled) root.mainInstance?.runAnnotateActiveWindow()
+                        onClicked: if (parent.enabled) root.mainInstance?.runAnnotateActiveWindow(pluginApi)
                         onEntered: TooltipService.show(annotWinBtn, parent.enabled ? pluginApi?.tr("annotate.windowTooltip") : pluginApi?.tr("annotate.windowHyprlandOnly"))
                         onExited: TooltipService.hide()
                     }
@@ -424,7 +424,7 @@ Item {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: root.mainInstance?.runAnnotateFullscreen()
+                        onClicked: root.mainInstance?.runAnnotateFullscreen(pluginApi)
                         onEntered: TooltipService.show(annotFsBtn, pluginApi?.tr("annotate.fullscreenTooltip"))
                         onExited: TooltipService.hide()
                     }
@@ -469,7 +469,7 @@ Item {
                             AtmoIcon { icon: "scan"; color: scanBtn.containsMouse ? AtmoColor.mOnPrimary : AtmoColor.mPrimary; scale: 0.8 }
                             NText { text: pluginApi?.tr("panel.scan"); color: scanBtn.containsMouse ? AtmoColor.mOnPrimary : AtmoColor.mPrimary; font.weight: Font.Bold; pointSize: Style.fontSizeXS }
                         }
-                        MouseArea { id: scanBtn; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.mainInstance?.runOcr(root.selectedOcrLang) }
+                        MouseArea { id: scanBtn; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.mainInstance?.runOcr(root.selectedOcrLang, pluginApi) }
                     }
                 }
             }
@@ -492,7 +492,7 @@ Item {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: root.mainInstance?.runPin()
+                        onClicked: root.mainInstance?.runPin(pluginApi)
                         onEntered: TooltipService.show(pinScreenBtn, pluginApi?.tr("tooltips.pinRegion"))
                         onExited: TooltipService.hide()
                     }
@@ -510,7 +510,7 @@ Item {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: root.mainInstance?.runPinFromFile()
+                        onClicked: root.mainInstance?.runPinFromFile(pluginApi)
                         onEntered: TooltipService.show(pinFileBtn, pluginApi?.tr("tooltips.pinImage"))
                         onExited: TooltipService.hide()
                     }
@@ -611,7 +611,7 @@ Item {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: root.mainInstance?.runRecord(root.selectedRecordFormat, root.recordAudioOutput, root.recordAudioInput, root.recordCursor)
+                            onClicked: root.mainInstance?.runRecord(root.selectedRecordFormat, root.recordAudioOutput, root.recordAudioInput, root.recordCursor, pluginApi)
                             onEntered: TooltipService.show(recRegionBtn, pluginApi?.tr("tooltips.record"))
                             onExited: TooltipService.hide()
                         }
@@ -629,7 +629,7 @@ Item {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: root.mainInstance?.runRecordFullscreen(root.selectedRecordFormat, root.recordAudioOutput, root.recordAudioInput, root.recordCursor)
+                            onClicked: root.mainInstance?.runRecordFullscreen(root.selectedRecordFormat, root.recordAudioOutput, root.recordAudioInput, root.recordCursor, pluginApi)
                             onEntered: TooltipService.show(recFsBtn, pluginApi?.tr("tooltips.recordfs"))
                             onExited: TooltipService.hide()
                         }

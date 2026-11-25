@@ -20,7 +20,7 @@ Item {
   property real contentPreferredHeight: Math.round(480 * Style.uiScaleRatio)
 
   // Shortcut to service
-  readonly property var service: pluginApi?.mainInstance
+  readonly property var service: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
   readonly property bool defaultIncludeWallpapers:
     pluginApi?.pluginSettings?.includeWallpapers ??
@@ -120,7 +120,7 @@ Item {
                 } else {
                   saveError.text = msg
                 }
-              })
+              }, root.pluginApi)
             }
           }
         }

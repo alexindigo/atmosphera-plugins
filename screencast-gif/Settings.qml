@@ -4,55 +4,68 @@ import qs.Commons
 import qs.Widgets
 
 ColumnLayout {
-    id: root
+  id: root
 
-    property var pluginApi: null
+  property var pluginApi: null
+  readonly property var outputDirField: pluginApi?.field("outputDir") ?? null
+  readonly property var fpsField: pluginApi?.field("fps") ?? null
+  readonly property var maxRecordingSecondsField: pluginApi?.field("maxRecordingSeconds") ?? null
 
-    property var cfg: pluginApi?.pluginSettings || ({})
-    property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
+  property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    property string valueOutputDir: displayBaseline.valueOutputDir
-    property int valueFps: displayBaseline.valueFps
-    property int valueMaxRecordingSeconds: displayBaseline.valueMaxRecordingSeconds
-    NSettingsBaseline {
-        id: displayBaseline
-        readonly property string valueOutputDir: cfg.outputDir ?? defaults.outputDir
-        readonly property int valueFps: cfg.fps ?? defaults.fps
-        readonly property int valueMaxRecordingSeconds: cfg.maxRecordingSeconds ?? defaults.maxRecordingSeconds
-    }
-    readonly property bool settingsDirty: displayBaseline.differs({valueOutputDir: root.valueOutputDir, valueFps: root.valueFps, valueMaxRecordingSeconds: root.valueMaxRecordingSeconds})
+  readonly property string valueOutputDir: root.outputDirField?.value ?? defaults.outputDir
+  readonly property int valueFps: root.fpsField?.value ?? defaults.fps
+  readonly property int valueMaxRecordingSeconds: root.maxRecordingSecondsField?.value ?? defaults.maxRecordingSeconds
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
-    spacing: Style.marginL
+  spacing: Style.marginL
 
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("settings.shared-effect")
+    Layout.fillWidth: true
+    wrapMode: Text.WordWrap
+    color: AtmoColor.mOnSurface
+    pointSize: Style.fontSizeS
+  }
+
+  NPluginSettingsField {
+    field: root.outputDirField
     NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.outputDir.label")
-        description: pluginApi?.tr("settings.outputDir.description")
-        text: root.valueOutputDir
-        onTextChanged: root.valueOutputDir = text
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.outputDir.label")
+      description: pluginApi?.tr("settings.outputDir.description")
+      text: root.valueOutputDir
+      onEditCommitted: root.outputDirField.set(text)
     }
+  }
 
+  NPluginSettingsField {
+    field: root.fpsField
     NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.fps.label")
-        description: pluginApi?.tr("settings.fps.description")
-        text: String(root.valueFps)
-        onTextChanged: root.valueFps = parseInt(text) || 20
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.fps.label")
+      description: pluginApi?.tr("settings.fps.description")
+      text: String(root.valueFps)
+      onEditCommitted: root.fpsField.set(parseInt(text) || 20)
     }
+  }
 
+  NPluginSettingsField {
+    field: root.maxRecordingSecondsField
     NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.maxRecordingSeconds.label")
-        description: pluginApi?.tr("settings.maxRecordingSeconds.description")
-        text: String(root.valueMaxRecordingSeconds)
-        onTextChanged: root.valueMaxRecordingSeconds = parseInt(text) || 0
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.maxRecordingSeconds.label")
+      description: pluginApi?.tr("settings.maxRecordingSeconds.description")
+      text: String(root.valueMaxRecordingSeconds)
+      onEditCommitted: root.maxRecordingSecondsField.set(parseInt(text) || 0)
     }
+  }
 
-    function saveSettings() {
-        if (!pluginApi) return
-        pluginApi.pluginSettings.outputDir = root.valueOutputDir
-        pluginApi.pluginSettings.fps = root.valueFps
-        pluginApi.pluginSettings.maxRecordingSeconds = root.valueMaxRecordingSeconds
-        pluginApi.saveSettings()
-    }
+  function saveSettings() {
+    if (!pluginApi)
+      return;
+    pluginApi.saveSettings();
+  }
 }

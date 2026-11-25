@@ -28,9 +28,9 @@ Item {
 
         if (screenName === undefined) {
             if (value !== null && typeof value === "object") throw new Error("timer-scalar-input");
-            _pending = {key: key, value: value, context: context};
+            _pending = {key: key, value: value, context: context, writer: pluginApi};
         } else {
-            _pending = {commands: Commands.capture([{op: "set", screen: screenName, field: key, value: value}]), context: context};
+            _pending = {commands: Commands.capture([{op: "set", screen: screenName, field: key, value: value}]), context: context, writer: pluginApi};
         }
         failed = false;
         timer.restart();
@@ -57,7 +57,7 @@ Item {
         triggeredOnStart: false
 
         onTriggered: {
-            if (!root._pending || !root.pluginApi) return;
+            if (!root._pending || !root._pending.writer?.settingsContext?.current()) return;
             if (root.busy) return; // The completion schedules any newer input.
             var body = root._pending;
             root.busy = true;
@@ -71,9 +71,13 @@ Item {
                 root.completed(result, body.context);
             }
             try {
-                if (body.commands) root.monitorCommand.submit(body.commands);
-                else root.pluginApi.pluginSettings[body.key] = body.value;
-                root.pluginApi.saveSettings(finish);
+                const writer = body.writer;
+                const command = Commands.create(function () { return writer.pluginSettings.monitors; },
+                    function (value) { writer.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
+                    function () { return writer.manifest?.metadata?.defaultSettings; });
+                if (body.commands) command.submit(body.commands);
+                else writer.pluginSettings[body.key] = body.value;
+                writer.saveSettings(finish);
             } catch (error) {
                 Qt.callLater(function () { finish({status: "failed", error: {code: "timer-edit"}}); });
             }

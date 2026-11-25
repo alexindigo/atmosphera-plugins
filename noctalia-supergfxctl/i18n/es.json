@@ -16,6 +16,7 @@
     "Vfio": "Transferencia directa de VFIO"
   },
   "settings": {
+    "shared-effect": "El modo de la GPU y las observaciones del dispositivo son compartidos. Las consultas y solicitudes usan la configuración aplicada de esta instancia; los cambios de modo afectan a todas las instancias. El control de las notificaciones de ROG sigue sin estar disponible.",
     "debug": {
       "description": "Imprimir información de depuración en la consola.",
       "label": "Modo de depuración"

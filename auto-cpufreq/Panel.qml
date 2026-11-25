@@ -10,7 +10,7 @@ Item {
     id: root
     property var pluginApi: null
 
-    readonly property var main: pluginApi?.mainInstance
+    readonly property var main: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
     readonly property var geometryPlaceholder: panelContainer
     readonly property bool allowAttach: true
 
@@ -122,7 +122,7 @@ Item {
                 }
             }
 
-            // ── Battery (sysfs via BarWidget mainInstance) ────────────────────
+            // Common Main-owned physical battery observation.
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: batRow.implicitHeight + Style.marginM * 2
@@ -429,7 +429,6 @@ Item {
         property string icon:        ""
         property string label:       ""
         property bool   active:      false
-        property bool   enabled:     true
         property bool   showDivider: false
         signal clicked()
 

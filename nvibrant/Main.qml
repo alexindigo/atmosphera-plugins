@@ -15,29 +15,45 @@ Item {
   // stored 1-based (1 = port 0), converted on use
   readonly property int displayIndex: (cfg.displayIndex ?? defaults.displayIndex ?? 1) - 1
 
-  function buildCmd(value) {
-    var parts = ["nvibrant"]
-    for (var i = 0; i < root.displayIndex; i++)
-      parts.push("0")
-    parts.push(value.toString())
-    return ["bash", "-lc", parts.join(" ")]
+  // Preserve the old typed QML int admission before building literal argv.
+  property int admittedDisplayIndex: 0
+  property int admittedVibranceValue: 0
+
+  function buildCmd(value, display) {
+    var parts = ["nvibrant"];
+    for (var i = 0; i < display; i++)
+      parts.push("0");
+    parts.push(value.toString());
+    return parts;
   }
 
-  function applyVibrance(value) {
-    Quickshell.execDetached(buildCmd(value))
+  function applyVibrance(value, context) {
+    context = context || pluginApi?.settingsContext;
+    if (!context?.current())
+      return false;
+    admittedDisplayIndex = (context.settingsView.displayIndex ?? defaults.displayIndex ?? 1) - 1;
+    admittedVibranceValue = value;
+    Quickshell.execDetached(buildCmd(admittedVibranceValue, admittedDisplayIndex));
+    return true;
   }
 
-  function toggle() {
-    if (pluginApi) {
-      var newEnabled = !vibrantEnabled
-      pluginApi.pluginSettings.enabled = newEnabled
-      pluginApi.saveSettings()
-      applyVibrance(newEnabled ? vibranceValue : 0)
-    }
+  function toggle(runtimeApi) {
+    runtimeApi = runtimeApi || pluginApi;
+    const context = runtimeApi?.settingsContext;
+    if (!context?.current())
+      return false;
+    const selected = context.settingsView;
+    const newEnabled = !(selected.enabled ?? defaults.enabled ?? false);
+    const value = selected.vibranceValue ?? defaults.vibranceValue ?? 512;
+    runtimeApi.pluginSettings.enabled = newEnabled;
+    runtimeApi.saveSettings();
+    return applyVibrance(newEnabled ? value : 0, context);
   }
 
   IpcHandler {
     target: "plugin:nvibrant"
-    function toggle() { root.toggle() }
+    function toggle() {
+      root.toggle();
+    }
   }
 }

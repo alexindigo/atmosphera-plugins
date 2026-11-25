@@ -25,7 +25,7 @@ Item {
     }
   }
 
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
   readonly property var hosts: mainInstance?.hosts ?? []
   readonly property int thresholdGood: mainInstance?.thresholdGood ?? 20
   readonly property int thresholdWarning: mainInstance?.thresholdWarning ?? 70
@@ -45,11 +45,11 @@ Item {
   function statusColor(status) {
     switch (status) {
     case "good":
-      return mainInstance?.colorGood;
+      return mainInstance?.colorGood ?? AtmoColor.mOnSurface;
     case "warning":
-      return mainInstance?.colorWarning;
+      return mainInstance?.colorWarning ?? AtmoColor.mOnSurface;
     case "critical":
-      return mainInstance?.colorCritical;
+      return mainInstance?.colorCritical ?? AtmoColor.mOnSurface;
     default:
       return "onSurface";
     }
@@ -308,11 +308,11 @@ Item {
             model: [
               {
                 thresh: root.thresholdGood,
-                color: mainInstance?.colorGood
+                color: mainInstance?.colorGood ?? AtmoColor.mOnSurface
               },
               {
                 thresh: root.thresholdWarning,
-                color: mainInstance?.colorWarning
+                color: mainInstance?.colorWarning ?? AtmoColor.mOnSurface
               },
             ]
             delegate: Item {

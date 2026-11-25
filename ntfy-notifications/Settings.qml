@@ -4,169 +4,189 @@ import qs.Commons
 import qs.Widgets
 
 ColumnLayout {
-    id: root
-    spacing: Style.marginM
+  id: root
+  spacing: Style.marginM
 
-    property var pluginApi: null
+  property var pluginApi: null
+  readonly property var serverUrlField: pluginApi?.field("serverUrl") ?? null
+  readonly property var topicsField: pluginApi?.field("topics") ?? null
+  readonly property var authMethodField: pluginApi?.field("authMethod") ?? null
+  readonly property var authTokenField: pluginApi?.field("authToken") ?? null
+  readonly property var authUsernameField: pluginApi?.field("authUsername") ?? null
+  readonly property var authPasswordField: pluginApi?.field("authPassword") ?? null
+  readonly property var pollIntervalField: pluginApi?.field("pollInterval") ?? null
+  readonly property var enableToastsField: pluginApi?.field("enableToasts") ?? null
+  readonly property var maxMessagesField: pluginApi?.field("maxMessages") ?? null
 
-    property var cfg: pluginApi?.pluginSettings || ({})
-    property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
+  // Edit copies
+  readonly property string editServerUrl: root.serverUrlField?.value ?? "https://ntfy.sh"
+  readonly property string editTopics: root.topicsField?.value ?? ""
+  readonly property string editAuthMethod: root.authMethodField?.value ?? "none"
+  readonly property string editAuthToken: root.authTokenField?.value ?? ""
+  readonly property string editAuthUsername: root.authUsernameField?.value ?? ""
+  readonly property string editAuthPassword: root.authPasswordField?.value ?? ""
+  readonly property int editPollInterval: root.pollIntervalField?.value ?? 30
+  readonly property bool editEnableToasts: root.enableToastsField?.value ?? true
+  readonly property int editMaxMessages: root.maxMessagesField?.value ?? 100
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
-    // Edit copies
-    property string editServerUrl: displayBaseline.editServerUrl
-    property string editTopics: displayBaseline.editTopics
-    property string editAuthMethod: displayBaseline.editAuthMethod
-    property string editAuthToken: displayBaseline.editAuthToken
-    property string editAuthUsername: displayBaseline.editAuthUsername
-    property string editAuthPassword: displayBaseline.editAuthPassword
-    property int editPollInterval: displayBaseline.editPollInterval
-    property bool editEnableToasts: displayBaseline.editEnableToasts
-    property int editMaxMessages: displayBaseline.editMaxMessages
-    NSettingsBaseline {
-        id: displayBaseline
-        readonly property string editServerUrl: cfg.serverUrl ?? defaults.serverUrl ?? "https://ntfy.sh"
-        readonly property string editTopics: cfg.topics ?? defaults.topics ?? ""
-        readonly property string editAuthMethod: cfg.authMethod ?? defaults.authMethod ?? "none"
-        readonly property string editAuthToken: cfg.authToken ?? defaults.authToken ?? ""
-        readonly property string editAuthUsername: cfg.authUsername ?? defaults.authUsername ?? ""
-        readonly property string editAuthPassword: cfg.authPassword ?? defaults.authPassword ?? ""
-        readonly property int editPollInterval: cfg.pollInterval ?? defaults.pollInterval ?? 30
-        readonly property bool editEnableToasts: cfg.enableToasts ?? defaults.enableToasts ?? true
-        readonly property int editMaxMessages: cfg.maxMessages ?? defaults.maxMessages ?? 100
-    }
-    readonly property bool settingsDirty: displayBaseline.differs({editServerUrl: root.editServerUrl, editTopics: root.editTopics, editAuthMethod: root.editAuthMethod, editAuthToken: root.editAuthToken, editAuthUsername: root.editAuthUsername, editAuthPassword: root.editAuthPassword, editPollInterval: root.editPollInterval, editEnableToasts: root.editEnableToasts, editMaxMessages: root.editMaxMessages})
+  NLabel {
+    visible: root.pluginApi?.scopeKind === "instance"
+    label: root.pluginApi?.tr("settings.shared-effect-label")
+    description: root.pluginApi?.tr("settings.shared-effect")
+  }
 
-    function saveSettings() {
-        if (!pluginApi) return;
-        pluginApi.pluginSettings.serverUrl = editServerUrl;
-        pluginApi.pluginSettings.topics = editTopics;
-        pluginApi.pluginSettings.authMethod = editAuthMethod;
-        pluginApi.pluginSettings.authToken = editAuthToken;
-        pluginApi.pluginSettings.authUsername = editAuthUsername;
-        pluginApi.pluginSettings.authPassword = editAuthPassword;
-        pluginApi.pluginSettings.pollInterval = editPollInterval;
-        pluginApi.pluginSettings.enableToasts = editEnableToasts;
-        pluginApi.pluginSettings.maxMessages = editMaxMessages;
-        pluginApi.saveSettings();
-    }
+  function saveSettings() {
+    if (!pluginApi)
+      return;
+    pluginApi.saveSettings();
+  }
 
-    // --- Server URL ---
+  // --- Server URL ---
+  NPluginSettingsField {
+    field: root.serverUrlField
     NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.server.label")
-        description: pluginApi?.tr("settings.server.desc")
-        text: root.editServerUrl
-        onEditingFinished: {
-            root.editServerUrl = text;
-            root.saveSettings();
-        }
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.server.label")
+      description: pluginApi?.tr("settings.server.desc")
+      text: root.editServerUrl
+      onEditCommitted: {
+        root.serverUrlField.set(text);
+      }
     }
+  }
 
-    // --- Topics ---
+  // --- Topics ---
+  NPluginSettingsField {
+    field: root.topicsField
     NTextInput {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.topics.label")
-        description: pluginApi?.tr("settings.topics.desc")
-        text: root.editTopics
-        onEditingFinished: {
-            root.editTopics = text;
-            root.saveSettings();
-        }
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.topics.label")
+      description: pluginApi?.tr("settings.topics.desc")
+      text: root.editTopics
+      onEditCommitted: {
+        root.topicsField.set(text);
+      }
     }
+  }
 
-    // --- Auth Method ---
+  // --- Auth Method ---
+  NPluginSettingsField {
+    field: root.authMethodField
     NComboBox {
-        Layout.fillWidth: true
-        label: pluginApi?.tr("settings.auth.label")
-        description: pluginApi?.tr("settings.auth.desc")
-        minimumWidth: 200
-        model: [
-            { "key": "none", "name": pluginApi?.tr("settings.auth.none") },
-            { "key": "token", "name": pluginApi?.tr("settings.auth.token") },
-            { "key": "basic", "name": pluginApi?.tr("settings.auth.basic") }
-        ]
-        currentKey: root.editAuthMethod
-        onSelected: key => {
-            root.editAuthMethod = key;
-            root.saveSettings();
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.auth.label")
+      description: pluginApi?.tr("settings.auth.desc")
+      minimumWidth: 200
+      model: [
+        {
+          "key": "none",
+          "name": pluginApi?.tr("settings.auth.none")
+        },
+        {
+          "key": "token",
+          "name": pluginApi?.tr("settings.auth.token")
+        },
+        {
+          "key": "basic",
+          "name": pluginApi?.tr("settings.auth.basic")
         }
+      ]
+      currentKey: root.editAuthMethod
+      onSelected: key => {
+        root.authMethodField.set(key);
+      }
     }
+  }
 
-    // --- Token (visible when auth = token) ---
+  // --- Token (visible when auth = token) ---
+  NPluginSettingsField {
+    field: root.authTokenField
+    visible: root.editAuthMethod === "token"
     NTextInput {
-        Layout.fillWidth: true
-        visible: root.editAuthMethod === "token"
-        label: pluginApi?.tr("settings.token.label")
-        description: pluginApi?.tr("settings.token.desc")
-        text: root.editAuthToken
-        onEditingFinished: {
-            root.editAuthToken = text;
-            root.saveSettings();
-        }
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.token.label")
+      description: pluginApi?.tr("settings.token.desc")
+      text: root.editAuthToken
+      onEditCommitted: {
+        root.authTokenField.set(text);
+      }
     }
+  }
 
-    // --- Username (visible when auth = basic) ---
+  // --- Username (visible when auth = basic) ---
+  NPluginSettingsField {
+    field: root.authUsernameField
+    visible: root.editAuthMethod === "basic"
     NTextInput {
-        Layout.fillWidth: true
-        visible: root.editAuthMethod === "basic"
-        label: pluginApi?.tr("settings.username.label")
-        description: pluginApi?.tr("settings.username.desc")
-        text: root.editAuthUsername
-        onEditingFinished: {
-            root.editAuthUsername = text;
-            root.saveSettings();
-        }
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.username.label")
+      description: pluginApi?.tr("settings.username.desc")
+      text: root.editAuthUsername
+      onEditCommitted: {
+        root.authUsernameField.set(text);
+      }
     }
+  }
 
-    // --- Password (visible when auth = basic) ---
+  // --- Password (visible when auth = basic) ---
+  NPluginSettingsField {
+    field: root.authPasswordField
+    visible: root.editAuthMethod === "basic"
     NTextInput {
-        Layout.fillWidth: true
-        visible: root.editAuthMethod === "basic"
-        label: pluginApi?.tr("settings.password.label")
-        description: pluginApi?.tr("settings.password.desc")
-        text: root.editAuthPassword
-        onEditingFinished: {
-            root.editAuthPassword = text;
-            root.saveSettings();
-        }
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.password.label")
+      description: pluginApi?.tr("settings.password.desc")
+      text: root.editAuthPassword
+      onEditCommitted: {
+        root.authPasswordField.set(text);
+      }
     }
+  }
 
-    // --- Poll Interval ---
+  // --- Poll Interval ---
+  NPluginSettingsField {
+    field: root.pollIntervalField
     NSpinBox {
-        label: pluginApi?.tr("settings.pollInterval.label")
-        description: pluginApi?.tr("settings.pollInterval.desc")
-        from: 15
-        to: 3600
-        stepSize: 15
-        value: root.editPollInterval
-        onValueModified: {
-            root.editPollInterval = value;
-            root.saveSettings();
-        }
+      label: pluginApi?.tr("settings.pollInterval.label")
+      description: pluginApi?.tr("settings.pollInterval.desc")
+      from: 15
+      to: 3600
+      stepSize: 15
+      value: root.editPollInterval
+      requestValue: value => {
+        root.pollIntervalField.set(value);
+      }
     }
+  }
 
-    // --- Enable Toasts ---
+  // --- Enable Toasts ---
+  NPluginSettingsField {
+    field: root.enableToastsField
     NToggle {
-        label: pluginApi?.tr("settings.enableToasts.label")
-        description: pluginApi?.tr("settings.enableToasts.desc")
-        checked: root.editEnableToasts
-        onToggled: checked => {
-            root.editEnableToasts = checked;
-            root.saveSettings();
-        }
+      label: pluginApi?.tr("settings.enableToasts.label")
+      description: pluginApi?.tr("settings.enableToasts.desc")
+      checked: root.editEnableToasts
+      onToggled: checked => {
+        root.enableToastsField.set(checked);
+      }
     }
+  }
 
-    // --- Max Messages ---
+  // --- Max Messages ---
+  NPluginSettingsField {
+    field: root.maxMessagesField
     NSpinBox {
-        label: pluginApi?.tr("settings.maxMessages.label")
-        description: pluginApi?.tr("settings.maxMessages.desc")
-        from: 10
-        to: 500
-        stepSize: 10
-        value: root.editMaxMessages
-        onValueModified: {
-            root.editMaxMessages = value;
-            root.saveSettings();
-        }
+      label: pluginApi?.tr("settings.maxMessages.label")
+      description: pluginApi?.tr("settings.maxMessages.desc")
+      from: 10
+      to: 500
+      stepSize: 10
+      value: root.editMaxMessages
+      requestValue: value => {
+        root.maxMessagesField.set(value);
+      }
     }
+  }
 }

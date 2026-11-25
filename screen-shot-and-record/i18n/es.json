@@ -12,6 +12,7 @@
         }
     },
     "settings": {
+        "shared-effect": "Capture actions use this instance's settings when requested. Capture selectors and the active recorder are shared; stopping affects the active recording.",
         "enableCross": {
             "label": "Activar Mira",
             "description": "Si se debe activar la mira."

@@ -24,8 +24,9 @@ Item {
   property real livePosition: 0
   property bool seekDragging: false
   readonly property var detailCacheOwner: currentItem?.provider || null
-  readonly property string previewMetadataMode: detailCacheOwner?.mainInstance?.previewMetadataMode ?? detailCacheOwner?.pluginApi?.pluginSettings?.previewMetadataMode ?? currentItem?.previewMetadataMode ?? detailCacheOwner?.pluginApi?.manifest?.metadata?.defaultSettings?.previewMetadataMode ?? "always"
-  readonly property string previewThumbnailSize: detailCacheOwner?.mainInstance?.previewThumbnailSize ?? detailCacheOwner?.pluginApi?.pluginSettings?.previewThumbnailSize ?? currentItem?.previewThumbnailSize ?? detailCacheOwner?.pluginApi?.manifest?.metadata?.defaultSettings?.previewThumbnailSize ?? "comfortable"
+  readonly property var cfg: detailCacheOwner?.pluginApi?.settingsView ?? ({})
+  readonly property string previewMetadataMode: cfg.previewMetadataMode ?? currentItem?.previewMetadataMode ?? "always"
+  readonly property string previewThumbnailSize: cfg.previewThumbnailSize ?? currentItem?.previewThumbnailSize ?? "comfortable"
   readonly property real compactArtworkHeight: Math.round((previewThumbnailSize === "small" ? 120 : (previewThumbnailSize === "large" ? 190 : 150)) * Style.uiScaleRatio)
   readonly property real fullArtworkHeight: Math.round((previewThumbnailSize === "small" ? 180 : (previewThumbnailSize === "large" ? 280 : 220)) * Style.uiScaleRatio)
   readonly property real effectiveArtworkHeight: {
@@ -36,11 +37,11 @@ Item {
     return Math.max(compactArtworkHeight, Math.min(fullArtworkHeight, responsiveHeight));
   }
   readonly property bool compactLayout: contentArea.height > 0 && effectiveArtworkHeight < (fullArtworkHeight - Math.round(8 * Style.uiScaleRatio))
-  readonly property bool showUploaderMetadata: detailCacheOwner?.mainInstance?.showUploaderMetadata !== false
-  readonly property bool showAlbumMetadata: detailCacheOwner?.mainInstance?.showAlbumMetadata !== false
-  readonly property bool showDurationMetadata: detailCacheOwner?.mainInstance?.showDurationMetadata !== false
-  readonly property bool showPlayStatsMetadata: detailCacheOwner?.mainInstance?.showPlayStatsMetadata !== false
-  readonly property bool showStatusMetadata: detailCacheOwner?.mainInstance?.showStatusMetadata !== false
+  readonly property bool showUploaderMetadata: cfg.showUploaderMetadata !== false
+  readonly property bool showAlbumMetadata: cfg.showAlbumMetadata !== false
+  readonly property bool showDurationMetadata: cfg.showDurationMetadata !== false
+  readonly property bool showPlayStatsMetadata: cfg.showPlayStatsMetadata !== false
+  readonly property bool showStatusMetadata: cfg.showStatusMetadata !== false
   readonly property real currentSpeed: detailCacheOwner?.mainInstance?.currentSpeed || 1
   readonly property real maxPreviewHeight: Math.round(560 * Style.uiScaleRatio)
 
@@ -438,7 +439,7 @@ Item {
 
       RowLayout {
         Layout.fillWidth: true
-        visible: previewPanel.showChips && detailCacheOwner?.mainInstance?.showPreviewChips !== false
+        visible: previewPanel.showChips && previewPanel.cfg.showPreviewChips !== false
         spacing: Style.marginXS
 
         Repeater {

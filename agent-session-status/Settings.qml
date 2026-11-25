@@ -7,94 +7,106 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
-  property var cfg: pluginApi?.pluginSettings || ({})
-  property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
+  readonly property var bindAddressField: pluginApi?.field("bindAddress") ?? null
+  readonly property var portField: pluginApi?.field("port") ?? null
+  readonly property var tokenField: pluginApi?.field("token") ?? null
+  readonly property var pollIntervalSecField: pluginApi?.field("pollIntervalSec") ?? null
+  readonly property var hideWhenEmptyField: pluginApi?.field("hideWhenEmpty") ?? null
 
-  property string editBindAddress: displayBaseline.editBindAddress
-  property int editPort: displayBaseline.editPort
-  property string editToken: displayBaseline.editToken
-  property int editPollIntervalSec: displayBaseline.editPollIntervalSec
-  property bool editHideWhenEmpty: displayBaseline.editHideWhenEmpty
+  readonly property string editBindAddress: root.bindAddressField?.value ?? "127.0.0.1"
+  readonly property int editPort: Number(root.portField?.value ?? 55854)
+  readonly property string editToken: root.tokenField?.value ?? ""
+  readonly property int editPollIntervalSec: Number(root.pollIntervalSecField?.value ?? 2)
+  readonly property bool editHideWhenEmpty: root.hideWhenEmptyField?.value ?? false
   property bool _applyEffectPending: false
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property string editBindAddress: cfg.bindAddress ?? defaults.bindAddress ?? "127.0.0.1"
-    readonly property int editPort: Number(cfg.port ?? defaults.port ?? 55854)
-    readonly property string editToken: cfg.token ?? defaults.token ?? ""
-    readonly property int editPollIntervalSec: Number(cfg.pollIntervalSec ?? defaults.pollIntervalSec ?? 2)
-    readonly property bool editHideWhenEmpty: cfg.hideWhenEmpty ?? defaults.hideWhenEmpty ?? false
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({editBindAddress: root.editBindAddress, editPort: root.editPort, editToken: root.editToken, editPollIntervalSec: root.editPollIntervalSec, editHideWhenEmpty: root.editHideWhenEmpty})
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
   Connections {
     target: root.pluginApi
     function onSettingsCompleted(result) {
-      if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current") return;
+      if (!root._applyEffectPending || !result || (result.status !== "saved" && result.status !== "nothing_to_save") || result.refreshState !== "current")
+        return;
       root._applyEffectPending = false;
-      root.pluginApi.mainInstance?.restartService();
+      root.pluginApi.mainInstance?.restartService(root.pluginApi.runtimeContext);
     }
   }
 
   spacing: Style.marginL
 
-  NTextInput {
+  NText {
+    visible: root.pluginApi?.scopeKind === "instance"
     Layout.fillWidth: true
-    label: pluginApi?.tr("settings.bindAddress.label")
-    description: pluginApi?.tr("settings.bindAddress.desc")
-    text: root.editBindAddress
-    onTextChanged: root.editBindAddress = text
+    text: root.pluginApi?.tr("settings.shared-effect")
+    wrapMode: Text.WordWrap
   }
 
-  NSpinBox {
-    label: pluginApi?.tr("settings.port.label")
-    description: pluginApi?.tr("settings.port.desc")
-    from: 1
-    to: 65535
-    value: root.editPort
-    onValueChanged: root.editPort = value
+  NPluginSettingsField {
+    field: root.bindAddressField
+    NTextInput {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.bindAddress.label")
+      description: pluginApi?.tr("settings.bindAddress.desc")
+      text: root.editBindAddress
+      onEditCommitted: root.bindAddressField.set(text.trim() || "127.0.0.1")
+    }
   }
 
-  NTextInput {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.token.label")
-    description: pluginApi?.tr("settings.token.desc")
-    text: root.editToken
-    onTextChanged: root.editToken = text
+  NPluginSettingsField {
+    field: root.portField
+    NSpinBox {
+      label: pluginApi?.tr("settings.port.label")
+      description: pluginApi?.tr("settings.port.desc")
+      from: 1
+      to: 65535
+      value: root.editPort
+      requestValue: value => root.portField.set(value)
+    }
   }
 
-  NSpinBox {
-    label: pluginApi?.tr("settings.pollInterval.label")
-    description: pluginApi?.tr("settings.pollInterval.desc")
-    from: 1
-    to: 30
-    value: root.editPollIntervalSec
-    onValueChanged: root.editPollIntervalSec = value
+  NPluginSettingsField {
+    field: root.tokenField
+    NTextInput {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.token.label")
+      description: pluginApi?.tr("settings.token.desc")
+      text: root.editToken
+      onEditCommitted: root.tokenField.set(text.trim())
+    }
+  }
+
+  NPluginSettingsField {
+    field: root.pollIntervalSecField
+    NSpinBox {
+      label: pluginApi?.tr("settings.pollInterval.label")
+      description: pluginApi?.tr("settings.pollInterval.desc")
+      from: 1
+      to: 30
+      value: root.editPollIntervalSec
+      requestValue: value => root.pollIntervalSecField.set(value)
+    }
   }
 
   Item {
     Layout.fillWidth: true
     Layout.preferredHeight: hideToggle.implicitHeight
 
-    NToggle {
-      id: hideToggle
-      anchors.fill: parent
-      label: pluginApi?.tr("settings.hideWhenEmpty.label")
-      description: pluginApi?.tr("settings.hideWhenEmpty.desc")
-      checked: root.editHideWhenEmpty
-      onToggled: checked => root.editHideWhenEmpty = checked
+    NPluginSettingsField {
+      field: root.hideWhenEmptyField
+      NToggle {
+        id: hideToggle
+        anchors.fill: parent
+        label: pluginApi?.tr("settings.hideWhenEmpty.label")
+        description: pluginApi?.tr("settings.hideWhenEmpty.desc")
+        checked: root.editHideWhenEmpty
+        onToggled: checked => root.hideWhenEmptyField.set(checked)
+      }
     }
   }
 
   function saveSettings() {
-    if (!pluginApi) return
-
-    root.editBindAddress = root.editBindAddress.trim() || "127.0.0.1"
-    root.editToken = root.editToken.trim()
-    pluginApi.pluginSettings.bindAddress = root.editBindAddress
-    pluginApi.pluginSettings.port = root.editPort
-    pluginApi.pluginSettings.token = root.editToken
-    pluginApi.pluginSettings.pollIntervalSec = root.editPollIntervalSec
-    pluginApi.pluginSettings.hideWhenEmpty = root.editHideWhenEmpty
+    if (!pluginApi)
+      return;
     if (pluginApi.saveSettings() !== false)
-      root._applyEffectPending = true
+      root._applyEffectPending = true;
   }
 }

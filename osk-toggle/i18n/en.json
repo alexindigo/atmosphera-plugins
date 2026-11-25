@@ -11,6 +11,7 @@
     "settings": "Widget settings"
   },
   "settings": {
+    "shared-effect": "All instances control one keyboard. Apply, Recheck or a widget action selects the applied backend and binary for that shared keyboard; another configuration can replace it. Display and availability follow this instance.",
     "backend": {
       "label": "Backend",
       "desc": "Which on-screen keyboard to control (auto detects at startup)",

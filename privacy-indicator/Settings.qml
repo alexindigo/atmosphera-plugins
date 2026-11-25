@@ -7,20 +7,34 @@ ColumnLayout {
   id: root
 
   property var pluginApi: null
+  readonly property var hideInactiveField: pluginApi?.field("hideInactive") ?? null
+  readonly property var enableToastField: pluginApi?.field("enableToast") ?? null
+  readonly property var iconSpacingField: pluginApi?.field("iconSpacing") ?? null
+  readonly property var removeMarginsField: pluginApi?.field("removeMargins") ?? null
+  readonly property var activeColorField: pluginApi?.field("activeColor") ?? null
+  readonly property var inactiveColorField: pluginApi?.field("inactiveColor") ?? null
+  readonly property var micFilterRegexField: pluginApi?.field("micFilterRegex") ?? null
+  readonly property var camFilterRegexField: pluginApi?.field("camFilterRegex") ?? null
 
-  property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property bool hideInactive: displayBaseline.hideInactive
-  property bool enableToast: displayBaseline.enableToast
-  property bool removeMargins: displayBaseline.removeMargins
-  property int iconSpacing: displayBaseline.iconSpacing
-  property string activeColor: displayBaseline.activeColor
-  property string inactiveColor: displayBaseline.inactiveColor
-  property string micFilterRegex: displayBaseline.micFilterRegex
-  property string camFilterRegex: displayBaseline.camFilterRegex
+  readonly property bool hideInactive: root.hideInactiveField?.value ?? false
+  readonly property bool enableToast: root.enableToastField?.value ?? true
+  readonly property bool removeMargins: root.removeMarginsField?.value ?? false
+  readonly property int iconSpacing: root.iconSpacingField?.value ?? 4
+  readonly property string activeColor: root.activeColorField?.value ?? "primary"
+  readonly property string inactiveColor: root.inactiveColorField?.value ?? "none"
+  readonly property string micFilterRegex: root.micFilterRegexField?.value ?? defaults.micFilterRegex
+  readonly property string camFilterRegex: root.camFilterRegexField?.value ?? defaults.camFilterRegex
 
   spacing: Style.marginL
+
+  NText {
+    Layout.fillWidth: true
+    visible: root.pluginApi?.scopeKind === "instance"
+    text: root.pluginApi?.tr("settings.shared-effect") ?? ""
+    wrapMode: Text.WordWrap
+  }
 
   Component.onCompleted: {
     Logger.i("PrivacyIndicator", "Settings UI loaded");
@@ -30,123 +44,128 @@ ColumnLayout {
     spacing: Style.marginM
     Layout.fillWidth: true
 
-    NToggle {
-      label: pluginApi?.tr("settings.hideInactive.label")
-      description: pluginApi?.tr("settings.hideInactive.desc")
+    NPluginSettingsField {
+      field: root.hideInactiveField
+      NToggle {
+        label: pluginApi?.tr("settings.hideInactive.label")
+        description: pluginApi?.tr("settings.hideInactive.desc")
 
-      checked: root.hideInactive
-      onToggled: checked =>  {
-        root.hideInactive = checked;
-      }
-    }
-
-    NToggle {
-      label: pluginApi?.tr("settings.enableToast.label")
-      description: pluginApi?.tr("settings.enableToast.desc")
-
-      checked: root.enableToast
-      onToggled: checked => {
-        root.enableToast = checked;
-      }
-    }
-
-    NToggle {
-      label: pluginApi?.tr("settings.removeMargins.label")
-      description: pluginApi?.tr("settings.removeMargins.desc")
-
-      checked: root.removeMargins
-      onToggled: checked =>  {
-        root.removeMargins = checked;
-      }
-    }
-
-    NColorChoice {
-      label: pluginApi?.tr("settings.activeColor.label")
-      description: pluginApi?.tr("settings.activeColor.desc")
-      currentKey: root.activeColor
-      onSelected: key => root.activeColor = key
-    }
-
-    NColorChoice {
-      label: pluginApi?.tr("settings.inactiveColor.label")
-      description: pluginApi?.tr("settings.inactiveColor.desc")
-      currentKey: root.inactiveColor
-      onSelected: key => root.inactiveColor = key
-      noneColor: Qt.alpha(AtmoColor.mOnSurfaceVariant, 0.3)
-      noneOnColor: Qt.alpha(AtmoColor.mOnSurface, 0.7)
-    }
-
-    NComboBox {
-      label: pluginApi?.tr("settings.iconSpacing.label")
-      description: pluginApi?.tr("settings.iconSpacing.desc")
-
-      model: {
-        const labels = ["XXS", "XS", "S", "M", "L", "XL"];
-        const values = [Style.marginXXS, Style.marginXS, Style.marginS, Style.marginM, Style.marginL, Style.marginXL];
-
-        const result = [];
-        for (var i = 0; i < labels.length; ++i) {
-          const v = values[i];
-          result.push({
-            key: v.toFixed(0),
-            name: `${labels[i]} (${v}px)`
-          });
+        checked: root.hideInactive
+        onToggled: checked => {
+          root.hideInactiveField.set(checked);
         }
-        return result;
       }
-
-      // INFO: From my understanding, the toFixed(0) shouldn't be needed here and there, but without the
-      // current key does not show when opening the settings window.
-      currentKey: root.iconSpacing.toFixed(0)
-      onSelected: key => root.iconSpacing = key
     }
 
-    NTextInput {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.micFilterRegex.label")
-      description: pluginApi?.tr("settings.micFilterRegex.desc")
-      placeholderText: "effect_input.rnnoise|easyeffects"
-      text: root.micFilterRegex
-      onTextChanged: root.micFilterRegex = text
+    NPluginSettingsField {
+      field: root.enableToastField
+      NToggle {
+        label: pluginApi?.tr("settings.enableToast.label")
+        description: pluginApi?.tr("settings.enableToast.desc")
+
+        checked: root.enableToast
+        onToggled: checked => {
+          root.enableToastField.set(checked);
+        }
+      }
     }
 
-    NTextInput {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.camFilterRegex.label")
-      description: pluginApi?.tr("settings.camFilterRegex.desc")
-      placeholderText: "droidcam"
-      text: root.camFilterRegex
-      onTextChanged: root.camFilterRegex = text
+    NPluginSettingsField {
+      field: root.removeMarginsField
+      NToggle {
+        label: pluginApi?.tr("settings.removeMargins.label")
+        description: pluginApi?.tr("settings.removeMargins.desc")
+
+        checked: root.removeMargins
+        onToggled: checked => {
+          root.removeMarginsField.set(checked);
+        }
+      }
+    }
+
+    NPluginSettingsField {
+      field: root.activeColorField
+      NColorChoice {
+        label: pluginApi?.tr("settings.activeColor.label")
+        description: pluginApi?.tr("settings.activeColor.desc")
+        currentKey: root.activeColor
+        onSelected: key => root.activeColorField.set(key)
+      }
+    }
+
+    NPluginSettingsField {
+      field: root.inactiveColorField
+      NColorChoice {
+        label: pluginApi?.tr("settings.inactiveColor.label")
+        description: pluginApi?.tr("settings.inactiveColor.desc")
+        currentKey: root.inactiveColor
+        onSelected: key => root.inactiveColorField.set(key)
+        noneColor: Qt.alpha(AtmoColor.mOnSurfaceVariant, 0.3)
+        noneOnColor: Qt.alpha(AtmoColor.mOnSurface, 0.7)
+      }
+    }
+
+    NPluginSettingsField {
+      field: root.iconSpacingField
+      NComboBox {
+        label: pluginApi?.tr("settings.iconSpacing.label")
+        description: pluginApi?.tr("settings.iconSpacing.desc")
+
+        model: {
+          const labels = ["XXS", "XS", "S", "M", "L", "XL"];
+          const values = [Style.marginXXS, Style.marginXS, Style.marginS, Style.marginM, Style.marginL, Style.marginXL];
+
+          const result = [];
+          for (var i = 0; i < labels.length; ++i) {
+            const v = values[i];
+            result.push({
+                          key: v.toFixed(0),
+                          name: `${labels[i]} (${v}px)`
+                        });
+          }
+          return result;
+        }
+
+        // INFO: From my understanding, the toFixed(0) shouldn't be needed here and there, but without the
+        // current key does not show when opening the settings window.
+        currentKey: root.iconSpacing.toFixed(0)
+        onSelected: key => root.iconSpacingField.set(key)
+      }
+    }
+
+    NPluginSettingsField {
+      field: root.micFilterRegexField
+      NTextInput {
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.micFilterRegex.label")
+        description: pluginApi?.tr("settings.micFilterRegex.desc")
+        placeholderText: "effect_input.rnnoise|easyeffects"
+        text: root.micFilterRegex
+        onEditCommitted: root.micFilterRegexField.set(text)
+      }
+    }
+
+    NPluginSettingsField {
+      field: root.camFilterRegexField
+      NTextInput {
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.camFilterRegex.label")
+        description: pluginApi?.tr("settings.camFilterRegex.desc")
+        placeholderText: "droidcam"
+        text: root.camFilterRegex
+        onEditCommitted: root.camFilterRegexField.set(text)
+      }
     }
   }
 
-  NSettingsBaseline {
-    id: displayBaseline
-    readonly property bool hideInactive: cfg.hideInactive ?? defaults.hideInactive ?? false
-    readonly property bool enableToast: cfg.enableToast ?? defaults.enableToast ?? true
-    readonly property bool removeMargins: cfg.removeMargins ?? defaults.removeMargins ?? false
-    readonly property int iconSpacing: cfg.iconSpacing ?? defaults.iconSpacing ?? 4
-    readonly property string activeColor: cfg.activeColor ?? defaults.activeColor ?? "primary"
-    readonly property string inactiveColor: cfg.inactiveColor ?? defaults.inactiveColor ?? "none"
-    readonly property string micFilterRegex: cfg.micFilterRegex ?? defaults.micFilterRegex
-    readonly property string camFilterRegex: cfg.camFilterRegex ?? defaults.camFilterRegex
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({hideInactive: root.hideInactive, enableToast: root.enableToast, removeMargins: root.removeMargins, iconSpacing: root.iconSpacing, activeColor: root.activeColor, inactiveColor: root.inactiveColor, micFilterRegex: root.micFilterRegex, camFilterRegex: root.camFilterRegex})
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   function saveSettings() {
     if (!pluginApi) {
       Logger.e("PrivacyIndicator", "Cannot save settings: pluginApi is null");
       return;
     }
-
-    pluginApi.pluginSettings.hideInactive = root.hideInactive;
-    pluginApi.pluginSettings.enableToast = root.enableToast;
-    pluginApi.pluginSettings.iconSpacing = root.iconSpacing;
-    pluginApi.pluginSettings.removeMargins = root.removeMargins;
-    pluginApi.pluginSettings.activeColor = root.activeColor;
-    pluginApi.pluginSettings.inactiveColor = root.inactiveColor;
-    pluginApi.pluginSettings.micFilterRegex = root.micFilterRegex;
-    pluginApi.pluginSettings.camFilterRegex = root.camFilterRegex;
 
     pluginApi.saveSettings(function (result) {
       if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")

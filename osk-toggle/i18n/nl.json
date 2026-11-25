@@ -11,6 +11,7 @@
     "settings": "Widget-instellingen"
   },
   "settings": {
+    "shared-effect": "Alle instanties bedienen hetzelfde toetsenbord. Toepassen, Opnieuw controleren of een widgetactie kiest de backend en het uitvoerbare bestand voor dit gedeelde toetsenbord; een andere configuratie kan die keuze vervangen. Weergave en beschikbaarheid volgen deze instantie.",
     "backend": {
       "label": "Backend",
       "desc": "Welk schermtoetsenbord aansturen: auto, squeekboard of wvkbd (auto detecteert bij opstarten)",

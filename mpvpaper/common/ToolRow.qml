@@ -8,8 +8,6 @@ RowLayout {
 
     required property var pluginApi
 
-    property bool enabled: true
-    
     Layout.fillWidth: true
 
     property bool isPlaying:
@@ -20,10 +18,12 @@ RowLayout {
         pluginApi.pluginSettings.isMuted ||
         false
 
-    // A settings consumer injects local preference intents; runtime callers keep
-    // the existing immediate writer when no local callback is connected.
-    property var playingWriter: null
-    property var muteWriter: null
+    // Presentation never selects a persistence owner. Both Settings and runtime
+    // callers supply the action appropriate to their captured context.
+    required property var playingWriter
+    required property var muteWriter
+    required property var randomAction
+    required property var clearAction
 
 
     NButton {
@@ -63,34 +63,22 @@ RowLayout {
     * Button functionality
     ********************************/
     function random() {
-        if(pluginApi?.mainInstance == null) {
-            Logger.e("mpvpaper", "Main instance isn't loaded");
-            return;
-        }
-
-        pluginApi.mainInstance.random();
+        randomAction();
     }
 
     function clear() {
-        if(pluginApi?.mainInstance == null) {
-            Logger.e("mpvpaper", "Main instance isn't loaded");
-            return;
-        }
-
-        pluginApi.mainInstance.clear();
+        clearAction();
     }
 
     function togglePlaying() {
         if (pluginApi == null) return;
 
-        if (typeof playingWriter === "function") playingWriter(!root.isPlaying);
-        else { pluginApi.pluginSettings.isPlaying = !root.isPlaying; pluginApi.saveSettings(); }
+        playingWriter(!root.isPlaying);
     }
 
     function toggleMute() {
         if(pluginApi == null) return;
 
-        if (typeof muteWriter === "function") muteWriter(!root.isMuted);
-        else { pluginApi.pluginSettings.isMuted = !root.isMuted; pluginApi.saveSettings(); }
+        muteWriter(!root.isMuted);
     }
 }

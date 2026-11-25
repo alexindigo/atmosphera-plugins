@@ -3,12 +3,12 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import qs.Commons
-import "." as Local
 
 Item {
   id: root
 
   property string rawText: ""
+  property var session: null
   property bool sessionActive: false
   property real fontSize: Style.fontSizeS
   property string fontFamily: Settings.data.ui.fontFixed
@@ -20,21 +20,25 @@ Item {
   property var _ts: null
 
   Component.onCompleted: {
+    replayBuffer();
+    Qt.callLater(focusTerminal);
+  }
+  function replayBuffer() {
     _initTerminal();
     if (rawText.length > 0) {
       _processInput(rawText);
       root._ts.processed = rawText.length;
-      _refreshDisplay();
     }
-    Qt.callLater(focusTerminal);
+    _refreshDisplay();
   }
+  onSessionChanged: Qt.callLater(replayBuffer)
   onRowsChanged: _initTerminal()
   onColsChanged: _initTerminal()
   onVisibleChanged: if (visible) Qt.callLater(focusTerminal)
   onSessionActiveChanged: if (sessionActive) Qt.callLater(focusTerminal)
 
   Connections {
-    target: Local.HermesSession
+    target: root.session
     function onTerminalOutput(text) {
       if (!root._ts) _initTerminal();
       _processInput(text);

@@ -5,7 +5,13 @@ import Quickshell.Io
 Item {
     id: root
 
-    property var pluginApi: null
+    property var settingsContext: null
+    // Accepted alongside WvkbdBackend's initial properties, unused by this backend.
+    property string wvkbdBin: ""
+    property bool _retired: false
+    property bool _constructed: false
+    readonly property bool current: !root._retired && (settingsContext?.current() ?? false)
+    readonly property bool quiescent: !stateChecker.running && !squeekboardChecker.running && !squeekboardMonitor.running && !stateMonitor.running && !toggleProcess.running
 
     property bool keyboardActive: false
     property bool gsettingsOk: false
@@ -20,13 +26,15 @@ Item {
         command: ["gsettings", "get", "org.gnome.desktop.a11y.applications", "screen-keyboard-enabled"]
         stdout: SplitParser {
             onRead: data => {
+                if (!root.current) return;
                 root.keyboardActive = data.trim() === "true"
             }
         }
         onExited: (exitCode, exitStatus) => {
+            if (!root.current) return;
             root.gsettingsOk = exitCode === 0
         }
-        Component.onCompleted: running = true
+        Component.onCompleted: running = root.current
     }
 
     // --- Squeekboard availability: initial check ---
@@ -37,9 +45,10 @@ Item {
                   "org.freedesktop.DBus", "GetNameOwner",
                   "s", "sm.puri.OSK0"]
         onExited: (exitCode, exitStatus) => {
+            if (!root.current) return;
             root.squeekboardOk = exitCode === 0
         }
-        Component.onCompleted: running = true
+        Component.onCompleted: running = root.current
     }
 
     // --- Squeekboard availability: live D-Bus monitor ---
@@ -49,11 +58,12 @@ Item {
         id: squeekboardMonitor
         command: ["dbus-monitor", "--session",
                   "type='signal',sender='org.freedesktop.DBus',member='NameOwnerChanged'"]
-        running: true
+        running: root.current
         stdout: SplitParser {
             property int argCount: 0
             property bool isOurService: false
             onRead: data => {
+                if (!root.current) return;
                 const trimmed = data.trim()
                 if (trimmed.startsWith("signal ")) {
                     argCount = 0
@@ -75,7 +85,7 @@ Item {
             }
         }
         onExited: (exitCode, exitStatus) => {
-            squeekboardMonitor.running = true
+            if (root.current) squeekboardMonitor.running = true
         }
     }
 
@@ -83,9 +93,10 @@ Item {
     Process {
         id: stateMonitor
         command: ["dconf", "watch", "/org/gnome/desktop/a11y/applications/screen-keyboard-enabled"]
-        running: true
+        running: root.current
         stdout: SplitParser {
             onRead: data => {
+                if (!root.current) return;
                 let trimmed = data.trim()
                 if (trimmed === "true" || trimmed === "false") {
                     root.keyboardActive = trimmed === "true"
@@ -93,6 +104,7 @@ Item {
             }
         }
         onExited: (exitCode, exitStatus) => {
+            if (!root.current) return;
             stateChecker.running = true
             stateMonitor.running = true
         }
@@ -102,17 +114,26 @@ Item {
         id: toggleProcess
     }
 
-    Component.onDestruction: {
+    function retire() {
+        root._retired = true;
+        stateChecker.running = false;
+        squeekboardChecker.running = false;
         stateMonitor.running = false
         squeekboardMonitor.running = false
+        toggleProcess.running = false;
     }
+    onCurrentChanged: { if (_constructed && !current) retire(); }
+    Component.onCompleted: { _constructed = true; if (!current) retire(); }
+    Component.onDestruction: retire()
 
     function recheckState() {
+        if (!root.current) return;
         squeekboardChecker.running = true
         stateChecker.running = true
     }
 
     function toggleKeyboard() {
+        if (!root.current) return;
         toggleProcess.command = ["gsettings", "set", "org.gnome.desktop.a11y.applications",
                                  "screen-keyboard-enabled", root.keyboardActive ? "false" : "true"]
         toggleProcess.running = true

@@ -2,6 +2,13 @@
 
 selected="${1:-__default__}"
 
+is_aggregate_selection() {
+  case "$selected" in
+    ""|"__default__"|"DisplayDevice") return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 read_file() {
   if [ -r "$1" ]; then
     tr -d '\n' < "$1"
@@ -192,7 +199,7 @@ matches_selected() {
     ""|"__default__"|"DisplayDevice")
       return 0
       ;;
-    "$name"|*"$name"*)
+    "$name"|*/"$name"|*/"battery_$name")
       return 0
       ;;
     *)
@@ -266,7 +273,7 @@ if [ "$count" -eq 0 ]; then
   exit 0
 fi
 
-if [ "$power_known" -eq 0 ] || ! is_positive "$total_power"; then
+if is_aggregate_selection && { [ "$power_known" -eq 0 ] || ! is_positive "$total_power"; }; then
   external_power="$(calc_external_supply_watts)"
   if is_positive "$external_power"; then
     total_power="$external_power"

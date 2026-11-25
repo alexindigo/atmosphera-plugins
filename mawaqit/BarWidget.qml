@@ -37,7 +37,8 @@ Item {
 
   readonly property bool use12h:   Settings.data.location.use12hourFormat
 
-  readonly property var    mainInstance:   pluginApi?.mainInstance
+  readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+  readonly property var mainInstance: settingsConsumer
   readonly property var    prayerTimings:  mainInstance?.prayerTimings  ?? null
   readonly property bool   isRamadan:      mainInstance?.isRamadan      ?? false
   readonly property bool   isLoading:      mainInstance?.isLoading      ?? false

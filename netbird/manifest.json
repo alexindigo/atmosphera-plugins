@@ -1,9 +1,9 @@
 {
   "id": "netbird",
   "name": "NetBird",
-  "version": "1.1.6",
+  "version": "1.1.10",
   "minNoctaliaVersion": "4.0.0",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "Cleboost",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -19,15 +19,15 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "compactMode": {"type": "Boolean"},
-        "defaultPeerAction": {"type": "String"},
-        "hideDisconnected": {"type": "Boolean"},
-        "managementUrl": {"type": "String"},
-        "pingCount": {"type": "Real"},
-        "refreshInterval": {"type": "Real"},
-        "showIpAddress": {"type": "Boolean"},
-        "showPing": {"type": "Boolean"},
-        "terminalCommand": {"type": "String"}
+        "compactMode": {"editorUsage": "configuration", "type": "Boolean"},
+        "defaultPeerAction": {"editorUsage": "configuration", "type": "String"},
+        "hideDisconnected": {"editorUsage": "configuration", "type": "Boolean"},
+        "managementUrl": {"editorUsage": "configuration", "type": "String"},
+        "pingCount": {"editorUsage": "configuration", "type": "Real"},
+        "refreshInterval": {"editorUsage": "configuration", "type": "Real"},
+        "showIpAddress": {"editorUsage": "configuration", "type": "Boolean"},
+        "showPing": {"editorUsage": "configuration", "type": "Boolean"},
+        "terminalCommand": {"editorUsage": "configuration", "type": "String"}
       }
     },
     "defaultSettings": {

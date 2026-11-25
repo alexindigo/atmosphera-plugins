@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "Questa istanza seleziona il controllo periodico e i comandi. L'esecuzione di un aggiornamento modifica il sistema per tutte le istanze.",
     "changeIcon": {
       "label": "Seleziona icona"
     },

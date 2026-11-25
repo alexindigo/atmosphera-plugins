@@ -14,7 +14,7 @@ Item {
   property real contentPreferredWidth: 320 * Style.uiScaleRatio
   property real contentPreferredHeight: panelColumn.implicitHeight + Style.marginXL * 2
 
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var mainInstance: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
   readonly property bool hasData: mainInstance?.hasData ?? false
   readonly property int aqi: hasData ? mainInstance.getAqi() : 0
   readonly property string aqiColor: hasData ? mainInstance.getAqiColor(aqi) : AtmoColor.mOnSurfaceVariant
@@ -42,7 +42,9 @@ Item {
         visible: root.hasData
 
         // ======== HERO: giant AQI number ========
-        Item { Layout.preferredHeight: Style.marginL }
+        Item {
+          Layout.preferredHeight: Style.marginL
+        }
 
         NText {
           Layout.alignment: Qt.AlignHCenter
@@ -61,7 +63,9 @@ Item {
           color: root.aqiColor
         }
 
-        Item { Layout.preferredHeight: Style.marginS }
+        Item {
+          Layout.preferredHeight: Style.marginS
+        }
 
         // Scale label
         NText {
@@ -71,7 +75,9 @@ Item {
           color: AtmoColor.mOnSurfaceVariant
         }
 
-        Item { Layout.preferredHeight: Style.marginM }
+        Item {
+          Layout.preferredHeight: Style.marginM
+        }
 
         // ======== Location pill ========
         Rectangle {
@@ -85,30 +91,58 @@ Item {
             id: locationText
             anchors.centerIn: parent
             text: {
-              var parts = []
-              var city = root.mainInstance?.getLocationName() ?? ""
-              if (city) parts.push(city)
-              var update = root.mainInstance?.lastUpdate ?? ""
-              if (update) parts.push(update)
-              return parts.join(" · ")
+              var parts = [];
+              var city = root.mainInstance?.getLocationName() ?? "";
+              if (city)
+                parts.push(city);
+              var update = root.mainInstance?.lastUpdate ?? "";
+              if (update)
+                parts.push(update);
+              return parts.join(" · ");
             }
             pointSize: Style.fontSizeS
             color: AtmoColor.mOnSurfaceVariant
           }
         }
 
-        Item { Layout.preferredHeight: Style.marginXL }
+        Item {
+          Layout.preferredHeight: Style.marginXL
+        }
 
         // ======== Pollutant rows ========
         Repeater {
           model: root.hasData ? [
-            { key: "pm25", value: root.mainInstance.pm25, pollutant: "pm25" },
-            { key: "pm10", value: root.mainInstance.pm10, pollutant: "pm10" },
-            { key: "ozone", value: root.mainInstance.ozone, pollutant: "ozone" },
-            { key: "no2", value: root.mainInstance.no2, pollutant: "no2" },
-            { key: "co", value: root.mainInstance.co, pollutant: "co" },
-            { key: "so2", value: root.mainInstance.so2, pollutant: "so2" }
-          ] : []
+                                  {
+                                    key: "pm25",
+                                    value: root.mainInstance.pm25,
+                                    pollutant: "pm25"
+                                  },
+                                  {
+                                    key: "pm10",
+                                    value: root.mainInstance.pm10,
+                                    pollutant: "pm10"
+                                  },
+                                  {
+                                    key: "ozone",
+                                    value: root.mainInstance.ozone,
+                                    pollutant: "ozone"
+                                  },
+                                  {
+                                    key: "no2",
+                                    value: root.mainInstance.no2,
+                                    pollutant: "no2"
+                                  },
+                                  {
+                                    key: "co",
+                                    value: root.mainInstance.co,
+                                    pollutant: "co"
+                                  },
+                                  {
+                                    key: "so2",
+                                    value: root.mainInstance.so2,
+                                    pollutant: "so2"
+                                  }
+                                ] : []
 
           delegate: ColumnLayout {
             required property var modelData
@@ -179,9 +213,11 @@ Item {
         NText {
           Layout.alignment: Qt.AlignHCenter
           text: {
-            if (root.mainInstance?.loading) return pluginApi?.tr("panel.loading")
-            if (root.mainInstance?.errorMessage) return root.mainInstance.errorMessage
-            return pluginApi?.tr("panel.noData")
+            if (root.mainInstance?.loading)
+              return pluginApi?.tr("panel.loading");
+            if (root.mainInstance?.errorMessage)
+              return root.mainInstance.errorMessage;
+            return pluginApi?.tr("panel.noData");
           }
           pointSize: Style.fontSizeL
           color: AtmoColor.mOnSurfaceVariant
@@ -191,7 +227,9 @@ Item {
         }
       }
 
-      Item { Layout.preferredHeight: Style.marginXL }
+      Item {
+        Layout.preferredHeight: Style.marginXL
+      }
 
       // ======== Footer ========
       RowLayout {
@@ -202,18 +240,19 @@ Item {
           Layout.fillWidth: true
           text: pluginApi?.tr("panel.refresh")
           onClicked: {
-            Logger.d("Air Quality", "Refreshing from panel...")
-            root.mainInstance?.refresh()
+            Logger.d("Air Quality", "Refreshing from panel...");
+            root.mainInstance?.refresh();
           }
         }
 
         AtmoIconButton {
           icon: "settings"
           onClicked: {
-            if (!pluginApi) return
-            Logger.d("Air Quality", "Opening settings from panel...")
-            BarService.openPluginSettings(pluginApi.panelOpenScreen, pluginApi.manifest)
-            pluginApi.closePanel(pluginApi.panelOpenScreen)
+            if (!pluginApi)
+              return;
+            Logger.d("Air Quality", "Opening settings from panel...");
+            BarService.openPluginSettings(pluginApi.panelOpenScreen, pluginApi.manifest);
+            pluginApi.closePanel(pluginApi.panelOpenScreen);
           }
         }
       }

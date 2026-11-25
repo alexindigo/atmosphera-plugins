@@ -790,7 +790,7 @@ Item {
                                     "clearFirst": true,
                                     "finalAction": "skip",
                                     "emptyNotice": pluginApi?.tr("panel.emptyScopedLibrary")
-                                  });
+                                  }, pluginApi?.settingsContext);
   }
 
   function queueCurrentLibrarySelection(shuffle) {
@@ -798,7 +798,7 @@ Item {
     mainInstance?.startQueueBatch(entries, {
                                     "clearFirst": false,
                                     "emptyNotice": pluginApi?.tr("panel.emptyScopedLibrary")
-                                  });
+                                  }, pluginApi?.settingsContext);
   }
 
   function formatRating(rating) {
@@ -1215,9 +1215,9 @@ Item {
             if (current) {
               root.mainInstance?.togglePause();
             } else if (section === "queue") {
-              root.mainInstance?.playQueueEntryNow(normalized);
+              root.mainInstance?.playQueueEntryNow(normalized, root.pluginApi.settingsContext);
             } else {
-              root.mainInstance?.playEntry(normalized);
+              root.mainInstance?.playEntry(normalized, root.pluginApi.settingsContext);
             }
           }
         }
@@ -1851,7 +1851,7 @@ Item {
                     text: pluginApi?.tr("panel.playUrl")
                     icon: "player-play-filled"
                     fontSize: Style.fontSizeS
-                    onClicked: root.mainInstance?.playUrl(root.trimmedSearchText(), pluginApi?.tr("common.customUrl"))
+                    onClicked: root.mainInstance?.playUrl(root.trimmedSearchText(), pluginApi?.tr("common.customUrl"), root.pluginApi.settingsContext)
                   }
 
                   NButton {
@@ -2090,7 +2090,7 @@ Item {
                     fontSize: Style.fontSizeS
                     visible: !root.hasLibrarySelection() && root.librarySection === "tracks"
                     enabled: (mainInstance?.visibleLibraryEntries() || []).length > 0
-                    onClicked: root.mainInstance?.autoplaySavedTracks(false)
+                    onClicked: root.mainInstance?.autoplaySavedTracks(false, root.pluginApi.settingsContext)
                   }
 
                   NButton {
@@ -2099,7 +2099,7 @@ Item {
                     fontSize: Style.fontSizeS
                     visible: !root.hasLibrarySelection() && root.librarySection === "tracks"
                     enabled: (mainInstance?.visibleLibraryEntries() || []).length > 0
-                    onClicked: root.mainInstance?.autoplaySavedTracks(true)
+                    onClicked: root.mainInstance?.autoplaySavedTracks(true, root.pluginApi.settingsContext)
                   }
 
                   NButton {
@@ -2285,21 +2285,21 @@ Item {
                                               "text": pluginApi?.tr("panel.playAction"),
                                               "icon": "player-play-filled",
                                               "onClicked": function () {
-                                                root.mainInstance?.playPlaylist(modelData?.id || "", false);
+                                                root.mainInstance?.playPlaylist(modelData?.id || "", false, root.pluginApi.settingsContext);
                                               }
                                             })
                           tertiaryAction: ({
                                              "text": pluginApi?.tr("panel.shuffleAction"),
                                              "icon": "arrows-shuffle",
                                              "onClicked": function () {
-                                               root.mainInstance?.playPlaylist(modelData?.id || "", true);
+                                               root.mainInstance?.playPlaylist(modelData?.id || "", true, root.pluginApi.settingsContext);
                                              }
                                            })
                           quaternaryAction: ({
                                                 "text": pluginApi?.tr("panel.queueAction"),
                                                 "icon": "list",
                                                 "onClicked": function () {
-                                                  root.mainInstance?.queuePlaylist(modelData?.id || "", false);
+                                                  root.mainInstance?.queuePlaylist(modelData?.id || "", false, root.pluginApi.settingsContext);
                                                 }
                                               })
                         }
@@ -2370,7 +2370,7 @@ Item {
                     icon: "player-play-filled"
                     fontSize: Style.fontSizeS
                     enabled: (mainInstance?.queueEntries || []).length > 0
-                    onClicked: root.mainInstance?.startQueue()
+                    onClicked: root.mainInstance?.startQueue(root.pluginApi.settingsContext)
                   }
 
                   NButton {
@@ -2378,7 +2378,7 @@ Item {
                     icon: "player-skip-forward"
                     fontSize: Style.fontSizeS
                     enabled: (mainInstance?.queueEntries || []).length > 0
-                    onClicked: root.mainInstance?.skipQueue()
+                    onClicked: root.mainInstance?.skipQueue(root.pluginApi.settingsContext)
                   }
 
                   NButton {

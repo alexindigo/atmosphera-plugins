@@ -36,6 +36,7 @@
     }
   },
   "settings": {
+    "shared-effect": "Les réglages de prière et d’affichage s’appliquent à cette instance. Le son, les notifications et le cache du calendrier mensuel sont partagés. L’aperçu joue le son immédiatement, sans attendre Appliquer, et Annuler ne l’arrête pas.",
     "location": {
       "header": "Localisation",
       "desc": "Utilisé pour récupérer les temps de prières journaliers depuis l'API Aladhan."

@@ -1,127 +1,143 @@
 import QtQuick
-import "../../common"
-import "../../common/MonitorCommands.js" as Commands
 import QtQuick.Layouts
 
 import Quickshell
+import "../../common/MonitorCommands.js" as Commands
+import "../../common"
 
 import qs.Commons
 import qs.Widgets
 
 ColumnLayout {
-    id: root
-    spacing: Style.marginM
+  id: root
+  spacing: Style.marginM
+  Layout.fillWidth: true
+
+  /***************************
+  * PROPERTIES
+  ***************************/
+  // Required properties
+  required property var pluginApi
+  required enabled
+  required property string selectedMonitor
+  required property var monitorSettings
+  NSettingsBaseline {
+    id: displayBaseline
+    readonly property bool hardwareAcceleration: Commands.value(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor, "hardwareAcceleration", root.pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property string profile: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.profile ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
+    readonly property string mpvSocket: root.pluginApi?.initialSettings?.mpvSocket ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.mpvSocket ?? ""
+  }
+  readonly property bool settingsDirty: edits.hasIntent || displayBaseline.differs({
+                                                                                     hardwareAcceleration: hardwareAcceleration,
+                                                                                     profile: profile,
+                                                                                     mpvSocket: mpvSocket
+                                                                                   })
+  MonitorEdits {
+    id: edits
+    values: ({
+               hardwareAcceleration: root.hardwareAcceleration,
+               profile: root.profile
+             })
+  }
+
+  // Monitor specific properties
+  property bool hardwareAcceleration: Commands.resolve(monitorSettings, "hardwareAcceleration", pluginApi?.manifest?.metadata?.defaultSettings)
+  property string profile: monitorSettings.profile ?? pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
+
+  // Global properties
+  property string mpvSocket: displayBaseline.mpvSocket
+
+  // Signals
+  signal saveMonitorProperty(key: string, value: var)
+
+  /***************************
+  * EVENTS
+  ***************************/
+  function loadMonitor(record) {
+    hardwareAcceleration = Commands.resolve(record, "hardwareAcceleration", pluginApi?.manifest?.metadata?.defaultSettings);
+    profile = record.profile ?? pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? "";
+    edits.reset();
+  }
+  Component.onCompleted: loadMonitor(monitorSettings)
+
+  /***************************
+  * COMPONENTS
+  ***************************/
+  // Profile
+  NComboBox {
+    enabled: root.enabled
     Layout.fillWidth: true
-
-
-    /***************************
-    * PROPERTIES
-    ***************************/
-    // Required properties
-    required property var    pluginApi
-    required enabled
-    required property string selectedMonitor
-    required property var monitorSettings
-    NSettingsBaseline {
-        id: displayBaseline
-        readonly property bool hardwareAcceleration: Commands.value(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor, "hardwareAcceleration", root.pluginApi?.manifest?.metadata?.defaultSettings)
-        readonly property string profile: Commands.record(root.pluginApi?.initialSettings?.monitors, root.selectedMonitor)?.profile ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
-        readonly property string mpvSocket: root.pluginApi?.initialSettings?.mpvSocket ?? root.pluginApi?.manifest?.metadata?.defaultSettings?.mpvSocket ?? ""
+    label: root.pluginApi?.tr("settings.advanced.profile.label")
+    description: root.pluginApi?.tr("settings.advanced.profile.description")
+    defaultValue: "default"
+    model: [
+      {
+        "key": "default",
+        "name": root.pluginApi?.tr("settings.advanced.profile.default")
+      },
+      {
+        "key": "fast",
+        "name": root.pluginApi?.tr("settings.advanced.profile.fast")
+      },
+      {
+        "key": "high-quality",
+        "name": root.pluginApi?.tr("settings.advanced.profile.high_quality")
+      },
+      {
+        "key": "low-latency",
+        "name": root.pluginApi?.tr("settings.advanced.profile.low_latency")
+      }
+    ]
+    currentKey: root.profile
+    onSelected: key => {
+      root.profile = key;
+      edits.mark("profile");
     }
-    readonly property bool settingsDirty: edits.hasIntent || displayBaseline.differs({hardwareAcceleration: hardwareAcceleration, profile: profile, mpvSocket: mpvSocket})
-    MonitorEdits {
-        id: edits
-        values: ({hardwareAcceleration: root.hardwareAcceleration, profile: root.profile})
+  }
+
+  // Hardware Acceleration
+  NToggle {
+    enabled: root.enabled
+    Layout.fillWidth: true
+    label: root.pluginApi?.tr("settings.advanced.hardware_acceleration.label")
+    description: root.pluginApi?.tr("settings.advanced.hardware_acceleration.description")
+    checked: root.hardwareAcceleration
+    onToggled: checked => {
+      root.hardwareAcceleration = checked;
+      edits.mark("hardwareAcceleration");
     }
+    defaultValue: false
+  }
 
-    // Monitor specific properties
-    property bool hardwareAcceleration: Commands.resolve(monitorSettings, "hardwareAcceleration", pluginApi?.manifest?.metadata?.defaultSettings)
-    property string profile: monitorSettings.profile ?? pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
-
-    // Global properties
-    property string mpvSocket: displayBaseline.mpvSocket
-
-    // Signals
-    signal saveMonitorProperty(key: string, value: var);
-
-
-    /***************************
-    * EVENTS
-    ***************************/
-    function loadMonitor(record) {
-        hardwareAcceleration = Commands.resolve(record, "hardwareAcceleration", pluginApi?.manifest?.metadata?.defaultSettings)
-        profile = record.profile ?? pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
-        edits.reset();
-    }
-    Component.onCompleted: loadMonitor(monitorSettings)
-
-
-    /***************************
-    * COMPONENTS
-    ***************************/
-    // Profile
-    NComboBox {
-        enabled: root.enabled
-        Layout.fillWidth: true
-        label:       root.pluginApi?.tr("settings.advanced.profile.label")
-        description: root.pluginApi?.tr("settings.advanced.profile.description")
-        defaultValue: "default"
-        model: [
-            {
-                "key": "default",
-                "name": root.pluginApi?.tr("settings.advanced.profile.default")
-            },
-            {
-                "key": "fast",
-                "name": root.pluginApi?.tr("settings.advanced.profile.fast")
-            },
-            {
-                "key": "high-quality",
-                "name": root.pluginApi?.tr("settings.advanced.profile.high_quality")
-            },
-            {
-                "key": "low-latency",
-                "name": root.pluginApi?.tr("settings.advanced.profile.low_latency")
-            }
-        ]
-        currentKey: root.profile
-        onSelected: key => { root.profile = key; edits.mark("profile"); }
-    }
-
-    // Hardware Acceleration
-    NToggle {
-        enabled: root.enabled
-        Layout.fillWidth: true
-        label:       root.pluginApi?.tr("settings.advanced.hardware_acceleration.label")
-        description: root.pluginApi?.tr("settings.advanced.hardware_acceleration.description")
-        checked: root.hardwareAcceleration
-        onToggled: checked => { root.hardwareAcceleration = checked; edits.mark("hardwareAcceleration"); }
-        defaultValue: false
-    }
-
-    // MPV Socket path
+  // MPV Socket path
+  NPluginSettingsField {
+    field: root.pluginApi?.field("mpvSocket") ?? null
     NTextInput {
-        enabled: root.enabled
-        Layout.fillWidth: true
-        label:           root.pluginApi?.tr("settings.advanced.mpv_socket.label")
-        description:     root.pluginApi?.tr("settings.advanced.mpv_socket.description")
-        placeholderText: root.pluginApi?.tr("settings.advanced.mpv_socket.input_placeholder")
-        text: root.mpvSocket
-        onTextChanged: root.mpvSocket = text
+      enabled: root.enabled
+      Layout.fillWidth: true
+      label: root.pluginApi?.tr("settings.advanced.mpv_socket.label")
+      description: root.pluginApi?.tr("settings.advanced.mpv_socket.description")
+      placeholderText: root.pluginApi?.tr("settings.advanced.mpv_socket.input_placeholder")
+      text: root.mpvSocket
+      onEditCommitted: {
+        root.mpvSocket = text;
+        root.pluginApi.field("mpvSocket").set(text);
+      }
+    }
+  }
+
+  /********************************
+  * Save settings functionality
+  ********************************/
+  function saveSettings() {
+    if (pluginApi == null) {
+      Logger.e("video-wallpaper", "Cannot save: pluginApi is null");
+      return;
     }
 
-
-    /********************************
-    * Save settings functionality
-    ********************************/
-    function saveSettings() {
-        if(pluginApi == null) {
-            Logger.e("video-wallpaper", "Cannot save: pluginApi is null");
-            return;
-        }
-
-        return edits.submit((key, value) => root.saveMonitorProperty(key, value));
-
-    }
-    function acknowledgeSettings(captured) { edits.acknowledge(captured); }
+    return edits.submit((key, value) => root.saveMonitorProperty(key, value));
+  }
+  function acknowledgeSettings(captured) {
+    edits.acknowledge(captured);
+  }
 }

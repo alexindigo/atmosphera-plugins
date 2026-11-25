@@ -73,6 +73,7 @@
     "pinned-cleared": "All pinned items cleared"
   },
   "settings": {
+    "shared-effect": "Clipboard history, pins, notes and Todo content are shared. This instance selects presentation and the policy of actions it starts; content actions are immediate and are not undone by Discard.",
     "tab-general": "General",
     "tab-appearance": "Appearance",
     "integrations": "Intégrations",

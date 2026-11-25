@@ -8,10 +8,11 @@ RowLayout {
     width: parent.width
 
     property var pluginApi: null
-    property int hunger: pluginApi?.mainInstance?.hunger ?? 100
-    property int happiness: pluginApi?.mainInstance?.happiness ?? 100
-    property int cleanliness: pluginApi?.mainInstance?.cleanliness ?? 100
-    property int energy: pluginApi?.mainInstance?.energy ?? 100
+    property var game: null
+    property int hunger: game?.hunger ?? 100
+    property int happiness: game?.happiness ?? 100
+    property int cleanliness: game?.cleanliness ?? 100
+    property int energy: game?.energy ?? 100
 
     component Gauge: Item {
         id: root

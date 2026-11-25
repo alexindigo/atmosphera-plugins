@@ -48,6 +48,12 @@ qs ipc call plugin:ntfy-notifications toggle
 
 The plugin polls the ntfy API using HTTP GET requests with `?poll=1&since=<timestamp>`. This retrieves new messages since the last check without keeping a persistent connection. Messages are parsed from ntfy's NDJSON response format.
 
+On Atmosphera, each configured instance selects its own server, topics and
+authentication. Its Bar and Panel share one request/result client. Read status
+remains shared across instances, and a server/message event produces at most one
+desktop notification even when multiple current clients receive it. Explicit IPC
+refreshes the plugin-level client.
+
 ## Privacy
 
 - The plugin only communicates with the configured ntfy server

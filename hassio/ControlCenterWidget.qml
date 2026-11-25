@@ -9,7 +9,7 @@ AtmoIconButtonHot {
 
     property ShellScreen screen
     property var pluginApi: null
-    property var main: pluginApi?.mainInstance ?? null
+    readonly property var main: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
     readonly property string status: {
         if (!main || main.haToken === "")

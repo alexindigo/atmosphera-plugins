@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -22,11 +23,11 @@ Item {
   property bool autoHeight: cfg.autoHeight ?? defaults.autoHeight ?? true
   property int columnCount: cfg.columnCount ?? defaults.columnCount ?? 3
 
-  // Bug 4 fix: re-evaluate rawCategories whenever Main.qml increments cheatsheetDataVersion
-  property int _dataVersion: pluginApi?.mainInstance?.cheatsheetDataVersion ?? 0
+  readonly property var settingsConsumer: pluginApi?.mainInstance?.clientFor(pluginApi) ?? null
+  property int _dataVersion: settingsConsumer?.cheatsheetDataVersion ?? 0
   property var rawCategories: {
     var _v = _dataVersion; // force QML dependency on version counter
-    return pluginApi?.state?.cheatsheetData ?? pluginApi?.pluginSettings?.cheatsheetData ?? [];
+    return settingsConsumer?.categories ?? [];
   }
   property var categories: []
 
@@ -37,7 +38,7 @@ Item {
     id: loadingTimeoutTimer
     interval: 4000
     repeat: false
-    running: false
+    running: root.isLoading
     onTriggered: {
       if (root.isLoading) {
         root.loadingTimedOut = true;
@@ -47,11 +48,8 @@ Item {
 
   Component.onCompleted: {
     categories = processCategories(rawCategories);
-    // Start timeout timer if we have no data yet
-    if (root.isLoading) {
-      loadingTimeoutTimer.start();
-    }
   }
+  onIsLoadingChanged: loadingTimedOut = false
 
 
   // Dynamic column items (up to 4 columns)
@@ -62,13 +60,12 @@ Item {
     id: columnUpdateDebounce
     interval: 100
     repeat: false
-    onTriggered: updateColumnItemsNow()
+    onTriggered: root.updateColumnItemsNow()
   }
 
   Component.onDestruction: {
     // Stop timer to prevent firing after destruction
     columnUpdateDebounce.stop();
-    loadingTimeoutTimer.stop();
 
     // Clear column items
     columnItems = [];
@@ -78,6 +75,8 @@ Item {
     categories = processCategories(rawCategories);
     updateColumnItems();
   }
+  onSplitWorkspacesChanged: { categories = processCategories(rawCategories); }
+  onWorkspaceSplitThresholdChanged: { categories = processCategories(rawCategories); }
 
   onCategoriesChanged: {
     updateColumnItems();
@@ -175,7 +174,8 @@ Item {
   readonly property int workspaceSplitThreshold: cfg.workspaceSplitThreshold ?? defaults.workspaceSplitThreshold ?? 12
 
   // Data is loaded by Main.qml, we just display it
-  property bool isLoading: rawCategories.length === 0
+  readonly property string parseStatus: settingsConsumer?.parseStatus ?? "loading"
+  readonly property bool isLoading: rawCategories.length === 0 && parseStatus === "loading"
 
   function calculateDynamicHeight() {
     // If auto height is disabled, use manual height (but still respect screen limit)
@@ -241,16 +241,22 @@ Item {
         // Title section (centered)
         Item { Layout.fillWidth: true }
 
+        NText {
+          visible: root.parseStatus === "failed" && root.rawCategories.length > 0
+          text: root.pluginApi?.tr("panel.refresh-failed")
+          color: AtmoColor.mError
+        }
+
         AtmoIcon {
           icon: "keyboard"
           pointSize: Style.fontSizeM
           color: AtmoColor.mPrimary
         }
         NText {
-          text: CompositorService.isHyprland ? pluginApi?.tr("panel.title-hyprland") :
-                CompositorService.isNiri     ? pluginApi?.tr("panel.title-niri") :
-                CompositorService.isMango    ? pluginApi?.tr("panel.title-mango") :
-                                               pluginApi?.tr("panel.title")
+          text: CompositorService.isHyprland ? root.pluginApi?.tr("panel.title-hyprland") :
+                CompositorService.isNiri     ? root.pluginApi?.tr("panel.title-niri") :
+                CompositorService.isMango    ? root.pluginApi?.tr("panel.title-mango") :
+                                               root.pluginApi?.tr("panel.title")
           font.pointSize: Style.fontSizeM
           font.weight: Font.Bold
           color: AtmoColor.mPrimary
@@ -258,7 +264,7 @@ Item {
 
         NTextInput {
           id: searchInput
-          placeholderText: pluginApi?.tr("panel.search-placeholder")
+          placeholderText: root.pluginApi?.tr("panel.search-placeholder")
           text: root.searchText
 
           onTextChanged: {
@@ -273,7 +279,7 @@ Item {
         AtmoIconButton {
           icon: "refresh"
           onClicked: {
-            pluginApi?.mainInstance?.refresh();
+            root.settingsConsumer?.refresh();
           }
         }
 
@@ -281,10 +287,10 @@ Item {
         AtmoIconButton {
           icon: "settings"
           onClicked: {
-            var screen = pluginApi?.panelOpenScreen;
-            if (screen && pluginApi?.manifest) {
-              pluginApi.closePanel(screen);
-              BarService.openPluginSettings(screen, pluginApi.manifest);
+            var screen = root.pluginApi?.panelOpenScreen;
+            if (screen && root.pluginApi?.manifest) {
+              root.pluginApi.closePanel(screen);
+              BarService.openPluginSettings(screen, root.pluginApi.manifest);
             }
           }
         }
@@ -294,8 +300,10 @@ Item {
     NText {
       id: loadingText
       anchors.centerIn: parent
-      text: root.loadingTimedOut ? pluginApi?.tr("panel.loading-timeout") : pluginApi?.tr("panel.loading")
-      visible: root.isLoading
+      text: root.pluginApi?.tr(root.parseStatus === "failed" ? "panel.refresh-failed"
+                      : root.loadingTimedOut ? "panel.loading-timeout"
+                      : root.isLoading ? "panel.loading" : "panel.no-binds")
+      visible: root.rawCategories.length === 0
       font.pointSize: Style.fontSizeL
       color: AtmoColor.mOnSurface
     }
@@ -322,19 +330,28 @@ Item {
           model: root.columnItems.length
 
           ColumnLayout {
+            id: column
+            required property int index
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignTop
             spacing: 2
 
-            property var colItems: root.columnItems[index] || []
+            property var colItems: root.columnItems[column.index] || []
 
             Repeater {
-              model: colItems
+              model: column.colItems
               Loader {
+                id: entryLoader
+                required property var modelData
                 Layout.fillWidth: true
-                sourceComponent: modelData.type === "header" ? headerComponent :
-                               (modelData.type === "spacer" ? spacerComponent : bindComponent)
-                property var itemData: modelData
+                sourceComponent: entryLoader.modelData.type === "header" ? headerComponent :
+                               (entryLoader.modelData.type === "spacer" ? spacerComponent : bindComponent)
+                Binding {
+                  target: entryLoader.item
+                  property: "itemData"
+                  value: entryLoader.modelData
+                  when: entryLoader.status === Loader.Ready
+                }
 
                 // Memory leak prevention: explicit cleanup
                 Component.onDestruction: {
@@ -352,6 +369,8 @@ Item {
   Component {
     id: headerComponent
     ColumnLayout {
+      id: categoryHeader
+      property var itemData: ({title: ""})
       Layout.preferredWidth: 300
       Layout.topMargin: Style.marginM
       Layout.bottomMargin: 4
@@ -362,7 +381,7 @@ Item {
       NText {
         Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
         x: parent.width - implicitWidth
-        text: itemData.title
+        text: categoryHeader.itemData.title
         font.pointSize: Style.fontSizeM
         font.weight: Font.Bold
         color: AtmoColor.mPrimary
@@ -376,6 +395,7 @@ Item {
   Component {
     id: spacerComponent
     Item {
+      property var itemData: ({})
       height: 10
       Layout.fillWidth: true
     }
@@ -385,6 +405,7 @@ Item {
     id: bindComponent
     RowLayout {
       id: bindRow
+      property var itemData: ({keys: "", desc: "", undescribed: false, bindId: ""})
       spacing: Style.marginS
       height: 22
       Layout.bottomMargin: 1
@@ -396,19 +417,21 @@ Item {
         Layout.alignment: Qt.AlignVCenter
         spacing: 3
         Repeater {
-          model: itemData.keys.split(" + ")
+          model: bindRow.itemData.keys.split(" + ")
           Rectangle {
+            id: badge
+            required property string modelData
             width: keyText.implicitWidth + 10
             height: 18
-            color: getKeyColor(modelData)
+            color: root.getKeyColor(badge.modelData)
             radius: 3
             NText {
               id: keyText
               anchors.centerIn: parent
-              text: getKeyLabel(modelData)
+              text: root.getKeyLabel(badge.modelData)
               font.pointSize: text.length > 12 ? 7 : 8
               font.weight: Font.Bold
-              color: getKeyTextColor(modelData)
+              color: root.getKeyTextColor(badge.modelData)
             }
           }
         }
@@ -416,10 +439,10 @@ Item {
 
       // Described bind: plain text (unchanged behaviour)
       NText {
-        visible: !itemData.undescribed
+        visible: !bindRow.itemData.undescribed
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignVCenter
-        text: itemData.desc
+        text: bindRow.itemData.desc
         font.pointSize: Style.fontSizeXS
         color: root.descriptionTextColor
         elide: Text.ElideRight
@@ -427,10 +450,10 @@ Item {
 
       // Undescribed bind: placeholder + add-description / hide actions
       NText {
-        visible: itemData.undescribed && !bindRow.editing
+        visible: bindRow.itemData.undescribed && !bindRow.editing
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignVCenter
-        text: pluginApi?.tr("panel.no-description")
+        text: root.pluginApi?.tr("panel.no-description")
         font.pointSize: Style.fontSizeXS
         font.italic: true
         color: AtmoColor.mOnSurfaceVariant
@@ -445,45 +468,45 @@ Item {
 
       NTextInput {
         id: descInput
-        visible: itemData.undescribed && bindRow.editing
+        visible: bindRow.itemData.undescribed && bindRow.editing
         Layout.fillWidth: true
         Layout.preferredHeight: Style.baseWidgetSize
-        placeholderText: pluginApi?.tr("panel.add-description-placeholder")
+        placeholderText: root.pluginApi?.tr("panel.add-description-placeholder")
       }
 
       AtmoIconButton {
-        visible: itemData.undescribed && bindRow.editing
+        visible: bindRow.itemData.undescribed && bindRow.editing
         Layout.preferredHeight: 18
         icon: "check"
-        tooltipText: pluginApi?.tr("panel.save-description")
+        tooltipText: root.pluginApi?.tr("panel.save-description")
         onClicked: {
-          root.saveBindDescription(itemData.bindId, descInput.text);
+          root.saveBindDescription(bindRow.itemData.bindId, descInput.text);
           bindRow.editing = false;
         }
       }
 
       AtmoIconButton {
-        visible: itemData.undescribed && bindRow.editing
+        visible: bindRow.itemData.undescribed && bindRow.editing
         Layout.preferredHeight: 18
         icon: "close"
-        tooltipText: pluginApi?.tr("panel.cancel")
+        tooltipText: root.pluginApi?.tr("panel.cancel")
         onClicked: { bindRow.editing = false; }
       }
 
       AtmoIconButton {
-        visible: itemData.undescribed && !bindRow.editing
+        visible: bindRow.itemData.undescribed && !bindRow.editing
         Layout.preferredHeight: 18
         icon: "edit"
-        tooltipText: pluginApi?.tr("panel.add-description")
+        tooltipText: root.pluginApi?.tr("panel.add-description")
         onClicked: { bindRow.editing = true; descInput.text = ""; descInput.inputItem.forceActiveFocus(); }
       }
 
       AtmoIconButton {
-        visible: itemData.undescribed && !bindRow.editing
+        visible: bindRow.itemData.undescribed && !bindRow.editing
         Layout.preferredHeight: 18
         icon: "eye-off"
-        tooltipText: pluginApi?.tr("panel.hide-bind")
-        onClicked: { root.hideBind(itemData.bindId); }
+        tooltipText: root.pluginApi?.tr("panel.hide-bind")
+        onClicked: { root.hideBind(bindRow.itemData.bindId); }
       }
     }
   }
@@ -528,37 +551,13 @@ Item {
     return keyName;
   }
 
-  // ===== Bind override helpers (shared keyed map in plugin settings) =====
-  function _cloneOverrides() {
-    if (!pluginApi || !pluginApi.pluginSettings) return ({});
-    var src = pluginApi.pluginSettings.bindOverrides || ({});
-    try { return JSON.parse(JSON.stringify(src)); } catch (e) { return ({}); }
-  }
-
+  // Main captures the originating runtime API and owns completion/lifetime.
   function saveBindDescription(bindId, desc) {
-    if (!pluginApi || !bindId) return;
-    var o = _cloneOverrides();
-    if (!o[bindId]) o[bindId] = ({});
-    var trimmed = (desc || "").trim();
-    if (trimmed.length === 0) {
-      delete o[bindId].desc;
-      if (Object.keys(o[bindId]).length === 0) delete o[bindId];
-    } else {
-      o[bindId].desc = trimmed;
-    }
-    pluginApi.pluginSettings.bindOverrides = o;
-    pluginApi.saveSettings();
-    pluginApi.mainInstance?.refresh();
+    return pluginApi?.mainInstance?.updateBind(pluginApi, bindId, desc, false) ?? false;
   }
 
   function hideBind(bindId) {
-    if (!pluginApi || !bindId) return;
-    var o = _cloneOverrides();
-    if (!o[bindId]) o[bindId] = ({});
-    o[bindId].hidden = true;
-    pluginApi.pluginSettings.bindOverrides = o;
-    pluginApi.saveSettings();
-    pluginApi.mainInstance?.refresh();
+    return pluginApi?.mainInstance?.updateBind(pluginApi, bindId, "", true) ?? false;
   }
 
   function buildColumnItems(categoryIndices) {

@@ -1,4 +1,5 @@
 {
+  "settings": {"shared-effect": "L’appareil sélectionné et l’apparence s’appliquent à cette instance. La recherche d’appareils, l’appairage et les transferts de fichiers utilisent le service KDE Connect partagé et agissent sur l’appareil lui-même."},
   "panel": {
     "title": "Appareils connectés",
     "signal": {

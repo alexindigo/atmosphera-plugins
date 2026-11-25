@@ -29,7 +29,7 @@ function cachedScreenshotEntry(entries, screenName) {
   return entries && entries[screenName] || null;
 }
 
-function canReuseScreenshot(entries, screenName, wallpaperPath, scaling, normalizePath, fallbackScaling) {
+function canReuseScreenshot(entries, screenName, wallpaperPath, scaling, clamp, normalizePath, fallbackScaling) {
   const entry = cachedScreenshotEntry(entries, screenName);
   const cachedPath = normalizePath(entry && entry.path || "");
   const cachedWallpaperPath = normalizePath(entry && entry.wallpaperPath || "");
@@ -40,7 +40,8 @@ function canReuseScreenshot(entries, screenName, wallpaperPath, scaling, normali
     return false;
   }
 
-  return cachedWallpaperPath === normalizePath(wallpaperPath) && cachedScaling === nextScaling;
+  return cachedWallpaperPath === normalizePath(wallpaperPath) && cachedScaling === nextScaling
+    && typeof entry.clamp === "string" && entry.clamp === clamp;
 }
 
 function formatBytes(bytesValue, fallbackText) {

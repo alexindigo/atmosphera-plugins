@@ -33,6 +33,8 @@ Item {
 
   // Display text based on mode
   readonly property string displayText: {
+    if (!main)
+      return "--";
     if (loading)
       return "...";
     if (!loaded || rate === 0)
@@ -51,8 +53,8 @@ Item {
   // State from Main.qml
   readonly property bool loading: main?.loading || false
 
-  // Access Main.qml instance for shared state/functions
-  readonly property var main: pluginApi?.mainInstance
+  // One Main-owned client for this runtime context, shared across its views.
+  readonly property var main: pluginApi?.mainInstance && pluginApi?.settingsContext ? pluginApi.mainInstance.settingsConsumerFor(pluginApi.settingsContext) : null
 
   // Required properties injected by PluginBarWidgetSlot
   property var pluginApi: null
@@ -63,6 +65,8 @@ Item {
   property int sectionWidgetsCount: 0
   readonly property string toCurrency: cfg.targetCurrency || defaults.targetCurrency || "EUR"
   readonly property string tooltipText: {
+    if (!main)
+      return pluginApi?.tr("widget.error") || "Could not load rates, check your internet connection.";
     if (loading)
       return pluginApi?.tr("widget.loading") || "Loading exchange rates...";
     if (!loaded)

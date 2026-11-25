@@ -24,7 +24,8 @@ Item {
 
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-  readonly property var monitor: pluginApi?.mainInstance
+  readonly property var settingsClient: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext)
+  readonly property var monitor: settingsClient?.observation
 
   readonly property string screenName: screen ? screen.name : ""
   readonly property string barPosition: Settings.getBarPositionForScreen(screenName)
@@ -44,12 +45,13 @@ Item {
   property int refreshNonce: 0
 
   readonly property string deviceNativePath: cfg.deviceNativePath ?? defaults.deviceNativePath ?? "__default__"
-  readonly property var selectedDevice: BatteryService.isDevicePresent(BatteryService.findDevice(deviceNativePath)) ? BatteryService.findDevice(deviceNativePath) : null
+  readonly property var selectedDevice: monitor?.selectedDevice ?? null
 
   readonly property bool isReady: BatteryService.isDeviceReady(selectedDevice)
   readonly property bool isPresent: BatteryService.isDevicePresent(selectedDevice)
   readonly property real percent: isReady ? BatteryService.getPercentage(selectedDevice) : -1
   readonly property bool isCharging: isReady ? BatteryService.isCharging(selectedDevice) : false
+  readonly property bool isCharged: isReady ? BatteryService.isCharged(selectedDevice) : false
   readonly property bool isPluggedIn: isReady ? BatteryService.isPluggedIn(selectedDevice) : false
   readonly property bool isLowBattery: isReady ? BatteryService.isLowBattery(selectedDevice) : false
   readonly property bool isCriticalBattery: isReady ? BatteryService.isCriticalBattery(selectedDevice) : false
@@ -90,7 +92,7 @@ Item {
         }
       }
 
-      let healthDevice = selectedDevice.healthSupported ? selectedDevice : (BatteryService.laptopBatteries.length > 0 ? BatteryService.laptopBatteries[0] : null);
+      const healthDevice = root.monitor?.healthDevice;
       if (healthDevice && healthDevice.healthSupported) {
         rows.push([I18n.tr("battery.battery-health"), `${Math.round(healthDevice.healthPercentage)}%`]);
       }
@@ -168,6 +170,7 @@ Item {
         percentage: root.percent
         ready: root.isReady
         charging: root.isCharging
+        charged: root.isCharged
         pluggedIn: root.isPluggedIn
         low: root.isLowBattery
         critical: root.isCriticalBattery
@@ -198,6 +201,7 @@ Item {
         percentage: root.percent
         ready: root.isReady
         charging: root.isCharging
+        charged: root.isCharged
         pluggedIn: root.isPluggedIn
         low: root.isLowBattery
         critical: root.isCriticalBattery
@@ -349,126 +353,11 @@ Item {
   }
 
   function formatPower(compact, showUnavailable) {
-    if (root.monitor && root.monitor.sysfsOk) {
-      return root.monitor.formatPower(compact, showUnavailable);
-    }
-
-    const rate = resolvePowerRate(selectedDevice);
-    if (rate <= 0) {
-      return showUnavailable ? pluginApi?.tr("common.unavailable") : "";
-    }
-
-    return `${rate.toFixed(1)}${compact ? "W" : " W"}`;
-  }
-
-  function resolvePowerRate(device) {
-    const directRate = readDeviceRate(device);
-    if (directRate > 0) {
-      return directRate;
-    }
-
-    // UPower's DisplayDevice can report a zero rate even when BAT* devices have data.
-    let totalRate = 0;
-    let foundPhysicalRate = false;
-    const batteries = BatteryService.laptopBatteries || [];
-    for (let i = 0; i < batteries.length; i++) {
-      const battery = batteries[i];
-      if (!battery || (battery.nativePath && battery.nativePath.includes("DisplayDevice"))) {
-        continue;
-      }
-
-      const rate = readDeviceRate(battery);
-      if (rate > 0) {
-        totalRate += rate;
-        foundPhysicalRate = true;
-      }
-    }
-
-    if (foundPhysicalRate) {
-      return totalRate;
-    }
-
-    return directRate;
-  }
-
-  function readDeviceRate(device) {
-    if (!device || device.changeRate === undefined || device.changeRate === null) {
-      return -1;
-    }
-
-    const rate = Math.abs(Number(device.changeRate));
-    return isNaN(rate) ? -1 : rate;
+    return root.monitor?.formatPower(compact, showUnavailable) ?? (showUnavailable ? pluginApi?.tr("common.unavailable") : "");
   }
 
   function formatRemainingTime() {
-    if (root.monitor && root.monitor.sysfsOk) {
-      return root.monitor.formatRelevantTime(false);
-    }
-
-    if (!isReady || !selectedDevice) {
-      return "";
-    }
-
-    return formatDurationCompact(resolveRemainingSeconds(selectedDevice));
-  }
-
-  function resolveRemainingSeconds(device) {
-    const directSeconds = readRemainingSeconds(device);
-    if (directSeconds > 0) {
-      return directSeconds;
-    }
-
-    const batteries = BatteryService.laptopBatteries || [];
-    for (let i = 0; i < batteries.length; i++) {
-      const battery = batteries[i];
-      if (!battery || (battery.nativePath && battery.nativePath.includes("DisplayDevice"))) {
-        continue;
-      }
-
-      const seconds = readRemainingSeconds(battery);
-      if (seconds > 0) {
-        return seconds;
-      }
-    }
-
-    return 0;
-  }
-
-  function readRemainingSeconds(device) {
-    if (!BatteryService.isDeviceReady(device)) {
-      return 0;
-    }
-
-    if (BatteryService.isCharging(device) && device.timeToFull > 0) {
-      return device.timeToFull;
-    }
-    if (!BatteryService.isCharging(device) && !BatteryService.isPluggedIn(device) && device.timeToEmpty > 0) {
-      return device.timeToEmpty;
-    }
-    if (device.timeToFull > 0) {
-      return device.timeToFull;
-    }
-    if (device.timeToEmpty > 0) {
-      return device.timeToEmpty;
-    }
-
-    return 0;
-  }
-
-  function formatDurationCompact(seconds) {
-    if (seconds <= 0) {
-      return "";
-    }
-
-    const totalMinutes = Math.max(1, Math.round(seconds / 60));
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-
-    if (hours > 0) {
-      return minutes > 0 ? `${hours}h${minutes}m` : `${hours}h`;
-    }
-
-    return `${minutes}m`;
+    return root.monitor?.formatRelevantTime(false) ?? "";
   }
 
   function toggleBatteryPanel() {

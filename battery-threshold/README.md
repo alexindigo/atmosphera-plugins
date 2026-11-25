@@ -9,7 +9,7 @@ this in action:
 
 ## Features
 
-- **Bar Widget**: Shows current battery threshold in the bar
+- **Bar Widget**: Opens the selected battery's threshold panel
 - **Panel**: Adjust battery threshold with a slider (40-100%)
 - **Persistent Settings**: Saves and restores threshold across reboots
 
@@ -23,6 +23,25 @@ threshold using the slider.
 - Drag the slider to set battery threshold (40-100%)
 - Changes are applied immediately
 - Settings persist across reboots
+
+### Configuration and shared hardware
+
+Settings opened for a placement edit that instance's battery selection. Settings
+-> Plugins edits the plugin-level configuration, which instances inherit until
+they override it. Reset removes that override instead of copying a default.
+
+The physical charge limit belongs to the selected battery, not to a widget. All
+views of the same battery observe the same current limit. A configuration's saved
+limit is restored once when its Main-owned client activates, or after accepted
+Settings Apply. Conflicting saved limits can therefore change the same battery
+in activation order; no client continually reasserts its limit. Additional views
+of an already active configuration do not restore it again.
+
+Moving the panel slider immediately changes its captured battery and then saves
+the limit through that panel's own runtime preference owner. A failed physical
+write does not save the preference. A failed preference save does not undo a
+successful physical write. Retired contexts cannot save delayed action results
+into another configuration. Main/IPC commands remain explicitly plugin-level.
 
 ## Setup (Required)
 

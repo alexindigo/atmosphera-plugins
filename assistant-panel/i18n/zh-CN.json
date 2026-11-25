@@ -64,6 +64,7 @@
     "vi": "越南语"
   },
   "settings": {
+    "sharedContent": "Provider and translation choices follow this widget. Conversation, input, translation results and history are shared; clear and stop affect everyone.",
     "aiSection": "AI对话设置",
     "provider": "AI提供商",
     "providerDesc": "选择偏好的AI提供商",

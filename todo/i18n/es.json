@@ -12,6 +12,7 @@
     "items_count": "{active} de {total} elementos"
   },
   "main": {
+    "export_busy": "An export is already running. Retry after it finishes.",
     "added_new_todo": "Se agregó una nueva tarea:",
     "cleared_completed_todos": "Tareas completadas eliminadas",
     "cleared_all_todos": "Todas las tareas eliminadas",
@@ -85,6 +86,7 @@
     }
   },
   "settings": {
+    "shared-effect": "Tasks and pages keep their existing shared owner. Display and export choices belong to this configuration; exporting uses the shared tasks.",
     "background_color": {
       "description": "Color de fondo del widget de tareas",
       "label": "Color de fondo"

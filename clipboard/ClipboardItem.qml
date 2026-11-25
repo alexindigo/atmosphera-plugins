@@ -184,7 +184,7 @@ Item {
         if (card.pinned)
             return;
         if (card.renderAsImage && card.entryId) {
-            card.pluginApi?.mainInstance?.getImage(card.entryId);
+            card.pluginApi?.mainInstance?.getImage(card.entryId, card.pluginApi.settingsContext);
         }
         if (card.renderAsFile && card.entryId) {
             card.pluginApi?.mainInstance?.getFileMeta(card.entryId);
@@ -193,6 +193,8 @@ Item {
     onEntryIdChanged: _requestDecode()
     onRenderAsImageChanged: _requestDecode()
     onRenderAsFileChanged: _requestDecode()
+    onPluginApiChanged: _requestDecode()
+    Component.onCompleted: _requestDecode()
 
     // Signal bubbled up when this row triggers a copy. Panel.qml listens to
     // this and drives its own closePanelTimer so recycled delegates

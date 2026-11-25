@@ -1,36 +1,47 @@
 import QtQuick
-import Quickshell
-import Quickshell.Io
 import qs.Commons
-import qs.Services.UI
-import "Auth.js" as Auth
 
 Item {
-    id: root
-    property var pluginApi: null
-    property var _lifetime: ({alive: true})
-    property var _request: null
-    Component.onDestruction: {
-        _lifetime.alive = false;
-        if (_request) _request.abort();
-    }
+  id: root
+  property var pluginApi: null
+  property var _settingsConsumers: new Map()
+  Component { id: clientFactory; SpotifySettingsClient {} }
+  function settingsConsumerFor(context) {
+    if (!context || !context.current()) return null;
+    if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+    var client = clientFactory.createObject(root, {
+      settingsContext: context, observation: root,
+      retire: function(retired) { root._settingsConsumers.delete(context); retired.destroy(); }
+    });
+    _settingsConsumers.set(context, client);
+    return client;
+  }
 
-    function refreshAccessToken() {
-        if (!pluginApi || _request) return;
-        var api = pluginApi;
-        var lifetime = _lifetime;
-        var input = {clientId: api.pluginSettings.clientId, clientSecret: api.pluginSettings.clientSecret, refreshToken: api.pluginSettings.refreshToken};
-        _request = Auth.requestToken(Qt.btoa(input.clientId + ":" + input.clientSecret), {refresh_token: input.refreshToken, grant_type: "refresh_token"}, function(tokens, error) {
-            if (!lifetime.alive) return;
-            root._request = null;
-            if (error) { Logger.e("spotify-player", "Token refresh failed"); return; }
-            if (root.pluginApi !== api || api.pluginSettings.clientId !== input.clientId || api.pluginSettings.clientSecret !== input.clientSecret || api.pluginSettings.refreshToken !== input.refreshToken) return;
-            api.pluginSettings.accessToken = tokens.accessToken;
-            api.pluginSettings.refreshToken = tokens.refreshToken || input.refreshToken;
-            api.pluginSettings.tokenExpiresAt = tokens.tokenExpiresAt;
-            api.saveSettings(function(result) {
-                if (lifetime.alive && (result.status === "saved" || result.status === "nothing_to_save")) Logger.i("spotify-player", "Token refreshed successfully");
-            });
-        });
+  // Runtime actions supply their captured API. No page acquires this writer.
+  function adoptTokens(client, input, tokens, callback) {
+    var runtimeApi = input?.api;
+    if (!tokens || !runtimeApi || _settingsConsumers.get(runtimeApi.settingsContext) !== client || !client.accepts(input)) return false;
+    const applied = runtimeApi.pluginSettings;
+    if ((applied.refreshToken || "") !== input.refreshToken || (applied.accessToken || "") !== input.accessToken ||
+        (applied.tokenExpiresAt || 0) !== input.tokenExpiresAt) {
+      callback(null);
+      return true;
     }
+    applied.accessToken = tokens.accessToken;
+    // Omitting a refresh token means no field edit, not a copied override.
+    if (typeof tokens.refreshToken === "string" && tokens.refreshToken) applied.refreshToken = tokens.refreshToken;
+    applied.tokenExpiresAt = tokens.tokenExpiresAt;
+    runtimeApi.saveSettings(function(result) {
+      if (!client || !client.current || !client.accepts(input)) return;
+      callback((result.status === "saved" || result.status === "nothing_to_save") &&
+        (!result.unresolvedGroups || !result.unresolvedGroups.length));
+    });
+    return true;
+  }
+
+  // Calls without a placed origin remain deliberately plugin-level.
+  function refreshAccessToken(runtimeApi) {
+    var api = runtimeApi || pluginApi;
+    return settingsConsumerFor(api?.settingsContext)?.refreshAccessToken(api) ?? false;
+  }
 }

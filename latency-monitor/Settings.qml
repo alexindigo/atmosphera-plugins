@@ -2,24 +2,35 @@ import QtQuick
 import QtQuick.Layouts
 import qs.Commons
 import qs.Widgets
+import "ThresholdPolicy.js" as ThresholdPolicy
 
 ColumnLayout {
   id: root
 
   property var pluginApi: null
-  property var cfg: pluginApi?.pluginSettings || ({})
+  readonly property var hostsField: pluginApi?.field("hosts") ?? null
+  readonly property var intervalSecondsField: pluginApi?.field("intervalSeconds") ?? null
+  readonly property var thresholdGoodField: pluginApi?.field("thresholdGood") ?? null
+  readonly property var thresholdWarningField: pluginApi?.field("thresholdWarning") ?? null
+  readonly property var showHostNameField: pluginApi?.field("showHostName") ?? null
+  readonly property var barHostField: pluginApi?.field("barHost") ?? null
+  readonly property var colorGoodField: pluginApi?.field("colorGood") ?? null
+  readonly property var colorWarningField: pluginApi?.field("colorWarning") ?? null
+  readonly property var colorCriticalField: pluginApi?.field("colorCritical") ?? null
+  readonly property var animationsField: pluginApi?.field("animations") ?? null
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-  property int valueIntervalSeconds: displayBaseline.project("valueIntervalSeconds")
-  property int valueThresholdGood: displayBaseline.project("valueThresholdGood")
-  property int valueThresholdWarning: displayBaseline.project("valueThresholdWarning")
-  property bool valueShowHostName: displayBaseline.valueShowHostName
-  property string valueBarHost: displayBaseline.valueBarHost
-  property string valueColorGood: displayBaseline.valueColorGood
-  property string valueColorWarning: displayBaseline.valueColorWarning
-  property string valueColorCritical: displayBaseline.valueColorCritical
-  property var valueHosts: displayBaseline.valueHosts
-  property bool valueAnimations: displayBaseline.valueAnimations
+  readonly property int valueIntervalSeconds: root.intervalSecondsField?.value ?? defaults.intervalSeconds
+  readonly property int valueThresholdGood: root.thresholdGoodField?.value ?? defaults.thresholdGood
+  // Project the effective range without rewriting the independently resettable warning preference.
+  readonly property int valueThresholdWarning: ThresholdPolicy.effectiveWarning(valueThresholdGood, root.thresholdWarningField?.value ?? defaults.thresholdWarning)
+  readonly property bool valueShowHostName: root.showHostNameField?.value ?? defaults.showHostName
+  readonly property string valueBarHost: root.barHostField?.value ?? defaults.barHost
+  readonly property string valueColorGood: root.colorGoodField?.value ?? defaults.colorGood
+  readonly property string valueColorWarning: root.colorWarningField?.value ?? defaults.colorWarning
+  readonly property string valueColorCritical: root.colorCriticalField?.value ?? defaults.colorCritical
+  readonly property var valueHosts: root.hostsField?.value ?? defaults.hosts
+  readonly property bool valueAnimations: root.animationsField?.value ?? defaults.animations
 
   spacing: Style.marginL
 
@@ -37,18 +48,21 @@ ColumnLayout {
       Layout.fillWidth: true
       spacing: Style.marginS
 
-      NTextInput {
-        Layout.preferredWidth: 120 * Style.uiScaleRatio
-        label: index === 0 ? pluginApi?.tr("settings.hosts.name") : ""
-        placeholderText: "Name"
-        text: modelData.name
-        onEditingFinished: {
-          const arr = root.valueHosts.slice();
-          arr[index] = {
-            name: text,
-            address: arr[index].address
-          };
-          root.valueHosts = arr;
+      NPluginSettingsField {
+        field: root.hostsField
+        NTextInput {
+          Layout.preferredWidth: 120 * Style.uiScaleRatio
+          label: index === 0 ? pluginApi?.tr("settings.hosts.name") : ""
+          placeholderText: "Name"
+          text: modelData.name
+          onEditCommitted: {
+            const arr = root.valueHosts.slice();
+            arr[index] = {
+              name: text,
+              address: arr[index].address
+            };
+            root.hostsField.set(arr);
+          }
         }
       }
 
@@ -63,7 +77,7 @@ ColumnLayout {
             name: arr[index].name,
             address: text
           };
-          root.valueHosts = arr;
+          root.hostsField.set(arr);
         }
       }
 
@@ -76,7 +90,7 @@ ColumnLayout {
         onClicked: {
           const arr = root.valueHosts.slice();
           arr.splice(index, 1);
-          root.valueHosts = arr;
+          root.hostsField.set(arr);
         }
       }
     }
@@ -105,38 +119,41 @@ ColumnLayout {
       tooltipText: pluginApi?.tr("settings.hosts.add")
       enabled: addNameField.text.trim() !== "" && addAddrField.text.trim() !== ""
       onClicked: {
-        root.valueHosts = root.valueHosts.concat([
-          {
-            name: addNameField.text.trim(),
-            address: addAddrField.text.trim()
-          }
-        ]);
+        root.hostsField.set(root.valueHosts.concat([
+                                                     {
+                                                       name: addNameField.text.trim(),
+                                                       address: addAddrField.text.trim()
+                                                     }
+                                                   ]));
         addNameField.text = "";
         addAddrField.text = "";
       }
     }
   }
 
-  NComboBox {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.barHost.label")
-    description: pluginApi?.tr("settings.barHost.desc")
-    currentKey: root.valueBarHost
-    model: {
-      const base = [
-        {
-          key: "worst",
-          name: pluginApi?.tr("settings.barHost.worst")
-        }
-      ];
-      for (const h of root.valueHosts)
-        base.push({
-          key: h.name,
-          name: h.name
-        });
-      return base;
+  NPluginSettingsField {
+    field: root.barHostField
+    NComboBox {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.barHost.label")
+      description: pluginApi?.tr("settings.barHost.desc")
+      currentKey: root.valueBarHost
+      model: {
+        const base = [
+                {
+                  key: "worst",
+                  name: pluginApi?.tr("settings.barHost.worst")
+                }
+              ];
+        for (const h of root.valueHosts)
+          base.push({
+                      key: h.name,
+                      name: h.name
+                    });
+        return base;
+      }
+      onSelected: key => root.barHostField.set(key)
     }
-    onSelected: key => root.valueBarHost = key
   }
 
   NDivider {
@@ -167,16 +184,18 @@ ColumnLayout {
     }
   }
 
-  NSlider {
-    id: rangeValueIntervalSeconds
-    objectName: "settings-range-valueIntervalSeconds"
-    onValueChanged: root.valueIntervalSeconds = value
-    Layout.fillWidth: true
-    from: 1
-    to: 30
-    stepSize: 1
-    value: root.valueIntervalSeconds
-    onMoved: root.valueIntervalSeconds = Math.round(value)
+  NPluginSettingsField {
+    field: root.intervalSecondsField
+    NSlider {
+      id: rangeValueIntervalSeconds
+      objectName: "settings-range-valueIntervalSeconds"
+      Layout.fillWidth: true
+      from: 1
+      to: 30
+      stepSize: 1
+      value: root.valueIntervalSeconds
+      onMoved: root.intervalSecondsField.set(Math.round(value))
+    }
   }
 
   NDivider {
@@ -204,16 +223,18 @@ ColumnLayout {
       font.family: "monospace"
     }
   }
-  NSlider {
-    id: rangeValueThresholdGood
-    objectName: "settings-range-valueThresholdGood"
-    onValueChanged: root.valueThresholdGood = value
-    Layout.fillWidth: true
-    from: 5
-    to: 100
-    stepSize: 5
-    value: root.valueThresholdGood
-    onMoved: root.valueThresholdGood = Math.round(value)
+  NPluginSettingsField {
+    field: root.thresholdGoodField
+    NSlider {
+      id: rangeValueThresholdGood
+      objectName: "settings-range-valueThresholdGood"
+      Layout.fillWidth: true
+      from: 5
+      to: 100
+      stepSize: 5
+      value: root.valueThresholdGood
+      onMoved: root.thresholdGoodField.set(Math.round(value))
+    }
   }
 
   RowLayout {
@@ -232,16 +253,18 @@ ColumnLayout {
       font.family: "monospace"
     }
   }
-  NSlider {
-    id: rangeValueThresholdWarning
-    objectName: "settings-range-valueThresholdWarning"
-    onValueChanged: root.valueThresholdWarning = value
-    Layout.fillWidth: true
-    from: root.valueThresholdGood + 5   // can't go below good threshold
-    to: 500
-    stepSize: 5
-    value: root.valueThresholdWarning
-    onMoved: root.valueThresholdWarning = Math.round(value)
+  NPluginSettingsField {
+    field: root.thresholdWarningField
+    NSlider {
+      id: rangeValueThresholdWarning
+      objectName: "settings-range-valueThresholdWarning"
+      Layout.fillWidth: true
+      from: ThresholdPolicy.minimumWarning(root.valueThresholdGood)
+      to: 500
+      stepSize: 5
+      value: root.valueThresholdWarning
+      onMoved: root.thresholdWarningField.set(Math.round(value))
+    }
   }
 
   NDivider {
@@ -253,20 +276,26 @@ ColumnLayout {
     Layout.bottomMargin: -Style.marginM
   }
 
-  NToggle {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.showHostName.label")
-    description: pluginApi?.tr("settings.showHostName.desc")
-    checked: root.valueShowHostName
-    onToggled: checked => root.valueShowHostName = checked
+  NPluginSettingsField {
+    field: root.showHostNameField
+    NToggle {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.showHostName.label")
+      description: pluginApi?.tr("settings.showHostName.desc")
+      checked: root.valueShowHostName
+      onToggled: checked => root.showHostNameField.set(checked)
+    }
   }
 
-  NToggle {
-    Layout.fillWidth: true
-    label: pluginApi?.tr("settings.animations.label")
-    description: pluginApi?.tr("settings.animations.desc")
-    checked: root.valueAnimations
-    onToggled: checked => root.valueAnimations = checked
+  NPluginSettingsField {
+    field: root.animationsField
+    NToggle {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.animations.label")
+      description: pluginApi?.tr("settings.animations.desc")
+      checked: root.valueAnimations
+      onToggled: checked => root.animationsField.set(checked)
+    }
   }
 
   RowLayout {
@@ -275,9 +304,12 @@ ColumnLayout {
       Layout.alignment: Qt.AlignCenter
     }
 
-    NColorPicker {
-      selectedColor: root.valueColorGood
-      onColorSelected: key => root.valueColorGood = key
+    NPluginSettingsField {
+      field: root.colorGoodField
+      NColorPicker {
+        selectedColor: root.valueColorGood
+        onColorSelected: key => root.colorGoodField.set(key)
+      }
     }
   }
 
@@ -287,9 +319,12 @@ ColumnLayout {
       Layout.alignment: Qt.AlignCenter
     }
 
-    NColorPicker {
-      selectedColor: root.valueColorWarning
-      onColorSelected: key => root.valueColorWarning = key
+    NPluginSettingsField {
+      field: root.colorWarningField
+      NColorPicker {
+        selectedColor: root.valueColorWarning
+        onColorSelected: key => root.colorWarningField.set(key)
+      }
     }
   }
 
@@ -299,41 +334,21 @@ ColumnLayout {
       Layout.alignment: Qt.AlignCenter
     }
 
-    NColorPicker {
-      selectedColor: root.valueColorCritical
-      onColorSelected: key => root.valueColorCritical = key
+    NPluginSettingsField {
+      field: root.colorCriticalField
+      NColorPicker {
+        selectedColor: root.valueColorCritical
+        onColorSelected: key => root.colorCriticalField.set(key)
+      }
     }
   }
 
-  NSettingsBaseline {
-    ranges: [NSettingsRange { field: "valueIntervalSeconds"; from: rangeValueIntervalSeconds.from; to: rangeValueIntervalSeconds.to }, NSettingsRange { field: "valueThresholdGood"; from: rangeValueThresholdGood.from; to: rangeValueThresholdGood.to }, NSettingsRange { field: "valueThresholdWarning"; from: rangeValueThresholdWarning.from; to: rangeValueThresholdWarning.to }]
-    id: displayBaseline
-    readonly property var valueHosts: cfg.hosts ?? defaults.hosts
-    readonly property int valueIntervalSeconds: cfg.intervalSeconds ?? defaults.intervalSeconds
-    readonly property int valueThresholdGood: cfg.thresholdGood ?? defaults.thresholdGood
-    readonly property int valueThresholdWarning: cfg.thresholdWarning ?? defaults.thresholdWarning
-    readonly property bool valueShowHostName: cfg.showHostName ?? defaults.showHostName
-    readonly property string valueBarHost: cfg.barHost ?? defaults.barHost
-    readonly property string valueColorGood: cfg.colorGood ?? defaults.colorGood
-    readonly property string valueColorWarning: cfg.colorWarning ?? defaults.colorWarning
-    readonly property string valueColorCritical: cfg.colorCritical ?? defaults.colorCritical
-    readonly property bool valueAnimations: cfg.animations ?? defaults.animations
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({valueHosts: root.valueHosts, valueIntervalSeconds: root.valueIntervalSeconds, valueThresholdGood: root.valueThresholdGood, valueThresholdWarning: root.valueThresholdWarning, valueShowHostName: root.valueShowHostName, valueBarHost: root.valueBarHost, valueColorGood: root.valueColorGood, valueColorWarning: root.valueColorWarning, valueColorCritical: root.valueColorCritical, valueAnimations: root.valueAnimations})
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   function saveSettings() {
     if (!pluginApi)
       return;
-    pluginApi.pluginSettings.hosts = root.valueHosts;
-    pluginApi.pluginSettings.intervalSeconds = root.valueIntervalSeconds;
-    pluginApi.pluginSettings.thresholdGood = root.valueThresholdGood;
-    pluginApi.pluginSettings.thresholdWarning = root.valueThresholdWarning;
-    pluginApi.pluginSettings.showHostName = root.valueShowHostName;
-    pluginApi.pluginSettings.barHost = root.valueBarHost;
-    pluginApi.pluginSettings.colorGood = root.valueColorGood;
-    pluginApi.pluginSettings.colorWarning = root.valueColorWarning;
-    pluginApi.pluginSettings.colorCritical = root.valueColorCritical;
-    pluginApi.pluginSettings.animations = root.valueAnimations;
     pluginApi.saveSettings(function (result) {
       if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
         Logger.d("LatencyMonitor", "Settings saved");

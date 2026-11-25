@@ -29,6 +29,8 @@
     "timeDays": "{count}d ago"
   },
   "settings": {
+    "shared-effect-label": "Shared read status and notifications",
+    "shared-effect": "This instance selects its own server and topics. Read status is shared across instances, and each incoming message shows at most one desktop notification.",
     "server": {
       "label": "Server URL",
       "desc": "The ntfy server URL (default: https://ntfy.sh)"

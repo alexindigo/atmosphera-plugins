@@ -64,6 +64,7 @@
     "vi": "Vietnamien"
   },
   "settings": {
+    "sharedContent": "Provider and translation choices follow this widget. Conversation, input, translation results and history are shared; clear and stop affect everyone.",
     "aiSection": "Paramètres du chat IA",
     "provider": "Fournisseur d'IA",
     "providerDesc": "Sélectionnez votre fournisseur d'IA préféré",

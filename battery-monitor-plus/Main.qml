@@ -1,140 +1,65 @@
 import QtQuick
-import Quickshell.Io
-import qs.Commons
-import qs.Services.Hardware
 
 Item {
   id: root
-
   property var pluginApi: null
-
-  property bool sysfsOk: false
-  property string sysfsStatus: ""
-  property real sysfsPowerWatts: -1
-  property int sysfsTimeToEmpty: 0
-  property int sysfsTimeToFull: 0
-  property int sysfsCapacity: -1
-  property string sysfsSource: ""
-  property string sysfsError: ""
-  property int refreshNonce: 0
-
-  readonly property var cfg: pluginApi?.pluginSettings || ({})
-  readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
-  readonly property int refreshIntervalSeconds: Math.max(1, cfg.refreshIntervalSeconds ?? defaults.refreshIntervalSeconds ?? 5)
-  readonly property string deviceNativePath: cfg.deviceNativePath ?? defaults.deviceNativePath ?? "__default__"
-  readonly property bool isChargingHardware: sysfsStatus === "Charging"
-  readonly property bool isDischargingHardware: sysfsStatus === "Discharging"
-
-  Component.onCompleted: scanSysfs()
-
-  Timer {
-    interval: root.refreshIntervalSeconds * 1000
-    repeat: true
-    running: true
-    triggeredOnStart: false
-    onTriggered: root.scanSysfs()
+  property var _settingsConsumers: new Map()
+  property var _observations: new Map()
+  Component { id: observationFactory; BatteryObservation {} }
+  Component { id: clientFactory; BatterySettingsClient {} }
+  function acquireObservation(path, client) {
+    if (!_observations.has(path)) {
+      var observer = observationFactory.createObject(root, {pluginApi: pluginApi, deviceNativePath: path});
+      _observations.set(path, {observer: observer, clients: new Set()});
+    }
+    var entry = _observations.get(path);
+    entry.clients.add(client);
+    return entry.observer;
   }
-
-  Process {
-    id: sysfsScanProcess
-    running: false
-    stdout: StdioCollector {
-      id: sysfsStdout
-    }
-    stderr: StdioCollector {
-      id: sysfsStderr
-    }
-
-    onExited: function (exitCode, exitStatus) {
-      root.applySysfsSnapshot(sysfsStdout.text || "", sysfsStderr.text || "");
+  function releaseObservation(path, client) {
+    var entry = _observations.get(path);
+    if (!entry) return;
+    entry.clients.delete(client);
+    if (entry.clients.size === 0) {
+      _observations.delete(path);
+      entry.observer.destroy();
     }
   }
-
-  function scanSysfs() {
-    if (!pluginApi || !pluginApi.pluginDir || sysfsScanProcess.running) {
-      return;
-    }
-
-    sysfsScanProcess.command = ["sh", `${pluginApi.pluginDir}/scripts/read_battery_sysfs.sh`, root.deviceNativePath];
-    sysfsScanProcess.running = true;
+  function settingsConsumerFor(context) {
+    if (!context || !context.current()) return null;
+    if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+    var client = clientFactory.createObject(root, {
+      settingsContext: context,
+      defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({}),
+      acquireObservation: function(path, consumer) { return root.acquireObservation(path, consumer); },
+      releaseObservation: function(path, consumer) { root.releaseObservation(path, consumer); },
+      retire: function(retired) {
+        root._settingsConsumers.delete(context);
+        retired.releaseObservationLease();
+        retired.destroy();
+      }
+    });
+    _settingsConsumers.set(context, client);
+    return client;
   }
-
-  function applySysfsSnapshot(stdoutText, stderrText) {
-    let parsed = null;
-    try {
-      parsed = JSON.parse((stdoutText || "").trim());
-    } catch (e) {
-      root.sysfsOk = false;
-      root.sysfsError = stderrText || String(e);
-      root.refreshNonce++;
-      Logger.w("BatteryMonitorPlus", "Failed to parse sysfs battery data:", root.sysfsError);
-      return;
-    }
-
-    root.sysfsOk = parsed.ok === true;
-    root.sysfsStatus = parsed.status || "";
-    root.sysfsPowerWatts = numberOr(parsed.powerWatts, -1);
-    root.sysfsTimeToEmpty = Math.round(numberOr(parsed.timeToEmpty, 0));
-    root.sysfsTimeToFull = Math.round(numberOr(parsed.timeToFull, 0));
-    root.sysfsCapacity = Math.round(numberOr(parsed.capacity, -1));
-    root.sysfsSource = parsed.source || "";
-    root.sysfsError = parsed.error || "";
-    root.refreshNonce++;
-  }
-
-  function numberOr(value, fallback) {
-    const parsed = Number(value);
-    return isNaN(parsed) ? fallback : parsed;
-  }
-
-  function statusText() {
-    if (!sysfsOk) {
-      return pluginApi?.tr("status.noBattery");
-    }
-
-    if (sysfsStatus === "Charging") {
-      return pluginApi?.tr("status.charging");
-    }
-    if (sysfsStatus === "Discharging") {
-      return pluginApi?.tr("status.discharging");
-    }
-    if (sysfsStatus === "Full") {
-      return pluginApi?.tr("status.fullyCharged");
-    }
-    if (sysfsStatus === "Not charging" || sysfsStatus === "Unknown") {
-      return pluginApi?.tr("status.pluggedIn");
-    }
-
-    return sysfsStatus || pluginApi?.tr("status.noBattery");
-  }
-
-  function formatPower(compact, showUnavailable) {
-    if (!sysfsOk || sysfsPowerWatts <= 0) {
-      return showUnavailable ? pluginApi?.tr("common.unavailable") : "";
-    }
-
-    return `${sysfsPowerWatts.toFixed(1)}${compact ? "W" : " W"}`;
-  }
-
-  function formatRelevantTime(showUnavailable) {
-    const seconds = sysfsStatus === "Charging" ? sysfsTimeToFull : sysfsTimeToEmpty;
-    const text = formatDurationCompact(seconds);
-    return text || (showUnavailable ? pluginApi?.tr("common.unavailable") : "");
-  }
-
-  function formatDurationCompact(seconds) {
-    if (seconds <= 0) {
-      return "";
-    }
-
-    const totalMinutes = Math.max(1, Math.round(seconds / 60));
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-
-    if (hours > 0) {
-      return minutes > 0 ? `${hours}h${minutes}m` : `${hours}h`;
-    }
-
-    return `${minutes}m`;
-  }
+  readonly property var settingsConsumer: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
+  readonly property var observation: settingsConsumer?.observation
+  readonly property bool sysfsOk: observation?.sysfsOk ?? false
+  readonly property string sysfsStatus: observation?.sysfsStatus ?? ""
+  readonly property real sysfsPowerWatts: observation?.sysfsPowerWatts ?? -1
+  readonly property int sysfsTimeToEmpty: observation?.sysfsTimeToEmpty ?? 0
+  readonly property int sysfsTimeToFull: observation?.sysfsTimeToFull ?? 0
+  readonly property int sysfsCapacity: observation?.sysfsCapacity ?? -1
+  readonly property string sysfsSource: observation?.sysfsSource ?? ""
+  readonly property string sysfsError: observation?.sysfsError ?? ""
+  readonly property int refreshNonce: observation?.refreshNonce ?? 0
+  readonly property int refreshIntervalSeconds: settingsConsumer?.refreshIntervalSeconds ?? 5
+  readonly property string deviceNativePath: settingsConsumer?.deviceNativePath ?? "__default__"
+  readonly property bool isChargingHardware: observation?.isChargingHardware ?? false
+  readonly property bool isDischargingHardware: observation?.isDischargingHardware ?? false
+  function scanSysfs() { settingsConsumer?.refresh(); }
+  function statusText() { return observation?.statusText() ?? ""; }
+  function formatPower(compact, unavailable) { return observation?.formatPower(compact, unavailable) ?? ""; }
+  function formatRelevantTime(unavailable) { return observation?.formatRelevantTime(unavailable) ?? ""; }
+  function formatDurationCompact(seconds) { return observation?.formatDurationCompact(seconds) ?? ""; }
 }

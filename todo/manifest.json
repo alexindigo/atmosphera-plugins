@@ -1,9 +1,9 @@
 {
   "id": "todo",
   "name": "Todo List",
-  "version": "1.10.8",
+  "version": "1.10.13",
   "minNoctaliaVersion": "3.7.1",
-  "minAtmospheraVersion": "0.10.0",
+  "minAtmospheraVersion": "0.11.0",
   "author": "lonerOrz <lonerOrz@qq.com>",
   "license": "MIT",
   "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -24,19 +24,19 @@
     "settingsSchema": {
       "version": 1,
       "fields": {
-        "todos": {"type": "List", "machineLocal": true, "element": {"type": "Record", "fields": {"id": {"type": "Real", "optional": true}, "text": {"type": "String", "optional": true}, "completed": {"type": "Boolean", "optional": true}, "createdAt": {"type": "String", "optional": true}, "pageId": {"type": "Real", "optional": true}, "priority": {"type": "String", "optional": true}, "details": {"type": "String", "optional": true}}}},
-        "pages": {"type": "List", "machineLocal": true, "element": {"type": "Record", "fields": {"id": {"type": "Real"}, "name": {"type": "String"}}}},
-        "current_page_id": {"type": "Real", "machineLocal": true},
-        "count": {"type": "Real", "machineLocal": true},
-        "completedCount": {"type": "Real", "machineLocal": true},
-        "exportEmptySections": {"type": "Boolean"},
-        "exportFormat": {"type": "String"},
-        "exportPath": {"type": "String"},
-        "isExpanded": {"type": "Boolean"},
-        "priorityColors": {"type": "Record", "fields": {"high": {"type": "String", "optional": true}, "medium": {"type": "String", "optional": true}, "low": {"type": "String", "optional": true}}},
-        "showBackground": {"type": "Boolean"},
-        "showCompleted": {"type": "Boolean"},
-        "useCustomColors": {"type": "Boolean"}
+        "todos": {"type": "List", "editorUsage": "content", "machineLocal": true, "element": {"type": "Record", "fields": {"id": {"type": "Real", "optional": true}, "text": {"type": "String", "optional": true}, "completed": {"type": "Boolean", "optional": true}, "createdAt": {"type": "String", "optional": true}, "pageId": {"type": "Real", "optional": true}, "priority": {"type": "String", "optional": true}, "details": {"type": "String", "optional": true}}}},
+        "pages": {"type": "List", "editorUsage": "content", "machineLocal": true, "element": {"type": "Record", "fields": {"id": {"type": "Real"}, "name": {"type": "String"}}}},
+        "current_page_id": {"type": "Real", "editorUsage": "content", "machineLocal": true},
+        "count": {"type": "Real", "editorUsage": "operational", "machineLocal": true},
+        "completedCount": {"type": "Real", "editorUsage": "operational", "machineLocal": true},
+        "exportEmptySections": {"type": "Boolean", "editorUsage": "configuration"},
+        "exportFormat": {"type": "String", "editorUsage": "configuration"},
+        "exportPath": {"type": "String", "editorUsage": "configuration"},
+        "isExpanded": {"type": "Boolean", "editorUsage": "configuration"},
+        "priorityColors": {"type": "Record", "editorUsage": "configuration", "fields": {"high": {"type": "String", "optional": true}, "medium": {"type": "String", "optional": true}, "low": {"type": "String", "optional": true}}},
+        "showBackground": {"type": "Boolean", "editorUsage": "configuration"},
+        "showCompleted": {"type": "Boolean", "editorUsage": "configuration"},
+        "useCustomColors": {"type": "Boolean", "editorUsage": "configuration"}
       }
     },
     "defaultSettings": {

@@ -43,24 +43,27 @@ QtObject {
   }
 
   function updateMainDevice(checkReachable) {
+    root.mainDevice = selectDevice(root.mainDeviceId, checkReachable);
+    anyDevicesConnected = devices.find((device) => device.reachable) !== undefined;
+  }
+
+  // Pure selection over the one shared discovery snapshot. Each captured
+  // settings client keeps its own selection, never the singleton's pointer.
+  function selectDevice(deviceId, checkReachable) {
     let newMain;
     if (checkReachable) {
-      newMain = devices.find((device) => device.id === root.mainDeviceId && device.reachable);
+      newMain = devices.find((device) => device.id === deviceId && device.reachable);
       if (newMain === undefined)
         newMain = devices.find((device) => device.reachable);
       if (newMain === undefined)
         newMain = devices.length === 0 ? null : devices[0];
     } else {
-      newMain = devices.find((device) => device.id === root.mainDeviceId);
+      newMain = devices.find((device) => device.id === deviceId);
       if (newMain === undefined)
         newMain = devices.length === 0 ? null : devices[0];
     }
 
-    if (root.mainDevice !== newMain) {
-      root.mainDevice = newMain;
-    }
-
-    anyDevicesConnected = devices.find((device) => device.reachable) !== undefined;
+    return newMain;
   }
 
   function triggerFindMyPhone(deviceId: string): void {

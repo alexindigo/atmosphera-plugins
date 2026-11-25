@@ -1,7 +1,8 @@
 {
   "settings": {
     "list": {
-      "remove": "Remove the following desktop widget setup."
+      "remove": "Remove the following desktop widget setup.",
+      "shared": "Saved setups are shared by every instance. Manage them in this plugin's settings."
     },
     "load_widgets": {
       "description": "Enable the loading of the widgets when the wallpaper changes.",

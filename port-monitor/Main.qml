@@ -8,13 +8,32 @@ Item {
   id: root
   property var pluginApi: null
 
+  property var _settingsConsumers: new Map()
+  Component { id: clientFactory; PortSettingsClient {} }
+  function settingsConsumerFor(context) {
+    if (!context || !context.current()) return null;
+    if (_settingsConsumers.has(context)) return _settingsConsumers.get(context);
+    var client = clientFactory.createObject(root, {
+      settingsContext: context,
+      observation: root,
+      retire: function(retired) {
+        root._settingsConsumers.delete(context);
+        retired.destroy();
+      }
+    });
+    _settingsConsumers.set(context, client);
+    return client;
+  }
+  readonly property var settingsConsumer: pluginApi ? settingsConsumerFor(pluginApi.settingsContext) : null
+
   property var cfg: pluginApi?.pluginSettings || ({})
   property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
   // Shared state
-  property var portList: []
-  property int portCount: 0
-  property list<var> sortedPorts: []
+  property var rawPorts: []
+  readonly property var portList: projectPorts(rawPorts, cfg.hideSystemPorts ?? defaults.hideSystemPorts ?? false)
+  readonly property int portCount: portList.length
+  readonly property var sortedPorts: portList
 
   // Terminal detection
   property string detectedTerminal: ""
@@ -54,14 +73,6 @@ Item {
       terminalDetectProcess.command = ["which", root.terminalCandidates[0]]
       terminalDetectProcess.running = true
     }
-  }
-
-  // Poll timer
-  Timer {
-    interval: (root.cfg.refreshInterval ?? root.defaults.refreshInterval ?? 5) * 1000
-    running: true
-    repeat: true
-    onTriggered: root.refresh()
   }
 
   // IPC handler
@@ -171,12 +182,12 @@ Item {
   }
 
   function applyFiltersAndUpdate(allPorts) {
-    var hideSystem = root.cfg.hideSystemPorts ?? root.defaults.hideSystemPorts ?? false
-    var merged = allPorts
+    root.rawPorts = projectPorts(allPorts, false)
+    Logger.d("Port Monitor", "Parsed " + root.portCount + " listening ports")
+  }
 
-    if (hideSystem) {
-      merged = merged.filter(function(p) { return p.port >= 1024 })
-    }
+  function projectPorts(allPorts, hideSystem) {
+    var merged = hideSystem ? allPorts.filter(function(p) { return p.port >= 1024 }) : allPorts.slice()
 
     // Sort: user processes first (has PID), then system, then by port number
     merged.sort(function(a, b) {
@@ -197,10 +208,7 @@ Item {
       }
     }
 
-    root.portList = unique
-    root.portCount = unique.length
-    root.sortedPorts = unique
-    Logger.d("Port Monitor", "Parsed " + root.portCount + " listening ports")
+    return unique
   }
 
   // Delayed refresh after kill to let the process terminate

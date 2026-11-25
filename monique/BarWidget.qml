@@ -1,10 +1,10 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import qs.Commons
-import qs.Widgets
-import qs.Services.UI
 import Quickshell.Io
+import qs.Commons
+import qs.Services.UI
+import qs.Widgets
 
 Item {
   id: root
@@ -18,32 +18,29 @@ Item {
 
   readonly property bool pillDirection: BarService.getPillDirection(root)
   readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var settingsConsumer: mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
-  readonly property string activeColorKey: pluginApi?.pluginSettings?.activeColor
-    ?? pluginApi?.manifest?.metadata?.defaultSettings?.activeColor
-    ?? "primary"
+  readonly property string activeColorKey: pluginApi?.pluginSettings?.activeColor ?? pluginApi?.manifest?.metadata?.defaultSettings?.activeColor ?? "primary"
 
-  readonly property bool showProfileLabel: pluginApi?.pluginSettings?.showProfileLabel
-    ?? pluginApi?.manifest?.metadata?.defaultSettings?.showProfileLabel
-    ?? true
+  readonly property bool showProfileLabel: pluginApi?.pluginSettings?.showProfileLabel ?? pluginApi?.manifest?.metadata?.defaultSettings?.showProfileLabel ?? true
 
   readonly property bool hasActiveProfile: (mainInstance?.activeProfile ?? "") !== ""
 
   readonly property color resolvedIconColor: {
-    var resolved = AtmoColor.resolveColorKeyOptional(activeColorKey)
+    var resolved = AtmoColor.resolveColorKeyOptional(activeColorKey);
     if (!resolved || resolved === "transparent" || resolved.a === 0)
-      return mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface
-    return resolved
+      return mouseArea.containsMouse ? AtmoColor.mOnHover : AtmoColor.mOnSurface;
+    return resolved;
   }
 
   readonly property real contentWidth: {
     if (!(mainInstance?.moniqueInstalled ?? false)) {
-      return Style.capsuleHeight
+      return Style.capsuleHeight;
     }
     if (hasActiveProfile && showProfileLabel) {
-      return contentRow.implicitWidth + Style.marginM * 2
+      return contentRow.implicitWidth + Style.marginM * 2;
     }
-    return Style.capsuleHeight
+    return Style.capsuleHeight;
   }
   readonly property real contentHeight: Style.capsuleHeight
 
@@ -106,13 +103,13 @@ Item {
     ]
 
     onTriggered: action => {
-      contextMenu.close()
-      PanelService.closeContextMenu(screen)
+      contextMenu.close();
+      PanelService.closeContextMenu(screen);
 
       if (action === "open-monique") {
-        openMoniqueProcess.running = true
+        openMoniqueProcess.running = true;
       } else if (action === "widget-settings") {
-        BarService.openPluginSettings(screen, pluginApi.manifest)
+        BarService.openPluginSettings(screen, pluginApi.manifest);
       }
     }
   }
@@ -126,18 +123,18 @@ Item {
 
     onEntered: {
       if (root.hasActiveProfile)
-        TooltipService.show(root, mainInstance.activeProfile, BarService.getTooltipDirection(root.screen?.name))
+        TooltipService.show(root, mainInstance.activeProfile, BarService.getTooltipDirection(root.screen?.name));
     }
 
     onExited: {
-      TooltipService.hide()
+      TooltipService.hide();
     }
 
     onClicked: mouse => {
       if (mouse.button === Qt.LeftButton) {
-        pluginApi?.openPanel(root.screen, root)
+        pluginApi?.openPanel(root.screen, root);
       } else if (mouse.button === Qt.RightButton) {
-        PanelService.showContextMenu(contextMenu, root, screen)
+        PanelService.showContextMenu(contextMenu, root, screen);
       }
     }
   }

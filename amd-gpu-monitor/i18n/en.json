@@ -31,6 +31,7 @@
     "activity": "Activity"
   },
   "settings": {
+    "shared-effect": "Device and display choices apply to this instance. Views selecting the same GPU share its observations and history.",
     "bar_section": "Bar widget",
     "compact_mode_label": "Compact mode",
     "compact_mode_description": "Show vertical mini gauges instead of percentage text.",

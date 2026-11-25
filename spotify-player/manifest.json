@@ -1,9 +1,9 @@
 {
     "id": "spotify-player",
     "name": "Spotify Player",
-    "version": "1.0.5",
+    "version": "1.0.14",
     "minNoctaliaVersion": "4.7.6",
-    "minAtmospheraVersion": "0.10.0",
+    "minAtmospheraVersion": "0.11.0",
     "author": "suvi",
     "license": "GPL 3.0",
     "repository": "https://github.com/noctalia-dev/noctalia-plugins",
@@ -22,14 +22,14 @@
         "settingsSchema": {
             "version": 1,
             "fields": {
-                "accessToken": {"type": "String", "machineLocal": true, "sensitive": true},
-                "callbackPort": {"type": "Real"},
-                "clientId": {"type": "String"},
-                "clientSecret": {"type": "String", "machineLocal": true, "sensitive": true},
-                "message": {"type": "String", "optional": true},
-                "playerId": {"type": "String"},
-                "refreshToken": {"type": "String", "machineLocal": true, "sensitive": true},
-                "tokenExpiresAt": {"type": "Real", "machineLocal": true}
+                "accessToken": {"editorUsage": "operational", "type": "String", "machineLocal": true, "sensitive": true},
+                "callbackPort": {"editorUsage": "configuration", "type": "Real"},
+                "clientId": {"editorUsage": "configuration", "type": "String"},
+                "clientSecret": {"editorUsage": "configuration", "type": "String", "machineLocal": true, "sensitive": true},
+                "message": {"editorUsage": "configuration", "type": "String", "optional": true},
+                "playerId": {"editorUsage": "configuration", "type": "String"},
+                "refreshToken": {"editorUsage": "operational", "type": "String", "machineLocal": true, "sensitive": true},
+                "tokenExpiresAt": {"editorUsage": "operational", "type": "Real", "machineLocal": true}
             }
         },
         "defaultSettings": {

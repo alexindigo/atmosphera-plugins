@@ -39,6 +39,8 @@ Include these files in the publishable plugin package:
 
 - `manifest.json`
 - `Main.qml`
+- `HabiticaSettingsClient.qml`
+- `HabiticaQueryWorker.qml`
 - `BarWidget.qml`
 - `Panel.qml`
 - `Settings.qml`
@@ -82,6 +84,17 @@ After configuration:
 - checklist toggles and tag filtering are available through plugin settings.
 
 The plugin keeps the current refresh optimization: it avoids unnecessary full refreshes while cached data is still fresh, and it fetches avatar-heavy data less often than basic task data.
+
+On Atmosphera, a scoped widget editor selects that instance's account, filters
+and presentation. All views of the same instance share one request client.
+Scoring changes the selected remote account for every client using that account;
+it is an explicit action, not an unapplied settings draft.
+
+The plugin-level account alone uses the existing saved offline cache. Fresh cache
+entries record their account's user ID, never the token. Older cache bytes without
+an account identity stay on disk but are not shown as another account; a successful
+fresh plugin-level fetch replaces them. Instance clients keep their results in
+memory and cannot overwrite that shared cache.
 
 ## Privacy And Security
 

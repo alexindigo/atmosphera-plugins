@@ -31,6 +31,7 @@
     "activity": "活动"
   },
   "settings": {
+    "shared-effect": "\u8bbe\u5907\u548c\u663e\u793a\u9009\u9879\u4ec5\u5e94\u7528\u4e8e\u6b64\u5b9e\u4f8b\u3002\u9009\u62e9\u540c\u4e00GPU\u7684\u89c6\u56fe\u5171\u4eab\u6d4b\u91cf\u503c\u548c\u5386\u53f2\u3002",
     "bar_section": "栏组件",
     "compact_mode_label": "紧凑模式",
     "compact_mode_description": "显示竖向迷你仪表而非百分比文字。",

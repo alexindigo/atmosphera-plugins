@@ -5,37 +5,33 @@ import qs.Commons
 import qs.Widgets
 
 ColumnLayout {
-    id: root
-    spacing: Style.marginM
-    Layout.fillWidth: true
+  id: root
+  spacing: Style.marginM
+  Layout.fillWidth: true
 
+  /***************************
+  * PROPERTIES
+  ***************************/
+  required property var pluginApi
+  required enabled
 
-    /***************************
-    * PROPERTIES
-    ***************************/
-    required property var pluginApi
-    required enabled
-
-
-    /***************************
-    * COMPONENTS
-    ***************************/
-    Connections {
-        target: pluginApi
-        function onPluginSettingsChanged() {
-            // Update the local properties on change
-        }
+  /***************************
+  * COMPONENTS
+  ***************************/
+  Connections {
+    target: pluginApi
+    function onPluginSettingsChanged() {
+      // Update the local properties on change
     }
+  }
 
-
-    /********************************
-    * Save settings functionality
-    ********************************/
-    function saveSettings() {
-        if(pluginApi == null) {
-            Logger.e("mpvpaper", "Cannot save: pluginApi is null");
-            return;
-        }
-
+  /********************************
+  * Save settings functionality
+  ********************************/
+  function saveSettings() {
+    if (pluginApi == null) {
+      Logger.e("mpvpaper", "Cannot save: pluginApi is null");
+      return;
     }
+  }
 }

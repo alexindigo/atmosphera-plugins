@@ -15,7 +15,8 @@ Item {
   property real contentPreferredWidth: 320 * Style.uiScaleRatio
   property real contentPreferredHeight: 450 * Style.uiScaleRatio
   
-  readonly property var mainInstance: pluginApi?.mainInstance
+  readonly property var settingsConsumer: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
+  readonly property var mainInstance: settingsConsumer
   readonly property bool allowAttach: true
 
   Rectangle {

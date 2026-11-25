@@ -36,6 +36,7 @@
     "refreshRateSuffix": "@ %1 Hz"
   },
   "settings": {
+    "shared-effect": "This instance selects its config file and appearance. Live output observations and display changes are shared by all instances.",
     "niriConfigPath": {
       "label": "Niri config path",
       "description": "Path to the main niri configuration file"

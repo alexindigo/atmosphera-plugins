@@ -10,24 +10,21 @@ import qs.Widgets
 ColumnLayout {
   id: root
   property var pluginApi: null
+  readonly property var panelWidthField: pluginApi?.field("panelWidth") ?? null
+  readonly property var panelHeightField: pluginApi?.field("panelHeight") ?? null
+  readonly property var fontSizeField: pluginApi?.field("fontSize") ?? null
+  readonly property var filePathField: pluginApi?.field("filePath") ?? null
+  readonly property var useMonospaceField: pluginApi?.field("useMonospace") ?? null
 
   // Local state
-  property int panelWidth: displayBaseline.project("panelWidth")
-  property int panelHeight: displayBaseline.project("panelHeight")
-  property int fontSize: displayBaseline.project("fontSize")
-  property string filePath: displayBaseline.filePath
+  readonly property int panelWidth: root.panelWidthField?.value ?? 600
+  readonly property int panelHeight: root.panelHeightField?.value ?? 400
+  readonly property int fontSize: root.fontSizeField?.value ?? 14
+  readonly property string filePath: root.filePathField?.value ?? ""
   property bool filePathWritable: true
-  property bool useMonospace: displayBaseline.useMonospace
-  NSettingsBaseline {
-    ranges: [NSettingsRange { field: "panelWidth"; from: widthSlider.from; to: widthSlider.to }, NSettingsRange { field: "panelHeight"; from: heightSlider.from; to: heightSlider.to }, NSettingsRange { field: "fontSize"; from: fontSizeSlider.from; to: fontSizeSlider.to }]
-    id: displayBaseline
-    readonly property int panelWidth: pluginApi?.pluginSettings?.panelWidth ?? 600
-    readonly property int panelHeight: pluginApi?.pluginSettings?.panelHeight ?? 400
-    readonly property int fontSize: pluginApi?.pluginSettings?.fontSize ?? 14
-    readonly property string filePath: pluginApi?.pluginSettings?.filePath ?? ""
-    readonly property bool useMonospace: pluginApi?.pluginSettings?.useMonospace ?? false
-  }
-  readonly property bool settingsDirty: displayBaseline.differs({panelWidth: root.panelWidth, panelHeight: root.panelHeight, fontSize: root.fontSize, filePath: root.filePath, useMonospace: root.useMonospace})
+  readonly property bool useMonospace: root.useMonospaceField?.value ?? false
+  // Explicit field intents only; the selected session owns Apply/Reset.
+  readonly property bool settingsDirty: false
 
   spacing: Style.marginM
 
@@ -35,7 +32,7 @@ ColumnLayout {
   Process {
     id: writeCheckProcess
 
-    onExited: function(exitCode, exitStatus) {
+    onExited: function (exitCode, exitStatus) {
       root.filePathWritable = (exitCode === 0);
     }
   }
@@ -47,21 +44,12 @@ ColumnLayout {
     }
 
     // Check if file exists and is writable, or if parent directory is writable
-    var testCmd = "if [ -e \"" + root.filePath + "\" ]; then " +
-                  "[ -w \"" + root.filePath + "\" ]; " +
-                  "else " +
-                  "[ -w \"$(dirname \"" + root.filePath + "\")\" ]; " +
-                  "fi";
+    var testCmd = "if [ -e \"" + root.filePath + "\" ]; then " + "[ -w \"" + root.filePath + "\" ]; " + "else " + "[ -w \"$(dirname \"" + root.filePath + "\")\" ]; " + "fi";
     writeCheckProcess.exec(["sh", "-c", testCmd]);
   }
 
   function saveSettings() {
     if (pluginApi) {
-      pluginApi.pluginSettings.panelWidth = root.panelWidth
-      pluginApi.pluginSettings.panelHeight = root.panelHeight
-      pluginApi.pluginSettings.fontSize = root.fontSize
-      pluginApi.pluginSettings.filePath = root.filePath
-      pluginApi.pluginSettings.useMonospace = root.useMonospace
       pluginApi.saveSettings();
     }
   }
@@ -89,17 +77,19 @@ ColumnLayout {
         pointSize: Style.fontSizeM
       }
 
-      NSlider {
-        objectName: "settings-range-panelWidth"
-        onValueChanged: root.panelWidth = value
-        id: widthSlider
-        Layout.fillWidth: true
-        from: 400
-        to: 1200
-        value: root.panelWidth
-        stepSize: 50
-        onMoved: {
-          root.panelWidth = Math.round(value);
+      NPluginSettingsField {
+        field: root.panelWidthField
+        NSlider {
+          id: widthSlider
+          objectName: "settings-range-panelWidth"
+          Layout.fillWidth: true
+          from: 400
+          to: 1200
+          value: root.panelWidth
+          stepSize: 50
+          onMoved: {
+            root.panelWidthField.set(Math.round(value));
+          }
         }
       }
     }
@@ -113,17 +103,19 @@ ColumnLayout {
         pointSize: Style.fontSizeM
       }
 
-      NSlider {
-        objectName: "settings-range-panelHeight"
-        onValueChanged: root.panelHeight = value
-        id: heightSlider
-        Layout.fillWidth: true
-        from: 300
-        to: 900
-        value: root.panelHeight
-        stepSize: 50
-        onMoved: {
-          root.panelHeight = Math.round(value);
+      NPluginSettingsField {
+        field: root.panelHeightField
+        NSlider {
+          id: heightSlider
+          objectName: "settings-range-panelHeight"
+          Layout.fillWidth: true
+          from: 300
+          to: 900
+          value: root.panelHeight
+          stepSize: 50
+          onMoved: {
+            root.panelHeightField.set(Math.round(value));
+          }
         }
       }
     }
@@ -134,15 +126,18 @@ ColumnLayout {
     spacing: Style.marginS
     Layout.topMargin: Style.marginM
 
-    NTextInputButton {
-      label: pluginApi?.tr("settings.file_storage.title") || "File Storage"
-      description: pluginApi?.tr("settings.file_storage.description") || "Optionally save scratchpad content to a file instead of plugin storage. Leave empty to use default storage."
-      placeholderText: "/home/user/notes.txt"
-      text: root.filePath
-      buttonIcon: "file"
-      buttonTooltip: pluginApi?.tr("settings.file_storage.select") || "Select file"
-      onInputEditingFinished: root.filePath = text
-      onButtonClicked: filePicker.openFilePicker()
+    NPluginSettingsField {
+      field: root.filePathField
+      NTextInputButton {
+        label: pluginApi?.tr("settings.file_storage.title") || "File Storage"
+        description: pluginApi?.tr("settings.file_storage.description") || "Optionally save scratchpad content to a file instead of plugin storage. Leave empty to use default storage."
+        placeholderText: "/home/user/notes.txt"
+        text: root.filePath
+        buttonIcon: "file"
+        buttonTooltip: pluginApi?.tr("settings.file_storage.select") || "Select file"
+        onInputEditCommitted: root.filePathField.set(text)
+        onButtonClicked: filePicker.openFilePicker()
+      }
     }
 
     NText {
@@ -170,26 +165,31 @@ ColumnLayout {
       pointSize: Style.fontSizeM
     }
 
-    NSlider {
-      objectName: "settings-range-fontSize"
-      onValueChanged: root.fontSize = value
-      id: fontSizeSlider
-      Layout.fillWidth: true
-      from: 10
-      to: 24
-      value: root.fontSize
-      stepSize: 1
-      onMoved: {
-        root.fontSize = Math.round(value)
+    NPluginSettingsField {
+      field: root.fontSizeField
+      NSlider {
+        id: fontSizeSlider
+        objectName: "settings-range-fontSize"
+        Layout.fillWidth: true
+        from: 10
+        to: 24
+        value: root.fontSize
+        stepSize: 1
+        onMoved: {
+          root.fontSizeField.set(Math.round(value));
+        }
       }
     }
 
-    NToggle {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.text_appearance.monospace") || "Monospace Font"
-      description: pluginApi?.tr("settings.text_appearance.monospace_description") || "Use a monospace font for the text area"
-      checked: root.useMonospace
-      onToggled: checked => root.useMonospace = checked
+    NPluginSettingsField {
+      field: root.useMonospaceField
+      NToggle {
+        Layout.fillWidth: true
+        label: pluginApi?.tr("settings.text_appearance.monospace") || "Monospace Font"
+        description: pluginApi?.tr("settings.text_appearance.monospace_description") || "Use a monospace font for the text area"
+        checked: root.useMonospace
+        onToggled: checked => root.useMonospaceField.set(checked)
+      }
     }
   }
 
@@ -233,7 +233,7 @@ ColumnLayout {
     initialPath: root.filePath || Quickshell.env("HOME")
     onAccepted: paths => {
       if (paths.length > 0) {
-        root.filePath = paths[0]
+        root.filePathField.set(paths[0]);
       }
     }
   }

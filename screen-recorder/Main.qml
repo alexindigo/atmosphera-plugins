@@ -23,6 +23,18 @@ Item {
     property bool isReplaying: false
     property bool isReplayPending: false
 
+    // Each physical operation retains the policy admitted by its caller. Main
+    // and IPC still default to plugin scope; rendering never replaces that API.
+    property var recordingPolicy: null
+    property var replayPolicy: null
+
+    function capturePolicy(context) {
+        context = context || pluginApi?.settingsContext;
+        if (!context?.current()) return null;
+        const settings = context.settingsView;
+        return { context: context, settings: settings };
+    }
+
     // Single reusable Process object
     Process {
         id: checker
@@ -111,7 +123,9 @@ Item {
             "h264": "4096x4096"
         })
 
-    function buildResolutionFlag() {
+    function buildResolutionFlag(settings) {
+        const resolution = settings.resolution || "original";
+        const videoCodec = settings.videoCodec || "h264";
         if (resolution !== "original") {
             return `-s ${resolution}`;
         }
@@ -141,8 +155,8 @@ Item {
     }
 
     // Start or Stop recording
-    function toggleRecording() {
-        (isRecording || isPending) ? stopRecording() : startRecording();
+    function toggleRecording(context) {
+        (isRecording || isPending) ? stopRecording() : startRecording(context);
     }
 
     // Open recording file
@@ -168,13 +182,16 @@ Item {
     }
 
     // Start screen recording
-    function startRecording() {
+    function startRecording(context) {
         if (!isAvailable) {
             return;
         }
-        if (isRecording || isPending) {
+        if (isRecording || isPending || recorderProcess.running || portalCheckProcess.running || monitorDetectProcess.running) {
             return;
         }
+        const policy = capturePolicy(context);
+        if (!policy) return false;
+        recordingPolicy = policy;
         isPending = true;
         hasActiveRecording = false;
 
@@ -257,6 +274,11 @@ Item {
     }
 
     function launchRecorder() {
+        if (!recordingPolicy?.context.current()) {
+            isPending = false;
+            return;
+        }
+        const videoSource = recordingPolicy.settings.videoSource || "portal";
         // If focused-monitor is selected, detect monitor first
         if (videoSource === "focused-monitor" && CompositorService.isHyprland) {
             var script = 'set -euo pipefail\n' + 'pos=$(hyprctl cursorpos)\n' + 'cx=${pos%,*}; cy=${pos#*,}\n' + 'mon=$(hyprctl monitors -j | jq -r --argjson cx "$cx" --argjson cy "$cy" ' + "'.[] | select(($cx>=.x) and ($cx<(.x+.width)) and ($cy>=.y) and ($cy<(.y+.height))) | .name' " + '| head -n1)\n' + '[ -n "${mon:-}" ] || { echo "MONITOR_NOT_FOUND"; exit 1; }\n' + 'use_prime=0\n' + 'for v in /sys/class/drm/card*/device/vendor; do\n' + '  [ -f "$v" ] || continue\n' + '  if grep -qi "0x10de" "$v"; then\n' + '    card="$(basename "$(dirname "$(dirname "$v")")")"\n' + '    [ -e "/sys/class/drm/${card}-${mon}" ] && use_prime=1 && break\n' + '  fi\n' + 'done\n' + 'echo "${mon}:${use_prime}"';
@@ -270,6 +292,23 @@ Item {
     }
 
     function launchRecorderWithSource(source, primeRun) {
+        const policy = recordingPolicy;
+        if (!policy?.context.current()) {
+            isPending = false;
+            return;
+        }
+        const settings = policy.settings;
+        const filenamePattern = settings.filenamePattern || "recording_yyyyMMdd_HHmmss";
+        const directory = settings.directory || "";
+        const audioSource = settings.audioSource || "default_output";
+        const audioCodec = settings.audioCodec || "opus";
+        const frameRate = settings.frameRate || "60";
+        const customFrameRate = settings.customFrameRate || "60";
+        const videoCodec = settings.videoCodec || "h264";
+        const quality = settings.quality || "very_high";
+        const showCursor = settings.showCursor ?? true;
+        const colorRange = settings.colorRange || "limited";
+        const restorePortalSession = settings.restorePortalSession ?? false;
         var pattern = filenamePattern || "recording_yyyyMMdd_HHmmss";
         var filename = expandFilenamePattern(pattern);
         var videoDir = Settings.preprocessPath(directory);
@@ -280,6 +319,7 @@ Item {
             videoDir += "/";
         }
         outputPath = videoDir + filename;
+        policy.outputPath = outputPath;
 
         const audioFlags = (() => {
                 if (audioSource === "none") {
@@ -292,7 +332,7 @@ Item {
             })();
 
         var actualFrameRate = (frameRate === "custom") ? customFrameRate : frameRate;
-        var resolutionFlag = buildResolutionFlag();
+        var resolutionFlag = buildResolutionFlag(settings);
         var restoreFlag = restorePortalSession ? "-restore-portal-session yes" : "";
         var flags = `-w ${source} -f ${actualFrameRate} -k ${videoCodec} ${audioFlags} -q ${quality} -cursor ${showCursor ? "yes" : "no"} -cr ${colorRange} ${resolutionFlag} ${restoreFlag} -o "${outputPath}"`;
         var primePrefix = primeRun ? "prime-run " : "";
@@ -358,6 +398,17 @@ Item {
         stdout: StdioCollector {}
         stderr: StdioCollector {}
         onExited: function (exitCode, exitStatus) {
+            const policy = root.recordingPolicy;
+            const completedPath = policy?.outputPath || "";
+            const copyToClipboard = policy?.settings.copyToClipboard ?? false;
+            if (!policy?.context.current()) {
+                isRecording = false;
+                isPending = false;
+                hasActiveRecording = false;
+                pendingTimer.stop();
+                monitorTimer.stop();
+                return;
+            }
             const stdout = String(recorderProcess.stdout.text || "").trim();
             const stderr = String(recorderProcess.stderr.text || "").trim();
             const wasCancelled = isCancelledByUser(stdout, stderr);
@@ -388,10 +439,10 @@ Item {
                 monitorTimer.running = false;
                 if (exitCode === 0) {
                     // ToastService.showNotice(pluginApi.tr("messages.saved"), outputPath, "video")
-                    ToastService.showNotice(pluginApi.tr("messages.saved"), outputPath, "video", 3000, pluginApi.tr("messages.open-file"), () => openFile(outputPath));
+                    ToastService.showNotice(pluginApi.tr("messages.saved"), completedPath, "video", 3000, pluginApi.tr("messages.open-file"), () => { if (policy.context.current()) openFile(completedPath); });
 
                     if (copyToClipboard) {
-                        copyFileToClipboard(outputPath);
+                        copyFileToClipboard(completedPath);
                     }
                 } else {
                     // Don't show error if user intentionally cancelled
@@ -409,10 +460,10 @@ Item {
             } else if (!isPending && exitCode === 0 && outputPath) {
                 // Fallback: if process exited successfully with an outputPath, handle it
                 // ToastService.showNotice(pluginApi.tr("messages.saved"), outputPath, "video")
-                ToastService.showNotice(pluginApi.tr("messages.saved"), outputPath, "video", 3000, pluginApi.tr("messages.open-file"), () => openFile(outputPath));
+                ToastService.showNotice(pluginApi.tr("messages.saved"), completedPath, "video", 3000, pluginApi.tr("messages.open-file"), () => { if (policy.context.current()) openFile(completedPath); });
 
                 if (copyToClipboard) {
-                    copyFileToClipboard(outputPath);
+                    copyFileToClipboard(completedPath);
                 }
             }
         }
@@ -516,14 +567,16 @@ Item {
 
     // ─── Replay Buffer ───────────────────────────────────────────────────
 
-    function toggleReplay() {
-        (isReplaying || isReplayPending) ? stopReplay() : startReplay();
+    function toggleReplay(context) {
+        (isReplaying || isReplayPending) ? stopReplay() : startReplay(context);
     }
 
-    function startReplay() {
+    function startReplay(context) {
         if (!isAvailable) return;
-        if (isReplaying || isReplayPending) return;
-        if (!replayEnabled) return;
+        if (isReplaying || isReplayPending || replayProcess.running || replayPortalCheckProcess.running || replayMonitorDetectProcess.running) return;
+        const policy = capturePolicy(context);
+        if (!policy || !(policy.settings.replayEnabled ?? false)) return false;
+        replayPolicy = policy;
 
         isReplayPending = true;
 
@@ -533,6 +586,11 @@ Item {
     }
 
     function launchReplay() {
+        if (!replayPolicy?.context.current()) {
+            isReplayPending = false;
+            return;
+        }
+        const videoSource = replayPolicy.settings.videoSource || "portal";
         // If focused-monitor is selected, detect monitor first
         if (videoSource === "focused-monitor" && CompositorService.isHyprland) {
             var script = 'set -euo pipefail\n' + 'pos=$(hyprctl cursorpos)\n' + 'cx=${pos%,*}; cy=${pos#*,}\n' + 'mon=$(hyprctl monitors -j | jq -r --argjson cx "$cx" --argjson cy "$cy" ' + "'.[] | select(($cx>=.x) and ($cx<(.x+.width)) and ($cy>=.y) and ($cy<(.y+.height))) | .name' " + '| head -n1)\n' + '[ -n "${mon:-}" ] || { echo "MONITOR_NOT_FOUND"; exit 1; }\n' + 'use_prime=0\n' + 'for v in /sys/class/drm/card*/device/vendor; do\n' + '  [ -f "$v" ] || continue\n' + '  if grep -qi "0x10de" "$v"; then\n' + '    card="$(basename "$(dirname "$(dirname "$v")")")"\n' + '    [ -e "/sys/class/drm/${card}-${mon}" ] && use_prime=1 && break\n' + '  fi\n' + 'done\n' + 'echo "${mon}:${use_prime}"';
@@ -546,6 +604,24 @@ Item {
     }
 
     function launchReplayWithSource(source, primeRun) {
+        if (!replayPolicy?.context.current()) {
+            isReplayPending = false;
+            return;
+        }
+        const settings = replayPolicy.settings;
+        const directory = settings.directory || "";
+        const replayDuration = settings.replayDuration || "30";
+        const customReplayDuration = settings.customReplayDuration || "30";
+        const replayStorage = settings.replayStorage || "ram";
+        const frameRate = settings.frameRate || "60";
+        const customFrameRate = settings.customFrameRate || "60";
+        const audioSource = settings.audioSource || "default_output";
+        const audioCodec = settings.audioCodec || "opus";
+        const videoCodec = settings.videoCodec || "h264";
+        const quality = settings.quality || "very_high";
+        const showCursor = settings.showCursor ?? true;
+        const colorRange = settings.colorRange || "limited";
+        const restorePortalSession = settings.restorePortalSession ?? false;
         var videoDir = Settings.preprocessPath(directory);
         if (!videoDir) {
             videoDir = Quickshell.env("HOME") + "/Videos";
@@ -557,7 +633,7 @@ Item {
 
         var actualDuration = (replayDuration === "custom") ? customReplayDuration : replayDuration;
         var actualFrameRate = (frameRate === "custom") ? customFrameRate : frameRate;
-        var resolutionFlag = buildResolutionFlag();
+        var resolutionFlag = buildResolutionFlag(settings);
 
         const audioFlags = (() => {
                 if (audioSource === "none") {
@@ -620,6 +696,8 @@ Item {
         id: replayProcess
         stdout: SplitParser {
             onRead: data => {
+                const policy = root.replayPolicy;
+                if (!policy?.context.current()) return;
                 // gpu-screen-recorder outputs the saved file path to stdout on each SIGUSR1 save
                 var savedPath = String(data).trim();
                 if (savedPath && savedPath.length > 0 && !savedPath.startsWith("GPU_SCREEN_RECORDER")) {
@@ -627,10 +705,10 @@ Item {
                         pluginApi.tr("messages.replay-saved"),
                         savedPath, "video", 3000,
                         pluginApi.tr("messages.open-file"),
-                        () => openFile(savedPath)
+                        () => { if (policy.context.current()) openFile(savedPath); }
                     );
 
-                    if (copyToClipboard) {
+                    if (policy.settings.copyToClipboard ?? false) {
                         copyFileToClipboard(savedPath);
                     }
                 }

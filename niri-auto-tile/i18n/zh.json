@@ -17,6 +17,7 @@
     "settings": "设置"
   },
   "settings": {
+    "shared-effect": "Auto-Tile 为整个桌面使用同一个后台进程。点击应用或执行操作会选定它的设置；更改会影响各实例共用的同一组窗口。",
     "enabled": "启用 Auto-Tile",
     "enabled-desc": "在窗口打开或关闭时自动重新分配列宽",
     "per-workspace": "按工作区",

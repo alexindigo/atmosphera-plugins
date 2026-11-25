@@ -12,6 +12,7 @@
     "ipc_received": "Otrzymano przełącznik IPC"
   },
   "settings": {
+    "shared-effect": "Okna Steam i nakładka są współdzielone. Po otwarciu nakładki z tego widżetu przez całą sesję obowiązuje układ zastosowany w widżecie. Późniejsze zmiany ustawień zaczną obowiązywać przy następnym otwarciu.",
     "custom-layout-label": "Use custom Hyprland layout (Lua)",
     "custom-layout-description": "Let a Hyprland custom Lua layout tile the windows instead of floating+positioning them. Requires Hyprland 0.55+ Lua config and steam-layout.lua (see README). When enabled, the width sliders below are handled by the Lua layout."
   }

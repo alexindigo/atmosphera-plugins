@@ -1,5 +1,6 @@
 {
   "settings": {
+    "shared-effect": "Esta instancia selecciona el sondeo y los comandos. Ejecutar una actualización cambia el sistema para todas las instancias.",
     "changeIcon": {
       "label": "Seleccionar icono"
     },

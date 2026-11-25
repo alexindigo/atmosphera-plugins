@@ -17,6 +17,7 @@
     "settings": "Настройки"
   },
   "settings": {
+    "shared-effect": "Auto-Tile uses one daemon for the desktop. Apply or a runtime action selects its policy; changes affect the same windows for every instance.",
     "enabled": "Включить Auto-Tile",
     "enabled-desc": "Автоматически перераспределять ширину столбцов при открытии или закрытии окон",
     "per-workspace": "По рабочему пространству",

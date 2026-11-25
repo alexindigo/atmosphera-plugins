@@ -1,85 +1,56 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.Widgets
 import qs.Commons
+import qs.Widgets
 
 ColumnLayout {
-    id: root
+  id: root
+  property var pluginApi: null
+  readonly property var threshold: pluginApi?.field("minimumThreshold")
+  readonly property var background: pluginApi?.field("hideBackground")
+  readonly property bool settingsDirty: false
+  spacing: Style.marginM
 
-    // Plugin API (injected by the settings dialog system)
-    property var pluginApi: null
-
-    // Local state - track changes before saving
-    property real valueMinimumThreshold: displayBaseline.project("valueMinimumThreshold")
-    property bool valueHideBackground: displayBaseline.valueHideBackground
-    NSettingsBaseline {
-        ranges: [NSettingsRange { field: "valueMinimumThreshold"; from: thresholdSlider.from; to: thresholdSlider.to }]
-        id: displayBaseline
-        readonly property real valueMinimumThreshold: pluginApi?.pluginSettings?.minimumThreshold || 10
-        readonly property bool valueHideBackground: pluginApi?.pluginSettings?.hideBackground ?? false
+  NPluginSettingsField {
+    field: root.threshold
+    spacing: Style.marginS
+    NLabel {
+      label: root.pluginApi?.tr("settings.minimumThreshold.label")
+      description: root.pluginApi?.tr("settings.minimumThreshold.description")
     }
-    readonly property bool settingsDirty: displayBaseline.differs({valueMinimumThreshold: root.valueMinimumThreshold, valueHideBackground: root.valueHideBackground})
-
-    spacing: Style.marginM
-
-    Component.onCompleted: {
-        Logger.i("Catwalk", "Settings UI loaded");
+    NSlider {
+      id: thresholdSlider
+      Layout.fillWidth: true
+      objectName: "settings-range-valueMinimumThreshold"
+      from: 5
+      to: 25
+      value: root.threshold?.value ?? 10
+      stepSize: 1
+      onMoved: root.threshold.set(value)
     }
-
-    ColumnLayout {
-        Layout.fillWidth: true
-        spacing: Style.marginS
-
-        NLabel {
-            label: pluginApi?.tr("settings.minimumThreshold.label") || "Minimum CPU Threshold"
-            description: pluginApi?.tr("settings.minimumThreshold.description") || "CPU usage must be above this percentage for the cat to start running"
-        }
-
-        NSlider {
-            objectName: "settings-range-valueMinimumThreshold"
-            id: thresholdSlider
-            from: 5
-            to: 25
-            value: root.valueMinimumThreshold
-            stepSize: 1
-            onValueChanged: {
-                root.valueMinimumThreshold = value
-            }
-        }
-
-        Text {
-            textFormat: Text.PlainText
-            text: (pluginApi?.tr("settings.currentThreshold") || "Current threshold: {value}%").replace("{value}", thresholdSlider.value)
-            color: AtmoColor.mOnSurfaceVariant
-            font.pointSize: Style.fontSizeS
-        }
+    NText {
+      textFormat: Text.PlainText
+      text: (root.pluginApi?.tr("settings.currentThreshold") || "").replace("{value}", thresholdSlider.value)
+      color: AtmoColor.mOnSurfaceVariant
+      font.pointSize: Style.fontSizeS
     }
-
+  }
+  NPluginSettingsField {
+    field: root.background
     NToggle {
-        label: pluginApi?.tr("settings.hideBackground.label") || "Hide Background"
-        description: pluginApi?.tr("settings.hideBackground.description") || "Hide the background of the desktop widget"
-
-        checked: root.valueHideBackground
-        onToggled: function(checked) {
-            root.valueHideBackground = checked
-        }
+      Layout.fillWidth: true
+      label: root.pluginApi?.tr("settings.hideBackground.label")
+      description: root.pluginApi?.tr("settings.hideBackground.description")
+      checked: root.background?.value ?? false
+      onToggled: function (checked) {
+        root.background.set(checked);
+      }
     }
-
-    // This function is called by the dialog to save settings
-    function saveSettings() {
-        if (!pluginApi) {
-            Logger.e("Catwalk", "Cannot save settings: pluginApi is null");
-            return;
-        }
-
-        // Update the plugin settings object
-        pluginApi.pluginSettings.minimumThreshold = root.valueMinimumThreshold;
-        pluginApi.pluginSettings.hideBackground = root.valueHideBackground;
-
-        // Save to disk
-        pluginApi.saveSettings(function (result) {
-            if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
-                Logger.i("Catwalk", "Settings saved successfully");
-        });
-    }
+  }
+  function saveSettings() {
+    pluginApi.saveSettings(function (result) {
+      if (result && (result.status === "saved" || result.status === "nothing_to_save") && result.refreshState === "current")
+        Logger.i("Catwalk", "Settings saved successfully");
+    });
+  }
 }

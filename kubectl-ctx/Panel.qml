@@ -14,7 +14,7 @@ Item {
   property real contentPreferredWidth: Math.round((pluginApi?.pluginSettings?.panelWidth ?? pluginApi?.manifest?.metadata?.defaultSettings?.panelWidth ?? 620) * Style.uiScaleRatio)
   property real contentPreferredHeight: Math.round((pluginApi?.pluginSettings?.panelHeight ?? pluginApi?.manifest?.metadata?.defaultSettings?.panelHeight ?? 680) * Style.uiScaleRatio)
 
-  readonly property var main: pluginApi?.mainInstance ?? null
+  readonly property var main: pluginApi?.mainInstance?.settingsConsumerFor(pluginApi.settingsContext) ?? null
 
   // Close namespace dropdown when context changes
   Connections {

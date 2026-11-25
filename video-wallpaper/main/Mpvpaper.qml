@@ -9,6 +9,9 @@ import "../common/MonitorCommands.js" as Commands
 Item {
     id: root
     required property var pluginApi
+    property var settingsContext: pluginApi?.settingsContext
+    readonly property bool policyCurrent: settingsContext?.current() ?? false
+    readonly property var cfg: settingsContext?.settingsView ?? ({})
 
 
     /***************************
@@ -21,24 +24,37 @@ Item {
     required property int    screenHeight
 
     // Monitor specific properties
-    readonly property string currentWallpaper:     Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.currentWallpaper ?? ""
-    readonly property bool hardwareAcceleration: Commands.value(pluginApi?.pluginSettings?.monitors, screenName, "hardwareAcceleration", pluginApi?.manifest?.metadata?.defaultSettings)
-    readonly property string fillMode:             Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.fillMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? ""
-    readonly property bool isMuted: Commands.value(pluginApi?.pluginSettings?.monitors, screenName, "isMuted", pluginApi?.manifest?.metadata?.defaultSettings)
-    readonly property bool isPlaying: Commands.value(pluginApi?.pluginSettings?.monitors, screenName, "isPlaying", pluginApi?.manifest?.metadata?.defaultSettings)
-    readonly property int orientation: Commands.value(pluginApi?.pluginSettings?.monitors, screenName, "orientation", pluginApi?.manifest?.metadata?.defaultSettings)
-    readonly property string profile:              Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.profile ?? pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
-    readonly property double volume: Math.max(0, Math.min(1, Commands.value(pluginApi?.pluginSettings?.monitors, screenName, "volume", pluginApi?.manifest?.metadata?.defaultSettings)))
+    readonly property string currentWallpaper: Commands.record(cfg.monitors, screenName)?.currentWallpaper ?? ""
+    readonly property bool hardwareAcceleration: Commands.value(cfg.monitors, screenName, "hardwareAcceleration", pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property string fillMode: Commands.record(cfg.monitors, screenName)?.fillMode ?? pluginApi?.manifest?.metadata?.defaultSettings?.fillMode ?? ""
+    readonly property bool isMuted: Commands.value(cfg.monitors, screenName, "isMuted", pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property bool isPlaying: Commands.value(cfg.monitors, screenName, "isPlaying", pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property int orientation: Commands.value(cfg.monitors, screenName, "orientation", pluginApi?.manifest?.metadata?.defaultSettings)
+    readonly property string profile: Commands.record(cfg.monitors, screenName)?.profile ?? pluginApi?.manifest?.metadata?.defaultSettings?.profile ?? ""
+    readonly property double volume: Math.max(0, Math.min(1, Commands.value(cfg.monitors, screenName, "volume", pluginApi?.manifest?.metadata?.defaultSettings)))
 
     // Global properties
-    readonly property bool wallpaperEnabled: pluginApi?.pluginSettings?.enabled ?? false
-    readonly property string mpvSocket: pluginApi?.pluginSettings?.mpvSocket ?? pluginApi?.manifest?.metadata?.defaultSettings?.mpvSocket ?? ""
+    readonly property bool wallpaperEnabled: policyCurrent && (cfg.enabled ?? false)
+    readonly property string mpvSocket: cfg.mpvSocket ?? pluginApi?.manifest?.metadata?.defaultSettings?.mpvSocket ?? ""
 
     // Constants
     readonly property string mpvSocketScreen: `${mpvSocket}-${screenName}`
 
     // Local properties
     property bool mpvpaperExists: false
+    property var admittedContext: null
+    property int policyGeneration: 0
+
+    function replacePolicy() {
+        const generation = ++policyGeneration;
+        admittedContext = null;
+        deactivateMpvpaper();
+        Qt.callLater(function () {
+            if (generation === root.policyGeneration && root.policyCurrent) root.activateMpvpaper();
+        });
+    }
+    onSettingsContextChanged: replacePolicy()
+    onMpvSocketScreenChanged: replacePolicy()
 
 
     /***************************
@@ -79,6 +95,7 @@ Item {
 
         Logger.d("video-wallpaper", "Activating mpvpaper...");
 
+        admittedContext = settingsContext;
         mpvProc.command = buildMpvCommand();
         mpvProc.running = true;
 
@@ -94,6 +111,7 @@ Item {
     }
 
     function sendCommandToMPV(command: string) {
+        if (!policyCurrent || admittedContext !== settingsContext) return;
         socket.connected = true;
         socket.path = mpvSocketScreen;
         socket.write(`${command}\n`);

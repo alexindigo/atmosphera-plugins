@@ -22,6 +22,13 @@
 
 ## Usage
 
+All instances share one daemon and the same compositor windows. Applied Settings
+or an originating runtime action selects its effective policy; opening a view
+does not. Runtime column/toggle writes stay with the originating instance.
+The daemon binds every niri subprocess to its own lifetime, including abrupt
+Main destruction. Explicit false only-at-max uses `--no-only-at-max`; the
+standalone omitted-flag default remains true.
+
 ### Bar Widget
 
 - Column indicators showing the current max visible count

@@ -84,11 +84,11 @@ AtmoIconButton {
       PanelService.closeContextMenu(screen);
 
       if (action === "refreshWallpapers") {
-        mainInstance?.refreshWallpaperCache(true, true);
+        mainInstance?.refreshWallpaperCache(true, true, pluginApi?.settingsContext);
       } else if (action === "stop") {
         mainInstance?.stopAll(true);
       } else if (action === "start") {
-        mainInstance?.reload(true);
+        mainInstance?.reload(true, pluginApi?.settingsContext);
       } else if (action === "settings") {
         BarService.openPluginSettings(root.screen, pluginApi?.manifest);
       }
