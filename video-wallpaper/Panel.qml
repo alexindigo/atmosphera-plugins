@@ -161,6 +161,7 @@ Item {
                     required property var modelData
                     pluginApi: root.pluginApi
                     selectWallpaper: (path, names, api) => root.pluginApi?.mainInstance?.selectWallpaper(path, names, api)
+                    writeMonitorSetting: (key, value, screen, api) => api?.mainInstance?.submitMonitorCommand(api, "set", key, value, screen) ?? false
                     thumbCacheReady: root.thumbCacheReady
                     screenName: modelData.name
                     folderModel: wallpaperFolderModel

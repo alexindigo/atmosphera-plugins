@@ -55,7 +55,7 @@ Item {
     ++_generation; _saving = false;
     clearAuthorization();
     browser.running = false;
-    if (_request) { var request = _request; _request = null; request.onreadystatechange = function() {}; request.abort(); }
+    if (_request) finishTokenRequest(_request, true);
     cancelProcesses(); availableDevices = ""; searchResults = []; playlistResults = []; error = "";
   }
   Component {
@@ -147,12 +147,33 @@ Item {
     onExited: code => { if (code !== 0) root.failAuthorization("browser"); }
     onRunningChanged: if (!running && !startedForRequest) root.failAuthorization("browser")
   }
+  Timer {
+    id: tokenDeadline
+    interval: 30000
+    onTriggered: root.expireTokenRequest()
+  }
+  function finishTokenRequest(pending, abort) {
+    if (_request !== pending) return false;
+    tokenDeadline.stop();
+    _request = null;
+    if (pending.xhr) {
+      pending.xhr.onreadystatechange = function() {};
+      if (abort) pending.xhr.abort();
+    }
+    return true;
+  }
+  function expireTokenRequest() {
+    if (_request && finishTokenRequest(_request, true)) error = "token-response";
+  }
   function requestToken(input, values, after) {
     if (!accepts(input) || _request || _saving) return false;
     var generation = _generation, lifetime = _lifetime;
-    _request = Auth.requestToken(Qt.btoa(input.clientId + ":" + input.clientSecret), values, function(tokens, failure) {
-      if (!lifetime.alive || generation !== root._generation || !root.accepts(input)) return;
-      root._request = null;
+    var pending = {xhr: null};
+    _request = pending;
+    tokenDeadline.restart();
+    pending.xhr = Auth.requestToken(Qt.btoa(input.clientId + ":" + input.clientSecret), values, function(tokens, failure) {
+      if (!lifetime.alive || !root.finishTokenRequest(pending, false)) return;
+      if (generation !== root._generation || !root.accepts(input)) return;
       if (failure) { root.error = failure; return; }
       root._saving = true;
       if (!observation.adoptTokens(root, input, tokens, function(ok) {
@@ -181,9 +202,17 @@ Item {
     }, "devices");
   }
   function query(url, input, completed, slot) {
-    return run(["curl", url, "-H", "Authorization: Bearer " + input.accessToken], input, function(code, text) {
-      if (code !== 0) { root.error = "request"; return; }
+    return request([url], input, function(text) {
       try { completed(JSON.parse(text)); } catch (failure) { root.error = "response"; }
+    }, slot);
+  }
+  function request(args, input, completed, slot) {
+    // curl can exit successfully for HTTP rejection. Keep the status out of
+    // the body consumed by callers, and admit only successful HTTP responses.
+    return run(["curl", "--write-out", "\n%{response_code}", "-H", "Authorization: Bearer " + input.accessToken].concat(args), input, function(code, text) {
+      const status = /\n2[0-9]{2}$/.exec(text);
+      if (code !== 0 || !status) { root.error = "request"; return; }
+      completed(text.slice(0, status.index));
     }, slot);
   }
   function readShuffle(api) {
@@ -201,8 +230,7 @@ Item {
     return query("https://api.spotify.com/v1/me/playlists", input, data => root.playlistResults = data.items || [], "playlists");
   }
   function shuffle(input, state, closeAfter) {
-    return run(["curl", "--fail", "-X", "PUT", "https://api.spotify.com/v1/me/player/shuffle?state=" + state.toString() + (input.playerId ? "&device_id=" + input.playerId : ""), "-H", "Authorization: Bearer " + input.accessToken], input, function(code) {
-      if (code !== 0) { root.error = "request"; return; }
+    return request(["-X", "PUT", "https://api.spotify.com/v1/me/player/shuffle?state=" + state.toString() + (input.playerId ? "&device_id=" + input.playerId : "")], input, function() {
       root.shuffleState = state;
       if (closeAfter) input.api.closePanel(input.api.panelOpenScreen);
     }, "shuffle");
@@ -216,8 +244,7 @@ Item {
     var body = data.type === "track" ? {uris: [data.uri]} : {context_uri: data.uri};
     var title = data.type !== "playlist" ? data.artists[0].name + " - " + data.name : data.name;
     var state = shuffleState;
-    return run(["curl", "-X", "PUT", "https://api.spotify.com/v1/me/player/play" + (input.playerId ? "?device_id=" + input.playerId : ""), "-H", "Authorization: Bearer " + input.accessToken, "--json", JSON.stringify(body)], input, function(code) {
-      if (code !== 0) { root.error = "request"; return; }
+    return request(["-X", "PUT", "https://api.spotify.com/v1/me/player/play" + (input.playerId ? "?device_id=" + input.playerId : ""), "--json", JSON.stringify(body)], input, function() {
       ToastService.showNotice(input.api.tr("panel.notif"), title, "music");
       root.shuffle(input, state, true);
     }, "play");

@@ -15,6 +15,7 @@ ColumnLayout {
     id: root
     required property var pluginApi
     required property var selectWallpaper
+    required property var writeMonitorSetting
     anchors.fill: parent
 
 
@@ -135,8 +136,6 @@ ColumnLayout {
         screenName:      root.screenName
         randomAction: () => root.pluginApi.mainInstance.random(root.screenName, root.pluginApi)
         clearAction: () => root.pluginApi.mainInstance.clear(root.screenName, root.pluginApi)
-        settingWriter: (key, value) => {
-            if (root.saveMonitorProperty(key, value)) root.pluginApi.saveSettings();
-        }
+        settingWriter: (key, value) => root.writeMonitorSetting(key, value, root.monitorSpecific ? root.screenName : "", root.pluginApi)
     }
 }

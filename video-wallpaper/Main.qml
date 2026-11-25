@@ -38,6 +38,22 @@ Item {
         return runtimeApi;
     }
 
+    // One admitted writer owns immediate panel, bar and IPC monitor commands.
+    // An empty screen targets the connected outputs, never offline records.
+    function submitMonitorCommand(runtimeApi, op, field, value, screen) {
+        if (!runtimeApi || runtimeApi.apiRole === "settings-editor" || typeof screen !== "string") return false;
+        const writer = admitRuntime(runtimeApi);
+        if (!writer) return false;
+        const names = screen === "" ? Array.from(Quickshell.screens, output => output.name) : [screen];
+        if (!names.length) return false;
+        const commands = Commands.create(() => writer.pluginSettings.monitors,
+            next => { writer.pluginSettings.monitors = next; }, value => Settings.store.copyValue(value),
+            () => writer.manifest?.metadata?.defaultSettings);
+        if (!commands.submit(names.map(name => ({op: op, screen: name, field: field, value: value})))) return false;
+        writer.saveSettings();
+        return true;
+    }
+
 
     /***************************
     * PROPERTIES
@@ -272,6 +288,7 @@ Item {
         id: ipcHandler
         pluginApi: root.pluginApi
         admitRuntime: root.admitRuntime
+        writeMonitorCommand: root.submitMonitorCommand
 
         random: root.random
         clear: root.clear

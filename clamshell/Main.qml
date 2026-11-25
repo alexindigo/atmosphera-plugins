@@ -23,6 +23,7 @@ Item {
     property var pluginApi: null
 
     property var selectedContext: null
+    property var runtimeWriters: []
     property bool retired: false
     readonly property var policyContext: selectedContext || pluginApi?.settingsContext
     readonly property bool policyCurrent: !retired && (policyContext?.current() ?? false)
@@ -42,9 +43,11 @@ Item {
         ?? "noctalia-clamshell"
 
     // ───── Public state (consumed by widgets via mainInstance) ───────────
-    // `enabled` is the user-facing toggle. Writes are immediately persisted
-    // because widgets and IPC mutate this property directly.
-    readonly property bool enabled: policyCurrent && ((cfg.enabled !== undefined)
+    // Incoming assignments use the same writer boundary as widget/IPC
+    // commands. Keep the settings binding independent of incoming writes.
+    property bool enabled: false
+    property bool _publishingEnabled: false
+    readonly property bool effectiveEnabled: policyCurrent && inhibitorAvailable && ((cfg.enabled !== undefined)
         ? cfg.enabled
         : (defaults.enabled !== undefined ? defaults.enabled : true))
 
@@ -72,9 +75,17 @@ Item {
     // part of the public mainInstance contract (spec §8).
     signal stateChanged
 
-    onEnabledChanged: {
+    onEffectiveEnabledChanged: {
+        publishEnabled();
         stateChanged();
         reconcileInhibitor();
+    }
+    onEnabledChanged: {
+        if (_publishingEnabled || enabled === effectiveEnabled) return;
+        const writer = writerForPolicy();
+        if (!writer || !setEnabled(enabled, writer))
+            Logger.w(root.logTag, "Rejected enabled assignment: no authorized writer or inhibitor unavailable");
+        publishEnabled();
     }
     onExternalPresentChanged: { stateChanged(); reconcileInhibitor(); }
     onInhibitorActiveChanged: stateChanged()
@@ -100,15 +111,31 @@ Item {
 
     // ─────────────────────────────────────────────────────────────────────
     // Public methods (spec §8).
+    function publishEnabled() {
+        _publishingEnabled = true;
+        enabled = effectiveEnabled;
+        _publishingEnabled = false;
+    }
+
+    function canWrite(runtimeApi) {
+        return !retired && runtimeApi && runtimeApi.apiRole !== "settings-editor"
+            && runtimeApi.settingsReady && runtimeApi.settingsContext?.current();
+    }
+
+    function writerForPolicy() {
+        if (!policyCurrent) return null;
+        if (pluginApi?.settingsContext === policyContext && canWrite(pluginApi)) return pluginApi;
+        return runtimeWriters.find(api => api?.settingsContext === policyContext && canWrite(api)) ?? null;
+    }
+
     function enable(runtimeApi) {
         runtimeApi = runtimeApi || pluginApi;
-        if (retired || !runtimeApi?.settingsContext?.current()) return "error:retired";
+        if (!canWrite(runtimeApi)) return "error:retired";
         if (!root.inhibitorAvailable) {
             setEnabled(false, runtimeApi);
             return "error:no-systemd-inhibit";
         }
-        setEnabled(true, runtimeApi);
-        return "ok";
+        return setEnabled(true, runtimeApi) ? "ok" : "error:retired";
     }
 
     function disable(runtimeApi) {
@@ -117,12 +144,8 @@ Item {
     }
 
     function toggle(runtimeApi) {
-        if (root.enabled) {
-            root.disable(runtimeApi);
-        } else {
-            root.enable(runtimeApi);
-        }
-        return root.enabled ? "on" : "off";
+        const result = root.effectiveEnabled ? root.disable(runtimeApi) : root.enable(runtimeApi);
+        return result === "ok" ? (root.effectiveEnabled ? "on" : "off") : result;
     }
 
     function refresh() {
@@ -142,8 +165,10 @@ Item {
     }
 
     function setEnabled(value, runtimeApi) {
-        const context = runtimeApi?.settingsContext;
-        if (retired || !context?.current()) return false;
+        if (!canWrite(runtimeApi) || (value && !inhibitorAvailable)) return false;
+        const context = runtimeApi.settingsContext;
+        runtimeWriters = runtimeWriters.filter(api => api?.settingsContext?.current());
+        if (!runtimeWriters.includes(runtimeApi)) runtimeWriters = runtimeWriters.concat([runtimeApi]);
         runtimeApi.pluginSettings.enabled = value;
         runtimeApi.saveSettings();
         return applySettings(context);
@@ -160,7 +185,7 @@ Item {
             });
         }
         return JSON.stringify({
-            enabled: root.enabled,
+            enabled: root.effectiveEnabled,
             externalPresent: root.externalPresent,
             inhibitorActive: root.inhibitorActive,
             inhibitorAvailable: root.inhibitorAvailable,
@@ -170,7 +195,7 @@ Item {
     }
 
     function stateLabel() {
-        if (!root.enabled) return pluginApi?.tr("state.disabled");
+        if (!root.effectiveEnabled) return pluginApi?.tr("state.disabled");
         if (root.externalPresent) return pluginApi?.tr("state.active");
         return pluginApi?.tr("state.standby");
     }
@@ -501,7 +526,7 @@ Item {
         Logger.i(root.logTag, "systemd-inhibit exited; code=" + code);
         root.notifyInhibitorChange(false, policy);
         if (!componentReady || retired) return;
-        if (!intentional && policyCurrent && enabled && externalPresent && inhibitorAvailable)
+        if (!intentional && effectiveEnabled && externalPresent)
             inhibitorRetry.restart();
         else
             Qt.callLater(root.reconcileInhibitor);
@@ -509,7 +534,7 @@ Item {
 
     function reconcileInhibitor() {
         if (!componentReady || retired) return;
-        const wanted = policyCurrent && enabled && externalPresent && inhibitorAvailable;
+        const wanted = effectiveEnabled && externalPresent;
         const previous = inhibitorProc.policy;
         if (!wanted) inhibitorRetry.stop();
         if (previous) {

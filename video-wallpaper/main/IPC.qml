@@ -8,9 +8,7 @@ Item {
     id: root
     required property var pluginApi
     required property var admitRuntime
-    readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
-        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
-        function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
+    required property var writeMonitorCommand
 
 
     /***************************
@@ -39,11 +37,7 @@ Item {
     }
 
     function submitMonitorCommand(op, key, value, screen) {
-        if (!pluginApi || !admitRuntime(pluginApi)) return;
-        var names = screen === "" ? Array.from(Quickshell.screens).map(screen => screen.name) : [screen];
-        if (!names.length) return;
-        monitorCommand.submit(names.map(name => ({op: op, screen: name, field: key, value: value})));
-        pluginApi.saveSettings();
+        return writeMonitorCommand(pluginApi, op, key, value, screen);
     }
 
     function getMonitorProperty(key: string, screen: string): string {

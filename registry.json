@@ -381,7 +381,7 @@
       "author": "Sovego",
       "description": "Auto clamshell on external display, with manual override",
       "license": "MIT",
-      "version": "0.1.8",
+      "version": "0.1.9",
       "tags": [
         "Bar",
         "System",
@@ -2390,7 +2390,7 @@
       "author": "suvi",
       "description": "Control spotify_player from a bar widget.",
       "license": "GPL 3.0",
-      "version": "1.0.11",
+      "version": "1.0.12",
       "tags": [
         "Bar",
         "Panel",
@@ -2695,7 +2695,7 @@
       "author": "spiros132",
       "description": "A plugin that uses a backend renderer to play videos as your wallpaper.",
       "license": "MIT",
-      "version": "3.0.14",
+      "version": "3.0.15",
       "tags": [
         "Bar",
         "Panel",

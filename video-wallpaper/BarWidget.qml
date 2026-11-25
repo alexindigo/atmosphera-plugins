@@ -12,10 +12,6 @@ Item {
     property var pluginApi: null
     onPluginApiChanged: pluginApi?.mainInstance?.registerRuntime(pluginApi)
     Component.onCompleted: pluginApi?.mainInstance?.registerRuntime(pluginApi)
-    readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
-        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
-        function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
-
     property ShellScreen screen
     property string widgetId: ""
     property string section: ""
@@ -40,15 +36,8 @@ Item {
     /***************************
     * FUNCTIONS
     ***************************/
-    function saveMonitorProperty(key: string, value: var): void {
-        if(pluginApi == null) {
-            Logger.e("video-wallpaper", "PluginAPI is null.");
-            return;
-        }
-
-        if (!pluginApi.mainInstance?.admitRuntime(pluginApi)) return;
-        var names = monitorSpecific ? [screen.name] : Array.from(Quickshell.screens).map(screen => screen.name);
-        if (names.length) monitorCommand.submit(names.map(name => ({op: "set", screen: name, field: key, value: value})));
+    function saveMonitorProperty(key, value) {
+        return pluginApi?.mainInstance?.submitMonitorCommand(pluginApi, "set", key, value, monitorSpecific ? screen?.name : "") ?? false;
     }
 
     /***************************
@@ -111,19 +100,15 @@ Item {
                     break;
                 case "play":
                     root.saveMonitorProperty("isPlaying", true);
-                    root.pluginApi.saveSettings();
                     break;
                 case "pause":
                     root.saveMonitorProperty("isPlaying", false);
-                    root.pluginApi.saveSettings();
                     break;
                 case "mute":
                     root.saveMonitorProperty("isMuted", true);
-                    root.pluginApi.saveSettings();
                     break;
                 case "unmute":
                     root.saveMonitorProperty("isMuted", false);
-                    root.pluginApi.saveSettings();
                     break;
                 case "settings":
                     BarService.openPluginSettings(root.screen, root.pluginApi.manifest);
