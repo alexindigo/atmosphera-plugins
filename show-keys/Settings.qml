@@ -452,8 +452,6 @@ ColumnLayout {
     if (!pluginApi)
       return;
 
-    if (root.editUseCustomColors) {}
-
     pluginApi.saveSettings();
   }
 }

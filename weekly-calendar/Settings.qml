@@ -131,7 +131,7 @@ ColumnLayout {
         id: rangeHourLineOpacity
         objectName: "settings-range-hourLineOpacity"
         Layout.fillWidth: true
-        from: 0.1
+        from: 0
         to: 1
         stepSize: 0.1
         value: root.hourLineOpacity
@@ -172,7 +172,7 @@ ColumnLayout {
         id: rangeDayLineOpacity
         objectName: "settings-range-dayLineOpacity"
         Layout.fillWidth: true
-        from: 0.1
+        from: 0
         to: 1
         stepSize: 0.1
         value: root.dayLineOpacity

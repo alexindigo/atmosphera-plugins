@@ -201,14 +201,15 @@ Item {
     return query("https://api.spotify.com/v1/me/playlists", input, data => root.playlistResults = data.items || [], "playlists");
   }
   function shuffle(input, state, closeAfter) {
-    return run(["curl", "-X", "PUT", "https://api.spotify.com/v1/me/player/shuffle?state=" + state.toString() + (input.playerId ? "&device_id=" + input.playerId : ""), "-H", "Authorization: Bearer " + input.accessToken], input, function(code) {
+    return run(["curl", "--fail", "-X", "PUT", "https://api.spotify.com/v1/me/player/shuffle?state=" + state.toString() + (input.playerId ? "&device_id=" + input.playerId : ""), "-H", "Authorization: Bearer " + input.accessToken], input, function(code) {
       if (code !== 0) { root.error = "request"; return; }
+      root.shuffleState = state;
       if (closeAfter) input.api.closePanel(input.api.panelOpenScreen);
     }, "shuffle");
   }
   function shufflePlayback(api) {
     var input = inputFor(api); if (!input) return false;
-    shuffleState = !shuffleState; return shuffle(input, shuffleState, false);
+    return shuffle(input, !shuffleState, false);
   }
   function play(data, api) {
     var input = inputFor(api); if (!input) return false;

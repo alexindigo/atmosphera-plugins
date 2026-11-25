@@ -196,6 +196,7 @@ Item {
 
     property int followingPage: 1
     property var allFollowingUsers: []
+    property bool batchFetchFailed: false
 
     Process {
         id: followingProcess
@@ -218,18 +219,22 @@ Item {
         stderr: StdioCollector {}
     }
 
+    // Only a complete fetch may replace the published feed and cache.
+    function failFeedFetch(message) {
+        if (!active || !root.isLoading) return;
+        root.isLoading = false
+        root.hasError = true
+        root.errorMessage = message
+        Logger.w("GitHubFeed", message)
+    }
+
     function handleFollowingResponse(responseText) {
         if (!active) return;
         try {
             var users = JSON.parse(responseText)
 
             if (!Array.isArray(users)) {
-                if (users.message) {
-                    Logger.e("GitHubFeed", "Following API error: " + users.message)
-                    root.hasError = true
-                    root.errorMessage = users.message
-                }
-                finishFollowingFetch()
+                failFeedFetch(users?.message || "Invalid following response")
                 return
             }
 
@@ -248,8 +253,7 @@ Item {
             }
 
         } catch (e) {
-            Logger.e("GitHubFeed", "Failed to parse following response: " + e)
-            finishFollowingFetch()
+            failFeedFetch("Failed to parse following response: " + e)
         }
     }
 
@@ -367,8 +371,8 @@ Item {
                     root.totalGraphQLCost += result.data.rateLimit.cost || 0
                 }
 
-                if (!result.data) {
-                    Logger.w("GitHubFeed", "Batch " + (batchIndex + 1) + " no data field")
+                if (!result.data || result.errors?.length) {
+                    Logger.w("GitHubFeed", "Batch " + (batchIndex + 1) + " returned incomplete data")
                     shouldRetry = true
                 } else {
                     processBatchData(result.data)
@@ -390,6 +394,7 @@ Item {
             root.batchQueue.push({ index: batchIndex, retryCount: retryCount + 1 })
         } else if (!success) {
             Logger.e("GitHubFeed", "Batch " + (batchIndex + 1) + " failed after " + retryCount + " retries")
+            root.batchFetchFailed = true
             root.completedBatches++
         }
 
@@ -482,7 +487,8 @@ Item {
 
     function checkAllBatchesComplete() {
         if (root.completedBatches >= root.totalBatches && root.batchQueue.length === 0) {
-            fetchMyRepoEvents()
+            if (root.batchFetchFailed) failFeedFetch("Could not refresh all followed users")
+            else fetchMyRepoEvents()
         }
     }
 
@@ -557,11 +563,6 @@ Item {
 
         stderr: StdioCollector {}
 
-        onExited: function(exitCode, exitStatus) {
-            if (root.active && exitCode !== 0) {
-                finalizeFetch()
-            }
-        }
     }
 
     function fetchMyRepoEvents() {
@@ -608,8 +609,7 @@ Item {
         if (!active) return;
         try {
             if (!responseText || responseText.trim() === "" || !responseText.trim().startsWith("{")) {
-                Logger.w("GitHubFeed", "My repos response invalid")
-                finalizeFetch()
+                failFeedFetch("My repositories response is invalid")
                 return
             }
 
@@ -619,9 +619,8 @@ Item {
                 root.totalGraphQLCost += result.data.rateLimit.cost || 0
             }
 
-            if (!result.data || !result.data.user || !result.data.user.repositories) {
-                Logger.w("GitHubFeed", "No data for your repos")
-                finalizeFetch()
+            if (result.errors?.length || !Array.isArray(result.data?.user?.repositories?.nodes)) {
+                failFeedFetch(result.errors?.[0]?.message || "No data for your repositories")
                 return
             }
 
@@ -670,7 +669,8 @@ Item {
             logDebug("Processed stars/forks on your repos, total events: " + root.collectedEvents.length)
 
         } catch (e) {
-            Logger.e("GitHubFeed", "Failed to parse my repos response: " + e)
+            failFeedFetch("Failed to parse my repositories response: " + e)
+            return
         }
 
         finalizeFetch()
@@ -708,6 +708,7 @@ Item {
         root.completedBatches = 0
         root.totalBatches = 0
         root.totalGraphQLCost = 0
+        root.batchFetchFailed = false
 
         followingProcess.page = 1
         followingProcess.running = true
@@ -869,7 +870,7 @@ Item {
     }
 
     function finalizeFetch() {
-        if (!active) return;
+        if (!active || !root.isLoading) return;
         root.collectedEvents.sort(function(a, b) {
             var dateA = new Date(a.created_at)
             var dateB = new Date(b.created_at)

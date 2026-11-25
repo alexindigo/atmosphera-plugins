@@ -351,6 +351,10 @@ Item {
   function _onAcpExited(code) {
     var wasReady = root.acpPhase === "ready";
     var errors = acpProcess?.stderrBuffer || "";
+    if (!wasReady && !root.isManuallyStopped) {
+      _settleAcpFailure("Failed to start claude-code-acp (code " + code + ")" + (errors ? ": " + errors.trim() : ""));
+      return;
+    }
     stopAcpProcess();
     root.acpPhase = "idle";
     root.isGenerating = false;
@@ -360,6 +364,17 @@ Item {
         (errors ? ": " + errors.trim() : "");
     }
     root.isManuallyStopped = false;
+  }
+
+  function _settleAcpFailure(message) {
+    const policy = acpProcess?.policy;
+    if (policy) {
+      root._pendingPrompts = root._pendingPrompts.filter(request =>
+        request.policy.context !== policy.context || request.policy.identity !== policy.identity);
+    }
+    stopAcpProcess();
+    root.errorMessage = message;
+    Qt.callLater(root._flushPendingPrompts);
   }
 
   // Write a JSON-RPC frame (already newline-terminated) to the agent's stdin.
@@ -457,11 +472,7 @@ Item {
           hint = "\nFix: edit ~/.claude/settings.json — `permissions.defaultMode` must be one of " +
                  "default | acceptEdits | plan | bypassPermissions.";
         }
-        root.errorMessage = (msg.id === 1 ? "Failed to initialize agent: " : "Failed to start session: ") + humanMsg + hint;
-        root.acpPhase = "idle";
-        root.isGenerating = false;
-        root._pendingPrompts = [];
-        finalizeStreaming();
+        _settleAcpFailure((msg.id === 1 ? "Failed to initialize agent: " : "Failed to start session: ") + humanMsg + hint);
         return;
       }
 
@@ -491,8 +502,7 @@ Item {
         Logger.i("ClaudeCode", "session ready: " + sr.sessionId);
         _flushPendingPrompts();
       } else {
-        root.errorMessage = "session/new returned no sessionId";
-        Logger.e("ClaudeCode", root.errorMessage);
+        _settleAcpFailure("session/new returned no sessionId");
       }
       return;
     }

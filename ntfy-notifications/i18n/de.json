@@ -29,7 +29,7 @@
     "timeDays": "vor {count} Tagen"
   },
   "settings": {
-    "shared-effect-label": "Shared read status and notifications",
+    "shared-effect-label": "Gemeinsamer Lesestatus und Benachrichtigungen",
     "shared-effect": "Diese Instanz wählt ihren eigenen Server und ihre eigenen Themen. Der Lesestatus gilt für alle Instanzen, und für jede eingehende Nachricht wird höchstens eine Desktop-Benachrichtigung angezeigt.",
     "server": {
       "label": "Server-URL",

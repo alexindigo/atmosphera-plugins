@@ -73,6 +73,11 @@ Item {
         if (origin) functions.setWallpaper(path, screen, origin);
     }
 
+    function selectWallpaper(path, names, runtimeApi) {
+        const origin = admitRuntime(runtimeApi);
+        if (origin) functions.selectWallpaper(path, names, origin);
+    }
+
 
     /***************************
     * HELPER FUNCTIONALITY
@@ -270,6 +275,6 @@ Item {
 
         random: root.random
         clear: root.clear
-        setWallpaper: root.setWallpaper
+        selectWallpaper: root.selectWallpaper
     }
 }

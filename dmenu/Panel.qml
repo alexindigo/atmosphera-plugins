@@ -135,6 +135,20 @@ FocusScope {
       flickable.contentY = itemY + 48 - flickable.height;
   }
 
+  function dismissPanel() {
+    root.main?.endSession(false);
+    closeVisiblePanel();
+  }
+
+  function closeVisiblePanel() {
+    const api = root.pluginApi;
+    const screen = api?.panelOpenScreen;
+    if (screen) {
+      root.main?.recordPanelClose();
+      api.closePanel(screen);
+    }
+  }
+
   function handleKeyPress(event) {
     if (event.key === Qt.Key_Down) {
       selectedIndex = Math.min(selectedIndex + 1, filteredItems.length - 1);
@@ -148,8 +162,7 @@ FocusScope {
       activateItem(selectedIndex);
       event.accepted = true;
     } else if (event.key === Qt.Key_Escape) {
-      if (main)
-        main.endSession();
+      root.dismissPanel();
       event.accepted = true;
     } else if (event.key === Qt.Key_Tab) {
       selectedIndex = (selectedIndex + 1) % Math.max(1, filteredItems.length);
@@ -186,6 +199,9 @@ FocusScope {
 
     function onSessionEnded(sid) {
       root.updateFilter();
+    }
+    function onSessionInvalidated() {
+      root.closeVisiblePanel();
     }
   }
 

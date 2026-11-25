@@ -268,7 +268,7 @@ Item {
                 ColumnLayout {
                     anchors.centerIn: parent
                     spacing: Style.marginL
-                    visible: root.hasError && root.hasUsername
+                    visible: root.hasError && root.hasUsername && root.currentTab === 0 && root.events.length === 0
 
                     NText {
                         Layout.alignment: Qt.AlignHCenter
@@ -294,8 +294,8 @@ Item {
                 ColumnLayout {
                     anchors.centerIn: parent
                     spacing: Style.marginL
-                    visible: !root.isLoading && !root.hasError && root.hasUsername && (
-                        (root.currentTab === 0 && root.events.length === 0) ||
+                    visible: !root.isLoading && root.hasUsername && (
+                        (root.currentTab === 0 && !root.hasError && root.events.length === 0) ||
                         (root.currentTab === 1 && (!mainInstance?.notificationsList || mainInstance.notificationsList.length === 0))
                     )
 
@@ -310,7 +310,7 @@ Item {
                 NScrollView {
                     anchors.fill: parent
                     anchors.margins: Style.marginS
-                    visible: root.hasUsername && !root.hasError && (
+                    visible: root.hasUsername && (
                         (root.currentTab === 0 && root.events.length > 0) ||
                         (root.currentTab === 1 && mainInstance?.notificationsList && mainInstance.notificationsList.length > 0)
                     )
@@ -323,6 +323,13 @@ Item {
                             Layout.fillWidth: true
                             spacing: Style.marginS
                             visible: root.currentTab === 0
+
+                        NText {
+                            Layout.fillWidth: true
+                            visible: root.hasError
+                            text: "Refresh failed. Showing the last available events."
+                            wrapMode: Text.WordWrap
+                        }
 
                         Repeater {
                             model: root.events

@@ -81,6 +81,7 @@ Item {
     onInhibitorWhoChanged: reconcileInhibitor()
     onNotifyEnabledChanged: reconcileInhibitor()
     onPolicyCurrentChanged: reconcileInhibitor()
+    onPolicyContextChanged: reconcileInhibitor()
     onInternalConnectorRegexChanged: {
         if (componentReady && lastOutputsPayload) classifyOutputs(lastOutputsPayload);
     }
@@ -463,6 +464,7 @@ Item {
     Process {
         id: inhibitorProc
         property var policy: null
+        property bool stopping: false
         running: false
 
         stdout: StdioCollector {}
@@ -480,24 +482,44 @@ Item {
             root.notifyInhibitorChange(true, inhibitorProc.policy);
         }
 
-        onExited: (exitCode, exitStatus) => {
-            Logger.i(root.logTag, "systemd-inhibit exited; code=" + exitCode + " status=" + exitStatus);
-            root.notifyInhibitorChange(false, inhibitorProc.policy);
-            inhibitorProc.policy = null;
+        onExited: exitCode => root.settleInhibitor(exitCode)
+        onRunningChanged: if (!running && policy) root.settleInhibitor(-1)
+    }
+
+    Timer {
+        id: inhibitorRetry
+        interval: 5000
+        onTriggered: root.reconcileInhibitor()
+    }
+
+    function settleInhibitor(code) {
+        const policy = inhibitorProc.policy;
+        if (!policy) return;
+        const intentional = inhibitorProc.stopping;
+        inhibitorProc.policy = null;
+        inhibitorProc.stopping = false;
+        Logger.i(root.logTag, "systemd-inhibit exited; code=" + code);
+        root.notifyInhibitorChange(false, policy);
+        if (!componentReady || retired) return;
+        if (!intentional && policyCurrent && enabled && externalPresent && inhibitorAvailable)
+            inhibitorRetry.restart();
+        else
             Qt.callLater(root.reconcileInhibitor);
-        }
     }
 
     function reconcileInhibitor() {
         if (!componentReady || retired) return;
         const wanted = policyCurrent && enabled && externalPresent && inhibitorAvailable;
         const previous = inhibitorProc.policy;
-        if (inhibitorProc.running) {
-            if (!wanted || !previous || previous.context !== policyContext || previous.who !== inhibitorWho || previous.notify !== notifyEnabled)
+        if (!wanted) inhibitorRetry.stop();
+        if (previous) {
+            if (!inhibitorProc.stopping && (!wanted || previous.context !== policyContext || previous.who !== inhibitorWho || previous.notify !== notifyEnabled)) {
+                inhibitorProc.stopping = true;
                 inhibitorProc.running = false;
+            }
             return;
         }
-        if (!wanted) return;
+        if (!wanted || inhibitorRetry.running) return;
         const policy = {context: policyContext, who: inhibitorWho, notify: notifyEnabled};
         inhibitorProc.policy = policy;
         inhibitorProc.command = ["systemd-inhibit", "--what=handle-lid-switch", "--who=" + policy.who,
@@ -534,6 +556,7 @@ Item {
         // running=false, but we stop the backoff timer too so a queued
         // reconnect can't race with destruction.
         backoffTimer.stop();
+        inhibitorRetry.stop();
         if (eventStreamProc.running) {
             eventStreamProc.running = false;
         }

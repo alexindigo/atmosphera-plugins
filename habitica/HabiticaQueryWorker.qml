@@ -90,10 +90,10 @@ Item {
   function handleApiResponse(kind, text, exitCode) {
     if (!active || !client.current) return;
     var response;
-    try { response = JSON.parse(text); } catch (error) { response = {success: false, message: "Invalid JSON response"}; }
-    if (exitCode !== 0 || !response.success) {
+    try { response = JSON.parse(text); } catch (error) { response = null; }
+    if (exitCode !== 0 || response?.success !== true) {
       isLoading = false; releaseScore(); hasError = true;
-      errorMessage = exitCode !== 0 ? pluginApi?.tr("error.network") : response.message || response.error || pluginApi?.tr("error.request");
+      errorMessage = exitCode !== 0 ? pluginApi?.tr("error.network") : response?.message || response?.error || pluginApi?.tr("error.request");
       return;
     }
     if (kind === "user") {

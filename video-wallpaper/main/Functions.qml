@@ -102,19 +102,24 @@ Item {
 
     function setWallpaper(path, screen, runtimeApi, admittedScreens) {
         runtimeApi = runtimeApi || pluginApi;
+        const selected = runtimeApi?.settingsContext?.settingsView;
+        if (selected) selectWallpaper(path, admittedScreens || affectedScreens(selected, screen), runtimeApi, true);
+    }
+
+    // Every selection owns its exact outputs, including reselecting the same file.
+    function selectWallpaper(path, names, runtimeApi, restartPlayback) {
+        runtimeApi = runtimeApi || pluginApi;
         if (!runtimeApi?.settingsContext?.current() || runtimeApi.settingsContext !== settingsContext) {
             Logger.e("video-wallpaper", "Can't set the wallpaper because pluginApi is null.");
             return;
         }
 
-        const selected = runtimeApi.settingsContext.settingsView;
-        const names = admittedScreens || affectedScreens(selected, screen);
         if (!names.length) return;
-        if (!admittedScreens) cancelBrowse(names);
+        cancelBrowse(names);
         var edits = [];
         for (var name of names) {
             edits.push({op: "set", screen: name, field: "currentWallpaper", value: path});
-            edits.push({op: "set", screen: name, field: "isPlaying", value: true});
+            if (restartPlayback) edits.push({op: "set", screen: name, field: "isPlaying", value: true});
         }
         const writer = runtimeApi;
         const monitorCommand = Commands.create(function () { return writer.pluginSettings.monitors; },

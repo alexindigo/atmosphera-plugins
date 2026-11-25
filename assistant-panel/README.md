@@ -38,7 +38,7 @@ removing that origin cancels its pending request, not the common conversation.
 Clear/stop affect that common conversation. IPC remains explicitly plugin-level.
 History-save truncation uses the policy captured by the admitted content edit.
 Tab and draft saves persist their fields without changing that history policy.
-An HTTP rejection does not append an assistant reply or clear the draft. Settings Apply and
+An HTTP rejection does not append an assistant reply. The compose box clears at admission, not on HTTP success. Settings Apply and
 Discard do not undo already admitted chat, translation or content actions.
 
 ### AI Provider Setup

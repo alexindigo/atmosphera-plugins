@@ -13,8 +13,8 @@ Item {
   property var currentRequest: null
   property var pendingFileLoader: null
   onOwnerCurrentChanged: if (!ownerCurrent)
-                           endSession(false)
-  onPluginApiChanged: endSession(false)
+                           invalidateSession()
+  onPluginApiChanged: invalidateSession()
 
   // ── Inline state object ──
   property QtObject state: QtObject {
@@ -38,6 +38,7 @@ Item {
   signal itemsChanged
   signal sessionStarted(int sid)
   signal sessionEnded(int sid)
+  signal sessionInvalidated()
 
   // ── Deferred launcher open ──
   // When openPanel is called shortly after a closePanel (chaining),
@@ -134,6 +135,15 @@ Item {
       retired.destroy();
   }
 
+  function invalidateSession() {
+    endSession(false);
+    sessionInvalidated();
+  }
+
+  function recordPanelClose() {
+    lastCloseTimestamp = Date.now();
+  }
+
   function endSession(closePanel = true) {
     var capturedApi = currentRequest?.api ?? pluginApi;
     currentRequest = null;
@@ -153,7 +163,7 @@ Item {
     if (wasActive)
       sessionEnded(oldSid);
     if (closePanel && capturedApi && capturedApi === pluginApi && ownerCurrent) {
-      lastCloseTimestamp = Date.now();
+      recordPanelClose();
       capturedApi.withCurrentScreen(function (screen) {
         if (root.ownerCurrent && capturedApi === root.pluginApi && generation === root.requestGeneration)
           capturedApi.closePanel(screen);

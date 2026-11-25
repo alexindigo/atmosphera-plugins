@@ -16,7 +16,7 @@
     "no_events": "Нет событий"
   },
   "settings": {
-    "shared-effect": "Calendar events and synchronization are shared. This instance has its own week, navigation and display settings.",
+    "shared-effect": "События календаря и синхронизация общие. У этого экземпляра свои настройки начала недели, навигации и отображения.",
     "weekStart": "Первый день недели",
     "weekStart_description": "Выберите, с какого дня начинается неделя в календаре.",
     "monday": "Понедельник",

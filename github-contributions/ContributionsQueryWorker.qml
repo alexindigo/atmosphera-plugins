@@ -58,6 +58,10 @@ Item {
   // Token fetch — GraphQL API
   Process {
     id: graphqlProcess
+    onStarted: {
+      write("Authorization: Bearer " + root.token + "\n");
+      stdinEnabled = false;
+    }
     onExited: (exitCode, exitStatus) => {
       if (!root.active)
         return;
@@ -92,7 +96,8 @@ Item {
                                        "login": username
                                      }
                                    });
-      graphqlProcess.command = ["curl", "-s", "--max-time", "30", "-X", "POST", "https://api.github.com/graphql", "-H", "Authorization: Bearer " + token, "-H", "Content-Type: application/json", "-d", payload];
+      graphqlProcess.command = ["curl", "-s", "--max-time", "30", "-X", "POST", "https://api.github.com/graphql", "-H", "@-", "-H", "Content-Type: application/json", "-d", payload];
+      graphqlProcess.stdinEnabled = true;
       graphqlProcess.running = true;
     } else {
       htmlProcess.command = ["curl", "-s", "--max-time", "30", "https://github.com/users/" + username + "/contributions"];

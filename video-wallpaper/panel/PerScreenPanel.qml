@@ -14,9 +14,7 @@ import "../common/MonitorCommands.js" as Commands
 ColumnLayout {
     id: root
     required property var pluginApi
-    readonly property var monitorCommand: Commands.create(function () { return root.pluginApi?.pluginSettings?.monitors; },
-        function (value) { root.pluginApi.pluginSettings.monitors = value; }, function (value) { return Settings.store.copyValue(value); },
-        function () { return root.pluginApi?.manifest?.metadata?.defaultSettings; })
+    required property var selectWallpaper
     anchors.fill: parent
 
 
@@ -34,17 +32,6 @@ ColumnLayout {
     /***************************
     * FUNCTIONS
     ***************************/
-    function saveMonitorProperty(key: string, value: var): bool {
-        if(pluginApi == null) {
-            Logger.e("video-wallpaper", "PluginAPI is null.");
-            return false;
-        }
-
-        if (!pluginApi.mainInstance?.admitRuntime(pluginApi)) return false;
-        var names = monitorSpecific ? [screenName] : Array.from(Quickshell.screens).map(screen => screen.name);
-        return names.length > 0 && monitorCommand.submit(names.map(name => ({op: "set", screen: name, field: key, value: value})));
-    }
-
 
     /***************************
     * COMPONENTS
@@ -129,13 +116,8 @@ ColumnLayout {
                             hoverEnabled: true;
 
                             onClicked: {
-                                if(root.pluginApi.mainInstance == null) {
-                                    Logger.e("video-wallpaper", "Can't change background because pluginApi or main instance doesn't exist!");
-                                    return;
-                                }
-
-                                root.saveMonitorProperty("currentWallpaper", wallpaper.modelData);
-                                root.pluginApi.saveSettings();
+                                const names = root.monitorSpecific ? [root.screenName] : Array.from(Quickshell.screens, output => output.name);
+                                root.selectWallpaper(wallpaper.modelData, names, root.pluginApi);
                             }
 
                             onEntered: TooltipService.show(wallpaperImage, wallpaper.modelData, "auto", 100);

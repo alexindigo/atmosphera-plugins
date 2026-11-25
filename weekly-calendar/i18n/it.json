@@ -16,7 +16,7 @@
     "no_events": "Nessun evento"
   },
   "settings": {
-    "shared-effect": "Calendar events and synchronization are shared. This instance has its own week, navigation and display settings.",
+    "shared-effect": "Gli eventi del calendario e la sincronizzazione sono condivisi. Questa istanza ha impostazioni proprie per l’inizio della settimana, la navigazione e la visualizzazione.",
     "weekStart": "Primo giorno della settimana",
     "weekStart_description": "Scegli il giorno che fa iniziare la settimana.",
     "monday": "Lunedì",

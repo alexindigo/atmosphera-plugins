@@ -259,6 +259,10 @@ Item {
     return colors[colors.length - 1];
   }
 
+  function httpCommand(url) {
+    return ["curl", "-s", "--max-time", "30", url];
+  }
+
   function refresh() {
     if (!active || loading)
       return;
@@ -305,12 +309,12 @@ Item {
       }
       var aqicnUrl = "https://api.waqi.info/feed/geo:" + lat + ";" + lon + "/?token=" + root.aqicnToken;
       Logger.d("Air Quality", "Fetching AQICN data for geo:" + lat + ";" + lon);
-      aqicnFetchProcess.command = ["curl", "-s", aqicnUrl];
+      aqicnFetchProcess.command = httpCommand(aqicnUrl);
       aqicnFetchProcess.running = true;
     } else {
       var url = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=" + lat + "&longitude=" + lon + "&current=us_aqi,european_aqi,pm2_5,pm10,ozone,nitrogen_dioxide,carbon_monoxide,sulphur_dioxide&timezone=auto";
       Logger.d("Air Quality", "Fetching Open-Meteo: " + url);
-      fetchProcess.command = ["curl", "-s", url];
+      fetchProcess.command = httpCommand(url);
       fetchProcess.running = true;
     }
   }

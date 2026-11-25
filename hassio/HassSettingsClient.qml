@@ -10,6 +10,7 @@ Item {
   readonly property string haUrl: cfg.haUrl ?? ""
   readonly property string haToken: cfg.haToken ?? ""
   readonly property string _queryIdentity: JSON.stringify([haUrl, haToken])
+  readonly property string _pinsIdentity: JSON.stringify(cfg.entities ?? [])
   property bool _constructed: false
   property var _worker: null
   readonly property bool connected: _worker?.connected ?? false
@@ -53,6 +54,7 @@ Item {
   }
   Timer { id: replacement; interval: 300; onTriggered: root._replaceQuery() }
   on_QueryIdentityChanged: _queueQuery()
+  on_PinsIdentityChanged: if (_constructed) refreshEntities()
   onCurrentChanged: {
     if (!current && _constructed) { replacement.stop(); _retireWorker(); retire(root); }
   }

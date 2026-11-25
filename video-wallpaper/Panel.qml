@@ -160,6 +160,7 @@ Item {
                 PerScreenPanel {
                     required property var modelData
                     pluginApi: root.pluginApi
+                    selectWallpaper: (path, names, api) => root.pluginApi?.mainInstance?.selectWallpaper(path, names, api)
                     thumbCacheReady: root.thumbCacheReady
                     screenName: modelData.name
                     folderModel: wallpaperFolderModel

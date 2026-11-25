@@ -66,7 +66,6 @@ Item {
         }
         pluginApi.pluginSettings.entities = pinned;
         pluginApi.saveSettings();
-        root.main.refreshEntities();
         root._pinVersion++;
     }
 

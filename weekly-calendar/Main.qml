@@ -86,10 +86,13 @@ Item {
     Component.onCompleted: initializePluginSettings()
     function initializePluginSettings() {
         if (!pluginApi) return;
-        if (!pluginApi.pluginSettings.weekStart) {
-            var submitted = {weekStart: "1", timeFormat: "24h", lineColorType: "mOutline", hourLineOpacity: 0.5, dayLineOpacity: 1.0};
-            for (var key of Object.keys(submitted)) pluginApi.pluginSettings[key] = submitted[key];
-            pluginApi.saveSettings();
+        const defaults = {weekStart: "1", timeFormat: "24h", lineColorType: "mOutline", hourLineOpacity: 0.5, dayLineOpacity: 1.0};
+        let changed = false;
+        for (const key of Object.keys(defaults)) {
+            if (pluginApi.pluginSettings[key] !== undefined) continue;
+            pluginApi.pluginSettings[key] = defaults[key];
+            changed = true;
         }
+        if (changed) pluginApi.saveSettings();
     }
 }

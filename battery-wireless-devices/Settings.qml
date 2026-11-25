@@ -32,10 +32,9 @@ ColumnLayout {
     text: root.pluginApi?.tr("settings.shared-observation") ?? ""
   }
 
-  // Working copy of the per-device config: { <id>: { enabled, icon, iconColor,
-  // ringColor, launchCmd, name, type } }. Mutated in place by the controls so
-  // the Repeater never rebuilds and loses edits.
-  property var editDevices: ({})
+  // Both the cards and edit intents start from the current field projection.
+  readonly property var deviceViewModel: deviceView({devices: root.devicesField?.value || ({}), deviceOrder: root.deviceOrderField?.value || []}, liveDevices)
+  readonly property var editDevices: deviceViewModel.devices
 
   // Devices shown in the list, in bar order: union of currently-detected
   // devices and any previously-configured ones (so unplugged devices keep
@@ -98,6 +97,7 @@ ColumnLayout {
     populateList();
     initialized = true;
   }
+  onDeviceViewModelChanged: if (initialized) populateList()
 
   function _defaultCfg() {
     return {
@@ -192,12 +192,7 @@ ColumnLayout {
   // The working view is derived from the field values plus live detection,
   // so field Reset and the periodic rescan converge on the same state.
   function populateList() {
-    var view = deviceView({
-                            devices: root.devicesField?.value || ({}),
-                            deviceOrder: root.deviceOrderField?.value || []
-                          }, liveDevices);
-    editDevices = view.devices;
-    deviceList = view.list;
+    deviceList = deviceViewModel.list;
   }
 
   function _devicesIntent(source) {
@@ -357,8 +352,7 @@ ColumnLayout {
             required property int index
             required property var modelData
             readonly property var cfg: root.editDevices[modelData.id] || root._defaultCfg()
-            // Notifiable mirror of cfg.enabled so the toggle updates live
-            // (editDevices is mutated in place and doesn't emit change signals).
+            // Notifiable mirror of cfg.enabled so the toggle updates live.
             property bool enabledLocal: cfg.enabled === true
 
             // Drag state

@@ -20,7 +20,7 @@ Item {
 
     required property var random
     required property var clear
-    required property var setWallpaper
+    required property var selectWallpaper
 
 
     /***************************
@@ -86,7 +86,8 @@ Item {
 
         // Current wallpaper
         function setWallpaper(path: string, screen: string) {
-            root.saveMonitorProperty("currentWallpaper", path, screen);
+            const names = screen === "" ? Array.from(Quickshell.screens, output => output.name) : [screen];
+            root.selectWallpaper(path, names, root.pluginApi);
         }
 
         function getWallpaper(screen: string): string {

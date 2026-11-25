@@ -96,7 +96,7 @@
       "author": "adriamartin91",
       "description": "Displays real-time air quality data with EPA color coding. Supports Open-Meteo and AQICN data sources. Shows AQI index and pollutant breakdown.",
       "license": "MIT",
-      "version": "1.1.8",
+      "version": "1.1.9",
       "tags": [
         "Bar",
         "Desktop",
@@ -161,7 +161,7 @@
       "author": "j-1in",
       "description": "AI Chat and Translation panel",
       "license": "MIT",
-      "version": "2.1.16",
+      "version": "2.1.17",
       "tags": [
         "Bar",
         "Panel",
@@ -272,7 +272,7 @@
       "author": "Wilfred Mallawa",
       "description": "Set the battery threshold for laptop batteries to extend battery lifespan",
       "license": "MIT",
-      "version": "1.2.12",
+      "version": "1.2.13",
       "tags": [
         "Bar",
         "Panel",
@@ -290,7 +290,7 @@
       "author": "aslauw",
       "description": "Bar widget showing battery levels for wireless peripherals (mouse, keyboard, headset, etc.) via OpenRazer and Solaar.",
       "license": "MIT",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "tags": [
         "Bar",
         "Indicator",
@@ -381,7 +381,7 @@
       "author": "Sovego",
       "description": "Auto clamshell on external display, with manual override",
       "license": "MIT",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "tags": [
         "Bar",
         "System",
@@ -401,7 +401,7 @@
       "author": "d7om",
       "description": "Claude Code (Anthropic agentic CLI) with full tool access, permission controls, session management, MCP servers, and device integration",
       "license": "MIT",
-      "version": "0.2.9",
+      "version": "0.2.10",
       "tags": [
         "Bar",
         "Panel",
@@ -684,7 +684,7 @@
       "author": "Ben Hilton",
       "description": "An IPC-driven dmenu replacement that lets external scripts present choices through a Noctalia panel.",
       "license": "MIT",
-      "version": "1.0.11",
+      "version": "1.0.12",
       "tags": [
         "Panel",
         "Productivity",
@@ -810,7 +810,7 @@
       "author": "xevrion",
       "description": "Displays your GitHub contribution graph as a desktop widget. Works without a token via your public profile, or with a personal access token for private contributions.",
       "license": "MIT",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "tags": [
         "Desktop",
         "Development",
@@ -829,7 +829,7 @@
       "author": "linuxmobile",
       "description": "Display GitHub activity from users you follow and activity on your repos",
       "license": "MIT",
-      "version": "1.3.9",
+      "version": "1.3.10",
       "tags": [
         "Bar",
         "Panel",
@@ -848,7 +848,7 @@
       "author": "vasqs",
       "description": "Habitica dashboard and task scorer for Noctalia Shell with official avatar sprite rendering.",
       "license": "MIT",
-      "version": "1.0.9",
+      "version": "1.0.10",
       "tags": [
         "Bar",
         "Panel",
@@ -867,7 +867,7 @@
       "author": "Pozzoo",
       "description": "Monitor and control Home Assistant entities from the bar. Requires qt6-websockets.",
       "license": "MIT",
-      "version": "1.1.8",
+      "version": "1.1.9",
       "tags": [
         "Bar",
         "Panel",
@@ -1793,7 +1793,7 @@
       "author": "maxe",
       "description": "Subscribe to ntfy topics and receive push notifications directly in your bar, with full theming support",
       "license": "MIT",
-      "version": "1.0.11",
+      "version": "1.0.12",
       "tags": [
         "Bar",
         "Panel",
@@ -2299,7 +2299,7 @@
       "author": "onez3r0",
       "description": "Floating OSD that displays keyboard input in real-time via evtest.",
       "license": "MIT",
-      "version": "1.0.9",
+      "version": "1.0.10",
       "tags": [
         "Indicator",
         "System"
@@ -2390,7 +2390,7 @@
       "author": "suvi",
       "description": "Control spotify_player from a bar widget.",
       "license": "GPL 3.0",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "tags": [
         "Bar",
         "Panel",
@@ -2695,7 +2695,7 @@
       "author": "spiros132",
       "description": "A plugin that uses a backend renderer to play videos as your wallpaper.",
       "license": "MIT",
-      "version": "3.0.13",
+      "version": "3.0.14",
       "tags": [
         "Bar",
         "Panel",
@@ -2816,7 +2816,7 @@
       "author": "dodaars",
       "description": "A weekly calendar plugin complementing Noctalia's inbuilt calendar service.",
       "license": "MIT",
-      "version": "1.1.9",
+      "version": "1.1.10",
       "tags": [
         "Bar",
         "Panel",

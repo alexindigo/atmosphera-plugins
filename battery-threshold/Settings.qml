@@ -45,7 +45,7 @@ ColumnLayout {
 
   NPluginSettingsField {
     field: root.batteryDeviceField
-    visible: service?.isAvailable ?? false
+    visible: root.batteryModel.length > 0
     NComboBox {
       Layout.fillWidth: true
       label: pluginApi?.tr("settings.battery-device")

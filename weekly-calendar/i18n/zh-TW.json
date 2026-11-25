@@ -16,7 +16,7 @@
     "no_events": "缺少活動"
   },
   "settings": {
-    "shared-effect": "Calendar events and synchronization are shared. This instance has its own week, navigation and display settings.",
+    "shared-effect": "行事曆事件與同步由各執行個體共用。此執行個體可個別設定每週起始日、導覽和顯示方式。",
     "weekStart": "一週起始日",
     "weekStart_description": "選擇日曆中一週的起始日。",
     "monday": "週一",
