@@ -25,10 +25,6 @@ Item {
 
   signal ready
 
-  function toLocalPath(urlStr) {
-    return String(urlStr).replace(/^file:\/\//, "");
-  }
-
   FolderListModel {
     id: thumbnailModel
 
@@ -60,7 +56,8 @@ Item {
       var fileName = thumbnailModel.get(i, "fileName");
       entries.push({
                      fileName: fileName,
-                     filePath: toLocalPath(thumbnailModel.get(i, "filePath")),
+                     filePath: thumbnailModel.get(i, "filePath"),
+                     fileUrl: thumbnailModel.get(i, "fileUrl"),
                      isVideo: Utils.isVideo(fileName, service.videoFilter),
                      hex: ""
                    });
@@ -78,7 +75,7 @@ Item {
   function pump() {
     while (_cursor < _entries.length && Object.keys(_requests).length < 2) {
       const entry = _entries[_cursor];
-      const id = sampler.sample(entry.filePath, 32, 32, 0.1);
+      const id = sampler.sample(entry.fileUrl, 32, 32, 0.1);
       if (id === -2) {
         retry.restart();
         return;
