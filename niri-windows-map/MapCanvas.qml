@@ -114,12 +114,22 @@ Item {
   readonly property bool dragActive: root._dragging
   readonly property real phantomHeight: root._phantomH
   property var _activeDragHandler: null
+  property var _rowAtPress: null
+
+  Connections {
+    target: root.mapFacade
+    function onMapStateChanged() {
+      if (!root.mapFacade.mapState.ready)
+        root._rowAtPress = null;
+    }
+  }
 
   function _cancelDrag() {
     _pressWinId = null;
     _activeDragHandler = null;
     _dragWinId = null;
     _dragging = false;
+    _rowAtPress = null;
     pressHoldTimer.stop();
   }
 
@@ -143,9 +153,15 @@ Item {
   readonly property var _workspaceRows: workspaceOrder().map(function (ws, index) {
     return {id: ws.id, y: root.workspaceRowY(index), height: root.workspaceRowHeight(index), trailing: index === root._workspaceOrder.length - 1};
   })
+  readonly property var _sameRowDrag: {
+    if (!_dragging || !mapFacade.matchesRow(_dragWinId, _rowAtPress))
+      return null;
+    return {windowId: _dragWinId, workspaceId: _rowAtPress.workspaceId, leftEdge: _barWidth, gutter: 2 * _colGap,
+      columns: _rowAtPress.columns.map(column => column.map(w => ({id: w.id, rect: root.windowGeometry(w)})))};
+  }
 
   function _targetAt(point) {
-    return MapGeometry.targetAt(point, _viewport, _insertStrip, _mapOriginInRoot, _userScale, _workspaceRows, renderedW);
+    return MapGeometry.targetAt(point, _viewport, _insertStrip, _mapOriginInRoot, _userScale, _workspaceRows, renderedW, _sameRowDrag);
   }
 
   readonly property var _dragTarget: _dragging ? _targetAt(_dragPointer) : null
@@ -586,7 +602,9 @@ Item {
 
     Item {
       id: mapContent
-      width: root.renderedW
+      // Allow edge scrolling to expose the after-last-column gap even when
+      // the last column fills the panel. The panel's resting size is unchanged.
+      width: root.renderedW + (root._sameRowDrag?.gutter ?? 0)
       height: root.renderedH + root._trailingLandingSpace
       // Center within the Flickable viewport so any residual letterbox
       // distributes equally — EXCEPT during a drag, when the panel grows
@@ -611,7 +629,7 @@ Item {
             visible: modelData.id === root.hoveredWs
             x: 0
             y: root.workspaceRowY(index)
-            width: mapContent.width
+            width: root.renderedW
             height: root.workspaceRowHeight(index)
             color: AtmoColor.mPrimary
             opacity: 0.07
@@ -623,7 +641,7 @@ Item {
             visible: root._dropMove?.insertAtIndex === null && modelData.id === root._dropMove?.workspace.id
             x: 0
             y: root.workspaceRowY(index)
-            width: mapContent.width
+            width: root.renderedW
             height: root.workspaceRowHeight(index)
             color: AtmoColor.mPrimary
             opacity: 0.12
@@ -647,7 +665,7 @@ Item {
           MouseArea {
             x: 0
             y: root.workspaceRowY(index)
-            width: mapContent.width
+            width: root.renderedW
             height: root.workspaceRowHeight(index)
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
@@ -914,6 +932,7 @@ Item {
               if (mouse.button === Qt.LeftButton) {
                 root._pressTime = Date.now();
                 root._windowsCache = root._windowsLive;
+                root._rowAtPress = root.mapFacade.tiledRow(modelData.id);
                 root._pressWinId = modelData.id;
                 root._pressStart = hoverArea.mapToItem(null, mouse.x, mouse.y);
                 dragH.enabled = true;
@@ -988,7 +1007,7 @@ Item {
                 // The release event owns the final position; the centroid
                 // can already have been reset by the time this signal fires.
                 if (point.state === EventPoint.Released)
-                  root.mapFacade.drop(root._dragWinId, root._targetAt(root.mapFromItem(null, point.scenePosition)));
+                  root.mapFacade.drop(root._dragWinId, root._targetAt(root.mapFromItem(null, point.scenePosition)), root._rowAtPress);
                 root._cancelDrag();
               } else if (transition === PointerDevice.CancelGrabExclusive) {
                 root._cancelDrag();
@@ -1114,46 +1133,6 @@ Item {
         }
       }
 
-      // Drag ghost: follows the cursor while a window is being dragged to
-      // another workspace. Semi-transparent chip with the window's icon.
-      Item {
-        id: dragGhost
-        // Escape the scrolling viewport's clip so the ghost can enter the
-        // phantom row without exposing any of the offscreen map content.
-        parent: root
-        visible: root._dragging
-        readonly property var _win: {
-          for (var i = 0; i < root._windows.length; i++) {
-            if (root._windows[i].id === root._dragWinId)
-              return root._windows[i];
-          }
-          return null;
-        }
-        width: Math.max(32, 240 * root._autoScale)
-        height: width * 0.7
-        readonly property point _position: root._dragPointer
-        x: _position.x - width * scale / 2
-        y: _position.y - height * scale / 2
-        scale: root._userScale
-        transformOrigin: Item.TopLeft
-        z: 101
-
-        Rectangle {
-          anchors.fill: parent
-          radius: 6
-          color: AtmoColor.mSurface
-          border.color: AtmoColor.mPrimary
-          border.width: 2
-          opacity: 0.92
-        }
-        AtmoAppIcon {
-          anchors.centerIn: parent
-          width: Math.max(12, parent.height - 12)
-          height: width
-          name: dragGhost._win ? ThemeIcons.iconNameForAppId(dragGhost._win.appId || "") : "application-x-executable"
-        }
-      }
-
       // This workspace reserves the info height and remains a scrolled drop
       // target. Its text is presented separately in the visible viewport.
       Item {
@@ -1161,6 +1140,82 @@ Item {
         y: root.workspaceRowY(Math.max(0, root._workspaceOrder.length - 1))
         width: mapContent.width
         height: root._infoStripH
+      }
+    }
+  }
+
+  // The ghost can enter the phantom. The placement marker draws above it
+  // but remains clipped to the map viewport.
+  Item {
+    anchors.fill: parent
+    visible: root._dragging
+    z: 101
+
+    Item {
+      id: dragGhost
+
+      readonly property var _win: {
+        for (var i = 0; i < root._windows.length; i++) {
+          if (root._windows[i].id === root._dragWinId)
+            return root._windows[i];
+        }
+        return null;
+      }
+      width: Math.max(32, 240 * root._autoScale)
+      height: width * 0.7
+      readonly property point _position: root._dragPointer
+      x: _position.x - width * scale / 2
+      y: _position.y - height * scale / 2
+      scale: root._userScale
+      transformOrigin: Item.TopLeft
+
+      Rectangle {
+        anchors.fill: parent
+        radius: 6
+        color: AtmoColor.mSurface
+        border.color: AtmoColor.mPrimary
+        border.width: 2
+        opacity: 0.92
+      }
+      AtmoAppIcon {
+        anchors.centerIn: parent
+        width: Math.max(12, parent.height - 12)
+        height: width
+        name: dragGhost._win ? ThemeIcons.iconNameForAppId(dragGhost._win.appId || "") : "application-x-executable"
+      }
+    }
+
+    Item {
+      id: placementViewport
+
+      x: root._viewport.x
+      y: root._viewport.y
+      width: root._viewport.width
+      height: root._viewport.height
+      clip: true
+      visible: !!root._dragTarget?.seam
+      readonly property rect seam: {
+        root._mapOriginInRoot;
+        mapContent.scale;
+        const targetSeam = root._dragTarget?.seam;
+        return targetSeam ? mapContent.mapToItem(placementViewport, targetSeam) : Qt.rect(0, 0, 0, 0);
+      }
+
+      Item {
+        id: seamBox
+
+        x: placementViewport.seam.x
+        y: placementViewport.seam.y
+        width: placementViewport.seam.width
+        height: placementViewport.seam.height
+
+        Rectangle {
+          anchors.centerIn: parent
+          anchors.alignWhenCentered: false
+          width: seamBox.width || Style.borderM
+          height: seamBox.height || Style.borderM
+          color: AtmoColor.mPrimary
+        }
       }
     }
   }

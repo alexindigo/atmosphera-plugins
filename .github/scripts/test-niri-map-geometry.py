@@ -67,6 +67,29 @@ ShellRoot {
     check("already aligned bottom stop adds no space",Geometry.trailingLandingSpace(274,56,4,7,30),0);
     check("fitting content adds no space",Geometry.trailingLandingSpace(304,56,4,4,30),0);
     check("a viewport shorter than one slot and the strip adds no space",Geometry.trailingLandingSpace(84,56,4,7,30),0);
+    const tile=(id,x,y,w,h)=>({id,rect:Qt.rect(x,y,w,h)});
+    const rowDrag={windowId:"0",workspaceId:"0",leftEdge:4,gutter:8,columns:[
+      [tile("L",12,0,44,32)], [tile("0",60,0,44,32)],
+      [tile("T",108,0,52,15),tile("B",108,17,52,15)]]};
+    const wider=Qt.rect(0,40,168,100);
+    function rowTarget(x,y,drag=rowDrag) {
+      const t=Geometry.targetAt(Qt.point(x,y),wider,phantom,origin,1,rows,160,drag);
+      return t?.seam ? [t.kind,t.workspaceId,t.anchorId,t.index??null,t.seam.x,t.seam.y,t.seam.width,t.seam.height] : t;
+    }
+    check("vertical seam before first column",rowTarget(8,52),["gap","0",null,null,8,0,0,32]);
+    check("both adjacent singleton gaps and its source tile are no-ops",[rowTarget(58,52),rowTarget(80,52),rowTarget(106,52)],[null,null,null]);
+    check("vertical seam after final full-width column",rowTarget(164,52),["gap","0","T",null,164,0,0,32]);
+    check("stack top/middle/bottom slots use rendered tile edges",[rowTarget(130,42),rowTarget(130,56),rowTarget(130,69)],
+      [["stack","0","T",1,108,0,52,0],["stack","0","T",2,108,16,52,0],["stack","0","T",3,108,32,52,0]]);
+    const stacked=Object.assign({},rowDrag,{windowId:"T"});
+    check("expelling a stacked source leaves its surviving column as the anchor",rowTarget(164,52,stacked),["gap","0","B",null,164,0,0,32]);
+    check("reordering in own stack excludes source from index and anchor",rowTarget(130,69,stacked),["stack","0","B",2,108,32,52,0]);
+    check("tile above its midpoint is unchanged after removing the source",rowTarget(130,60,stacked),null);
+    check("right gutter cannot extend another workspace drop target",rowTarget(164,80),null);
+    check("source-row projection leaves phantom, cross-row and trailing intact",[rowTarget(50,20),rowTarget(50,80),rowTarget(50,115)],
+      [{kind:"insert"},{kind:"row",id:"9007199254740992"},{kind:"trailing"}]);
+    const zoomedGap=Geometry.targetAt(Qt.point(70,64),wider,phantom,Qt.point(-258,40),2,rows,160,rowDrag);
+    check("zoom and scrolling share the same gap geometry",[zoomedGap.kind,zoomedGap.anchorId,zoomedGap.seam.x],["gap","T",164]);
     console.log("MAP_GEOMETRY|"+JSON.stringify(results));Qt.callLater(function () { Qt.quit(); });
   }
 }
@@ -88,7 +111,7 @@ def main():
                                  stdout=log, stderr=subprocess.STDOUT, timeout=25)
     lines = [line.split('MAP_GEOMETRY|', 1)[1] for line in (args.output / 'shell.log').read_text().splitlines() if 'MAP_GEOMETRY|' in line]
     cases = json.loads(lines[-1]) if lines else []
-    passed = process.returncode == 0 and len(cases) == 29 and all(row['passed'] for row in cases)
+    passed = process.returncode == 0 and len(cases) == 39 and all(row['passed'] for row in cases)
     (args.output / 'result.json').write_text(json.dumps(dict(passed=passed, exit_code=process.returncode, cases=cases), indent=2) + '\n')
     for row in cases:
         print(row['name'], 'PASS' if row['passed'] else 'FAIL')

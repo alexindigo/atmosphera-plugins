@@ -27,6 +27,34 @@ function normalize(state) {
   return {ready: true, windows, workspaces, focusedWindowId: exactId(state.focusedWindowId), focusedWorkspaceId: exactId(state.focusedWorkspaceId)};
 }
 
+// Freeze the actual column/tile order rather than trusting window-list order.
+// Focus/title changes do not invalidate a placement; tiled membership does.
+function tiledRow(state, id) {
+  if (!state.ready)
+    return null;
+  const source = state.windows.find(w => w.id === id && w.layout?.posInScrollingLayout?.length === 2);
+  const workspace = source && state.workspaces.find(w => w.id === source.workspaceId);
+  if (!workspace)
+    return null;
+  const position = w => w.layout.posInScrollingLayout;
+  const windows = state.windows.filter(w => w.workspaceId === workspace.id && w.layout?.posInScrollingLayout?.length === 2);
+  windows.sort((a, b) => position(a)[0] - position(b)[0] || position(a)[1] - position(b)[1]);
+  const columns = [];
+  for (const window of windows) {
+    const last = columns[columns.length - 1];
+    if (last && position(last[0])[0] === position(window)[0])
+      last.push(window);
+    else
+      columns.push([window]);
+  }
+  return {workspaceId: workspace.id, columns, key: JSON.stringify([workspace.idx, workspace.output,
+    windows.map(w => [w.id, position(w)[0], position(w)[1]])])};
+}
+
+function sameRow(a, b) {
+  return !!a && !!b && a.workspaceId === b.workspaceId && a.key === b.key;
+}
+
 function drop(state, id, target) {
   if (!state.ready || !target || !["row", "trailing", "insert"].includes(target.kind))
     return null;

@@ -23,7 +23,7 @@
       "author": "Atmosphera",
       "description": "Spatial overview map of niri windows and workspaces. Click tiles to focus, click rows to switch, or drag a window to move it.",
       "license": "GPL-3.0",
-      "version": "1.0.18",
+      "version": "1.0.19",
       "tags": [
         "Panel",
         "Niri",
@@ -31,8 +31,8 @@
       ],
       "repository": "https://github.com/alexindigo/atmosphera-plugins",
       "official": true,
-      "lastUpdated": "2026-11-24",
-      "minAtmospheraVersion": "0.11.0"
+      "lastUpdated": "2026-11-25",
+      "minAtmospheraVersion": "0.11.1"
     },
     {
       "id": "2-in-1-tools",
