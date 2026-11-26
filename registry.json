@@ -1409,7 +1409,7 @@
       "author": "spiros132",
       "description": "A plugin that allows having video wallpapers using mpvpaper.",
       "license": "MIT",
-      "version": "1.6.17",
+      "version": "1.6.18",
       "tags": [
         "Bar",
         "Panel",
@@ -2695,7 +2695,7 @@
       "author": "spiros132",
       "description": "A plugin that uses a backend renderer to play videos as your wallpaper.",
       "license": "MIT",
-      "version": "3.0.16",
+      "version": "3.0.17",
       "tags": [
         "Bar",
         "Panel",

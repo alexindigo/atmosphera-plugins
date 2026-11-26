@@ -23,7 +23,6 @@ ColumnLayout {
     * PROPERTIES
     ***************************/
     required property string screenName
-    required property bool   thumbCacheReady
     required property FolderModel folderModel
 
     readonly property string currentWallpaper: Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.currentWallpaper ?? ""
@@ -47,7 +46,7 @@ ColumnLayout {
 
         ColumnLayout {
             anchors.fill: parent
-            visible: !root.thumbCacheReady
+            visible: !root.folderModel.ready
             spacing: Style.marginS
 
             NText {
@@ -60,7 +59,7 @@ ColumnLayout {
 
         ColumnLayout {
             anchors.fill: parent
-            visible: root.thumbCacheReady
+            visible: root.folderModel.ready
             spacing: Style.marginS
 
             NGridView {

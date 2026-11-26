@@ -26,7 +26,7 @@ Item {
     property real contentPreferredWidth: 1000 * Style.uiScaleRatio
     property real contentPreferredHeight: 700 * Style.uiScaleRatio
 
-    readonly property bool thumbCacheReady: pluginApi?.mainInstance.thumbCacheReady || false
+    readonly property bool folderReady: wallpapersFolderModel.status === FolderListModel.Ready
 
     readonly property bool active: 
         pluginApi.pluginSettings.active || 
@@ -108,7 +108,7 @@ Item {
 
                 ColumnLayout {
                     anchors.fill: parent
-                    visible: !root.thumbCacheReady
+                    visible: !root.folderReady
                     spacing: Style.marginS
 
                     NText {
@@ -121,7 +121,7 @@ Item {
 
                 ColumnLayout {
                     anchors.fill: parent
-                    visible: root.thumbCacheReady
+                    visible: root.folderReady
                     spacing: Style.marginS
 
                     NGridView {
@@ -137,7 +137,7 @@ Item {
                         // For now all wallpapers are shown in a 16:9 ratio
                         cellHeight: Math.floor(itemSize * (9/16))
 
-                        model: wallpapersFolderModel.status == FolderListModel.Ready ? wallpapersFolderModel : 0
+                        model: root.folderReady ? wallpapersFolderModel : 0
 
                         // Wallpaper
                         delegate: Item {

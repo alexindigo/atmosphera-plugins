@@ -31,20 +31,7 @@ Item {
     readonly property string activeBackend:    pluginApi?.pluginSettings?.activeBackend    ?? pluginApi?.manifest?.metadata?.defaultSettings?.activeBackend ?? ""
     readonly property bool wallpaperEnabled: pluginApi?.pluginSettings?.enabled ?? false
     readonly property bool   monitorSpecific:  pluginApi?.pluginSettings?.monitorSpecific  ?? false
-    // Previews can be shown: every video has its thumbnail or a labelled failure.
-    readonly property bool thumbCacheReady: pluginApi?.mainInstance?.thumbnailsSettled ?? false
     readonly property string wallpapersFolder: pluginApi?.pluginSettings?.wallpapersFolder ?? pluginApi?.manifest?.metadata?.defaultSettings?.wallpapersFolder ?? ""
-
-
-    /***************************
-    * EVENTS
-    ***************************/
-    onThumbCacheReadyChanged: {
-        // When the thumbnail cache is ready, reload the folder model.
-        if (thumbCacheReady) {
-            wallpaperFolderModel.forceReload();
-        }
-    }
 
 
     /***************************
@@ -162,7 +149,6 @@ Item {
                     pluginApi: root.pluginApi
                     selectWallpaper: (path, names, api) => root.pluginApi?.mainInstance?.selectWallpaper(path, names, api)
                     writeMonitorSetting: (key, value, screen, api) => api?.mainInstance?.submitMonitorCommand(api, "set", key, value, screen) ?? false
-                    thumbCacheReady: root.thumbCacheReady
                     screenName: modelData.name
                     folderModel: wallpaperFolderModel
                 }
