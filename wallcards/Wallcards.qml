@@ -72,8 +72,7 @@ PanelWindow {
     applicant.command = ["bash", "-c", Utils.wallpaperCommand(f)];
     applicant.running = true;
 
-    var wallpaperPath = f.isVideo ? f.thumbnail : f.filePath;
-    WallpaperService.changeWallpaper(wallpaperPath);
+    WallpaperService.changeWallpaper(f.filePath);
   }
 
   function applyFilterToFiles() {
@@ -167,7 +166,6 @@ PanelWindow {
   ThumbnailService {
     id: thumbnailService
 
-    cacheDir: root.pluginApi?.Settings.cacheDir + "/wallcards"
     imageFilter: root.imageFilter
     videoFilter: root.videoFilter
     wallpaperDir: root.pluginApi?.Settings.data.wallpaper.directory

@@ -1409,7 +1409,7 @@
       "author": "spiros132",
       "description": "A plugin that allows having video wallpapers using mpvpaper.",
       "license": "MIT",
-      "version": "1.6.16",
+      "version": "1.6.17",
       "tags": [
         "Bar",
         "Panel",
@@ -1960,7 +1960,7 @@
       "author": "Qholin",
       "description": "A customizable parallax effect for the wallpaper based on the active workspace.",
       "license": "MIT",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "minAtmospheraVersion": "0.11.0",
       "tags": [
         "Desktop"
@@ -2695,7 +2695,7 @@
       "author": "spiros132",
       "description": "A plugin that uses a backend renderer to play videos as your wallpaper.",
       "license": "MIT",
-      "version": "3.0.15",
+      "version": "3.0.16",
       "tags": [
         "Bar",
         "Panel",
@@ -2748,7 +2748,7 @@
       "author": "tonigineer",
       "description": "A `lively` wallpaper selector.",
       "license": "MIT",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "tags": [
         "Desktop",
         "Theming"

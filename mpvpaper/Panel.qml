@@ -137,7 +137,7 @@ Item {
                         // For now all wallpapers are shown in a 16:9 ratio
                         cellHeight: Math.floor(itemSize * (9/16))
 
-                        model: wallpapersFolderModel.status == FolderListModel.Ready && root.thumbCacheReady ? wallpapersFolderModel : 0
+                        model: wallpapersFolderModel.status == FolderListModel.Ready ? wallpapersFolderModel : 0
 
                         // Wallpaper
                         delegate: Item {
@@ -157,12 +157,10 @@ Item {
 
                                 radius: Style.iRadiusXS
 
-                                borderWidth: root.thumbCacheReady && root.currentWallpaper == wallpapersFolderModel.get(index, "filePath") ? Style.borderM : 0
+                                borderWidth: root.currentWallpaper == wallpaper.path ? Style.borderM : 0
                                 borderColor: AtmoColor.mPrimary;
 
-                                imagePath: root.thumbCacheReady ? pluginApi.mainInstance.getThumbUrl(wallpaper.path) : "";
-                                sourceFailureCode: root.thumbCacheReady ? pluginApi.mainInstance.getThumbFailure(wallpaper.path).code : ""
-                                sourceFailureReason: root.thumbCacheReady ? pluginApi.mainInstance.getThumbFailure(wallpaper.path).reason : ""
+                                imagePath: wallpaper.path
                                 fallbackIcon: "alert-circle"
 
                                 MouseArea {

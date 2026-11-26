@@ -13,8 +13,7 @@ Item {
     // producer too, never a second request owned by a color consumer.
     property var requestedPaths: []
 
-    // Video frames come from the shell's image owner (validated PNG
-    // thumbnails); this producer only holds one interest per current video.
+    // Export only frames the wallpaper/palette integration needs as files.
     // Cache readiness belongs to this generation, never to preference files.
     readonly property bool thumbCacheReady: internal.ready
     readonly property bool generationFailed: internal.failed
@@ -30,11 +29,9 @@ Item {
         property bool settled: false
         property bool pending: true
         property bool retry: false
-        readonly property string retryOwner: "video-wallpaper:" + Date.now() + ":" + Math.random()
-        property int retrySequence: 0
         property int generation: 0
         property var paths: []
-        // video path -> {token, state: "loading" | "ready" | "unavailable", path}
+        // video path -> {request, state: "loading" | "ready" | "unavailable", path}
         property var entries: ({})
     }
 
@@ -76,23 +73,14 @@ Item {
         return thumbnailFor(videoPath);
     }
 
-    function request(videoPath, retryRevision) {
-        const entry = { token: "", state: "loading", path: "", code: "", reason: "" };
-        entry.token = ImageCacheService.acquireSource({
-            source: videoPath,
-            width: 1024,
-            height: 1024,
-            fit: "contain",
-            animationIntent: "still",
-            operation: "video-thumbnail",
-            retry: retryRevision !== "",
-            revision: retryRevision
-        }, function (reply) {
+    function request(videoPath) {
+        const entry = { request: null, state: "loading", path: "", code: "", reason: "" };
+        entry.request = ImageCacheService.exportVideoFrame(videoPath, function (path, ready, reply) {
             if (internal.entries[videoPath] !== entry) return;
-            const ready = (reply.status === "hit" || reply.status === "generated") && reply.url !== "";
+            entry.request = null;
             if (!ready) Logger.w("video-wallpaper", "Thumbnail unavailable:", videoPath, reply.reason || "");
             entry.state = ready ? "ready" : "unavailable";
-            entry.path = ready ? decodeURIComponent(String(reply.url).replace(/^file:\/\//, "")) : "";
+            entry.path = ready ? path : "";
             entry.code = ready ? "" : (reply.code || "decode-unavailable");
             entry.reason = ready ? "" : (reply.reason || "");
             internal.entries = Object.assign({}, internal.entries);
@@ -103,7 +91,7 @@ Item {
 
     function release(entries) {
         for (const path in entries)
-            ImageCacheService.releaseSource(entries[path].token);
+            entries[path].request?.cancel();
     }
 
     function pump() {
@@ -111,14 +99,11 @@ Item {
         internal.pending = false;
         const retry = internal.retry;
         internal.retry = false;
-        const paths = Array.from(new Set(Array.from(folderModel.files).concat(requestedPaths).filter(path => path !== "")));
+        const paths = Array.from(new Set(requestedPaths.filter(path => path !== "")));
         const previous = internal.entries;
         const entries = {};
-        // A different producer can still hold the last retry's result.
-        // Only refreshes need a private revision; normal requests still share.
-        const revision = retry ? internal.retryOwner + ":" + (++internal.retrySequence) : "";
         for (const path of paths)
-            entries[path] = previous[path] && !retry ? previous[path] : request(path, revision);
+            entries[path] = previous[path] && !retry ? previous[path] : request(path);
         const retired = {};
         for (const path in previous)
             if (entries[path] !== previous[path]) retired[path] = previous[path];

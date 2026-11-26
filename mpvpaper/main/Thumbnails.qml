@@ -19,14 +19,12 @@ Item {
     required property bool thumbCacheReady
     required property FolderListModel folderModel
 
-    // Video frames come from the shell's image owner (validated PNG
-    // thumbnails). One interest per video: path -> {token, state, url, path,
+    // Only the selected video's palette needs an exported file.
+    // path -> {request, state, path,
     // code, reason}. Reassigned on every change so bindings follow it.
     property var _entries: ({})
     property var colorRequest: null
     property bool colorScheduled: false
-    readonly property string _retryOwner: "mpvpaper:" + Date.now() + ":" + Math.random()
-    property int _retrySequence: 0
 
     onActiveChanged: if (!active) cancelColorGen()
     onSettingsContextChanged: cancelColorGen()
@@ -57,8 +55,7 @@ Item {
 
     // Get thumbnail url of a video ("" until the owner produced it)
     function getThumbUrl(videoPath: string): string {
-        const entry = root._entries[videoPath];
-        return entry && entry.state === "ready" ? entry.url : "";
+        return getThumbPath(videoPath);
     }
 
     // The owner's failure for a video's thumbnail ({code, reason}, empty when none)
@@ -98,7 +95,7 @@ Item {
         const entry = root._entries[wallpaper];
         if (!entry) {
             // The current wallpaper isn't in the wallpapers folder.
-            root._entries = Object.assign({}, root._entries, { [root.currentWallpaper]: root.request(root.currentWallpaper, "") });
+            root.acquire([wallpaper], false);
             return;
         }
         if (entry.state === "loading") return;
@@ -116,24 +113,14 @@ Item {
         });
     }
 
-    function request(videoPath: string, retryRevision: string): var {
-        const entry = { token: "", state: "loading", url: "", path: "", code: "", reason: "" };
-        entry.token = ImageCacheService.acquireSource({
-            source: videoPath,
-            width: 1024,
-            height: 1024,
-            fit: "contain",
-            animationIntent: "still",
-            operation: "video-thumbnail",
-            retry: retryRevision !== "",
-            revision: retryRevision
-        }, function (reply) {
+    function request(videoPath: string): var {
+        const entry = { request: null, state: "loading", path: "", code: "", reason: "" };
+        entry.request = ImageCacheService.exportVideoFrame(videoPath, function (path, ready, reply) {
             if (root._entries[videoPath] !== entry) return;
-            const ready = (reply.status === "hit" || reply.status === "generated") && reply.url !== "";
+            entry.request = null;
             if (!ready) Logger.w("mpvpaper", "Thumbnail unavailable:", videoPath, reply.reason || "");
             entry.state = ready ? "ready" : "unavailable";
-            entry.url = ready ? reply.url : "";
-            entry.path = ready ? decodeURIComponent(String(reply.url).replace(/^file:\/\//, "")) : "";
+            entry.path = ready ? path : "";
             entry.code = ready ? "" : (reply.code || "decode-unavailable");
             entry.reason = ready ? "" : (reply.reason || "");
             root._entries = Object.assign({}, root._entries);
@@ -147,14 +134,11 @@ Item {
     function acquire(paths, retry) {
         const previous = root._entries;
         const entries = {};
-        // A different producer can still hold the last retry's result.
-        // Only refreshes need a private revision; normal requests still share.
-        const revision = retry ? root._retryOwner + ":" + (++root._retrySequence) : "";
         for (const path of paths)
-            entries[path] = previous[path] && !retry ? previous[path] : root.request(path, revision);
+            entries[path] = previous[path] && !retry ? previous[path] : root.request(path);
         root._entries = entries;
         for (const path in previous)
-            if (entries[path] !== previous[path]) ImageCacheService.releaseSource(previous[path].token);
+            if (entries[path] !== previous[path]) previous[path].request?.cancel();
     }
 
     function settle() {
@@ -170,12 +154,7 @@ Item {
         // Reset the state of thumbCacheReady
         clearThumbCacheReady();
 
-        const paths = [];
-        for (let i = 0; i < folderModel.count; i++)
-            paths.push(folderModel.get(i, "filePath"));
-        if (root.currentWallpaper !== "" && paths.indexOf(root.currentWallpaper) === -1)
-            paths.push(root.currentWallpaper);
-        root.acquire(paths, retry === true);
+        root.acquire(root.active && root.currentWallpaper !== "" ? [root.currentWallpaper] : [], retry === true);
         root.settle();
     }
 
@@ -191,6 +170,6 @@ Item {
 
     Component.onDestruction: {
         for (const path in root._entries)
-            ImageCacheService.releaseSource(root._entries[path].token);
+            root._entries[path].request?.cancel();
     }
 }
