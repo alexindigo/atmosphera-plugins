@@ -1,11 +1,11 @@
 {
   "id": "niri-windows-map",
   "name": "Niri Windows Map",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "author": "Atmosphera",
   "license": "GPL-3.0",
   "description": "Spatial overview map of niri windows and workspaces. Click tiles to focus, click rows to switch, or drag a window to move it.",
-  "minAtmospheraVersion": "0.11.0",
+  "minAtmospheraVersion": "0.11.1",
   "defaultEnabled": false,
   "tags": [
     "Panel",

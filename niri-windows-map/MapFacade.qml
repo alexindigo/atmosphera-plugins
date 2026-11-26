@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell.Io
+import qs.Commons
 import qs.Services.Compositor
 import "MapState.js" as MapState
 
@@ -7,6 +8,7 @@ Item {
   id: root
   property var facade: CompositorService
   readonly property bool currentShell: facade.snapshot !== undefined && typeof facade.moveWindowToWorkspace === "function"
+  readonly property bool supportsSameRow: currentShell && typeof facade.moveWindowWithinWorkspace === "function"
   property int _legacyRevision: 0
   readonly property var mapState: MapState.normalize(currentShell ? facade.snapshot : legacyState(_legacyRevision))
 
@@ -68,7 +70,27 @@ Item {
     return MapState.drop(mapState, id, target);
   }
 
-  function drop(id, target) {
+  function tiledRow(id) {
+    return supportsSameRow ? MapState.tiledRow(mapState, id) : null;
+  }
+
+  function matchesRow(id, frozenRow): bool {
+    return !!frozenRow && MapState.sameRow(frozenRow, tiledRow(id));
+  }
+
+  function drop(id, target, frozenRow) {
+    if (target?.kind === "gap" || target?.kind === "stack") {
+      if (target.workspaceId === frozenRow?.workspaceId && matchesRow(id, frozenRow)) {
+        const placement = {kind: target.kind, workspaceId: target.workspaceId, anchorId: target.anchorId};
+        if (target.kind === "stack")
+          placement.index = target.index;
+        facade.moveWindowWithinWorkspace(id, placement, (ok, error) => {
+          if (!ok)
+            Logger.w("NiriWindowsMap", "Same-workspace move stopped: " + error);
+        });
+      }
+      return;
+    }
     const move = resolveDrop(id, target);
     if (!move)
       return;
