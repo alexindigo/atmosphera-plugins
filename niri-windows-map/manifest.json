@@ -1,7 +1,7 @@
 {
   "id": "niri-windows-map",
   "name": "Niri Windows Map",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "author": "Atmosphera",
   "license": "GPL-3.0",
   "description": "Spatial overview map of niri windows and workspaces. Click tiles to focus, click rows to switch, or drag a window to move it.",
@@ -18,6 +18,11 @@
     "barWidget": "BarWidget.qml",
     "settings": "Settings.qml"
   },
+  "actions": [
+    {"id": "toggle", "label": "Windows map", "description": "Toggle the map of open windows.", "icon": "map", "panel": "toggle"},
+    {"id": "open", "label": "Open Windows Map", "description": "Open the map of open windows.", "icon": "map", "panel": "open"},
+    {"id": "close", "label": "Close Windows Map", "description": "Close the map of open windows.", "icon": "map", "panel": "close"}
+  ],
   "metadata": {
     "settingsSchema": {
       "version": 1,
