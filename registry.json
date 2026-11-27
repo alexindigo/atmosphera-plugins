@@ -1960,8 +1960,8 @@
       "author": "Qholin",
       "description": "A customizable parallax effect for the wallpaper based on the active workspace.",
       "license": "MIT",
-      "version": "1.0.11",
-      "minAtmospheraVersion": "0.11.0",
+      "version": "1.0.12",
+      "minAtmospheraVersion": "0.12.0",
       "tags": [
         "Desktop"
       ],
