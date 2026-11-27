@@ -1,17 +1,14 @@
 import "Utils.js" as Utils
 import QtQuick
-import Quickshell
-import Quickshell.Io
 import Qt.labs.folderlistmodel
+import ImvQml
 import qs.Commons
-import qs.Services.UI
 
 Item {
   id: service
 
-  // Thumbnails come from the shared image owner (validated PNGs, fallback
-  // decoding, video frames); the dominant color is read from those.
-  required property string cacheDir
+  // Cards display original sources through NImage. Sampling owns only small
+  // RGBA buffers, not staging files or a separate decode pipeline.
   required property var imageFilter
   required property var videoFilter
   required property string wallpaperDir
@@ -23,12 +20,10 @@ Item {
   property int pendingProcesses: 0
   property int thumbnailRevision: 0
   property var _entries: []
+  property var _requests: ({})
+  property int _cursor: 0
 
   signal ready
-
-  function toLocalPath(urlStr) {
-    return String(urlStr).replace(/^file:\/\//, "");
-  }
 
   FolderListModel {
     id: thumbnailModel
@@ -46,16 +41,12 @@ Item {
   }
 
   function releaseEntries() {
-    for (const entry of _entries) {
-      entry.alive = false;
-      if (entry.sampler) {
-        entry.sampler.destroy();
-        entry.sampler = null;
-      }
-      if (entry.token)
-        ImageCacheService.releaseSource(entry.token);
-    }
+    retry.stop();
+    for (const id of Object.keys(_requests))
+      sampler.cancel(Number(id));
+    _requests = ({});
     _entries = [];
+    _cursor = 0;
   }
 
   function createThumbnails() {
@@ -65,14 +56,10 @@ Item {
       var fileName = thumbnailModel.get(i, "fileName");
       entries.push({
                      fileName: fileName,
-                     filePath: toLocalPath(thumbnailModel.get(i, "filePath")),
+                     filePath: thumbnailModel.get(i, "filePath"),
+                     fileUrl: thumbnailModel.get(i, "fileUrl"),
                      isVideo: Utils.isVideo(fileName, service.videoFilter),
-                     url: "",
-                     hex: "",
-                     settled: false,
-                     alive: true,
-                     token: "",
-                      sampler: null
+                     hex: ""
                    });
     }
     _entries = entries;
@@ -80,83 +67,43 @@ Item {
     loading = entries.length > 0;
     // One placeholder per wallpaper while loading: the progress total.
     files = entries.map(() => ({}));
-    for (const entry of entries)
-      request(entry);
+    pump();
     if (entries.length === 0)
       ready();
   }
 
-  function request(entry) {
-    entry.token = ImageCacheService.acquireSource({
-                                                    source: entry.filePath,
-                                                    width: entry.isVideo ? 1024 : 1000,
-                                                    height: entry.isVideo ? 1024 : 500,
-                                                    fit: "contain",
-                                                    animationIntent: "still",
-                                                    operation: entry.isVideo ? "video-thumbnail" : "render"
-                                                  }, function (reply) {
-                                                    if (!entry.alive || entry.settled)
-                                                      return;
-                                                    if (!["hit", "generated"].includes(reply.status) || !reply.url) {
-                                                      Logger.w("Wallcards", "Thumbnail unavailable:", entry.fileName, reply.reason || "");
-                                                      settle(entry);
-                                                      return;
-                                                    }
-                                                    entry.url = reply.url;
-                                                    sampleColor(entry, reply.url);
-                                                  });
-  }
-
-  function sampleColor(entry, thumbnailUrl) {
-    // This is a normalized owner artifact, never the original wallpaper.
-    const url = String(thumbnailUrl);
-    if (!url.startsWith("file:///")) {
-      settle(entry);
-      return;
-    }
-    const path = decodeURIComponent(url.slice(7));
-    const cache = ImageCacheService.thumbnailDir;
-    const filename = entry.isVideo ? /^xx-large\/[a-f0-9]{32}\.png$/ : /^atmosphera-representations-v1\/still\/[a-f0-9]{64}\.png$/;
-    if (!cache.startsWith("/") || !path.startsWith(cache) || !filename.test(path.slice(cache.length))) {
-      settle(entry);
-      return;
-    }
-    const sampler = samplerComponent.createObject(service, { thumbnailPath: path });
-    if (!sampler) {
-      settle(entry);
-      return;
-    }
-    entry.sampler = sampler;
-    sampler.completed.connect(function (hex) {
-      if (!entry.alive || entry.settled || entry.sampler !== sampler)
+  function pump() {
+    while (_cursor < _entries.length && Object.keys(_requests).length < 2) {
+      const entry = _entries[_cursor];
+      const id = sampler.sample(entry.fileUrl, 32, 32, 0.1);
+      if (id === -2) {
+        retry.restart();
         return;
-      entry.sampler = null;
-      sampler.destroy();
-      entry.hex = hex;
-      settle(entry);
-    });
-    sampler.running = true;
+      }
+      ++_cursor;
+      if (id > 0)
+        _requests[id] = entry;
+      else
+        settle();
+    }
   }
 
-  function averageColor(histogram) {
+  function averageColor(buffer) {
     let pixels = 0;
     const sums = [0, 0, 0];
     // Count the sampled pixels equally, skipping only fully transparent ones.
-    const rows = /^\s*(\d+):[^\n]*?\s#([0-9a-f]{8})(?=\s|$)/gim;
-    let row;
-    while ((row = rows.exec(histogram)) !== null) {
-      if (row[2].slice(6) === "00")
+    const rgba = new Uint8Array(buffer);
+    for (let offset = 0; offset + 3 < rgba.length; offset += 4) {
+      if (rgba[offset + 3] === 0)
         continue;
-      const count = Number(row[1]);
-      pixels += count;
+      ++pixels;
       for (let i = 0; i < 3; i++)
-        sums[i] += count * parseInt(row[2].slice(i * 2, i * 2 + 2), 16);
+        sums[i] += rgba[offset + i];
     }
     return pixels ? sums.map(sum => Math.round(sum / pixels).toString(16).padStart(2, "0")).join("") : "";
   }
 
-  function settle(entry) {
-    entry.settled = true;
+  function settle() {
     pendingProcesses = Math.max(0, pendingProcesses - 1);
     thumbnailRevision++;
     if (pendingProcesses === 0)
@@ -169,7 +116,7 @@ Item {
                                          filePath: entry.filePath,
                                          // A failed thumbnail shows the original through the owner,
                                          // which labels the failure.
-                                         thumbnail: entry.url || entry.filePath,
+                                          thumbnail: entry.filePath,
                                          hexCode: entry.hex,
                                          filterColor: getFilterColor(entry.hex),
                                          isVideo: entry.isVideo
@@ -234,19 +181,20 @@ Item {
     return "Monochrome";
   }
 
-  Component {
-    id: samplerComponent
-
-    Process {
-      required property string thumbnailPath
-      signal completed(string hex)
-
-      // Only read a histogram on stdout; never decode an original or write an image.
-      command: ["magick", "-limit", "thread", "1", thumbnailPath, "-scale", "32x32>", "-type", "TrueColorAlpha", "-depth", "8", "-format", "%c", "histogram:info:-"]
-      stdout: StdioCollector { id: histogram }
-      onExited: (code, status) => completed(code === 0 && status === 0 ? service.averageColor(histogram.text) : "")
-      // FailedToStart does not deliver exited. A normal exit was already handled.
-      onRunningChanged: if (!running) completed("")
+  Timer { id: retry; interval: 125; onTriggered: service.pump() }
+  ImvImageJob {
+    id: sampler
+    onFinished: (id, result) => {
+      const entry = service._requests[id];
+      if (!entry)
+        return;
+      delete service._requests[id];
+      if (result.stage === "complete")
+        entry.hex = service.averageColor(result.rgba);
+      else
+        Logger.w("Wallcards", "Image sample unavailable:", entry.fileName, result.detail || result.code);
+      service.settle();
+      service.pump();
     }
   }
 

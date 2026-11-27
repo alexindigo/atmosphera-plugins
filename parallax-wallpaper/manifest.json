@@ -1,8 +1,8 @@
 {
   "id": "parallax-wallpaper",
   "name": "Parallax Wallpaper",
-  "version": "1.0.10",
-  "minAtmospheraVersion": "0.11.0",
+  "version": "1.0.12",
+  "minAtmospheraVersion": "0.12.0",
   "minNoctaliaVersion": "4.4.0",
   "author": "Qholin",
   "license": "MIT",

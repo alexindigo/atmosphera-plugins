@@ -23,7 +23,6 @@ ColumnLayout {
     * PROPERTIES
     ***************************/
     required property string screenName
-    required property bool   thumbCacheReady
     required property FolderModel folderModel
 
     readonly property string currentWallpaper: Commands.record(pluginApi?.pluginSettings?.monitors, screenName)?.currentWallpaper ?? ""
@@ -47,7 +46,7 @@ ColumnLayout {
 
         ColumnLayout {
             anchors.fill: parent
-            visible: !root.thumbCacheReady
+            visible: !root.folderModel.ready
             spacing: Style.marginS
 
             NText {
@@ -60,7 +59,7 @@ ColumnLayout {
 
         ColumnLayout {
             anchors.fill: parent
-            visible: root.thumbCacheReady
+            visible: root.folderModel.ready
             spacing: Style.marginS
 
             NGridView {
@@ -76,7 +75,7 @@ ColumnLayout {
                 // For now all wallpapers are shown in a 16:9 ratio
                 cellHeight: Math.floor(itemSize * (9/16))
 
-                model: root.folderModel.ready && root.thumbCacheReady ? root.folderModel.files : 0
+                model: root.folderModel.ready ? root.folderModel.files : 0
 
                 // Wallpaper
                 delegate: Item {
@@ -95,17 +94,12 @@ ColumnLayout {
                         radius: Style.radiusXS
 
                         borderWidth: {
-                            if (root.thumbCacheReady && root.currentWallpaper == wallpaper.modelData) return Style.borderM;
+                            if (root.currentWallpaper == wallpaper.modelData) return Style.borderM;
                             else return 0;
                         }
                         borderColor: AtmoColor.mPrimary;
 
-                        imagePath: {
-                            if (root.thumbCacheReady && root.pluginApi.mainInstance != null) return root.pluginApi.mainInstance.getThumbPath(wallpaper.modelData);
-                            else return "";
-                        }
-                        sourceFailureCode: root.thumbCacheReady && root.pluginApi.mainInstance != null ? root.pluginApi.mainInstance.getThumbFailure(wallpaper.modelData).code : ""
-                        sourceFailureReason: root.thumbCacheReady && root.pluginApi.mainInstance != null ? root.pluginApi.mainInstance.getThumbFailure(wallpaper.modelData).reason : ""
+                        imagePath: wallpaper.modelData
                         fallbackIcon: "alert-circle"
 
                         MouseArea {

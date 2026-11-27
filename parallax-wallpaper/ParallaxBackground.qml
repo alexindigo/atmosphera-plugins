@@ -103,7 +103,8 @@ Variants {
       readonly property var currentWallpaper: _front === 0 ? firstWallpaper : secondWallpaper
       readonly property var nextWallpaper: _front === 0 ? secondWallpaper : firstWallpaper
 
-      visible: wallpaperReady
+      // The layer stays transparent while the first sampled texture loads.
+      visible: true
 
       readonly property real edgeSmoothness: Settings.data.wallpaper.transitionEdgeSmoothness
       readonly property var allTransitions: WallpaperService.allTransitions
@@ -266,7 +267,7 @@ Variants {
         fillMode: Image.Stretch // The wallpaper shader owns fit/crop exactly once.
         smooth: true
         mipmap: false
-        visible: false
+        textureOnly: true
         onStatusChanged: Qt.callLater(root._settleCandidate, 0)
       }
 
@@ -281,7 +282,7 @@ Variants {
         fillMode: Image.Stretch
         smooth: true
         mipmap: false
-        visible: false
+        textureOnly: true
         onStatusChanged: Qt.callLater(root._settleCandidate, 1)
       }
 
@@ -290,6 +291,7 @@ Variants {
         id: shaderLoader
         anchors.fill: parent
         active: true
+        visible: root.wallpaperReady
 
         scale: {
           if (!root.autoZoom) return root.zoomAmount;
